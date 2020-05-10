@@ -1,2 +1,2 @@
-# IDSimF
-Open Ion Trajectory Simulation Framework
+# Ion Dynamics Simulation Framework - IDSimF
+Open Ion Trajectory Simulation Framework 
