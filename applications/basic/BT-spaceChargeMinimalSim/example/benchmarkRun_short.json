@@ -1,0 +1,7 @@
+{
+"sim_time_steps":6000,
+"trajectory_write_interval":50,
+"dt":1e-8,
+"ion_cloud_init_file":"test_ion_cloud_01.csv",
+"space_charge_factor":1e3
+}

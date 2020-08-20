@@ -1,0 +1,16 @@
+*.pyc
+pyGeometryGeneration/.idea
+*.o
+*.so
+*.tmp
+*.dll
+*.exe
+*.dylib
+.idea
+.ipynb_checkpoints
+.vscode
+cmake-build-*
+_build
+_static
+_templates
+

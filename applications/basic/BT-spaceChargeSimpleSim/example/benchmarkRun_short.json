@@ -1,0 +1,8 @@
+{
+  "sim_time_steps":1500,
+  "trajectory_write_interval":50,
+  "dt":1e-8,
+  "space_charge_factor":1e3,
+  "n_ions":[300,300],
+  "ion_masses":[35,37]
+}

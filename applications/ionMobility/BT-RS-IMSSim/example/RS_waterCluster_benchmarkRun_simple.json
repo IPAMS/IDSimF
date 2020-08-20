@@ -1,0 +1,19 @@
+{
+  "sim_time_steps":1000,
+  "dt_s":1e-6,
+  "concentrations_write_interval":10,
+  "trajectory_write_interval":50,
+  "trajectory_write_velocities":"false",
+  "space_charge_factor":0,
+  "reaction_configuration":"RS_ReacSys_simpleReaction.conf",
+  "n_particles":[2000,0],
+  "electric_field_mag_Vm-1":1000,
+  "start_width_yz_mm":1,
+  "start_width_x_mm":1,
+  "stop_position_x_mm":100,
+  "transport_model_type":"simple",
+  "background_temperature_K":298,
+  "background_partial_pressures_Pa":[100000],
+  "collision_gas_masses_amu":[28.0],
+  "collision_gas_diameters_angstrom":[3.64]
+}

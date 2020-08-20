@@ -1,0 +1,28 @@
+{
+  "sim_time_steps":200,
+  "dt":5e-11,
+  "trajectory_write_interval":20,
+  "space_charge_factor":1.0,
+  "frequency_rf":1.0e6,
+  "n_ions":[6000,6000],
+  "ion_masses":[35,37],
+  "ion_charges":[1,2],
+  "ion_collision_gas_diameters_angstrom": [2.0,2.5],
+  "ion_start_geometry": "box",
+  "ion_start_box_center_position_m": [0.002,0.002,0.002],
+  "ion_start_box_size_m": [0.001,0.001,0.001],
+  "V_rf":1.0,
+  "collision_gas_mass_amu":80.0,
+  "collision_gas_diameter_angstrom":3.64,
+  "background_gas_temperature_K":298,
+  "background_gas_pressure_Pa":1.0,
+  "potential_array_scale": 0.001,
+  "potential_arrays": [
+    "../../../../../tests/testfields/capacitor_test_pa/cylinder_capacitor.pa1",
+    "../../../../../tests/testfields/capacitor_test_pa/cylinder_capacitor.pa2",
+    "../../../../../tests/testfields/capacitor_test_pa/cylinder_capacitor.pa3",
+    "../../../../../tests/testfields/capacitor_test_pa/cylinder_capacitor.pa4"],
+  "dc_potentials": [10,0,-5,50],
+  "rf_potential_factors": [0,0,0,0],
+  "simulation_domain_boundaries": [[-1, 1], [-1, 1], [-1, 1]]
+}
