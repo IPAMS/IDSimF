@@ -41,7 +41,9 @@ Refer to the "Installation" section of the documentation for details how to comp
 
 ## Documentation
 
-The main documentation is written with [Sphinx](https://www.sphinx-doc.org/). It is located in `/documentation` and can be compiled to html with `make html`. See the documentation for details of the simulation applications and modules. 
+The documentation and user guide is available online at https://idsimf.readthedocs.io/ 
+
+The main documentation is written with [Sphinx](https://www.sphinx-doc.org/). It is located in `/documentation` and can be compiled to html locally with `make html`. See the documentation for details of the simulation applications and modules. 
 
 ## IDSimPy
 
