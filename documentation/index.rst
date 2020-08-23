@@ -100,13 +100,3 @@ Documentation
    modules/particlesimulation
    modules/collisionmodels
    modules/rs
-
-
-
-==================
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
