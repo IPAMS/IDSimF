@@ -38,6 +38,8 @@ TEST_CASE("SIMION PA basic tests","[SimionPotentialArray]"){
         std::string paFilename = "simion_test_planar_2d.pa";
         ParticleSimulation::SimionPotentialArray simPa(paFilename);
 
+        REQUIRE(simPa.getBounds() == std::array<double,6>{-0.099, 0.099, -0.049, 0.049, 0.0, 0.0});
+
         REQUIRE(simPa.getNumberOfGridPoints() == std::array<ParticleSimulation::index_t, 3>{100,50,1});
 
         REQUIRE_THROWS_MATCHES(simPa.getInterpolatedPotential(1.0,2.0,0.0),
@@ -59,6 +61,8 @@ TEST_CASE("SIMION PA basic tests","[SimionPotentialArray]"){
     SECTION("Test with planar 3d PA") {
         std::string paFilename = "simion_test_planar_3d.pa";
         ParticleSimulation::SimionPotentialArray simPa(paFilename);
+
+        REQUIRE(simPa.getBounds() == std::array<double,6>{0.0, 0.039, 0.0, 0.019, 0.0, 0.039});
 
         REQUIRE_THROWS_MATCHES(simPa.isElectrode(0.038, 0.018, 0.0390001),
                 ParticleSimulation::PotentialArrayException,
@@ -86,10 +90,14 @@ TEST_CASE("SIMION PA basic tests","[SimionPotentialArray]"){
                         ==  vectorsApproxEqual);
     }
 
-    SECTION("Test with planar 3d PA with spatial scaling and tanslation") {
+    SECTION("Test with planar 3d PA with spatial scaling and translation") {
         std::string paFilename = "simion_test_planar_3d.pa";
         ParticleSimulation::SimionPotentialArray simPaScaled(paFilename,{10.0,10.0,0.0}, 1.0, 100.0);
         ParticleSimulation::SimionPotentialArray simPa(paFilename);
+
+        REQUIRE(simPa.getBounds() == std::array<double,6>{0.0, 0.039, 0.0, 0.019, 0.0, 0.039});
+        REQUIRE(simPaScaled.getBounds() == std::array<double,6>{10.0, 49.0, 10.0, 29.0, 0.0, 39.0});
+
 
         REQUIRE(simPaScaled.getInterpolatedPotential(30.0, 25.0, 30.0) == Approx(-8537.619));
 
@@ -128,6 +136,13 @@ TEST_CASE("SIMION PA basic tests","[SimionPotentialArray]"){
     SECTION("Test with cylindrical PA") {
         std::string paFilename = "simion_test_cylindrical.pa";
         ParticleSimulation::SimionPotentialArray simPa(paFilename);
+
+        std::array<double,6> correctBounds{0.0, 0.149, -0.059, 0.059, -0.059, 0.059};
+        std::array<double,6> bounds = simPa.getBounds();
+        for (int i=0; i<6; ++i){
+            REQUIRE( Approx(bounds[i]) == correctBounds[i]);
+        }
+
 
         REQUIRE( simPa.isInside(0.07, 0.02, 0.03) );
         REQUIRE( ! simPa.isInside(0.07, 0.7, 0.03) );

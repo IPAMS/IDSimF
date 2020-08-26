@@ -116,9 +116,9 @@ Core::Vector ParticleSimulation::SimionPotentialArray::getField(double xPt, doub
         double zT = tc[2];
         double rT = sqrt(yT*yT + zT*zT);
 
-        if (Core::safetyGuards && (xT < internalBoundsLower[0] ||
-                                   xT > internalBoundsUpper[0] ||
-                                   rT > internalBoundsUpper[1] ) ){
+        if (Core::safetyGuards && (xT < internalBoundsLower_[0] ||
+                                   xT > internalBoundsUpper_[0] ||
+                                   rT > internalBoundsUpper_[1] ) ){
             std::stringstream ss;
             ss << "Point " << xPt << " " << yPt << " " << zPt << " is not in the cylindrical potential array";
             throw (ParticleSimulation::PotentialArrayException(ss.str()));
@@ -126,16 +126,16 @@ Core::Vector ParticleSimulation::SimionPotentialArray::getField(double xPt, doub
 
         // Handle grid boundaries (use value on boundary if difference quotient reaches over the boundary)
         double xL = xT - nodeDistanceHalf_;
-        if (xL < internalBoundsLower[0]) xL = internalBoundsLower[0];
+        if (xL < internalBoundsLower_[0]) xL = internalBoundsLower_[0];
 
         double xU = xT + nodeDistanceHalf_;
-        if (xU > internalBoundsUpper[0]) xU = internalBoundsUpper[0];
+        if (xU > internalBoundsUpper_[0]) xU = internalBoundsUpper_[0];
 
         double rL = rT - nodeDistanceHalf_;
-        if (rL < internalBoundsLower[1]) rL = internalBoundsLower[1];
+        if (rL < internalBoundsLower_[1]) rL = internalBoundsLower_[1];
 
         double rU = rT + nodeDistanceHalf_;
-        if (rU > internalBoundsUpper[1]) rU = internalBoundsUpper[1];
+        if (rU > internalBoundsUpper_[1]) rU = internalBoundsUpper_[1];
 
         double pL0 = interpolatedPotentialCylindrical_(xL, rT);
         double pU0 = interpolatedPotentialCylindrical_(xU, rT);
@@ -166,16 +166,16 @@ Core::Vector ParticleSimulation::SimionPotentialArray::getField(double xPt, doub
 
         // Handle grid boundaries (use value on boundary if difference quotient reaches over the boundary)
         double xL = xT - nodeDistanceHalf_;
-        if (xL < internalBoundsLower[0]) xL = internalBoundsLower[0];
+        if (xL < internalBoundsLower_[0]) xL = internalBoundsLower_[0];
 
         double xU = xT + nodeDistanceHalf_;
-        if (xU > internalBoundsUpper[0]) xU = internalBoundsUpper[0];
+        if (xU > internalBoundsUpper_[0]) xU = internalBoundsUpper_[0];
 
         double yL = yT - nodeDistanceHalf_;
-        if (yL < internalBoundsLower[1]) yL = internalBoundsLower[1];
+        if (yL < internalBoundsLower_[1]) yL = internalBoundsLower_[1];
 
         double yU = yT + nodeDistanceHalf_;
-        if (yU > internalBoundsUpper[1]) yU = internalBoundsUpper[1];
+        if (yU > internalBoundsUpper_[1]) yU = internalBoundsUpper_[1];
 
         if (dim_ == PA_2D){
 
@@ -191,10 +191,10 @@ Core::Vector ParticleSimulation::SimionPotentialArray::getField(double xPt, doub
         }
         else {
             double zL = zT - nodeDistanceHalf_;
-            if (zL < internalBoundsLower[2]) zL = internalBoundsLower[2];
+            if (zL < internalBoundsLower_[2]) zL = internalBoundsLower_[2];
 
             double zU = zT + nodeDistanceHalf_;
-            if (zU > internalBoundsUpper[2]) zU = internalBoundsUpper[2];
+            if (zU > internalBoundsUpper_[2]) zU = internalBoundsUpper_[2];
 
             double pL00 = interpolatedPotentialCartesian3D_(xL, yT, zT);
             double pU00 = interpolatedPotentialCartesian3D_(xU, yT, zT);
@@ -290,7 +290,7 @@ bool ParticleSimulation::SimionPotentialArray::isInside(double xPt, double yPt, 
 }
 
 std::array<double,6> ParticleSimulation::SimionPotentialArray::getBounds() {
-    return {0.0,0.0,0.0, 0.0,0.0,0.0};
+    return bounds_;
 }
 
 std::array<ParticleSimulation::index_t,3> ParticleSimulation::SimionPotentialArray::getNumberOfGridPoints() {
@@ -305,6 +305,7 @@ void ParticleSimulation::SimionPotentialArray::readPa_(std::string filename) {
     paFilename_ = filename;
     std::ifstream inStream(filename, std::ios::binary);
     readBinaryPa_(inStream);
+    updateBounds_();
 }
 
 void ParticleSimulation::SimionPotentialArray::readBinaryPa_(std::ifstream &inStream) {
@@ -344,11 +345,11 @@ void ParticleSimulation::SimionPotentialArray::readBinaryPa_(std::ifstream &inSt
         dim_ = PA_2D;
 
         if (mirrorx_){
-            internalBoundsLower = {-(nx_ -1), 0, 0};
+            internalBoundsLower_ = {-(nx_ -1), 0, 0};
         } else{
-            internalBoundsLower = {0, 0, 0};
+            internalBoundsLower_ = {0, 0, 0};
         }
-        internalBoundsUpper = { nx_-1, ny_-1, 0};
+        internalBoundsUpper_ = {nx_-1, ny_-1, 0};
 
     } else {
         symmetry_ = PLANAR;
@@ -367,8 +368,8 @@ void ParticleSimulation::SimionPotentialArray::readBinaryPa_(std::ifstream &inSt
             lbz = -(nz_ -1);
         }
 
-        internalBoundsLower = {lbx, lby, lbz};
-        internalBoundsUpper = {nx_-1, ny_-1, nz_-1};
+        internalBoundsLower_ = {lbx, lby, lbz};
+        internalBoundsUpper_ = {nx_-1, ny_-1, nz_-1};
 
         if (nz_ == 1){
             dim_ = PA_2D;
@@ -394,6 +395,35 @@ void ParticleSimulation::SimionPotentialArray::readBinaryPa_(std::ifstream &inSt
     inStream.read( reinterpret_cast<char*>(points_.data()), sizeof(double)*numPoints_);
 }
 
+
+/**
+ * Updates bounds, which are the extent of the PA in the spatial directions.
+ */
+void ParticleSimulation::SimionPotentialArray::updateBounds_() {
+    if (symmetry_ == CYLINDRICAL){
+        double xMin = cornerLocation_[0] + internalBoundsLower_[0] * scale_;
+        double xMax = cornerLocation_[0] + internalBoundsUpper_[0] * scale_;
+        double yMin = cornerLocation_[1] - internalBoundsUpper_[1] * scale_;
+        double yMax = cornerLocation_[1] + internalBoundsUpper_[1] * scale_;
+        double zMin = cornerLocation_[2] - internalBoundsUpper_[1] * scale_;
+        double zMax = cornerLocation_[2] + internalBoundsUpper_[1] * scale_;
+
+        bounds_ = {xMin, xMax, yMin, yMax, zMin, zMax};
+    }
+    else{
+        double xMin = cornerLocation_[0] + internalBoundsLower_[0] * scale_;
+        double xMax = cornerLocation_[0] + internalBoundsUpper_[0] * scale_;
+        double yMin = cornerLocation_[1] + internalBoundsLower_[1] * scale_;
+        double yMax = cornerLocation_[1] + internalBoundsUpper_[1] * scale_;
+        double zMin = cornerLocation_[2] + internalBoundsLower_[2] * scale_;
+        double zMax = cornerLocation_[2] + internalBoundsUpper_[2] * scale_;
+
+        bounds_ = {xMin, xMax, yMin, yMax, zMin, zMax};
+    }
+
+}
+
+
 /**
  * Calculates the transformed / mapped grid coordinates (including translation, scaling and mirroring) from a
  * world coordinate
@@ -408,9 +438,9 @@ std::array<double,3> ParticleSimulation::SimionPotentialArray::transformAndCheck
 
         double r = sqrt(yT*yT + zT*zT);
 
-        if (Core::safetyGuards && (xT < internalBoundsLower[0] ||
-                                   xT > internalBoundsUpper[0] ||
-                                   r  > internalBoundsUpper[1] ) ){
+        if (Core::safetyGuards && (xT < internalBoundsLower_[0] ||
+                                   xT > internalBoundsUpper_[0] ||
+                                   r  > internalBoundsUpper_[1] ) ){
             std::stringstream ss;
             ss << "Point " << xPt << " " << yPt << " " << zPt << " is not in the cylindrical potential array";
             throw (ParticleSimulation::PotentialArrayException(ss.str()));
@@ -423,9 +453,9 @@ std::array<double,3> ParticleSimulation::SimionPotentialArray::transformAndCheck
     else{
 
         if (Core::safetyGuards &&
-                (xT < internalBoundsLower[0] || xT > internalBoundsUpper[0] ||
-                 yT < internalBoundsLower[1] || yT > internalBoundsUpper[1] ||
-                 zT < internalBoundsLower[2] || zT > internalBoundsUpper[2] )) {
+                (xT < internalBoundsLower_[0] || xT > internalBoundsUpper_[0] ||
+                 yT < internalBoundsLower_[1] || yT > internalBoundsUpper_[1] ||
+                 zT < internalBoundsLower_[2] || zT > internalBoundsUpper_[2] )) {
             std::stringstream ss;
             ss << "Point " << xPt << " " << yPt << " " << zPt << " is not in the planar potential array";
             throw (ParticleSimulation::PotentialArrayException(ss.str()));

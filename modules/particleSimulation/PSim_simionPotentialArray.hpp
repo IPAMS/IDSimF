@@ -87,6 +87,7 @@ namespace ParticleSimulation{
         //private methods:
         void readPa_(std::string filename);
         void readBinaryPa_(std::ifstream& inStream);
+        void updateBounds_();
         std::array<double,3> transformAndCheckCoordinates_(double xPt, double yPt, double zPt) const;
         std::array<double,3> scaleAndShiftCoordinates_(double xPt, double yPt, double zPt) const;
 
@@ -123,8 +124,9 @@ namespace ParticleSimulation{
         double dy_ = 0;
         double dz_ = 0;
 
-        std::array<index_t ,3> internalBoundsLower = {0,0,0};
-        std::array<index_t ,3> internalBoundsUpper = {0,0,0};
+        std::array<index_t ,3> internalBoundsLower_ = {0, 0, 0};
+        std::array<index_t ,3> internalBoundsUpper_ = {0, 0, 0};
+        std::array<double ,6> bounds_ = {0, 0, 0, 0, 0, 0};
 
         int numPoints_ = 0; ///< Total number of nodes / points
         bool mirrorx_ = false; ///< Flag if mirrored in x direction
