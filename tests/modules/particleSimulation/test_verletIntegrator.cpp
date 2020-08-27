@@ -39,24 +39,26 @@ using sPair= sMap::value_type;
 
 TEST_CASE("Test serial verlet integrator", "[ParticleSimulation][VerletIntegrator][trajectory integration]") {
 
+    //Set the global random generator to a test random number generator to make the test experiment fully deterministic:
+    Core::globalRandomGenerator = std::make_unique<Core::TestRandomGenerator>();
+
+    double ionAcceleration = 10.0; //((1000V / 100mm) * elementary charge) / 100 amu = 9.64e9 m/s^2
+
+    auto accelerationFct = [ionAcceleration](BTree::Particle *particle, int particleIndex, BTree::Tree &tree,
+                                             double time, int timestep){
+        Core::Vector result(ionAcceleration, 0, ionAcceleration * 0.5);
+        return (result);
+    };
+
+    auto timestepWriteFct = [](std::vector<BTree::Particle*>& particles, BTree::Tree& tree, double time, int timestep,
+                               bool lastTimestep){};
+
+    auto otherActionsFct = [] (
+            Core::Vector& newPartPos,BTree::Particle* particle,
+            int particleIndex, BTree::Tree& tree, double time,int timestep){
+    };
+
     SECTION( "Verlet integrator should be working with deferred particle addition") {
-
-        // init empty verlet integrator
-        double ionAcceleration = 10.0; //((1000V / 100mm) * elementary charge) / 100 amu = 9.64e9 m/s^2
-
-        auto accelerationFct = [ionAcceleration](BTree::Particle *particle, int particleIndex, BTree::Tree &tree,
-                                                 double time, int timestep){
-            Core::Vector result(ionAcceleration, 0, ionAcceleration * 0.5);
-            return (result);
-        };
-
-        auto timestepWriteFct = [](std::vector<BTree::Particle*>& particles, BTree::Tree& tree, double time, int timestep,
-                                   bool lastTimestep){};
-
-        auto otherActionsFct = [] (
-                Core::Vector& newPartPos,BTree::Particle* particle,
-                int particleIndex, BTree::Tree& tree, double time,int timestep){
-        };
 
         CollisionModel::EmptyCollisionModel collisionModel;
 
@@ -94,31 +96,12 @@ TEST_CASE("Test serial verlet integrator", "[ParticleSimulation][VerletIntegrato
         REQUIRE(Approx(ionPos.z()).epsilon(1e-7) == 0.000995);
     }
 
-    SECTION( "Verlet integrator should be able to integrate correctly non reactive particles") {
-        //Set the global random generator to a test random number generator to make the test experiment fully deterministic:
-        Core::globalRandomGenerator = std::make_unique<Core::TestRandomGenerator>();
 
+    SECTION( "Verlet integrator should be able to integrate correctly non reactive particles") {
         //Test with verlet integration:
         double nParticles = 10;
         double dt = 1e-4;
         double timeSteps = 50;
-
-        double ionAcceleration = 10.0; //((1000V / 100mm) * elementary charge) / 100 amu = 9.64e9 m/s^2
-
-        auto accelerationFct = [ionAcceleration](BTree::Particle *particle, int particleIndex, BTree::Tree &tree,
-                                                 double time, int timestep){
-            Core::Vector result(ionAcceleration, 0, ionAcceleration * 0.5);
-            return (result);
-        };
-
-        auto timestepWriteFct = [](std::vector<BTree::Particle*>& particles, BTree::Tree& tree, double time, int timestep,
-                                   bool lastTimestep){};
-
-        auto otherActionsFct = [] (
-                Core::Vector& newPartPos,BTree::Particle* particle,
-                int particleIndex, BTree::Tree& tree, double time,int timestep){
-        };
-
 
         std::vector<BTree::uniquePartPtr>particles;
         std::vector<BTree::Particle*>particlesPtrs;
@@ -154,17 +137,14 @@ TEST_CASE("Test serial verlet integrator", "[ParticleSimulation][VerletIntegrato
     }
 
     SECTION( "Verlet integrator should work with reactive particles and reactions") {
-        //Set the global random generator to a test random number generator to make the test experiment fully deterministic:
-        Core::globalRandomGenerator = std::make_unique<Core::TestRandomGenerator>();
 
         //prepare data structures:
         double nParticles = 2;
         double dt = 1e-4;
         int timeSteps = 50;
 
-        double ionAcceleration = 10.0; //((1000V / 100mm) * elementary charge) / 100 amu = 9.64e9 m/s^2
-
-        auto accelerationFct = [ionAcceleration] (BTree::Particle* particle, int particleIndex, BTree::Tree& tree, double time,int timestep){
+        auto accelerationFctReactive = [ionAcceleration] (BTree::Particle* particle, int particleIndex,
+                BTree::Tree& tree, double time,int timestep){
 
             Core::Vector result(
                     ionAcceleration * particle->getCharge() / particle->getMass(),
@@ -172,23 +152,12 @@ TEST_CASE("Test serial verlet integrator", "[ParticleSimulation][VerletIntegrato
             return(result);
         };
 
-        auto timestepWriteFct = [](std::vector<BTree::Particle*>& particles, BTree::Tree& tree, double time, int timestep,
-                                   bool lastTimestep){};
-
-        auto otherActionsFct = [] (
-                Core::Vector& newPartPos,BTree::Particle* particle,
-                int particleIndex, BTree::Tree& tree, double time,int timestep){
-            //std::cout << particle->getLocation() << std::endl;
-        };
-
-
         //prepare reaction system and particles:
         RS::ConfigFileParser parser = RS::ConfigFileParser();
         RS::Simulation rsSim = RS::Simulation(parser.parseFile("RS_verlet_test.conf"));
         RS::SimulationConfiguration* simConf = rsSim.simulationConfiguration();
         RS::Substance* ed_1 = simConf->substance(0);
         RS::Substance* ed_2 = simConf->substance(1);
-
 
         std::vector<uniqueReactivePartPtr>particles;
         std::vector<BTree::Particle*>particlesPtrs; // pointers on the raw particles for trajectory integrator
@@ -217,13 +186,11 @@ TEST_CASE("Test serial verlet integrator", "[ParticleSimulation][VerletIntegrato
 
         ParticleSimulation::VerletIntegrator verletIntegrator(
                 particlesPtrs,
-                accelerationFct, timestepWriteFct, otherActionsFct,
+                accelerationFctReactive, timestepWriteFct, otherActionsFct,
                 collisionModel);
 
         verletIntegrator.run(timeSteps,dt);
 
-
-        std::cout<<std::endl;
         Core::Vector ionPos = particles[0]-> getLocation();
         REQUIRE(Approx(ionPos.x()) == 118.298);
         REQUIRE(Approx(ionPos.y()) == 0.0);
