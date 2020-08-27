@@ -115,15 +115,17 @@ int main(int argc, const char * argv[]) {
     for(const auto &paName: potentialArraysNames){
         std::filesystem::path paPath = confBasePath / paName;
         std::unique_ptr<ParticleSimulation::SimionPotentialArray> pa_pt =
-                std::make_unique<ParticleSimulation::SimionPotentialArray>(paPath,paScale);
+                std::make_unique<ParticleSimulation::SimionPotentialArray>(paPath, paScale);
         potentialArrays.push_back(std::move(pa_pt));
     }
 
-
-    //scaling factor of 0.1 because SIMION uses a value of 10000 in  Fast Adjust PAs and  mm to m is 1000 = 0.1
-    std::vector<double> potentialsDc = doubleVectorConfParameter("dc_potentials", confRoot, 0.1);
-    std::vector<double> potentialFactorsRf = doubleVectorConfParameter("rf_potential_factors", confRoot, 0.1);
-    std::vector<double> potentialFactorsExcite = doubleVectorConfParameter("excite_potential_factors", confRoot, 0.1);
+    // SIMION fast adjust PAs use 10000 as normalized potential value
+    // since we retrieve the field (in V/length unit) from the PA below, we have to scale the factors
+    // with the geometric scaling factor
+    double potentialScale = 1.0 / 10000.0 / paScale;
+    std::vector<double> potentialsFactorsDc = doubleVectorConfParameter("dc_potentials", confRoot, potentialScale);
+    std::vector<double> potentialFactorsRf = doubleVectorConfParameter("rf_potential_factors", confRoot, potentialScale);
+    std::vector<double> potentialFactorsExcite = doubleVectorConfParameter("excite_potential_factors", confRoot, potentialScale);
     std::vector<double> detectionPAFactorsRaw = doubleVectorConfParameter("detection_potential_factors", confRoot);
     std::vector<ParticleSimulation::SimionPotentialArray*> detectionPAs;
 
@@ -148,7 +150,7 @@ int main(int argc, const char * argv[]) {
         for(const auto &pa: potentialArrays){
             std::array<double, 6> paBounds = pa->getBounds();
             for (size_t i=0; i<6; ++i){
-                if (minExtent[i] > paBounds[i]){
+                if (minExtent[i] < paBounds[i]){
                     minExtent[i] = paBounds[i];
                 }
             }
@@ -312,7 +314,7 @@ int main(int argc, const char * argv[]) {
     auto trapFieldFunction =
                  [exciteMode, rfMode, excitePulseLength, excitePulsePotential,
                          spaceChargeFactor, omega, &swiftWaveForm, &V_0, &V_0_ramp, &ionsInactive,
-                         &potentialArrays, &potentialsDc, &potentialFactorsRf, &potentialFactorsExcite]
+                         &potentialArrays, &potentialsFactorsDc, &potentialFactorsRf, &potentialFactorsExcite]
                          (BTree::Particle *particle, int particleIndex,auto& tree, double time, int timestep)
                          -> Core::Vector{
 
@@ -339,7 +341,7 @@ int main(int argc, const char * argv[]) {
                          Core::Vector paField = potentialArrays[i]->getField(pos.x(), pos.y(), pos.z());
 
                          Core::Vector paEffectiveField =
-                                 paField * potentialsDc.at(i) +
+                                 paField * potentialsFactorsDc.at(i) +
                                  paField * potentialFactorsRf.at(i) * V_t +
                                  paField * potentialFactorsExcite.at(i) * excitePotential;
 
