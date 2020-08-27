@@ -39,17 +39,12 @@ ParticleSimulation::VerletIntegrator::VerletIntegrator(
         ParticleSimulation::VerletIntegrator::timestepWriteFctType timestepWriteFunction,
         ParticleSimulation::VerletIntegrator::otherActionsFctType otherActionsFunction,
         CollisionModel::AbstractCollisionModel &collisionModel) :
+ParticleSimulation::AbstractTimeIntegrator(particles),
 accelerationFunction_(std::move(accelerationFunction)),
 timestepWriteFunction_(std::move(timestepWriteFunction)),
 otherActionsFunction_(std::move(otherActionsFunction)),
 collisionModel_(&collisionModel)
-{
-    //init velocities and accelerations:
-    for (int i=0; i<particles.size(); ++i){
-        addParticle(particles[i]);
-    }
-    tree_.computeChargeDistribution();
-}
+{}
 
 /**
  * Creates an empty verlet integrator (without simulated particles)
@@ -108,6 +103,9 @@ void ParticleSimulation::VerletIntegrator::run(int nTimesteps, double dt) {
  * @param dt time step length
  */
 void ParticleSimulation::VerletIntegrator::runSingleStep(double dt) {
+
+    bearParticles_(time_);
+
     for (int i=0; i<nParticles_; ++i){
         if (particles_[i]->isActive() == true){
 

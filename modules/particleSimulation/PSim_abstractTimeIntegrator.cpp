@@ -29,8 +29,29 @@ particles_(std::vector<BTree::Particle *>()),
 nParticles_(0),
 particleTOBs_(std::vector<pTobPair_t>()),
 particlesBornIdx_(0)
-
 {}
+
+ParticleSimulation::AbstractTimeIntegrator::AbstractTimeIntegrator(std::vector<BTree::Particle*> particles):
+time_(0.0),
+timestep_(0),
+particles_(std::vector<BTree::Particle *>()),
+nParticles_(0),
+particleTOBs_(std::vector<pTobPair_t>()),
+particlesBornIdx_(0)
+{
+    //init velocities and accelerations:
+
+    //particleTOBs_ = std::vector<std::pair<double,Core::Particle*>>();
+    for (const auto &part: particles){
+        particleTOBs_.emplace_back(
+                part->getTimeOfBirth(),
+                part);
+    }
+
+    // + sort particleTOBs_ according to time of birth
+    std::sort(particleTOBs_.begin(), particleTOBs_.end(),
+            [](const pTobPair_t &p1, const pTobPair_t &p2) {return p1.first < p2.first;});
+}
 
 /**
  * Generate ions in the simulation which are born up to the time "time"

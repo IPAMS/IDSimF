@@ -79,6 +79,12 @@ TEST_CASE("Test serial verlet integrator", "[ParticleSimulation][VerletIntegrato
         REQUIRE_NOTHROW(verletIntegrator.addParticle(&testParticle1));
         REQUIRE_NOTHROW(verletIntegrator.run(nSteps,dt));
 
+        Core::Vector ionPos1 = testParticle1.getLocation();
+        REQUIRE(Approx(ionPos1.x()).epsilon(1e-6) == 0.000495);
+        REQUIRE(Approx(ionPos1.y()).epsilon(1e-2) == 0.00);
+        REQUIRE(Approx(ionPos1.z()).epsilon(1e-7) == 0.0002475);
+
+
         std::cout<<"p 1: "<<testParticle1.getLocation()<<std::endl;
 
         BTree::Particle testParticle2(Core::Vector(0.0, 0.01, 0.0),
@@ -88,34 +94,37 @@ TEST_CASE("Test serial verlet integrator", "[ParticleSimulation][VerletIntegrato
         REQUIRE_NOTHROW(verletIntegrator.addParticle(&testParticle2));
         REQUIRE_NOTHROW(verletIntegrator.run(nSteps,dt));
 
-        verletIntegrator.run(nSteps,dt);
+        //verletIntegrator.run(nSteps,dt);
 
-        Core::Vector ionPos = testParticle2.getLocation();
-        REQUIRE(Approx(ionPos.x()).epsilon(1e-6) == 0.00199);
-        REQUIRE(Approx(ionPos.y()).epsilon(1e-2) == 0.01);
-        REQUIRE(Approx(ionPos.z()).epsilon(1e-7) == 0.000995);
+        Core::Vector ionPos2 = testParticle2.getLocation();
+        REQUIRE(Approx(ionPos2.x()).epsilon(1e-6) == 0.000495);
+        REQUIRE(Approx(ionPos2.y()).epsilon(1e-2) == 0.01);
+        REQUIRE(Approx(ionPos2.z()).epsilon(1e-7) == 0.0002475);
     }
 
-
-    SECTION( "Verlet integrator should be able to integrate correctly non reactive particles") {
-        //Test with verlet integration:
+    SECTION( "Verlet integrator should be able to integrate correctly non reactive particles with TOB distribution") {
         double nParticles = 10;
+        double timeSteps = 60;
         double dt = 1e-4;
-        double timeSteps = 50;
 
+        //prepare particles with a distributed time of birth (TOB):
         std::vector<BTree::uniquePartPtr>particles;
         std::vector<BTree::Particle*>particlesPtrs;
 
         double yPos = 0;
-        for (int i=0; i<nParticles; i++){
+        double lastTime = timeSteps * dt - 4*dt;
+        double timeOfBirth = lastTime;
+        for (int i=0; i<nParticles; ++i){
             BTree::uniquePartPtr particle = std::make_unique<BTree::Particle>(
-                    Core::Vector(0.0,yPos,0.0),
+                    Core::Vector(0.0, yPos, 0.0),
                     Core::Vector(0.0,0.0,0.0),
                     1.0,
-                    100.0);
+                    100.0,
+                    timeOfBirth);
             particlesPtrs.push_back(particle.get());
             particles.push_back(std::move(particle));
-            yPos = yPos+0.01;
+            yPos += 0.01;
+            timeOfBirth -= dt*0.5;
         }
 
         CollisionModel::EmptyCollisionModel collisionModel;
@@ -125,14 +134,21 @@ TEST_CASE("Test serial verlet integrator", "[ParticleSimulation][VerletIntegrato
                 accelerationFct, timestepWriteFct, otherActionsFct,
                 collisionModel);
 
-        verletIntegrator.runSingleStep(dt);
-        verletIntegrator.run(timeSteps,dt);
+        verletIntegrator.run(timeSteps, dt);
 
-        for (int i=0; i<nParticles; i++){
+        double endTime = timeSteps * dt;
+        for (int i=0; i<nParticles; ++i){
             Core::Vector ionPos = particles[i]-> getLocation();
-            REQUIRE(Approx(ionPos.x()).epsilon(1e-6) == 0.0001275);
+
+            //calculate approximate position according to a pure linear uniform acceleration
+            // according to the real time the particles were present in the simulation:
+            double diffTime = endTime - (0.5*dt)  - particles[i]-> getTimeOfBirth();
+            double xCalculated= 0.5 * ionAcceleration * diffTime * diffTime;
+            double zCalculated= 0.5 * xCalculated;
+
+            REQUIRE(Approx(ionPos.x()).epsilon(0.05) == xCalculated);
             REQUIRE(Approx(ionPos.y()).epsilon(1e-7) == i*0.01);
-            REQUIRE(Approx(ionPos.z()).epsilon(1e-7) == 6.375e-05);
+            REQUIRE(Approx(ionPos.z()).epsilon(0.05) == zCalculated);
         }
     }
 
@@ -222,7 +238,6 @@ TEST_CASE("Test serial verlet integrator", "[ParticleSimulation][VerletIntegrato
         REQUIRE(Approx(ionVelo.x()) == 482.442);
         REQUIRE(Approx(ionVelo.y()) == 0.0);
         REQUIRE(Approx(ionVelo.z()) == 0.0);
-
 
         ionPos = particles[3]-> getLocation();
         REQUIRE(Approx(ionPos.x()) == -61.6113);

@@ -32,7 +32,7 @@
 
 TEST_CASE( "Test velocity integrator", "[ParticleSimulation][VelocityIntegrator][trajectory integration]") {
 
-    SECTION( "Velocity integrator should be able to integrate correctly particles") {
+    SECTION( "Velocity integrator should be able to integrate particles correctly") {
 
         //Test with verlet integration:
         double nParticles = 10;

@@ -454,7 +454,6 @@ int main(int argc, const char * argv[]) {
              &hdf5Writer, &additionalParameterTransformFct, &avgPositionWriter, &ionsInactiveWriter, &fftWriter](
                     std::vector<BTree::Particle*>& particles, auto& tree, double time, int timestep, bool lastTimestep){
 
-
                 if (timestep % fftWriteInterval == 0) {
                     //avgPositionWriter->writeTimestep(tree, time);
                     ionsInactiveWriter->writeTimestep(ionsInactive, time);

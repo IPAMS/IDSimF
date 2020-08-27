@@ -30,24 +30,12 @@ ParticleSimulation::ParallelVerletIntegrator::ParallelVerletIntegrator(std::vect
                                ParticleSimulation::ParallelVerletIntegrator::timestepWriteFctType timestepWriteFunction,
                                ParticleSimulation::ParallelVerletIntegrator::otherActionsFctType otherActionsFunction,
                                CollisionModel::AbstractCollisionModel &collisionModel):
+AbstractTimeIntegrator(particles),
 accelerationFunction_(std::move(accelerationFunction)),
 timestepWriteFunction_(std::move(timestepWriteFunction)),
 otherActionsFunction_(std::move(otherActionsFunction)),
 collisionModel_(&collisionModel)
-{
-    //init velocities and accelerations:
-
-    //particleTOBs_ = std::vector<std::pair<double,Core::Particle*>>();
-    for (const auto &part: particles){
-        particleTOBs_.emplace_back(
-                part->getTimeOfBirth(),
-                part);
-    }
-
-    // + sort particleTOBs_ according to time of birth
-    std::sort(particleTOBs_.begin(), particleTOBs_.end(),
-              [](const pTobPair_t &p1, const pTobPair_t &p2) {return p1.first < p2.first;});
-}
+{}
 
 ParticleSimulation::ParallelVerletIntegrator::ParallelVerletIntegrator(
             ParticleSimulation::ParallelVerletIntegrator::accelerationFctType accelerationFunction,

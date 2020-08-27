@@ -52,6 +52,9 @@ namespace ParticleSimulation{
         typedef std::pair<double,BTree::Particle*> pTobPair_t;
 
         AbstractTimeIntegrator();
+        AbstractTimeIntegrator(std::vector<BTree::Particle*> particles);
+
+
 
         virtual ~AbstractTimeIntegrator() = default;
 
