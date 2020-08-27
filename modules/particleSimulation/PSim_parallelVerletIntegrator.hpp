@@ -81,8 +81,6 @@ namespace ParticleSimulation{
                            int timestep)>
                     otherActionsFctType;
 
-            typedef std::pair<double,BTree::Particle*> pTobPair_t;
-
             ParallelVerletIntegrator(
                     std::vector<BTree::Particle*> particles,
                     accelerationFctType accelerationFunction,
@@ -106,8 +104,6 @@ namespace ParticleSimulation{
     private:
 
         size_t numberOfNodes_; ///< number of nodes in the parallel BTree attached to this integrator
-        std::vector<pTobPair_t> particleTOBs_; ///< Time of births of the individual particles
-        size_t particlesBornIdx_; ///< index in particleTOBs_ indicating the particles already born
 
         CollisionModel::AbstractCollisionModel* collisionModel_; ///< the gas collision model to perform while integrating
 

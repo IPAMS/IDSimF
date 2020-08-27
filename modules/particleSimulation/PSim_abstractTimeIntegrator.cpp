@@ -26,5 +26,26 @@ ParticleSimulation::AbstractTimeIntegrator::AbstractTimeIntegrator() :
 time_(0.0),
 timestep_(0),
 particles_(std::vector<BTree::Particle *>()),
-nParticles_(0)
+nParticles_(0),
+particleTOBs_(std::vector<pTobPair_t>()),
+particlesBornIdx_(0)
+
 {}
+
+/**
+ * Generate ions in the simulation which are born up to the time "time"
+ * The time of birth in the particles is set according to the actual birth time in the simulation
+ *
+ * @param time the time until particles are born
+ */
+void ParticleSimulation::AbstractTimeIntegrator::bearParticles_(double time){
+
+    if (particlesBornIdx_ < particleTOBs_.size()) {
+        while (particlesBornIdx_ < particleTOBs_.size() && particleTOBs_[particlesBornIdx_].first <= time) {
+            BTree::Particle *part = particleTOBs_[particlesBornIdx_].second;
+            part->setTimeOfBirth(time); //set particle TOB to the actual TOB in the simulation
+            addParticle(part);
+            ++particlesBornIdx_;
+        }
+    }
+}

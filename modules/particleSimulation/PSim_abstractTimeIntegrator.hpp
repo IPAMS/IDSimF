@@ -32,11 +32,13 @@
 #include <vector>
 #include <functional>
 
+#include "BTree_particle.hpp"
 #include "Core_vector.hpp"
+
 //forward declare own classes:
-namespace BTree{
+/*namespace BTree{
     class Particle;
-}
+}*/
 
 namespace ParticleSimulation{
 
@@ -46,6 +48,8 @@ namespace ParticleSimulation{
     class AbstractTimeIntegrator {
 
     public:
+
+        typedef std::pair<double,BTree::Particle*> pTobPair_t;
 
         AbstractTimeIntegrator();
 
@@ -61,7 +65,11 @@ namespace ParticleSimulation{
         int timestep_; ///< the current time step
         std::vector<BTree::Particle*> particles_; ///< links to the simulated particles
         long nParticles_; ///< number of particles
+        std::vector<pTobPair_t> particleTOBs_; ///< Time of births of the individual particles
+        size_t particlesBornIdx_; ///< index in particleTOBs_ indicating the particles already born
 
+
+        void bearParticles_(double time);
     };
 }
 #endif /* BTree_abstractTimeIntegrator_hpp */

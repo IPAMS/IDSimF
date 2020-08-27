@@ -454,6 +454,7 @@ int main(int argc, const char * argv[]) {
              &hdf5Writer, &additionalParameterTransformFct, &avgPositionWriter, &ionsInactiveWriter, &fftWriter](
                     std::vector<BTree::Particle*>& particles, auto& tree, double time, int timestep, bool lastTimestep){
 
+
                 if (timestep % fftWriteInterval == 0) {
                     //avgPositionWriter->writeTimestep(tree, time);
                     ionsInactiveWriter->writeTimestep(ionsInactive, time);
@@ -492,6 +493,8 @@ int main(int argc, const char * argv[]) {
                                             collisionGasMassAmu,
                                             collisionGasDiameterM);
 
+
+
     // simulate ===============================================================================================
     clock_t begin = std::clock();
 
@@ -509,6 +512,7 @@ int main(int argc, const char * argv[]) {
                 hsModel);
         verletIntegrator.run(timeSteps, dt);
     }
+
 
     if (rfMode == RAMPED_RF) {
         hdf5Writer->writeVectorDataset("V_rf",V_rf_export);

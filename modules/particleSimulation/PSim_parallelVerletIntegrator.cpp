@@ -33,9 +33,7 @@ ParticleSimulation::ParallelVerletIntegrator::ParallelVerletIntegrator(std::vect
 accelerationFunction_(std::move(accelerationFunction)),
 timestepWriteFunction_(std::move(timestepWriteFunction)),
 otherActionsFunction_(std::move(otherActionsFunction)),
-collisionModel_(&collisionModel),
-particleTOBs_(std::vector<pTobPair_t>()),
-particlesBornIdx_(0)
+collisionModel_(&collisionModel)
 {
     //init velocities and accelerations:
 
@@ -76,6 +74,11 @@ void ParticleSimulation::ParallelVerletIntegrator::addParticle(BTree::Particle *
 
     tree_.insertParticle(*particle, nParticles_);
     ++nParticles_;
+}
+
+void ParticleSimulation::ParallelVerletIntegrator::bearParticles_(double time) {
+    ParticleSimulation::AbstractTimeIntegrator::bearParticles_(time);
+    initInternalState_();
 }
 
 void ParticleSimulation::ParallelVerletIntegrator::initInternalState_(){
@@ -161,21 +164,4 @@ void ParticleSimulation::ParallelVerletIntegrator::terminateSimulation(){
     timestepWriteFunction_(particles_,tree_,time_,timestep_,true);
 }
 
-/**
- * Generate ions in the simulation which are born up to the time "time"
- * The time of birth in the particles is set according to the actual birth time in the simulation
- *
- * @param time the time until particles are born
- */
-void ParticleSimulation::ParallelVerletIntegrator::bearParticles_(double time){
 
-    if (particlesBornIdx_ < particleTOBs_.size()) {
-        while (particlesBornIdx_ < particleTOBs_.size() && particleTOBs_[particlesBornIdx_].first <= time) {
-            BTree::Particle *part = particleTOBs_[particlesBornIdx_].second;
-            part->setTimeOfBirth(time); //set particle TOB to the actual TOB in the simulation
-            addParticle(part);
-            ++particlesBornIdx_;
-        }
-        initInternalState_();
-    }
-}
