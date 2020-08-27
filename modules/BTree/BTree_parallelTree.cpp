@@ -105,7 +105,8 @@ Core::Vector BTree::ParallelTree::computeEFieldFromTree(BTree::Particle &particl
         BTree::ParallelNode* currentNode = nodesToProcess.at(cur);
 
         if(currentNode->numP_ == 1){ // if node has only one particle: calculate force directly
-            efield=efield+root_->calculateElectricForce(loc, currentNode->particle_->getLocation(),currentNode->particle_->getCharge());
+            efield=efield+root_->calculateElectricField(loc, currentNode->particle_->getLocation(),
+                    currentNode->particle_->getCharge());
         }
         else { // if more particles: process the node
             // get squared distance to the charge center:
@@ -113,7 +114,7 @@ Core::Vector BTree::ParallelTree::computeEFieldFromTree(BTree::Particle &particl
 
             // if distance is large enough: Use node as approximate pseudo particle (use charge center and charge weight of the node)
             if(currentNode->edgeLengthSquaredNormalized_ < r2){
-                efield=efield+root_->calculateElectricForce(loc, currentNode->centerOfCharge_, currentNode->charge_);
+                efield=efield+root_->calculateElectricField(loc, currentNode->centerOfCharge_, currentNode->charge_);
             }
             else { // if distiance is too small: Decent a level in the tree and add the child nodes to the process list
                 for(int i=0; i < 8; ++i) {

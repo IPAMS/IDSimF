@@ -53,14 +53,14 @@ BTree::Node& BTree::Node::operator=(const BTree::Node& that){
 
 // Public member methods:
 /**
- * Computes the electric force on a given particle from the charged particles in a tree
+ * Computes the electric field on a given particle from the charged particles in a tree
  * with this node as root node
- * @param targetP a particle to calculate the total electric force for
+ * @param targetP a particle to calculate the total electric field for
  * @return the electric force on the particle resulting from the particles in the tree with this node as root
  */
-Core::Vector BTree::Node::computeElectricForceFromTree(BTree::Particle &targetP){
+Core::Vector BTree::Node::computeElectricFieldFromTree(BTree::Particle &targetP){
     if (numP_ == 1){
-        Core::Vector efield= calculateElectricForce(
+        Core::Vector efield= calculateElectricField(
                 targetP.getLocation(),
                 particle_->getLocation(),
                 particle_->getCharge());
@@ -71,7 +71,7 @@ Core::Vector BTree::Node::computeElectricForceFromTree(BTree::Particle &targetP)
         double d = max_.x() - min_.x();
         
         if (r > 0 && d/r < BTree::Node::theta){
-            Core::Vector efield= calculateElectricForce(
+            Core::Vector efield= calculateElectricField(
                     targetP.getLocation(),
                     centerOfCharge_,
                     charge_);
@@ -82,7 +82,7 @@ Core::Vector BTree::Node::computeElectricForceFromTree(BTree::Particle &targetP)
             Core::Vector efield= Core::Vector(0.0,0.0,0.0);
             for (int i=0; i<8; i++){
                 if(octNodes_[i] != nullptr){
-                    efield = efield + octNodes_[i]->computeElectricForceFromTree(targetP);
+                    efield = efield +octNodes_[i]->computeElectricFieldFromTree(targetP);
                 }
             }
             return(efield);

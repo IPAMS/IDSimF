@@ -323,13 +323,13 @@ TEST_CASE( "Test electric field calculation in parallel node","[Node]") {
         Core::Vector a = Core::Vector(1.0, 1.0, 1.0);
         Core::Vector b = Core::Vector(2.0, 1.0, 1.0);
 
-        Core::Vector c = BTree::ParallelNode::calculateElectricForce(a, b, 1.0);
+        Core::Vector c = BTree::ParallelNode::calculateElectricField(a, b, 1.0);
         Core::Vector d = Core::Vector(-(1.0/(4*M_PI*8.854e-12)), 0.0, 0.0);
 
         REQUIRE(
                 vectorApproxCompare(
-                        BTree::ParallelNode::calculateElectricForce(a, b, 1.0),
-                        BTree::ParallelNode::calculateElectricForce(b, a, 1.0)*(-1))
+                        BTree::ParallelNode::calculateElectricField(a, b, 1.0),
+                        BTree::ParallelNode::calculateElectricField(b, a, 1.0)*(-1))
                         ==vectorsApproxEqual);
 
         REQUIRE(vectorApproxCompare(c, d)==vectorsApproxEqual);

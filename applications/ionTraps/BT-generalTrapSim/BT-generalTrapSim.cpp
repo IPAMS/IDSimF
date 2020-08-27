@@ -59,10 +59,6 @@ const std::string key_spaceCharge_z = "keySpaceChargeZ";
 const std::string key_trapForce_x = "keyTrapForceX";
 const std::string key_trapForce_y = "keyTrapForceY";
 const std::string key_trapForce_z = "keyTrapForceZ";
-const std::string key_velocity_x = "keyVeloX";
-const std::string key_velocity_y = "keyVeloY";
-const std::string key_velocity_z = "keyVeloZ";
-
 
 int main(int argc, const char * argv[]) {
 
@@ -352,7 +348,7 @@ int main(int argc, const char * argv[]) {
 
 
     auto accelerationFunctionQIT =
-            [spaceChargeFactor,&trapFieldFunction](
+            [spaceChargeFactor, &trapFieldFunction](
                     BTree::Particle *particle, int particleIndex,
                     auto& tree, double time, int timestep) -> Core::Vector{
 
@@ -364,9 +360,8 @@ int main(int argc, const char * argv[]) {
                 Core::Vector spaceChargeForce(0,0,0);
                 if (spaceChargeFactor > 0) {
                     spaceChargeForce =
-                            tree.computeElectricForceFromTree(*particle) * (particleCharge * spaceChargeFactor);
+                            tree.computeEFieldFromTree(*particle) * (particleCharge * spaceChargeFactor);
                 }
-                //std::cout<<"rf:"<<rfForce<<" spCh:"<<spaceChargeForce<<std::endl;
 
                 //update the additional parameters for writing them later to the trajectory:
                 particle->setAuxScalarParam(key_trapForce_x, trapForce.x());
@@ -380,7 +375,7 @@ int main(int argc, const char * argv[]) {
             };
 
     auto accelerationFunctionQIT_parallel =
-            [spaceChargeFactor,&trapFieldFunction](
+            [spaceChargeFactor, &trapFieldFunction](
                     BTree::Particle *particle, int particleIndex,
                     auto& tree, double time, int timestep) -> Core::Vector{
 
@@ -452,7 +447,7 @@ int main(int argc, const char * argv[]) {
                                               "spacecharge x","spacecharge y","spacecharge z"};
 
     auto hdf5Writer = std::make_unique<ParticleSimulation::TrajectoryHDF5Writer>(
-            projectName + "_trajectories.hd5", auxParamNames,additionalParameterTransformFct);
+            projectName + "_trajectories.hd5", auxParamNames, additionalParameterTransformFct);
 
     auto timestepWriteFunction =
             [trajectoryWriteInterval, fftWriteInterval, fftWriteMode, &V_0, &V_rf_export, &ionsInactive, timeSteps,

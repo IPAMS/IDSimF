@@ -44,7 +44,7 @@ namespace BTree {
         Node& operator=(const Node& that);
 
         // Member methods:
-        Core::Vector computeElectricForceFromTree(Particle &targetP);
+        Core::Vector computeElectricFieldFromTree(Particle &targetP);
         
         //mostly diagnostic methods:
         void testSpatialTreeIntegrity();

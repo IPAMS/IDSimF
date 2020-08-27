@@ -163,8 +163,8 @@ void BTree::Tree::computeChargeDistribution(){
  * @param particle a testparticle on which the electric force from the tree acts
  * @returns the electric force on that particle
  */
-Core::Vector BTree::Tree::computeElectricForceFromTree(BTree::Particle &particle){
-    return root_->computeElectricForceFromTree(particle);
+Core::Vector BTree::Tree::computeEFieldFromTree(BTree::Particle &particle){
+    return root_->computeElectricFieldFromTree(particle);
 }
 
 /**

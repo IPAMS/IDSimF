@@ -193,7 +193,7 @@ int main(int argc, const char * argv[]) {
             }
         }
 
-        Core::Vector spaceChargeForce = tree.computeElectricForceFromTree(*particle)* spaceChargeFactor;
+        Core::Vector spaceChargeForce = tree.computeEFieldFromTree(*particle)* spaceChargeFactor;
         Core::Vector result = (E  + spaceChargeForce) * particleCharge / particle->getMass();
         return(result);
     };

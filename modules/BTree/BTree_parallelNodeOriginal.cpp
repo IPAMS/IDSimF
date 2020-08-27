@@ -492,10 +492,10 @@ Core::Vector BTree::ParallelNodeOriginal::computeEFieldFromTree(BTree::Particle&
 
     //todo: Check if i caluclate the field to myself...
     if (numP_ == 1){
-        return(calculateElectricForce(
-                                 targetP.getLocation(),
-                                 particle_->getLocation(),
-                                 particle_->getCharge()));
+        return(calculateElectricField(
+                targetP.getLocation(),
+                particle_->getLocation(),
+                particle_->getCharge()));
     }
     else{
         // magnitude2 berechnet den Abstand der beiden Werte zum Quadrat. Es wird nicht mehr die Wurzel gezogen
@@ -503,10 +503,10 @@ Core::Vector BTree::ParallelNodeOriginal::computeEFieldFromTree(BTree::Particle&
         // durch_ wird in der insert Funktion gesetzt und wird hier nur aufgerufen
         // durch_ wird anders berechnet als vorher. Theta wurde bei der Rechnung hinzugefügt, sodass die Ungleichung umgestellt wurde
         if(durch_ < r){
-            return(calculateElectricForce(
-                                targetP.getLocation(),
-                                centerOfCharge_,
-                                charge_));
+            return(calculateElectricField(
+                    targetP.getLocation(),
+                    centerOfCharge_,
+                    charge_));
 
         }
         else{
@@ -524,13 +524,14 @@ Core::Vector BTree::ParallelNodeOriginal::computeEFieldFromTree(BTree::Particle&
                 // Berechnet die Kraft explizit für jeden Knoten der in das Feld hinzugefügt wurde.
                 // Hier wird der erste Fall umgesetzt. Sollte der aktuelle Knoten nur ein Partikel beinhalten
                 if(MyNodes[j]->numP_==1)
-                    efield=efield+calculateElectricForce(loc,MyNodes[j]->particle_->getLocation(),MyNodes[j]->particle_->getCharge());
+                    efield=efield+calculateElectricField(loc, MyNodes[j]->particle_->getLocation(),
+                            MyNodes[j]->particle_->getCharge());
                 // Ansonsten wird die Entfernung zum Masseschwerpunkt bestimmt
                 else
                 {
                     double r2= (loc-MyNodes[j]->centerOfCharge_).magnitudeSquared();
                     if(MyNodes[j]->durch_<r2)
-                        efield=efield+calculateElectricForce(loc,MyNodes[j]->centerOfCharge_,MyNodes[j]->charge_);
+                        efield=efield+calculateElectricField(loc, MyNodes[j]->centerOfCharge_, MyNodes[j]->charge_);
                     // Sollte die Entfernung größer als r2 sein, dann werden die noch zu betrachtenden Knoten dem Feld hinzugefügt
                     else
                     {
@@ -557,7 +558,7 @@ Core::Vector BTree::ParallelNodeOriginal::computeEFieldFromTree(BTree::Particle&
 
 Core::Vector BTree::ParallelNodeOriginal::computeElectricForceFromTree(BTree::Particle &targetP){
     std::stringstream ss;
-    ss << "Method not implemented: Core::ParallelNodeOriginal::computeElectricForceFromTree";
+    ss << "Method not implemented: Core::ParallelNodeOriginal::computeElectricFieldFromTree";
     throw (std::runtime_error(ss.str()));
 }
 

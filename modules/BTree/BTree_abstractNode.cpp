@@ -69,13 +69,13 @@ int BTree::AbstractNode::getNumberOfNodes(){
 }
 
 /**
- * Computes the electric force on a test charge located at r1 from a charge located at r2
+ * Computes the electric field on a test charge located at r1 from a charge located at r2
  * @param r1 the position of the small test charge (in m)
  * @param r2 the position of the charge "charge2" (in m)
  * @param charge2 the charge of "charge2" (in coulomb)
- * @return The electric force on on the testcharge at r1
+ * @return The electric field at the position r1
  */
-Core::Vector BTree::AbstractNode::calculateElectricForce(const Core::Vector &r1, const Core::Vector &r2, double charge2){
+Core::Vector BTree::AbstractNode::calculateElectricField(const Core::Vector &r1, const Core::Vector &r2, double charge2){
     double d = (r1-r2).magnitude();
     if (d>0){
         return ( (r1-r2)*(charge2/(Core::ELECTRIC_CONSTANT*(d*d*d))) ); //d*d*d is faster than pow(d,3.0)

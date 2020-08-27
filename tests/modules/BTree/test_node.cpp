@@ -344,13 +344,13 @@ TEST_CASE( "Test field calculation in serial node", "[Node]") {
         Core::Vector a = Core::Vector(1.0,1.0,1.0);
         Core::Vector b = Core::Vector(2.0,1.0,1.0);
 
-        Core::Vector c = BTree::Node::calculateElectricForce(a, b, 1.0);
+        Core::Vector c = BTree::Node::calculateElectricField(a, b, 1.0);
         Core::Vector d = Core::Vector(-(1.0/(4*M_PI*8.854e-12)),0.0,0.0);
 
         REQUIRE(
                 vectorApproxCompare(
-                        BTree::Node::calculateElectricForce(a, b, 1.0),
-                        BTree::Node::calculateElectricForce(b, a, 1.0)*(-1))
+                        BTree::Node::calculateElectricField(a, b, 1.0),
+                        BTree::Node::calculateElectricField(b, a, 1.0)*(-1))
                         ==  vectorsApproxEqual);
 
         REQUIRE(vectorApproxCompare(c,d) == vectorsApproxEqual);
@@ -368,7 +368,7 @@ TEST_CASE( "Test field calculation in serial node", "[Node]") {
         testTree.insertParticle(testIon4,4);
 
         testTree.computeChargeDistribution();
-        Core::Vector testField1 = testTree.computeElectricForceFromTree(testIon1);
+        Core::Vector testField1 = testTree.computeEFieldFromTree(testIon1);
         REQUIRE( Approx(testField1.x()).epsilon(1e-4) == -1.4399645e-9);
         REQUIRE( Approx(testField1.y()).epsilon(1e-4) == -1.4399645e-9/4.0);
         REQUIRE( Approx(testField1.z()).epsilon(1e-4) == 1.4399645e-7);
@@ -401,7 +401,7 @@ TEST_CASE( "Test field calculation in serial node", "[Node]") {
         REQUIRE(testTree.getRoot()->getNumberOfParticles() == 8);
         REQUIRE(testTree.getRoot()->getCharge() - 8.0*Core::ELEMENTARY_CHARGE < 1e-30);
 
-        Core::Vector testField1 = testTree.computeElectricForceFromTree(testIon1);
+        Core::Vector testField1 = testTree.computeEFieldFromTree(testIon1);
         REQUIRE( ((testField1.x() < 2e-25) && (testField1.y() < 2e-25) && (testField1.z() < 2e-25)) );
     }
 
@@ -415,7 +415,7 @@ TEST_CASE( "Test field calculation in serial node", "[Node]") {
         testNode.insertParticle(&testIon2);
         testNode.computeChargeDistributionRecursive();
 
-        Core::Vector testField1 = testNode.computeElectricForceFromTree(testIon1);
+        Core::Vector testField1 = testNode.computeElectricFieldFromTree(testIon1);
         REQUIRE( testField1.x() == testField1.y());
         REQUIRE( testField1.x() == testField1.z());
     }
@@ -434,7 +434,7 @@ TEST_CASE( "Test field calculation in serial node", "[Node]") {
 
         testNode.computeChargeDistributionRecursive();
 
-        Core::Vector testField1 = testNode.computeElectricForceFromTree(testIon1);
+        Core::Vector testField1 = testNode.computeElectricFieldFromTree(testIon1);
 
         REQUIRE( testField1.x() == Approx(testField1.y()).epsilon(0.001));
         REQUIRE( testField1.x() == Approx(testField1.z()).epsilon(0.001));
@@ -456,10 +456,10 @@ TEST_CASE( "Test field calculation in serial node", "[Node]") {
         }
         testNode.computeChargeDistributionRecursive();
 
-        Core::Vector testField1 = testNode.computeElectricForceFromTree(testIon1);
-        Core::Vector testField2 = testNode.computeElectricForceFromTree(testIon2);
-        Core::Vector testField3 = testNode.computeElectricForceFromTree(testIon3);
-        Core::Vector testField4 = testNode.computeElectricForceFromTree(testIon4);
+        Core::Vector testField1 = testNode.computeElectricFieldFromTree(testIon1);
+        Core::Vector testField2 = testNode.computeElectricFieldFromTree(testIon2);
+        Core::Vector testField3 = testNode.computeElectricFieldFromTree(testIon3);
+        Core::Vector testField4 = testNode.computeElectricFieldFromTree(testIon4);
 
         REQUIRE( (testField1.x() - testField2.z()) < 1e-8);
         REQUIRE( (testField1.x() - testField3.y()) < 1e-8);

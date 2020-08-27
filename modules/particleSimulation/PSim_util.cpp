@@ -123,7 +123,7 @@ std::vector<std::tuple<double,double,Core::Vector>> ParticleSimulation::util::pr
             }
             
             testParticle = BTree::Particle(particlePosition, 1);
-            force= tree.computeElectricForceFromTree(testParticle);
+            force= tree.computeEFieldFromTree(testParticle);
             result.emplace_back(std::tuple<double,double,Core::Vector>{uPos,vPos,force});
             //resultFile<<uPos<<" "<<vPos<<" "<<force<<std::endl;
         }

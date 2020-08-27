@@ -54,7 +54,7 @@ namespace BTree {
 
         // Static methods:
         static int getNumberOfNodes();
-        static Core::Vector calculateElectricForce(const Core::Vector &r1, const Core::Vector &r2, double charge2);
+        static Core::Vector calculateElectricField(const Core::Vector &r1, const Core::Vector &r2, double charge2);
 
         // Accessors:
         int getNumberOfParticles();

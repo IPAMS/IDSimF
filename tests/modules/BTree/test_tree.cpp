@@ -175,8 +175,8 @@ TEST_CASE( "Test serial tree charge distribution calculation","[Tree]"){
         REQUIRE(testTree.getNumberOfParticles() == 3);
         REQUIRE(testTree.getRoot()->getCharge() == 3.0*Core::ELEMENTARY_CHARGE);
 
-        REQUIRE(testTree.computeElectricForceFromTree(testIon1) == Core::Vector(0.0,0.0,0.0));
-        REQUIRE(testTree.computeElectricForceFromTree(testIon2) != Core::Vector(0.0,0.0,0.0));
+        REQUIRE(testTree.computeEFieldFromTree(testIon1) == Core::Vector(0.0,0.0,0.0));
+        REQUIRE(testTree.computeEFieldFromTree(testIon2) != Core::Vector(0.0,0.0,0.0));
 
         std::list<BTree::Particle*>* particleList= testTree.getParticleList();
         REQUIRE(particleList->size() == 3);
@@ -192,13 +192,13 @@ TEST_CASE( "Test serial tree charge distribution calculation","[Tree]"){
         testTree.insertParticle(testIon3,3);
 
         testTree.computeChargeDistribution();
-        REQUIRE(testTree.computeElectricForceFromTree(testIon1) != Core::Vector(0.0,0.0,0.0));
+        REQUIRE(testTree.computeEFieldFromTree(testIon1) != Core::Vector(0.0,0.0,0.0));
         REQUIRE(
                 vectorApproxCompare(
-                        testTree.computeElectricForceFromTree(testIon2),
+                        testTree.computeEFieldFromTree(testIon2),
                         Core::Vector(0.0,0.0,0.0))
                         ==  vectorsApproxEqual);
-        REQUIRE(testTree.computeElectricForceFromTree(testIon3) != Core::Vector(0.0,0.0,0.0));
+        REQUIRE(testTree.computeEFieldFromTree(testIon3) != Core::Vector(0.0,0.0,0.0));
     }
 
     SECTION( "Test force calculation with a large number of particles in a cube"){
@@ -246,9 +246,9 @@ TEST_CASE( "Test serial tree charge distribution calculation","[Tree]"){
 
         testTree.computeChargeDistribution();
         REQUIRE(testTree.getNumberOfParticles() == 6 * nions);
-        Core::Vector centralForce = testTree.computeElectricForceFromTree(testIon1);
-        Core::Vector leftForce = testTree.computeElectricForceFromTree(testIon2);
-        Core::Vector topForce = testTree.computeElectricForceFromTree(testIon4);
+        Core::Vector centralForce = testTree.computeEFieldFromTree(testIon1);
+        Core::Vector leftForce = testTree.computeEFieldFromTree(testIon2);
+        Core::Vector topForce = testTree.computeEFieldFromTree(testIon4);
         REQUIRE(std::abs(centralForce.x()) < 1.0 );
         REQUIRE(std::abs(centralForce.y()) < 1.0 );
         REQUIRE(std::abs(centralForce.z()) < 1.0 );

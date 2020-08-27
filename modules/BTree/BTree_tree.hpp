@@ -59,7 +59,7 @@ namespace BTree {
 
         //charge calculation methods:
         void computeChargeDistribution();
-        Core::Vector computeElectricForceFromTree(Particle &particle);
+        Core::Vector computeEFieldFromTree(Particle &particle);
 
         //particle modification methods:
         void insertParticle(Particle &particle, int ext_index);

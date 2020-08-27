@@ -70,7 +70,7 @@ TEST_CASE("Compare results of serial and parallel varlet integrators with a line
                 Core::Vector spaceChargeForce(0,0,0);
                 if (spaceChargeFactor > 0) {
                     spaceChargeForce =
-                            tree.computeElectricForceFromTree(*particle) * (particleCharge * spaceChargeFactor);
+                            tree.computeEFieldFromTree(*particle) * (particleCharge * spaceChargeFactor);
                 }
                 return (spaceChargeForce / particle->getMass());
             };
