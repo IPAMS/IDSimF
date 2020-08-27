@@ -109,20 +109,19 @@ int main(int argc, const char * argv[]) {
     }
 
     //read potential array configuration of the trap =================================================
-    double paScale = doubleConfParameter("potential_array_scaling", confRoot);
+    double paSpatialScale = doubleConfParameter("potential_array_scaling", confRoot);
     std::vector<std::unique_ptr<ParticleSimulation::SimionPotentialArray>> potentialArrays;
     std::vector<std::string> potentialArraysNames = stringVectorConfParameter("potential_arrays", confRoot);
     for(const auto &paName: potentialArraysNames){
         std::filesystem::path paPath = confBasePath / paName;
         std::unique_ptr<ParticleSimulation::SimionPotentialArray> pa_pt =
-                std::make_unique<ParticleSimulation::SimionPotentialArray>(paPath, paScale);
+                std::make_unique<ParticleSimulation::SimionPotentialArray>(paPath, paSpatialScale);
         potentialArrays.push_back(std::move(pa_pt));
     }
 
-    // SIMION fast adjust PAs use 10000 as normalized potential value
-    // since we retrieve the field (in V/length unit) from the PA below, we have to scale the factors
-    // with the geometric scaling factor
-    double potentialScale = 1.0 / 10000.0 / paScale;
+
+    // SIMION fast adjust PAs use 10000 as normalized potential value, thus we have to scale everything with 1/10000
+    double potentialScale = 1.0 / 10000.0;
     std::vector<double> potentialsFactorsDc = doubleVectorConfParameter("dc_potentials", confRoot, potentialScale);
     std::vector<double> potentialFactorsRf = doubleVectorConfParameter("rf_potential_factors", confRoot, potentialScale);
     std::vector<double> potentialFactorsExcite = doubleVectorConfParameter("excite_potential_factors", confRoot, potentialScale);
@@ -429,7 +428,7 @@ int main(int argc, const char * argv[]) {
     auto avgPositionWriter = std::make_unique<ParticleSimulation::AverageChargePositionWriter>(projectName+"_averagePosition.txt");
 
     auto fftWriter = std::make_unique<ParticleSimulation::InductionCurrentWriter>(
-            particlePtrs, projectName + "_fft.txt",detectionPAs,detectionPAFactors,paScale);
+            particlePtrs, projectName + "_fft.txt",detectionPAs,detectionPAFactors,paSpatialScale);
     auto ionsInactiveWriter = std::make_unique<ParticleSimulation::Scalar_writer>(projectName+ "_ionsInactive.txt");
 
     ParticleSimulation::additionalPartParamFctType additionalParameterTransformFct =
