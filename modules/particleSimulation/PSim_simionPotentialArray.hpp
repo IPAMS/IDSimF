@@ -64,9 +64,9 @@ namespace ParticleSimulation{
 
     public:
 
-        SimionPotentialArray(std::string filename, double potentialScale = 1.0);
-        SimionPotentialArray(std::string filename, double scale, double potentialScale);
-        SimionPotentialArray(std::string filename, Core::Vector position, double scale, double potentialScale);
+        SimionPotentialArray(std::string filename, double spatialScale = 0.001);
+        SimionPotentialArray(std::string filename, double spatialScale, double potentialScale);
+        SimionPotentialArray(std::string filename, Core::Vector position, double spatialScale, double potentialScale);
 
         //disable copies:
         SimionPotentialArray(const SimionPotentialArray&) = delete;
@@ -104,7 +104,7 @@ namespace ParticleSimulation{
         std::string paFilename_; ///< Name of the PA file
 
         std::array<double,3> cornerLocation_; ///< Position of the "lower" corner of the PA in real space (to move the PA)
-        double scale_; ///< Geometric scale between real world coordinates and PA coordinates
+        double spatialScale_; ///< Geometric scale between real world coordinates and PA coordinates
         double potentialScale_; ///< Scale factor between internal potentials and real world potential
 
         std::vector<double> points_; ///< The raw data points of the PA in a linearized vector

@@ -33,23 +33,24 @@ ParticleSimulation::PotentialArrayException::operator std::string() const {
  * since the usual length unit in SIMION PA files is mm.
  *
  * @param filename The filename of the SIMION PA file to read
- * @param potentialScale A scale factor for the potential values (default = 1.0)
+ * @param spatialScale A geometric scale factor to scale the potential array
+ * (default = 0.001 which is the conversion factor from mm, the length unit of SIMION, to m)
  */
-ParticleSimulation::SimionPotentialArray::SimionPotentialArray(std::string filename, double potentialScale)
-        :cornerLocation_({0.0, 0.0, 0.0}), scale_(0.001), potentialScale_(potentialScale) {
+ParticleSimulation::SimionPotentialArray::SimionPotentialArray(std::string filename, double spatialScale)
+        :cornerLocation_({0.0, 0.0, 0.0}), spatialScale_(spatialScale), potentialScale_(1.0) {
     readPa_(filename);
 }
 
 ParticleSimulation::SimionPotentialArray::SimionPotentialArray(std::string filename,
-                                                               double scale, double potentialScale)
-        :cornerLocation_({0.0, 0.0, 0.0}), scale_(scale), potentialScale_(potentialScale) {
+                                                               double spatialScale, double potentialScale)
+        :cornerLocation_({0.0, 0.0, 0.0}), spatialScale_(spatialScale), potentialScale_(potentialScale) {
     readPa_(filename);
 }
 
 
 ParticleSimulation::SimionPotentialArray::SimionPotentialArray(std::string filename, Core::Vector position,
-                                                               double scale, double potentialScale)
-        :cornerLocation_({position.x(),position.y(),position.z()}), scale_(scale), potentialScale_(potentialScale) {
+                                                               double spatialScale, double potentialScale)
+        :cornerLocation_({position.x(),position.y(),position.z()}), spatialScale_(spatialScale), potentialScale_(potentialScale) {
     readPa_(filename);
 }
 
@@ -213,7 +214,7 @@ Core::Vector ParticleSimulation::SimionPotentialArray::getField(double xPt, doub
 
     // The field is expected to be returned in V/m and has therefore to be
     // geometrically scaled
-    return(field / scale_);
+    return(field / spatialScale_);
 }
 
 
@@ -378,7 +379,6 @@ void ParticleSimulation::SimionPotentialArray::readBinaryPa_(std::ifstream &inSt
         }
     }
 
-    //FIXME:
     // read internal scaling ...
     if (mode_ <= -2){
         inStream.read( reinterpret_cast<char*>(&dx_), sizeof(dx_));
@@ -401,22 +401,22 @@ void ParticleSimulation::SimionPotentialArray::readBinaryPa_(std::ifstream &inSt
  */
 void ParticleSimulation::SimionPotentialArray::updateBounds_() {
     if (symmetry_ == CYLINDRICAL){
-        double xMin = cornerLocation_[0] + internalBoundsLower_[0] * scale_;
-        double xMax = cornerLocation_[0] + internalBoundsUpper_[0] * scale_;
-        double yMin = cornerLocation_[1] - internalBoundsUpper_[1] * scale_;
-        double yMax = cornerLocation_[1] + internalBoundsUpper_[1] * scale_;
-        double zMin = cornerLocation_[2] - internalBoundsUpper_[1] * scale_;
-        double zMax = cornerLocation_[2] + internalBoundsUpper_[1] * scale_;
+        double xMin = cornerLocation_[0] + internalBoundsLower_[0] * spatialScale_;
+        double xMax = cornerLocation_[0] + internalBoundsUpper_[0] * spatialScale_;
+        double yMin = cornerLocation_[1] - internalBoundsUpper_[1] * spatialScale_;
+        double yMax = cornerLocation_[1] + internalBoundsUpper_[1] * spatialScale_;
+        double zMin = cornerLocation_[2] - internalBoundsUpper_[1] * spatialScale_;
+        double zMax = cornerLocation_[2] + internalBoundsUpper_[1] * spatialScale_;
 
         bounds_ = {xMin, xMax, yMin, yMax, zMin, zMax};
     }
     else{
-        double xMin = cornerLocation_[0] + internalBoundsLower_[0] * scale_;
-        double xMax = cornerLocation_[0] + internalBoundsUpper_[0] * scale_;
-        double yMin = cornerLocation_[1] + internalBoundsLower_[1] * scale_;
-        double yMax = cornerLocation_[1] + internalBoundsUpper_[1] * scale_;
-        double zMin = cornerLocation_[2] + internalBoundsLower_[2] * scale_;
-        double zMax = cornerLocation_[2] + internalBoundsUpper_[2] * scale_;
+        double xMin = cornerLocation_[0] + internalBoundsLower_[0] * spatialScale_;
+        double xMax = cornerLocation_[0] + internalBoundsUpper_[0] * spatialScale_;
+        double yMin = cornerLocation_[1] + internalBoundsLower_[1] * spatialScale_;
+        double yMax = cornerLocation_[1] + internalBoundsUpper_[1] * spatialScale_;
+        double zMin = cornerLocation_[2] + internalBoundsLower_[2] * spatialScale_;
+        double zMax = cornerLocation_[2] + internalBoundsUpper_[2] * spatialScale_;
 
         bounds_ = {xMin, xMax, yMin, yMax, zMin, zMax};
     }
@@ -430,9 +430,9 @@ void ParticleSimulation::SimionPotentialArray::updateBounds_() {
  */
 std::array<double,3> ParticleSimulation::SimionPotentialArray::transformAndCheckCoordinates_(double xPt, double yPt, double zPt) const{
 
-    double xT = (xPt-cornerLocation_[0]) / scale_;
-    double yT = (yPt-cornerLocation_[1]) / scale_;
-    double zT = (zPt-cornerLocation_[2]) / scale_;
+    double xT = (xPt-cornerLocation_[0]) / spatialScale_;
+    double yT = (yPt-cornerLocation_[1]) / spatialScale_;
+    double zT = (zPt-cornerLocation_[2]) / spatialScale_;
 
     if (symmetry_ == CYLINDRICAL){
 
@@ -470,9 +470,9 @@ std::array<double,3> ParticleSimulation::SimionPotentialArray::transformAndCheck
  */
 std::array<double,3> ParticleSimulation::SimionPotentialArray::scaleAndShiftCoordinates_(double xPt, double yPt, double zPt) const{
 
-    double xt = (xPt-cornerLocation_[0]) / scale_;
-    double yt = (yPt-cornerLocation_[1]) / scale_;
-    double zt = (zPt-cornerLocation_[2]) / scale_;
+    double xt = (xPt-cornerLocation_[0]) / spatialScale_;
+    double yt = (yPt-cornerLocation_[1]) / spatialScale_;
+    double zt = (zPt-cornerLocation_[2]) / spatialScale_;
 
     return  {xt,yt,zt};
 }
@@ -671,7 +671,7 @@ bool ParticleSimulation::SimionPotentialArray::isElectrode_(index_t ix, index_t 
 void ParticleSimulation::SimionPotentialArray::printState() {
 
     std::cout << "SIMION PA ---------------------------------"<<std::endl;
-    std::cout << "corner position: " << cornerLocation_[0]<<" "<<cornerLocation_[1]<<" "<<cornerLocation_[2] << " scale:" << scale_ << std::endl;
+    std::cout << "corner position: " << cornerLocation_[0] << " " << cornerLocation_[1] << " " << cornerLocation_[2] << " scale:" << spatialScale_ << std::endl;
     std::cout << "mode: "<<mode_ << " symmetry: "<< symmetry_ << " maxVoltage: "<<maxVoltage_ <<std::endl;
     std::cout << "nx: "<<nx_ << " ny: "<<ny_ << " nz: "<<nz_ <<" npoints: "<< numPoints_<<std::endl;
     std::cout << "mx: "<<mirrorx_ << " my: "<<mirrory_<< " mz: "<<mirrorz_ <<std::endl;

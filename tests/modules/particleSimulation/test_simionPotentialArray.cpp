@@ -112,7 +112,7 @@ TEST_CASE("SIMION PA basic tests","[SimionPotentialArray]"){
         std::string paFilename = "simion_test_planar_3d.pa";
 
         double potScaleFactor = 0.001;
-        ParticleSimulation::SimionPotentialArray simPaScaled(paFilename, 0.001);
+        ParticleSimulation::SimionPotentialArray simPaScaled(paFilename, 0.001, potScaleFactor);
         ParticleSimulation::SimionPotentialArray simPa(paFilename);
 
         //check if scaled potential is correct on electrode
@@ -120,7 +120,7 @@ TEST_CASE("SIMION PA basic tests","[SimionPotentialArray]"){
             simPaScaled.getInterpolatedPotential(0.038, 0.018, 0.038) / potScaleFactor ==
             Approx(simPa.getInterpolatedPotential(0.038, 0.018, 0.038)));
 
-        //... and on a arbitraty position which is not an electrode:
+        //... and on a arbitrary position which is not an electrode:
         REQUIRE(
                 simPaScaled.getInterpolatedPotential(0.02, 0.015, 0.03) / potScaleFactor ==
                 Approx(simPa.getInterpolatedPotential(0.02, 0.015, 0.03)));
