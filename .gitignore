@@ -11,6 +11,5 @@ pyGeometryGeneration/.idea
 .vscode
 cmake-build-*
 _build
-_static
 _templates
 
