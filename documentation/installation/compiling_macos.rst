@@ -13,25 +13,25 @@ Update package sources, install ``git`` and ``cmake``:
 
 First the macports installation and the package sources should be updated: 
 
-.. code-block::
+.. code-block:: console
 
     sudo port selfupdate
 
 Install ``git`` with macports:
 
-.. code-block:: shell
+.. code-block:: console
 
     sudo port install git
 
 Install ``cmake`` with macports:
 
-.. code-block::
+.. code-block:: console
 
     sudo port install cmake
 
 This should make ``git`` and ``cmake`` available. This can be verified by checking their versions: 
 
-.. code-block:: shell
+.. code-block:: console
 
     $ git --version
     git version 2.28.0
@@ -46,13 +46,13 @@ Install a C++17 compatible C++ compiler :
 IDSimF is written in C++17, therefore a recent compiler fully supporting the C++17 language standard has to be used to compile IDSimF. The c++ compiler of `gnu compiler collection (gcc) <https://gcc.gnu.org/>`_  gnu compiler collection (``g++``
 ) in major version 9 is readily available with macports and is compatible with IDSimF. Install it with 
 
-.. code-block::
+.. code-block:: console
 
     sudo port install gcc9
 
 Alternatively, the `llvm <https://www.llvm.org/>`_ c++ frontend `clang <https://clang.llvm.org/>`_  in major version 10 is also available and can be used to compile IDSimF. Install it with 
 
-.. code-block::
+.. code-block:: console
 
     sudo port install clang-10
 
@@ -74,7 +74,7 @@ IDSimF uses ``cmake`` as helping tool for configuration and compilation. ``cmake
 
 To do an out of source build, change into the cloned IDSimF folder and create a build folder, for example ``build`` in it and change into it: 
 
-.. code-block::
+.. code-block:: console
     
     cd IDSimF
     mkdir build
@@ -85,7 +85,7 @@ Basically ``cmake`` prepares a build tree in the current folder if it is called 
 In the build folder, prepare a build / binary tree for the compilation with ``g++``
  with 
 
-.. code-block::
+.. code-block:: console
 
     cmake .. -DCMAKE_CXX_COMPILER=/opt/local/bin/g++-mp-9 -DCMAKE_BUILD_TYPE=Release
 
@@ -96,7 +96,7 @@ The build options are:
 
 Configuring a build with ``clang`` is very similar:
 
-.. code-block::
+.. code-block:: console
 
     cmake .. -DCMAKE_CXX_COMPILER=/opt/local/bin/clang++-mp-10 -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_FLAGS="-stdlib=macports-libstdc++"
 

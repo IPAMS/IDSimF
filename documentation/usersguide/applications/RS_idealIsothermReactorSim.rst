@@ -24,7 +24,7 @@ Simulation configuration description
     Example: 
     If the ``[SUBSTANCES]`` block in the reaction configuration is 
 
-    .. code-block:: 
+    .. code-block:: none
 
         [SUBSTANCES]
         Cl_1 discrete 19 1 3.57e-4  4.00000000e-10

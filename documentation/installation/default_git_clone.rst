@@ -1,6 +1,6 @@
 Clone the IDSimF repository to your local machine with git from GitHub: 
 
-.. code-block::
+.. code-block:: console
     
     git clone https://github.com/IPAMS/IDSimF.git
 

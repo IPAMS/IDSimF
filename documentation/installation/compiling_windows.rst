@@ -49,7 +49,7 @@ Use the Cygwin setup program to install Cygwin and the following packages:
 
 This makes all required tools available in the Cygwin environment. You can check if ``git`` ``cmake`` and a c++ compiler is available in the Cygwin environment by checking the versions of the individual tools in a cygwin shell: 
 
-.. code-block::
+.. code-block:: console
 
     $ git --version
     git version 2.28.0
@@ -67,7 +67,7 @@ Clone the IDSimF repository
 
 Within a Cygwin shell, clone the IDSimF repository to your local machine with git from GitHub: 
 
-.. code-block::
+.. code-block:: console
     
     git clone https://github.com/IPAMS/IDSimF.git
 
