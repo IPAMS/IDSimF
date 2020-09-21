@@ -471,6 +471,7 @@ int main(int argc, const char * argv[]) {
                 if (lastTimestep) {
                     V_rf_export.emplace_back(V_0);
                     hdf5Writer->writeTimestep(particles,time);
+                    hdf5Writer->writeSplatTimes(particles);
                     hdf5Writer->finalizeTrajectory();
                     std::cout << "finished ts:" << timestep << " time:" << time << std::endl;
                 }
