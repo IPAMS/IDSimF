@@ -12,14 +12,14 @@ Running unit tests
 
 IDSimF uses the `Catch2 <https://github.com/catchorg/Catch2>`_ test framework to verify the correct function of its modules with unit tests. The unit tests for the individual modules of IDSimF are located in ``tests/modules``. After compilation, every subfolder in ``tests/modules`` contains an test runner executable binary named ``test_<modulename>``. To run the tests of a module, execute the test runner binary in its folder. For example, run the tests for the `core` module with 
 
-.. code-block::
+.. code-block:: console
     
     cd tests/modules/core
     ./test_core
 
 this should produce an output similar to 
 
-.. code-block::
+.. code-block:: none
 
     ===============================================================================
     All tests passed (4035 assertions in 4 test cases)
@@ -35,7 +35,7 @@ Most of the executables do not expect command line options and can be run withou
 
 For example the benchmark in ``tests/benchmarks/interpolatedField/runtime_benchmark`` performs a test of sampling in interpolated vector and scalar fields. It should produce an output similar to 
 
-.. code-block::
+.. code-block:: console
 
     $ ./benchmark_interpolated_field_runtime
     Own implementation: sum:1.4e+08 vec:1.4e+08 2e+08 4e+07 elapsed:3.0186 for 40000000 samples
@@ -52,13 +52,13 @@ Simulation applications expect a simulation run configuration file as first argu
 
 For example, ``applications/basic/BT-spaceChargeMinimalParallelSim`` implements a simple parallelized simulation of the electric particle-particle interaction (space charge) in a sphere of ions. To run it with an example configuration run change into the simulation application directory 
 
-.. code-block::
+.. code-block:: console
 
     cd applications/basic/BT-spaceChargeMinimalParallelSim
 
 and run a test simulation with 
 
-.. code-block::
+.. code-block:: console
 
     ./BT-spaceChargeMinimalParallelSim example/benchmarkRun_short.json testRun
 

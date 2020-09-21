@@ -2,7 +2,7 @@ IDSimF uses ``cmake`` as helping tool for configuration and compilation. ``cmake
 
 To do an out of source build, change into the cloned IDSimF folder and create a build folder, for example ``build`` in it and change into it: 
 
-.. code-block::
+.. code-block:: console
     
     cd IDSimF
     mkdir build
@@ -12,7 +12,7 @@ Basically ``cmake`` prepares a build tree in the current folder if it is called 
 
 In the build folder, prepare build / binary tree with 
 
-.. code-block::
+.. code-block:: console
 
     cmake .. -DCMAKE_BUILD_TYPE=Release
 

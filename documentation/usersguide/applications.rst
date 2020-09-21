@@ -13,7 +13,7 @@ Applications are typically called with an configuration file defining the parame
 
 For example, running the simulation application ``BT-spaceChargeMinimalParallelSim``, which implements a simple ion cloud with space charge interaction, using a simulation configuration ``simConfiguration.json`` with 
 
-.. code-block::
+.. code-block:: console
 
     $ ./BT-spaceChargeMinimalParallelSim simConfiguration.json simulationRun001
 

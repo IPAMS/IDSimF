@@ -13,25 +13,25 @@ Update package sources, check / install ``git`` and ``cmake``:
 
 First the package sources should be updated: 
 
-.. code-block::
+.. code-block:: console
 
     sudo apt update
 
 Usually git should be installed already, however check if ``git`` is really installed: 
 
-.. code-block::
+.. code-block:: console
 
     git --version 
 
 prints the installed git version. If ``git`` is not installed, install it with 
 
-.. code-block::
+.. code-block:: console
 
     sudo apt install git 
 
 ``cmake`` is usually not installed. Install it with 
 
-.. code-block::
+.. code-block:: console
 
     sudo apt install cmake
 
@@ -42,7 +42,7 @@ Install GCC C++ compiler:
 The c++ compiler of `gnu compiler collection (gcc) <https://gcc.gnu.org/>`_  gnu compiler collection (``g++``
 ) in major version 9 is readily available on Ubuntu 20 LTS and is fully compatible with IDSimF. Install it with 
 
-.. code-block::
+.. code-block:: console
 
     sudo apt install g++
 

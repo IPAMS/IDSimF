@@ -12,25 +12,25 @@ Update package sources, Check / install Git and cmake:
 
 First the package sources should be updated: 
 
-.. code-block:: shell
+.. code-block:: console
 
     sudo apt update
 
 Usually ``git`` should be installed already, however check if git is really installed: 
 
-.. code-block:: shell
+.. code-block:: console
 
     git --version 
 
 prints the installed ``git`` version. If ``git`` is not installed, install it with 
 
-.. code-block:: shell
+.. code-block:: console
 
     sudo apt install git 
 
 ``cmake`` is usually not installed. Install it with 
 
-.. code-block:: shell
+.. code-block:: console
 
     sudo apt install cmake
 
@@ -41,13 +41,13 @@ Install a modern C++ compiler:
 The default C++ compiler in Ubuntu is too old to support all used C++17 features. Therefore, a modern / recent compiler has to be installed. The c++ compiler of `gnu compiler collection (gcc) <https://gcc.gnu.org/>`_  gnu compiler collection (``g++``
 ) in major version 8 is readily available on Ubuntu 18 and is compatible with IDSimF. Install it with 
 
-.. code-block:: shell
+.. code-block:: console
 
     sudo apt install g++-8
 
 Alternatively the `llvm <https://www.llvm.org/>`_ c++ frontend `clang 10 / llvm <https://clang.llvm.org/>`_ is also available and can be used to compile IDSimF. Install it with 
 
-.. code-block:: shell
+.. code-block:: console
 
     sudo apt install clang-10
 
@@ -58,7 +58,7 @@ Clone the IDSimF repository
 
 Clone the IDSimF repository to your local machine with ``git`` from GitHub: 
 
-.. code-block:: shell
+.. code-block:: console
     
     git clone https://github.com/IPAMS/IDSimF.git
 
@@ -76,7 +76,7 @@ IDSimF uses ``cmake`` as helping tool for configuration and compilation. ``cmake
 
 To do an out of source build, change into the cloned IDSimF folder and create a build folder, for example ``build`` in it and change into it: 
 
-.. code-block:: shell
+.. code-block:: console
     
     cd IDSimF
     mkdir build
@@ -86,7 +86,7 @@ Basically ``cmake`` prepares a build tree in the current folder if it is called 
 
 In the build folder, prepare build / binary tree with 
 
-.. code-block:: shell 
+.. code-block:: console
 
     cmake .. -DCMAKE_CXX_COMPILER=/usr/bin/g++-8 -DCMAKE_BUILD_TYPE=Release -DUSE_CPP_FSLIB=on
 
@@ -98,7 +98,7 @@ The build options mean the following:
 
 Configuring the build with ``clang`` is very similar: : 
 
-.. code-block:: shell
+.. code-block:: console
 
     cmake .. -DCMAKE_CXX_COMPILER=/usr/bin/clang++-10 -DCMAKE_BUILD_TYPE=Release
 
@@ -109,19 +109,19 @@ Building
 
 After configuration, the individual built targets (IDSimF modules, simulation applications and tests) can be built with ``cmake --build <path to a target>``. Since the root of the build tree is also a target for the whole project, all build targets in IDSimF are built serially (with no parallelization in the build process) with
 
-.. code-block:: shell
+.. code-block:: console
     
     cmake --build .
 
 ``cmake`` supports parallelized builds since version 3.12, but Ubuntu 18 LTS installs an older ``cmake`` version. However, the native build tool used by ``cmake`` to actually build is `make <https://en.wikipedia.org/wiki/Make_(software)>`_  which itself supports parallelized builds. ``cmake`` is able to pass options to the native build tool. A parallelized build with ``cmake`` and ``make`` is done with 
 
-.. code-block:: shell
+.. code-block:: console
 
     cmake --build . -- -j <number of parallel jobs>
 
 Alternatively, ``make`` can also be used directly: 
 
-.. code-block:: shell
+.. code-block:: console
 
     make -j <number of parallel jobs>
 
