@@ -12,8 +12,8 @@ Alternatively to Cygwin, Windows 10 and Windows Server 2019 are able to run Linu
 .. note::
     This guide assumes that you have basic familiarity with Linux / Unix shells and you can invoke commands, change directories, list directory contents etc. within a shell. 
 
-Install Cygwin and required Cygwin packages
-...........................................
+Install Windows Subsystem for Linux (WSL) and Ubuntu 20.04 LTS
+..............................................................
 
 Install Windows Subsystem for Linux (WSL) according to the `installation guide <https://docs.microsoft.com/en-us/windows/wsl/install-win10>`_. Install Ubuntu 20.04 LTS from the `Microsoft Store <https://www.microsoft.com/en-us/p/ubuntu-2004-lts/9n6svws3rx71>`_. 
 
