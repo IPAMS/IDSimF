@@ -7,7 +7,7 @@ Building guide: Windows
 Building with Windows Subsystem for Linux and Ubuntu 20 LTS
 -----------------------------------------------------------
 
-Alternatively to Cygwin, Windows 10 and Windows Server 2019 are able to run Linux executables natively with an compatibliy layer develped by Microsoft, the `Windows Subsystem for Linux (WSL) <https://docs.microsoft.com/en-us/windows/wsl/>`_. Different Linux distributions are available from the Microsoft store for installation into the WSL, including `Ubuntu 20.04 LTS <https://ubuntu.com/download/desktop>`_. After setup of WSL and installation of Ubuntu 20.04 LTS (Focal Fossa) within WSL, the build process of IDSimF is the same as in Ubuntu 20.04 LTS.
+Alternatively to Cygwin, Windows 10 and Windows Server 2019 are able to run Linux executables natively with an compatibility layer developed by Microsoft, the `Windows Subsystem for Linux (WSL) <https://docs.microsoft.com/en-us/windows/wsl/>`_. Different Linux distributions are available from the Microsoft store for installation into the WSL, including `Ubuntu 20.04 LTS <https://ubuntu.com/download/desktop>`_. After setup of WSL and installation of Ubuntu 20.04 LTS (Focal Fossa) within WSL, the build process of IDSimF is the same as in Ubuntu 20.04 LTS.
 
 .. note::
     This guide assumes that you have basic familiarity with Linux / Unix shells and you can invoke commands, change directories, list directory contents etc. within a shell. 
@@ -15,7 +15,7 @@ Alternatively to Cygwin, Windows 10 and Windows Server 2019 are able to run Linu
 Install Cygwin and required Cygwin packages
 ...........................................
 
-Install Windows Subsystem for Linux (WSL) acoordings to the `installation guide <https://docs.microsoft.com/en-us/windows/wsl/install-win10>`_. Install Ubuntu 20.04 LTS from the `Microsoft Store <https://www.microsoft.com/en-us/p/ubuntu-2004-lts/9n6svws3rx71>`_. 
+Install Windows Subsystem for Linux (WSL) according to the `installation guide <https://docs.microsoft.com/en-us/windows/wsl/install-win10>`_. Install Ubuntu 20.04 LTS from the `Microsoft Store <https://www.microsoft.com/en-us/p/ubuntu-2004-lts/9n6svws3rx71>`_. 
 
 After the installation of Ubuntu 20.04 (Focal Fossa) in WSL, you should have an "Ubuntu" tile in your Windows menu, which starts a new shell within the Ubuntu installation. 
 
