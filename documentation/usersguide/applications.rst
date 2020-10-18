@@ -41,10 +41,10 @@ is a valid IDSimF simulation configuration input.
 If IDSimF configuration files should be parsed with an external program, the comments has to stripped from the file to get standard compliant JSON. One option for this is to preprocess the configuration files content with a minify tool for JSON, e.g. the Python package `JSON  minify <https://github.com/getify/JSON.minify>`_. 
 
 
-Description of the applications
-===============================
+Simulation Applications Documentation
+=====================================
 
-The following gives a brief description of the application types and individual applications. 
+This section gives an overview of the simulation application categories and the individual simulation applications in IDSimF. Every application has a subsection where the simulation run configuration parameters are described in detail.
 
 --------------------------------------------
 ``basic``: Basic / Idealized Ion interaction 
