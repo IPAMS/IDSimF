@@ -60,7 +60,7 @@ Substance Types
     The parameters are: 
 
     * ``<molecular mass>``: Mass of a particle of this substance in amu. 
-    * ``<mobility>``: Electric mobility of the particles of this substance at standard conditions (:math:`K_0`) in m^2/(V s).
+    * ``<mobility>``: Electric mobility of the particles of this substance at standard conditions (:math:`K_0`) in :math:`\frac{\text{m}^2} {\text{V} \text{s}}`).
     * ``<collision diameter>`` Effective collision diameter of a particle of this substance in m.
     
 
