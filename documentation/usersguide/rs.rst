@@ -20,7 +20,7 @@ RS configurations are segmented in a ``[SUBSTANCES]`` part, which describes the 
 
 The following example illustrates the general structure of RS configurations: 
 
-.. code::
+.. code-block:: none
 
     [SUBSTANCES]
     A isotropic 1e10
@@ -38,7 +38,7 @@ Chemical species: ``[SUBSTANCES]`` section
 
 The ``[SUBSTANCES]`` section specifies the chemical substances in the RS simulation. Every substance is specified by one line in the ``[SUBSTANCES]`` section. The general format of a substance line is
 
-.. code:: none
+.. code-block:: none
 
     <Substance Name> <Substance Type> <List of substance type specific parameters>
 
@@ -53,7 +53,7 @@ Substance Types
 
     ``discrete`` substances are defined by: 
 
-    .. code:: none
+    .. code-block:: none
 
         <Substance Name> discrete <molecular mass> <charge> <mobility> <collison diameter>
 
@@ -69,7 +69,7 @@ Substance Types
 
     ``isotropic`` substances are defined by: 
 
-    .. code:: none
+    .. code-block:: none
 
         <Substance Name> isotropic <concentration>
 
@@ -84,7 +84,7 @@ Reactions: ``[REACTIONS]`` section
 
 The general format to describe a reaction in the ``[REACTIONS]`` section of an RS configuration is: 
 
-.. code:: none
+.. code-block:: none
 
     <Reaction Stochiometry> | <Reaction Type> <Reaction Parameter List> #<Reaction Name>
 
@@ -95,7 +95,7 @@ the parts of the reaction definition are:
     
     The stochiometry of the reaction is defined by a string of the format 
 
-    .. code:: none 
+    .. code-block:: none 
 
         <Educt List> => <Product List>
 
@@ -103,7 +103,7 @@ the parts of the reaction definition are:
     
     They have the form 
 
-    .. code:: none 
+    .. code-block:: none 
 
         <Quantifier> <Substance Name> + <Quantifier> <Substance Name> + ..
 
@@ -112,13 +112,13 @@ the parts of the reaction definition are:
 
     Specifiying the same substance multiple times in a educt or product list is legal, thus
 
-    .. code:: none 
+    .. code-block:: none 
 
         A + A + 2 A => 2 B 
 
     is equivalent to 
 
-    .. code:: none
+    .. code-block:: none
 
         4 A => B + B
 
@@ -128,7 +128,7 @@ the parts of the reaction definition are:
 ``<Reaction Parameter List>`` : List parameters of the reaction
     List of numeric values, specifying the parameters of the reaction. The list is semicolon separated and has the form 
 
-    .. code:: none 
+    .. code-block:: none 
 
         ; <Value> ; <Value> ...
 
@@ -138,7 +138,7 @@ the parts of the reaction definition are:
     
 For example 
 
-.. code::
+.. code-block:: none
 
     subst_1 + 2 A => subst_2  | static ; 1.0e-5 #subst1_forward
 
