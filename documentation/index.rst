@@ -86,7 +86,6 @@ Documentation
 
     usersguide/general_structure
     usersguide/applications
-    usersguide/application_development
     usersguide/rs
     usersguide/benchmarks
 

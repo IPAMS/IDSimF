@@ -148,6 +148,13 @@ The following gives a brief description of the application types and individual 
     applications/RS_idealIsothermReactorSim
 
 
+Guide: How to build an IDSimF Application?
+==========================================
+
+.. toctree::
+    :maxdepth: 1
+    
+    application_development
 
 .. rubric:: Footnotes
 
