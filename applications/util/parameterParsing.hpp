@@ -25,11 +25,11 @@ Json::Value readConfigurationJson(std::string confFileName){
     return confRoot;
 }
 
-bool isConfFileKey(std::string keyName, Json::Value confRoot) {
+bool isConfFileKey(std::string keyName, Json::Value& confRoot) {
     return confRoot.isMember(keyName);
 }
 
-int intConfParameter(std::string jsonName, Json::Value confRoot){
+int intConfParameter(std::string jsonName, Json::Value& confRoot){
     if (confRoot.isMember(jsonName) == true) {
         int result = confRoot.get(jsonName, 0).asInt();
         std::cout << jsonName << ":" << result << std::endl;
@@ -39,7 +39,7 @@ int intConfParameter(std::string jsonName, Json::Value confRoot){
     }
 }
 
-std::vector<int> intVectorConfParameter(std::string jsonName, Json::Value confRoot){
+std::vector<int> intVectorConfParameter(std::string jsonName, Json::Value& confRoot){
     std::vector<int> result;
     if (confRoot.isMember(jsonName) == true) {
         Json::Value jsonNode = confRoot.get(jsonName,0);
@@ -52,7 +52,7 @@ std::vector<int> intVectorConfParameter(std::string jsonName, Json::Value confRo
     return (result);
 }
 
-double doubleConfParameter(std::string jsonName, Json::Value confRoot){
+double doubleConfParameter(std::string jsonName, Json::Value& confRoot){
     if (confRoot.isMember(jsonName) == true) {
         double result = confRoot.get(jsonName, 0).asDouble();
         std::cout << jsonName << ":" << result << std::endl;
@@ -62,7 +62,7 @@ double doubleConfParameter(std::string jsonName, Json::Value confRoot){
     }
 }
 
-std::vector<double> doubleVectorConfParameter(std::string jsonName, Json::Value confRoot, double multiplicator = 1.0){
+std::vector<double> doubleVectorConfParameter(std::string jsonName, Json::Value& confRoot, double multiplicator = 1.0){
     std::vector<double> result;
     if (confRoot.isMember(jsonName) == true) {
         Json::Value jsonNode = confRoot.get(jsonName,0);
@@ -75,7 +75,7 @@ std::vector<double> doubleVectorConfParameter(std::string jsonName, Json::Value 
     return (result);
 }
 
-std::array<std::array<double,2>,3> double3dBox(std::string jsonName, Json::Value confRoot){
+std::array<std::array<double,2>,3> double3dBox(std::string jsonName, Json::Value& confRoot){
     std::array<std::array<double, 2>, 3> result{{{0, 0}, {0, 0}, {0, 0}}};
     if (confRoot.isMember(jsonName) == true) {
         Json::Value jsonNode = confRoot.get(jsonName,0);
@@ -98,7 +98,7 @@ std::array<std::array<double,2>,3> double3dBox(std::string jsonName, Json::Value
     return (result);
 }
 
-std::string stringConfParameter(std::string jsonName, Json::Value confRoot){
+std::string stringConfParameter(std::string jsonName, Json::Value& confRoot){
     if (confRoot.isMember(jsonName) == true) {
         std::string result = confRoot.get(jsonName, 0).asString();
         std::cout << jsonName << ":" << result << std::endl;
@@ -108,7 +108,7 @@ std::string stringConfParameter(std::string jsonName, Json::Value confRoot){
     }
 }
 
-std::vector<std::string> stringVectorConfParameter(std::string jsonName, Json::Value confRoot){
+std::vector<std::string> stringVectorConfParameter(std::string jsonName, Json::Value& confRoot){
     std::vector<std::string> result;
     if (confRoot.isMember(jsonName) == true) {
         Json::Value jsonNode = confRoot.get(jsonName,0);
@@ -121,7 +121,7 @@ std::vector<std::string> stringVectorConfParameter(std::string jsonName, Json::V
     return (result);
 }
 
-bool boolConfParameter(std::string jsonName, Json::Value confRoot){
+bool boolConfParameter(std::string jsonName, Json::Value& confRoot){
     if (confRoot.isMember(jsonName) == true) {
         std::string confString = confRoot.get(jsonName, 0).asString();
         std::cout << jsonName << ":" << confString << std::endl;
@@ -142,7 +142,7 @@ bool boolConfParameter(std::string jsonName, Json::Value confRoot){
 std::unique_ptr<ParticleSimulation::InterpolatedField> readInterpolatedField(
         std::string confBasePathStr,
         std::string jsonName,
-        Json::Value confRoot){
+        Json::Value& confRoot){
     if (confRoot.isMember(jsonName)==true){
         std::string fieldFileName = confRoot.get(jsonName,0).asString();
         std::filesystem::path fieldPath(std::filesystem::path(confBasePathStr) / std::filesystem::path(fieldFileName));
