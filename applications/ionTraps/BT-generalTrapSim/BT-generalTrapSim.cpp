@@ -93,9 +93,7 @@ int main(int argc, const char * argv[]) {
     int trajectoryWriteInterval = intConfParameter("trajectory_write_interval", confRoot);
     int fftWriteInterval = intConfParameter("fft_write_interval",confRoot);
     double dt = doubleConfParameter("dt", confRoot);
-    std::vector<int> nIons = std::vector<int>();
-    std::vector<double> ionMasses = std::vector<double>();
-    std::vector<double> ionCollisionDiameters_angstrom = std::vector<double>();
+
     std::string fftWriteMode_str = stringConfParameter("fft_write_mode",confRoot);
     FftWriteMode fftWriteMode;
     if (fftWriteMode_str == "unresolved"){
@@ -206,7 +204,6 @@ int main(int argc, const char * argv[]) {
     double excitePulsePotential = doubleConfParameter("excite_pulse_potential", confRoot);
 
 
-
     //read ion configuration =======================================================================
     std::vector<std::unique_ptr<BTree::Particle>>particles;
     std::vector<BTree::Particle*>particlePtrs;
@@ -222,33 +219,9 @@ int main(int argc, const char * argv[]) {
 
     } else {
         // ions are not given in an init file, read and init random ion box configuration
-        if (confRoot.isMember("n_ions") == true) {
-            Json::Value n_ions_json = confRoot.get("n_ions", 0);
-            for (int i = 0; i < n_ions_json.size(); i++) {
-                nIons.push_back(n_ions_json.get(i, 0.0).asInt());
-            }
-        } else {
-            throw std::invalid_argument("missing configuration value: n_ions");
-        }
-
-        if (confRoot.isMember("ion_masses") == true) {
-            Json::Value ions_masses_json = confRoot.get("ion_masses", 0);
-            for (int i = 0; i < ions_masses_json.size(); i++) {
-                ionMasses.push_back(ions_masses_json.get(i, 0.0).asDouble());
-            }
-        } else {
-            throw std::invalid_argument("missing configuration value: ion_masses");
-        }
-
-        if (confRoot.isMember("ion_collision_gas_diameters_angstrom") == true) {
-            //Fixme: Use vector library functions
-            Json::Value ions_collision_diams = confRoot.get("ion_collision_gas_diameters_angstrom", 0);
-            for (int i = 0; i < ions_collision_diams.size(); i++) {
-                ionCollisionDiameters_angstrom.push_back(ions_collision_diams.get(i, 0.0).asDouble());
-            }
-        } else {
-            throw std::invalid_argument("missing configuration value: ion_collision_gas_diameters_angstrom");
-        }
+        std::vector<int> nIons = intVectorConfParameter("n_ions", confRoot);
+        std::vector<double> ionMasses = doubleVectorConfParameter("ion_masses", confRoot);
+        std::vector<double> ionCollisionDiameters_angstrom = doubleVectorConfParameter("ion_collision_gas_diameters_angstrom", confRoot);
 
         double ions_tob_range = doubleConfParameter("ion_time_of_birth_range_s", confRoot);
 
