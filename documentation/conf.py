@@ -29,8 +29,10 @@ author = 'Institute for Pure and Applied Mass Spectrometry, University of Wupper
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    "sphinx_rtd_theme"
+    "sphinx_rtd_theme",
+    "breathe"
 ]
+
 
 master_doc = 'index'
 
@@ -70,3 +72,7 @@ html_static_path = ['_static']
 #html_css_files = [
 #    'css/custom.css',
 #]
+
+# Breathe Configuration
+breathe_projects = {"IDSimF":"_doxygen/xml"}
+breathe_default_project = "IDSimF"
