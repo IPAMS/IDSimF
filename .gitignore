@@ -12,4 +12,5 @@ pyGeometryGeneration/.idea
 cmake-build-*
 _build
 _templates
+_doxygen
 
