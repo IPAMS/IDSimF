@@ -10,7 +10,7 @@ The modules are the building blocks to create an IDSimF simulation application. 
     Bundles basic data structures like vectors and basic facilities required in most other modules like random generators.
 
 ``BTree``: Barnes-Hut tree
-    Provides Bares-Hut tree implementations which are used to simulate electric particle-particle interaction (space charge). 
+    Provides Barnes-Hut tree implementations which are used to simulate electric particle-particle interaction (space charge). 
 
 ``ParticleSimulation``: Facilities for particle trajectory simulation
     Provides algorithms, data structures and methods for charged particle trajectory simulations. This module contains for example trajectory integrators, file readers and writers, potential arrays and interpolated scalar and vector fields. 
