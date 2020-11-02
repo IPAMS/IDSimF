@@ -38,7 +38,7 @@ namespace BTree{
 
 namespace ParticleSimulation {
     /**
-     * Filewriter to write the average average position of the net charge in a Core to a file
+     * Filewriter to write the average position of the net charge in a Core to a file
      */
     class AverageChargePositionWriter{
     public:
