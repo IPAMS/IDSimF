@@ -58,6 +58,11 @@ Data Structures / Simulation Objects
     :members:
     :undoc-members:
 
+.. doxygenclass:: ParticleSimulation::SimionPotentialArray
+    :members:
+    :undoc-members:
+
+
 File Writers
 ============
 
