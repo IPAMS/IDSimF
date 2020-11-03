@@ -46,6 +46,18 @@ Verlet Integrators
     :members:
     :undoc-members:
 
+
+Data Structures / Simulation Objects
+====================================
+
+.. doxygenclass:: ParticleSimulation::InterpolatedField
+    :members:
+    :undoc-members:
+
+.. doxygenclass:: ParticleSimulation::SampledWaveform
+    :members:
+    :undoc-members:
+
 File Writers
 ============
 
