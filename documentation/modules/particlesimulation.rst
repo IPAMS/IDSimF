@@ -140,3 +140,15 @@ File readers import data from persistent files
     :members:
     :undoc-members:
 
+
+Utilities
+=========
+
+`PSim_util.hpp / .cpp` bundles a set of utility functions in the :cpp:any:`ParticleSimulation::util` namespace: 
+
+.. doxygennamespace:: ParticleSimulation::util
+   :undoc-members:
+
+`PSim_math.hpp / .cpp` bundles some math functions: 
+
+.. doxygenfile:: PSim_math.hpp
