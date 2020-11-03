@@ -16,7 +16,7 @@ The modules are the building blocks to create an IDSimF simulation application. 
     Provides algorithms, data structures and methods for charged particle trajectory simulations. This module contains for example trajectory integrators, file readers and writers, potential arrays and interpolated scalar and vector fields. 
 
 ``CollisionModel``: Background gas collision modeling
-    Provides models to describe the collisional interaction between charged particles and neutral Background gas. 
+    Provides models to describe the collisional interaction between charged particles and neutral background gas. 
 
 ``RS``: Reaction simulation and particle chemical kinetics modeling
     Provides particle based modeling of chemical kinetics and reaction dynamics of charged particles. 
