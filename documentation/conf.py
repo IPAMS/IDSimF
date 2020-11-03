@@ -13,7 +13,9 @@
 # import os
 # import sys
 # sys.path.insert(0, os.path.abspath('.'))
+import subprocess, sys, os
 import sphinx_rtd_theme
+
 
 
 # -- Project information -----------------------------------------------------
@@ -81,7 +83,6 @@ breathe_default_project = "IDSimF"
 # Run doxygen for breathe on the read the docs servers: 
 # taken from https://breathe.readthedocs.io/en/latest/readthedocs.html 
 
-import subprocess, sys
 
 def run_doxygen(folder):
     """Run the doxygen make command in the designated folder"""
