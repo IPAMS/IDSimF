@@ -22,4 +22,4 @@ The modules are the building blocks to create an IDSimF simulation application. 
     Provides particle based modeling of chemical kinetics and reaction dynamics of charged particles. 
 
 
-The detailed documentation of the modules is not finished yet. In the meantime, refer to the actual source code for details. 
+Parts of the in source docstrings are not finished yet. In the meantime, refer to the actual source code for details. 
