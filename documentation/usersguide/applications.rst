@@ -112,9 +112,9 @@ This section gives an overview of the simulation application categories and the 
 
     applications/BT_quadrupoleCollisionCellSim
 
-----------------------------------------------------
-``ionTraps``: Ion activation / ion collision devices
-----------------------------------------------------
+------------------------------
+``ionTraps``: Ion trap devices
+------------------------------
 
 :doc:`BT-QITSim <applications/BT_QITSim>`: Idealized Quadrupole Ion Trap (QIT) with space charge and background gas collisions
     Ion trajectory simulation of an idealized quadrupole ion trap (QIT) considering space charge effects and hard sphere collisions with neutral background gas particles. The electric field of the ion trap is defined by idealized, analytical equations and FFT detection by determining the mirror charge on the cap electrodes is supported.
