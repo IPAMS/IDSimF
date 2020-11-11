@@ -37,6 +37,7 @@ add_subdirectory (tests/modules/RS)
 add_subdirectory (tests/modules/collisionModels)
 add_subdirectory (tests/modules/particleSimulation)
 add_subdirectory (tests/simulations)
+add_subdirectory (tests/applications)
 
 add_subdirectory (tests/benchmarks/errorfunction)
 add_subdirectory (tests/benchmarks/collision_hardsphere/runtime_benchmark)
