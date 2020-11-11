@@ -21,11 +21,11 @@
  ------------
  BTree_genericBaseNode.hpp
 
- Templated base class for Nodes in Barnes-Hut Tree, which bundles generalizable
+ Templated base class for nodes in Barnes-Hut tree, which bundles generalizable
  methods / algorithms for concrete tree node types NodType
  ****************************/
 
-//FIXME: put template implemenation to cpp file and use explicit instantiation
+//FIXME: put template implementation to cpp file and use explicit instantiation
 #ifndef BTree_generic_base_node_hpp
 #define BTree_generic_base_node_hpp
 
@@ -38,6 +38,15 @@
 
 namespace BTree{
 
+    /**
+     * Templated base class for nodes in Barnes-Hut tree, which bundles generalizable
+     * methods / algorithms for concrete tree node types NodType.
+     *
+     * This class uses the Curiously recurring template pattern (CRTP) / F-bound idiom to generalize
+     * functionality for concrete tree nodes.
+     *
+     * @tparam NodType the concrete node type to generate generalizable methods for
+     */
     template<class NodType>
     class GenericBaseNode: public AbstractNode {
 
