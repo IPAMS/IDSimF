@@ -35,6 +35,9 @@ namespace BTree {
 
     class Particle;
 
+    /**
+     * Abstract base class for Barnes-Hut Tree nodes
+     */
     class AbstractNode {
 
     public:
