@@ -34,7 +34,7 @@
 namespace Core {
 
     /**
-     * Simple 3d vector class
+     * Simple 3d vector
      */
     class Vector {
 

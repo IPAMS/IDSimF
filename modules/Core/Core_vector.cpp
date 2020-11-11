@@ -23,6 +23,9 @@
 #include <iostream>
 #include <cmath>
 
+/**
+ * Constructs zero vector
+ */
 Core::Vector::Vector()
         :
         x_(0),
@@ -30,6 +33,12 @@ Core::Vector::Vector()
         z_(0)
 {}
 
+/**
+ * Constructs vector with components
+ * @param x x component
+ * @param y y component
+ * @param z z component
+ */
 Core::Vector::Vector(double x,double y, double z)
 :
     x_(x),
@@ -37,44 +46,77 @@ Core::Vector::Vector(double x,double y, double z)
     z_(z)
 {}
 
+/**
+ * Constructs vector with components passed as array
+ * @param coord three element array with x,y,z components
+ */
 Core::Vector::Vector(double* coord){
     x_= coord[0];
     y_= coord[1];
     z_= coord[2];
 }
 
+/**
+ * Prints vector state / vector components
+ */
 void Core::Vector::printState(){
     std::cout << "x="<<x_<< " y="<<y_<<" z="<<z_<<"\n";
 }
 
 // Accessors:
+
+/**
+ * x component
+ */
 double Core::Vector::x() const{
     return x_;
 }
 
+/**
+ * y component
+ */
 double Core::Vector::y() const{
     return y_;
 }
 
+/**
+ * z component
+ */
 double Core::Vector::z() const{
     return z_;
 }
 
 // Setters:
+
+/**
+ * Sets new components
+ * @param x x component
+ * @param y y component
+ * @param z z component
+ */
 void Core::Vector::set(double x, double y, double z){
     x_=x;
     y_=y;
     z_=z;
 }
 
+/**
+ * Set new x component
+ */
 void Core::Vector::x(double x){
     x_ = x;
 }
 
+/**
+ * Set new y component
+ */
 void Core::Vector::y(double y){
     y_ = y;
 }
 
+/**
+ * Set new z component
+ */
 void Core::Vector::z(double z){
     z_ = z;
 }
@@ -88,6 +130,9 @@ double Core::Vector::magnitude(){
     return sqrt(x_*x_ + y_*y_ + z_*z_);
 }
 
+/**
+ * Returns the square of magnitude of the vector
+ */
 double Core::Vector::magnitudeSquared(){
     return (x_*x_ + y_*y_ + z_*z_);
 }
