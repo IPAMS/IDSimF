@@ -35,11 +35,11 @@
 #include "json.h"
 #include "parameterParsing.hpp"
 #include "inputFileUtilities.hpp"
+#include "ionDefinitionReading.hpp"
 #include <iostream>
 #include <vector>
 #include <ctime>
 
-enum IonStartGeometry {BOX,CYLINDER,VECTOR};
 
 // constants:
 const double rho_per_pa = 2.504e20; //(particles / m^3) / Pa
@@ -78,19 +78,6 @@ int main(int argc, const char * argv[]) {
     double freq_rf = doubleConfParameter("frequency_rf", confRoot); //Hz, RF Frequency
     double omega_rf = freq_rf * M_PI *2.0;
 
-    // read ion configuration ========================
-    std::vector<int> nIons = intVectorConfParameter("n_ions",confRoot);
-    std::vector<double> ionMasses = doubleVectorConfParameter("ion_masses",confRoot);
-    std::vector<double> ionCharges = doubleVectorConfParameter("ion_charges",confRoot);
-    std::vector<double> ionCollisionDiameters_angstrom =
-            doubleVectorConfParameter("ion_collision_gas_diameters_angstrom",confRoot);
-
-//    std::vector<double> centerPos = doubleVectorConfParameter("ion_start_box_center_position_m", confRoot);
-//    Core::Vector ionStartBoxCenterPosition_m = {centerPos[0], centerPos[1], centerPos[2]};
-//    std::vector<double> boxSize = doubleVectorConfParameter("ion_start_box_size_m", confRoot);
-//    Core::Vector ionStartBoxSize_m = {boxSize[0], boxSize[1], boxSize[2]};
-//    Core::Vector ionStartCornerPosition_m = ionStartBoxCenterPosition_m - (ionStartBoxSize_m*0.5);
-
 
     //read potential arrays and potential array configuration =================================================
     // Note that fast adjust PAs are expected here
@@ -114,71 +101,10 @@ int main(int argc, const char * argv[]) {
         throw std::invalid_argument("missing configuration value: simulation_domain_boundaries");
     }
 
-    std::string ionStartGeom_str = stringConfParameter("ion_start_geometry",confRoot);
-    IonStartGeometry ionStartGeom;
-
-    double ionStartCylinder_radius;
-    double ionStartCylinder_length;
-
-    std::vector<double> centerPos;
-    Core::Vector ionStartBoxCenterPosition_m;
-    std::vector<double> boxSize;
-    Core::Vector ionStartBoxSize_m;
-    Core::Vector ionStartCornerPosition_m;
-
-    std::vector<double> vectorStartingPosition;
-
-    if (ionStartGeom_str == "box"){
-        ionStartGeom = BOX;
-        centerPos = doubleVectorConfParameter("ion_start_box_center_position_m", confRoot);
-        ionStartBoxCenterPosition_m = {centerPos[0], centerPos[1], centerPos[2]};
-        boxSize = doubleVectorConfParameter("ion_start_box_size_m", confRoot);
-        ionStartBoxSize_m = {boxSize[0], boxSize[1], boxSize[2]};
-        ionStartCornerPosition_m = ionStartBoxCenterPosition_m - (ionStartBoxSize_m*0.5);
-
-    } else if (ionStartGeom_str == "cylinder"){
-        ionStartGeom = CYLINDER;
-        ionStartCylinder_radius = doubleConfParameter("ion_start_cylinder_radius_m", confRoot);
-        ionStartCylinder_length = doubleConfParameter("ion_start_cylinder_length_m", confRoot);
-
-    } else if (ionStartGeom_str == "vector"){
-        ionStartGeom = VECTOR;
-        vectorStartingPosition = doubleVectorConfParameter("ion_start_vector_position_m", confRoot);
-
-    }
-
-    //init ions:
+    //Read ion configuration and initialize ions:
     std::vector<std::unique_ptr<BTree::Particle>>particles;
     std::vector<BTree::Particle*>particlePtrs;
-
-    for (int i=0; i<nIons.size(); ++i){
-        int nParticles = nIons[i];
-        double mass = ionMasses[i];
-        double charge = ionCharges[i];
-        double collisionDiameter_m = ionCollisionDiameters_angstrom[i]*1e-10;
-        std::vector<std::unique_ptr<BTree::Particle>> ions;
-
-        if (ionStartGeom == BOX) {
-            ions =  ParticleSimulation::util::getRandomIonsInBox(nParticles, charge, ionStartCornerPosition_m, ionStartBoxSize_m);
-        }
-        else if (ionStartGeom == CYLINDER){
-            ions = ParticleSimulation::util::getRandomIonsInCylinderXDirection(
-                    nParticles, charge, ionStartCylinder_radius, ionStartCylinder_length);
-        }else if(ionStartGeom == VECTOR){
-            ions = ParticleSimulation::util::getIonOnLineVector(nParticles, charge, vectorStartingPosition[0], vectorStartingPosition[1], vectorStartingPosition[2]);
-        }
-
-
-        for (int j=0; j<nParticles; ++j){
-            ions[j]->setMassAMU(mass);
-            ions[j]->setChargeElementary(charge);
-            ions[j]->setDiameter(collisionDiameter_m);
-
-            particlePtrs.push_back(ions[j].get());
-            particles.push_back(std::move(ions[j]));
-        }
-    }
-
+    AppUtils::readIonDefinition(particles, particlePtrs, confRoot);
 
     //init gas collision models:
     CollisionModel::HardSphereModel hsModel = CollisionModel::HardSphereModel(
