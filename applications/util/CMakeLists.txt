@@ -6,7 +6,7 @@ set(SOURCE_FILES
         inputFileUtilities.hpp
         inputFileUtilities.cpp
         ionDefinitionReading.cpp
-        ionDefinitionReading.hpp)
+        ionDefinitionReading.hpp parameterParsing.cpp)
 
 add_library(apputils STATIC ${SOURCE_FILES})
 target_include_directories(apputils PUBLIC

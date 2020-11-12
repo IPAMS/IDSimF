@@ -35,19 +35,36 @@ TEST_CASE( "Test basic ion definition reading", "[ApplicationUtils]"){
     Json::Value conf_box = readConfigurationJson("ionBox.json");
     Json::Value conf_ionCloud = readConfigurationJson("ionCloudFile.json");
 
+    std::vector<std::unique_ptr<BTree::Particle>>particles;
+    std::vector<BTree::Particle*>particlePtrs;
+
     SECTION("Ion definition reading: If ion cloud file is present should be recognized"){
         REQUIRE_FALSE(AppUtils::isIonCloudDefinitionPresent(conf_box));
         REQUIRE(AppUtils::isIonCloudDefinitionPresent(conf_ionCloud));
     }
 
     SECTION("Ion definition reading: Ion cloud file should be readable"){
-        std::vector<std::unique_ptr<BTree::Particle>>particles;
-        std::vector<BTree::Particle*>particlePtrs;
-
         AppUtils::readIonDefinitionFromIonCloudFile(particles, particlePtrs, conf_ionCloud);
 
         REQUIRE(particles[1]->getCharge() == Approx(1.0 * Core::ELEMENTARY_CHARGE));
         REQUIRE(vectorApproxCompare(particles[1]->getLocation(), Core::Vector(-0.001, 0.0, 0.0)) == "Vectors approximately equal");
+    }
 
+    SECTION("Ion definition reading: Random ion box definiton should be readable"){
+        AppUtils::readRandomIonDefinition(particles, particlePtrs, conf_box);
+
+        bool particleOutOfBoxFound = false;
+
+        for(const auto& part: particles){
+            Core::Vector pLocation = part->getLocation();
+            if (pLocation.x() < 0.001 || pLocation.x() > 0.003 ||
+                pLocation.y() < 0.001 || pLocation.y() > 0.003 ||
+                pLocation.z() < 0.001 || pLocation.z() > 0.003 )
+            {
+                particleOutOfBoxFound = true;
+            }
+        }
+
+        REQUIRE( !particleOutOfBoxFound );
     }
 }
