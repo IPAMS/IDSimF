@@ -28,6 +28,7 @@
 
 #include "json.h"
 #include "parameterParsing.hpp"
+#include "ionDefinitionReading.hpp"
 #include "BTree_particle.hpp"
 #include "BTree_tree.hpp"
 #include "PSim_trajectoryHDF5Writer.hpp"
@@ -39,7 +40,6 @@
 #include "PSim_math.hpp"
 #include "PSim_averageChargePositionWriter.hpp"
 #include "PSim_inductionCurrentWriter.hpp"
-#include "PSim_ionCloudReader.hpp"
 #include "PSim_simionPotentialArray.hpp"
 #include "CollisionModel_HardSphere.hpp"
 #include <iostream>
@@ -48,7 +48,6 @@
 #include <filesystem>
 
 enum IntegratorMode {VERLET,PARALLEL_VERLET};
-enum IonStartGeometry {BOX,CYLINDER};
 enum RfAmplitudeMode {STATIC_RF,RAMPED_RF};
 enum ExciteMode {RECTPULSE,SWIFT};
 enum FftWriteMode {UNRESOLVED,MASS_RESOLVED};
@@ -112,7 +111,6 @@ int main(int argc, const char * argv[]) {
                 std::make_unique<ParticleSimulation::SimionPotentialArray>(paPath, paSpatialScale);
         potentialArrays.push_back(std::move(pa_pt));
     }
-
 
     // SIMION fast adjust PAs use 10000 as normalized potential value, thus we have to scale everything with 1/10000
     double potentialScale = 1.0 / 10000.0;
@@ -204,78 +202,11 @@ int main(int argc, const char * argv[]) {
     double excitePulsePotential = doubleConfParameter("excite_pulse_potential", confRoot);
 
 
+
     //read ion configuration =======================================================================
     std::vector<std::unique_ptr<BTree::Particle>>particles;
     std::vector<BTree::Particle*>particlePtrs;
-
-    if (confRoot.isMember("ion_cloud_init_file") == true) {
-        std::string ionCloudFileName = confRoot.get("ion_cloud_init_file", 0).asString();
-        ParticleSimulation::IonCloudReader reader = ParticleSimulation::IonCloudReader();
-        particles = reader.readIonCloud(ionCloudFileName);
-        //prepare a vector of raw pointers
-        for (const auto& part : particles){
-            particlePtrs.push_back(part.get());
-        }
-
-    } else {
-        // ions are not given in an init file, read and init random ion box configuration
-        std::vector<int> nIons = intVectorConfParameter("n_ions", confRoot);
-        std::vector<double> ionMasses = doubleVectorConfParameter("ion_masses", confRoot);
-        std::vector<double> ionCollisionDiameters_angstrom = doubleVectorConfParameter("ion_collision_gas_diameters_angstrom", confRoot);
-
-        double ions_tob_range = doubleConfParameter("ion_time_of_birth_range_s", confRoot);
-
-        std::string ionStartGeom_str = stringConfParameter("ion_start_geometry",confRoot);
-        IonStartGeometry ionStartGeom;
-
-        double ionStartCylinder_radius;
-        double ionStartCylinder_length;
-        Core::Vector ionsBasePos;
-        std::vector<double> basePos = doubleVectorConfParameter("ion_start_base_position_m", confRoot);
-        ionsBasePos.x(basePos[0]);
-        ionsBasePos.y(basePos[1]);
-        ionsBasePos.z(basePos[2]);
-
-        if (ionStartGeom_str == "box"){
-            ionStartGeom = BOX;
-        } else if (ionStartGeom_str == "cylinder"){
-            ionStartGeom = CYLINDER;
-            ionStartCylinder_radius = doubleConfParameter("ion_start_cylinder_radius_m", confRoot);
-            ionStartCylinder_length = doubleConfParameter("ion_start_cylinder_length_m", confRoot);
-        }
-
-        for (int i = 0; i < nIons.size(); i++) {
-            int nParticles = nIons[i];
-            double mass = ionMasses[i];
-            double collisionDiameter_m = ionCollisionDiameters_angstrom[i]*1e-10;
-            std::vector<std::unique_ptr<BTree::Particle>> ions;
-
-            if (ionStartGeom == BOX) {
-                ions = ParticleSimulation::util::getRandomIonsInBox(
-                        nParticles, 1.0,
-                        Core::Vector(-1.5, -1.5, -1.5) / 1000.0,
-                        Core::Vector(3, 3, 3) / 1000.0,
-                        ions_tob_range);
-
-            }
-            else if (ionStartGeom == CYLINDER){
-                ions = ParticleSimulation::util::getRandomIonsInCylinderXDirection(
-                        nParticles, 1.0, ionStartCylinder_radius, ionStartCylinder_length, ions_tob_range);
-            }
-
-            for (int j = 0; j < nParticles; j++) {
-                ions[j]->setMassAMU(mass);
-                ions[j]->setDiameter(collisionDiameter_m);
-
-                //shift all ions according to the base pos:
-                Core::Vector buf = ions[j]->getLocation() + ionsBasePos;
-                ions[j]->setLocation(buf);
-                particlePtrs.push_back(ions[j].get());
-                particles.push_back(std::move(ions[j]));
-            }
-        }
-    }
-
+    AppUtils::readIonDefinition(particles, particlePtrs, confRoot);
 
     // define functions for the trajectory integration ==================================================
     int ionsInactive = 0;
@@ -465,8 +396,6 @@ int main(int argc, const char * argv[]) {
                                             backgroundTemperature,
                                             collisionGasMassAmu,
                                             collisionGasDiameterM);
-
-
 
     // simulate ===============================================================================================
     clock_t begin = std::clock();
