@@ -53,6 +53,10 @@ namespace AppUtils{
             std::vector<BTree::Particle*>& particlePtrs,
             Json::Value& confRoot);
 
+    void readIonDefinition(
+            std::vector<std::unique_ptr<BTree::Particle>>& particles,
+            std::vector<BTree::Particle*>& particlePtrs,
+            Json::Value& confRoot);
 
 }
 

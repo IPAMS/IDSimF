@@ -121,7 +121,7 @@ void AppUtils::readRandomIonDefinition(
                     ions_tob_range);
 
         }
-        else if (ionStartGeom == CYLINDER){
+        else if (ionStartGeom == CYLINDER) {
             ions = ParticleSimulation::util::getRandomIonsInCylinderXDirection(
                     nParticles, charge, ionStartCylinder_radius, ionStartCylinder_length, ions_tob_range);
         }
@@ -138,3 +138,22 @@ void AppUtils::readRandomIonDefinition(
         }
     }
 }
+
+/**
+ * Reads a particle definition from a simulation config file into particles and particle pointer vectors
+ *
+ * @param particles vector to read the particles to
+ * @param particlePtrs vector of particle pointers to read the particle pointers to
+ * @param confRoot a simulation configuration
+ */
+void AppUtils::readIonDefinition(std::vector<std::unique_ptr<BTree::Particle>>& particles,
+                                       std::vector<BTree::Particle*>& particlePtrs, Json::Value& confRoot) {
+
+    if (AppUtils::isIonCloudDefinitionPresent(confRoot)) {
+        AppUtils::readIonDefinitionFromIonCloudFile(particles, particlePtrs, confRoot);
+    }
+    else {
+        AppUtils::readRandomIonDefinition(particles, particlePtrs, confRoot);
+    }
+}
+

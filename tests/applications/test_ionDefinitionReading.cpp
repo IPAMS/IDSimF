@@ -30,6 +30,23 @@
 #include "test_util.hpp"
 #include "catch.hpp"
 
+bool testParticleBox(std::vector<std::unique_ptr<BTree::Particle>>& particles){
+
+    bool particleOutOfBoxFound = false;
+
+    for(const auto& part: particles){
+        Core::Vector pLocation = part->getLocation();
+        if (pLocation.x() < 0.001 || pLocation.x() > 0.003 ||
+                pLocation.y() < 0.001 || pLocation.y() > 0.003 ||
+                pLocation.z() < 0.001 || pLocation.z() > 0.003 )
+        {
+            particleOutOfBoxFound = true;
+        }
+    }
+
+    return (particleOutOfBoxFound);
+}
+
 TEST_CASE( "Test basic ion definition reading", "[ApplicationUtils]"){
 
     Json::Value conf_box = readConfigurationJson("ionBox.json");
@@ -50,21 +67,20 @@ TEST_CASE( "Test basic ion definition reading", "[ApplicationUtils]"){
         REQUIRE(vectorApproxCompare(particles[1]->getLocation(), Core::Vector(-0.001, 0.0, 0.0)) == "Vectors approximately equal");
     }
 
-    SECTION("Ion definition reading: Random ion box definiton should be readable"){
+    SECTION("Ion definition reading: Random ion box definition should be readable"){
         AppUtils::readRandomIonDefinition(particles, particlePtrs, conf_box);
+        bool particleOutOfBoxFound = testParticleBox(particles);
+        REQUIRE( !particleOutOfBoxFound );
+    }
 
-        bool particleOutOfBoxFound = false;
+    SECTION("Ion definition reading: Full ion definition reading with ion cloud file should work"){
+        AppUtils::readIonDefinition(particles, particlePtrs, conf_ionCloud);
+        REQUIRE(vectorApproxCompare(particles[1]->getLocation(), Core::Vector(-0.001, 0.0, 0.0)) == "Vectors approximately equal");
+    }
 
-        for(const auto& part: particles){
-            Core::Vector pLocation = part->getLocation();
-            if (pLocation.x() < 0.001 || pLocation.x() > 0.003 ||
-                pLocation.y() < 0.001 || pLocation.y() > 0.003 ||
-                pLocation.z() < 0.001 || pLocation.z() > 0.003 )
-            {
-                particleOutOfBoxFound = true;
-            }
-        }
-
+    SECTION("Ion definition reading: Full ion definition reading with random box should work"){
+        AppUtils::readIonDefinition(particles, particlePtrs, conf_box);
+        bool particleOutOfBoxFound = testParticleBox(particles);
         REQUIRE( !particleOutOfBoxFound );
     }
 }
