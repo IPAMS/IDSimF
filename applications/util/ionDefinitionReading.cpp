@@ -20,6 +20,7 @@
  ****************************/
 
 #include "ionDefinitionReading.hpp"
+#include "PSim_ionCloudReader.hpp"
 
 /**
  * Returns if a ion cloud definition file was specified in a simulation configuration
@@ -28,4 +29,27 @@
  */
 bool AppUtils::isIonCloudDefinitionPresent(Json::Value &confRoot) {
     return confRoot.isMember(AppUtils::ION_CLOUD_FILE_KEY);
+}
+
+
+/**
+ * Reads the ions defined by an ion cloud definition file specified by a simulation configuration
+ * into particles and particle pointer vectors
+ *
+ * @param particles vector to read the particles to
+ * @param particlePtrs vector of particle pointers to read the particle pointers to
+ * @param confRoot a simulation configuration
+ */
+void AppUtils::readIonDefinitionFromIonCloudFile(
+        std::vector<std::unique_ptr<BTree::Particle>>& particles,
+        std::vector<BTree::Particle*>& particlePtrs,
+        Json::Value& confRoot) {
+
+    std::string ionCloudFileName = confRoot.get("ion_cloud_init_file", 0).asString();
+    ParticleSimulation::IonCloudReader reader = ParticleSimulation::IonCloudReader();
+    particles = reader.readIonCloud(ionCloudFileName);
+    //prepare a vector of raw pointers
+    for (const auto& part : particles){
+        particlePtrs.push_back(part.get());
+    }
 }

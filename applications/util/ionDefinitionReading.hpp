@@ -40,6 +40,11 @@ namespace AppUtils{
     const std::string ION_CLOUD_FILE_KEY = "ion_cloud_init_file";
 
     bool isIonCloudDefinitionPresent(Json::Value& confRoot);
+
+    void readIonDefinitionFromIonCloudFile(
+            std::vector<std::unique_ptr<BTree::Particle>>& particles,
+            std::vector<BTree::Particle*>& particlePtrs,
+            Json::Value& confRoot);
 }
 
 #endif //IDSIMF_IONDEFINITIONREADING_HPP

@@ -27,6 +27,7 @@
 
 #include "ionDefinitionReading.hpp"
 #include "parameterParsing.hpp"
+#include "test_util.hpp"
 #include "catch.hpp"
 
 TEST_CASE( "Test basic ion definition reading", "[ApplicationUtils]"){
@@ -34,6 +35,19 @@ TEST_CASE( "Test basic ion definition reading", "[ApplicationUtils]"){
     Json::Value conf_box = readConfigurationJson("ionBox.json");
     Json::Value conf_ionCloud = readConfigurationJson("ionCloudFile.json");
 
-    REQUIRE_FALSE(AppUtils::isIonCloudDefinitionPresent(conf_box));
-    REQUIRE(AppUtils::isIonCloudDefinitionPresent(conf_ionCloud));
+    SECTION("Ion definition reading: If ion cloud file is present should be recognized"){
+        REQUIRE_FALSE(AppUtils::isIonCloudDefinitionPresent(conf_box));
+        REQUIRE(AppUtils::isIonCloudDefinitionPresent(conf_ionCloud));
+    }
+
+    SECTION("Ion definition reading: Ion cloud file should be readable"){
+        std::vector<std::unique_ptr<BTree::Particle>>particles;
+        std::vector<BTree::Particle*>particlePtrs;
+
+        AppUtils::readIonDefinitionFromIonCloudFile(particles, particlePtrs, conf_ionCloud);
+
+        REQUIRE(particles[1]->getCharge() == Approx(1.0 * Core::ELEMENTARY_CHARGE));
+        REQUIRE(vectorApproxCompare(particles[1]->getLocation(), Core::Vector(-0.001, 0.0, 0.0)) == "Vectors approximately equal");
+
+    }
 }
