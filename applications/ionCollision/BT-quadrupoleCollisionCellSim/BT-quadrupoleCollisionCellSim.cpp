@@ -33,9 +33,9 @@
 #include "PSim_parallelVerletIntegrator.hpp"
 #include "CollisionModel_HardSphere.hpp"
 #include "json.h"
-#include "parameterParsing.hpp"
-#include "inputFileUtilities.hpp"
-#include "ionDefinitionReading.hpp"
+#include "appUtils_parameterParsing.hpp"
+#include "appUtils_inputFileUtilities.hpp"
+#include "appUtils_ionDefinitionReading.hpp"
 #include <iostream>
 #include <vector>
 #include <ctime>

@@ -19,8 +19,8 @@
  along with IDSimF.  If not, see <https://www.gnu.org/licenses/>.
  ****************************/
 
-#include "ionDefinitionReading.hpp"
-#include "parameterParsing.hpp"
+#include "appUtils_ionDefinitionReading.hpp"
+#include "appUtils_parameterParsing.hpp"
 #include "PSim_ionCloudReader.hpp"
 #include "PSim_util.hpp"
 

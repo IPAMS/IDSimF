@@ -27,7 +27,7 @@
 
 
 #include "json.h"
-#include "parameterParsing.hpp"
+#include "appUtils_parameterParsing.hpp"
 #include "RS_Simulation.hpp"
 #include "RS_SimulationConfiguration.hpp"
 #include "RS_ConfigFileParser.hpp"

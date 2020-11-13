@@ -2,11 +2,11 @@ project(apputils)
 
 set(SOURCE_FILES
         ${CMAKE_SOURCE_DIR}/libs/jsoncpp/jsoncpp.cpp
-        parameterParsing.hpp
-        inputFileUtilities.hpp
-        inputFileUtilities.cpp
-        ionDefinitionReading.cpp
-        ionDefinitionReading.hpp parameterParsing.cpp)
+        appUtils_parameterParsing.hpp
+        appUtils_inputFileUtilities.hpp
+        appUtils_inputFileUtilities.cpp
+        appUtils_ionDefinitionReading.cpp
+        appUtils_ionDefinitionReading.hpp appUtils_parameterParsing.cpp)
 
 add_library(apputils STATIC ${SOURCE_FILES})
 target_include_directories(apputils PUBLIC

@@ -24,8 +24,8 @@
  Utility functions for the management / usage of input files (potential arrays / parameter files etc.)
 
  ****************************/
-#ifndef IDSIMF_INPUTFILEUTILITIES_HPP
-#define IDSIMF_INPUTFILEUTILITIES_HPP
+#ifndef IDSIMF_APPUTILS_INPUTFILEUTILITIES_HPP
+#define IDSIMF_APPUTILS_INPUTFILEUTILITIES_HPP
 
 #include "PSim_simionPotentialArray.hpp"
 #include <memory>
@@ -38,4 +38,4 @@ namespace AppUtils{
             double scale, bool fastAdjustPA);
 }
 
-#endif //IDSIMF_INPUTFILEUTILITIES_HPP
+#endif //IDSIMF_APPUTILS_INPUTFILEUTILITIES_HPP

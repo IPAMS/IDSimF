@@ -27,8 +27,8 @@
  ****************************/
 
 #include "json.h"
-#include "parameterParsing.hpp"
-#include "ionDefinitionReading.hpp"
+#include "appUtils_parameterParsing.hpp"
+#include "appUtils_ionDefinitionReading.hpp"
 #include "BTree_particle.hpp"
 #include "BTree_tree.hpp"
 #include "PSim_trajectoryHDF5Writer.hpp"

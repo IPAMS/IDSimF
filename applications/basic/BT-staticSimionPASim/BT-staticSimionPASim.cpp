@@ -36,7 +36,7 @@
 #include "PSim_simionPotentialArray.hpp"
 #include "CollisionModel_EmptyCollisionModel.hpp"
 #include "json.h"
-#include "parameterParsing.hpp"
+#include "appUtils_parameterParsing.hpp"
 #include <iostream>
 #include <vector>
 #include <ctime>

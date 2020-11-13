@@ -26,7 +26,7 @@
  ****************************/
 
 #include "json.h"
-#include "parameterParsing.hpp"
+#include "appUtils_parameterParsing.hpp"
 #include "BTree_particle.hpp"
 #include "BTree_tree.hpp"
 #include "PSim_trajectoryExplorerJSONwriter.hpp"

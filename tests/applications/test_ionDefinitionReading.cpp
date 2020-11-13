@@ -25,8 +25,8 @@
 
  ****************************/
 
-#include "ionDefinitionReading.hpp"
-#include "parameterParsing.hpp"
+#include "appUtils_ionDefinitionReading.hpp"
+#include "appUtils_parameterParsing.hpp"
 #include "test_util.hpp"
 #include "catch.hpp"
 

@@ -19,7 +19,7 @@
  along with IDSimF.  If not, see <https://www.gnu.org/licenses/>.
  ****************************/
 
-#include "inputFileUtilities.hpp"
+#include "appUtils_inputFileUtilities.hpp"
 
 std::vector<std::unique_ptr<ParticleSimulation::SimionPotentialArray> >
 AppUtils::readPotentialArrayFiles(std::vector<std::string> potentialArrayFilenames,
