@@ -99,11 +99,16 @@ void AppUtils::readRandomIonDefinition(
         std::vector<double> boxSize = doubleVectorConfParameter("ion_start_box_size_m", confRoot);
         ionStartBoxSize_m = {boxSize[0], boxSize[1], boxSize[2]};
         ionStartCornerPosition_m = Core::Vector(0.0, 0.0, 0.0) - (ionStartBoxSize_m*0.5);
-
-    } else if (ionStartGeom_str == "cylinder"){
+    }
+    else if (ionStartGeom_str == "cylinder"){
         ionStartGeom = CYLINDER;
         ionStartCylinder_radius = doubleConfParameter("ion_start_cylinder_radius_m", confRoot);
         ionStartCylinder_length = doubleConfParameter("ion_start_cylinder_length_m", confRoot);
+    }
+    else{
+        std::stringstream ss;
+        ss << "Invalid ion start geometry identifier: " << ionStartGeom_str;
+        throw (std::invalid_argument(ss.str()));
     }
 
     for (int i = 0; i < nIons.size(); i++) {

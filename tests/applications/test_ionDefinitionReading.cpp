@@ -83,4 +83,10 @@ TEST_CASE( "Test basic ion definition reading", "[ApplicationUtils]"){
         bool particleOutOfBoxFound = testParticleBox(particles);
         REQUIRE( !particleOutOfBoxFound );
     }
+
+    SECTION("Ion definition reading: Ion definition reading with invalid file should throw"){
+        Json::Value conf_invalid = readConfigurationJson("ionDefinition_invalid.json");
+        REQUIRE_THROWS_AS(
+                AppUtils::readIonDefinition(particles, particlePtrs, conf_invalid), std::invalid_argument);
+    }
 }

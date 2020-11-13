@@ -1,0 +1,9 @@
+{
+  "n_ions":[6000,6000],
+  "ion_masses":[35,37],
+  "ion_charges":[1,2],
+  "ion_collision_gas_diameters_angstrom": [2.0,2.5],
+  "ion_start_geometry": "not_existing",
+  "ion_start_base_position_m": [0.002,0.002,0.002],
+  "ion_start_box_size_m": [0.001,0.001,0.001]
+}
