@@ -31,7 +31,7 @@
 #include "RS_Substance.hpp"
 #include "catch.hpp"
 
-TEST_CASE( "Basic Particle semantics ests", "[Particle]") {
+TEST_CASE( "Basic Particle semantics tests", "[Particle]") {
 
     BTree::Particle testIon = BTree::Particle(Core::Vector(1.0, 2.0, 3.0), 2.0);
 
@@ -42,19 +42,40 @@ TEST_CASE( "Basic Particle semantics ests", "[Particle]") {
         REQUIRE(testIon.isActive());
     }
 
-    SECTION("Advanced Particle creation tests") {
-        //Test ion location:
-        BTree::Particle testIon2 = BTree::Particle(
-                Core::Vector(2.0, 3.0, 4.0),
-                Core::Vector(1.0, 1.0, 1.0),
-                1.0,
-                100.0,
-                1e-5);
-        REQUIRE(testIon2.getLocation()==Core::Vector(2.0, 3.0, 4.0));
-        REQUIRE(testIon2.getCharge()==1.0*Core::ELEMENTARY_CHARGE);
-        REQUIRE(testIon2.getMass()==100.0*Core::AMU_TO_KG);
-        REQUIRE(testIon2.getTimeOfBirth()==1e-5);
-        REQUIRE(testIon2.isActive());
+    SECTION("Test particle constructors") {
+
+        SECTION("Test constructor with time of birth"){
+            //Test ion location:
+            BTree::Particle testIon2 = BTree::Particle(
+                    Core::Vector(2.0, 3.0, 4.0),
+                    Core::Vector(1.0, 1.0, 1.0),
+                    1.0,
+                    100.0,
+                    1e-5);
+            REQUIRE(testIon2.getLocation()==Core::Vector(2.0, 3.0, 4.0));
+            REQUIRE(testIon2.getCharge()==1.0*Core::ELEMENTARY_CHARGE);
+            REQUIRE(testIon2.getMass()==100.0*Core::AMU_TO_KG);
+            REQUIRE(testIon2.getTimeOfBirth()==1e-5);
+            REQUIRE(testIon2.isActive());
+        }
+
+        SECTION("Test constructor with time of birth and collision diameter"){
+            //Test ion location:
+            BTree::Particle testIon2 = BTree::Particle(
+                    Core::Vector(2.0, 3.0, 4.0),
+                    Core::Vector(1.0, 1.0, 1.0),
+                    1.0,
+                    100.0,
+                    3.2e-10,
+                    1e-5);
+            REQUIRE(testIon2.getLocation()==Core::Vector(2.0, 3.0, 4.0));
+            REQUIRE(testIon2.getCharge()==1.0*Core::ELEMENTARY_CHARGE);
+            REQUIRE(testIon2.getMass()==100.0*Core::AMU_TO_KG);
+            REQUIRE(testIon2.getDiameter()==3.2e-10);
+            REQUIRE(testIon2.getTimeOfBirth()==1e-5);
+            REQUIRE(testIon2.isActive());
+        }
+
     }
 
     SECTION("Basic Particle setter tests") {
