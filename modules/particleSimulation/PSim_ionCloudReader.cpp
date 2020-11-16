@@ -63,7 +63,7 @@ std::vector<std::unique_ptr<BTree::Particle>> ParticleSimulation::IonCloudReader
                     pVal.push_back(std::strtod(line.c_str(), nullptr));
                 }
 
-                if (pVal.size() == 9) {
+                if (pVal.size() == 10) {
                     ionCloud.push_back(std::make_unique<BTree::Particle>(
                                 Core::Vector(pVal[0], pVal[1], pVal[2]), //location
                                 Core::Vector(pVal[3], pVal[4], pVal[5]), //velocity

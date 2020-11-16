@@ -47,10 +47,28 @@ TEST_CASE("Test ion cloud reader", "[ParticleSimulation][IonCloudReader][file re
         ParticleSimulation::IonCloudReader reader = ParticleSimulation::IonCloudReader();
         std::vector<std::unique_ptr<BTree::Particle>> iCl = reader.readIonCloud("test_ion_cloud_01.csv");
         std::vector<BTree::Particle> iClRef = std::vector<BTree::Particle>();
-        iClRef.push_back(BTree::Particle(Core::Vector(1.0,1.0,1.0),Core::Vector(1.00,1.00,1.00),1.0,100.0));
-        iClRef.push_back(BTree::Particle(Core::Vector(1.0,2.0,1.0),Core::Vector(10.0,10.0,10.0),-1.0,200.0));
-        iClRef.push_back(BTree::Particle(Core::Vector(-10,-20,-10.0),Core::Vector(-10.00,10.0,-10.0),2.0,300.0));
-        iClRef.push_back(BTree::Particle(Core::Vector(1.0,2.0,1.0),Core::Vector(10.0,10.0,10.0),-10.5,200.0));
+
+
+
+        iClRef.push_back(BTree::Particle(
+                Core::Vector(1.0,1.0,1.0),
+                Core::Vector(1.00,1.00,1.00),
+                1.0, 100.0, 3.64e-10, 0));
+
+        iClRef.push_back(BTree::Particle(
+                Core::Vector(1.0,2.0,1.0),
+                Core::Vector(10.0,10.0,10.0),
+                -1.0, 200.0, 3.64e-10, 0.0));
+
+        iClRef.push_back(BTree::Particle(
+                Core::Vector(-10,-20,-10.0),
+                Core::Vector(-10.00,10.0,-10.0),
+                2.0, 300.0, 3.64e-10, 1e-5));
+
+        iClRef.push_back(BTree::Particle(
+                Core::Vector(1.0,2.0,1.0),
+                Core::Vector(10.0,10.0,10.0),
+                -10.5, 200.0, 3.64e-10, 3e-5));
 
         REQUIRE(iCl.size() == 4);
 
@@ -59,6 +77,7 @@ TEST_CASE("Test ion cloud reader", "[ParticleSimulation][IonCloudReader][file re
             REQUIRE( (*iCl[i]).getVelocity() == iClRef[i].getVelocity() );
             REQUIRE( (*iCl[i]).getCharge() == iClRef[i].getCharge() );
             REQUIRE( (*iCl[i]).getMass() == iClRef[i].getMass() );
+            REQUIRE( (*iCl[i]).getDiameter() == Approx(iClRef[i].getDiameter()).epsilon(1e-15) );
         }
     }
 }
