@@ -6,9 +6,10 @@ BT-generalTrapSim
 
 Ion trajectory simulation in an RF ion trap device with arbitrary geometry considering space charge and hard sphere collisions with neutral background gas particles. The electrode geometry is defined by SIMION potential arrays. 
 
-------------
+
 FT detection
-------------
+============
+
 There are different detection modes in ion traps. Commonly, ions are ejected mass selectively from the trap, e.g. by resonant excitation, and detected by a particle detector. 
 
 Alternatively, the trapped ions can be excited with an excitation signal on the cap electrodes, which induces an oscillation of the ions in the trap. This oscillation can be detected by the induced mirror charge on detection electrodes. A mass spectrum can be calculated from the recorded mirror charge signal ("transient") by a Fourier transformation. 
@@ -34,18 +35,6 @@ Simulation configuration description
 ``dt`` : float
     Time step length in seconds 
 
-``n_ions`` : vector of integers
-    Number of ions of the ionic species defined by the the masses defined in ``ion_masses``. 
-
-``ion_masses`` : vector of float 
-    Ion masses in amu. 
-
-``ion_collision_gas_diameters_angstrom`` : Vector of float
-    Effective hard sphere collision diameters of the ionic species in angström. 
-
-``ion_time_of_birth_range_s`` : float
-    Time range in which ions are generated, in seconds. The specified number of ions are generated uniformly in this time range.
-
 ``space_charge_factor`` : float
     Multiplication factor for particle-particle interaction (space charge).
 
@@ -68,9 +57,42 @@ Simulation configuration description
         
         [[x low, x high], [y low, y high], [z low, z high]]
 
------------------------
+--------------------------------------
+Ion / simulated particle configuration
+--------------------------------------
+
+The particles to simulate can be defined in the simulation configuration file or a predefined particle ensemble can be used which is given as ion cloud file in CSV format. 
+
+Ion Cloud File
+--------------
+
+A predefined ion configuration can be specified by 
+
+``ion_cloud_init_file`` : file path
+    Path to an ion cloud initialization / definition file 
+
+Ion definition in simulation configuration file
+-----------------------------------------------
+
+If no ion cloud file is used, the following configuration parameters define the ion ensemble to simulate: 
+
+``n_ions`` : vector of integers
+    Number of ions of the ionic species defined by the the masses defined in ``ion_masses``. 
+
+``ion_masses`` : vector of float 
+    Ion masses in amu. 
+
+``ion_charges`` : Vector of float
+    Ion charges in elementary charges.     
+
+``ion_collision_gas_diameters_angstrom`` : Vector of float
+    Effective hard sphere collision diameters of the ionic species in angström. 
+
+``ion_time_of_birth_range_s`` : float
+    Time range in which ions are generated, in seconds. The specified number of ions are generated uniformly in this time range.
+
 Ion start configuration
------------------------
+.......................
 
 The initial positions of the simulated ions can be a cubic box or a cylinder in ``x`` direction. The center of the ion start zone is specified by ``ion_start_base_position_m``.
 
