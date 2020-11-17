@@ -117,6 +117,8 @@ If no ion cloud file is used, the following configuration parameters define the 
 ``ion_collision_gas_diameters_angstrom`` : Vector of float
     Effective hard sphere collision diameters of the ionic species in angström. 
 
+``ion_time_of_birth_range_s`` : float
+    Time range in which ions are generated, in seconds. The specified number of ions are generated uniformly in this time range.
 
 Ion start configuration
 .......................
