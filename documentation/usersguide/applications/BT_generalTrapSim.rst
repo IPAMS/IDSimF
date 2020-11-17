@@ -88,6 +88,8 @@ If no ion cloud file is used, the following configuration parameters define the 
 ``ion_time_of_birth_range_s`` : float
     Time range in which ions are generated, in seconds. The specified number of ions are generated uniformly in this time range.
 
+Ion start configuration
+.......................
 
 The initial positions of the simulated ions can be a cubic box or a cylinder in ``x`` direction. The center of the ion start zone is specified by ``ion_start_base_position_m``.
 
