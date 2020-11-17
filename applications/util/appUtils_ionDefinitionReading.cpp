@@ -36,18 +36,25 @@ bool AppUtils::isIonCloudDefinitionPresent(Json::Value &confRoot) {
 
 /**
  * Reads the ions defined by an ion cloud definition file specified by a simulation configuration
- * into particles and particle pointer vectors
+ * into particles and particle pointer vectors.
+ *
+ * Note that the ion cloud file location is relative to the given configuration file location (confFilePathStr)
  *
  * @param particles vector to read the particles to
  * @param particlePtrs vector of particle pointers to read the particle pointers to
  * @param confRoot a simulation configuration
+ * @param confBasePath path to the base path of the simulation configuration file with the configuration in confRoot
  */
 void AppUtils::readIonDefinitionFromIonCloudFile(
         std::vector<std::unique_ptr<BTree::Particle>>& particles,
         std::vector<BTree::Particle*>& particlePtrs,
-        Json::Value& confRoot) {
+        Json::Value& confRoot,
+        std::string confBasePath) {
 
-    std::string ionCloudFileName = confRoot.get("ion_cloud_init_file", 0).asString();
+    std::string ionCloudFileName = pathRelativeToConfBasePath(
+            confBasePath,
+            confRoot.get("ion_cloud_init_file", 0).asString());
+
     ParticleSimulation::IonCloudReader reader = ParticleSimulation::IonCloudReader();
     particles = reader.readIonCloud(ionCloudFileName);
     //prepare a vector of raw pointers
@@ -150,12 +157,14 @@ void AppUtils::readRandomIonDefinition(
  * @param particles vector to read the particles to
  * @param particlePtrs vector of particle pointers to read the particle pointers to
  * @param confRoot a simulation configuration
+ * @param confBasePath path to the base path of the simulation configuration file with the configuration in confRoot
  */
 void AppUtils::readIonDefinition(std::vector<std::unique_ptr<BTree::Particle>>& particles,
-                                       std::vector<BTree::Particle*>& particlePtrs, Json::Value& confRoot) {
+                                 std::vector<BTree::Particle*>& particlePtrs,
+                                 Json::Value& confRoot, std::string confBasePath) {
 
     if (AppUtils::isIonCloudDefinitionPresent(confRoot)) {
-        AppUtils::readIonDefinitionFromIonCloudFile(particles, particlePtrs, confRoot);
+        AppUtils::readIonDefinitionFromIonCloudFile(particles, particlePtrs, confRoot, confBasePath);
     }
     else {
         AppUtils::readRandomIonDefinition(particles, particlePtrs, confRoot);

@@ -46,7 +46,8 @@ namespace AppUtils{
     void readIonDefinitionFromIonCloudFile(
             std::vector<std::unique_ptr<BTree::Particle>>& particles,
             std::vector<BTree::Particle*>& particlePtrs,
-            Json::Value& confRoot);
+            Json::Value& confRoot,
+            std::string confBasePath);
 
     void readRandomIonDefinition(
             std::vector<std::unique_ptr<BTree::Particle>>& particles,
@@ -56,7 +57,8 @@ namespace AppUtils{
     void readIonDefinition(
             std::vector<std::unique_ptr<BTree::Particle>>& particles,
             std::vector<BTree::Particle*>& particlePtrs,
-            Json::Value& confRoot);
+            Json::Value& confRoot,
+            std::string confBasePath);
 
 }
 
