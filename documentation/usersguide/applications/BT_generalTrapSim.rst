@@ -82,6 +82,9 @@ If no ion cloud file is used, the following configuration parameters define the 
 ``ion_masses`` : vector of float 
     Ion masses in amu. 
 
+``ion_charges`` : Vector of float
+    Ion charges in elementary charges.     
+
 ``ion_collision_gas_diameters_angstrom`` : Vector of float
     Effective hard sphere collision diameters of the ionic species in angström. 
 
