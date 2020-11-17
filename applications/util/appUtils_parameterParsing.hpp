@@ -26,6 +26,7 @@ std::unique_ptr<ParticleSimulation::InterpolatedField> readInterpolatedField(
         Json::Value& confRoot);
 
 std::string pathRelativeToConfFile(std::string confFilePathStr, std::string pathStr);
+std::string pathRelativeToConfBasePath(std::string confBasePath, std::string pathStr);
 
 std::string confFileBasePath(std::string confFilePathStr);
 

@@ -151,6 +151,10 @@ std::string pathRelativeToConfFile(std::string confFilePathStr, std::string path
     return std::filesystem::path(confFilePathStr).parent_path() / std::filesystem::path(pathStr);
 }
 
+std::string pathRelativeToConfBasePath(std::string confBasePath, std::string pathStr){
+    return std::filesystem::path(confBasePath) / std::filesystem::path(pathStr);
+}
+
 std::string confFileBasePath(std::string confFilePathStr){
     return std::filesystem::path(confFilePathStr).parent_path();
 }
