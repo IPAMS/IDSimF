@@ -175,7 +175,7 @@ int main(int argc, const char * argv[]) {
                 }
                 else if (timestep % trajectoryWriteInterval == 0) {
 
-                    std::cout << "ts:" << timestep << " time:" << time << " V_rf:"
+                    std::cout << "ts:" << timestep << " time:" << time
                               <<" ions existing: "<<particles.size()<< " ions inactive: "
                               << ionsInactive << std::endl;
 
@@ -198,7 +198,6 @@ int main(int argc, const char * argv[]) {
                 newPartPos.z() >= simulationDomainBoundaries[2][1] ||
                 potentialArrays.at(0)->isElectrode(newPartPos.x(), newPartPos.y(), newPartPos.z() )  )
         {
-            std::cout << particle->getVelocity() << std::endl;
             particle->setActive(false);
             particle->setSplatTime(time);
             ionsInactive++;
