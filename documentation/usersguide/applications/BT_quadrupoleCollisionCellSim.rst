@@ -7,7 +7,6 @@ BT-quadrupoleCollisionCellSim
 Simulates a quadrupolar collision cell with hard sphere collisions between ions and background gas, space charge and variable electrode geometry given by SIMION potential arrays. The ions are accelerated into the collision cell which is filled with a collision gas. The ions are confined radially in a quadrupolar RF field. 
 
 .. note::
-    * Currently, the collision of ions with electrode surfaces is not determined and ions are not terminated on electrode surfaces. 
     
     * The time step length is *not* adapted to the gas dynamic parameters of the hard sphere model model. For a valid modeling, the time step length should be significantly shorter than the mean time between ion-neutral collisions.
 
@@ -29,18 +28,6 @@ Simulation configuration description
 
 ``frequency_rf`` : float
     Frequency of the RF trapping field in Hz. 
-
-``n_ions`` : Vector of integers
-    Number of ions of the ionic species defined by the the masses defined in ``ion_masses``, the collision diameters in ``ion_collision_gas_diameters_angstrom`` and the charges in ``ion_charges``. 
-
-``ion_masses`` : Vector of float 
-    Ion masses in amu. 
-
-``ion_charges`` : Vector of float
-    Ion charges in elementary charges. 
-
-``ion_collision_gas_diameters_angstrom`` : Vector of float
-    Effective hard sphere collision diameters of the ionic species in angström. 
 
 ``V_rf`` : float
     RF amplitude in V. 
@@ -99,37 +86,57 @@ The electrode geometry and the resulting electric potential is defined by SIMION
     * :math:`F_{\text{RF}}` given by ``rf_potential_factors``.
 
 
------------------------
+--------------------------------------
+Ion / simulated particle configuration
+--------------------------------------
+
+The particles to simulate can be defined in the simulation configuration file or a predefined particle ensemble can be used which is given as ion cloud file in CSV format. 
+
+Ion Cloud File
+--------------
+
+A predefined ion configuration can be specified by 
+
+``ion_cloud_init_file`` : file path
+    Path to an ion cloud initialization / definition file 
+
+Ion definition in simulation configuration file
+-----------------------------------------------
+
+If no ion cloud file is used, the following configuration parameters define the ion ensemble to simulate: 
+
+``n_ions`` : vector of integers
+    Number of ions of the ionic species defined by the the masses defined in ``ion_masses``. 
+
+``ion_masses`` : vector of float 
+    Ion masses in amu. 
+
+``ion_charges`` : Vector of float
+    Ion charges in elementary charges.     
+
+``ion_collision_gas_diameters_angstrom`` : Vector of float
+    Effective hard sphere collision diameters of the ionic species in angström. 
+
+
 Ion start configuration
------------------------
+.......................
 
-The simulated particle ensemble can be initialized in different start geometries, which have different configuration parameters: 
+The initial positions of the simulated ions can be a cubic box or a cylinder in ``x`` direction. The center of the ion start zone is specified by ``ion_start_base_position_m``.
 
-``ion_start_geometry`` : Keyword:[``box``, ``cylinder``, ``vector``]
-    Sets the ion start geometry mode.
+``ion_start_geometry`` : Keyword:[``box``, ``cylinder``]
+    Sets the ion start geometry.
 
     ``box`` : Ion start zone is a box 
-        The ion start zone is a box, oriented parallel to the axes. The box is defined by: 
-        
-        ``ion_start_box_center_position_m`` : vector of 3 floats
-            Position of the box center in m. 
-
-        ``ion_start_box_size_m`` : vector of 3 floats
-            Size of the box in ``x``, ``y``, ``z`` direction in m. 
+        The ion start zone is a cubic box of 3 mm edge length around ``ion_start_base_position_m``, randomly filled with particles. 
 
     ``cylinder`` : Ion start zone is a cylinder in ``x`` direction
-        The ion start zone is a cylinder parallel to the ``x`` axis, with its center at the origin of the coordinate system. 
+        The ion start zone is a cylinder parallel to the ``x`` axis, with its center at ``ion_start_base_position_m``. The cylinder is defined by
 
         ``ion_start_cylinder_radius_m``: float
-            Radius of the cylinder around the ``x`` axis. 
+            Radius of the cylinder around the ``x`` axis in m. 
 
         ``ion_start_cylinder_length_m`` : float
-            Length from the origin of the cylinder to the cylinder end in ``x`` direction. The cylinder is in total 2 * ``ion_start_cylinder_length_m`` long. 
+            Distance from the origin of the cylinder to the cylinder ends in ``x`` direction. The cylinder is therefore in total 2 * ``ion_start_cylinder_length_m`` long. 
 
-    ``vector`` : single vector
-        All particles start at a single position given by
-
-        ``ion_start_vector_position_m``: vector of 3 floats
-            Position to start the particles at. 
-
-        Note that starting two particles at the exact same position will lead to an exception. Therefore, this mode can only used with single particles. 
+``ion_start_base_position_m`` : Vector of 3 floats
+    Base position of the ion start zone in m. 
