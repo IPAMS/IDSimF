@@ -104,7 +104,7 @@ int main(int argc, const char * argv[]) {
     //Read ion configuration and initialize ions:
     std::vector<std::unique_ptr<BTree::Particle>>particles;
     std::vector<BTree::Particle*>particlePtrs;
-    AppUtils::readIonDefinition(particles, particlePtrs, confRoot);
+    AppUtils::readIonDefinition(particles, particlePtrs, confRoot, confBasePath);
 
     //init gas collision models:
     CollisionModel::HardSphereModel hsModel = CollisionModel::HardSphereModel(
