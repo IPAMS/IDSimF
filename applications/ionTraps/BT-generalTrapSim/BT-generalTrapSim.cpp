@@ -201,12 +201,10 @@ int main(int argc, const char * argv[]) {
     }
     double excitePulsePotential = doubleConfParameter("excite_pulse_potential", confRoot);
 
-
-
     //read ion configuration =======================================================================
     std::vector<std::unique_ptr<BTree::Particle>>particles;
     std::vector<BTree::Particle*>particlePtrs;
-    AppUtils::readIonDefinition(particles, particlePtrs, confRoot);
+    AppUtils::readIonDefinition(particles, particlePtrs, confRoot, confBasePath);
 
     // define functions for the trajectory integration ==================================================
     int ionsInactive = 0;
