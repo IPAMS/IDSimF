@@ -289,11 +289,12 @@ void ParticleSimulation::TrajectoryHDF5Writer::writeSplatTimes(std::vector<BTree
     // Define memory space and write.
     hsize_t slabDimsSplattimes[1] = {nParticles};
     H5::DataSpace memspaceSplattimes(1, slabDimsSplattimes);
-    double datBuf[nParticles];
+
+    std::vector<double> datBuf(nParticles); //use a vector to prevent stack overflows
     for(int i=0; i<nParticles; ++i){
         datBuf[i] = particles[i]->getSplatTime();
     }
-    dsetSplattimes->write(datBuf,H5::PredType::NATIVE_DOUBLE,memspaceSplattimes,dataspaceSplattimes);
+    dsetSplattimes->write(datBuf.data(),H5::PredType::NATIVE_DOUBLE,memspaceSplattimes,dataspaceSplattimes);
 }
 
 /**
