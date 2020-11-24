@@ -40,6 +40,7 @@ add_subdirectory (tests/simulations)
 add_subdirectory (tests/applications)
 
 add_subdirectory (tests/benchmarks/errorfunction)
+add_subdirectory (tests/benchmarks/filewriter/HDF5filewriter)
 add_subdirectory (tests/benchmarks/collision_hardsphere/runtime_benchmark)
 add_subdirectory (tests/benchmarks/collision_hardsphere/maxwell_benchmark)
 add_subdirectory (tests/benchmarks/collision_sds/runtime_benchmark)
