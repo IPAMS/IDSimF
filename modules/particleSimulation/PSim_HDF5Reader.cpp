@@ -17,13 +17,8 @@
 
  You should have received a copy of the GNU General Public License
  along with IDSimF.  If not, see <https://www.gnu.org/licenses/>.
-
- ------------
- PSim_HDF5Reader.cpp
-
- Description
-
  ****************************/
+
 #include "PSim_HDF5Reader.hpp"
 
 ParticleSimulation::HDF5Reader::HDF5Reader(const std::string &hdf5Filename, bool compression) {
