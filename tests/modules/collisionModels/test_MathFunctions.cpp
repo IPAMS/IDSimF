@@ -27,43 +27,8 @@
 
 #include "catch.hpp"
 #include "CollisionModel_MathFunctions.hpp"
-#include <array>
-#include <cmath>
 
-TEST_CASE("Test trigonometic functions implementation", "[CollisionModels][Math]") {
 
-    SECTION("Radians to degree implementation should be correct") {
-
-        REQUIRE( (CollisionModel::radToDeg(0.0 * M_PI) == Approx(0.0)));
-        REQUIRE( (CollisionModel::radToDeg(1.0 * M_PI) == Approx(180.0)));
-        REQUIRE( (CollisionModel::radToDeg(0.5 * M_PI) == Approx(90.0)));
-        REQUIRE( (CollisionModel::radToDeg(-0.5 * M_PI) == Approx(-90.0)));
-
-        REQUIRE( (CollisionModel::degToRad(0.0) == Approx(0.0 * M_PI)));
-        REQUIRE( (CollisionModel::degToRad(180.0) == Approx(1.0 * M_PI)));
-        REQUIRE( (CollisionModel::degToRad(90.0) == Approx(0.5 * M_PI)));
-        REQUIRE( (CollisionModel::degToRad(-90.0) == Approx(-0.5 * M_PI)));
-
-    }
-
-    SECTION("Cartesian to polar should be correct") {
-
-        SECTION("Test with {1,1,0}"){
-            Core::Vector cart = Core::Vector(1.0,1.0,0);
-            Core::Vector polar = CollisionModel::cartesianToPolar(cart);
-            REQUIRE(polar.x() == Approx(sqrt(2.0)));
-            REQUIRE(polar.y() == Approx(0.0));
-            REQUIRE(polar.z() == Approx(M_PI_4));
-        }
-
-        SECTION("Test with {1,-1,-1}"){
-            Core::Vector cart = Core::Vector(1.0,-1.0,-1.0);
-            Core::Vector polar  = CollisionModel::cartesianToPolar(cart);
-            REQUIRE(polar.x() == Approx(sqrt(3.0)));
-            REQUIRE(polar.y() == Approx(M_PI_4));
-        }
-    }
-}
 
 TEST_CASE("Test random functions implementation", "[CollisionModels][Math]") {
     SECTION("Spherical random vectors should have the correct length") {

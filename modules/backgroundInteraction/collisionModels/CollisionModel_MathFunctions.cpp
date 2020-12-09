@@ -22,54 +22,6 @@
 #include "CollisionModel_MathFunctions.hpp"
 #include "Core_randomGenerators.hpp"
 
-/**
- * Convert from degrees to radians
- */
-double CollisionModel::degToRad(double phi){
-    return( M_PI / 180.0 * phi); 
-}
-
-/**
- * Convert from radians to degrees
- */
-double CollisionModel::radToDeg(double phi){
-    return( phi / (M_PI/180.0) );
-}
-
-/**
- * Convert a cartesian vector 'vec' to polar coordinates
- * @return A three dimensional vector with the elements {radius, azimuth, elevation}
- */
-Core::Vector CollisionModel::cartesianToPolar(Core::Vector vec){
-    double r = vec.magnitude();
-    double azimuth = -atan2(vec.z(), vec.x());
-    double elevation = asin(vec.y() / r);
-
-    return {r, azimuth, elevation};
-}
-
-/**
- * Rotates a vector 'vec' an 'angle' around the elevation axis
- */
-Core::Vector CollisionModel::elevationRotate(Core::Vector vec, double angle){
-    return {
-            cos(angle)*vec.x() - sin(angle)*vec.y(),
-            sin(angle)*vec.x() + cos(angle)*vec.y(),
-            vec.z()
-    };
-}
-
-/**
- * Rotates a vector 'vec' an 'angle' around the azimuth axis
- */
-Core::Vector CollisionModel::azimuthRotate(Core::Vector vec, double angle){
-    //double phi = degToRad(angle);
-    return {
-            cos(angle)*vec.x() + sin(angle)*vec.z(),
-            vec.y(),
-            -sin(angle)*vec.x() + cos(angle)*vec.z()
-    };
-}
 
 /**
  * Generates an uniformly distributed random sample on a sphere with radius 'r'

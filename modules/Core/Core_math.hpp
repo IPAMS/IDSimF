@@ -19,22 +19,28 @@
  along with IDSimF.  If not, see <https://www.gnu.org/licenses/>.
 
  ------------
- CollisionModel_MathFunctions.hpp
+ Core_math.hpp
 
- Additional mathematical support functions used in collision models
+ Mathematical utility functions of general purpose
 
  ****************************/
-
-#ifndef Collision_MathFunctions_hpp
-#define Collision_MathFunctions_hpp
+#ifndef IDSIMF_CORE_MATH_HPP
+#define IDSIMF_CORE_MATH_HPP
 
 #include "Core_vector.hpp"
 #include "Core_constants.hpp"
-#include <cmath>
 
-namespace CollisionModel {
+namespace Core {
 
-    Core::Vector sphereRand(double r);
+    double degToRad(double phi);
+    double radToDeg(double phi);
+
+    Core::Vector cartesianToPolar(Core::Vector vec);
+    Core::Vector elevationRotate(Core::Vector vec, double angle);
+    Core::Vector azimuthRotate(Core::Vector vec, double angle);
+
+
 }
 
-#endif /* Collision_MathFunctions_hpp */
+
+#endif //IDSIMF_CORE_MATH_HPP

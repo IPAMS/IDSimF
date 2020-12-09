@@ -20,6 +20,7 @@
  ****************************/
 
 #include "CollisionModel_HardSphere.hpp"
+#include "Core_math.hpp"
 #include "Core_randomGenerators.hpp"
 
 /**
