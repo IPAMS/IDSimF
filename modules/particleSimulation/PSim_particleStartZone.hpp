@@ -29,6 +29,11 @@
 #define Particle_simulation_particle_start_zone
 
 #include "Core_vector.hpp"
+#include "Core_randomGenerators.hpp"
+#include "BTree_particle.hpp"
+#include "memory"
+#include "vector"
+
 
 namespace ParticleSimulation{
 
@@ -41,7 +46,8 @@ namespace ParticleSimulation{
         virtual ~ParticleStartZone() = default;
 
         virtual Core::Vector getRandomParticlePosition() = 0;
-
+        virtual std::vector<std::unique_ptr<BTree::Particle>> getRandomParticlesInStartZone(
+                int numIons, double charge, double timeOfBirthRange=0.0) = 0;
     };
 }
 
