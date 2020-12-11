@@ -35,8 +35,23 @@ namespace ParticleSimulation{
     class CylinderStartZone : public ParticleStartZone {
 
     public:
+        CylinderStartZone(double radius, double length,
+                          Core::Vector normalVector = {0.0, 0.0, 0.0},
+                          Core::Vector baseVector = {0.0, 0.0, 0.0});
 
         Core::Vector getRandomParticlePosition() override;
+        std::vector<std::unique_ptr<BTree::Particle>> getRandomParticlesInStartZone(
+                int numIons, double charge, double timeOfBirthRange) override;
+
+    private:
+        double radius_;
+        double length_;
+        Core::Vector normalVector_;
+        Core::Vector baseVector_;
+
+        Core::RndDistPtr rnd_x_;
+        Core::RndDistPtr rnd_R_ = Core::globalRandomGenerator->getUniformDistribution(0,1);
+        Core::RndDistPtr rnd_phi_ = Core::globalRandomGenerator->getUniformDistribution(0,2*M_PI);
     };
 }
 

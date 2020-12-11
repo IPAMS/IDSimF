@@ -134,8 +134,9 @@ void AppUtils::readRandomIonDefinition(
 
         }
         else if (ionStartGeom == CYLINDER) {
-            ions = ParticleSimulation::util::getRandomIonsInCylinderXDirection(
-                    nParticles, charge, ionStartCylinder_radius, ionStartCylinder_length, ions_tob_range);
+            // FIXME: use cylinder start zone
+            //ions = ParticleSimulation::util::getRandomIonsInCylinderXDirection(
+            //        nParticles, charge, ionStartCylinder_radius, ionStartCylinder_length, ions_tob_range);
         }
 
         for (int j = 0; j < nParticles; j++) {

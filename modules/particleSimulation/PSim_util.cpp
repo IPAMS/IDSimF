@@ -182,44 +182,6 @@ std::vector<std::unique_ptr<BTree::Particle>> ParticleSimulation::util::getRando
     return result;
 }
 
-/**
- * Generates a random cylinder of ions around the x axis
- *
- * @param numIons number of ions
- * @param charge charge of the generated ions
- * @param radius radius of the cylinder around the x axis
- * @param length the length ("radius") in x direction (cylinder spans from -length to +length)
- * @param timeOfBirthRange ions are generated with times of birth uniformly distributed in this range
- * @return randomly vector of ions in a cylinder around the x axis
- */
-std::vector<std::unique_ptr<BTree::Particle>>
-ParticleSimulation::util::getRandomIonsInCylinderXDirection(int numIons, double charge,
-                                                            double radius, double length,
-                                                            double timeOfBirthRange){
-    Core::RndDistPtr rnd_R = Core::globalRandomGenerator->getUniformDistribution(0,1);
-    Core::RndDistPtr rnd_phi = Core::globalRandomGenerator->getUniformDistribution(0,2*M_PI);
-    Core::RndDistPtr rnd_x = Core::globalRandomGenerator->getUniformDistribution(-length,length);
-    Core::RndDistPtr rnd_tob = Core::globalRandomGenerator->getUniformDistribution(0,timeOfBirthRange);
-
-    std::vector<std::unique_ptr<BTree::Particle>> result;
-    //Core::Particle* result = new Core::Particle[numIons];
-    for (int i=0; i<numIons; i++){
-        double R = sqrt(rnd_R->rndValue()) * radius;
-        double phi = rnd_phi->rndValue();
-        std::unique_ptr<BTree::Particle> newIon = std::make_unique<BTree::Particle>(
-                Core::Vector(
-                        rnd_x->rndValue(),
-                        sin(phi)*R,
-                        cos(phi)*R
-                        ),
-                charge);
-
-        newIon -> setTimeOfBirth(rnd_tob->rndValue());
-        result.push_back(std::move(newIon));
-    }
-    return result;
-}
-
 
 /**
  * Generates a starting vector at position x,y,z

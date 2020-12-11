@@ -21,7 +21,61 @@
 
 #include "PSim_cylinderStartZone.hpp"
 
+/**
+ * Constructs a cylinder start zone
+ *
+ * @param radius radius of the cylinder
+ * @param length length of the cylinder
+ * @param normalVector normal vector of the
+ */
+ParticleSimulation::CylinderStartZone::CylinderStartZone(
+    double radius, double length, Core::Vector normalVector, Core::Vector baseVector) :
+radius_(radius),
+length_(length),
+normalVector_(normalVector),
+baseVector_(baseVector)
+{
+    rnd_x_ = Core::globalRandomGenerator->getUniformDistribution(0.0, length_);
+}
 
 Core::Vector ParticleSimulation::CylinderStartZone::getRandomParticlePosition() {
-    return {0.0, 0.0, 0.0};
+
+    double R = sqrt(rnd_R_->rndValue()) * radius_;
+    double phi = rnd_phi_->rndValue();
+
+    //todo: rotate and shift
+
+    return {
+            rnd_x_->rndValue(),
+            sin(phi)*R,
+            cos(phi)*R
+    };
 }
+
+/**
+ * Generates a set of random ions in the cylindrical ion start zone
+ *
+ * @param numIons number of ions
+ * @param charge charge of the generated ions
+ * @param timeOfBirthRange ions are generated with times of birth uniformly distributed in this range
+ * @return vector of random ions in cylindrical start zone
+ */
+std::vector<std::unique_ptr<BTree::Particle>> ParticleSimulation::CylinderStartZone::getRandomParticlesInStartZone(
+        int numIons, double charge, double timeOfBirthRange) {
+
+    Core::RndDistPtr rnd_tob = Core::globalRandomGenerator->getUniformDistribution(0,timeOfBirthRange);
+
+    std::vector<std::unique_ptr<BTree::Particle>> result;
+    //Core::Particle* result = new Core::Particle[numIons];
+    for (int i=0; i<numIons; i++){
+        std::unique_ptr<BTree::Particle> newIon = std::make_unique<BTree::Particle>(
+                getRandomParticlePosition(),
+                charge);
+
+        newIon -> setTimeOfBirth(rnd_tob->rndValue());
+        result.push_back(std::move(newIon));
+    }
+    return result;
+}
+
+
