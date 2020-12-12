@@ -38,6 +38,7 @@ double Core::radToDeg(double phi){
 
 /**
  * Convert a cartesian vector 'vec' to polar coordinates
+ * (coordinate system convention is y upwards)
  * @return A three dimensional vector with the elements {radius, azimuth, elevation}
  */
 Core::Vector Core::cartesianToPolar(Core::Vector vec){
@@ -50,6 +51,7 @@ Core::Vector Core::cartesianToPolar(Core::Vector vec){
 
 /**
  * Rotates a vector 'vec' an 'angle' around the elevation axis
+ * (which is the z axis in cartesian coordinates)
  */
 Core::Vector Core::elevationRotate(Core::Vector vec, double angle){
     return {
@@ -61,6 +63,7 @@ Core::Vector Core::elevationRotate(Core::Vector vec, double angle){
 
 /**
  * Rotates a vector 'vec' an 'angle' around the azimuth axis
+ * (which is the y axis in cartesian coordinates)
  */
 Core::Vector Core::azimuthRotate(Core::Vector vec, double angle){
     //double phi = degToRad(angle);
