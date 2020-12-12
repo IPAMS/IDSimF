@@ -42,11 +42,11 @@ TEST_CASE( "Test cylinder particle start zones",
     double length = 4.0;
     int nSamples = 1000;
 
-    SECTION("Check if samples are out of cylindrical start zone in x-direction"){
+    SECTION("Check if position samples are out of cylindrical start zone in x-direction"){
         ParticleSimulation::CylinderStartZone cylinderStartZone_x(radius, length);
 
         bool outOfCylinder = false;
-        for (int i=0; i<=nSamples; ++i){
+        for (int i=0; i<nSamples; ++i){
             Core::Vector startPos = cylinderStartZone_x.getRandomParticlePosition();
             double r = std::sqrt(startPos.y()*startPos.y() + startPos.z()*startPos.z());
 
@@ -57,11 +57,11 @@ TEST_CASE( "Test cylinder particle start zones",
         REQUIRE_FALSE(outOfCylinder);
     }
 
-    SECTION("Check if samples are out of shifted cylindrical start zone in z-direction"){
+    SECTION("Check if position samples are out of shifted cylindrical start zone in z-direction"){
         ParticleSimulation::CylinderStartZone cylinderStartZone_z(radius, length, {0.0, 0.0, 3.0});
 
         bool outOfCylinder = false;
-        for (int i=0; i<=nSamples; ++i){
+        for (int i=0; i<nSamples; ++i){
             Core::Vector startPos = cylinderStartZone_z.getRandomParticlePosition();
             double r = std::sqrt(startPos.x()*startPos.x() + startPos.y()*startPos.y());
 
@@ -72,13 +72,13 @@ TEST_CASE( "Test cylinder particle start zones",
         REQUIRE_FALSE(outOfCylinder);
     }
 
-    SECTION("Check if samples are out of shifted cylindrical start zone in y-direction with shift"){
+    SECTION("Check if position samples are out of shifted cylindrical start zone in y-direction with shift"){
 
         Core::Vector shift(1.0, 2.0, 0.0);
         ParticleSimulation::CylinderStartZone cylinderStartZone_y(radius, length, {0.0, 2.0, 0.0}, shift);
 
         bool outOfCylinder = false;
-        for (int i=0; i<=nSamples; ++i){
+        for (int i=0; i<nSamples; ++i){
             Core::Vector startPos = cylinderStartZone_y.getRandomParticlePosition();
             startPos = startPos - shift;
 
@@ -91,9 +91,39 @@ TEST_CASE( "Test cylinder particle start zones",
         REQUIRE_FALSE(outOfCylinder);
     }
 
-    SECTION("Check if two random samples are different"){
+    SECTION("Check if two random position samples are different"){
         ParticleSimulation::CylinderStartZone cylinderStartZone(radius, length);
         REQUIRE(cylinderStartZone.getRandomParticlePosition() != cylinderStartZone.getRandomParticlePosition());
+    }
+
+    SECTION("Test generation of particle cloud in cylindrical start zone"){
+
+        Core::Vector shift(2.0, 1.0, 0.0);
+        ParticleSimulation::CylinderStartZone cylinderStartZone(radius, length, {0.0, 2.0, 0.0}, shift);
+
+        std::vector<std::unique_ptr<BTree::Particle>> ions =
+                cylinderStartZone.getRandomParticlesInStartZone(nSamples, 2.0, 5.0);
+
+
+        double chargeExpected = 2.0 * Core::ELEMENTARY_CHARGE;
+        bool incorrectIonFound = false;
+        for (int i=0; i<nSamples; ++i){
+            Core::Vector pos = ions[i]->getLocation();
+            pos = pos - shift;
+            double r = std::sqrt(pos.x()*pos.x() + pos.z()*pos.z());
+
+            double charge = ions[i]->getCharge();
+            double tob = ions[i]->getTimeOfBirth();
+
+            if (pos.y() > length || pos.y() < 0.0 || r > radius ||
+                charge != chargeExpected || tob < 0.0 || tob > 5.0
+            ){
+                incorrectIonFound = true;
+            }
+        }
+        REQUIRE_FALSE(incorrectIonFound);
+
+        REQUIRE(ions[0]->getLocation() != ions[1]->getLocation());
     }
 
 }
