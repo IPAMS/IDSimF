@@ -46,7 +46,7 @@ TEST_CASE( "Test cylinder particle start zones",
         ParticleSimulation::CylinderStartZone cylinderStartZone_x(radius, length);
 
         bool outOfCylinder = false;
-        for (int i=0; i<=nSamples; i++){
+        for (int i=0; i<=nSamples; ++i){
             Core::Vector startPos = cylinderStartZone_x.getRandomParticlePosition();
             double r = std::sqrt(startPos.y()*startPos.y() + startPos.z()*startPos.z());
 
@@ -54,14 +54,14 @@ TEST_CASE( "Test cylinder particle start zones",
                 outOfCylinder = true;
             }
         }
-        REQUIRE(!outOfCylinder);
+        REQUIRE_FALSE(outOfCylinder);
     }
 
     SECTION("Check if samples are out of shifted cylindrical start zone in z-direction"){
         ParticleSimulation::CylinderStartZone cylinderStartZone_z(radius, length, {0.0, 0.0, 3.0});
 
         bool outOfCylinder = false;
-        for (int i=0; i<=nSamples; i++){
+        for (int i=0; i<=nSamples; ++i){
             Core::Vector startPos = cylinderStartZone_z.getRandomParticlePosition();
             double r = std::sqrt(startPos.x()*startPos.x() + startPos.y()*startPos.y());
 
@@ -69,7 +69,26 @@ TEST_CASE( "Test cylinder particle start zones",
                 outOfCylinder = true;
             }
         }
-        REQUIRE(!outOfCylinder);
+        REQUIRE_FALSE(outOfCylinder);
+    }
+
+    SECTION("Check if samples are out of shifted cylindrical start zone in y-direction with shift"){
+
+        Core::Vector shift(1.0, 2.0, 0.0);
+        ParticleSimulation::CylinderStartZone cylinderStartZone_y(radius, length, {0.0, 2.0, 0.0}, shift);
+
+        bool outOfCylinder = false;
+        for (int i=0; i<=nSamples; ++i){
+            Core::Vector startPos = cylinderStartZone_y.getRandomParticlePosition();
+            startPos = startPos - shift;
+
+            double r = std::sqrt(startPos.x()*startPos.x() + startPos.z()*startPos.z());
+
+            if (startPos.y() > length || startPos.y() < 0.0 || r > radius){
+                outOfCylinder = true;
+            }
+        }
+        REQUIRE_FALSE(outOfCylinder);
     }
 
     SECTION("Check if two random samples are different"){

@@ -46,7 +46,12 @@ namespace ParticleSimulation{
     private:
         double radius_;
         double length_;
+
+        bool isRotated_ = false;
+        bool isShifted_ = false;
         Core::Vector normalVector_;
+        double azimuth_ = 0.0;
+        double elevation_ = 0.0;
         Core::Vector baseVector_;
 
         Core::RndDistPtr rnd_x_;

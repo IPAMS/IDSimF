@@ -20,6 +20,7 @@
  ****************************/
 
 #include "PSim_cylinderStartZone.hpp"
+#include "Core_math.hpp"
 
 /**
  * Constructs a cylinder start zone
@@ -32,9 +33,20 @@ ParticleSimulation::CylinderStartZone::CylinderStartZone(
     double radius, double length, Core::Vector normalVector, Core::Vector baseVector) :
 radius_(radius),
 length_(length),
-normalVector_(normalVector),
 baseVector_(baseVector)
 {
+    if (normalVector.magnitude() > 0.0){
+        normalVector_ = normalVector/normalVector.magnitude();
+        isRotated_ = true;
+        Core::Vector normalPolarCoords = Core::cartesianToPolar(normalVector);
+        azimuth_ = normalPolarCoords.y();
+        elevation_ = normalPolarCoords.z();
+    }
+
+    if (baseVector.magnitude() > 0.0){
+        isShifted_ = true;
+    }
+
     rnd_x_ = Core::globalRandomGenerator->getUniformDistribution(0.0, length_);
 }
 
@@ -43,13 +55,19 @@ Core::Vector ParticleSimulation::CylinderStartZone::getRandomParticlePosition() 
     double R = sqrt(rnd_R_->rndValue()) * radius_;
     double phi = rnd_phi_->rndValue();
 
-    //todo: rotate and shift
+    // base cartesian coordinates in base cylinder (in x-direction)
+    Core::Vector particleCoordinates(rnd_x_->rndValue(), sin(phi)*R, cos(phi)*R);
 
-    return {
-            rnd_x_->rndValue(),
-            sin(phi)*R,
-            cos(phi)*R
-    };
+    if (isRotated_){
+        particleCoordinates = Core::elevationRotate(particleCoordinates, elevation_);
+        particleCoordinates = Core::azimuthRotate(particleCoordinates, azimuth_);
+    }
+
+    if (isShifted_){
+        particleCoordinates = particleCoordinates + baseVector_;
+    }
+
+    return particleCoordinates;
 }
 
 /**
