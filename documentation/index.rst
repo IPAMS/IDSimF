@@ -99,6 +99,7 @@ Documentation
    modules/particlesimulation
    modules/collisionmodels
    modules/rs
+   modules/apputils
 
 
 ==================
