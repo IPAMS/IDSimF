@@ -1,7 +1,7 @@
 #include "appUtils_parameterParsing.hpp"
 #include "Core_vector.hpp"
 
-Json::Value readConfigurationJson(std::string confFileName){
+Json::Value readConfigurationJson(const std::string& confFileName){
     std::cout << confFileName<<std::endl;
     std::filesystem::path confFilePath(confFileName);
     if (!std::filesystem::exists(confFilePath)){
@@ -18,12 +18,12 @@ Json::Value readConfigurationJson(std::string confFileName){
     return confRoot;
 }
 
-bool isConfFileKey(std::string keyName, Json::Value& confRoot) {
+bool isConfFileKey(const std::string& keyName, const Json::Value& confRoot) {
     return confRoot.isMember(keyName);
 }
 
-int intConfParameter(std::string jsonName, Json::Value& confRoot){
-    if (confRoot.isMember(jsonName) == true) {
+int intConfParameter(const std::string& jsonName, const Json::Value& confRoot){
+    if (confRoot.isMember(jsonName)) {
         int result = confRoot.get(jsonName, 0).asInt();
         std::cout << jsonName << ":" << result << std::endl;
         return(result);
@@ -32,9 +32,9 @@ int intConfParameter(std::string jsonName, Json::Value& confRoot){
     }
 }
 
-std::vector<int> intVectorConfParameter(std::string jsonName, Json::Value& confRoot){
+std::vector<int> intVectorConfParameter(const std::string& jsonName, const Json::Value& confRoot){
     std::vector<int> result;
-    if (confRoot.isMember(jsonName) == true) {
+    if (confRoot.isMember(jsonName)) {
         Json::Value jsonNode = confRoot.get(jsonName,0);
         for (int i=0; i<jsonNode.size(); i++){
             result.push_back(jsonNode.get(i,0).asInt());
@@ -45,7 +45,7 @@ std::vector<int> intVectorConfParameter(std::string jsonName, Json::Value& confR
     return (result);
 }
 
-double doubleConfParameter(std::string jsonName, Json::Value& confRoot){
+double doubleConfParameter(const std::string& jsonName, const Json::Value& confRoot){
     if (confRoot.isMember(jsonName) == true) {
         double result = confRoot.get(jsonName, 0).asDouble();
         std::cout << jsonName << ":" << result << std::endl;
@@ -55,7 +55,7 @@ double doubleConfParameter(std::string jsonName, Json::Value& confRoot){
     }
 }
 
-std::vector<double> doubleVectorConfParameter(std::string jsonName, Json::Value& confRoot, double multiplicator){
+std::vector<double> doubleVectorConfParameter(const std::string& jsonName, const Json::Value& confRoot, double multiplicator){
     std::vector<double> result;
     if (confRoot.isMember(jsonName) == true) {
         Json::Value jsonNode = confRoot.get(jsonName,0);
@@ -68,12 +68,12 @@ std::vector<double> doubleVectorConfParameter(std::string jsonName, Json::Value&
     return (result);
 }
 
-Core::Vector vector3dConfParameter(std::string jsonName, Json::Value& confRoot){
+Core::Vector vector3dConfParameter(const std::string& jsonName, const Json::Value& confRoot){
     std::vector<double> vectorRaw = doubleVectorConfParameter(jsonName, confRoot);
     return {vectorRaw[0], vectorRaw[1], vectorRaw[2]};
 }
 
-std::array<std::array<double,2>,3> double3dBox(std::string jsonName, Json::Value& confRoot){
+std::array<std::array<double,2>,3> double3dBox(const std::string& jsonName, const Json::Value& confRoot){
     std::array<std::array<double, 2>, 3> result{{{0, 0}, {0, 0}, {0, 0}}};
     if (confRoot.isMember(jsonName) == true) {
         Json::Value jsonNode = confRoot.get(jsonName,0);
@@ -96,7 +96,7 @@ std::array<std::array<double,2>,3> double3dBox(std::string jsonName, Json::Value
     return (result);
 }
 
-std::string stringConfParameter(std::string jsonName, Json::Value& confRoot){
+std::string stringConfParameter(const std::string& jsonName, const Json::Value& confRoot){
     if (confRoot.isMember(jsonName) == true) {
         std::string result = confRoot.get(jsonName, 0).asString();
         std::cout << jsonName << ":" << result << std::endl;
@@ -106,7 +106,7 @@ std::string stringConfParameter(std::string jsonName, Json::Value& confRoot){
     }
 }
 
-std::vector<std::string> stringVectorConfParameter(std::string jsonName, Json::Value& confRoot){
+std::vector<std::string> stringVectorConfParameter(const std::string& jsonName, const Json::Value& confRoot){
     std::vector<std::string> result;
     if (confRoot.isMember(jsonName) == true) {
         Json::Value jsonNode = confRoot.get(jsonName,0);
@@ -119,7 +119,7 @@ std::vector<std::string> stringVectorConfParameter(std::string jsonName, Json::V
     return (result);
 }
 
-bool boolConfParameter(std::string jsonName, Json::Value& confRoot){
+bool boolConfParameter(const std::string& jsonName, const Json::Value& confRoot){
     if (confRoot.isMember(jsonName) == true) {
         std::string confString = confRoot.get(jsonName, 0).asString();
         std::cout << jsonName << ":" << confString << std::endl;
@@ -138,9 +138,9 @@ bool boolConfParameter(std::string jsonName, Json::Value& confRoot){
 }
 
 std::unique_ptr<ParticleSimulation::InterpolatedField> readInterpolatedField(
-        std::string confBasePathStr,
-        std::string jsonName,
-        Json::Value& confRoot){
+        const std::string& confBasePathStr,
+        const std::string& jsonName,
+        const Json::Value& confRoot){
     if (confRoot.isMember(jsonName)==true){
         std::string fieldFileName = confRoot.get(jsonName,0).asString();
         std::filesystem::path fieldPath(std::filesystem::path(confBasePathStr) / std::filesystem::path(fieldFileName));
@@ -152,14 +152,14 @@ std::unique_ptr<ParticleSimulation::InterpolatedField> readInterpolatedField(
     }
 }
 
-std::string pathRelativeToConfFile(std::string confFilePathStr, std::string pathStr){
+std::string pathRelativeToConfFile(const std::string& confFilePathStr, const std::string& pathStr){
     return std::filesystem::path(confFilePathStr).parent_path() / std::filesystem::path(pathStr);
 }
 
-std::string pathRelativeToConfBasePath(std::string confBasePath, std::string pathStr){
+std::string pathRelativeToConfBasePath(const std::string& confBasePath, const std::string& pathStr){
     return std::filesystem::path(confBasePath) / std::filesystem::path(pathStr);
 }
 
-std::string confFileBasePath(std::string confFilePathStr){
+std::string confFileBasePath(const std::string& confFilePathStr){
     return std::filesystem::path(confFilePathStr).parent_path();
 }
