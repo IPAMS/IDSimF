@@ -22,6 +22,9 @@
 #include "appUtils_ionDefinitionReading.hpp"
 #include "appUtils_parameterParsing.hpp"
 #include "PSim_ionCloudReader.hpp"
+#include "PSim_particleStartZone.hpp"
+#include "PSim_boxStartZone.hpp"
+#include "PSim_cylinderStartZone.hpp"
 #include "PSim_util.hpp"
 
 /**
@@ -38,7 +41,7 @@ bool AppUtils::isIonCloudDefinitionPresent(Json::Value &confRoot) {
  * Reads the ions defined by an ion cloud definition file specified by a simulation configuration
  * into particles and particle pointer vectors.
  *
- * Note that the ion cloud file location is relative to the given configuration file location (confFilePathStr)
+ * Note that the ion cloud file location is relative to the given configuration file location (confBasePath)
  *
  * @param particles vector to read the particles to
  * @param particlePtrs vector of particle pointers to read the particle pointers to
@@ -81,36 +84,27 @@ void AppUtils::readRandomIonDefinition(
     std::vector<double> ionCharges = doubleVectorConfParameter("ion_charges",confRoot);
     std::vector<double> ionCollisionDiameters_angstrom = doubleVectorConfParameter("ion_collision_gas_diameters_angstrom", confRoot);
 
-
     double ions_tob_range = 0.0;
     if (confRoot.isMember("ion_time_of_birth_range_s")){
         ions_tob_range = doubleConfParameter("ion_time_of_birth_range_s", confRoot);
     }
 
-
     std::string ionStartGeom_str = stringConfParameter("ion_start_geometry",confRoot);
-    IonRandomStartGeometry ionStartGeom;
 
+    Core::Vector ionsBasePos_m =  vector3dConfParameter("ion_start_base_position_m", confRoot);
 
-    std::vector<double> basePos = doubleVectorConfParameter("ion_start_base_position_m", confRoot);
-    Core::Vector ionsBasePos_m(basePos[0], basePos[1], basePos[2]);
-
-    Core::Vector ionStartBoxSize_m;
-    Core::Vector ionStartCornerPosition_m;
-
-    double ionStartCylinder_radius;
-    double ionStartCylinder_length;
-
+    std::unique_ptr<ParticleSimulation::ParticleStartZone> particleStartZone;
     if (ionStartGeom_str == "box"){
-        ionStartGeom = BOX;
-        std::vector<double> boxSize = doubleVectorConfParameter("ion_start_box_size_m", confRoot);
-        ionStartBoxSize_m = {boxSize[0], boxSize[1], boxSize[2]};
-        ionStartCornerPosition_m = Core::Vector(0.0, 0.0, 0.0) - (ionStartBoxSize_m*0.5);
+        Core::Vector ionsBoxSize_m = vector3dConfParameter("ion_start_box_size_m", confRoot);
+        particleStartZone = std::make_unique<ParticleSimulation::BoxStartZone>(
+                ionsBoxSize_m, ionsBasePos_m);
     }
     else if (ionStartGeom_str == "cylinder"){
-        ionStartGeom = CYLINDER;
-        ionStartCylinder_radius = doubleConfParameter("ion_start_cylinder_radius_m", confRoot);
-        ionStartCylinder_length = doubleConfParameter("ion_start_cylinder_length_m", confRoot);
+        double radius = doubleConfParameter("ion_start_radius_m", confRoot);
+        double length = doubleConfParameter("ion_start_length_m", confRoot);
+        Core::Vector normal_vector = vector3dConfParameter("ion_start_cylinder_normal_vector", confRoot);
+        particleStartZone = std::make_unique<ParticleSimulation::CylinderStartZone>(
+                radius, length, normal_vector, ionsBasePos_m);
     }
     else{
         std::stringstream ss;
@@ -118,34 +112,24 @@ void AppUtils::readRandomIonDefinition(
         throw (std::invalid_argument(ss.str()));
     }
 
+    // iterate through all ion groups
     for (int i = 0; i < nIons.size(); i++) {
+
+        // get ion group parameters
         int nParticles = nIons[i];
         double mass = ionMasses[i];
         double charge = ionCharges[i];
         double collisionDiameter_m = ionCollisionDiameters_angstrom[i]*1e-10;
-        std::vector<std::unique_ptr<BTree::Particle>> ions;
 
-        if (ionStartGeom == BOX) {
-            ions = ParticleSimulation::util::getRandomIonsInBox(
-                    nParticles, charge,
-                    ionStartCornerPosition_m,
-                    ionStartBoxSize_m,
-                    ions_tob_range);
+        // get actual ions for the group
+        std::vector<std::unique_ptr<BTree::Particle>> ions = particleStartZone->getRandomParticlesInStartZone(
+                nParticles, charge, ions_tob_range);
 
-        }
-        else if (ionStartGeom == CYLINDER) {
-            // FIXME: use cylinder start zone
-            //ions = ParticleSimulation::util::getRandomIonsInCylinderXDirection(
-            //        nParticles, charge, ionStartCylinder_radius, ionStartCylinder_length, ions_tob_range);
-        }
-
+        // set additional parameter and push particles to vectors containing all particles
         for (int j = 0; j < nParticles; j++) {
             ions[j]->setMassAMU(mass);
             ions[j]->setDiameter(collisionDiameter_m);
 
-            //shift all ions according to the base pos:
-            Core::Vector buf = ions[j]->getLocation() + ionsBasePos_m;
-            ions[j]->setLocation(buf);
             particlePtrs.push_back(ions[j].get());
             particles.push_back(std::move(ions[j]));
         }

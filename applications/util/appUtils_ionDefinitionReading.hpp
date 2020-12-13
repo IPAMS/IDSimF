@@ -39,8 +39,6 @@ namespace AppUtils{
 
     const std::string ION_CLOUD_FILE_KEY = "ion_cloud_init_file";
 
-    enum IonRandomStartGeometry {BOX,CYLINDER};
-
     bool isIonCloudDefinitionPresent(Json::Value& confRoot);
 
     void readIonDefinitionFromIonCloudFile(

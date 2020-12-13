@@ -47,47 +47,95 @@ bool testParticleBox(std::vector<std::unique_ptr<BTree::Particle>>& particles){
     return (particleOutOfBoxFound);
 }
 
-TEST_CASE( "Test basic ion definition reading", "[ApplicationUtils]"){
+bool testParticleCylinder(std::vector<std::unique_ptr<BTree::Particle>>& particles){
+
+    Core::Vector expectedShift(0.002, 0.005, -0.002);
+    double expectedLength = 0.006;
+    double expectedRadius = 0.004;
+
+    bool incorrectIonFound = false;
+
+    for(const auto& part: particles){
+        Core::Vector pos = part->getLocation();
+        pos = pos - expectedShift;
+        double r = std::sqrt(pos.x()*pos.x() + pos.y()*pos.y());
+
+        if (pos.z() > expectedLength || pos.z() < 0.0 || r > expectedRadius){
+            incorrectIonFound = true;
+        }
+    }
+
+    return (incorrectIonFound);
+}
+
+TEST_CASE( "Test ion definition reading", "[ApplicationUtils]") {
 
     Json::Value conf_box = readConfigurationJson("ionBox.json");
+    Json::Value conf_cylinder = readConfigurationJson("ionCylinder.json");
     Json::Value conf_ionCloud = readConfigurationJson("ionCloudFile.json");
+
     std::string configurationPath = "./";
 
-    std::vector<std::unique_ptr<BTree::Particle>>particles;
-    std::vector<BTree::Particle*>particlePtrs;
+    std::vector<std::unique_ptr<BTree::Particle>> particles;
+    std::vector<BTree::Particle*> particlePtrs;
 
-    SECTION("Ion definition reading: If ion cloud file is present should be recognized"){
-        REQUIRE_FALSE(AppUtils::isIonCloudDefinitionPresent(conf_box));
-        REQUIRE(AppUtils::isIonCloudDefinitionPresent(conf_ionCloud));
-    }
-
-    SECTION("Ion definition reading: Ion cloud file should be readable"){
-        AppUtils::readIonDefinitionFromIonCloudFile(particles, particlePtrs, conf_ionCloud, configurationPath);
-
-        REQUIRE(particles[1]->getCharge() == Approx(-1.0 * Core::ELEMENTARY_CHARGE));
-        REQUIRE(vectorApproxCompare(particles[1]->getLocation(), Core::Vector(1.0, 2.0, 1.0)) == "Vectors approximately equal");
-    }
-
-    SECTION("Ion definition reading: Random ion box definition should be readable"){
-        AppUtils::readRandomIonDefinition(particles, particlePtrs, conf_box);
-        bool particleOutOfBoxFound = testParticleBox(particles);
-        REQUIRE( !particleOutOfBoxFound );
-    }
-
-    SECTION("Ion definition reading: Full ion definition reading with ion cloud file should work"){
-        AppUtils::readIonDefinition(particles, particlePtrs, conf_ionCloud, configurationPath);
-        REQUIRE(vectorApproxCompare(particles[1]->getLocation(), Core::Vector(1.0, 2.0, 1.0)) == "Vectors approximately equal");
-    }
-
-    SECTION("Ion definition reading: Full ion definition reading with random box should work"){
-        AppUtils::readIonDefinition(particles, particlePtrs, conf_box, configurationPath);
-        bool particleOutOfBoxFound = testParticleBox(particles);
-        REQUIRE( !particleOutOfBoxFound );
-    }
-
-    SECTION("Ion definition reading: Ion definition reading with invalid file should throw"){
+    SECTION("Ion definition reading: Ion definition reading with invalid file should throw") {
         Json::Value conf_invalid = readConfigurationJson("ionDefinition_invalid.json");
         REQUIRE_THROWS_AS(
-                AppUtils::readIonDefinition(particles, particlePtrs, conf_invalid, configurationPath), std::invalid_argument);
+                AppUtils::readIonDefinition(particles, particlePtrs, conf_invalid, configurationPath),
+                std::invalid_argument);
+    }
+
+
+    SECTION("Test ion definitions with ion cloud files") {
+
+        SECTION("Ion definition reading: If ion cloud file is present should be recognized") {
+            REQUIRE_FALSE(AppUtils::isIonCloudDefinitionPresent(conf_box));
+            REQUIRE(AppUtils::isIonCloudDefinitionPresent(conf_ionCloud));
+        }
+
+        SECTION("Ion definition reading: Ion cloud file should be readable") {
+            AppUtils::readIonDefinitionFromIonCloudFile(particles, particlePtrs, conf_ionCloud, configurationPath);
+
+            REQUIRE(particles[1]->getCharge()==Approx(-1.0*Core::ELEMENTARY_CHARGE));
+            REQUIRE(vectorApproxCompare(particles[1]->getLocation(), Core::Vector(1.0, 2.0, 1.0))
+                    =="Vectors approximately equal");
+        }
+
+        SECTION("Ion definition reading: Full ion definition reading with ion cloud file should work") {
+            AppUtils::readIonDefinition(particles, particlePtrs, conf_ionCloud, configurationPath);
+            REQUIRE(vectorApproxCompare(particles[1]->getLocation(), Core::Vector(1.0, 2.0, 1.0))
+                    =="Vectors approximately equal");
+        }
+    }
+
+    SECTION("Test ion definitions with box start zone") {
+
+        SECTION("Ion definition reading: Random ion box definition should be readable") {
+            AppUtils::readRandomIonDefinition(particles, particlePtrs, conf_box);
+            bool particleOutOfBoxFound = testParticleBox(particles);
+            REQUIRE(!particleOutOfBoxFound);
+        }
+
+        SECTION("Ion definition reading: Full ion definition reading with random box should work") {
+            AppUtils::readIonDefinition(particles, particlePtrs, conf_box, configurationPath);
+            bool particleOutOfBoxFound = testParticleBox(particles);
+            REQUIRE(!particleOutOfBoxFound);
+        }
+    }
+
+    SECTION("Test ion definitions with cylinder start zone") {
+
+        SECTION("Ion definition reading: Random ion cylinder definition should be readable") {
+            AppUtils::readRandomIonDefinition(particles, particlePtrs, conf_cylinder);
+            bool particleOutOfCylinderFound = testParticleCylinder(particles);
+            REQUIRE(!particleOutOfCylinderFound);
+        }
+
+        SECTION("Ion definition reading: Full ion definition reading with random box should work") {
+            AppUtils::readIonDefinition(particles, particlePtrs, conf_cylinder, configurationPath);
+            bool particleOutOfCylinderFound = testParticleCylinder(particles);
+            REQUIRE(!particleOutOfCylinderFound);
+        }
     }
 }
