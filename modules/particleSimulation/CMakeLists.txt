@@ -38,7 +38,11 @@ set(SOURCE_FILES
         PSim_simionPotentialArray.hpp
         PSim_HDF5Reader.cpp
         PSim_HDF5Reader.hpp
-        PSim_particleStartZone.hpp PSim_cylinderStartZone.cpp PSim_cylinderStartZone.hpp)
+        PSim_particleStartZone.hpp
+        PSim_cylinderStartZone.cpp
+        PSim_cylinderStartZone.hpp
+        PSim_boxStartZone.cpp
+        PSim_boxStartZone.hpp PSim_particleStartZone.cpp)
 
 add_library(particlesimulation STATIC ${SOURCE_FILES})
 target_include_directories(particlesimulation PUBLIC .)

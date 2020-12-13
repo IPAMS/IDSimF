@@ -28,13 +28,43 @@
 #include "catch.hpp"
 #include "Core_vector.hpp"
 #include "PSim_cylinderStartZone.hpp"
+#include "PSim_boxStartZone.hpp"
 #include <algorithm>
 #include <vector>
-//#include <iterator>
-//#include <iostream>
-//#include <functional>
 
-TEST_CASE( "Test cylinder particle start zones",
+
+TEST_CASE( "Test box particle start zone",
+        "[ParticleSimulation][ParticleStartZone][particle definitions]") {
+
+    int nSamples = 1000;
+
+    SECTION("Test positions in shifted box start zone"){
+
+        Core::Vector center(4.0, 3.0, 1.0);
+        Core::Vector boxSize(3.0, 1.0, 2.0);
+        Core::Vector lower = center - (boxSize*0.5);
+        Core::Vector upper = center + (boxSize*0.5);
+
+        ParticleSimulation::BoxStartZone boxStartZone(boxSize, center);
+
+        bool outOfCylinder = false;
+        for (int i=0; i<nSamples; ++i){
+            Core::Vector startPos = boxStartZone.getRandomParticlePosition();
+            if (
+                startPos.x() < lower.x() || startPos.x() > upper.x() ||
+                startPos.y() < lower.y() || startPos.y() > upper.y() ||
+                startPos.z() < lower.z() || startPos.z() > upper.z()
+            ){
+                outOfCylinder = true;
+            }
+        }
+
+        REQUIRE_FALSE(outOfCylinder);
+    }
+}
+
+
+TEST_CASE( "Test cylinder particle start zone",
         "[ParticleSimulation][ParticleStartZone][particle definitions]") {
 
     // define cylinder start zone in x direction
