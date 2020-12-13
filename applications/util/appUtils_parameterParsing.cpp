@@ -1,5 +1,5 @@
 #include "appUtils_parameterParsing.hpp"
-
+#include "Core_vector.hpp"
 
 Json::Value readConfigurationJson(std::string confFileName){
     std::cout << confFileName<<std::endl;
@@ -66,6 +66,11 @@ std::vector<double> doubleVectorConfParameter(std::string jsonName, Json::Value&
         throw std::invalid_argument("missing configuration value: " + jsonName);
     }
     return (result);
+}
+
+Core::Vector vector3dConfParameter(std::string jsonName, Json::Value& confRoot){
+    std::vector<double> vectorRaw = doubleVectorConfParameter(jsonName, confRoot);
+    return {vectorRaw[0], vectorRaw[1], vectorRaw[2]};
 }
 
 std::array<std::array<double,2>,3> double3dBox(std::string jsonName, Json::Value& confRoot){

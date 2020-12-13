@@ -14,6 +14,7 @@ int intConfParameter(std::string jsonName, Json::Value& confRoot);
 std::vector<int> intVectorConfParameter(std::string jsonName, Json::Value& confRoot);
 double doubleConfParameter(std::string jsonName, Json::Value& confRoot);
 std::vector<double> doubleVectorConfParameter(std::string jsonName, Json::Value& confRoot, double multiplicator = 1.0);
+Core::Vector vector3dConfParameter(std::string jsonName, Json::Value& confRoot);
 std::array<std::array<double,2>,3> double3dBox(std::string jsonName, Json::Value& confRoot);
 std::string stringConfParameter(std::string jsonName, Json::Value& confRoot);
 std::vector<std::string> stringVectorConfParameter(std::string jsonName, Json::Value& confRoot);
