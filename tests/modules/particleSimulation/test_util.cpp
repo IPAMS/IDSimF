@@ -32,32 +32,6 @@
 #include "catch.hpp"
 TEST_CASE( "Test random particle generation","[ParticleSimulation][utilities][random]") {
 
-    SECTION( "Randomly generated ions in a box should be in that box"){
-        int nions = 100;
-        Core::Vector corner = Core::Vector(0.0,0.0,0.0);
-        Core::Vector boxSize = Core::Vector(1.0,2.0,3.0);
-        std::vector<std::unique_ptr<BTree::Particle>> ions = ParticleSimulation::util::getRandomIonsInBox(nions, 10, corner,
-                boxSize);
-
-        bool invalidIonFound = false;
-        for (int i=0; i<nions; ++i){
-            Core::Vector pos = ions[i]->getLocation();
-            if (
-                    pos.x()< corner.x() ||
-                            pos.x()> (corner.x()+boxSize.x()) ||
-                            pos.y()< corner.y() ||
-                            pos.y()> (corner.y()+boxSize.y()) ||
-                            pos.z()< corner.z() ||
-                            pos.z()> (corner.z()+boxSize.z()) ||
-                            ions[i]->getCharge() != 10* Core::ELEMENTARY_CHARGE
-                    ){
-
-                invalidIonFound = true;
-            }
-        }
-        REQUIRE(! invalidIonFound);
-    }
-
     SECTION( "Randomly generated ions on a cylinder wall should be on that cylinder wall"){
         int nions = 100;
         double cylinderRadius = 10;
