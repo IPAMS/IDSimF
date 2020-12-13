@@ -44,10 +44,10 @@ namespace ParticleSimulation{
 
     public:
         virtual ~ParticleStartZone() = default;
-
         virtual Core::Vector getRandomParticlePosition() = 0;
-        virtual std::vector<std::unique_ptr<BTree::Particle>> getRandomParticlesInStartZone(
-                int numIons, double charge, double timeOfBirthRange=0.0) = 0;
+
+        std::vector<std::unique_ptr<BTree::Particle>> getRandomParticlesInStartZone(
+                int numIons, double charge, double timeOfBirthRange=0.0);
     };
 }
 

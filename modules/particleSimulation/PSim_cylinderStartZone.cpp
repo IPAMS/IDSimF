@@ -69,31 +69,3 @@ Core::Vector ParticleSimulation::CylinderStartZone::getRandomParticlePosition() 
 
     return particleCoordinates;
 }
-
-/**
- * Generates a set of random ions in the cylindrical ion start zone
- *
- * @param numIons number of ions
- * @param charge charge of the generated ions
- * @param timeOfBirthRange ions are generated with times of birth uniformly distributed in this range
- * @return vector of random ions in cylindrical start zone
- */
-std::vector<std::unique_ptr<BTree::Particle>> ParticleSimulation::CylinderStartZone::getRandomParticlesInStartZone(
-        int numIons, double charge, double timeOfBirthRange) {
-
-    Core::RndDistPtr rnd_tob = Core::globalRandomGenerator->getUniformDistribution(0,timeOfBirthRange);
-
-    std::vector<std::unique_ptr<BTree::Particle>> result;
-    //Core::Particle* result = new Core::Particle[numIons];
-    for (int i=0; i<numIons; i++){
-        std::unique_ptr<BTree::Particle> newIon = std::make_unique<BTree::Particle>(
-                getRandomParticlePosition(),
-                charge);
-
-        newIon -> setTimeOfBirth(rnd_tob->rndValue());
-        result.push_back(std::move(newIon));
-    }
-    return result;
-}
-
-

@@ -40,8 +40,6 @@ namespace ParticleSimulation{
                           Core::Vector baseVector = {0.0, 0.0, 0.0});
 
         Core::Vector getRandomParticlePosition() override;
-        std::vector<std::unique_ptr<BTree::Particle>> getRandomParticlesInStartZone(
-                int numIons, double charge, double timeOfBirthRange) override;
 
     private:
         double radius_;
