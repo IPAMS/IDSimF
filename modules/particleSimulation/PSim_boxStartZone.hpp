@@ -32,6 +32,9 @@
 
 namespace ParticleSimulation{
 
+    /**
+     * A box start zone with faces parallel to the axes of the coordinate system
+     */
     class BoxStartZone : public ParticleStartZone {
 
     public:

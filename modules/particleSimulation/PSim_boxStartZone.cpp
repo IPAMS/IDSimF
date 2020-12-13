@@ -23,9 +23,10 @@
 #include "Core_math.hpp"
 
 /**
+ * Constructs a box start zone
  *
- * @param size
- * @param centerPosition
+ * @param size Size of the box in x,y,z, direction
+ * @param centerPosition Position of the box center
  */
 ParticleSimulation::BoxStartZone::BoxStartZone(Core::Vector size, Core::Vector centerPosition) {
 
@@ -37,6 +38,9 @@ ParticleSimulation::BoxStartZone::BoxStartZone(Core::Vector size, Core::Vector c
     rnd_z = Core::globalRandomGenerator->getUniformDistribution(cornerLower.z(), cornerUpper.z());
 }
 
+/**
+ * Gets a random position in the box particle start zone.
+ */
 Core::Vector ParticleSimulation::BoxStartZone::getRandomParticlePosition() {
 
     return {rnd_x->rndValue(), rnd_y->rndValue(), rnd_z->rndValue()};

@@ -25,9 +25,10 @@
 /**
  * Constructs a cylinder start zone
  *
- * @param radius radius of the cylinder
+ * @param radius Radius of the cylinder
  * @param length length of the cylinder
- * @param normalVector normal vector of the
+ * @param normalVector Normal vector of the bottom face of the cylinder
+ * @param baseVector Center position of the bottom face of the cylinder
  */
 ParticleSimulation::CylinderStartZone::CylinderStartZone(
     double radius, double length, Core::Vector normalVector, Core::Vector baseVector) :
@@ -50,6 +51,9 @@ baseVector_(baseVector)
     rnd_x_ = Core::globalRandomGenerator->getUniformDistribution(0.0, length_);
 }
 
+/**
+ * Returns a new random particle position in the cylindrical start zone
+ */
 Core::Vector ParticleSimulation::CylinderStartZone::getRandomParticlePosition() {
 
     double R = sqrt(rnd_R_->rndValue()) * radius_;

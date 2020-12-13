@@ -32,6 +32,9 @@
 
 namespace ParticleSimulation{
 
+    /**
+     * Cylindrical particle start zone which can be rotated and translated in space.
+     */
     class CylinderStartZone : public ParticleStartZone {
 
     public:
