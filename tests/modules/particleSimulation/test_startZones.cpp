@@ -47,7 +47,7 @@ TEST_CASE( "Test box particle start zone",
 
         ParticleSimulation::BoxStartZone boxStartZone(boxSize, center);
 
-        bool outOfCylinder = false;
+        bool outOfBox = false;
         for (int i=0; i<nSamples; ++i){
             Core::Vector startPos = boxStartZone.getRandomParticlePosition();
             if (
@@ -55,11 +55,11 @@ TEST_CASE( "Test box particle start zone",
                 startPos.y() < lower.y() || startPos.y() > upper.y() ||
                 startPos.z() < lower.z() || startPos.z() > upper.z()
             ){
-                outOfCylinder = true;
+                outOfBox = true;
             }
         }
 
-        REQUIRE_FALSE(outOfCylinder);
+        REQUIRE_FALSE(outOfBox);
     }
 }
 
