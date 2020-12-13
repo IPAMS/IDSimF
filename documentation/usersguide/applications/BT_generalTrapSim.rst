@@ -57,62 +57,8 @@ Simulation configuration description
         
         [[x low, x high], [y low, y high], [z low, z high]]
 
---------------------------------------
-Ion / simulated particle configuration
---------------------------------------
 
-The particles to simulate can be defined in the simulation configuration file or a predefined particle ensemble can be used which is given as ion cloud file in CSV format. 
-
-Ion Cloud File
---------------
-
-A predefined ion configuration can be specified by 
-
-``ion_cloud_init_file`` : file path
-    Path to an ion cloud initialization / definition file 
-
-Ion definition in simulation configuration file
------------------------------------------------
-
-If no ion cloud file is used, the following configuration parameters define the ion ensemble to simulate: 
-
-``n_ions`` : vector of integers
-    Number of ions of the ionic species defined by the the masses defined in ``ion_masses``. 
-
-``ion_masses`` : vector of float 
-    Ion masses in amu. 
-
-``ion_charges`` : Vector of float
-    Ion charges in elementary charges.     
-
-``ion_collision_gas_diameters_angstrom`` : Vector of float
-    Effective hard sphere collision diameters of the ionic species in angström. 
-
-``ion_time_of_birth_range_s`` : float
-    Time range in which ions are generated, in seconds. The specified number of ions are generated uniformly in this time range.
-
-Ion start configuration
-.......................
-
-The initial positions of the simulated ions can be a cubic box or a cylinder in ``x`` direction. The center of the ion start zone is specified by ``ion_start_base_position_m``.
-
-``ion_start_geometry`` : Keyword:[``box``, ``cylinder``]
-    Sets the ion start geometry.
-
-    ``box`` : Ion start zone is a box 
-        The ion start zone is a cubic box of 3 mm edge length around ``ion_start_base_position_m``, randomly filled with particles. 
-
-    ``cylinder`` : Ion start zone is a cylinder in ``x`` direction
-        The ion start zone is a cylinder parallel to the ``x`` axis, with its center at ``ion_start_base_position_m``. The cylinder is defined by
-
-        ``ion_start_cylinder_radius_m``: float
-            Radius of the cylinder around the ``x`` axis in m. 
-
-        ``ion_start_cylinder_length_m`` : float
-            Distance from the origin of the cylinder to the cylinder ends in ``x`` direction. The cylinder is therefore in total 2 * ``ion_start_cylinder_length_m`` long. 
-
-``ion_start_base_position_m`` : Vector of 3 floats
-    Base position of the ion start zone in m. 
+.. include:: includes/ion_definition_reading_options.rst
 
 
 --------------------------------------------------------
