@@ -132,7 +132,7 @@ TEST_CASE( "Test ion definition reading", "[ApplicationUtils]") {
             REQUIRE(!particleOutOfCylinderFound);
         }
 
-        SECTION("Ion definition reading: Full ion definition reading with random box should work") {
+        SECTION("Ion definition reading: Full ion definition reading with cylinder should work") {
             AppUtils::readIonDefinition(particles, particlePtrs, conf_cylinder, configurationPath);
             bool particleOutOfCylinderFound = testParticleCylinder(particles);
             REQUIRE(!particleOutOfCylinderFound);
