@@ -55,6 +55,9 @@ namespace ParticleSimulation {
         std::vector<Core::Vector> getRandomPositionsInBox(int nPositions,Core::Vector corner, Core::Vector boxSize);
 
         std::vector<std::unique_ptr<BTree::Particle>>
+        getRandomIonsInBox(int numIons, double charge, Core::Vector corner, Core::Vector boxSize, double timeOfBirthRange=0.0);
+
+        std::vector<std::unique_ptr<BTree::Particle>>
         getIonOnLineVector(int numIons, double charge, double x, double y, double z, double timeOfBirthRange=0.0);
     }
 
