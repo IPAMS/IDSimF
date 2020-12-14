@@ -30,6 +30,7 @@
 
 #include "json.h"
 #include "BTree_particle.hpp"
+#include "PSim_particleStartZone.hpp"
 #include <vector>
 #include <string>
 #include <memory>
@@ -39,24 +40,26 @@ namespace AppUtils{
 
     const std::string ION_CLOUD_FILE_KEY = "ion_cloud_init_file";
 
-    bool isIonCloudDefinitionPresent(Json::Value& confRoot);
+    bool isIonCloudDefinitionPresent(const Json::Value& confRoot);
 
     void readIonDefinitionFromIonCloudFile(
             std::vector<std::unique_ptr<BTree::Particle>>& particles,
             std::vector<BTree::Particle*>& particlePtrs,
-            Json::Value& confRoot,
-            std::string confBasePath);
+            const Json::Value& confRoot,
+            const std::string& confBasePath);
+
+    std::unique_ptr<ParticleSimulation::ParticleStartZone> getStartZoneFromIonDefinition(const Json::Value& confRoot);
 
     void readRandomIonDefinition(
             std::vector<std::unique_ptr<BTree::Particle>>& particles,
             std::vector<BTree::Particle*>& particlePtrs,
-            Json::Value& confRoot);
+            const Json::Value& confRoot);
 
     void readIonDefinition(
             std::vector<std::unique_ptr<BTree::Particle>>& particles,
             std::vector<BTree::Particle*>& particlePtrs,
-            Json::Value& confRoot,
-            std::string confBasePath);
+            const Json::Value& confRoot,
+            const std::string& confBasePath);
 
 }
 

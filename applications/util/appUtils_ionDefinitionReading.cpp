@@ -32,7 +32,7 @@
  *
  * @param confRoot a simulation configuration
  */
-bool AppUtils::isIonCloudDefinitionPresent(Json::Value &confRoot) {
+bool AppUtils::isIonCloudDefinitionPresent(const Json::Value& confRoot) {
     return confRoot.isMember(AppUtils::ION_CLOUD_FILE_KEY);
 }
 
@@ -51,8 +51,8 @@ bool AppUtils::isIonCloudDefinitionPresent(Json::Value &confRoot) {
 void AppUtils::readIonDefinitionFromIonCloudFile(
         std::vector<std::unique_ptr<BTree::Particle>>& particles,
         std::vector<BTree::Particle*>& particlePtrs,
-        Json::Value& confRoot,
-        std::string confBasePath) {
+        const Json::Value& confRoot,
+        const std::string& confBasePath) {
 
     std::string ionCloudFileName = pathRelativeToConfBasePath(
             confBasePath,
@@ -67,27 +67,11 @@ void AppUtils::readIonDefinitionFromIonCloudFile(
 }
 
 /**
- * Reads a random box or random cylinder ion definition into particles and particle pointer vectors
+ * Gets the random particle start zone defined in an simulation configuration file
  *
- * @param particles vector to read the particles to
- * @param particlePtrs vector of particle pointers to read the particle pointers to
  * @param confRoot a simulation configuration
  */
-void AppUtils::readRandomIonDefinition(
-        std::vector<std::unique_ptr<BTree::Particle>>& particles,
-        std::vector<BTree::Particle*>& particlePtrs,
-        Json::Value& confRoot) {
-
-    // ions are not given in an init file, read and init random ion box configuration
-    std::vector<int> nIons = intVectorConfParameter("n_ions", confRoot);
-    std::vector<double> ionMasses = doubleVectorConfParameter("ion_masses", confRoot);
-    std::vector<double> ionCharges = doubleVectorConfParameter("ion_charges",confRoot);
-    std::vector<double> ionCollisionDiameters_angstrom = doubleVectorConfParameter("ion_collision_gas_diameters_angstrom", confRoot);
-
-    double ions_tob_range = 0.0;
-    if (confRoot.isMember("ion_time_of_birth_range_s")){
-        ions_tob_range = doubleConfParameter("ion_time_of_birth_range_s", confRoot);
-    }
+std::unique_ptr<ParticleSimulation::ParticleStartZone> AppUtils::getStartZoneFromIonDefinition(const Json::Value &confRoot) {
 
     std::string ionStartGeom_str = stringConfParameter("ion_start_geometry",confRoot);
 
@@ -111,6 +95,33 @@ void AppUtils::readRandomIonDefinition(
         ss << "Invalid ion start geometry identifier: " << ionStartGeom_str;
         throw (std::invalid_argument(ss.str()));
     }
+
+    return(particleStartZone);
+}
+
+/**
+ * Reads a random box or random cylinder ion definition into particles and particle pointer vectors
+ *
+ * @param particles vector to read the particles to
+ * @param particlePtrs vector of particle pointers to read the particle pointers to
+ * @param confRoot a simulation configuration
+ */
+void AppUtils::readRandomIonDefinition(
+        std::vector<std::unique_ptr<BTree::Particle>>& particles,
+        std::vector<BTree::Particle*>& particlePtrs,
+        const Json::Value& confRoot) {
+
+    // ions are not given in an init file, read and init random ion box configuration
+    std::vector<int> nIons = intVectorConfParameter("n_ions", confRoot);
+    std::vector<double> ionMasses = doubleVectorConfParameter("ion_masses", confRoot);
+    std::vector<double> ionCharges = doubleVectorConfParameter("ion_charges",confRoot);
+    std::vector<double> ionCollisionDiameters_angstrom = doubleVectorConfParameter("ion_collision_gas_diameters_angstrom", confRoot);
+
+    double ions_tob_range = 0.0;
+    if (confRoot.isMember("ion_time_of_birth_range_s")){
+        ions_tob_range = doubleConfParameter("ion_time_of_birth_range_s", confRoot);
+    }
+    std::unique_ptr<ParticleSimulation::ParticleStartZone> particleStartZone = getStartZoneFromIonDefinition(confRoot);
 
     // iterate through all ion groups
     for (int i = 0; i < nIons.size(); i++) {
@@ -146,7 +157,8 @@ void AppUtils::readRandomIonDefinition(
  */
 void AppUtils::readIonDefinition(std::vector<std::unique_ptr<BTree::Particle>>& particles,
                                  std::vector<BTree::Particle*>& particlePtrs,
-                                 Json::Value& confRoot, std::string confBasePath) {
+                                 const Json::Value& confRoot,
+                                 const std::string& confBasePath) {
 
     if (AppUtils::isIonCloudDefinitionPresent(confRoot)) {
         AppUtils::readIonDefinitionFromIonCloudFile(particles, particlePtrs, confRoot, confBasePath);
