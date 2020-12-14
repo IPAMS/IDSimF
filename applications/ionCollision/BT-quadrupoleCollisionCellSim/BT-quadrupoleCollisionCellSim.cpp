@@ -41,6 +41,14 @@
 #include <vector>
 #include <ctime>
 
+/**
+ * Mode of ion termination:
+ * TERMINATE = ions are terminated / splatted at electrodes / domain edges
+ * RESTART = ions are restarted in their start zone
+ */
+enum IonTerminationMode{
+    TERMINATE, RESTART
+};
 
 // constants:
 const double rho_per_pa = 2.504e20; //(particles / m^3) / Pa
@@ -102,9 +110,25 @@ int main(int argc, const char * argv[]) {
         throw std::invalid_argument("missing configuration value: simulation_domain_boundaries");
     }
 
+
+    // Read ion termination mode configuration from simulation config
+    std::string ionTerminationMode_str = stringConfParameter("termination_mode", confRoot);
+    IonTerminationMode ionTerminationMode;
+    if (ionTerminationMode_str == "terminate") {
+        ionTerminationMode = TERMINATE;
+    } else if (ionTerminationMode_str == "restart") {
+        if (AppUtils::isIonCloudDefinitionPresent(confRoot)){
+            throw std::invalid_argument("Ion restart mode is not possible with ion cloud file");
+        }
+        ionTerminationMode = RESTART;
+    } else{
+        throw std::invalid_argument("Invalid ion termination mode");
+    }
+
     //Read ion configuration and initialize ions:
     std::vector<std::unique_ptr<BTree::Particle>>particles;
     std::vector<BTree::Particle*>particlePtrs;
+
     AppUtils::readIonDefinition(particles, particlePtrs, confRoot, confBasePath);
 
     //init gas collision models:
@@ -186,24 +210,51 @@ int main(int argc, const char * argv[]) {
                 }
             };
 
-    auto otherActionsFunction = [&simulationDomainBoundaries, &ionsInactive, &potentialArrays](
-            Core::Vector& newPartPos, BTree::Particle* particle,
-            int particleIndex,
-            auto& tree, double time, int timestep) {
-        // if the ion is out of the boundary box: Terminate the ion
-        if ( newPartPos.x() <= simulationDomainBoundaries[0][0] ||
+
+    //define other actions according to ion termination mode:
+
+    auto isIonTerminated = [&simulationDomainBoundaries, &potentialArrays](Core::Vector& newPartPos)->bool {
+        return (newPartPos.x() <= simulationDomainBoundaries[0][0] ||
                 newPartPos.x() >= simulationDomainBoundaries[0][1] ||
                 newPartPos.y() <= simulationDomainBoundaries[1][0] ||
                 newPartPos.y() >= simulationDomainBoundaries[1][1] ||
                 newPartPos.z() <= simulationDomainBoundaries[2][0] ||
                 newPartPos.z() >= simulationDomainBoundaries[2][1] ||
-                potentialArrays.at(0)->isElectrode(newPartPos.x(), newPartPos.y(), newPartPos.z() )  )
-        {
-            particle->setActive(false);
-            particle->setSplatTime(time);
-            ionsInactive++;
-        }
+                potentialArrays.at(0)->isElectrode(newPartPos.x(), newPartPos.y(), newPartPos.z()) );
     };
+
+    ParticleSimulation::ParallelVerletIntegrator::otherActionsFctType otherActionsFunction;
+
+    if (ionTerminationMode == TERMINATE){
+        otherActionsFunction = [&isIonTerminated, &ionsInactive](
+                Core::Vector& newPartPos, BTree::Particle* particle,
+                int particleIndex,
+                auto& tree, double time, int timestep)
+        {
+            // if the ion is out of the boundary box or ion has hit an electrode: Terminate
+            if(isIonTerminated(newPartPos))
+            {
+                particle->setActive(false);
+                particle->setSplatTime(time);
+                ionsInactive++;
+            }
+        };
+    }
+    else { //ion termination mode is RESTART
+        std::shared_ptr<ParticleSimulation::ParticleStartZone> particleStartZone =
+                AppUtils::getStartZoneFromIonDefinition(confRoot);
+
+        otherActionsFunction = [&isIonTerminated, pz = std::move(particleStartZone)](
+                Core::Vector& newPartPos, BTree::Particle* particle,
+                int particleIndex,
+                auto& tree, double time, int timestep) {
+            // if the ion is out of the boundary box or ion has hit an electrode: Restart in ion start zone
+            if (isIonTerminated(newPartPos)) {
+                newPartPos  = pz->getRandomParticlePosition();
+            }
+        };
+    }
+
 
     // simulate ===============================================================================================
     clock_t begin = std::clock();
