@@ -134,6 +134,8 @@ namespace ParticleSimulation{
         std::vector<Core::Vector>  a_tdt_;
 
         //std::vector<int> ion_keys_; ///< vector of external labels attached to the individual ions
+
+        void bearParticles_(double time);
     };
 }
 #endif /* BTree_verletIntegrator_hpp */

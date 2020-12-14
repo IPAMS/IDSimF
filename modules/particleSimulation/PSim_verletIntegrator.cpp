@@ -139,7 +139,6 @@ void ParticleSimulation::VerletIntegrator::runSingleStep(double dt) {
     timestepWriteFunction_(particles_,tree_,time_,timestep_,false);
     timestep_++;
     time_ = time_ + dt;
-
 }
 
 /**
@@ -147,4 +146,12 @@ void ParticleSimulation::VerletIntegrator::runSingleStep(double dt) {
  */
 void ParticleSimulation::VerletIntegrator::terminateSimulation(){
     timestepWriteFunction_(particles_,tree_,time_,timestep_,true);
+}
+
+
+void ParticleSimulation::VerletIntegrator::bearParticles_(double time) {
+    bool particlesCreated = ParticleSimulation::AbstractTimeIntegrator::bearParticles_(time);
+    if (particlesCreated){
+        tree_.computeChargeDistribution();
+    }
 }

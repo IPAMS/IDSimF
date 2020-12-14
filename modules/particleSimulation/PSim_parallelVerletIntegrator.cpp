@@ -65,8 +65,10 @@ void ParticleSimulation::ParallelVerletIntegrator::addParticle(BTree::Particle *
 }
 
 void ParticleSimulation::ParallelVerletIntegrator::bearParticles_(double time) {
-    ParticleSimulation::AbstractTimeIntegrator::bearParticles_(time);
-    initInternalState_();
+    bool particlesCreated = ParticleSimulation::AbstractTimeIntegrator::bearParticles_(time);
+    if (particlesCreated){
+        initInternalState_();
+    }
 }
 
 void ParticleSimulation::ParallelVerletIntegrator::initInternalState_(){
