@@ -2,6 +2,7 @@
 #define IONSIMULATION_CPP_TEST_UTIL_HPP
 
 #include "Core_vector.hpp"
+#include "PSim_boxStartZone.hpp"
 #include <string>
 #include <sstream>
 #include "catch.hpp"
@@ -35,5 +36,14 @@ inline std::string vectorApproxCompare(const Core::Vector &lhs, const Core::Vect
         return ss.str();
     }
 }
+
+//FIXME: get rid of this method: Rewrite tests with start zone directly
+inline std::vector<std::unique_ptr<BTree::Particle>> getRandomIonsInBox(int numIons, Core::Vector corner, Core::Vector boxSize){
+    Core::Vector center = corner + boxSize/2.0;
+    ParticleSimulation::BoxStartZone startZone(boxSize, center);
+
+    return startZone.getRandomParticlesInStartZone(numIons, 1.0);
+}
+
 
 #endif //IONSIMULATION_CPP_TEST_UTIL_HPP

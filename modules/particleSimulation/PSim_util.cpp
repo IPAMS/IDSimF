@@ -166,7 +166,7 @@ std::vector<Core::Vector> ParticleSimulation::util::getRandomPositionsInBox(int 
  * @param timeOfBirthRange ions are generated with times of birth uniformly distributed in this range
  * @return randomly vector of ions in a box
  */
-std::vector<std::unique_ptr<BTree::Particle>> ParticleSimulation::util::getRandomIonsInBox(int numIons, double charge,
+/*std::vector<std::unique_ptr<BTree::Particle>> ParticleSimulation::util::getRandomIonsInBox(int numIons, double charge,
                                                                                            Core::Vector corner, Core::Vector boxSize,
                                                                                            double timeOfBirthRange){
     std::vector<Core::Vector> positions = getRandomPositionsInBox(numIons,corner,boxSize);
@@ -180,6 +180,7 @@ std::vector<std::unique_ptr<BTree::Particle>> ParticleSimulation::util::getRando
     }
     return result;
 }
+ */
 
 /**
  * Generates a starting vector at position x,y,z
