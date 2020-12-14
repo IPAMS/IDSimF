@@ -39,6 +39,7 @@
 #include "PSim_averageChargePositionWriter.hpp"
 #include "PSim_idealizedQitFFTWriter.hpp"
 #include "PSim_ionCloudReader.hpp"
+#include "PSim_cylinderStartZone.hpp"
 #include "CollisionModel_HardSphere.hpp"
 #include <iostream>
 #include <vector>
@@ -301,8 +302,10 @@ int main(int argc, const char * argv[]) {
                         ions_tob_range);
             }
             else if (ionStartGeom == CYLINDER){
-                ions = ParticleSimulation::util::getRandomIonsInCylinderXDirection(
-                        nParticles, 1.0, ionStartCylinder_radius, ionStartCylinder_length, ions_tob_range);
+                ParticleSimulation::CylinderStartZone cylinderStartZone(
+                        ionStartCylinder_radius, ionStartCylinder_length*2.0,
+                        {1.0, 0.0, 0.0}, {-ionStartCylinder_length, 0.0, 0.0});
+                ions = cylinderStartZone.getRandomParticlesInStartZone(nParticles, 1.0, ions_tob_range);
             }
 
             for (int j = 0; j < nParticles; j++) {
