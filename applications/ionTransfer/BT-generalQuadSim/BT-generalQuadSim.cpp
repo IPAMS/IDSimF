@@ -36,6 +36,7 @@
 #include "Core_randomGenerators.hpp"
 #include "PSim_trajectoryExplorerJSONwriter.hpp"
 #include "PSim_interpolatedField.hpp"
+#include "PSim_boxStartZone.hpp"
 #include "PSim_util.hpp"
 #include "PSim_verletIntegrator.hpp"
 #include "CollisionModel_HardSphere.hpp"
@@ -88,11 +89,10 @@ int main(int argc, const char * argv[]) {
 
     double entranceAperture = doubleConfParameter("entrance_aperture_mm", confRoot) / 1000.0;
 
-    double startQLength = doubleConfParameter("start_q_length_mm", confRoot) / 1000.0; //the start position on the q length (x) axis
-    double reStartQLength = doubleConfParameter("restart_q_length_mm", confRoot) / 1000.0;
+    double qStartBoxCenter = doubleConfParameter("start_center_mm", confRoot) / 1000.0;
+    double qStartBoxLength = doubleConfParameter("start_length_mm", confRoot) / 1000.0; //the start position on the q length (x) axis
 
     double maxQLength = doubleConfParameter("max_q_length_mm", confRoot) / 1000.0;
-    double qStart = doubleConfParameter("q_start_mm", confRoot) / 1000.0;
     double maxRadius = doubleConfParameter("max_r_mm", confRoot) / 1000.0;
 
     // read ion configuration ========================
@@ -127,16 +127,16 @@ int main(int argc, const char * argv[]) {
     jsonWriter->setScales(1000,1e6);
 
     // prepare random generators:
-    Core::RndDistPtr rnd_x = Core::globalRandomGenerator->getUniformDistribution(qStart,reStartQLength);
-    Core::RndDistPtr rnd_yz = Core::globalRandomGenerator->getUniformDistribution(-entranceAperture,entranceAperture);
+    //todo: reimplement ion start zone with ion start zone class
+    ParticleSimulation::BoxStartZone startZone(
+            {qStartBoxLength, 2*entranceAperture, 2*entranceAperture},
+            {qStartBoxCenter, 0.0, 0.0});
 
     //init ions:
     for (int i=0; i<nIons.size(); i++){
         int nParticles = nIons[i];
         double mass = ionMasses[i];
-        auto ions= ParticleSimulation::util::getRandomIonsInBox(nParticles,1.0,
-                                                                   Core::Vector(qStart,-entranceAperture/2.0,-entranceAperture/2.0),
-                                                                   Core::Vector(startQLength,entranceAperture,entranceAperture));
+        auto ions= startZone.getRandomParticlesInStartZone(nParticles, 1.0);
 
         for (int j=0; j<nParticles; j++){
             ions[j]->setMassAMU(mass);
@@ -176,26 +176,19 @@ int main(int argc, const char * argv[]) {
         Core::Vector pos = particle->getLocation();
         double particleCharge =particle->getCharge();
 
-        Core::Vector E =
-                (electricFieldQuadRF->getInterpolatedVector(pos.x(), pos.y(), pos.z(), 0) * cos(omega_rf* time)*V_rf) +
-                (electricFieldQuadEntrance->getInterpolatedVector(pos.x(), pos.y(), pos.z(), 0)*V_entrance);
+        try {
+            Core::Vector E =
+                    (electricFieldQuadRF->getInterpolatedVector(pos.x(), pos.y(), pos.z(), 0)*cos(omega_rf*time)*V_rf)+
+                            (electricFieldQuadEntrance->getInterpolatedVector(pos.x(), pos.y(), pos.z(), 0)*V_entrance);
 
-        //FIXME: This was intended to test if an ion has left the geometry,
-        //with the updated implementations of the interpolated field class, an ion leaving the
-        //interpolated field will result in an exception rather than a vector of NaNs.
-
-        if (std::isnan(E.x()) == true){
-            if(collisionMode == 1){
-                particle->setActive(false);
-            } else{
-                particle->setInvalid(true);
-                return (Core::Vector(0.0,0.0,0.0));
-            }
+            Core::Vector spaceChargeForce = tree.computeEFieldFromTree(*particle)*spaceChargeFactor;
+            Core::Vector result = (E+spaceChargeForce)*particleCharge/particle->getMass();
+            return (result);
         }
-
-        Core::Vector spaceChargeForce = tree.computeEFieldFromTree(*particle)* spaceChargeFactor;
-        Core::Vector result = (E  + spaceChargeForce) * particleCharge / particle->getMass();
-        return(result);
+        catch (const std::invalid_argument& exception){ //is thrown if particle is not in domain of interpolated fields
+            particle->setInvalid(true);
+            return (Core::Vector(0.0, 0.0, 0.0));
+        }
     };
 
     ParticleSimulation::additionalPartParamFctType additionalParameterTransformFct =
@@ -228,7 +221,8 @@ int main(int argc, const char * argv[]) {
         }
     };
 
-    auto otherActionsFunction= [maxQLength,maxRadius,&rnd_yz,&rnd_x](Core::Vector& newPartPos,BTree::Particle* particle,int particleIndex, BTree::Tree& tree, double time, int timestep){
+
+    auto otherActionsFunction= [maxQLength,maxRadius,&startZone](Core::Vector& newPartPos,BTree::Particle* particle,int particleIndex, BTree::Tree& tree, double time, int timestep){
 
         double r_pos = std::sqrt( newPartPos.y()*newPartPos.y() + newPartPos.z()*newPartPos.z() );
 
@@ -236,14 +230,8 @@ int main(int argc, const char * argv[]) {
             newPartPos.z(0.0);
         }
 
-        if (r_pos > maxRadius || newPartPos.x() > maxQLength || particle->isInvalid() == true){
-            double yNew = rnd_yz->rndValue();
-            double zNew = rnd_yz->rndValue();
-
-            newPartPos.set(
-                    rnd_x->rndValue(),
-                    yNew,
-                    zNew);
+        if (r_pos > maxRadius || newPartPos.x() > maxQLength || particle->isInvalid()){
+            newPartPos = startZone.getRandomParticlePosition();
             particle->setInvalid(false);
         }
     };
