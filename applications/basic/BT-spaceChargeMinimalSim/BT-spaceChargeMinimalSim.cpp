@@ -142,7 +142,8 @@ int main(int argc, const char * argv[]) {
                 }
     };
 
-    //a empty other actions function (to do nothing additionally in a timestep)
+
+    //an empty other actions function (to do nothing additionally in a timestep)
     auto otherActionsFunctionQIT = [](Core::Vector &newPartPos, BTree::Particle *particle,
                                                                  int particleIndex,
                                                                  BTree::Tree &tree, double time, int timestep){
