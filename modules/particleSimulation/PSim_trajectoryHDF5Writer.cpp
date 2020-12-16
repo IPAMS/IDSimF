@@ -90,6 +90,11 @@ TrajectoryHDF5Writer(hdf5Filename,compression)
 void ParticleSimulation::TrajectoryHDF5Writer::writeTimestep(std::vector<BTree::Particle*> &particles,
                                                              double time){
 
+    hsize_t nParticles = particles.size();
+    if (nParticles == 0){
+        throw std::invalid_argument("Attempt to write empty trajectory frame");
+    }
+
     // Write time of this time step to the times vector:
     sizeTimesteps_[0] += 1;
     dsetTimesteps_->extend(sizeTimesteps_);
@@ -99,8 +104,6 @@ void ParticleSimulation::TrajectoryHDF5Writer::writeTimestep(std::vector<BTree::
     dsetTimesteps_->write(ts,H5::PredType::NATIVE_DOUBLE,memspaceTimestep_,dSpaceTimestep);
 
     //write particle location data:
-    hsize_t nParticles = particles.size();
-
 
     //define chunk size in parameter direction:
     hsize_t nParticlesChunk = 200;
