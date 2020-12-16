@@ -131,6 +131,8 @@ std::vector<std::tuple<double,double,Core::Vector>> ParticleSimulation::util::pr
     return(result);
 }
 
+
+//TODO: get rid of method, update / correct usages
 /**
  * Produces random positions in a box
  * @param nPositions number of positions
