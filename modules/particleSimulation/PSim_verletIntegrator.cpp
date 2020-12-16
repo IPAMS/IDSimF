@@ -136,9 +136,9 @@ void ParticleSimulation::VerletIntegrator::runSingleStep(double dt) {
             tree_.updateParticleLocation(i,newPos_[i]);
         }
     }
-    timestepWriteFunction_(particles_,tree_,time_,timestep_,false);
     timestep_++;
     time_ = time_ + dt;
+    timestepWriteFunction_(particles_,tree_,time_,timestep_,false);
 }
 
 /**
