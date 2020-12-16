@@ -194,8 +194,8 @@ TEST_CASE( "Test HDF5 trajectory file writer", "[ParticleSimulation][file writer
         std::vector<BTree::Particle> particles;
         std::vector<BTree::Particle *> particlePtrs;
 
-        // try to write an empty frame, which should throw an exception:
-        REQUIRE_THROWS(writerBare.writeTimestep(particlePtrs, 0.0));
+        // try to write an empty frame, which should be silently ignored:
+        REQUIRE_NOTHROW(writerBare.writeTimestep(particlePtrs, 0.0));
 
         //prepare particles to test:
         for (int i = 0; i < nParticles; ++i) {

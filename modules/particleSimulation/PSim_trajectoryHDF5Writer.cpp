@@ -84,6 +84,9 @@ TrajectoryHDF5Writer(hdf5Filename,compression)
 
 /**
  * Writes a single time step to the HDF5 trajectory file
+ *
+ * Note that an empty timestep, without any particles, is **silently ignored**.
+ *
  * @param particles The particle ensemble in the simulation to write to the trajectory file
  * @param time The current simulated time
  */
@@ -92,7 +95,7 @@ void ParticleSimulation::TrajectoryHDF5Writer::writeTimestep(std::vector<BTree::
 
     hsize_t nParticles = particles.size();
     if (nParticles == 0){
-        throw std::invalid_argument("Attempt to write empty trajectory frame");
+        return; //silently ignore all empty time steps
     }
 
     // Write time of this time step to the times vector:

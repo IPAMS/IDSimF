@@ -148,7 +148,6 @@ void ParticleSimulation::VerletIntegrator::terminateSimulation(){
     timestepWriteFunction_(particles_,tree_,time_,timestep_,true);
 }
 
-
 void ParticleSimulation::VerletIntegrator::bearParticles_(double time) {
     bool particlesCreated = ParticleSimulation::AbstractTimeIntegrator::bearParticles_(time);
     if (particlesCreated){
