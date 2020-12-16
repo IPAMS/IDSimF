@@ -160,10 +160,6 @@ int main(int argc, const char * argv[]) {
             [trajectoryWriteInterval, &hdf5Writer, &additionalParameterTransformFct](
                     std::vector<BTree::Particle*>& particles, BTree::ParallelTree& tree, double time, int timestep, bool lastTimestep){
 
-                if(particles.empty()){
-                    return;
-                }
-
                 if (lastTimestep) {
                     hdf5Writer->writeTimestep(particles,time);
 
