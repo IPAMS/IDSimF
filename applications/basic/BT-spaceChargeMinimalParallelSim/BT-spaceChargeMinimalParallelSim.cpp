@@ -35,6 +35,7 @@
 #include "PSim_trajectoryExplorerJSONwriter.hpp"
 #include "PSim_trajectoryHDF5Writer.hpp"
 #include "PSim_util.hpp"
+#include "PSim_boxStartZone.hpp"
 #include "PSim_parallelVerletIntegrator.hpp"
 #include "PSim_ionCloudReader.hpp"
 #include "CollisionModel_EmptyCollisionModel.hpp"
@@ -106,10 +107,8 @@ int main(int argc, const char * argv[]) {
     for (int i = 0; i < nIons.size(); i++) {
         int nParticles = nIons[i];
         double mass = ionMasses[i];
-        auto ions = ParticleSimulation::util::getRandomIonsInBox(nParticles, 1.0,
-                                                                 Core::Vector(-1.5, -1.5, -1.5) /
-                                                                 1000.0,
-                                                                 Core::Vector(3, 3, 3) / 1000.0);
+        ParticleSimulation::BoxStartZone startZone(Core::Vector(3, 3, 3) / 1000.0);
+        auto ions = startZone.getRandomParticlesInStartZone(nParticles, 1.0);
         for (int j = 0; j < nParticles; j++) {
             ions[j]->setMassAMU(mass);
             particlePtrs.push_back(ions[j].get());
@@ -147,7 +146,6 @@ int main(int argc, const char * argv[]) {
                     BTree::Particle *particle, int particleIndex,
                     BTree::ParallelTree &tree, double time, int timestep) -> Core::Vector{
 
-                Core::Vector pos = particle->getLocation();
                 double particleCharge = particle->getCharge();
 
                 Core::Vector spaceChargeForce(0,0,0);
@@ -159,13 +157,17 @@ int main(int argc, const char * argv[]) {
             };
 
     auto timestepWriteFunction =
-            [trajectoryWriteInterval, &hdf5Writer, &additionalParameterTransformFct, &particlePtrs](
+            [trajectoryWriteInterval, &hdf5Writer, &additionalParameterTransformFct](
                     std::vector<BTree::Particle*>& particles, BTree::ParallelTree& tree, double time, int timestep, bool lastTimestep){
 
-                if (lastTimestep) {
-                    hdf5Writer->writeTimestep(particlePtrs,time);
+                if(particles.empty()){
+                    return;
+                }
 
-                    hdf5Writer->writeSplatTimes(particlePtrs);
+                if (lastTimestep) {
+                    hdf5Writer->writeTimestep(particles,time);
+
+                    hdf5Writer->writeSplatTimes(particles);
                     hdf5Writer->finalizeTrajectory();
                     std::cout << "finished ts:" << timestep << " time:" << time << std::endl;
                 }
@@ -174,7 +176,7 @@ int main(int argc, const char * argv[]) {
 
                     std::cout << "ts:" << timestep << " time:" << time << std::endl;
 
-                    hdf5Writer->writeTimestep(particlePtrs,time);
+                    hdf5Writer->writeTimestep(particles,time);
                 }
             };
 
