@@ -56,9 +56,6 @@ int main(int argc, const char * argv[]) {
     std::string projectName = argv[2];
     std::cout << projectName<<std::endl;
 
-
-
-
     // read basic simulation parameters =============================================================
     int timeSteps = intConfParameter("sim_time_steps", confRoot);
     int trajectoryWriteInterval = intConfParameter("trajectory_write_interval", confRoot);
