@@ -100,17 +100,14 @@ Simulation configuration description
 ``max_ion_radius`` : float
     Maximum radius a simulated particle can have before it is terminated in the simulation, in m. 
 
-``n_ions`` : vector of integers
-    Number of ions of the ionic species defined by the the masses defined in ``ion_masses``. 
 
-``ion_masses`` : vector of float 
-    Ion masses in amu. 
+.. include:: includes/ion_definition_reading_options.rst
 
-``ion_collision_gas_diameters_angstrom`` : Vector of float
-    Effective hard sphere collision diameters of the ionic species in angström. 
 
-``ion_time_of_birth_range_s`` : float
-    Time range in which ions are generated, in seconds. The specified number of ions are generated uniformly in this time range.
+----------------------------
+Background gas configuration
+----------------------------
+
 
 ``background_pressure_Pa`` : float
     Pressure of the neutral background as in Pa. 
@@ -214,24 +211,3 @@ The ion excitation field is applied bipolar on the cap electrodes. There are two
 
  ``excite_pulse_length`` : float 
     Length of the rectangular excitation pulse in pulsed excitation mode in seconds. 
-
------------------------
-Ion start configuration
------------------------
-
-The initial positions of the simulated ions can be a cubic box around the trap center or a cylinder in ``x`` direction.
-
-``ion_start_geometry`` : Keyword:[``box``, ``cylinder``]
-    Sets the ion start geometry.
-
-    ``box`` : Ion start zone is a box 
-        The ion start zone is a cubic box around the trap center, randomly filled with particles. 
-
-    ``cylinder`` : Ion start zone is a cylinder in ``x`` direction
-        The ion start zone is a cylinder parallel to the ``x`` axis, with its center at the center of the trap. The cylinder is defined by
-
-        ``ion_start_cylinder_radius_m``: float
-            Radius of the cylinder around the ``x`` axis in m. 
-
-        ``ion_start_cylinder_length_m`` : float
-            Distance from the origin of the cylinder to the cylinder ends in ``x`` direction. The cylinder is therefore in total 2 * ``ion_start_cylinder_length_m`` long. 
