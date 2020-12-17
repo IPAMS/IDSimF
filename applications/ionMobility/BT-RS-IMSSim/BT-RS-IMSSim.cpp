@@ -64,7 +64,7 @@ int main(int argc, const char *argv[]){
     // open configuration, parse configuration file =========================================
     if (argc < 2) {
         std::cout << "no configuration file given" << std::endl;
-        return (0);
+        return (1);
     }
 
     std::string confFileName = argv[1];
