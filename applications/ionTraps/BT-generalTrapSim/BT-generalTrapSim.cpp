@@ -204,6 +204,15 @@ int main(int argc, const char * argv[]) {
     std::vector<std::unique_ptr<BTree::Particle>>particles;
     std::vector<BTree::Particle*>particlePtrs;
     AppUtils::readIonDefinition(particles, particlePtrs, confRoot, confBasePath);
+    // init additional ion parameters:
+    for(const auto& particle: particles){
+        particle->setAuxScalarParam(key_trapForce_x, 0.0);
+        particle->setAuxScalarParam(key_trapForce_y, 0.0);
+        particle->setAuxScalarParam(key_trapForce_z, 0.0);
+        particle->setAuxScalarParam(key_spaceCharge_x, 0.0);
+        particle->setAuxScalarParam(key_spaceCharge_y, 0.0);
+        particle->setAuxScalarParam(key_spaceCharge_z, 0.0);
+    }
 
     // define functions for the trajectory integration ==================================================
     int ionsInactive = 0;
