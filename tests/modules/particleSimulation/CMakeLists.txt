@@ -51,3 +51,4 @@ target_include_directories(test_ParticleSimulation PUBLIC
 
 target_link_libraries(test_ParticleSimulation core particlesimulation btree collisionmodels rs ${HDF5_CXX_LIBRARIES} ${HDF5_LIBRARIES})
 
+add_test(NAME test_ParticleSimulation COMMAND test_ParticleSimulation)
