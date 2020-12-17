@@ -35,6 +35,7 @@
 #include "PSim_trajectoryExplorerJSONwriter.hpp"
 #include "PSim_trajectoryHDF5Writer.hpp"
 #include "PSim_util.hpp"
+#include "PSim_boxStartZone.hpp"
 #include "PSim_verletIntegrator.hpp"
 #include "PSim_math.hpp"
 #include "PSim_ionCloudReader.hpp"
@@ -46,7 +47,7 @@ int main(int argc, const char * argv[]) {
     // read configuration file ======================================================================
     if (argc <2){
         std::cout << "no conf project name or conf file given"<<std::endl;
-        return(0);
+        return(1);
     }
 
     std::string confFileName = argv[1];
@@ -54,9 +55,6 @@ int main(int argc, const char * argv[]) {
 
     std::string projectName = argv[2];
     std::cout << projectName<<std::endl;
-
-
-
 
     // read basic simulation parameters =============================================================
     int timeSteps = intConfParameter("sim_time_steps", confRoot);
@@ -96,16 +94,21 @@ int main(int argc, const char * argv[]) {
     for (int i = 0; i < nIons.size(); i++) {
         int nParticles = nIons[i];
         double mass = ionMasses[i];
-        auto ions = ParticleSimulation::util::getRandomIonsInBox(nParticles, 1.0,
+        ParticleSimulation::BoxStartZone startZone(Core::Vector(3.0, 3.0, 3.0)/1000.0);
+        auto ions = startZone.getRandomParticlesInStartZone(nParticles, 1.0);
+        /*auto ions = ParticleSimulation::util::getRandomIonsInBox(nParticles, 1.0,
                                                                  Core::Vector(-1.5, -1.5, -1.5) /
                                                                  1000.0,
-                                                                 Core::Vector(3, 3, 3) / 1000.0);
+        Core::Vector(3, 3, 3) / 1000.0);
+         */
         for (int j = 0; j < nParticles; j++) {
             ions[j]->setMassAMU(mass);
             particlePtrs.push_back(ions[j].get());
             particles.push_back(std::move(ions[j]));
         }
     }
+
+
 
     //prepare file writer ==============================================================================
 
@@ -137,7 +140,6 @@ int main(int argc, const char * argv[]) {
                     BTree::Particle *particle, int particleIndex,
                     BTree::Tree &tree, double time, int timestep) -> Core::Vector{
 
-                Core::Vector pos = particle->getLocation();
                 double particleCharge = particle->getCharge();
 
                 Core::Vector spaceChargeForce(0,0,0);

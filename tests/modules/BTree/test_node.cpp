@@ -29,6 +29,7 @@
 #include "BTree_tree.hpp"
 #include "BTree_particle.hpp"
 #include "PSim_util.hpp"
+#include "PSim_boxStartZone.hpp"
 #include "test_util.hpp"
 #include <iostream>
 #include <cmath>
@@ -448,9 +449,9 @@ TEST_CASE( "Test field calculation in serial node", "[Node]") {
         BTree::Particle testIon4 = BTree::Particle(Core::Vector(0.0,9.0,0.0),10.0);
         int nions = 10000;
 
-        Core::Vector corner = Core::Vector(-1.0,-1.0,-1.0);
         Core::Vector boxSize = Core::Vector(2.0,2.0,2.0);
-        std::vector<std::unique_ptr<BTree::Particle>> ions= ParticleSimulation::util::getRandomIonsInBox(nions,2.0,corner,boxSize);
+        ParticleSimulation::BoxStartZone startZone(boxSize);
+        std::vector<std::unique_ptr<BTree::Particle>> ions= startZone.getRandomParticlesInStartZone(nions, 2.0);
         for (int i=0; i<nions; i++){
             testNode.insertParticle(ions[i].get());
         }

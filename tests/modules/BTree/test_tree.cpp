@@ -28,11 +28,11 @@
 #include "Core_vector.hpp"
 #include "BTree_particle.hpp"
 #include "BTree_tree.hpp"
+#include "PSim_boxStartZone.hpp"
 #include "PSim_util.hpp"
 #include "test_util.hpp"
 #include <iostream>
 #include "catch.hpp"
-
 
 TEST_CASE( "Test serial tree semantics / particle management","[Tree]") {
     BTree::Tree testTree(
@@ -138,9 +138,9 @@ TEST_CASE( "Test serial tree semantics / particle management","[Tree]") {
 
     SECTION( "Test tree integrity with large number of random particles"){
         int nions = 10000;
-        Core::Vector corner(-0.001, -0.001, -0.001);
         Core::Vector boxSize(0.002, 0.002, 0.002);
-        std::vector<std::unique_ptr<BTree::Particle>> ions= ParticleSimulation::util::getRandomIonsInBox(nions,1,corner,boxSize);
+        ParticleSimulation::BoxStartZone startZone(boxSize);
+        std::vector<std::unique_ptr<BTree::Particle>> ions= startZone.getRandomParticlesInStartZone(nions, 1);
 
         for (int i=0; i<nions; i++){
             testTree.insertParticle((*ions[i]),i+1);
@@ -213,27 +213,27 @@ TEST_CASE( "Test serial tree charge distribution calculation","[Tree]"){
         int nions = 10000;
         Core::Vector corner1(-0.00051,-0.0005,-0.0005);
         Core::Vector boxSize1(0.00001,0.001,0.001);
-        auto ions1= ParticleSimulation::util::getRandomIonsInBox(nions,1,corner1,boxSize1);
+        auto ions1= getRandomIonsInBox(nions,corner1,boxSize1);
 
         Core::Vector corner2(0.0005,-0.0005,-0.0005);
         Core::Vector boxSize2(0.00001,0.001,0.001);
-        auto ions2= ParticleSimulation::util::getRandomIonsInBox(nions,1,corner2,boxSize2);
+        auto ions2= getRandomIonsInBox(nions,corner2,boxSize2);
 
         Core::Vector corner3(-0.0005,-0.00051,-0.0005);
         Core::Vector boxSize3(0.001,0.00001,0.001);
-        auto ions3= ParticleSimulation::util::getRandomIonsInBox(nions,1,corner3,boxSize3);
+        auto ions3= getRandomIonsInBox(nions,corner3,boxSize3);
 
         Core::Vector corner4(-0.0005,0.0005,-0.0005);
         Core::Vector boxSize4(0.001,0.00001,0.001);
-        auto ions4= ParticleSimulation::util::getRandomIonsInBox(nions,1,corner4,boxSize4);
+        auto ions4= getRandomIonsInBox(nions,corner4,boxSize4);
 
         Core::Vector corner5(-0.0005,-0.0005,-0.00051);
         Core::Vector boxSize5(0.001,0.001,0.00001);
-        auto ions5= ParticleSimulation::util::getRandomIonsInBox(nions,1,corner5,boxSize5);
+        auto ions5= getRandomIonsInBox(nions,corner5,boxSize5);
 
         Core::Vector corner6(-0.0005,-0.0005,0.0005);
         Core::Vector boxSize6(0.001,0.001,0.00001);
-        auto ions6= ParticleSimulation::util::getRandomIonsInBox(nions,1,corner6,boxSize6);
+        auto ions6= getRandomIonsInBox(nions,corner6,boxSize6);
 
         for (int i=0; i<nions; i++){
             testTree.insertParticle(*ions1[i],1);

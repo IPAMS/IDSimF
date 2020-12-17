@@ -31,7 +31,6 @@
 #include "PSim_trajectoryExplorerJSONwriter.hpp"
 #include "PSim_util.hpp"
 #include "PSim_verletIntegrator.hpp"
-#include "PSim_math.hpp"
 #include "PSim_ionCloudReader.hpp"
 #include "PSim_simionPotentialArray.hpp"
 #include "CollisionModel_EmptyCollisionModel.hpp"
@@ -47,7 +46,7 @@ int main(int argc, const char * argv[]) {
     // read configuration file ======================================================================
     if (argc <2){
         std::cout << "no conf project name or conf file given"<<std::endl;
-        return(0);
+        return(1);
     }
 
     std::string confFileName = argv[1];

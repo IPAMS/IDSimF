@@ -30,7 +30,6 @@
 #include "appUtils_parameterParsing.hpp"
 #include "appUtils_ionDefinitionReading.hpp"
 #include "BTree_particle.hpp"
-#include "BTree_tree.hpp"
 #include "PSim_trajectoryHDF5Writer.hpp"
 #include "PSim_scalar_writer.hpp"
 #include "PSim_util.hpp"
@@ -64,7 +63,7 @@ int main(int argc, const char * argv[]) {
     // read configuration file ======================================================================
     if (argc <2){
         std::cout << "no conf project name or conf file given"<<std::endl;
-        return(0);
+        return(1);
     }
 
     std::string confFileName = argv[1];
@@ -205,6 +204,15 @@ int main(int argc, const char * argv[]) {
     std::vector<std::unique_ptr<BTree::Particle>>particles;
     std::vector<BTree::Particle*>particlePtrs;
     AppUtils::readIonDefinition(particles, particlePtrs, confRoot, confBasePath);
+    // init additional ion parameters:
+    for(const auto& particle: particles){
+        particle->setAuxScalarParam(key_trapForce_x, 0.0);
+        particle->setAuxScalarParam(key_trapForce_y, 0.0);
+        particle->setAuxScalarParam(key_trapForce_z, 0.0);
+        particle->setAuxScalarParam(key_spaceCharge_x, 0.0);
+        particle->setAuxScalarParam(key_spaceCharge_y, 0.0);
+        particle->setAuxScalarParam(key_spaceCharge_z, 0.0);
+    }
 
     // define functions for the trajectory integration ==================================================
     int ionsInactive = 0;

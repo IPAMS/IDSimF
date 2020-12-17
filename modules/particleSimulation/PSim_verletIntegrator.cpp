@@ -88,11 +88,11 @@ void ParticleSimulation::VerletIntegrator::addParticle(BTree::Particle *particle
 void ParticleSimulation::VerletIntegrator::run(int nTimesteps, double dt) {
 
     //write initial state to the trajectory:
+    bearParticles_(0.0);
     timestepWriteFunction_(particles_,tree_,time_,timestep_,false);
 
 
     for (int step=0; step< nTimesteps; step++){
-        //std::cout << "ts: "<<step<<std::endl;
         runSingleStep(dt);
     }
     this->terminateSimulation();
@@ -136,10 +136,9 @@ void ParticleSimulation::VerletIntegrator::runSingleStep(double dt) {
             tree_.updateParticleLocation(i,newPos_[i]);
         }
     }
-    timestepWriteFunction_(particles_,tree_,time_,timestep_,false);
     timestep_++;
     time_ = time_ + dt;
-
+    timestepWriteFunction_(particles_,tree_,time_,timestep_,false);
 }
 
 /**
@@ -147,4 +146,11 @@ void ParticleSimulation::VerletIntegrator::runSingleStep(double dt) {
  */
 void ParticleSimulation::VerletIntegrator::terminateSimulation(){
     timestepWriteFunction_(particles_,tree_,time_,timestep_,true);
+}
+
+void ParticleSimulation::VerletIntegrator::bearParticles_(double time) {
+    bool particlesCreated = ParticleSimulation::AbstractTimeIntegrator::bearParticles_(time);
+    if (particlesCreated){
+        tree_.computeChargeDistribution();
+    }
 }

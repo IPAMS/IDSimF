@@ -72,7 +72,7 @@ namespace ParticleSimulation{
         size_t particlesBornIdx_; ///< index in particleTOBs_ indicating the particles already born
 
 
-        void bearParticles_(double time);
+        bool bearParticles_(double time);
     };
 }
 #endif /* BTree_abstractTimeIntegrator_hpp */

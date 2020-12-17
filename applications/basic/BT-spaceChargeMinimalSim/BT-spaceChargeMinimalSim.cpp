@@ -44,7 +44,7 @@ int main(int argc, const char * argv[]) {
     // read configuration file ======================================================================
     if (argc <2){
         std::cout << "no conf project name or conf file given"<<std::endl;
-        return(0);
+        return(1);
     }
 
     std::string confFileName = argv[1];
@@ -52,7 +52,6 @@ int main(int argc, const char * argv[]) {
 
     std::string projectName = argv[2];
     std::cout << projectName<<std::endl;
-
 
     // read basic simulation parameters =============================================================
     int timeSteps = intConfParameter("sim_time_steps", confRoot);
@@ -142,7 +141,8 @@ int main(int argc, const char * argv[]) {
                 }
     };
 
-    //a empty other actions function (to do nothing additionally in a timestep)
+
+    //an empty other actions function (to do nothing additionally in a timestep)
     auto otherActionsFunctionQIT = [](Core::Vector &newPartPos, BTree::Particle *particle,
                                                                  int particleIndex,
                                                                  BTree::Tree &tree, double time, int timestep){

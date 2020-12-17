@@ -21,3 +21,5 @@ add_executable(test_RS ${SOURCE_FILES})
 target_include_directories(test_RS PUBLIC
         ${CMAKE_SOURCE_DIR}/libs/catch)
 target_link_libraries(test_RS core btree rs)
+
+add_test(NAME test_RS COMMAND test_RS)

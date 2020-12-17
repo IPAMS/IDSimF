@@ -189,9 +189,15 @@ TEST_CASE( "Test HDF5 trajectory file writer", "[ParticleSimulation][file writer
         ParticleSimulation::TrajectoryHDF5Writer writerAux(filenameAux,
                 auxParamNames,
                 additionalParameterTransformFct);
-        //prepare particles to test:
+
+        // prepare data structures:
         std::vector<BTree::Particle> particles;
         std::vector<BTree::Particle *> particlePtrs;
+
+        // try to write an empty frame, which should be silently ignored:
+        REQUIRE_NOTHROW(writerBare.writeTimestep(particlePtrs, 0.0));
+
+        //prepare particles to test:
         for (int i = 0; i < nParticles; ++i) {
             particles.emplace_back(BTree::Particle());
         }

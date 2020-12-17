@@ -58,15 +58,22 @@ particlesBornIdx_(0)
  * The time of birth in the particles is set according to the actual birth time in the simulation
  *
  * @param time the time until particles are born
+ * @return true if particles were born
  */
-void ParticleSimulation::AbstractTimeIntegrator::bearParticles_(double time){
+bool ParticleSimulation::AbstractTimeIntegrator::bearParticles_(double time){
 
     if (particlesBornIdx_ < particleTOBs_.size()) {
+        int oldParticlesBornIdx = particlesBornIdx_;
+
         while (particlesBornIdx_ < particleTOBs_.size() && particleTOBs_[particlesBornIdx_].first <= time) {
             BTree::Particle *part = particleTOBs_[particlesBornIdx_].second;
             part->setTimeOfBirth(time); //set particle TOB to the actual TOB in the simulation
             addParticle(part);
             ++particlesBornIdx_;
         }
+
+        return particlesBornIdx_ > oldParticlesBornIdx;
+    } else{
+        return false;
     }
 }

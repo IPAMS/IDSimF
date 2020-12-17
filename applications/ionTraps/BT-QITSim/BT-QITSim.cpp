@@ -27,7 +27,6 @@
  ****************************/
 
 #include "json.h"
-#include "appUtils_parameterParsing.hpp"
 #include "BTree_particle.hpp"
 #include "PSim_trajectoryHDF5Writer.hpp"
 #include "PSim_util.hpp"
@@ -38,16 +37,15 @@
 #include "PSim_math.hpp"
 #include "PSim_averageChargePositionWriter.hpp"
 #include "PSim_idealizedQitFFTWriter.hpp"
-#include "PSim_ionCloudReader.hpp"
-#include "PSim_cylinderStartZone.hpp"
 #include "CollisionModel_HardSphere.hpp"
+#include "appUtils_parameterParsing.hpp"
+#include "appUtils_ionDefinitionReading.hpp"
 #include <iostream>
 #include <vector>
 #include <ctime>
 
 enum IntegratorMode {VERLET,PARALLEL_VERLET};
 enum GeometryMode {DEFAULT,SCALED,VARIABLE};
-enum IonStartGeometry {BOX,CYLINDER};
 enum RfAmplitudeMode {STATIC_RF,RAMPED_RF};
 enum RfWaveMode {SINE,SAMPLED};
 enum FieldMode {BASIC, HIGHER_ORDERS};
@@ -75,11 +73,12 @@ int main(int argc, const char * argv[]) {
     // read configuration file ======================================================================
     if (argc < 2){
         std::cout << "no conf project name or conf file given"<<std::endl;
-        return(0);
+        return(1);
     }
 
     std::string confFileName = argv[1];
     std::cout << confFileName<<std::endl;
+    std::string confBasePath = confFileBasePath(confFileName);
 
     std::string projectName = argv[2];
     std::cout << projectName<<std::endl;
@@ -233,90 +232,16 @@ int main(int argc, const char * argv[]) {
     //read ion configuration =======================================================================
     std::vector<std::unique_ptr<BTree::Particle>>particles;
     std::vector<BTree::Particle*>particlePtrs;
-
-    if (confRoot.isMember("ion_cloud_init_file") == true) {
-        std::string ionCloudFileName = confRoot.get("ion_cloud_init_file", 0).asString();
-        std::string ionCloudPath = pathRelativeToConfFile(confFileName, ionCloudFileName);
-        ParticleSimulation::IonCloudReader reader = ParticleSimulation::IonCloudReader();
-        particles = reader.readIonCloud(ionCloudPath);
-        //prepare a vector of raw pointers
-        for (const auto& part : particles){
-            particlePtrs.push_back(part.get());
-        }
-
-    } else {
-        // ions are not given in an init file, read and init random ion box configuration
-        if (confRoot.isMember("n_ions") == true) {
-            Json::Value n_ions_json = confRoot.get("n_ions", 0);
-            for (int i = 0; i < n_ions_json.size(); i++) {
-                nIons.push_back(n_ions_json.get(i, 0.0).asInt());
-            }
-        } else {
-            throw std::invalid_argument("missing configuration value: n_ions");
-        }
-
-        if (confRoot.isMember("ion_masses") == true) {
-            Json::Value ions_masses_json = confRoot.get("ion_masses", 0);
-            for (int i = 0; i < ions_masses_json.size(); i++) {
-                ionMasses.push_back(ions_masses_json.get(i, 0.0).asDouble());
-            }
-        } else {
-            throw std::invalid_argument("missing configuration value: ion_masses");
-        }
-
-        if (confRoot.isMember("ion_collision_gas_diameters_angstrom") == true) {
-            Json::Value ions_collision_diams = confRoot.get("ion_collision_gas_diameters_angstrom", 0);
-            for (int i = 0; i < ions_collision_diams.size(); i++) {
-                ionCollisionDiameters_angstrom.push_back(ions_collision_diams.get(i, 0.0).asDouble());
-            }
-        } else {
-            throw std::invalid_argument("missing configuration value: ion_collision_gas_diameters_angstrom");
-        }
-
-        double ions_tob_range = doubleConfParameter("ion_time_of_birth_range_s", confRoot);
-
-        std::string ionStartGeom_str = stringConfParameter("ion_start_geometry",confRoot);
-        IonStartGeometry ionStartGeom;
-
-        double ionStartCylinder_radius;
-        double ionStartCylinder_length;
-        if (ionStartGeom_str == "box"){
-            ionStartGeom = BOX;
-        } else if (ionStartGeom_str == "cylinder"){
-            ionStartGeom = CYLINDER;
-            ionStartCylinder_radius = doubleConfParameter("ion_start_cylinder_radius_m", confRoot);
-            ionStartCylinder_length = doubleConfParameter("ion_start_cylinder_length_m", confRoot);
-        }
-
-        for (int i = 0; i < nIons.size(); i++) {
-            int nParticles = nIons[i];
-            double mass = ionMasses[i];
-            double collisionDiameter_m = ionCollisionDiameters_angstrom[i]*1e-10;
-            std::vector<std::unique_ptr<BTree::Particle>> ions;
-
-            if (ionStartGeom == BOX) {
-                ions = ParticleSimulation::util::getRandomIonsInBox(
-                        nParticles, 1.0,
-                        Core::Vector(-1.5, -1.5, -1.5) / 1000.0,
-                        Core::Vector(3, 3, 3) / 1000.0,
-                        ions_tob_range);
-            }
-            else if (ionStartGeom == CYLINDER){
-                ParticleSimulation::CylinderStartZone cylinderStartZone(
-                        ionStartCylinder_radius, ionStartCylinder_length*2.0,
-                        {1.0, 0.0, 0.0}, {-ionStartCylinder_length, 0.0, 0.0});
-                ions = cylinderStartZone.getRandomParticlesInStartZone(nParticles, 1.0, ions_tob_range);
-            }
-
-            for (int j = 0; j < nParticles; j++) {
-                ions[j]->setMassAMU(mass);
-                ions[j]->setDiameter(collisionDiameter_m);
-                particlePtrs.push_back(ions[j].get());
-                particles.push_back(std::move(ions[j]));
-            }
-        }
+    AppUtils::readIonDefinition(particles, particlePtrs, confRoot, confBasePath);
+    // init additional ion parameters:
+    for(const auto& particle: particles){
+        particle->setAuxScalarParam(key_rf_x, 0.0);
+        particle->setAuxScalarParam(key_rf_y, 0.0);
+        particle->setAuxScalarParam(key_rf_z, 0.0);
+        particle->setAuxScalarParam(key_spaceCharge_x, 0.0);
+        particle->setAuxScalarParam(key_spaceCharge_y, 0.0);
+        particle->setAuxScalarParam(key_spaceCharge_z, 0.0);
     }
-
 
     // define functions for the trajectory integration ==================================================
     auto trapFieldFunction =
@@ -450,7 +375,7 @@ int main(int argc, const char * argv[]) {
                     spaceChargeForce =
                             tree.computeEFieldFromTree(*particle) * (particleCharge * spaceChargeFactor);
                 }
-                //std::cout<<"rf:"<<rfForce<<" spCh:"<<spaceChargeForce<<std::endl;
+
 
                 //update the additional parameters for writing them later to the trajectory:
                 particle->setAuxScalarParam(key_rf_x, rfForce.x());
@@ -508,7 +433,6 @@ int main(int argc, const char * argv[]) {
                     std::vector<BTree::Particle*>& particles, auto& tree, double time, int timestep, bool lastTimestep){
 
                 if (timestep % fftWriteInterval == 0) {
-                    //avgPositionWriter->writeTimestep(tree, time);
                     ionsInactiveWriter->writeTimestep(ionsInactive, time);
                     if (fftWriteMode == UNRESOLVED){
                         fftWriter->writeTimestep(time);
