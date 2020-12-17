@@ -37,8 +37,6 @@
 #include "PSim_math.hpp"
 #include "PSim_averageChargePositionWriter.hpp"
 #include "PSim_idealizedQitFFTWriter.hpp"
-#include "PSim_ionCloudReader.hpp"
-#include "PSim_cylinderStartZone.hpp"
 #include "CollisionModel_HardSphere.hpp"
 #include "appUtils_parameterParsing.hpp"
 #include "appUtils_ionDefinitionReading.hpp"
@@ -48,7 +46,6 @@
 
 enum IntegratorMode {VERLET,PARALLEL_VERLET};
 enum GeometryMode {DEFAULT,SCALED,VARIABLE};
-enum IonStartGeometry {BOX,CYLINDER};
 enum RfAmplitudeMode {STATIC_RF,RAMPED_RF};
 enum RfWaveMode {SINE,SAMPLED};
 enum FieldMode {BASIC, HIGHER_ORDERS};
