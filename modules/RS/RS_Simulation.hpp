@@ -32,6 +32,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <unordered_map>
 #include <list>
 #include <utility>
 #include "RS_Substance.hpp"
@@ -59,7 +60,7 @@ namespace RS {
         bool addParticle(RS::ReactiveParticle* particle,int index);
         void removeParticle(int index);
         ReactiveParticle& getParticle(int index);
-        std::map<Substance*,int> discreteConcentrations();
+        std::map<Substance* const,int> discreteConcentrations();
         long totalReactionEvents();
         long illEvents();
         long reactionEvents(AbstractReaction* reaction) const;
@@ -86,14 +87,14 @@ namespace RS {
         std::vector<Substance*> substances_; ///< the vector of all chemical substances in the simulation
         std::vector<AbstractReaction*> reactions_; ///< the vector of all chemical reactions in the simulation
         std::map<AbstractReaction* const,long> reactionEvents_; ///< a map to count the number of individual reaction events
-        std::map<Substance*,std::vector<AbstractReaction*>> reacInd_; ///< substance specific independent reactions (only one discrete educt)
-        std::map<Substance*,std::vector<AbstractReaction*>> reacDep_; ///< substance specific dependent reactions (more than one discrete educt)
-        std::map<std::pair<Substance*,Substance*>,std::vector<AbstractReaction*>> reacCollision_; ///< map of collision based reactions
-        std::map<Substance*,std::vector<double>> staticProbabilities_; ///< substance specific static reaction probabilities
-        std::map<Substance*,int> discreteConcentrations_; ///< substance specific discrete particle concentrations
+        std::map<Substance* const,std::vector<AbstractReaction*>> reacInd_; ///< substance specific independent reactions (only one discrete educt)
+        std::map<Substance* const,std::vector<AbstractReaction*>> reacDep_; ///< substance specific dependent reactions (more than one discrete educt)
+        std::map<std::pair<Substance* const,Substance* const>,std::vector<AbstractReaction*>> reacCollision_; ///< map of collision based reactions
+        std::map<Substance* const,std::vector<double>> staticProbabilities_; ///< substance specific static reaction probabilities
+        std::map<Substance* const,int> discreteConcentrations_; ///< substance specific discrete particle concentrations
 
         //std::list<ReactiveParticle> particles_;
-        using pMap = std::map<int,RS::ReactiveParticle*>;
+        using pMap = std::unordered_map<int, RS::ReactiveParticle*>;
         using pPair= pMap::value_type;
         pMap particleMap_;
     };

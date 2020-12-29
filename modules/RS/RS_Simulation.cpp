@@ -112,7 +112,7 @@ RS::ReactiveParticle& RS::Simulation::getParticle(int index) {
     return *particleMap_.at(index);
 }
 
-std::map<RS::Substance*,int> RS::Simulation::discreteConcentrations(){
+std::map<RS::Substance* const,int> RS::Simulation::discreteConcentrations(){
     return discreteConcentrations_;
 };
 
@@ -168,7 +168,6 @@ void RS::Simulation::doReaction(RS::AbstractReaction* reaction, RS::ReactivePart
 
     //this->addParticle(productParticle,index);
     discreteConcentrations_[product]++;
-
 }
 
 /**

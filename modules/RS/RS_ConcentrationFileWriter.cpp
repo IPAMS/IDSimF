@@ -44,7 +44,7 @@ void RS::ConcentrationFileWriter::closeFile() {
 
 void RS::ConcentrationFileWriter::writeTimestep(Simulation& sim) {
     std::vector<Substance*> discreteSubst = sim.simulationConfiguration()->getAllDiscreteSubstances();
-    std::map<Substance*,int> concs = sim.discreteConcentrations();
+    std::map<Substance* const,int> concs = sim.discreteConcentrations();
 
     transientFile_<<sim.timestep()<<" ; "<<sim.simulationTime() <<" ; ";
     for (auto subst: discreteSubst){
