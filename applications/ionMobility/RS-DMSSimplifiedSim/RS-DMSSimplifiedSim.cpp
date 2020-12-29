@@ -1,4 +1,4 @@
-/***************************
+/**************************
  Ion Dynamics Simulation Framework (IDSimF)
 
  Copyright 2020 - Physical and Theoretical Chemistry /
@@ -19,15 +19,15 @@
  along with IDSimF.  If not, see <https://www.gnu.org/licenses/>.
 
  ------------
- BT-RS-DMSSim.cpp
+ BT-RS-DMSSimplifiedSim.cpp
 
- Idealized plane electrode type differential ion mobility spectrometry (DMS) transport and chemistry simulation,
- including space chage and gas collision effects
+ Idealized plane electrode type differential ion mobility spectrometry (DMS):
+ Simplified / idealized simulation of compensation voltage with chemically reactive
+ particle ensemble
 
  ****************************/
 
 #include <iostream>
-#include <sstream>
 #include <cmath>
 #include <ctime>
 #include "json.h"
@@ -36,19 +36,13 @@
 #include "RS_SimulationConfiguration.hpp"
 #include "RS_ConfigFileParser.hpp"
 #include "RS_ConcentrationFileWriter.hpp"
-#include "PSim_verletIntegrator.hpp"
 #include "PSim_trajectoryExplorerJSONwriter.hpp"
 #include "PSim_scalar_writer.hpp"
 #include "PSim_util.hpp"
-#include "CollisionModel_EmptyCollisionModel.hpp"
-#include "CollisionModel_StatisticalDiffusion.hpp"
-#include "CollisionModel_SpatialFieldFunctions.hpp"
 
 const std::string key_ChemicalIndex = "keyChemicalIndex";
-enum CVMode {STATIC_CV,AUTO_CV};
-enum FlowMode {UNIFORM_FLOW,PARABOLIC_FLOW};
-enum BackgroundTemperatureMode {ISOTHERM,LINEAR_GRADIENT};
-enum CollisionType {SDS,NO_COLLISION};
+const double standardPressure_Pa = 102300; //101325
+enum CVMode {STATIC_CV, AUTO_CV};
 
 int main(int argc, const char * argv[]) {
 
@@ -66,83 +60,16 @@ int main(int argc, const char * argv[]) {
     int nStepsPerOscillation = intConfParameter("sim_time_steps_per_sv_oscillation",confRoot);
     int concentrationWriteInterval = intConfParameter("concentrations_write_interval",confRoot);
     int trajectoryWriteInterval = intConfParameter("trajectory_write_interval",confRoot);
-    double spaceChargeFactor = doubleConfParameter("space_charge_factor",confRoot);
-
-
 
     //geometric parameters:
     double startWidthX_m = doubleConfParameter("start_width_x_mm",confRoot)/1000.0;
     double startWidthY_m = doubleConfParameter("start_width_y_mm",confRoot)/1000.0;
     double startWidthZ_m = doubleConfParameter("start_width_z_mm",confRoot)/1000.0;
-    double electrodeDistance_m = doubleConfParameter("electrode_distance_mm",confRoot)/1000.0;
-    double electrodeLength_m = doubleConfParameter("electrode_length_mm",confRoot)/1000.0;
-    double electrodeHalfDistance_m = electrodeDistance_m / 2.0;
-    double electrodeHalfDistanceSquared_m = electrodeHalfDistance_m * electrodeHalfDistance_m;
 
 
-    //background gas parameters:
-    std::string collisionTypeStr = stringConfParameter("collision_model",confRoot);
-    CollisionType collisionType;
-    if (collisionTypeStr== "SDS"){
-        collisionType = SDS;
-    }
-    else if (collisionTypeStr == "none"){
-        collisionType = NO_COLLISION;
-    }
-    else{
-        throw std::invalid_argument("wrong configuration value: collision_model_type");
-    }
-
-    std::string flowModeStr = stringConfParameter("flow_mode",confRoot);
-    FlowMode flowMode;
-    if (flowModeStr == "uniform"){
-        flowMode = UNIFORM_FLOW;
-    }
-    else if (flowModeStr == "parabolic"){
-        flowMode = PARABOLIC_FLOW;
-    }
-    else{
-        throw std::invalid_argument("wrong configuration value: flow_mode");
-    }
-
-    //Define background temperature function for chemical reaction and collision model
-    BackgroundTemperatureMode  backgroundTempMode;
-    std::function<double(Core::Vector&)> backgroundTemperatureFct;
-    std::string backgroundTempStr = stringConfParameter("background_temperature_mode",confRoot);
-    if (backgroundTempStr == "isotherm"){
-        backgroundTempMode = ISOTHERM;
-        double backgroundTemperature_K = doubleConfParameter("background_temperature_K",confRoot);
-        backgroundTemperatureFct = CollisionModel::getConstantDoubleFunction(backgroundTemperature_K);
-    }
-    else if (backgroundTempStr == "linear_gradient"){
-        backgroundTempMode = LINEAR_GRADIENT;
-        double backgroundTemp_start =  doubleConfParameter("background_temperature_start_K",confRoot);
-        double backgroundTemp_stop =  doubleConfParameter("background_temperature_stop_K",confRoot);
-        double backgroundTemp_diff = backgroundTemp_stop - backgroundTemp_start;
-
-        backgroundTemperatureFct =
-            [backgroundTemp_start,
-             backgroundTemp_stop,
-             backgroundTemp_diff,
-             electrodeLength_m](Core::Vector& particleLocation)->double{
-
-                if (particleLocation.x() > electrodeLength_m){
-                    return backgroundTemp_stop;
-                }
-                else {
-                    return (backgroundTemp_diff / electrodeLength_m * particleLocation.x())+ backgroundTemp_start;
-                }
-            };
-    }
-    else{
-        throw std::invalid_argument("wrong configuration value: background_temperature_mode");
-    }
-
+    //Define background temperature
+    double backgroundTemperature_K = doubleConfParameter("background_temperature_K",confRoot);
     double backgroundPressure_Pa = doubleConfParameter("background_pressure_Pa",confRoot);
-    double gasVelocityX = doubleConfParameter("collision_gas_velocity_x_ms-1",confRoot);
-    double collisionGasMass_Amu = doubleConfParameter("collision_gas_mass_amu",confRoot);
-    double collisionGasDiameter_nm = doubleConfParameter("collision_gas_diameter_nm",confRoot);
-
 
     //field parameters:
     std::string cvModeStr = stringConfParameter("cv_mode",confRoot);
@@ -199,13 +126,13 @@ int main(int argc, const char * argv[]) {
         ionMobility.push_back(discreteSubstances[i]->mobility());
     }
 
-
     // prepare file writer  =================================================================
     RS::ConcentrationFileWriter resultFilewriter(projectFilename+"_conc.csv");
 
     auto jsonWriter = std::make_unique<ParticleSimulation::TrajectoryExplorerJSONwriter>(projectFilename+ "_trajectories.json");
     jsonWriter->setScales(1000,1);
 
+    // read particle configuration ==========================================================
     int ionsInactive = 0;
     int nAllParticles = 0;
     for (const auto ni: nParticles){
@@ -244,7 +171,7 @@ int main(int argc, const char * argv[]) {
             particlesPtrs.push_back(particle.get());
             rsSim.addParticle(particle.get(), nParticlesTotal);
             particles.push_back(std::move(particle));
-            trajectoryAdditionalParams.push_back(std::vector<double>(1));
+            trajectoryAdditionalParams.emplace_back(std::vector<double>(1));
             nParticlesTotal++;
         }
     }
@@ -261,27 +188,21 @@ int main(int argc, const char * argv[]) {
 
     // define trajectory integration parameters / functions =================================
 
-    auto accelerationFct =
-            [&fieldSV_VPerM, &fieldCV_VPerM, field_F, field_W, field_h, &fieldMagnitude, spaceChargeFactor, electrodeDistance_m]
-            (BTree::Particle *particle, int particleIndex, BTree::Tree &tree, double time, int timestep){
+    auto fieldFct =
+            [&fieldSV_VPerM, &fieldCV_VPerM, field_F, field_W, field_h]
+            (double time) -> double{
 
-        double particleCharge = particle->getCharge();
+        //double particleCharge = particle->getCharge();
         double voltageSVgp = fieldSV_VPerM * 0.6667; // V/m (1V/m peak to peak is 0.6667V/m ground to peak)
         double voltageSVt = fieldCV_VPerM + (field_F * sin(field_W * time)
                                     + sin(field_h * field_W * time - 0.5 * M_PI))
                                     * voltageSVgp / (field_F + 1);
 
-        fieldMagnitude = voltageSVt; //// / electrodeDistance_m;
+        //fieldMagnitude = voltageSVt; //// / electrodeDistance_m;
 
-        Core::Vector fieldForce(0, 0, fieldMagnitude * particleCharge);
+        //Core::Vector fieldForce(0, 0, fieldMagnitude * particleCharge);
 
-        if (spaceChargeFactor == 0.0) {
-            return (fieldForce / particle->getMass());
-        } else {
-            Core::Vector spaceChargeForce =
-                    tree.computeEFieldFromTree(*particle) * (particleCharge * spaceChargeFactor);
-            return ((fieldForce + spaceChargeForce) / particle->getMass());
-        }
+        return voltageSVgp;
     };
 
 
@@ -294,10 +215,8 @@ int main(int argc, const char * argv[]) {
 
     auto timestepWriteFct =
             [&jsonWriter, &voltageWriter, &additionalParameterTransformFct, trajectoryWriteInterval,
-                    &rsSim, &resultFilewriter, concentrationWriteInterval, nSteps,
-                    &fieldMagnitude, &ionsInactive]
-                    (std::vector<BTree::Particle *> &particles, BTree::Tree &tree, double time, int timestep,
-                     bool lastTimestep){
+                    &rsSim, &resultFilewriter, concentrationWriteInterval, &fieldMagnitude]
+                    (std::vector<BTree::Particle *> &particles, double time, int timestep, bool lastTimestep){
 
         if (timestep % concentrationWriteInterval ==0) {
             rsSim.printConcentrations();
@@ -315,96 +234,24 @@ int main(int argc, const char * argv[]) {
         }
 
         else if (timestep % trajectoryWriteInterval ==0){
-            std::cout<<"ts:"<<timestep<<" time:"<<time<<" average cloud position:"<<
-                     tree.getRoot()->getCenterOfCharge()<<std::endl;
-
             jsonWriter->writeTimestep(
                     particles, additionalParameterTransformFct, time, false);
         }
     };
 
 
-    auto otherActionsFct = [electrodeHalfDistance_m, electrodeLength_m, &ionsInactive] (
-            Core::Vector& newPartPos,BTree::Particle* particle,
-            int particleIndex, BTree::Tree& tree, double time,int timestep){
-
-        if (std::fabs(newPartPos.z()) >= electrodeHalfDistance_m) {
-            particle->setActive(false);
-            particle->setSplatTime(time);
-            ionsInactive++;
-        }
-        else if (newPartPos.x() >= electrodeLength_m) {
-            particle->setActive(false);
-            ionsInactive++;
-        }
-    };
-
-
-    //define / gas interaction /  collision model:
-    std::unique_ptr<CollisionModel::AbstractCollisionModel> collisionModelPtr;
-    if (collisionType == SDS){
-        // prepare static pressure and temperature functions
-        auto staticPressureFct = CollisionModel::getConstantDoubleFunction(backgroundPressure_Pa);
-
-        std::function<Core::Vector(Core::Vector&)>velocityFct;
-
-        if (flowMode == UNIFORM_FLOW){
-            velocityFct =
-                [gasVelocityX] (Core::Vector& pos){
-                    return Core::Vector(gasVelocityX,0.0,0.0);
-                };
-        } else if (flowMode == PARABOLIC_FLOW){
-            velocityFct =
-                    [gasVelocityX,electrodeHalfDistanceSquared_m] (Core::Vector& pos){
-                        //parabolic profile is vX = 2 * Vavg * (1 - r^2 / R^2) with the radius / electrode distance R
-                        double xVelo = gasVelocityX * 2.0 * (1- pos.z() * pos.z() /  electrodeHalfDistanceSquared_m);
-                        return Core::Vector(xVelo,0.0,0.0);
-                    };
-        }
-
-        std::unique_ptr<CollisionModel::StatisticalDiffusionModel> collisionModel=
-                std::make_unique<CollisionModel::StatisticalDiffusionModel>(
-                        staticPressureFct,
-                        backgroundTemperatureFct,
-                        velocityFct,
-                        collisionGasMass_Amu,
-                        collisionGasDiameter_nm*1e-9);
-
-        for (const auto& particle: particlesPtrs){
-            particle->setDiameter(
-                    CollisionModel::util::estimateCollisionDiameterFromMass(
-                            particle->getMass()/Core::AMU_TO_KG
-                    )* 1e-9);
-            collisionModel->setSTPParameters(*particle);
-        }
-        collisionModelPtr = std::move(collisionModel);
-    }
-    else if(collisionType == NO_COLLISION){
-        std::unique_ptr<CollisionModel::EmptyCollisionModel> collisionModel=
-                std::make_unique<CollisionModel::EmptyCollisionModel>();
-        collisionModelPtr = std::move(collisionModel);
-    }
-
-
-    //init trajectory simulation object:
-    ParticleSimulation::VerletIntegrator verletIntegrator(
-            particlesPtrs,
-            accelerationFct, timestepWriteFct, otherActionsFct,
-            *collisionModelPtr
-    );
-    // ======================================================================================
-
-
     // simulate   ===========================================================================
     clock_t begin = std::clock();
 
+    reactionConditions.temperature = backgroundTemperature_K;
+    double reducedPressure = standardPressure_Pa / backgroundPressure_Pa;
+    double simulatedTime = 0.0;
     for (int step=0; step<nSteps; step++) {
+
+        fieldMagnitude = fieldFct(simulatedTime);
+        reactionConditions.electricField = fieldMagnitude;
+
         for (int i = 0; i < nParticlesTotal; i++) {
-            reactionConditions.electricField = fieldMagnitude;
-            reactionConditions.temperature = backgroundTemperatureFct(particles[i]->getLocation());
-
-            //std::cout<<" i: "<<i<<" pos:"<<particles[i]->getLocation()<<" temp:"<<reactionConditions.temperature<<" \n";
-
             bool reacted = rsSim.react(i, reactionConditions, dt_s);
             int substIndex = substanceIndices.at(particles[i]->getSpecies());
             particles[i]->setAuxScalarParam(key_ChemicalIndex,substIndex);
@@ -412,11 +259,17 @@ int main(int argc, const char * argv[]) {
             if (reacted){
                 //we had an reaction event: update the collision model parameters for the particle which are not
                 //based on location (mostly STP parameters in SDS)
-                collisionModelPtr->initializeModelParameters(*particles[i]);
+                //collisionModelPtr->initializeModelParameters(*particles[i]);
             }
+
+            // move particle in z axis according to particle mobility:
+            double particleShift = particles[i]->getMobility() * reducedPressure * fieldMagnitude * dt_s;
+            Core::Vector particleLocation = particles[i]->getLocation();
+            particleLocation.z( particleLocation.z() + particleShift);
+            particles[i]->setLocation(particleLocation);
         }
         rsSim.advanceTimestep(dt_s);
-        verletIntegrator.runSingleStep(dt_s);
+        timestepWriteFct(particlesPtrs, simulatedTime, step, false);
 
         //autocorrect compensation voltage, to minimize z drift (once for every single SV oscillation):
         if (cvMode == AUTO_CV && step % nStepsPerOscillation == 0) {
@@ -440,7 +293,7 @@ int main(int argc, const char * argv[]) {
             break;
         }
     }
-    verletIntegrator.terminateSimulation();
+    timestepWriteFct(particlesPtrs, simulatedTime, nSteps, true);
 
     clock_t end = std::clock();
     double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
