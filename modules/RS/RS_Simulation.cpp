@@ -179,8 +179,8 @@ void RS::Simulation::doReaction(RS::AbstractReaction* reaction, RS::ReactivePart
  * @return true if a reaction had occurred
  */
 bool RS::Simulation::react(int index, RS::ReactionConditions& conditions, double dt) {
-    RS::ReactiveParticle* particle = particleMap_.at(index);
-    const std::vector<AbstractReaction*>* iReactions = &reacInd_.at(particle->getSpecies());
+    RS::ReactiveParticle* particle = particleMap_[index];
+    const std::vector<AbstractReaction*>* iReactions = &reacInd_[particle->getSpecies()];
 
     for(const auto& reaction: *iReactions){ //iterate through all independent reactions
 
