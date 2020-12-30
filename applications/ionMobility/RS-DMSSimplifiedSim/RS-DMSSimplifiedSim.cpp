@@ -166,7 +166,10 @@ int main(int argc, const char * argv[]) {
         for (int k = 0; k < nParticles[i]; k++) {
             uniqueReactivePartPtr particle = std::make_unique<RS::ReactiveParticle>(subst);
 
+            // init position and initial chemical species of the particle:
             particle->setLocation(initialPositions[k]);
+            int substIndex = substanceIndices.at(particle->getSpecies());
+            particle->setAuxScalarParam(key_ChemicalIndex, substIndex);
 
             particlesPtrs.push_back(particle.get());
             rsSim.addParticle(particle.get(), nParticlesTotal);
@@ -249,17 +252,14 @@ int main(int argc, const char * argv[]) {
 
         fieldMagnitude = fieldFct(rsSim.simulationTime());
         reactionConditions.electricField = fieldMagnitude;
-        //std::cout << "fieldMag: "<<fieldMagnitude<<std::endl;
 
         for (int i = 0; i < nParticlesTotal; i++) {
             bool reacted = rsSim.react(i, reactionConditions, dt_s);
-            int substIndex = substanceIndices.at(particles[i]->getSpecies());
-            particles[i]->setAuxScalarParam(key_ChemicalIndex,substIndex);
 
             if (reacted){
-                //we had an reaction event: update the collision model parameters for the particle which are not
-                //based on location (mostly STP parameters in SDS)
-                //collisionModelPtr->initializeModelParameters(*particles[i]);
+                //we had an reaction event: Update the chemical species for the trajectory
+                int substIndex = substanceIndices.at(particles[i]->getSpecies());
+                particles[i]->setAuxScalarParam(key_ChemicalIndex, substIndex);
             }
             // move particle in z axis according to particle mobility:
             double particleShift = particles[i]->getMobility() * reducedPressure * fieldMagnitude * dt_s;
@@ -287,7 +287,6 @@ int main(int argc, const char * argv[]) {
             std::cout << "CV corrected ts:"<< step << " time:"<<rsSim.simulationTime()<< " new val:"<<fieldCV_VPerM<<std::endl;
         }
 
-
         if (ionsInactive >= nAllParticles){
             break;
         }
@@ -301,6 +300,7 @@ int main(int argc, const char * argv[]) {
     std::cout << "elapsed seconds "<< elapsed_secs<<std::endl;
 
     // ======================================================================================
+
 
     return 0;
 }

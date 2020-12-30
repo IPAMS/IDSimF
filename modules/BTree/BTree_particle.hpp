@@ -35,6 +35,7 @@
 #include <memory>
 
 
+
 namespace BTree {
 
     class AbstractNode;
@@ -114,7 +115,7 @@ namespace BTree {
         double splatTime_;   ///< Time when the particle was terminated ("splatted")
         AbstractNode* hostNode_;     ///< A link to a tree node to which the particle is belonging currently
 
-        std::unordered_map<std::string,double> auxScalarParams_; ///< an arbitrary set of additional parameters, accessible by a name
+        std::unordered_map<std::string, double> auxScalarParams_; ///< an arbitrary set of additional parameters, accessible by a name
         std::array<double, 3> auxCollisionParams_ {0.0,0.0,0.0}; ///< quickly accessible parameters for collision models
     };
 
