@@ -118,8 +118,8 @@ namespace RS {
         void updateStaticReactionConcentration();
         std::map<Substance*,int> products() const;
         std::map<Substance*,int> educts() const;
-        std::map<Substance*,int> discreteProducts() const;
-        std::map<Substance*,int> discreteEducts() const;
+        const std::map<Substance*,int>* discreteProducts() const;
+        const std::map<Substance*,int>* discreteEducts() const;
 
         friend std::ostream& ::operator<<(std::ostream& os, const RS::AbstractReaction& reac);
     };

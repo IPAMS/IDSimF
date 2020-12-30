@@ -77,13 +77,13 @@ RS::Simulation::Simulation(std::unique_ptr<RS::SimulationConfiguration> simConf)
         }
         else if (reac->isIndependent()){
             //the reaction is independent: there is only one discrete educt
-            auto discreteEduct = reac->discreteEducts().begin();
+            auto discreteEduct = reac->discreteEducts()->begin();
             reacInd_.at(discreteEduct->first).push_back(reac);
             //staticProbabilities_.at(discreteEduct->first).push_back(reac->staticReactionConcentration());
         }
         else{
             //the reaction is dependent on more than one discrete educt: add it to the reaction maps of all educts
-            for(const auto& discreteEduct: reac->discreteEducts()){
+            for(const auto& discreteEduct: *reac->discreteEducts()){
                 reacDep_.at(discreteEduct.first).push_back(reac);
             }
         }
@@ -180,9 +180,9 @@ void RS::Simulation::doReaction(RS::AbstractReaction* reaction, RS::ReactivePart
  */
 bool RS::Simulation::react(int index, RS::ReactionConditions& conditions, double dt) {
     RS::ReactiveParticle* particle = particleMap_.at(index);
-    std::vector<AbstractReaction*> iReactions = reacInd_.at(particle->getSpecies());
+    const std::vector<AbstractReaction*>* iReactions = &reacInd_.at(particle->getSpecies());
 
-    for(const auto& reaction: iReactions){ //iterate through all independent reactions
+    for(const auto& reaction: *iReactions){ //iterate through all independent reactions
 
         RS::ReactionEvent reactionEvent = reaction->attemptReaction(conditions, particle, dt);
 
@@ -190,9 +190,9 @@ bool RS::Simulation::react(int index, RS::ReactionConditions& conditions, double
             if (reactionEvent.reactionProbability > 1.0){ //if the probability is >1 the time step was too long, and the reaction event was ill
                 ++illEvents_;
             }
-            // despite the possible illnes of the reaction event: now REACT!
+            // despite the possible illness of the reaction event: now REACT!
 
-            RS::Substance* product = reaction->discreteProducts().begin()->first;
+            RS::Substance* product = reaction->discreteProducts()->begin()->first;
             doReaction(reaction, particle, product);
 
             //end the independent reactions loop => the actual educt particle does not longer exist
@@ -218,7 +218,7 @@ bool RS::Simulation::collisionReact(int index, RS::Substance* reactionPartnerSpe
 
             //if probability is >= 1.0 => do reaction
             if (reactionEvent.reactionHappened){
-                RS::Substance* product = reaction->discreteProducts().begin()->first;
+                RS::Substance* product = reaction->discreteProducts()->begin()->first;
                 doReaction(reaction, particle, product);
                 return true;
             }

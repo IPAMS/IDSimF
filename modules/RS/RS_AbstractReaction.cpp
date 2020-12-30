@@ -166,8 +166,8 @@ std::map<RS::Substance*,int> RS::AbstractReaction::educts() const {
  *
  * @return the map of discrete (modeled in terms of discrete particles) substances
  */
-std::map<RS::Substance*,int> RS::AbstractReaction::discreteProducts() const {
-    return discreteProducts_;
+const std::map<RS::Substance*,int>* RS::AbstractReaction::discreteProducts() const {
+    return &discreteProducts_;
 }
 
 /**
@@ -176,8 +176,8 @@ std::map<RS::Substance*,int> RS::AbstractReaction::discreteProducts() const {
  *
  * @return the map of discrete (modeled in terms of discrete particles) educts
  */
-std::map<RS::Substance*,int> RS::AbstractReaction::discreteEducts() const{
-    return discreteEducts_;
+const std::map<RS::Substance*,int>* RS::AbstractReaction::discreteEducts() const{
+    return &discreteEducts_;
 }
 
 /**

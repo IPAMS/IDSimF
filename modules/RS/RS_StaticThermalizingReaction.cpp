@@ -42,7 +42,7 @@ RS::ReactionEvent RS::StaticThermalizingReaction::attemptReaction(RS::ReactionCo
 
         //first: get the product particle mass (since the particle will be updated with the new chemical
         //species afterwards and outside of this method
-        double productMass = this->discreteProducts().begin()->first->mass();
+        double productMass = this->discreteProducts()->begin()->first->mass();
 
         particle->setVelocity(
                 RS::util::maxwellBoltzmannRandomVelocity(conditions.temperature,productMass));

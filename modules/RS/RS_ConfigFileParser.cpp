@@ -186,7 +186,7 @@ bool RS::ConfigFileParser::parseReactions(SimulationConfiguration *simConf, std:
                         products,
                         parsedParams.at(0),
                         labelStr);
-                if ( !(reaction->discreteEducts().size() == 1 && reaction->educts().size() == 2) ){
+                if ( !(reaction->discreteEducts()->size() == 1 && reaction->educts().size() == 2) ){
                     throw (RS::ConfigurationFileException(
                             "Simple step reaction requires exactly one discrete and one isotropic educt"));
                 }
