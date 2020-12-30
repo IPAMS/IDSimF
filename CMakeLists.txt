@@ -25,7 +25,6 @@ include_directories(${HDF5_INCLUDE_DIRS})
 #optional libraries / optional features-------------
 option (USE_CPP_FSLIB "Use stdc++fs" OFF)
 option (USE_EIGEN "Use Eigen based tests / experimental implementations" OFF)
-
 #-------------------------------
 
 add_subdirectory (modules/Core)
@@ -47,6 +46,7 @@ add_subdirectory (tests/benchmarks/filewriter/HDF5filewriter)
 add_subdirectory (tests/benchmarks/collision_hardsphere/runtime_benchmark)
 add_subdirectory (tests/benchmarks/collision_hardsphere/maxwell_benchmark)
 add_subdirectory (tests/benchmarks/collision_sds/runtime_benchmark)
+add_subdirectory (tests/benchmarks/RS/runtime_benchmark)
 add_subdirectory (tests/benchmarks/simionPA/runtime_benchmark)
 add_subdirectory (tests/benchmarks/simionPA/samplingErrors_benchmark)
 add_subdirectory (tests/benchmarks/interpolatedField/runtime_benchmark)
