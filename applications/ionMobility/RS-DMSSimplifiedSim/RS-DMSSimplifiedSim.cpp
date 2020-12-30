@@ -202,7 +202,7 @@ int main(int argc, const char * argv[]) {
 
         //Core::Vector fieldForce(0, 0, fieldMagnitude * particleCharge);
 
-        return voltageSVgp;
+        return voltageSVt;
     };
 
 
@@ -245,11 +245,11 @@ int main(int argc, const char * argv[]) {
 
     reactionConditions.temperature = backgroundTemperature_K;
     double reducedPressure = standardPressure_Pa / backgroundPressure_Pa;
-    double simulatedTime = 0.0;
     for (int step=0; step<nSteps; step++) {
 
-        fieldMagnitude = fieldFct(simulatedTime);
+        fieldMagnitude = fieldFct(rsSim.simulationTime());
         reactionConditions.electricField = fieldMagnitude;
+        //std::cout << "fieldMag: "<<fieldMagnitude<<std::endl;
 
         for (int i = 0; i < nParticlesTotal; i++) {
             bool reacted = rsSim.react(i, reactionConditions, dt_s);
@@ -261,7 +261,6 @@ int main(int argc, const char * argv[]) {
                 //based on location (mostly STP parameters in SDS)
                 //collisionModelPtr->initializeModelParameters(*particles[i]);
             }
-
             // move particle in z axis according to particle mobility:
             double particleShift = particles[i]->getMobility() * reducedPressure * fieldMagnitude * dt_s;
             Core::Vector particleLocation = particles[i]->getLocation();
@@ -269,7 +268,7 @@ int main(int argc, const char * argv[]) {
             particles[i]->setLocation(particleLocation);
         }
         rsSim.advanceTimestep(dt_s);
-        timestepWriteFct(particlesPtrs, simulatedTime, step, false);
+        timestepWriteFct(particlesPtrs, rsSim.simulationTime(), step, false);
 
         //autocorrect compensation voltage, to minimize z drift (once for every single SV oscillation):
         if (cvMode == AUTO_CV && step % nStepsPerOscillation == 0) {
@@ -293,7 +292,7 @@ int main(int argc, const char * argv[]) {
             break;
         }
     }
-    timestepWriteFct(particlesPtrs, simulatedTime, nSteps, true);
+    timestepWriteFct(particlesPtrs, rsSim.simulationTime(), nSteps, true);
 
     clock_t end = std::clock();
     double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
