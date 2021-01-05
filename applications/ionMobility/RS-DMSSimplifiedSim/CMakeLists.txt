@@ -6,8 +6,11 @@ set(SOURCE_FILES
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 target_link_libraries(${PROJECT_NAME} core apputils rs collisionmodels particlesimulation)
 
-add_test(NAME BT-RS-DMSSimplifiedSim_waterCluster_benchmarkRun COMMAND ${PROJECT_NAME}
-        "example/RS_waterCluster_benchmarkRun.json" "run_BT-RS-DMSSim_waterCluster_benchmarkRun")
+add_test(NAME BT-RS-DMSSimplifiedSim_waterCluster_staticRun COMMAND ${PROJECT_NAME}
+        "example/DMS_waterCluster_static.json" "run_DMS_waterCluster_static")
+
+add_test(NAME BT-RS-DMSSimplifiedSim_waterCluster_tempDependentRun COMMAND ${PROJECT_NAME}
+        "example/DMS_waterCluster_tempDependent.json" "run_DMS_waterCluster_tempDependent")
 
 add_custom_command(TARGET ${PROJECT_NAME} PRE_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory
