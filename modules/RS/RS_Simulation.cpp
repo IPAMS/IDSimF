@@ -56,7 +56,7 @@ RS::Simulation::Simulation(std::unique_ptr<RS::SimulationConfiguration> simConf)
             RS::Substance* particleSubstance;
             RS::Substance* backgroundSubstance;
 
-            for(const auto& substPair: reac->educts()){
+            for(const auto& substPair: *reac->educts()){
                 RS::Substance* subst = substPair.first;
                 int factor = substPair.second;
                 if (factor == 1){
