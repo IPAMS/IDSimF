@@ -116,8 +116,8 @@ namespace RS {
         bool isCollisionReaction() const;
         double staticReactionConcentration() const;
         void updateStaticReactionConcentration();
-        std::map<Substance*,int> products() const;
-        std::map<Substance*,int> educts() const;
+        const std::map<Substance*,int>* products() const;
+        const std::map<Substance*,int>* educts() const;
         const std::map<Substance*,int>* discreteProducts() const;
         const std::map<Substance*,int>* discreteEducts() const;
 

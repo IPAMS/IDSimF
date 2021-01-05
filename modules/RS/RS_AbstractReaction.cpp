@@ -148,8 +148,8 @@ void RS::AbstractReaction::updateStaticReactionConcentration() {
  *
  * @return the map of products with their stociometric factors
  */
-std::map<RS::Substance*,int> RS::AbstractReaction::products() const {
-    return products_;
+const std::map<RS::Substance*,int>* RS::AbstractReaction::products() const {
+    return &products_;
 }
 
 /**
@@ -157,8 +157,8 @@ std::map<RS::Substance*,int> RS::AbstractReaction::products() const {
  *
  * @return the map of educts with their stociometric factors
  */
-std::map<RS::Substance*,int> RS::AbstractReaction::educts() const {
-    return educts_;
+const std::map<RS::Substance*,int>* RS::AbstractReaction::educts() const {
+    return &educts_;
 }
 
 /**
