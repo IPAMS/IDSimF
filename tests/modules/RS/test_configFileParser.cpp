@@ -190,11 +190,11 @@ TEST_CASE("Test parsing of chemical systems with RS config file parser", "[RS][C
         RS::AbstractReaction* r0 = simConf->reaction(0);
         REQUIRE(r0->getTypeLabel() == "static");
         REQUIRE(r0->getLabel() == "cl1_forward");
-        REQUIRE(r0->discreteEducts().at(simConf->substanceByName("Cl_1"))== 1);
-        REQUIRE(r0->educts().at(simConf->substanceByName("H2O"))== 1);
+        REQUIRE(r0->discreteEducts()->at(simConf->substanceByName("Cl_1"))== 1);
+        REQUIRE(r0->educts()->at(simConf->substanceByName("H2O"))== 1);
 
-        REQUIRE(r0->discreteProducts().at(simConf->substanceByName("Cl_2"))== 1);
-        REQUIRE(r0->products().at(simConf->substanceByName("N2"))== 1);
+        REQUIRE(r0->discreteProducts()->at(simConf->substanceByName("Cl_2"))== 1);
+        REQUIRE(r0->products()->at(simConf->substanceByName("N2"))== 1);
     }
 
     SECTION( "Existing field dependent water cluster RS config file should parse correctly") {
@@ -213,9 +213,9 @@ TEST_CASE("Test parsing of chemical systems with RS config file parser", "[RS][C
         RS::AbstractReaction* r8 = simConf->reaction(8);
         REQUIRE(r8->getTypeLabel() == "vanthoff_field");
         REQUIRE(r8->getLabel() == "cl2_backward");
-        REQUIRE(r8->discreteEducts().at(simConf->substanceByName("Cl_2")) == 1);
-        REQUIRE_THROWS(r8->educts().at(simConf->substanceByName("H2O")));
-        REQUIRE(r8->educts().at(simConf->substanceByName("N2"))== 1);
+        REQUIRE(r8->discreteEducts()->at(simConf->substanceByName("Cl_2")) == 1);
+        REQUIRE_THROWS(r8->educts()->at(simConf->substanceByName("H2O")));
+        REQUIRE(r8->educts()->at(simConf->substanceByName("N2"))== 1);
 
         RS::FieldDependentVantHoffReaction reac_compare(
                 educts, products,

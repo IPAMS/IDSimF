@@ -170,7 +170,7 @@ TEST_CASE( "Test RS simulations", "[RS][Simulation]") {
             sim.advanceTimestep(1.0);
         }
 
-        std::map<RS::Substance*,int> finalConcs = sim.discreteConcentrations();
+        std::map<RS::Substance* const, int> finalConcs = sim.discreteConcentrations();
         REQUIRE(finalConcs[subst_A] == 37);
         REQUIRE(finalConcs[sim.simulationConfiguration()->getAllSubstances()[2]] == 63);
         REQUIRE(sim.getParticle(2).getSpecies() == subst_C);

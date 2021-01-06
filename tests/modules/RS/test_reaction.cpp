@@ -40,6 +40,7 @@
 
 
 using sMap = std::map<RS::Substance*,int>;
+using sMapPtr = const sMap*;
 using sPair= sMap::value_type;
 
 TEST_CASE("Test basic reaction semantics", "[RS][Reaction]") {
@@ -81,17 +82,17 @@ TEST_CASE("Test basic reaction semantics", "[RS][Reaction]") {
 
         REQUIRE(reac.getLabel() == "a test reaction");
 
-        sMap ret_dist_educts = reac.discreteEducts();
-        sMap ret_dist_products = reac.discreteProducts();
+        sMapPtr ret_dist_educts = reac.discreteEducts();
+        sMapPtr ret_dist_products = reac.discreteProducts();
 
-        REQUIRE(ret_dist_educts[&ed_1] == 2);
-        REQUIRE(ret_dist_educts.count(&ed_3) == 0);
-        REQUIRE(ret_dist_educts.count(&ed_4) == 0);
+        REQUIRE(ret_dist_educts->at(&ed_1) == 2);
+        REQUIRE(ret_dist_educts->count(&ed_3) == 0);
+        REQUIRE(ret_dist_educts->count(&ed_4) == 0);
 
-        REQUIRE(ret_dist_products[&pro_1] == 4);
-        REQUIRE(ret_dist_products[&pro_2] == 2);
-        REQUIRE(ret_dist_products.count(&pro_3) == 0);
-        REQUIRE(ret_dist_products.count(&pro_4) == 0);
+        REQUIRE(ret_dist_products->at(&pro_1) == 4);
+        REQUIRE(ret_dist_products->at(&pro_2) == 2);
+        REQUIRE(ret_dist_products->count(&pro_3) == 0);
+        REQUIRE(ret_dist_products->count(&pro_4) == 0);
     }
 }
 
