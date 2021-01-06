@@ -72,18 +72,22 @@ This section gives an overview of the simulation application categories and the 
 ``ionMobility``: Ion mobility devices
 -------------------------------------
 
+:doc:`BT-RS-IMSSim <applications/BT_RS_IMSSim>`: Simulation of drift tube Ion Mobility Spectrometry
+    Simulation of a drift tube Ion Mobility Spectrometry Device, including background gas interaction, ion chemistry and space charge. 
+
 :doc:`BT-RS-DMSSim <applications/BT_RS_DMSSim>` Simulation of planar Differential Ion Mobility 
     Simulation of a Differential Ion Mobility (DMS) separation device with idealized planar electrodes, including background gas interaction, ion chemistry and space charge. 
 
-:doc:`BT-RS-IMSSim <applications/BT_RS_IMSSim>`: Simulation of drift tube Ion Mobility Spectrometry
-    Simulation of a drift tube Ion Mobility Spectrometry Device, including background gas interaction, ion chemistry and space charge. 
+:doc:`RS-DMSSimplifiedSim <applications/BT_DMSSimplifiedSim>`: Simplified / idealized simulation of planar Differential Ion Mobility
+    Simplified simulation of a planar electrode Differential Ion Mobility (DMS) separation device: Search for simulated compensation voltage (CV) of a chemically active ion ensemble in DMS. 
 
 .. toctree::
     :maxdepth: 1
     :hidden:
 
-    applications/BT_RS_DMSSim
     applications/BT_RS_IMSSim
+    applications/BT_RS_DMSSim
+    applications/RS_DMSSimplifiedSim
 
 
 ------------------------------------------------------
