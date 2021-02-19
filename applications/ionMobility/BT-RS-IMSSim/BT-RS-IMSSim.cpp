@@ -156,7 +156,7 @@ int main(int argc, const char *argv[]){
                 };
                 return result;
             };
-        auxParamNames = {"chemical_id","velocity x","velocity y","velocity z"};
+        auxParamNames = {"chemical id","velocity x","velocity y","velocity z"};
     }
     else {
         additionalParamTFct = [](BTree::Particle *particle) -> std::vector<double>
@@ -166,7 +166,7 @@ int main(int argc, const char *argv[]){
             };
             return result;
         };
-        auxParamNames = {"chemical_id"};
+        auxParamNames = {"chemical id"};
     }
 
     //init hdf5 filewriter
