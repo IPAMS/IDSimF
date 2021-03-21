@@ -50,6 +50,10 @@ namespace AppUtils{
 
     std::unique_ptr<ParticleSimulation::ParticleStartZone> getStartZoneFromIonDefinition(const Json::Value& confRoot);
 
+    void setIonsKineticEnergy(
+            std::vector<std::unique_ptr<BTree::Particle>>& particles,
+            const Json::Value& confRoot);
+
     void readRandomIonDefinition(
             std::vector<std::unique_ptr<BTree::Particle>>& particles,
             std::vector<BTree::Particle*>& particlePtrs,

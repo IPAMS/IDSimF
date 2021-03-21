@@ -26,6 +26,7 @@
 #include "PSim_boxStartZone.hpp"
 #include "PSim_cylinderStartZone.hpp"
 #include "PSim_util.hpp"
+#include "Core_vector.hpp"
 
 /**
  * Returns if a ion cloud definition file was specified in a simulation configuration
@@ -99,6 +100,30 @@ std::unique_ptr<ParticleSimulation::ParticleStartZone> AppUtils::getStartZoneFro
     return(particleStartZone);
 }
 
+
+/**
+ * Sets the kinetic energy of an ion group according to the kinetic energy definition given
+ * in confRoot
+ * @param particles particle group to set the kinetic energy for
+ * @param confRoot a simulation configuration
+ */
+void AppUtils::setIonsKineticEnergy(
+        std::vector<std::unique_ptr<BTree::Particle>>& particles,
+        const Json::Value& confRoot) {
+
+    if (confRoot.isMember("ion_kinetic_energy_eV")){
+        double ion_ke = doubleConfParameter("ion_kinetic_energy_eV", confRoot) / Core::JOULE_TO_EV;
+        std::vector<double> direction_raw = doubleVectorConfParameter("ion_direction_vector", confRoot);
+        Core::Vector ion_dir(direction_raw[0], direction_raw[1], direction_raw[2]);
+        Core::Vector ion_dir_normalized(ion_dir * (1.0/ion_dir.magnitude()));
+        // iterate through all ion groups
+        for (auto &particle: particles){
+            double ion_velocity = std::sqrt( 2.0* ion_ke / particle->getMass());
+            particle->setVelocity(ion_dir_normalized * ion_velocity);
+        }
+    }
+}
+
 /**
  * Reads a random box or random cylinder ion definition into particles and particle pointer vectors
  *
@@ -121,6 +146,7 @@ void AppUtils::readRandomIonDefinition(
     if (confRoot.isMember("ion_time_of_birth_range_s")){
         ions_tob_range = doubleConfParameter("ion_time_of_birth_range_s", confRoot);
     }
+
     std::unique_ptr<ParticleSimulation::ParticleStartZone> particleStartZone = getStartZoneFromIonDefinition(confRoot);
 
     // iterate through all ion groups
@@ -136,13 +162,17 @@ void AppUtils::readRandomIonDefinition(
         std::vector<std::unique_ptr<BTree::Particle>> ions = particleStartZone->getRandomParticlesInStartZone(
                 nParticles, charge, ions_tob_range);
 
-        // set additional parameter and push particles to vectors containing all particles
-        for (int j = 0; j < nParticles; j++) {
-            ions[j]->setMassAMU(mass);
-            ions[j]->setDiameter(collisionDiameter_m);
+        // set particle parameters
+        for (std::unique_ptr<BTree::Particle>& ion: ions) {
+            ion->setMassAMU(mass);
+            ion->setDiameter(collisionDiameter_m);
+        }
+        setIonsKineticEnergy(ions, confRoot);
 
-            particlePtrs.push_back(ions[j].get());
-            particles.push_back(std::move(ions[j]));
+        // and push particles to vectors containing all particles
+        for (std::unique_ptr<BTree::Particle>& ion: ions){
+            particlePtrs.push_back(ion.get());
+            particles.push_back(std::move(ion));
         }
     }
 }
