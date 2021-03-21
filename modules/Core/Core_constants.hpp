@@ -42,7 +42,7 @@ namespace Core {
     
     const double K_BOLTZMANN = 1.3806505e-23;       ///< Boltzmann constant (J/K)
     const double RGas = 8.3145;                     ///< Ideal gas constant (J/(mol*K))
-    const double eVToJoule  = 6.2415095e+18;        ///< (eV/J) conversion factor
+    const double JOULE_TO_EV  = 6.2415095e+18;        ///< (eV/J) conversion factor
     const double N_AVOGADRO = 6.02214199e23;        ///< Avogadro's number
     const double MOL_VOLUME = 22.413996e-3;         //Volume (m^3) of one mol
                                                     // of ideal gas at 0 C, 101.325 kPa

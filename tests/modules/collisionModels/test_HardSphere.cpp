@@ -83,7 +83,7 @@ TEST_CASE( "Test Hard Sphere model after collision function", "[CollisionModels]
     auto afterCollisionFct = [&nTotalCollisions, &collisionEnergies](
             RS::CollisionConditions collisionConditions, BTree::Particle &){
         nTotalCollisions++;
-        collisionEnergies.push_back(collisionConditions.totalCollisionEnergy * Core::eVToJoule);
+        collisionEnergies.push_back(collisionConditions.totalCollisionEnergy * Core::JOULE_TO_EV);
     };
     double diameterHe = CollisionModel::HardSphereModel::DIAMETER_HE;
     CollisionModel::HardSphereModel hs = CollisionModel::HardSphereModel(1.0,298,4.0,diameterHe,afterCollisionFct);

@@ -258,7 +258,7 @@ TEST_CASE( "Test RS simulations", "[RS][Simulation]") {
         REQUIRE(hasReacted == false);
         REQUIRE(sim.getParticle(0).getSpecies() == Cl2);
 
-        collisionConditions.totalCollisionEnergy = 9.9 / Core::eVToJoule;
+        collisionConditions.totalCollisionEnergy = 9.9 / Core::JOULE_TO_EV;
         hasReacted = sim.collisionReact(1,N2,collisionConditions);
         REQUIRE(hasReacted == false);
         REQUIRE(sim.getParticle(1).getSpecies() == Cl2);
@@ -267,7 +267,7 @@ TEST_CASE( "Test RS simulations", "[RS][Simulation]") {
         REQUIRE(reacCl2Destruction->getLabel() == "cl2_destruction");
         REQUIRE(sim.reactionEvents(reacCl2Destruction) == 0);
 
-        collisionConditions.totalCollisionEnergy = 10.1 / Core::eVToJoule;
+        collisionConditions.totalCollisionEnergy = 10.1 / Core::JOULE_TO_EV;
         hasReacted = sim.collisionReact(1,N2,collisionConditions);
         REQUIRE(hasReacted == true);
         REQUIRE(sim.getParticle(1).getSpecies() == Cl1);

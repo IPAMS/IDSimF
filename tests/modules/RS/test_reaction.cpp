@@ -220,13 +220,13 @@ TEST_CASE("Test chemical semantics of RS reaction types", "[RS][Reaction]") {
         REQUIRE(reac.isCollisionReaction());
 
         //reaction below activation energy should return zero:
-        double totalReactionEnergy = 1.0e-1 / Core::eVToJoule;
+        double totalReactionEnergy = 1.0e-1 / Core::JOULE_TO_EV;
         RS::CollisionConditions collisionConditions = {.totalCollisionEnergy = totalReactionEnergy};
         double probability = reac.attemptReaction(collisionConditions,&dummyParticle).reactionProbability;
         REQUIRE(probability ==Approx(0.0));
 
         //reaction above activation energy should return preexponential factor * isotropic educts concentration * dt
-        totalReactionEnergy = 2.0e-1 / Core::eVToJoule;
+        totalReactionEnergy = 2.0e-1 / Core::JOULE_TO_EV;
         collisionConditions.totalCollisionEnergy = totalReactionEnergy;
         probability = reac.attemptReaction(collisionConditions, &dummyParticle).reactionProbability;
         REQUIRE(probability ==Approx(1.0));

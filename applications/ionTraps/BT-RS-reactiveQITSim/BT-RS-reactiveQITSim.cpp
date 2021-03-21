@@ -370,7 +370,7 @@ int main(int argc, const char * argv[]) {
     ParticleSimulation::additionalPartParamFctType additionalParameterTransformFct =
             [](BTree::Particle *particle) -> std::vector<double>{
                 double ionVelocity = particle->getVelocity().magnitude();
-                double kineticEnergy_eV = 0.5* particle->getMass() * ionVelocity * ionVelocity * Core::eVToJoule;
+                double kineticEnergy_eV = 0.5* particle->getMass() * ionVelocity * ionVelocity * Core::JOULE_TO_EV;
                 std::vector<double> result = {
                         particle->getVelocity().x(),
                         particle->getVelocity().y(),
