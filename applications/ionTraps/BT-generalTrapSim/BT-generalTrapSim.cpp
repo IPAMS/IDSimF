@@ -311,17 +311,21 @@ int main(int argc, const char * argv[]) {
                 return ((rfForce + spaceChargeForce) / particle->getMass());
             };
 
-    auto otherActionsFunctionQIT = [&simulationDomainBoundaries, &ionsInactive](
+    auto otherActionsFunctionQIT = [&simulationDomainBoundaries, &ionsInactive, &potentialArrays](
             Core::Vector& newPartPos, BTree::Particle* particle,
             int particleIndex,
             auto& tree, double time, int timestep) {
-        // if the ion is out of the boundary box: Terminate the ion
+        // if the ion is out of the boundary box or ends up in an electrode:
+        // Terminate the ion
+        // (since all potential arrays of the simulation define the basis functions of a linear combination,
+        // the electrode geometry has to be the same in all electrodes, thus check only the first one)
         if ( newPartPos.x() <= simulationDomainBoundaries[0][0] ||
              newPartPos.x() >= simulationDomainBoundaries[0][1] ||
              newPartPos.y() <= simulationDomainBoundaries[1][0] ||
              newPartPos.y() >= simulationDomainBoundaries[1][1] ||
              newPartPos.z() <= simulationDomainBoundaries[2][0] ||
-             newPartPos.z() >= simulationDomainBoundaries[2][1] )
+             newPartPos.z() >= simulationDomainBoundaries[2][1] ||
+             potentialArrays.at(0)->isElectrode(newPartPos.x(), newPartPos.y(), newPartPos.z()) )
         {
             particle->setActive(false);
             particle->setSplatTime(time);
