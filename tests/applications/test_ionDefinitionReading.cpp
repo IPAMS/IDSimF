@@ -47,11 +47,13 @@ bool testParticleBox(std::vector<std::unique_ptr<BTree::Particle>>& particles){
     return (particleOutOfBoxFound);
 }
 
-bool testParticleCylinder(std::vector<std::unique_ptr<BTree::Particle>>& particles){
+bool testParticleCylinder(
+        std::vector<std::unique_ptr<BTree::Particle>>& particles,
+        double expectedLength = 0.006,
+        double expectedRadius = 0.004
+        ){
 
     Core::Vector expectedShift(0.002, 0.005, -0.002);
-    double expectedLength = 0.006;
-    double expectedRadius = 0.004;
 
     bool incorrectIonFound = false;
 
@@ -71,7 +73,8 @@ bool testParticleCylinder(std::vector<std::unique_ptr<BTree::Particle>>& particl
 TEST_CASE( "Test ion definition reading", "[ApplicationUtils]") {
 
     Json::Value conf_box = readConfigurationJson("ionBox.json");
-    Json::Value conf_cylinder = readConfigurationJson("ionCylinder.json");
+    Json::Value conf_cylinder_minimal = readConfigurationJson("ionCylinder_minimal.json");
+    Json::Value conf_cylinder_full = readConfigurationJson("ionCylinder_full.json");
     Json::Value conf_ionCloud = readConfigurationJson("ionCloudFile.json");
 
     std::string configurationPath = "./";
@@ -121,21 +124,46 @@ TEST_CASE( "Test ion definition reading", "[ApplicationUtils]") {
             AppUtils::readIonDefinition(particles, particlePtrs, conf_box, configurationPath);
             bool particleOutOfBoxFound = testParticleBox(particles);
             REQUIRE(!particleOutOfBoxFound);
+
+
         }
     }
 
-    SECTION("Test ion definitions with cylinder start zone") {
+    SECTION("Test ion definitions with minimal cylinder start zone") {
 
-        SECTION("Ion definition reading: Random ion cylinder definition should be readable") {
-            AppUtils::readRandomIonDefinition(particles, particlePtrs, conf_cylinder);
+        SECTION("Ion definition reading: Minimal random ion cylinder definition should be readable") {
+            AppUtils::readRandomIonDefinition(particles, particlePtrs, conf_cylinder_minimal);
             bool particleOutOfCylinderFound = testParticleCylinder(particles);
             REQUIRE(!particleOutOfCylinderFound);
         }
 
-        SECTION("Ion definition reading: Full ion definition reading with cylinder should work") {
-            AppUtils::readIonDefinition(particles, particlePtrs, conf_cylinder, configurationPath);
+        SECTION("Ion definition reading: Full ion definition reading with minimal cylinder definition should work") {
+            AppUtils::readIonDefinition(particles, particlePtrs, conf_cylinder_minimal, configurationPath);
             bool particleOutOfCylinderFound = testParticleCylinder(particles);
             REQUIRE(!particleOutOfCylinderFound);
+        }
+    }
+
+    SECTION("Test ion definitions with full cylinder start zone") {
+
+        SECTION("Ion definition reading: Full ion definition reading with full cylinder definition should work") {
+            AppUtils::readIonDefinition(particles, particlePtrs, conf_cylinder_full, configurationPath);
+            bool particleOutOfCylinderFound = testParticleCylinder(particles, 0.08, 0.01);
+            REQUIRE(!particleOutOfCylinderFound);
+
+            auto& p_35 = particles[1];
+            auto& p_100 = particles[8001];
+            REQUIRE(p_35->getMass() == Approx(35*Core::AMU_TO_KG));
+            REQUIRE(p_100->getMass() == Approx(100*Core::AMU_TO_KG));
+
+            double kE_35 = 1/2.0 * p_35->getMass() * p_35->getVelocity().magnitudeSquared() * Core::JOULE_TO_EV;
+            double kE_100 = 1/2.0 * p_100->getMass() * p_100->getVelocity().magnitudeSquared() * Core::JOULE_TO_EV;
+            REQUIRE(kE_35 == Approx(100.0));
+            REQUIRE(kE_100 == Approx(100.0));
+
+            Core::Vector v_100 = p_100->getVelocity();
+            REQUIRE(v_100.z() == 0.0);
+            REQUIRE(2.0 * v_100.x() == Approx(v_100.y()));
         }
     }
 }

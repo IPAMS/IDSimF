@@ -8,7 +8,8 @@ set(SOURCE_FILES
 set(TEST_FILE_FOLDER ${CMAKE_SOURCE_DIR}/tests/testfields/simulation_configurations)
 set(TEST_FILES
         ${TEST_FILE_FOLDER}/ionBox.json
-        ${TEST_FILE_FOLDER}/ionCylinder.json
+        ${TEST_FILE_FOLDER}/ionCylinder_minimal.json
+        ${TEST_FILE_FOLDER}/ionCylinder_full.json
         ${TEST_FILE_FOLDER}/ionCloudFile.json
         ${TEST_FILE_FOLDER}/test_ion_cloud_01.csv
         ${TEST_FILE_FOLDER}/ionDefinition_invalid.json
