@@ -62,10 +62,15 @@ void ParticleSimulation::VelocityIntegrator::addParticle(BTree::Particle *partic
  * @param dt time step length
  */
 void ParticleSimulation::VelocityIntegrator::run(int nTimesteps, double dt) {
+    this->runState_ = RUNNING;
     for (int step=0; step< nTimesteps; step++){
         runSingleStep(dt);
+        if (this->runState_ == IN_TERMINATION){
+            break;
+        }
     }
     this->finalizeSimulation();
+    this->runState_ = STOPPED;
 }
 
 /**
@@ -77,7 +82,9 @@ void ParticleSimulation::VelocityIntegrator::runSingleStep(double dt) {
         if (particles_[i]->isActive() == true){
             Core::Vector velocity = velocityFunction_(particles_[i],i,time_,timestep_);
             particles_[i]->setVelocity(velocity);
-            particles_[i]->setLocation(particles_[i]->getLocation() + particles_[i]->getVelocity() * dt);
+            Core::Vector newPos = particles_[i]->getLocation() + particles_[i]->getVelocity() * dt;
+            particles_[i]->setLocation(newPos);
+            otherActionsFunction_(newPos, particles_[i], i, time_, timestep_);
         }
     }
 
