@@ -75,19 +75,20 @@ void ParticleSimulation::ParallelVerletIntegrator::initInternalState_(){
 
 void ParticleSimulation::ParallelVerletIntegrator::run(int nTimesteps, double dt) {
 
-    //write initial state to the trajectory:
+    // run init:
     this->runState_ = RUNNING;
     bearParticles_(0.0);
     timestepWriteFunction_(particles_, tree_, time_, timestep_, false);
 
+    // run:
     for (int step=0; step< nTimesteps; step++){
         runSingleStep(dt);
         if (this->runState_ == IN_TERMINATION){
             break;
         }
     }
-    this->runState_ = STOPPED;
     this->finalizeSimulation();
+    this->runState_ = STOPPED;
 }
 
 void ParticleSimulation::ParallelVerletIntegrator::runSingleStep(double dt){
