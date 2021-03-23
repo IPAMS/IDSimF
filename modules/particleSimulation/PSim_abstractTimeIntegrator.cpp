@@ -55,8 +55,26 @@ particlesBornIdx_(0)
             [](const pTobPair_t &p1, const pTobPair_t &p2) {return p1.first < p2.first;});
 }
 
+/**
+ * Indicates that the time integration should be terminated at the next possible time
+ */
 void ParticleSimulation::AbstractTimeIntegrator::setTerminationState() {
     runState_ = ParticleSimulation::IN_TERMINATION;
+}
+
+
+/**
+ * Gets the simulated time
+ */
+double ParticleSimulation::AbstractTimeIntegrator::time() {
+    return time_;
+}
+
+/**
+ * Gets the current time step
+ */
+int ParticleSimulation::AbstractTimeIntegrator::timeStep() {
+    return timestep_;
 }
 
 /**

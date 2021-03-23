@@ -105,7 +105,7 @@ TEST_CASE( "Test parallel verlet integrator", "[ParticleSimulation][ParallelVerl
         std::vector<BTree::uniquePartPtr>particles;
         std::vector<BTree::Particle*>particlesPtrs;
 
-        SECTION( "Parallel Verlet integrator should be able to integrate correctly non reactive particles") {
+        SECTION( "Parallel Verlet integrator should be able to integrate correctly non reactive particles with ToB") {
 
             //prepare particles with a distributed time of birth (TOB):
             double yPos = 0;
@@ -166,26 +166,31 @@ TEST_CASE( "Test parallel verlet integrator", "[ParticleSimulation][ParallelVerl
 
             CollisionModel::EmptyCollisionModel collisionModel;
 
-            ParticleSimulation::ParallelVerletIntegrator verletIntegrator(
-                    particlesPtrs,
-                    accelerationFct, timestepWriteFct, otherActionsFct,
-                    collisionModel);
+            SECTION("Integration should run through") {
+                ParticleSimulation::ParallelVerletIntegrator verletIntegrator(
+                        particlesPtrs,
+                        accelerationFct, timestepWriteFct, otherActionsFct,
+                        collisionModel);
 
-            verletIntegrator.run(timeSteps, dt);
+                verletIntegrator.run(timeSteps, dt);
 
-            double endTime = timeSteps*dt;
-            for (int i = 0; i<nParticles; ++i) {
-                Core::Vector ionPos = particles[i]->getLocation();
+                REQUIRE(verletIntegrator.time() == Approx(timeSteps*dt));
+                REQUIRE(verletIntegrator.timeStep() == timeSteps);
 
-                //calculate approximate position according to a pure linear uniform acceleration
-                // according to the real time the particles were present in the simulation:
-                double diffTime = endTime-(0.5*dt)-particles[i]->getTimeOfBirth();
-                double xCalculated = 0.5*ionAcceleration*diffTime*diffTime;
-                double zCalculated = 0.5*xCalculated;
+                double endTime = timeSteps*dt;
+                for (int i = 0; i<nParticles; ++i) {
+                    Core::Vector ionPos = particles[i]->getLocation();
 
-                REQUIRE(Approx(ionPos.x()).epsilon(0.05)==xCalculated);
-                REQUIRE(Approx(ionPos.y()).epsilon(1e-7)==i*0.01);
-                REQUIRE(Approx(ionPos.z()).epsilon(0.05)==zCalculated);
+                    //calculate approximate position according to a pure linear uniform acceleration
+                    // according to the real time the particles were present in the simulation:
+                    double diffTime = endTime-(0.5*dt)-particles[i]->getTimeOfBirth();
+                    double xCalculated = 0.5*ionAcceleration*diffTime*diffTime;
+                    double zCalculated = 0.5*xCalculated;
+
+                    REQUIRE(Approx(ionPos.x()).epsilon(0.05)==xCalculated);
+                    REQUIRE(Approx(ionPos.y()).epsilon(1e-7)==i*0.01);
+                    REQUIRE(Approx(ionPos.z()).epsilon(0.05)==zCalculated);
+                }
             }
         }
     }
