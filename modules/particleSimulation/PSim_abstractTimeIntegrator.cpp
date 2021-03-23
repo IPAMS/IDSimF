@@ -59,7 +59,7 @@ particlesBornIdx_(0)
  * Indicates that the time integration should be terminated at the next possible time
  */
 void ParticleSimulation::AbstractTimeIntegrator::setTerminationState() {
-    runState_ = ParticleSimulation::IN_TERMINATION;
+    runState_ = ParticleSimulation::AbstractTimeIntegrator::IN_TERMINATION;
 }
 
 

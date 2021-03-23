@@ -42,15 +42,13 @@
 
 namespace ParticleSimulation{
 
-    enum RunState {RUNNING, STOPPED, IN_TERMINATION};
-
     /**
      * Abstract base class for trajectory time integrators
      */
     class AbstractTimeIntegrator {
 
     public:
-
+        enum RunState {RUNNING, STOPPED, IN_TERMINATION};
         typedef std::pair<double,BTree::Particle*> pTobPair_t;
 
         AbstractTimeIntegrator();

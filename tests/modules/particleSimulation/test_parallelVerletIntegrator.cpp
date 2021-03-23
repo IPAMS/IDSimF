@@ -192,6 +192,30 @@ TEST_CASE( "Test parallel verlet integrator", "[ParticleSimulation][ParallelVerl
                     REQUIRE(Approx(ionPos.z()).epsilon(0.05)==zCalculated);
                 }
             }
+
+            SECTION("Integration should be stoppable") {
+
+                ParticleSimulation::AbstractTimeIntegrator* integratorPtr;
+                int terminationTimeStep = 40;
+
+                auto terminationActionFct = [&integratorPtr, terminationTimeStep] (
+                        Core::Vector& newPartPos,BTree::Particle* particle,
+                        int particleIndex, BTree::ParallelTree& tree, double time,int timestep){
+                            if (timestep >= terminationTimeStep){
+                                integratorPtr->setTerminationState();
+                            }
+                };
+
+                ParticleSimulation::ParallelVerletIntegrator verletIntegrator(
+                        particlesPtrs,
+                        accelerationFct, timestepWriteFct, terminationActionFct,
+                        collisionModel);
+                integratorPtr = &verletIntegrator;
+
+                verletIntegrator.run(timeSteps, dt);
+                REQUIRE(verletIntegrator.timeStep() == terminationTimeStep+1);
+                REQUIRE(verletIntegrator.time() == Approx(dt*(terminationTimeStep+1)));
+            }
         }
     }
 }
