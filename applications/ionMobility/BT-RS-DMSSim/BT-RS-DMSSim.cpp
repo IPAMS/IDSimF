@@ -440,7 +440,7 @@ int main(int argc, const char * argv[]) {
             break;
         }
     }
-    verletIntegrator.terminateSimulation();
+    verletIntegrator.finalizeSimulation();
 
     clock_t end = std::clock();
     double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;

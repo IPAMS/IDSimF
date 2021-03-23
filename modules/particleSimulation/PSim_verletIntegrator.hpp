@@ -113,7 +113,7 @@ namespace ParticleSimulation{
             void addParticle(BTree::Particle* particle);
             void run(int nTimesteps, double dt);
             void runSingleStep(double dt);
-            void terminateSimulation();
+            void finalizeSimulation();
 
     private:
         CollisionModel::AbstractCollisionModel* collisionModel_; ///< a gas collision model active in the simulation

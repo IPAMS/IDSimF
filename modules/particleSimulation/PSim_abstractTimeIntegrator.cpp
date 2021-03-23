@@ -23,6 +23,7 @@
 
 
 ParticleSimulation::AbstractTimeIntegrator::AbstractTimeIntegrator() :
+runState_(STOPPED),
 time_(0.0),
 timestep_(0),
 particles_(std::vector<BTree::Particle *>()),
@@ -32,6 +33,7 @@ particlesBornIdx_(0)
 {}
 
 ParticleSimulation::AbstractTimeIntegrator::AbstractTimeIntegrator(std::vector<BTree::Particle*> particles):
+runState_(STOPPED),
 time_(0.0),
 timestep_(0),
 particles_(std::vector<BTree::Particle *>()),
@@ -51,6 +53,10 @@ particlesBornIdx_(0)
     // + sort particleTOBs_ according to time of birth
     std::sort(particleTOBs_.begin(), particleTOBs_.end(),
             [](const pTobPair_t &p1, const pTobPair_t &p2) {return p1.first < p2.first;});
+}
+
+void ParticleSimulation::AbstractTimeIntegrator::setTerminationState() {
+    runState_ = ParticleSimulation::IN_TERMINATION;
 }
 
 /**

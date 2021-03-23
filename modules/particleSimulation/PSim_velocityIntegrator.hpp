@@ -97,7 +97,7 @@ namespace ParticleSimulation{
         void addParticle(BTree::Particle* particle);
         void run(int nTimesteps, double dt);
         void runSingleStep(double dt);
-        void terminateSimulation();
+        void finalizeSimulation();
 
     private:
         velocityFctType velocityFunction_; ///< function to calculate particle acceleration

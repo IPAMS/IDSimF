@@ -65,7 +65,7 @@ void ParticleSimulation::VelocityIntegrator::run(int nTimesteps, double dt) {
     for (int step=0; step< nTimesteps; step++){
         runSingleStep(dt);
     }
-    this->terminateSimulation();
+    this->finalizeSimulation();
 }
 
 /**
@@ -88,8 +88,8 @@ void ParticleSimulation::VelocityIntegrator::runSingleStep(double dt) {
 }
 
 /**
- * Terminates the verlet integration (should be called after the last timestep).
+ * Finalizes the verlet integration run (should be called after the last time step).
  */
-void ParticleSimulation::VelocityIntegrator::terminateSimulation(){
+void ParticleSimulation::VelocityIntegrator::finalizeSimulation(){
     timestepWriteFunction_(particles_,time_,timestep_,true);
 }

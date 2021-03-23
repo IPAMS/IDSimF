@@ -466,7 +466,7 @@ int main(int argc, const char * argv[]) {
     if (rfMode == RAMPED_RF) {
         hdf5Writer->writeVectorDataset("V_rf",V_rf_export);
     }
-    verletIntegrator.terminateSimulation();
+    verletIntegrator.finalizeSimulation();
 
     clock_t end = std::clock();
     double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;

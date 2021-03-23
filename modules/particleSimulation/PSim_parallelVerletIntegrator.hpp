@@ -99,7 +99,7 @@ namespace ParticleSimulation{
             void addParticle(BTree::Particle* particle) override;
             void run(int nTimesteps, double dt) override;
             void runSingleStep(double dt) override;
-            void terminateSimulation() override;
+            void finalizeSimulation() override;
 
     private:
 

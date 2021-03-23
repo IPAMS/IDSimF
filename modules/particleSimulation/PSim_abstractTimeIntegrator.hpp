@@ -42,6 +42,8 @@
 
 namespace ParticleSimulation{
 
+    enum RunState {RUNNING, STOPPED, IN_TERMINATION};
+
     /**
      * Abstract base class for trajectory time integrators
      */
@@ -54,16 +56,17 @@ namespace ParticleSimulation{
         AbstractTimeIntegrator();
         AbstractTimeIntegrator(std::vector<BTree::Particle*> particles);
 
-
-
         virtual ~AbstractTimeIntegrator() = default;
 
         virtual void addParticle(BTree::Particle* particle) = 0;
         virtual void run(int nTimesteps, double dt) = 0;
         virtual void runSingleStep(double dt) = 0;
-        virtual void terminateSimulation() = 0;
+        virtual void finalizeSimulation() = 0;
+
+        void setTerminationState();
 
     protected:
+        RunState runState_; ///< the current state the integrator is in
         double time_; ///< the current time in the simulation
         int timestep_; ///< the current time step
         std::vector<BTree::Particle*> particles_; ///< links to the simulated particles

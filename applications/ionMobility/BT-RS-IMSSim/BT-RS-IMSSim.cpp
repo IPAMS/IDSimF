@@ -418,7 +418,7 @@ int main(int argc, const char *argv[]){
     }
     resultFilewriter.writeReactionStatistics(rsSim);
     if (trajectoryIntegrator) {
-        trajectoryIntegrator->terminateSimulation();
+        trajectoryIntegrator->finalizeSimulation();
     }
 
     clock_t end = std::clock();

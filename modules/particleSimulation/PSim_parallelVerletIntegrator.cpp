@@ -82,7 +82,7 @@ void ParticleSimulation::ParallelVerletIntegrator::run(int nTimesteps, double dt
     for (int step=0; step< nTimesteps; step++){
         runSingleStep(dt);
     }
-    this->terminateSimulation();
+    this->finalizeSimulation();
 }
 
 void ParticleSimulation::ParallelVerletIntegrator::runSingleStep(double dt){
@@ -147,9 +147,10 @@ void ParticleSimulation::ParallelVerletIntegrator::runSingleStep(double dt){
     timestepWriteFunction_(particles_,tree_,time_,timestep_,false);
 }
 
-
-
-void ParticleSimulation::ParallelVerletIntegrator::terminateSimulation(){
+/**
+ * Finalizes the verlet integration run (should be called after the last time step).
+ */
+void ParticleSimulation::ParallelVerletIntegrator::finalizeSimulation(){
     timestepWriteFunction_(particles_,tree_,time_,timestep_,true);
 }
 
