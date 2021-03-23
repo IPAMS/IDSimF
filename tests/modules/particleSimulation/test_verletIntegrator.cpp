@@ -129,26 +129,56 @@ TEST_CASE("Test serial verlet integrator", "[ParticleSimulation][VerletIntegrato
 
         CollisionModel::EmptyCollisionModel collisionModel;
 
-        ParticleSimulation::VerletIntegrator verletIntegrator(
-                particlesPtrs,
-                accelerationFct, timestepWriteFct, otherActionsFct,
-                collisionModel);
+        SECTION("Verlet integrator should run through"){
 
-        verletIntegrator.run(timeSteps, dt);
 
-        double endTime = timeSteps * dt;
-        for (int i=0; i<nParticles; ++i){
-            Core::Vector ionPos = particles[i]-> getLocation();
+            ParticleSimulation::VerletIntegrator verletIntegrator(
+                    particlesPtrs,
+                    accelerationFct, timestepWriteFct, otherActionsFct,
+                    collisionModel);
 
-            //calculate approximate position according to a pure linear uniform acceleration
-            // according to the real time the particles were present in the simulation:
-            double diffTime = endTime - (0.5*dt)  - particles[i]-> getTimeOfBirth();
-            double xCalculated= 0.5 * ionAcceleration * diffTime * diffTime;
-            double zCalculated= 0.5 * xCalculated;
+            verletIntegrator.run(timeSteps, dt);
 
-            REQUIRE(Approx(ionPos.x()).epsilon(0.05) == xCalculated);
-            REQUIRE(Approx(ionPos.y()).epsilon(1e-7) == i*0.01);
-            REQUIRE(Approx(ionPos.z()).epsilon(0.05) == zCalculated);
+            REQUIRE(verletIntegrator.timeStep() == timeSteps);
+            REQUIRE(verletIntegrator.time() == Approx(timeSteps * dt));
+
+            double endTime = timeSteps * dt;
+            for (int i=0; i<nParticles; ++i){
+                Core::Vector ionPos = particles[i]-> getLocation();
+
+                //calculate approximate position according to a pure linear uniform acceleration
+                // according to the real time the particles were present in the simulation:
+                double diffTime = endTime - (0.5*dt)  - particles[i]-> getTimeOfBirth();
+                double xCalculated= 0.5 * ionAcceleration * diffTime * diffTime;
+                double zCalculated= 0.5 * xCalculated;
+
+                REQUIRE(Approx(ionPos.x()).epsilon(0.05) == xCalculated);
+                REQUIRE(Approx(ionPos.y()).epsilon(1e-7) == i*0.01);
+                REQUIRE(Approx(ionPos.z()).epsilon(0.05) == zCalculated);
+            }
+        }
+
+        SECTION("Verlet integrator should be stoppable"){
+
+            ParticleSimulation::AbstractTimeIntegrator* integratorPtr;
+            int terminationTimeStep = 50;
+
+            auto timestepStopFct = [&integratorPtr, terminationTimeStep](
+                    std::vector<BTree::Particle*>& particles, BTree::Tree& tree,
+                    double time, int timestep, bool lastTimestep){
+                if (timestep >= terminationTimeStep){
+                    integratorPtr->setTerminationState();
+                }
+            };
+
+            ParticleSimulation::VerletIntegrator verletIntegrator(
+                    particlesPtrs,
+                    accelerationFct, timestepStopFct, otherActionsFct,
+                    collisionModel);
+            integratorPtr = &verletIntegrator;
+            verletIntegrator.run(timeSteps, dt);
+
+            REQUIRE(verletIntegrator.timeStep() == terminationTimeStep);
         }
     }
 

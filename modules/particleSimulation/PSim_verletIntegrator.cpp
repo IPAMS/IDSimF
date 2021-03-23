@@ -87,15 +87,18 @@ void ParticleSimulation::VerletIntegrator::addParticle(BTree::Particle *particle
  */
 void ParticleSimulation::VerletIntegrator::run(int nTimesteps, double dt) {
 
-    //write initial state to the trajectory:
+    this->runState_ = RUNNING;
     bearParticles_(0.0);
     timestepWriteFunction_(particles_,tree_,time_,timestep_,false);
 
-
     for (int step=0; step< nTimesteps; step++){
         runSingleStep(dt);
+        if (this->runState_ == IN_TERMINATION){
+            break;
+        }
     }
     this->finalizeSimulation();
+    this->runState_ = STOPPED;
 }
 
 /**
