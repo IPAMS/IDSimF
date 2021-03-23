@@ -363,13 +363,19 @@ int main(int argc, const char * argv[]) {
     auto hdf5Writer = std::make_unique<ParticleSimulation::TrajectoryHDF5Writer>(
             projectName + "_trajectories.hd5", auxParamNames, additionalParameterTransformFct);
 
+    ParticleSimulation::AbstractTimeIntegrator *integratorPtr;
     auto timestepWriteFunction =
-            [trajectoryWriteInterval, fftWriteInterval, fftWriteMode, &V_0, &V_rf_export, &ionsInactive, timeSteps,
-             &hdf5Writer, &additionalParameterTransformFct, &avgPositionWriter, &ionsInactiveWriter, &fftWriter](
+            [trajectoryWriteInterval, fftWriteInterval, fftWriteMode, &V_0, &V_rf_export, &ionsInactive,
+             &hdf5Writer, &ionsInactiveWriter, &fftWriter, &integratorPtr](
                     std::vector<BTree::Particle*>& particles, auto& tree, double time, int timestep, bool lastTimestep){
 
+                // check if simulation should be terminated (if all particles are terminated)
+                if (ionsInactive >= particles.size() && particles.size() > 0){
+                    integratorPtr->setTerminationState();
+                }
+
+                // process time step data and write / export results
                 if (timestep % fftWriteInterval == 0) {
-                    //avgPositionWriter->writeTimestep(tree, time);
                     ionsInactiveWriter->writeTimestep(ionsInactive, time);
                     if (fftWriteMode == UNRESOLVED){
                         fftWriter->writeTimestep(time);
@@ -382,14 +388,7 @@ int main(int argc, const char * argv[]) {
                     }
                 }
 
-                if (lastTimestep) {
-                    V_rf_export.emplace_back(V_0);
-                    hdf5Writer->writeTimestep(particles,time);
-                    hdf5Writer->writeSplatTimes(particles);
-                    hdf5Writer->finalizeTrajectory();
-                    std::cout << "finished ts:" << timestep << " time:" << time << std::endl;
-                }
-                else if (timestep % trajectoryWriteInterval == 0) {
+                if (timestep % trajectoryWriteInterval == 0 || lastTimestep) {
 
                     std::cout << "ts:" << timestep << " time:" << time << " V_rf:" << V_0
                               <<" ions existing: "<<particles.size()<< " ions inactive: "
@@ -399,6 +398,12 @@ int main(int argc, const char * argv[]) {
                         V_rf_export.emplace_back(V_0);
                         hdf5Writer->writeTimestep(particles, time);
                     }
+                }
+
+                if (lastTimestep) {
+                    hdf5Writer->writeSplatTimes(particles);
+                    hdf5Writer->finalizeTrajectory();
+                    std::cout << "finished ts:" << timestep << " time:" << time << std::endl;
                 }
     };
 
@@ -415,6 +420,7 @@ int main(int argc, const char * argv[]) {
                 particlePtrs,
                 accelerationFunctionQIT, timestepWriteFunction, otherActionsFunctionQIT,
                 hsModel);
+        integratorPtr = &verletIntegrator;
         verletIntegrator.run(timeSteps, dt);
     }
     else if (integratorMode == PARALLEL_VERLET) {
@@ -422,6 +428,8 @@ int main(int argc, const char * argv[]) {
                 particlePtrs,
                 accelerationFunctionQIT_parallel, timestepWriteFunction, otherActionsFunctionQIT,
                 hsModel);
+
+        integratorPtr = &verletIntegrator;
         verletIntegrator.run(timeSteps, dt);
     }
 

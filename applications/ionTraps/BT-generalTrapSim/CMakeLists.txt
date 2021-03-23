@@ -10,6 +10,9 @@ target_link_libraries(${PROJECT_NAME} ${VTK_LIBRARIES} ${HDF5_CXX_LIBRARIES} ${H
 add_test(NAME BT-generalTrapSim_simpleCapacitor COMMAND ${PROJECT_NAME}
         "example/simpleCapacitor.json" "run_BT-generalTrapSim_simpleCapacitor")
 
+add_test(NAME BT-generalTrapSim_simpleCapacitor_allSplat COMMAND ${PROJECT_NAME}
+        "example/simpleCapacitor_allSplat.json" "run_BT-generalTrapSim_simpleCapacitor_allSplat")
+
 add_test(NAME BT-generalTrapSim_simpleCapacitor_ionCloud COMMAND ${PROJECT_NAME}
         "example/simpleCapacitor_ionCloud.json" "run_BT-generalTrapSim_simpleCapacitor_ionCloud")
 
