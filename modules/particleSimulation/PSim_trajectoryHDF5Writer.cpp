@@ -105,10 +105,14 @@ void ParticleSimulation::TrajectoryHDF5Writer::writeTimestep(std::vector<BTree::
     std::string timeStepGroupPath = "/particle_trajectory/timesteps/" + std::to_string(sizeTimesteps_[0]-1);
     timeStepGroup_ = std::make_unique<H5::Group>(h5f_->createGroup(timeStepGroupPath.c_str()));
 
-    //write particle location data:
 
     hsize_t nParticles = particles.size();
+    // Write particle number as attribute to the time step:
+    writeAttribute_(timeStepGroup_, "number of particles", nParticles);
+
     if (nParticles > 0) {
+        //write particle location data:
+
         //define chunk size in parameter direction:
         hsize_t nParticlesChunk = 200;
         if (nParticlesChunk>nParticles) {
@@ -204,15 +208,7 @@ void ParticleSimulation::TrajectoryHDF5Writer::writeVectorDataset(std::string ds
  */
 void ParticleSimulation::TrajectoryHDF5Writer::writeTrajectoryAttribute(std::string attrName, int value){
 
-    // Create a dataset attribute.
-    hsize_t dims[1] = { 1 };
-    H5::DataSpace attr_dataspace = H5::DataSpace (1, dims);
-    H5::Attribute attribute = baseGroup_->createAttribute( attrName.c_str(), H5::PredType::STD_I32BE,
-                                                   attr_dataspace);
-
-    // Write the attribute data.
-    int attr_data[1] = {value};
-    attribute.write( H5::PredType::NATIVE_INT, attr_data);
+    writeAttribute_(baseGroup_, attrName, value);
 }
 
 /**
@@ -356,4 +352,24 @@ void ParticleSimulation::TrajectoryHDF5Writer::writeAuxTimestep_(std::vector<BTr
     //write to the dataset:
     H5::DataSpace memspaceAux(2,slabDimsLocation);
     dsetAux->write(bufAux.data(),H5::PredType::NATIVE_DOUBLE,memspaceAux,dSpaceAux);
+}
+
+
+/**
+ * Writes an integer attribute to a HDF5 group
+ * @param group The group to write to
+ * @param attrName Name of the attribute to write
+ * @param value The value to write into the attribute in the trajectory file
+ */
+void ParticleSimulation::TrajectoryHDF5Writer::writeAttribute_(std::unique_ptr<H5::Group>& group, const std::string& attrName, int value){
+
+    // Create a dataset attribute.
+    hsize_t dims[1] = { 1 };
+    H5::DataSpace attr_dataspace = H5::DataSpace (1, dims);
+    H5::Attribute attribute = group->createAttribute( attrName.c_str(), H5::PredType::STD_I32BE,
+            attr_dataspace);
+
+    // Write the attribute data.
+    int attr_data[1] = {value};
+    attribute.write( H5::PredType::NATIVE_INT, attr_data);
 }

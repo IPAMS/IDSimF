@@ -56,12 +56,14 @@ namespace ParticleSimulation{
         void writeSplatTimes(std::vector<BTree::Particle*> &particles);
 
     private:
-        constexpr int static FILE_TYPE_VERSION = 2;   ///<File type version identifier of the files written
+        constexpr int static FILE_TYPE_VERSION = 3;   ///<File type version identifier of the files written
+
+        void writeAuxTimestep_(std::vector<BTree::Particle*> &particles);
+        void writeAttribute_(std::unique_ptr<H5::Group>& group, const std::string& attrName, int value);
 
         //int nTimestepsWritten_;
         bool compression_;
         bool isAuxWritten_;
-        void writeAuxTimestep_(std::vector<BTree::Particle*> &particles);
 
         std::unique_ptr<H5::H5File > h5f_;
         std::unique_ptr<H5::Group> baseGroup_;
