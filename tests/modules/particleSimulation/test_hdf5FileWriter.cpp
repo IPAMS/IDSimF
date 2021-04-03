@@ -194,8 +194,9 @@ TEST_CASE( "Test HDF5 trajectory file writer", "[ParticleSimulation][file writer
         std::vector<BTree::Particle> particles;
         std::vector<BTree::Particle *> particlePtrs;
 
-        // try to write an empty frame, which should be silently ignored:
-        REQUIRE_NOTHROW(writerBare.writeTimestep(particlePtrs, 0.0));
+        // write an empty frame:
+        writerBare.writeTimestep(particlePtrs, 0.0);
+        writerAux.writeTimestep(particlePtrs, 0.0);
 
         //prepare particles to test:
         for (int i = 0; i < nParticles; ++i) {
@@ -204,7 +205,7 @@ TEST_CASE( "Test HDF5 trajectory file writer", "[ParticleSimulation][file writer
         std::transform(particles.begin(), particles.end(), std::back_inserter(particlePtrs),
                 [](BTree::Particle &p) -> BTree::Particle *{ return &p; });
 
-        for (int k = 0; k < nFrames; k++) {
+        for (int k = 1; k < nFrames; k++) {
             for (int i = 0; i < nParticles; ++i) {
                 particles[i].setLocation(Core::Vector(i * 0.1, 1.0, k * 10.0));
                 particles[i].setAcceleration(Core::Vector(i * 0.1, k * 1.0, 0));
@@ -251,7 +252,7 @@ TEST_CASE( "Test HDF5 trajectory file writer", "[ParticleSimulation][file writer
 
 
         std::array<hsize_t,1> index= {0};
-        for (int ts=0; ts<nTimesteps; ++ts) {
+        for (int ts=1; ts<nTimesteps; ++ts) {
             index[0] = ts;
             REQUIRE(Approx(dFieldTimes.get(index)) == ts * 1.0);
             std::string tsPath = "/particle_trajectory/timesteps/" + std::to_string(ts) +"/positions";
@@ -302,7 +303,7 @@ TEST_CASE( "Test HDF5 trajectory file writer", "[ParticleSimulation][file writer
         REQUIRE(nTimesteps == nFrames);
 
         //read that file and check contents:
-        for (int ts=0; ts<nTimesteps; ++ts) {
+        for (int ts=1; ts<nTimesteps; ++ts) {
             std::string tsPath = "/particle_trajectory/timesteps/" + std::to_string(ts) +"/aux_parameters";
 
             H5::DataSet dsAux= auxFile.openDataSet(tsPath.c_str());

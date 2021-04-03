@@ -93,11 +93,6 @@ TrajectoryHDF5Writer(hdf5Filename,compression)
 void ParticleSimulation::TrajectoryHDF5Writer::writeTimestep(std::vector<BTree::Particle*> &particles,
                                                              double time){
 
-    hsize_t nParticles = particles.size();
-    if (nParticles == 0){
-        return; //silently ignore all empty time steps
-    }
-
     // Write time of this time step to the times vector:
     sizeTimesteps_[0] += 1;
     dsetTimesteps_->extend(sizeTimesteps_);
@@ -106,57 +101,62 @@ void ParticleSimulation::TrajectoryHDF5Writer::writeTimestep(std::vector<BTree::
     double ts[] = {time};
     dsetTimesteps_->write(ts,H5::PredType::NATIVE_DOUBLE,memspaceTimestep_,dSpaceTimestep);
 
-    //write particle location data:
-
-    //define chunk size in parameter direction:
-    hsize_t nParticlesChunk = 200;
-    if (nParticlesChunk > nParticles){
-        nParticlesChunk = nParticles;
-    }
-
-    //prepare location dataset structures:
-    hsize_t dimsLocation[2] = {nParticles,3};            // dataset dimensions at creation
-    hsize_t maxdimsLocation[2] = {nParticles,3};         // maximum dataset dimensions
-    hsize_t chunkDimsLocation[2] = {nParticlesChunk, 3};
-    H5::DataSpace dataspaceLocation(2,dimsLocation,maxdimsLocation);
-
-    // Modify dataset creation properties to enable chunking and optional compression:
-    H5::DSetCreatPropList propLocation;
-    propLocation.setChunk(2, chunkDimsLocation);
-
-    if (compression_){
-        propLocation.setDeflate(6);
-    }
-
     // Create group for this timestep and dataset for the location data:
     std::string timeStepGroupPath = "/particle_trajectory/timesteps/" + std::to_string(sizeTimesteps_[0]-1);
     timeStepGroup_ = std::make_unique<H5::Group>(h5f_->createGroup(timeStepGroupPath.c_str()));
 
-    std::unique_ptr<H5::DataSet> dsetPPositions = std::make_unique<H5::DataSet>(timeStepGroup_->createDataSet("positions",
-                                                                        H5::PredType::IEEE_F32BE, dataspaceLocation,
-                                                                        propLocation));
+    //write particle location data:
 
-    //prepare dataset:
-    H5::DataSpace dSpaceLocation = dsetPPositions->getSpace();
-    hsize_t slabDimsLocation[2]  = {nParticles,3};
-    hsize_t offsetLocation[2]  = {0,0};
-    dSpaceLocation.selectHyperslab(H5S_SELECT_SET, slabDimsLocation, offsetLocation);
+    hsize_t nParticles = particles.size();
+    if (nParticles > 0) {
+        //define chunk size in parameter direction:
+        hsize_t nParticlesChunk = 200;
+        if (nParticlesChunk>nParticles) {
+            nParticlesChunk = nParticles;
+        }
 
-    //create location data buffer:
-    std::vector<double> bufLocation(nParticles*3);
-    for (int i=0; i<nParticles; ++i){
-        Core::Vector loc = particles[i]->getLocation();
-        bufLocation[i*3] = loc.x();
-        bufLocation[i*3 +1] = loc.y();
-        bufLocation[i*3 +2] = loc.z();
-    }
+        //prepare location dataset structures:
+        hsize_t dimsLocation[2] = {nParticles, 3};            // dataset dimensions at creation
+        hsize_t maxdimsLocation[2] = {nParticles, 3};         // maximum dataset dimensions
+        hsize_t chunkDimsLocation[2] = {nParticlesChunk, 3};
+        H5::DataSpace dataspaceLocation(2, dimsLocation, maxdimsLocation);
 
-    //write to the dataset:
-    H5::DataSpace memspaceLocation(2,slabDimsLocation);
-    dsetPPositions->write(bufLocation.data(),H5::PredType::NATIVE_DOUBLE,memspaceLocation,dSpaceLocation);
+        // Modify dataset creation properties to enable chunking and optional compression:
+        H5::DSetCreatPropList propLocation;
+        propLocation.setChunk(2, chunkDimsLocation);
 
-    if (isAuxWritten_){
-        writeAuxTimestep_(particles);
+        if (compression_) {
+            propLocation.setDeflate(6);
+        }
+
+        // Create dataset for the location data:
+        std::unique_ptr<H5::DataSet> dsetPPositions = std::make_unique<H5::DataSet>(
+                timeStepGroup_->createDataSet("positions",
+                        H5::PredType::IEEE_F32BE, dataspaceLocation,
+                        propLocation));
+
+        //prepare dataset:
+        H5::DataSpace dSpaceLocation = dsetPPositions->getSpace();
+        hsize_t slabDimsLocation[2] = {nParticles, 3};
+        hsize_t offsetLocation[2] = {0, 0};
+        dSpaceLocation.selectHyperslab(H5S_SELECT_SET, slabDimsLocation, offsetLocation);
+
+        //create location data buffer:
+        std::vector<double> bufLocation(nParticles*3);
+        for (int i = 0; i<nParticles; ++i) {
+            Core::Vector loc = particles[i]->getLocation();
+            bufLocation[i*3] = loc.x();
+            bufLocation[i*3+1] = loc.y();
+            bufLocation[i*3+2] = loc.z();
+        }
+
+        //write to the dataset:
+        H5::DataSpace memspaceLocation(2, slabDimsLocation);
+        dsetPPositions->write(bufLocation.data(), H5::PredType::NATIVE_DOUBLE, memspaceLocation, dSpaceLocation);
+
+        if (isAuxWritten_) {
+            writeAuxTimestep_(particles);
+        }
     }
     offsetScalarLike_[0] +=1;
 }
