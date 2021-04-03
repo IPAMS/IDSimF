@@ -17,7 +17,7 @@ set(SOURCE_FILES
         test_util.cpp
         test_hdf5FileWriter.cpp
         test_hdf5FileReader.cpp
-        test_simionPotentialArray.cpp test_startZones.cpp)
+        test_simionPotentialArray.cpp test_startZones.cpp test_particleStartSplatTracker.cpp)
 
 set(TEST_FILE_FOLDER ${CMAKE_SOURCE_DIR}/tests/testfields)
 set(TEST_FILES
