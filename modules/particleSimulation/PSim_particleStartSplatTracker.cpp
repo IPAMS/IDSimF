@@ -46,10 +46,14 @@ void ParticleSimulation::ParticleStartSplatTracker::particleStart(BTree::Particl
 }
 
 void ParticleSimulation::ParticleStartSplatTracker::particleSplat(BTree::Particle* particle, double time) {
-
-    pMapEntry& entry = pMap_.at(particle);
-    entry.splatLocation = particle->getLocation();
-    entry.splatTime = time;
+    try{
+        pMapEntry& entry = pMap_.at(particle);
+        entry.splatLocation = particle->getLocation();
+        entry.splatTime = time;
+    }
+    catch (const std::out_of_range& exception) {
+        throw (std::invalid_argument("Particle to splat was not registered as started before"));
+    }
 }
 
 ParticleSimulation::pMapEntry ParticleSimulation::ParticleStartSplatTracker::get(BTree::Particle* particle) {

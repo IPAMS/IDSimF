@@ -73,4 +73,11 @@ TEST_CASE("TestParticleStartSplatTracker", "[ParticleSimulation][ParticleStartSp
                 tracker.particleStart(&particle_0, 1.2),
                 std::invalid_argument);
     }
+
+    SECTION("Test splat of not started particle"){
+        BTree::Particle particle_3({3.0, 3.0, 3-0}, 1.0);
+        REQUIRE_THROWS_AS(
+            tracker.particleSplat(&particle_3, 1.1),
+            std::invalid_argument);
+    }
 }
