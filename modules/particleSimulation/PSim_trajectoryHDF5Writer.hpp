@@ -33,6 +33,7 @@
 #include "H5Cpp.h"
 #include <string>
 #include <vector>
+#include <array>
 #include <memory>
 
 
@@ -54,7 +55,12 @@ namespace ParticleSimulation{
 
         void writeTimestep(std::vector<BTree::Particle*>& particles, double time);
 
-        void writeVectorDataset(std::string dsName, std::vector<double> values);
+
+        void writeDoubleListDataset(std::string dsName, std::vector<double> values, H5::Group* group = nullptr);
+        void write3DVectorListDataset(std::string dsName, std::vector<Core::Vector> values, H5::Group* group = nullptr);
+
+        template <int DIMS>
+        void writeVectorDatasetLowLevel(std::string dsName, std::vector<std::array<double, DIMS>> values, H5::Group* group = nullptr);
         void writeTrajectoryAttribute(std::string attrName, int value);
         void writeTrajectoryAttribute(std::string attrName, std::vector<double> values);
         void writeTrajectoryAttribute(std::string attrName, std::vector<std::string> values);

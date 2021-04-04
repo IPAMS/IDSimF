@@ -27,6 +27,7 @@
 
 #include "PSim_trajectoryHDF5Writer.hpp"
 #include "PSim_trajectoryExplorerJSONwriter.hpp"
+#include "PSim_particleStartSplatTracker.hpp"
 #include "Core_vector.hpp"
 #include "BTree_particle.hpp"
 #include "H5Cpp.h"
@@ -165,7 +166,7 @@ TEST_CASE( "Test HDF5 trajectory file writer", "[ParticleSimulation][file writer
     int nParticles = 5;
     int nFrames = 8;
 
-    SECTION( "Hdf5 trajectory writer can write files"){
+    SECTION( "Hdf5 trajectory writer can write trajectory files with and without particle attributes"){
 
         // prepare and write data to a hdf5 file:
         //prepare a bare writer:
@@ -191,7 +192,7 @@ TEST_CASE( "Test HDF5 trajectory file writer", "[ParticleSimulation][file writer
                 additionalParameterTransformFct);
 
         // prepare data structures:
-        std::vector<BTree::Particle> particles;
+        std::vector<BTree::uniquePartPtr>particles;
         std::vector<BTree::Particle *> particlePtrs;
 
         // write an empty frame:
@@ -199,30 +200,33 @@ TEST_CASE( "Test HDF5 trajectory file writer", "[ParticleSimulation][file writer
         writerAux.writeTimestep(particlePtrs, 0.0);
 
         //prepare particles to test:
-        for (int i = 0; i < nParticles; ++i) {
-            particles.emplace_back(BTree::Particle());
+        ParticleSimulation::ParticleStartSplatTracker tracker;
+        for (int i=0; i<nParticles; ++i){
+            double timeOfBirth = i*0.01;
+            BTree::uniquePartPtr particle = std::make_unique<BTree::Particle>();
+            particlePtrs.emplace_back(particle.get());
+            particles.emplace_back(std::move(particle));
+            tracker.particleStart(particlePtrs.at(i), timeOfBirth);
         }
-        std::transform(particles.begin(), particles.end(), std::back_inserter(particlePtrs),
-                [](BTree::Particle &p) -> BTree::Particle *{ return &p; });
 
         for (int k = 1; k < nFrames; k++) {
             for (int i = 0; i < nParticles; ++i) {
-                particles[i].setLocation(Core::Vector(i * 0.1, 1.0, k * 10.0));
-                particles[i].setAcceleration(Core::Vector(i * 0.1, k * 1.0, 0));
-                particles[i].setVelocity(Core::Vector(i * 0.01, i * 0.1, k * 10.0));
+                particles[i]->setLocation(Core::Vector(i * 0.1, 1.0, k * 10.0));
+                particles[i]->setAcceleration(Core::Vector(i * 0.1, k * 1.0, 0));
+                particles[i]->setVelocity(Core::Vector(i * 0.01, i * 0.1, k * 10.0));
             }
             writerBare.writeTimestep(particlePtrs, k * 1.0);
             writerAux.writeTimestep(particlePtrs, k * 1.0);
         }
-        particles[0].setSplatTime(1.0);
-        particles[1].setSplatTime(nFrames*1.0);
-        particles[nParticles-1].setSplatTime(0.99);
+        tracker.particleSplat(particlePtrs[0], 1.0);
+        tracker.particleSplat(particlePtrs[1], nFrames*1.0);
+        tracker.particleSplat(particlePtrs[nParticles-1], 0.99);
 
-        writerBare.writeSplatTimes(particlePtrs);
+        writerBare.writeStartSplatData(tracker);
         writerBare.finalizeTrajectory();
 
         std::vector<double> additionalVectorDataset = {10.0,10.1,10.2,10.3,10.4};
-        writerAux.writeVectorDataset("additional_vector_data_set",additionalVectorDataset);
+        writerAux.writeDoubleListDataset("additional_vector_data_set", additionalVectorDataset);
 
         std::vector<std::string> particleNames = {"Substance 1","Substance 2"};
         writerAux.writeTrajectoryAttribute("particle names",particleNames);

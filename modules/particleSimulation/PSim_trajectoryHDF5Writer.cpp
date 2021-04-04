@@ -170,36 +170,72 @@ void ParticleSimulation::TrajectoryHDF5Writer::writeTimestep(std::vector<BTree::
  * Write a numeric vector to a dataset in the trajectory file
  * @param dsName Name of the dataset in the HDF5 file to write the vector into
  * @param values Numeric vector with values to write to the dataset
+ * @param group FIXME
  */
-void ParticleSimulation::TrajectoryHDF5Writer::writeVectorDataset(std::string dsName, std::vector<double> values){
+void ParticleSimulation::TrajectoryHDF5Writer::writeDoubleListDataset(std::string dsName, std::vector<double> values, H5::Group* group){
+    std::vector<std::array<double, 1>> valuesPacked;
+    for (auto const &val: values){
+        std::array<double,1> ar = {val};
+        valuesPacked.emplace_back(ar);
+    }
+    writeVectorDatasetLowLevel<1>(dsName, valuesPacked, group);
+};
+
+void ParticleSimulation::TrajectoryHDF5Writer::write3DVectorListDataset(std::string dsName, std::vector<Core::Vector> values, H5::Group* group){
+    std::vector<std::array<double, 3>> valuesPacked;
+
+    for (auto const &val: values){
+        std::array<double,3> ar = {val.x(), val.y(), val.z()};
+        valuesPacked.emplace_back(ar);
+    }
+    writeVectorDatasetLowLevel<3>(dsName, valuesPacked, group);
+};
+
+
+/**
+ * FIXME
+ * @tparam NCOLUMNS
+ * @param dsName
+ * @param values
+ * @param group
+ */
+template <int NCOLUMNS>
+void ParticleSimulation::TrajectoryHDF5Writer::writeVectorDatasetLowLevel(std::string dsName, std::vector<std::array<double, NCOLUMNS>> values, H5::Group* group){
 
     //prepare dataset structures:
     size_t nValues = values.size();
 
-    hsize_t dims[1] = {nValues};                       // dataset dimensions at creation
-    hsize_t offset[1] = {0};
-    hsize_t maxdims[1] = {nValues};                   // maximum dataset dimensions
-    hsize_t chunkDims[1] = {nValues};
-    H5::DataSpace dataspace(1,dims,maxdims);
+    hsize_t dims[2] = {nValues, NCOLUMNS};                       // dataset dimensions at creation
+    hsize_t offset[2] = {0, 0};
+    hsize_t maxdims[2] = {nValues, NCOLUMNS};                   // maximum dataset dimensions
+    hsize_t chunkDims[2] = {nValues, NCOLUMNS};
+    H5::DataSpace dataspace(2, dims);
 
     // Modify dataset creation properties to enable chunking and optional compression:
     H5::DSetCreatPropList props;
-    props.setChunk(1, chunkDims);
+    props.setChunk(2, chunkDims);
 
     //create actual datasets:
-    H5::DataSet dset = baseGroup_->createDataSet(dsName.c_str(),
+    if (group ==nullptr){
+        group = baseGroup_.get();
+    }
+    H5::DataSet dset = group->createDataSet(dsName.c_str(),
                                                  H5::PredType::IEEE_F32BE, dataspace,
                                                  props);
 
-    dataspace.selectHyperslab(H5S_SELECT_SET, dims,offset);
+
+    H5::DataSpace dspace = dset.getSpace();
+    dspace.selectHyperslab(H5S_SELECT_SET, dims, offset);
 
     // Define memory space.
-    double dataBuf[nValues];
-    for (size_t i=0; i<nValues; i++){
-        dataBuf[i] = values[i];
+    std::vector<double> datBuf(nValues*NCOLUMNS);
+    for (int i=0; i<nValues; ++i){
+        for(int j=0; j<NCOLUMNS; ++j){
+            datBuf[i*NCOLUMNS+j] = values[i][j];
+        }
     }
-
-    dset.write(dataBuf,H5::PredType::NATIVE_DOUBLE,dataspace,dataspace);
+    H5::DataSpace memspace(2, dims);
+    dset.write(datBuf.data(), H5::PredType::NATIVE_DOUBLE, memspace, dspace);
 }
 
 /**
@@ -301,6 +337,12 @@ void ParticleSimulation::TrajectoryHDF5Writer::writeSplatTimes(std::vector<BTree
 }
 
 void ParticleSimulation::TrajectoryHDF5Writer::writeStartSplatData(ParticleStartSplatTracker tracker) {
+
+    tracker.sortStartSplatData();
+    //writeDoubleListDataset("particle start times", tracker.getStartTimes());
+    //writeDoubleListDataset("particle splat times", tracker.getSplatTimes());
+    write3DVectorListDataset("particle start locations", tracker.getStartLocations());
+    //write3DVectorListDataset("particle splat locations", tracker.getSplatLocations());
 
 }
 

@@ -112,6 +112,7 @@ TEST_CASE("TestParticleStartSplatTracker", "[ParticleSimulation][ParticleStartSp
             tracker.particleSplat(particlesPtrs.at(i), splatTime);
         }
 
+        tracker.sortStartSplatData();
         std::vector<ParticleSimulation::ParticleStartSplatTracker::pMapEntry> pData = tracker.getStartSplatData();
         CHECK(pData[10].globalIndex == 10);
         CHECK(pData[10].startLocation == Core::Vector(10*1.0, 1.0, 1.0));
@@ -123,6 +124,15 @@ TEST_CASE("TestParticleStartSplatTracker", "[ParticleSimulation][ParticleStartSp
 
         CHECK(pData[25].globalIndex == 25);
 
+        std::vector<double> startTimes = tracker.getStartTimes();
+        std::vector<double> splatTimes = tracker.getSplatTimes();
+        std::vector<Core::Vector> startLocations = tracker.getStartLocations();
+        std::vector<Core::Vector> splatLocations = tracker.getSplatLocations();
+
+        CHECK(startTimes[25] == particles[25]->getTimeOfBirth());
+        CHECK(splatTimes[25] == particles[25]->getSplatTime());
+        CHECK(startLocations[25] == Core::Vector(25*1.0, 1.0, 1.0));
+        CHECK(splatLocations[25] == particles[25]->getLocation());
 
         CHECK(pData[nParticles-1].state == ParticleSimulation::ParticleStartSplatTracker::STARTED);
         CHECK(pData[nParticles-1].splatTime == 0.0); //since the particle is not splatted

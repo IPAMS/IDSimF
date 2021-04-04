@@ -65,17 +65,51 @@ ParticleSimulation::ParticleStartSplatTracker::pMapEntry
     return pMap_.at(particle);
 }
 
+void ParticleSimulation::ParticleStartSplatTracker::sortStartSplatData() {
+    sortedParticleData_ = std::vector<pMapEntry>();
+
+    for (auto const &mapEntry : pMap_){
+        sortedParticleData_.emplace_back(mapEntry.second);
+    }
+    // Sort according to global index:
+    std::sort(sortedParticleData_.begin(), sortedParticleData_.end(),
+            [](const pMapEntry &e1, const pMapEntry &e2) {return e1.globalIndex < e2.globalIndex;});
+}
+
 
 std::vector<ParticleSimulation::ParticleStartSplatTracker::pMapEntry>
         ParticleSimulation::ParticleStartSplatTracker::getStartSplatData() {
-    std::vector<pMapEntry> entryList;
-    for (auto const &mapEntry : pMap_){
-        entryList.emplace_back(mapEntry.second);
+    return sortedParticleData_;
+}
+
+std::vector<double> ParticleSimulation::ParticleStartSplatTracker::getStartTimes() {
+    std::vector<double> result;
+    for (auto const &entry: sortedParticleData_){
+        result.emplace_back(entry.startTime);
     }
+    return result;
+}
 
-    // Sort according to global index:
-    std::sort(entryList.begin(), entryList.end(),
-            [](const pMapEntry &e1, const pMapEntry &e2) {return e1.globalIndex < e2.globalIndex;});
+std::vector<double> ParticleSimulation::ParticleStartSplatTracker::getSplatTimes() {
+    std::vector<double> result;
+    for (auto const &entry: sortedParticleData_){
+        result.emplace_back(entry.splatTime);
+    }
+    return result;
+}
 
-    return entryList;
+std::vector<Core::Vector> ParticleSimulation::ParticleStartSplatTracker::getStartLocations() {
+    std::vector<Core::Vector> result;
+    for (auto const &entry: sortedParticleData_){
+        result.emplace_back(entry.startLocation);
+    }
+    return result;
+}
+
+std::vector<Core::Vector> ParticleSimulation::ParticleStartSplatTracker::getSplatLocations() {
+    std::vector<Core::Vector> result;
+    for (auto const &entry: sortedParticleData_){
+        result.emplace_back(entry.splatLocation);
+    }
+    return result;
 }
