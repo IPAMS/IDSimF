@@ -40,6 +40,7 @@ namespace BTree{
 namespace ParticleSimulation{
 
     struct pMapEntry {
+        int globalIndex;             ///< A particle index to identify the particle globally
         double startTime;            ///< The start time of a particle
         double splatTime;            ///< The splat time of a particle
         Core::Vector startLocation;  ///< Start location of a particle
@@ -50,6 +51,8 @@ namespace ParticleSimulation{
 
     public:
 
+        ParticleStartSplatTracker();
+
         void particleStart(BTree::Particle* particle, double time);
         void particleSplat(BTree::Particle* particle, double time);
 
@@ -58,6 +61,7 @@ namespace ParticleSimulation{
     private:
 
         std::map<BTree::Particle*, pMapEntry> pMap_;
+        int pInsertIndex_;
     };
 }
 

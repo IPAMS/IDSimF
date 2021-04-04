@@ -22,13 +22,27 @@
 #include "PSim_particleStartSplatTracker.hpp"
 #include "BTree_particle.hpp"
 
+ParticleSimulation::ParticleStartSplatTracker::ParticleStartSplatTracker()
+:
+    pInsertIndex_(0),
+    pMap_()
+{}
+
 void ParticleSimulation::ParticleStartSplatTracker::particleStart(BTree::Particle* particle, double time) {
 
     // Existing particle entries are silently overwritten:
     pMapEntry entry;
+    entry.globalIndex = pInsertIndex_;
     entry.startLocation = particle->getLocation();
     entry.startTime = time;
-    pMap_.insert_or_assign(particle, entry);
+    auto emplaceResult = pMap_.try_emplace(particle, entry);
+    if (emplaceResult.second){ //emplace was successful, key was not already existing
+        particle->setIntegerAttribute("global index", entry.globalIndex);
+        pInsertIndex_++;
+    } else {
+        throw (std::invalid_argument("Illegal double insert into start splat tracker: Particle is already existing"));
+    }
+
 }
 
 void ParticleSimulation::ParticleStartSplatTracker::particleSplat(BTree::Particle* particle, double time) {
