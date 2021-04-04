@@ -339,11 +339,12 @@ void ParticleSimulation::TrajectoryHDF5Writer::writeSplatTimes(std::vector<BTree
 void ParticleSimulation::TrajectoryHDF5Writer::writeStartSplatData(ParticleStartSplatTracker tracker) {
 
     tracker.sortStartSplatData();
-    //writeDoubleListDataset("particle start times", tracker.getStartTimes());
-    //writeDoubleListDataset("particle splat times", tracker.getSplatTimes());
-    write3DVectorListDataset("particle start locations", tracker.getStartLocations());
-    //write3DVectorListDataset("particle splat locations", tracker.getSplatLocations());
 
+    H5::Group startSplatGroup = baseGroup_->createGroup("start_splat");
+    writeDoubleListDataset("particle start times", tracker.getStartTimes(), &startSplatGroup);
+    writeDoubleListDataset("particle splat times", tracker.getSplatTimes(), &startSplatGroup);
+    write3DVectorListDataset("particle start locations", tracker.getStartLocations(), &startSplatGroup);
+    write3DVectorListDataset("particle splat locations", tracker.getSplatLocations(), &startSplatGroup);
 }
 
 /**

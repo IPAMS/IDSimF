@@ -204,6 +204,7 @@ TEST_CASE( "Test HDF5 trajectory file writer", "[ParticleSimulation][file writer
         for (int i=0; i<nParticles; ++i){
             double timeOfBirth = i*0.01;
             BTree::uniquePartPtr particle = std::make_unique<BTree::Particle>();
+            particle->setLocation({0.0, 1.0, 0.0});
             particlePtrs.emplace_back(particle.get());
             particles.emplace_back(std::move(particle));
             tracker.particleStart(particlePtrs.at(i), timeOfBirth);
