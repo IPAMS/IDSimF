@@ -21,7 +21,7 @@
  ------------
  BTree_particleStartSplatTracker.hpp
 
- Tracker system to manage / record particle start and stop (splat) times / positions
+ Tracker system to record particle start and stop (splat) times / positions
 
  ****************************/
 
@@ -29,7 +29,8 @@
 #define PSim_ionStartSplatTracker_hpp
 
 #include "Core_vector.hpp"
-#include <map>
+#include <unordered_map>
+#include <vector>
 
 
 //forward declare own classes:
@@ -39,17 +40,32 @@ namespace BTree{
 
 namespace ParticleSimulation{
 
-    struct pMapEntry {
-        int globalIndex;             ///< A particle index to identify the particle globally
-        double startTime;            ///< The start time of a particle
-        double splatTime;            ///< The splat time of a particle
-        Core::Vector startLocation;  ///< Start location of a particle
-        Core::Vector splatLocation;  ///< Splat Location of a Particle
-    };
 
+
+    /**
+     * Tracker system to record particle start and stop (splat) times / positions. This separate tracking is
+     * required, because simulations are allowed to destroy and generate particles at their will, for example
+     * for simulations with a constant particle inflow. Thus an independent, global, tracking of start and
+     * stop locations and times is required.
+     */
     class ParticleStartSplatTracker {
 
     public:
+
+        enum particleState {
+            STARTED,
+            SPLATTED
+        };
+
+        struct pMapEntry {
+            int globalIndex;             ///< A particle index to identify the particle globally
+            particleState state;         ///< The current state of the tracked particle
+            double startTime=0;            ///< The start time of a particle
+            double splatTime=0;            ///< The splat time of a particle
+            Core::Vector startLocation;  ///< Start location of a particle
+            Core::Vector splatLocation;  ///< Splat Location of a Particle
+        };
+
 
         ParticleStartSplatTracker();
 
@@ -57,10 +73,11 @@ namespace ParticleSimulation{
         void particleSplat(BTree::Particle* particle, double time);
 
         pMapEntry get(BTree::Particle* particle);
+        std::vector<pMapEntry> getStartSplatData();
 
     private:
 
-        std::map<BTree::Particle*, pMapEntry> pMap_;
+        std::unordered_map<BTree::Particle*, pMapEntry> pMap_;
         int pInsertIndex_;
     };
 }

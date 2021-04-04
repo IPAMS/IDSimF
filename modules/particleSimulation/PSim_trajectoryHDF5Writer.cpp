@@ -20,6 +20,7 @@
  ****************************/
 
 #include "PSim_trajectoryHDF5Writer.hpp"
+#include "PSim_particleStartSplatTracker.hpp"
 #include <array>
 #include <cmath>
 #include <string>
@@ -297,6 +298,10 @@ void ParticleSimulation::TrajectoryHDF5Writer::writeSplatTimes(std::vector<BTree
         datBuf[i] = particles[i]->getSplatTime();
     }
     dsetSplattimes->write(datBuf.data(),H5::PredType::NATIVE_DOUBLE,memspaceSplattimes,dataspaceSplattimes);
+}
+
+void ParticleSimulation::TrajectoryHDF5Writer::writeStartSplatData(ParticleStartSplatTracker tracker) {
+
 }
 
 /**

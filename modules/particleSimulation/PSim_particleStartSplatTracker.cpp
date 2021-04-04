@@ -21,6 +21,7 @@
 
 #include "PSim_particleStartSplatTracker.hpp"
 #include "BTree_particle.hpp"
+#include <algorithm>
 
 ParticleSimulation::ParticleStartSplatTracker::ParticleStartSplatTracker()
 :
@@ -35,6 +36,8 @@ void ParticleSimulation::ParticleStartSplatTracker::particleStart(BTree::Particl
     entry.globalIndex = pInsertIndex_;
     entry.startLocation = particle->getLocation();
     entry.startTime = time;
+    entry.state = STARTED;
+
     auto emplaceResult = pMap_.try_emplace(particle, entry);
     if (emplaceResult.second){ //emplace was successful, key was not already existing
         particle->setIntegerAttribute("global index", entry.globalIndex);
@@ -50,12 +53,29 @@ void ParticleSimulation::ParticleStartSplatTracker::particleSplat(BTree::Particl
         pMapEntry& entry = pMap_.at(particle);
         entry.splatLocation = particle->getLocation();
         entry.splatTime = time;
+        entry.state = SPLATTED;
     }
     catch (const std::out_of_range& exception) {
         throw (std::invalid_argument("Particle to splat was not registered as started before"));
     }
 }
 
-ParticleSimulation::pMapEntry ParticleSimulation::ParticleStartSplatTracker::get(BTree::Particle* particle) {
+ParticleSimulation::ParticleStartSplatTracker::pMapEntry
+        ParticleSimulation::ParticleStartSplatTracker::get(BTree::Particle* particle) {
     return pMap_.at(particle);
+}
+
+
+std::vector<ParticleSimulation::ParticleStartSplatTracker::pMapEntry>
+        ParticleSimulation::ParticleStartSplatTracker::getStartSplatData() {
+    std::vector<pMapEntry> entryList;
+    for (auto const &mapEntry : pMap_){
+        entryList.emplace_back(mapEntry.second);
+    }
+
+    // Sort according to global index:
+    std::sort(entryList.begin(), entryList.end(),
+            [](const pMapEntry &e1, const pMapEntry &e2) {return e1.globalIndex < e2.globalIndex;});
+
+    return entryList;
 }

@@ -36,7 +36,13 @@
 #include <memory>
 
 
+namespace BTree{
+    class Particle;
+}
+
 namespace ParticleSimulation{
+
+    class ParticleStartSplatTracker;
 
     class TrajectoryHDF5Writer{
     public:
@@ -54,6 +60,7 @@ namespace ParticleSimulation{
         void writeTrajectoryAttribute(std::string attrName, std::vector<std::string> values);
         void finalizeTrajectory();
         void writeSplatTimes(std::vector<BTree::Particle*> &particles);
+        void writeStartSplatData(ParticleStartSplatTracker tracker);
 
     private:
         constexpr int static FILE_TYPE_VERSION = 3;   ///<File type version identifier of the files written
