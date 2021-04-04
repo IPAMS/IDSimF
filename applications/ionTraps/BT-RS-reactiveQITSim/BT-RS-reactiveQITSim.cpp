@@ -464,7 +464,7 @@ int main(int argc, const char * argv[]) {
     hdf5Writer->writeTrajectoryAttribute("Substance Names",discreteSubstanceNames);
     hdf5Writer->writeTrajectoryAttribute("Substance Masses",discreteSubstanceMasses);
     if (rfMode == RAMPED_RF) {
-        hdf5Writer->writeDoubleListDataset("V_rf", V_rf_export);
+        hdf5Writer->writeNumericListDataset("V_rf", V_rf_export);
     }
     verletIntegrator.finalizeSimulation();
 

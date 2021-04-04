@@ -56,11 +56,12 @@ namespace ParticleSimulation{
         void writeTimestep(std::vector<BTree::Particle*>& particles, double time);
 
 
-        void writeDoubleListDataset(std::string dsName, std::vector<double> values, H5::Group* group = nullptr);
+        template <typename DT>
+        void writeNumericListDataset(std::string dsName, std::vector<DT> values, H5::Group* group = nullptr);
         void write3DVectorListDataset(std::string dsName, std::vector<Core::Vector> values, H5::Group* group = nullptr);
 
-        template <int DIMS>
-        void writeVectorDatasetLowLevel(std::string dsName, std::vector<std::array<double, DIMS>> values, H5::Group* group = nullptr);
+        template <typename DT, int DIMS>
+        void writeArrayDataSet(std::string dsName, std::vector<std::array<DT, DIMS>> values, H5::Group* group = nullptr);
         void writeTrajectoryAttribute(std::string attrName, int value);
         void writeTrajectoryAttribute(std::string attrName, std::vector<double> values);
         void writeTrajectoryAttribute(std::string attrName, std::vector<std::string> values);

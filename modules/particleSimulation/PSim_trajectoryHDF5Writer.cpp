@@ -172,13 +172,15 @@ void ParticleSimulation::TrajectoryHDF5Writer::writeTimestep(std::vector<BTree::
  * @param values Numeric vector with values to write to the dataset
  * @param group FIXME
  */
-void ParticleSimulation::TrajectoryHDF5Writer::writeDoubleListDataset(std::string dsName, std::vector<double> values, H5::Group* group){
-    std::vector<std::array<double, 1>> valuesPacked;
+
+template <typename DT>
+void ParticleSimulation::TrajectoryHDF5Writer::writeNumericListDataset(std::string dsName, std::vector<DT> values, H5::Group* group){
+    std::vector<std::array<DT, 1>> valuesPacked;
     for (auto const &val: values){
-        std::array<double,1> ar = {val};
+        std::array<DT,1> ar = {val};
         valuesPacked.emplace_back(ar);
     }
-    writeVectorDatasetLowLevel<1>(dsName, valuesPacked, group);
+    writeArrayDataSet<DT, 1>(dsName, valuesPacked, group);
 };
 
 void ParticleSimulation::TrajectoryHDF5Writer::write3DVectorListDataset(std::string dsName, std::vector<Core::Vector> values, H5::Group* group){
@@ -188,26 +190,27 @@ void ParticleSimulation::TrajectoryHDF5Writer::write3DVectorListDataset(std::str
         std::array<double,3> ar = {val.x(), val.y(), val.z()};
         valuesPacked.emplace_back(ar);
     }
-    writeVectorDatasetLowLevel<3>(dsName, valuesPacked, group);
+    writeArrayDataSet<double, 3>(dsName, valuesPacked, group);
 };
 
 
 /**
  * FIXME
+ * @tparam DT
  * @tparam NCOLUMNS
  * @param dsName
  * @param values
  * @param group
  */
-template <int NCOLUMNS>
-void ParticleSimulation::TrajectoryHDF5Writer::writeVectorDatasetLowLevel(std::string dsName, std::vector<std::array<double, NCOLUMNS>> values, H5::Group* group){
+template <typename DT, int NCOLUMNS>
+void ParticleSimulation::TrajectoryHDF5Writer::writeArrayDataSet(std::string dsName, std::vector<std::array<DT, NCOLUMNS>> values, H5::Group* group){
 
     //prepare dataset structures:
     size_t nValues = values.size();
 
     hsize_t dims[2] = {nValues, NCOLUMNS};                       // dataset dimensions at creation
     hsize_t offset[2] = {0, 0};
-    hsize_t maxdims[2] = {nValues, NCOLUMNS};                   // maximum dataset dimensions
+    //hsize_t maxdims[2] = {nValues, NCOLUMNS};                   // maximum dataset dimensions gives
     hsize_t chunkDims[2] = {nValues, NCOLUMNS};
     H5::DataSpace dataspace(2, dims);
 
@@ -219,24 +222,33 @@ void ParticleSimulation::TrajectoryHDF5Writer::writeVectorDatasetLowLevel(std::s
     if (group ==nullptr){
         group = baseGroup_.get();
     }
-    H5::DataSet dset = group->createDataSet(dsName.c_str(),
-                                                 H5::PredType::IEEE_F32BE, dataspace,
-                                                 props);
 
+    const H5::PredType* dsetPredType;
+    const H5::PredType* writePredType;
+    if constexpr (std::is_same<DT, double>::value) {
+        dsetPredType = &H5::PredType::IEEE_F32BE;
+        writePredType = &H5::PredType::NATIVE_DOUBLE;
+    }
+    else if constexpr (std::is_same<DT, int>::value) {
+        dsetPredType = &H5::PredType::NATIVE_INT;
+        writePredType = &H5::PredType::NATIVE_INT;
+    }
 
+    H5::DataSet dset = group->createDataSet(dsName.c_str(), *dsetPredType, dataspace, props);
     H5::DataSpace dspace = dset.getSpace();
     dspace.selectHyperslab(H5S_SELECT_SET, dims, offset);
 
     // Define memory space.
-    std::vector<double> datBuf(nValues*NCOLUMNS);
+    std::vector<DT> datBuf(nValues*NCOLUMNS);
     for (int i=0; i<nValues; ++i){
         for(int j=0; j<NCOLUMNS; ++j){
             datBuf[i*NCOLUMNS+j] = values[i][j];
         }
     }
     H5::DataSpace memspace(2, dims);
-    dset.write(datBuf.data(), H5::PredType::NATIVE_DOUBLE, memspace, dspace);
+    dset.write(datBuf.data(), *writePredType, memspace, dataspace);
 }
+
 
 /**
  * Writes an integer attribute to the trajectory file
@@ -341,8 +353,9 @@ void ParticleSimulation::TrajectoryHDF5Writer::writeStartSplatData(ParticleStart
     tracker.sortStartSplatData();
 
     H5::Group startSplatGroup = baseGroup_->createGroup("start_splat");
-    writeDoubleListDataset("particle start times", tracker.getStartTimes(), &startSplatGroup);
-    writeDoubleListDataset("particle splat times", tracker.getSplatTimes(), &startSplatGroup);
+    writeNumericListDataset("particle splat state", tracker.getSplatState(), &startSplatGroup);
+    writeNumericListDataset("particle start times", tracker.getStartTimes(), &startSplatGroup);
+    writeNumericListDataset("particle splat times", tracker.getSplatTimes(), &startSplatGroup);
     write3DVectorListDataset("particle start locations", tracker.getStartLocations(), &startSplatGroup);
     write3DVectorListDataset("particle splat locations", tracker.getSplatLocations(), &startSplatGroup);
 }

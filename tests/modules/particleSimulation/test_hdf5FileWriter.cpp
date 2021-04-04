@@ -227,7 +227,7 @@ TEST_CASE( "Test HDF5 trajectory file writer", "[ParticleSimulation][file writer
         writerBare.finalizeTrajectory();
 
         std::vector<double> additionalVectorDataset = {10.0,10.1,10.2,10.3,10.4};
-        writerAux.writeDoubleListDataset("additional_vector_data_set", additionalVectorDataset);
+        writerAux.writeNumericListDataset("additional_vector_data_set", additionalVectorDataset);
 
         std::vector<std::string> particleNames = {"Substance 1","Substance 2"};
         writerAux.writeTrajectoryAttribute("particle names",particleNames);

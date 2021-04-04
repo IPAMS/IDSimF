@@ -82,6 +82,14 @@ std::vector<ParticleSimulation::ParticleStartSplatTracker::pMapEntry>
     return sortedParticleData_;
 }
 
+std::vector<int> ParticleSimulation::ParticleStartSplatTracker::getSplatState() {
+    std::vector<int> result;
+    for (auto const &entry: sortedParticleData_){
+        result.emplace_back(entry.state);
+    }
+    return result;
+}
+
 std::vector<double> ParticleSimulation::ParticleStartSplatTracker::getStartTimes() {
     std::vector<double> result;
     for (auto const &entry: sortedParticleData_){

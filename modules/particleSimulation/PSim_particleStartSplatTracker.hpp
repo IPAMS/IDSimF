@@ -53,8 +53,8 @@ namespace ParticleSimulation{
     public:
 
         enum particleState {
-            STARTED,
-            SPLATTED
+            STARTED = 1,
+            SPLATTED = 2
         };
 
         struct pMapEntry {
@@ -77,6 +77,7 @@ namespace ParticleSimulation{
 
         std::vector<pMapEntry> getStartSplatData();
 
+        std::vector<int> getSplatState();
         std::vector<double> getStartTimes();
         std::vector<double> getSplatTimes();
         std::vector<Core::Vector> getStartLocations();
