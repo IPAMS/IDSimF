@@ -487,7 +487,7 @@ int main(int argc, const char * argv[]) {
 
 
     if (rfAmplitudeMode == RAMPED_RF) {
-        hdf5Writer->writeVectorDataset("V_rf",V_rf_export);
+        hdf5Writer->writeDoubleListDataset("V_rf", V_rf_export);
     }
 
     clock_t end = std::clock();
