@@ -149,7 +149,7 @@ int main(int argc, const char *argv[]){
         additionalParamTFct = [](BTree::Particle *particle) -> std::vector<double>
             {
                 std::vector<double> result = {
-                        particle->getAuxScalarParam(key_ChemicalIndex),
+                        particle->getFloatAttribute(key_ChemicalIndex),
                         particle->getVelocity().x(),
                         particle->getVelocity().y(),
                         particle->getVelocity().z()
@@ -162,7 +162,7 @@ int main(int argc, const char *argv[]){
         additionalParamTFct = [](BTree::Particle *particle) -> std::vector<double>
         {
             std::vector<double> result = {
-                    particle->getAuxScalarParam(key_ChemicalIndex)
+                    particle->getFloatAttribute(key_ChemicalIndex)
             };
             return result;
         };
@@ -399,7 +399,7 @@ int main(int argc, const char *argv[]){
         for (int i = 0; i < nParticlesTotal; i++) {
             bool reacted = rsSim.react(i, reactionConditions, dt_s);
             int substIndex = substanceIndices.at(particles[i]->getSpecies());
-            particles[i]->setAuxScalarParam(key_ChemicalIndex, substIndex);
+            particles[i]->setFloatAttribute(key_ChemicalIndex, substIndex);
 
             if (reacted && collisionModelType == SDS) {
                 //we had an reaction event: update the collision model parameters for the particle which are not

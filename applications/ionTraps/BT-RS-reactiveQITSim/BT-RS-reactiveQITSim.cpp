@@ -60,8 +60,8 @@ double z_0_default = 7.0  / 1000.0;
 
 std::function<void(double,BTree::Particle&)> createCollisionCountFunction(std::string key){
     return [=](double collisionEnergy,BTree::Particle& ion)->void{
-        int nCollisions = ion.getAuxScalarParam(key);
-        ion.setAuxScalarParam(key, nCollisions+1);
+        int nCollisions = ion.getFloatAttribute(key);
+        ion.setFloatAttribute(key, nCollisions+1);
     };
 }
 
@@ -70,8 +70,8 @@ createCollisionReactionFunction(RS::Substance *collisionPartnerSubstance, RS::Si
 
     return [collisionPartnerSubstance,key,&rsSim] (RS::CollisionConditions conditions, BTree::Particle& ion){
         rsSim.collisionReact(ion.getIndex(),collisionPartnerSubstance,conditions);
-        int nCollisions = ion.getAuxScalarParam(key);
-        ion.setAuxScalarParam(key, nCollisions+1);
+        int nCollisions = ion.getFloatAttribute(key);
+        ion.setFloatAttribute(key, nCollisions+1);
     };
 }
 
@@ -272,7 +272,7 @@ int main(int argc, const char * argv[]) {
 
             particle->setIndex(nParticlesTotal);
             particle->setLocation(initialPositions[k]);
-            particle->setAuxScalarParam(key_Collisions_total,0);
+            particle->setFloatAttribute(key_Collisions_total, 0);
             particlePtrs.push_back(particle.get());
             rsSim.addParticle(particle.get(), nParticlesTotal);
             particles.push_back(std::move(particle));
@@ -376,8 +376,8 @@ int main(int argc, const char * argv[]) {
                         particle->getVelocity().y(),
                         particle->getVelocity().z(),
                         kineticEnergy_eV,
-                        particle->getAuxScalarParam(key_Collisions_total),
-                        particle->getAuxScalarParam(key_ChemicalIndex)
+                        particle->getFloatAttribute(key_Collisions_total),
+                        particle->getFloatAttribute(key_ChemicalIndex)
                 };
                 return result;
             };
@@ -450,7 +450,7 @@ int main(int argc, const char * argv[]) {
             if (particles[i]->isActive()) {
                 bool reacted = rsSim.react(i, reactionConditions, dt);
                 int substIndex = substanceIndices.at(particles[i]->getSpecies());
-                particles[i]->setAuxScalarParam(key_ChemicalIndex, substIndex);
+                particles[i]->setFloatAttribute(key_ChemicalIndex, substIndex);
             }
         }
         rsSim.advanceTimestep(dt);

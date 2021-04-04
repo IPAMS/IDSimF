@@ -169,7 +169,7 @@ int main(int argc, const char * argv[]) {
             // init position and initial chemical species of the particle:
             particle->setLocation(initialPositions[k]);
             int substIndex = substanceIndices.at(particle->getSpecies());
-            particle->setAuxScalarParam(key_ChemicalIndex, substIndex);
+            particle->setFloatAttribute(key_ChemicalIndex, substIndex);
 
             particlesPtrs.push_back(particle.get());
             rsSim.addParticle(particle.get(), nParticlesTotal);
@@ -211,7 +211,7 @@ int main(int argc, const char * argv[]) {
 
     ParticleSimulation::additionalPartParamFctType additionalParameterTransformFct =
             [=](BTree::Particle* particle) -> std::vector<double> {
-                std::vector<double> result = {particle->getAuxScalarParam(key_ChemicalIndex)};
+                std::vector<double> result = {particle->getFloatAttribute(key_ChemicalIndex)};
                 return result;
             };
 
@@ -259,7 +259,7 @@ int main(int argc, const char * argv[]) {
             if (reacted){
                 //we had an reaction event: Update the chemical species for the trajectory
                 int substIndex = substanceIndices.at(particles[i]->getSpecies());
-                particles[i]->setAuxScalarParam(key_ChemicalIndex, substIndex);
+                particles[i]->setFloatAttribute(key_ChemicalIndex, substIndex);
             }
             // move particle in z axis according to particle mobility:
             double particleShift = particles[i]->getMobility() * reducedPressure * fieldMagnitude * dt_s;

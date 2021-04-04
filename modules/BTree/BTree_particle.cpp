@@ -262,21 +262,39 @@ bool BTree::Particle::isInvalid() const{
 }
 
 /**
- * Gets an auxiliary parameter
- * @param key a textual key which identifies the auxiliary parameter
- * @return the value of the auxiliary parameter with the given key
+ * Gets a floating point particle attribute
+ * @param key a textual key which identifies the attribute
+ * @return the value of the attribute with the given key
  */
-double BTree::Particle::getAuxScalarParam(std::string key) const{
-    return auxScalarParams_.at(key);
+double BTree::Particle::getFloatAttribute(const std::string& key) const{
+    return attributesFloat_.at(key);
 }
 
 /**
- * Sets an auxiliary parameter
- * @param key a textual key which identifies the auxiliary parameter
- * @param value the new value of the auxiliary parameter
+ * Sets a floating point particle attribute
+ * @param key a textual key which identifies the attribute
+ * @param value the new value of the attribute
  */
-void BTree::Particle::setAuxScalarParam(std::string key, double value) {
-    auxScalarParams_[key] = value;
+void BTree::Particle::setFloatAttribute(const std::string& key, double value) {
+    attributesFloat_[key] = value;
+}
+
+/**
+ * Gets an integer particle attribute
+ * @param key a textual key which identifies the attribute
+ * @return the value of the attribute with the given key
+ */
+int BTree::Particle::getIntegerAttribute(const std::string& key) const{
+    return attributesInteger_.at(key);
+}
+
+/**
+ * Sets an integer particle attribute
+ * @param key a textual key which identifies the attribute
+ * @param value the new value of the attribute
+ */
+void BTree::Particle::setIntegerAttribute(const std::string& key, int value) {
+    attributesInteger_[key] = value;
 }
 
 /**

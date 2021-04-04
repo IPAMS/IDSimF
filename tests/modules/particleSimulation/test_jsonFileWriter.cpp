@@ -96,14 +96,14 @@ TEST_CASE("Test JSON trajectory file writer", "[ParticleSimulation][JSONTrajecto
         particles.push_back(&testIon3);
 
         //root->printNode(0);
-        testIon1.setAuxScalarParam(key_testKey, 10.1);
-        testIon2.setAuxScalarParam(key_testKey, 20.2);
-        testIon3.setAuxScalarParam(key_testKey, 30.3);
+        testIon1.setFloatAttribute(key_testKey, 10.1);
+        testIon2.setFloatAttribute(key_testKey, 20.2);
+        testIon3.setFloatAttribute(key_testKey, 30.3);
 
 
         ParticleSimulation::additionalPartParamFctType additionalParameterTransformFct =
                 [=](BTree::Particle* particle) -> std::vector<double> {
-                    std::vector<double> result = {particle->getAuxScalarParam(key_testKey)};
+                    std::vector<double> result = {particle->getFloatAttribute(key_testKey)};
                     return result;
                 };
 

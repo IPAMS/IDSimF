@@ -106,14 +106,27 @@ TEST_CASE( "Basic Particle semantics tests", "[Particle]") {
         REQUIRE(testIon.getLocation()==Core::Vector(10.0, 20.0, 30.0));
     }
 
-    SECTION("Auxiliary parameters are accessible as parameters") {
+    SECTION("Test particle attributes") {
 
-        std::string testKey = "a testkey";
+        SECTION("Test float attributes"){
+            std::string testKey = "a testkey";
 
-        testIon.setAuxScalarParam(testKey, 100.0);
-        REQUIRE(testIon.getAuxScalarParam(testKey)==100.0);
+            testIon.setFloatAttribute(testKey, 100.0);
+            REQUIRE(testIon.getFloatAttribute(testKey)==100.0);
 
-        testIon.setAuxScalarParam(testKey, 200.0);
-        REQUIRE(testIon.getAuxScalarParam(testKey)==200.0);
+            testIon.setFloatAttribute(testKey, 200.0);
+            REQUIRE(testIon.getFloatAttribute(testKey)==200.0);
+        }
+
+        SECTION("Test integer attributes"){
+            std::string testKey = "a testkey for integer";
+
+            testIon.setIntegerAttribute(testKey, 15);
+            REQUIRE(testIon.getIntegerAttribute(testKey)==15);
+
+            testIon.setIntegerAttribute(testKey, 20);
+            REQUIRE(testIon.getIntegerAttribute(testKey)==20);
+        }
+
     }
 }

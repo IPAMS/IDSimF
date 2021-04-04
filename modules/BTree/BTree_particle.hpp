@@ -76,8 +76,10 @@ namespace BTree {
         void setInvalid(bool invalid);
         bool isInvalid() const;
 
-        double getAuxScalarParam(std::string key) const;
-        void setAuxScalarParam(std::string key,double value);
+        double getFloatAttribute(const std::string& key) const;
+        void setFloatAttribute(const std::string& key, double value);
+        int getIntegerAttribute(const std::string& key) const;
+        void setIntegerAttribute(const std::string& key, int value);
         std::array<double, 3>& getAuxCollisionParams();
 
         void setMobility(double mobility);
@@ -115,7 +117,8 @@ namespace BTree {
         double splatTime_;   ///< Time when the particle was terminated ("splatted")
         AbstractNode* hostNode_;     ///< A link to a tree node to which the particle is belonging currently
 
-        std::unordered_map<std::string, double> auxScalarParams_; ///< an arbitrary set of additional parameters, accessible by a name
+        std::unordered_map<std::string, double> attributesFloat_; ///< an arbitrary set of additional floating point attributes, accessible by a name
+        std::unordered_map<std::string, int> attributesInteger_; ///< an arbitrary set of additional integer attributes, accessible by a name
         std::array<double, 3> auxCollisionParams_ {0.0,0.0,0.0}; ///< quickly accessible parameters for collision models
     };
 

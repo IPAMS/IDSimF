@@ -206,12 +206,12 @@ int main(int argc, const char * argv[]) {
     AppUtils::readIonDefinition(particles, particlePtrs, confRoot, confBasePath);
     // init additional ion parameters:
     for(const auto& particle: particles){
-        particle->setAuxScalarParam(key_trapForce_x, 0.0);
-        particle->setAuxScalarParam(key_trapForce_y, 0.0);
-        particle->setAuxScalarParam(key_trapForce_z, 0.0);
-        particle->setAuxScalarParam(key_spaceCharge_x, 0.0);
-        particle->setAuxScalarParam(key_spaceCharge_y, 0.0);
-        particle->setAuxScalarParam(key_spaceCharge_z, 0.0);
+        particle->setFloatAttribute(key_trapForce_x, 0.0);
+        particle->setFloatAttribute(key_trapForce_y, 0.0);
+        particle->setFloatAttribute(key_trapForce_z, 0.0);
+        particle->setFloatAttribute(key_spaceCharge_x, 0.0);
+        particle->setFloatAttribute(key_spaceCharge_y, 0.0);
+        particle->setFloatAttribute(key_spaceCharge_z, 0.0);
     }
 
     // define functions for the trajectory integration ==================================================
@@ -274,12 +274,12 @@ int main(int argc, const char * argv[]) {
                 }
 
                 //update the additional parameters for writing them later to the trajectory:
-                particle->setAuxScalarParam(key_trapForce_x, trapForce.x());
-                particle->setAuxScalarParam(key_trapForce_y, trapForce.y());
-                particle->setAuxScalarParam(key_trapForce_z, trapForce.z());
-                particle->setAuxScalarParam(key_spaceCharge_x, spaceChargeForce.x());
-                particle->setAuxScalarParam(key_spaceCharge_y, spaceChargeForce.y());
-                particle->setAuxScalarParam(key_spaceCharge_z, spaceChargeForce.z());
+                particle->setFloatAttribute(key_trapForce_x, trapForce.x());
+                particle->setFloatAttribute(key_trapForce_y, trapForce.y());
+                particle->setFloatAttribute(key_trapForce_z, trapForce.z());
+                particle->setFloatAttribute(key_spaceCharge_x, spaceChargeForce.x());
+                particle->setFloatAttribute(key_spaceCharge_y, spaceChargeForce.y());
+                particle->setFloatAttribute(key_spaceCharge_z, spaceChargeForce.z());
 
                 return ((trapForce + spaceChargeForce) / particle->getMass());
             };
@@ -301,12 +301,12 @@ int main(int argc, const char * argv[]) {
                 }
 
                 //update the additional parameters for writing them later to the trajectory:
-                particle->setAuxScalarParam(key_trapForce_x, rfForce.x());
-                particle->setAuxScalarParam(key_trapForce_y, rfForce.y());
-                particle->setAuxScalarParam(key_trapForce_z, rfForce.z());
-                particle->setAuxScalarParam(key_spaceCharge_x, spaceChargeForce.x());
-                particle->setAuxScalarParam(key_spaceCharge_y, spaceChargeForce.y());
-                particle->setAuxScalarParam(key_spaceCharge_z, spaceChargeForce.z());
+                particle->setFloatAttribute(key_trapForce_x, rfForce.x());
+                particle->setFloatAttribute(key_trapForce_y, rfForce.y());
+                particle->setFloatAttribute(key_trapForce_z, rfForce.z());
+                particle->setFloatAttribute(key_spaceCharge_x, spaceChargeForce.x());
+                particle->setFloatAttribute(key_spaceCharge_y, spaceChargeForce.y());
+                particle->setFloatAttribute(key_spaceCharge_z, spaceChargeForce.z());
 
                 return ((rfForce + spaceChargeForce) / particle->getMass());
             };
@@ -346,12 +346,12 @@ int main(int argc, const char * argv[]) {
                         particle->getVelocity().x(),
                         particle->getVelocity().y(),
                         particle->getVelocity().z(),
-                        particle->getAuxScalarParam(key_trapForce_x),
-                        particle->getAuxScalarParam(key_trapForce_y),
-                        particle->getAuxScalarParam(key_trapForce_z),
-                        particle->getAuxScalarParam(key_spaceCharge_x),
-                        particle->getAuxScalarParam(key_spaceCharge_y),
-                        particle->getAuxScalarParam(key_spaceCharge_z),
+                        particle->getFloatAttribute(key_trapForce_x),
+                        particle->getFloatAttribute(key_trapForce_y),
+                        particle->getFloatAttribute(key_trapForce_z),
+                        particle->getFloatAttribute(key_spaceCharge_x),
+                        particle->getFloatAttribute(key_spaceCharge_y),
+                        particle->getFloatAttribute(key_spaceCharge_z),
                 };
                 return result;
             };

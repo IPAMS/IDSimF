@@ -287,7 +287,7 @@ int main(int argc, const char * argv[]) {
 
     ParticleSimulation::additionalPartParamFctType additionalParameterTransformFct =
             [=](BTree::Particle* particle) -> std::vector<double> {
-                std::vector<double> result = {particle->getAuxScalarParam(key_ChemicalIndex)};
+                std::vector<double> result = {particle->getFloatAttribute(key_ChemicalIndex)};
                 return result;
             };
 
@@ -407,7 +407,7 @@ int main(int argc, const char * argv[]) {
 
             bool reacted = rsSim.react(i, reactionConditions, dt_s);
             int substIndex = substanceIndices.at(particles[i]->getSpecies());
-            particles[i]->setAuxScalarParam(key_ChemicalIndex,substIndex);
+            particles[i]->setFloatAttribute(key_ChemicalIndex, substIndex);
 
             if (reacted){
                 //we had an reaction event: update the collision model parameters for the particle which are not
