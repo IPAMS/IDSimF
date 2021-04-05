@@ -51,16 +51,6 @@ TEST_CASE( "Test parallel verlet integrator", "[ParticleSimulation][ParallelVerl
         return (result);
     };
 
-    auto timestepWriteFct = [](std::vector<BTree::Particle*>& particles, BTree::ParallelTree& tree, double time, int timestep,
-                               bool lastTimestep){};
-
-    auto otherActionsFct = [] (
-            Core::Vector& newPartPos,BTree::Particle* particle,
-            int particleIndex, BTree::ParallelTree& tree, double time,int timestep){
-    };
-
-    CollisionModel::EmptyCollisionModel collisionModel;
-
     BTree::Particle testParticle1(Core::Vector(0.0, 0.0, 0.0),
             Core::Vector(0.0, 0.0, 0.0),
             1.0, 100.0);
@@ -72,9 +62,8 @@ TEST_CASE( "Test parallel verlet integrator", "[ParticleSimulation][ParallelVerl
 
     SECTION( "Parallel Verlet integrator should be working with deferred particle addition") {
 
-        ParticleSimulation::ParallelVerletIntegrator verletIntegrator(
-                accelerationFct, timestepWriteFct, otherActionsFct,
-                collisionModel);
+        // bare integrator without time step or other actions function
+        ParticleSimulation::ParallelVerletIntegrator verletIntegrator(accelerationFct);
 
         //should not crash / throw without particles
         REQUIRE_NOTHROW(verletIntegrator.run(1,dt));
@@ -125,9 +114,7 @@ TEST_CASE( "Test parallel verlet integrator", "[ParticleSimulation][ParallelVerl
             }
 
             ParticleSimulation::ParallelVerletIntegrator verletIntegrator(
-                    particlesPtrs,
-                    accelerationFct, timestepWriteFct, otherActionsFct,
-                    collisionModel);
+                    particlesPtrs, accelerationFct, nullptr, nullptr, nullptr);
 
             verletIntegrator.run(timeSteps, dt);
 
@@ -164,13 +151,23 @@ TEST_CASE( "Test parallel verlet integrator", "[ParticleSimulation][ParallelVerl
                 yPos += 0.01;
             }
 
-            CollisionModel::EmptyCollisionModel collisionModel;
+            SECTION("Integration should run through and functions should be called") {
 
-            SECTION("Integration should run through") {
+                int nTimestepsRecorded = 0;
+                auto timestepWriteFct = [&nTimestepsRecorded](std::vector<BTree::Particle*>& particles, BTree::ParallelTree& tree, double time, int timestep,
+                                                              bool lastTimestep){
+                    nTimestepsRecorded++;
+                };
+
+                int nParticlesTouched = 0;
+                auto otherActionsFct = [&nParticlesTouched] (
+                        Core::Vector& newPartPos, BTree::Particle* particle,
+                        int particleIndex, BTree::ParallelTree& tree, double time,int timestep){
+                    nParticlesTouched++;
+                };
+
                 ParticleSimulation::ParallelVerletIntegrator verletIntegrator(
-                        particlesPtrs,
-                        accelerationFct, timestepWriteFct, otherActionsFct,
-                        collisionModel);
+                        particlesPtrs, accelerationFct, timestepWriteFct, otherActionsFct);
 
                 verletIntegrator.run(timeSteps, dt);
 
@@ -191,12 +188,21 @@ TEST_CASE( "Test parallel verlet integrator", "[ParticleSimulation][ParallelVerl
                     REQUIRE(Approx(ionPos.y()).epsilon(1e-7)==i*0.01);
                     REQUIRE(Approx(ionPos.z()).epsilon(0.05)==zCalculated);
                 }
+
+                CHECK(nTimestepsRecorded == timeSteps + 2);
+                CHECK(nParticlesTouched == timeSteps * nParticles);
             }
 
             SECTION("Integration should be stoppable") {
 
                 ParticleSimulation::AbstractTimeIntegrator* integratorPtr;
                 int terminationTimeStep = 40;
+
+                int nTimestepsRecorded = 0;
+                auto timestepWriteFct = [&nTimestepsRecorded](std::vector<BTree::Particle*>& particles, BTree::ParallelTree& tree, double time, int timestep,
+                                                              bool lastTimestep){
+                    nTimestepsRecorded++;
+                };
 
                 auto terminationActionFct = [&integratorPtr, terminationTimeStep] (
                         Core::Vector& newPartPos,BTree::Particle* particle,
@@ -208,11 +214,12 @@ TEST_CASE( "Test parallel verlet integrator", "[ParticleSimulation][ParallelVerl
 
                 ParticleSimulation::ParallelVerletIntegrator verletIntegrator(
                         particlesPtrs,
-                        accelerationFct, timestepWriteFct, terminationActionFct,
-                        collisionModel);
+                        accelerationFct, timestepWriteFct, terminationActionFct);
+
                 integratorPtr = &verletIntegrator;
 
                 verletIntegrator.run(timeSteps, dt);
+                REQUIRE(nTimestepsRecorded == terminationTimeStep+3);
                 REQUIRE(verletIntegrator.timeStep() == terminationTimeStep+1);
                 REQUIRE(verletIntegrator.time() == Approx(dt*(terminationTimeStep+1)));
             }

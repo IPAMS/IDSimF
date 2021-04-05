@@ -84,16 +84,16 @@ namespace ParticleSimulation{
             ParallelVerletIntegrator(
                     std::vector<BTree::Particle*> particles,
                     accelerationFctType accelerationFunction,
-                    timestepWriteFctType timestepWriteFunction,
-                    otherActionsFctType otherActionsFunction,
-                    CollisionModel::AbstractCollisionModel& collisionModel
+                    timestepWriteFctType timestepWriteFunction = nullptr,
+                    otherActionsFctType otherActionsFunction = nullptr,
+                    CollisionModel::AbstractCollisionModel* collisionModel = nullptr
             );
 
             ParallelVerletIntegrator(
                     accelerationFctType accelerationFunction,
-                    timestepWriteFctType timestepWriteFunction,
-                    otherActionsFctType otherActionsFunction,
-                    CollisionModel::AbstractCollisionModel& collisionModel
+                    timestepWriteFctType timestepWriteFunction = nullptr,
+                    otherActionsFctType otherActionsFunction = nullptr,
+                    CollisionModel::AbstractCollisionModel* collisionModel = nullptr
             );
 
             void addParticle(BTree::Particle* particle) override;
@@ -107,9 +107,9 @@ namespace ParticleSimulation{
 
         CollisionModel::AbstractCollisionModel* collisionModel_; ///< the gas collision model to perform while integrating
 
-        accelerationFctType accelerationFunction_;   ///< function to calculate particle acceleration
-        timestepWriteFctType timestepWriteFunction_; ///< function to export / write time step results
-        otherActionsFctType otherActionsFunction_;   ///< function for arbitrary other actions in the simulation
+        accelerationFctType accelerationFunction_ = nullptr;   ///< function to calculate particle acceleration
+        timestepWriteFctType timestepWriteFunction_ = nullptr; ///< function to export / write time step results
+        otherActionsFctType otherActionsFunction_ = nullptr;   ///< function for arbitrary other actions in the simulation
 
         //internal variables for actual calculations:
         Core::Vector loc_min_ = Core::Vector(-1000,-1000,-1000); ///< currently hard coded lower corner of the sim. domain
