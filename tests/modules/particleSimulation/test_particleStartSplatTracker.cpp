@@ -27,7 +27,9 @@
 
 
 #include "catch.hpp"
+#include "test_util.hpp"
 #include "PSim_particleStartSplatTracker.hpp"
+#include "PSim_parallelVerletIntegrator.hpp"
 #include "BTree_particle.hpp"
 #include "Core_vector.hpp"
 #include <iostream>
@@ -136,5 +138,81 @@ TEST_CASE("TestParticleStartSplatTracker", "[ParticleSimulation][ParticleStartSp
 
         CHECK(pData[nParticles-1].state == ParticleSimulation::ParticleStartSplatTracker::STARTED);
         CHECK(pData[nParticles-1].splatTime == 0.0); //since the particle is not splatted
+    }
+
+
+    SECTION("Tests with actual particle trajectory integration"){
+
+        ParticleSimulation::ParticleStartSplatTracker tracker;
+
+        // init variables / functions
+        double ionAcceleration = 5.0; //((1000V / 100mm) * elementary charge) / 100 amu = 9.64e9 m/s^2
+        double dt = 1e-4;
+
+
+        auto accelerationFct = [ionAcceleration](BTree::Particle *particle, int particleIndex, BTree::ParallelTree &tree,
+                                                 double time, int timestep){
+            Core::Vector result(ionAcceleration, 0, ionAcceleration * 0.5);
+            return (result);
+        };
+
+        double nParticles = 10;
+        double timeSteps = 100;
+
+        std::vector<BTree::uniquePartPtr>particles;
+        std::vector<BTree::Particle*>particlesPtrs;
+
+        double timeOfBirth = 0.0;
+        double yPos = 0.0;
+        for (int i=0; i<nParticles; ++i){
+            BTree::uniquePartPtr particle = std::make_unique<BTree::Particle>(
+                    Core::Vector(0.0, yPos, 0.0),
+                    Core::Vector(0.0,0.0,0.0),
+                    1.0,
+                    100.0,
+                    timeOfBirth);
+            particlesPtrs.push_back(particle.get());
+            particles.push_back(std::move(particle));
+            yPos += 0.01;
+            timeOfBirth += dt*0.5;
+        }
+
+
+        int nParticlesStartMonitored = 0;
+        auto particleStartMonitoringFct = [&nParticlesStartMonitored, &tracker] (BTree::Particle* particle, double time){
+            nParticlesStartMonitored++;
+            tracker.particleStart(particle, time);
+        };
+
+        double zMax = 1e-4;
+        auto otherActionsFct = [zMax, &tracker] (
+                Core::Vector& newPartPos, BTree::Particle* particle,
+                int particleIndex, BTree::ParallelTree& tree, double time,int timestep){
+            if (particle->getLocation().z() > zMax){
+                particle->setActive(false);
+                particle->setSplatTime(time);
+                tracker.particleSplat(particle, time);
+            }
+        };
+
+        ParticleSimulation::ParallelVerletIntegrator verletIntegrator(
+                particlesPtrs, accelerationFct, nullptr, otherActionsFct, particleStartMonitoringFct);
+
+        verletIntegrator.run(timeSteps, dt);
+
+        tracker.sortStartSplatData();
+
+        std::vector<double> startTimes = tracker.getStartTimes();
+        std::vector<double> splatTimes = tracker.getSplatTimes();
+        std::vector<Core::Vector> startLocations = tracker.getStartLocations();
+        std::vector<Core::Vector> splatLocations = tracker.getSplatLocations();
+        std::vector<int> states = tracker.getSplatState();
+
+        CHECK(states[0] == 2);
+        CHECK(states[9] == 2);
+        CHECK(startTimes[9] == 10*dt*0.5);
+        CHECK(splatTimes[9] == Approx(0.0095));
+        CHECK(vectorApproxCompare(splatLocations[9], Core::Vector(0.00020025, 0.09, 0.000100125)) == vectorsApproxEqual);
+        CHECK(vectorApproxCompare(startLocations[9], Core::Vector(0.0, 0.09, 0.0)) == vectorsApproxEqual);
     }
 }
