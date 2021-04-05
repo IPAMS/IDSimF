@@ -38,12 +38,12 @@ ParticleSimulation::VerletIntegrator::VerletIntegrator(
         ParticleSimulation::VerletIntegrator::accelerationFctType accelerationFunction,
         ParticleSimulation::VerletIntegrator::timestepWriteFctType timestepWriteFunction,
         ParticleSimulation::VerletIntegrator::otherActionsFctType otherActionsFunction,
-        CollisionModel::AbstractCollisionModel &collisionModel) :
-ParticleSimulation::AbstractTimeIntegrator(particles),
-accelerationFunction_(std::move(accelerationFunction)),
-timestepWriteFunction_(std::move(timestepWriteFunction)),
-otherActionsFunction_(std::move(otherActionsFunction)),
-collisionModel_(&collisionModel)
+        CollisionModel::AbstractCollisionModel* collisionModel) :
+    ParticleSimulation::AbstractTimeIntegrator(particles),
+    accelerationFunction_(std::move(accelerationFunction)),
+    timestepWriteFunction_(std::move(timestepWriteFunction)),
+    otherActionsFunction_(std::move(otherActionsFunction)),
+    collisionModel_(collisionModel)
 {}
 
 /**
@@ -58,11 +58,11 @@ ParticleSimulation::VerletIntegrator::VerletIntegrator(
         ParticleSimulation::VerletIntegrator::accelerationFctType accelerationFunction,
         ParticleSimulation::VerletIntegrator::timestepWriteFctType timestepWriteFunction,
         ParticleSimulation::VerletIntegrator::otherActionsFctType otherActionsFunction,
-        CollisionModel::AbstractCollisionModel &collisionModel) :
-        accelerationFunction_(std::move(accelerationFunction)),
-        timestepWriteFunction_(std::move(timestepWriteFunction)),
-        otherActionsFunction_(std::move(otherActionsFunction)),
-        collisionModel_(&collisionModel)
+        CollisionModel::AbstractCollisionModel* collisionModel) :
+    accelerationFunction_(std::move(accelerationFunction)),
+    timestepWriteFunction_(std::move(timestepWriteFunction)),
+    otherActionsFunction_(std::move(otherActionsFunction)),
+    collisionModel_(collisionModel)
 {}
 
 /**
@@ -89,7 +89,9 @@ void ParticleSimulation::VerletIntegrator::run(int nTimesteps, double dt) {
 
     this->runState_ = RUNNING;
     bearParticles_(0.0);
-    timestepWriteFunction_(particles_,tree_,time_,timestep_,false);
+    if (timestepWriteFunction_ !=nullptr) {
+        timestepWriteFunction_(particles_, tree_, time_, timestep_, false);
+    }
 
     for (int step=0; step< nTimesteps; step++){
         runSingleStep(dt);
@@ -112,20 +114,26 @@ void ParticleSimulation::VerletIntegrator::runSingleStep(double dt) {
     for (int i=0; i<nParticles_; ++i){
         if (particles_[i]->isActive() == true){
 
-            collisionModel_->updateModelParameters(*(particles_[i]));
+            if (collisionModel_ !=nullptr) {
+                collisionModel_->updateModelParameters(*(particles_[i]));
+            }
 
             newPos_[i] = particles_[i]->getLocation() + particles_[i]->getVelocity() * dt + a_t_[i]*(1.0/2.0*dt*dt);
             a_tdt_[i] = accelerationFunction_(particles_[i],i,tree_,time_,timestep_);
             //acceleration changes due to background interaction:
-            collisionModel_->modifyAcceleration(a_tdt_[i],*(particles_[i]),dt);
+            if (collisionModel_ !=nullptr) {
+                collisionModel_->modifyAcceleration(a_tdt_[i], *(particles_[i]), dt);
+            }
 
             particles_[i]->setVelocity( particles_[i]->getVelocity() + ((a_t_[i]+ a_tdt_[i])*1.0/2.0 *dt) );
             a_t_[i] = a_tdt_[i];
 
-            //velocity changes due to background interaction:
-            collisionModel_->modifyVelocity(*(particles_[i]),dt);
-            //position changes due to background interaction:
-            collisionModel_->modifyPosition(newPos_[i],*(particles_[i]),dt);
+            if (collisionModel_ !=nullptr){
+                //velocity changes due to background interaction:
+                collisionModel_->modifyVelocity(*(particles_[i]),dt);
+                //position changes due to background interaction:
+                collisionModel_->modifyPosition(newPos_[i],*(particles_[i]),dt);
+            }
         }
     }
 
@@ -135,20 +143,26 @@ void ParticleSimulation::VerletIntegrator::runSingleStep(double dt) {
     for (int i=0; i<nParticles_; ++i){
         if (particles_[i]->isActive() == true){
 
-            otherActionsFunction_(newPos_[i],particles_[i],i,tree_,time_,timestep_);
+            if (otherActionsFunction_ != nullptr) {
+                otherActionsFunction_(newPos_[i], particles_[i], i, tree_, time_, timestep_);
+            }
             tree_.updateParticleLocation(i,newPos_[i]);
         }
     }
     timestep_++;
     time_ = time_ + dt;
-    timestepWriteFunction_(particles_,tree_,time_,timestep_,false);
+    if (timestepWriteFunction_ != nullptr){
+        timestepWriteFunction_(particles_,tree_,time_,timestep_,false);
+    }
 }
 
 /**
  * Finalizes the verlet integration run (should be called after the last time step).
  */
 void ParticleSimulation::VerletIntegrator::finalizeSimulation(){
-    timestepWriteFunction_(particles_,tree_,time_,timestep_,true);
+    if (timestepWriteFunction_ !=nullptr) {
+        timestepWriteFunction_(particles_, tree_, time_, timestep_, true);
+    }
 }
 
 void ParticleSimulation::VerletIntegrator::bearParticles_(double time) {

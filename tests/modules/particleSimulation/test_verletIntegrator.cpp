@@ -50,25 +50,13 @@ TEST_CASE("Test serial verlet integrator", "[ParticleSimulation][VerletIntegrato
         return (result);
     };
 
-    auto timestepWriteFct = [](std::vector<BTree::Particle*>& particles, BTree::Tree& tree, double time, int timestep,
-                               bool lastTimestep){};
-
-    auto otherActionsFct = [] (
-            Core::Vector& newPartPos,BTree::Particle* particle,
-            int particleIndex, BTree::Tree& tree, double time,int timestep){
-    };
-
     SECTION( "Verlet integrator should be working with deferred particle addition") {
 
-        CollisionModel::EmptyCollisionModel collisionModel;
-
-        ParticleSimulation::VerletIntegrator verletIntegrator(
-                accelerationFct, timestepWriteFct, otherActionsFct,
-                collisionModel);
+        ParticleSimulation::VerletIntegrator verletIntegrator(accelerationFct);
 
         //should not crash / throw without particles
         double dt = 1e-4;
-        REQUIRE_NOTHROW(verletIntegrator.runSingleStep(dt));
+        CHECK_NOTHROW(verletIntegrator.runSingleStep(dt));
 
         //particles should be addable and integrator should be able to run:
         int nSteps = 100;
@@ -76,13 +64,13 @@ TEST_CASE("Test serial verlet integrator", "[ParticleSimulation][VerletIntegrato
                 Core::Vector(0.0, 0.0, 0.0),
                 1.0, 100.0);
 
-        REQUIRE_NOTHROW(verletIntegrator.addParticle(&testParticle1));
-        REQUIRE_NOTHROW(verletIntegrator.run(nSteps,dt));
+        CHECK_NOTHROW(verletIntegrator.addParticle(&testParticle1));
+        CHECK_NOTHROW(verletIntegrator.run(nSteps,dt));
 
         Core::Vector ionPos1 = testParticle1.getLocation();
-        REQUIRE(Approx(ionPos1.x()).epsilon(1e-6) == 0.000495);
-        REQUIRE(Approx(ionPos1.y()).epsilon(1e-2) == 0.00);
-        REQUIRE(Approx(ionPos1.z()).epsilon(1e-7) == 0.0002475);
+        CHECK(Approx(ionPos1.x()).epsilon(1e-6) == 0.000495);
+        CHECK(Approx(ionPos1.y()).epsilon(1e-2) == 0.00);
+        CHECK(Approx(ionPos1.z()).epsilon(1e-7) == 0.0002475);
 
 
         std::cout<<"p 1: "<<testParticle1.getLocation()<<std::endl;
@@ -91,15 +79,15 @@ TEST_CASE("Test serial verlet integrator", "[ParticleSimulation][VerletIntegrato
                 Core::Vector(0.0, 0.0, 0.0),
                 1.0, 100.0);
 
-        REQUIRE_NOTHROW(verletIntegrator.addParticle(&testParticle2));
-        REQUIRE_NOTHROW(verletIntegrator.run(nSteps,dt));
+        CHECK_NOTHROW(verletIntegrator.addParticle(&testParticle2));
+        CHECK_NOTHROW(verletIntegrator.run(nSteps,dt));
 
         //verletIntegrator.run(nSteps,dt);
 
         Core::Vector ionPos2 = testParticle2.getLocation();
-        REQUIRE(Approx(ionPos2.x()).epsilon(1e-6) == 0.000495);
-        REQUIRE(Approx(ionPos2.y()).epsilon(1e-2) == 0.01);
-        REQUIRE(Approx(ionPos2.z()).epsilon(1e-7) == 0.0002475);
+        CHECK(Approx(ionPos2.x()).epsilon(1e-6) == 0.000495);
+        CHECK(Approx(ionPos2.y()).epsilon(1e-2) == 0.01);
+        CHECK(Approx(ionPos2.z()).epsilon(1e-7) == 0.0002475);
     }
 
     SECTION( "Verlet integrator should be able to integrate correctly non reactive particles with TOB distribution") {
@@ -127,20 +115,32 @@ TEST_CASE("Test serial verlet integrator", "[ParticleSimulation][VerletIntegrato
             timeOfBirth -= dt*0.5;
         }
 
-        CollisionModel::EmptyCollisionModel collisionModel;
+        SECTION("Verlet integrator should run through and should call functions"){
 
-        SECTION("Verlet integrator should run through"){
+            int nTimeStepsRecorded = 0;
+            auto timestepWriteFct = [&nTimeStepsRecorded](std::vector<BTree::Particle*>& particles, BTree::Tree& tree, double time, int timestep,
+                                       bool lastTimestep){
+                nTimeStepsRecorded++;
+            };
 
+            int nParticlesTouched = 0;
+            auto otherActionsFct = [&nParticlesTouched] (
+                    Core::Vector& newPartPos,BTree::Particle* particle,
+                    int particleIndex, BTree::Tree& tree, double time,int timestep){
+                nParticlesTouched++;
+            };
 
             ParticleSimulation::VerletIntegrator verletIntegrator(
                     particlesPtrs,
-                    accelerationFct, timestepWriteFct, otherActionsFct,
-                    collisionModel);
+                    accelerationFct, timestepWriteFct, otherActionsFct);
 
             verletIntegrator.run(timeSteps, dt);
 
-            REQUIRE(verletIntegrator.timeStep() == timeSteps);
-            REQUIRE(verletIntegrator.time() == Approx(timeSteps * dt));
+            CHECK(nTimeStepsRecorded == timeSteps + 2);
+            CHECK(nParticlesTouched == 58);
+
+            CHECK(verletIntegrator.timeStep() == timeSteps);
+            CHECK(verletIntegrator.time() == Approx(timeSteps * dt));
 
             double endTime = timeSteps * dt;
             for (int i=0; i<nParticles; ++i){
@@ -152,9 +152,9 @@ TEST_CASE("Test serial verlet integrator", "[ParticleSimulation][VerletIntegrato
                 double xCalculated= 0.5 * ionAcceleration * diffTime * diffTime;
                 double zCalculated= 0.5 * xCalculated;
 
-                REQUIRE(Approx(ionPos.x()).epsilon(0.05) == xCalculated);
-                REQUIRE(Approx(ionPos.y()).epsilon(1e-7) == i*0.01);
-                REQUIRE(Approx(ionPos.z()).epsilon(0.05) == zCalculated);
+                CHECK(Approx(ionPos.x()).epsilon(0.05) == xCalculated);
+                CHECK(Approx(ionPos.y()).epsilon(1e-7) == i*0.01);
+                CHECK(Approx(ionPos.z()).epsilon(0.05) == zCalculated);
             }
         }
 
@@ -173,12 +173,11 @@ TEST_CASE("Test serial verlet integrator", "[ParticleSimulation][VerletIntegrato
 
             ParticleSimulation::VerletIntegrator verletIntegrator(
                     particlesPtrs,
-                    accelerationFct, timestepStopFct, otherActionsFct,
-                    collisionModel);
+                    accelerationFct, timestepStopFct);
             integratorPtr = &verletIntegrator;
             verletIntegrator.run(timeSteps, dt);
 
-            REQUIRE(verletIntegrator.timeStep() == terminationTimeStep);
+            CHECK(verletIntegrator.timeStep() == terminationTimeStep);
         }
     }
 
@@ -228,24 +227,21 @@ TEST_CASE("Test serial verlet integrator", "[ParticleSimulation][VerletIntegrato
         }
 
         // run trajectory integration without reactions:
-        CollisionModel::EmptyCollisionModel collisionModel;
 
         ParticleSimulation::VerletIntegrator verletIntegrator(
-                particlesPtrs,
-                accelerationFctReactive, timestepWriteFct, otherActionsFct,
-                collisionModel);
+                particlesPtrs, accelerationFctReactive);
 
         verletIntegrator.run(timeSteps,dt);
 
         Core::Vector ionPos = particles[0]-> getLocation();
-        REQUIRE(Approx(ionPos.x()) == 118.298);
-        REQUIRE(Approx(ionPos.y()) == 0.0);
-        REQUIRE(Approx(ionPos.z()) == 0.0);
+        CHECK(Approx(ionPos.x()) == 118.298);
+        CHECK(Approx(ionPos.y()) == 0.0);
+        CHECK(Approx(ionPos.z()) == 0.0);
 
         ionPos = particles[3]-> getLocation();
-        REQUIRE(Approx(ionPos.x()) == -59.1991);
-        REQUIRE(Approx(ionPos.y()) == 0.01);
-        REQUIRE(Approx(ionPos.z()) == 0.0);
+        CHECK(Approx(ionPos.x()) == -59.1991);
+        CHECK(Approx(ionPos.y()) == 0.01);
+        CHECK(Approx(ionPos.z()) == 0.0);
 
         //provoke chemical reaction:
         RS::ReactionConditions reactionConditions = RS::ReactionConditions();
@@ -261,25 +257,25 @@ TEST_CASE("Test serial verlet integrator", "[ParticleSimulation][VerletIntegrato
         }
 
         ionPos = particles[0]-> getLocation();
-        REQUIRE(Approx(ionPos.x()) == 241.321);
-        REQUIRE(Approx(ionPos.y()) == 0.0);
-        REQUIRE(Approx(ionPos.z()) == 0.0);
+        CHECK(Approx(ionPos.x()) == 241.321);
+        CHECK(Approx(ionPos.y()) == 0.0);
+        CHECK(Approx(ionPos.z()) == 0.0);
         Core::Vector ionVelo = particles[0]-> getVelocity();
-        REQUIRE(Approx(ionVelo.x()) == 482.442);
-        REQUIRE(Approx(ionVelo.y()) == 0.0);
-        REQUIRE(Approx(ionVelo.z()) == 0.0);
+        CHECK(Approx(ionVelo.x()) == 482.442);
+        CHECK(Approx(ionVelo.y()) == 0.0);
+        CHECK(Approx(ionVelo.z()) == 0.0);
 
         ionPos = particles[3]-> getLocation();
-        REQUIRE(Approx(ionPos.x()) == -61.6113);
-        REQUIRE(Approx(ionPos.y()) == 0.01);
-        REQUIRE(Approx(ionPos.z()) == 0.0);
+        CHECK(Approx(ionPos.x()) == -61.6113);
+        CHECK(Approx(ionPos.y()) == 0.01);
+        CHECK(Approx(ionPos.z()) == 0.0);
         ionVelo = particles[3]-> getVelocity();
-        REQUIRE(Approx(ionVelo.x()) == 23639.6);
-        REQUIRE(Approx(ionVelo.y()) == 0.0);
-        REQUIRE(Approx(ionVelo.z()) == 0.0);
+        CHECK(Approx(ionVelo.x()) == 23639.6);
+        CHECK(Approx(ionVelo.y()) == 0.0);
+        CHECK(Approx(ionVelo.z()) == 0.0);
 
-        REQUIRE(particles[0]->getSpecies() == simConf->substance(2));
-        REQUIRE(particles[3]->getSpecies() == simConf->substance(3));
+        CHECK(particles[0]->getSpecies() == simConf->substance(2));
+        CHECK(particles[3]->getSpecies() == simConf->substance(3));
 
         rsSim.printConcentrations();
     }

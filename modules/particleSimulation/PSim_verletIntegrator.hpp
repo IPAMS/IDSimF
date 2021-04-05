@@ -98,16 +98,16 @@ namespace ParticleSimulation{
             VerletIntegrator(
                     std::vector<BTree::Particle*> particles,
                     accelerationFctType accelerationFunction,
-                    timestepWriteFctType timestepWriteFunction,
-                    otherActionsFctType otherActionsFunction,
-                    CollisionModel::AbstractCollisionModel& collisionModel
+                    timestepWriteFctType timestepWriteFunction = nullptr,
+                    otherActionsFctType otherActionsFunction = nullptr,
+                    CollisionModel::AbstractCollisionModel* collisionModel = nullptr
             );
 
             VerletIntegrator(
                     accelerationFctType accelerationFunction,
-                    timestepWriteFctType timestepWriteFunction,
-                    otherActionsFctType otherActionsFunction,
-                    CollisionModel::AbstractCollisionModel& collisionModel
+                    timestepWriteFctType timestepWriteFunction = nullptr,
+                    otherActionsFctType otherActionsFunction = nullptr,
+                    CollisionModel::AbstractCollisionModel* collisionModel = nullptr
             );
 
             void addParticle(BTree::Particle* particle);
@@ -116,11 +116,11 @@ namespace ParticleSimulation{
             void finalizeSimulation();
 
     private:
-        CollisionModel::AbstractCollisionModel* collisionModel_; ///< a gas collision model active in the simulation
+        CollisionModel::AbstractCollisionModel* collisionModel_ = nullptr; ///< a gas collision model active in the simulation
 
-        accelerationFctType accelerationFunction_; ///< function to calculate particle acceleration
-        timestepWriteFctType timestepWriteFunction_; ///< function to define what is exported in every time step
-        otherActionsFctType otherActionsFunction_; ///< function with other actions done in every time step
+        accelerationFctType accelerationFunction_ = nullptr; ///< function to calculate particle acceleration
+        timestepWriteFctType timestepWriteFunction_ = nullptr; ///< function to define what is exported in every time step
+        otherActionsFctType otherActionsFunction_ = nullptr; ///< function with other actions done in every time step
 
 
         //internal variables for actual calculations:
