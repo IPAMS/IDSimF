@@ -30,8 +30,9 @@ ParticleSimulation::ParallelVerletIntegrator::ParallelVerletIntegrator(
         ParticleSimulation::ParallelVerletIntegrator::accelerationFctType accelerationFunction,
         ParticleSimulation::ParallelVerletIntegrator::timestepWriteFctType timestepWriteFunction,
         ParticleSimulation::ParallelVerletIntegrator::otherActionsFctType otherActionsFunction,
+        ParticleSimulation::AbstractTimeIntegrator::particleStartMonitoringFctType ionStartMonitoringFunction,
         CollisionModel::AbstractCollisionModel* collisionModel) :
-    AbstractTimeIntegrator(particles),
+    AbstractTimeIntegrator(particles, ionStartMonitoringFunction),
     accelerationFunction_(std::move(accelerationFunction)),
     timestepWriteFunction_(std::move(timestepWriteFunction)),
     otherActionsFunction_(std::move(otherActionsFunction)),
@@ -42,7 +43,9 @@ ParticleSimulation::ParallelVerletIntegrator::ParallelVerletIntegrator(
         ParticleSimulation::ParallelVerletIntegrator::accelerationFctType accelerationFunction,
         ParticleSimulation::ParallelVerletIntegrator::timestepWriteFctType timestepWriteFunction,
         ParticleSimulation::ParallelVerletIntegrator::otherActionsFctType otherActionsFunction,
+        ParticleSimulation::AbstractTimeIntegrator::particleStartMonitoringFctType ionStartMonitoringFunction,
         CollisionModel::AbstractCollisionModel* collisionModel) :
+    AbstractTimeIntegrator(ionStartMonitoringFunction),
     accelerationFunction_(std::move(accelerationFunction)),
     timestepWriteFunction_(std::move(timestepWriteFunction)),
     otherActionsFunction_(std::move(otherActionsFunction)),

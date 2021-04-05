@@ -38,8 +38,9 @@ ParticleSimulation::VerletIntegrator::VerletIntegrator(
         ParticleSimulation::VerletIntegrator::accelerationFctType accelerationFunction,
         ParticleSimulation::VerletIntegrator::timestepWriteFctType timestepWriteFunction,
         ParticleSimulation::VerletIntegrator::otherActionsFctType otherActionsFunction,
+        ParticleSimulation::AbstractTimeIntegrator::particleStartMonitoringFctType ionStartMonitoringFunction,
         CollisionModel::AbstractCollisionModel* collisionModel) :
-    ParticleSimulation::AbstractTimeIntegrator(particles),
+    ParticleSimulation::AbstractTimeIntegrator(particles, ionStartMonitoringFunction),
     accelerationFunction_(std::move(accelerationFunction)),
     timestepWriteFunction_(std::move(timestepWriteFunction)),
     otherActionsFunction_(std::move(otherActionsFunction)),
@@ -58,7 +59,9 @@ ParticleSimulation::VerletIntegrator::VerletIntegrator(
         ParticleSimulation::VerletIntegrator::accelerationFctType accelerationFunction,
         ParticleSimulation::VerletIntegrator::timestepWriteFctType timestepWriteFunction,
         ParticleSimulation::VerletIntegrator::otherActionsFctType otherActionsFunction,
+        ParticleSimulation::AbstractTimeIntegrator::particleStartMonitoringFctType ionStartMonitoringFunction,
         CollisionModel::AbstractCollisionModel* collisionModel) :
+    AbstractTimeIntegrator(ionStartMonitoringFunction),
     accelerationFunction_(std::move(accelerationFunction)),
     timestepWriteFunction_(std::move(timestepWriteFunction)),
     otherActionsFunction_(std::move(otherActionsFunction)),

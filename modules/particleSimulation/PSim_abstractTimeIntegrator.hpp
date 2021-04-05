@@ -49,10 +49,19 @@ namespace ParticleSimulation{
 
     public:
         enum RunState {RUNNING, STOPPED, IN_TERMINATION};
-        typedef std::pair<double,BTree::Particle*> pTobPair_t;
+        typedef std::pair<double, BTree::Particle*> pTobPair_t;
 
-        AbstractTimeIntegrator();
-        AbstractTimeIntegrator(std::vector<BTree::Particle*> particles);
+        /**
+          * Type definition for a function to watch ion start events
+          */
+        typedef std::function
+                <void (BTree::Particle* particle,
+                       double time)>
+                particleStartMonitoringFctType;
+
+        AbstractTimeIntegrator(particleStartMonitoringFctType ionStartMonitorFct = nullptr);
+        AbstractTimeIntegrator(std::vector<BTree::Particle*> particles,
+                               particleStartMonitoringFctType ionStartMonitorFct = nullptr);
 
         virtual ~AbstractTimeIntegrator() = default;
 
@@ -66,14 +75,14 @@ namespace ParticleSimulation{
         int timeStep();
 
     protected:
-        RunState runState_; ///< the current state the integrator is in
-        double time_; ///< the current time in the simulation
-        int timestep_; ///< the current time step
+        RunState runState_ = STOPPED; ///< the current state the integrator is in
+        double time_ = 0.0; ///< the current time in the simulation
+        int timestep_ = 0; ///< the current time step
         std::vector<BTree::Particle*> particles_; ///< links to the simulated particles
-        long nParticles_; ///< number of particles
+        long nParticles_ = 0; ///< number of particles
         std::vector<pTobPair_t> particleTOBs_; ///< Time of births of the individual particles
-        size_t particlesBornIdx_; ///< index in particleTOBs_ indicating the particles already born
-
+        size_t particlesBornIdx_ = 0; ///< index in particleTOBs_ indicating the particles already born
+        particleStartMonitoringFctType particleStartMonitorFct_ = nullptr; ///< Monitoring function for
 
         bool bearParticles_(double time);
     };

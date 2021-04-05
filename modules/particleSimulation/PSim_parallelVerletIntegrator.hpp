@@ -86,6 +86,7 @@ namespace ParticleSimulation{
                     accelerationFctType accelerationFunction,
                     timestepWriteFctType timestepWriteFunction = nullptr,
                     otherActionsFctType otherActionsFunction = nullptr,
+                    AbstractTimeIntegrator::particleStartMonitoringFctType ionStartMonitoringFunction = nullptr,
                     CollisionModel::AbstractCollisionModel* collisionModel = nullptr
             );
 
@@ -93,6 +94,7 @@ namespace ParticleSimulation{
                     accelerationFctType accelerationFunction,
                     timestepWriteFctType timestepWriteFunction = nullptr,
                     otherActionsFctType otherActionsFunction = nullptr,
+                    AbstractTimeIntegrator::particleStartMonitoringFctType ionStartMonitoringFunction = nullptr,
                     CollisionModel::AbstractCollisionModel* collisionModel = nullptr
             );
 

@@ -166,8 +166,13 @@ TEST_CASE( "Test parallel verlet integrator", "[ParticleSimulation][ParallelVerl
                     nParticlesTouched++;
                 };
 
+                int nParticlesStartMonitored = 0;
+                auto particleStartMonitoringFct = [&nParticlesStartMonitored] (BTree::Particle* particle, double time){
+                    nParticlesStartMonitored++;
+                };
+
                 ParticleSimulation::ParallelVerletIntegrator verletIntegrator(
-                        particlesPtrs, accelerationFct, timestepWriteFct, otherActionsFct);
+                        particlesPtrs, accelerationFct, timestepWriteFct, otherActionsFct, particleStartMonitoringFct);
 
                 verletIntegrator.run(timeSteps, dt);
 
@@ -191,6 +196,7 @@ TEST_CASE( "Test parallel verlet integrator", "[ParticleSimulation][ParallelVerl
 
                 CHECK(nTimestepsRecorded == timeSteps + 2);
                 CHECK(nParticlesTouched == timeSteps * nParticles);
+                CHECK(nParticlesStartMonitored == nParticles);
             }
 
             SECTION("Integration should be stoppable") {

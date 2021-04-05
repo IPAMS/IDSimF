@@ -26,6 +26,8 @@
 
  ****************************/
 
+// FIXME: Velocity integrator is currently not able to have Time Of Birth Distributions / Bear Particles
+
 #ifndef BTree_velocityIntegrator_hpp
 #define BTree_velocityIntegrator_hpp
 

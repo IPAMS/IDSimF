@@ -22,27 +22,14 @@
 #include "PSim_abstractTimeIntegrator.hpp"
 
 
-ParticleSimulation::AbstractTimeIntegrator::AbstractTimeIntegrator() :
-runState_(STOPPED),
-time_(0.0),
-timestep_(0),
-particles_(std::vector<BTree::Particle *>()),
-nParticles_(0),
-particleTOBs_(std::vector<pTobPair_t>()),
-particlesBornIdx_(0)
+ParticleSimulation::AbstractTimeIntegrator::AbstractTimeIntegrator(particleStartMonitoringFctType ionStartMonitorFct) :
+        particleStartMonitorFct_(std::move(ionStartMonitorFct))
 {}
 
-ParticleSimulation::AbstractTimeIntegrator::AbstractTimeIntegrator(std::vector<BTree::Particle*> particles):
-runState_(STOPPED),
-time_(0.0),
-timestep_(0),
-particles_(std::vector<BTree::Particle *>()),
-nParticles_(0),
-particleTOBs_(std::vector<pTobPair_t>()),
-particlesBornIdx_(0)
+ParticleSimulation::AbstractTimeIntegrator::AbstractTimeIntegrator(std::vector<BTree::Particle*> particles,
+                                                                   particleStartMonitoringFctType ionStartMonitorFct):
+        particleStartMonitorFct_(std::move(ionStartMonitorFct))
 {
-    //init velocities and accelerations:
-
     //particleTOBs_ = std::vector<std::pair<double,Core::Particle*>>();
     for (const auto &part: particles){
         particleTOBs_.emplace_back(
@@ -93,6 +80,9 @@ bool ParticleSimulation::AbstractTimeIntegrator::bearParticles_(double time){
             BTree::Particle *part = particleTOBs_[particlesBornIdx_].second;
             part->setTimeOfBirth(time); //set particle TOB to the actual TOB in the simulation
             addParticle(part);
+            if (particleStartMonitorFct_ != nullptr){
+                particleStartMonitorFct_(part, time);
+            }
             ++particlesBornIdx_;
         }
 

@@ -130,14 +130,20 @@ TEST_CASE("Test serial verlet integrator", "[ParticleSimulation][VerletIntegrato
                 nParticlesTouched++;
             };
 
+            int nParticlesStartMonitored = 0;
+            auto particleStartMonitoringFct = [&nParticlesStartMonitored] (BTree::Particle* particle, double time){
+                nParticlesStartMonitored++;
+            };
+
             ParticleSimulation::VerletIntegrator verletIntegrator(
                     particlesPtrs,
-                    accelerationFct, timestepWriteFct, otherActionsFct);
+                    accelerationFct, timestepWriteFct, otherActionsFct, particleStartMonitoringFct);
 
             verletIntegrator.run(timeSteps, dt);
 
             CHECK(nTimeStepsRecorded == timeSteps + 2);
             CHECK(nParticlesTouched == 58);
+            CHECK(nParticlesStartMonitored == nParticles);
 
             CHECK(verletIntegrator.timeStep() == timeSteps);
             CHECK(verletIntegrator.time() == Approx(timeSteps * dt));
