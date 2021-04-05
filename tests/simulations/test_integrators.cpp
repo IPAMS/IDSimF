@@ -108,33 +108,6 @@ TEST_CASE("Compare results of serial and parallel varlet integrators with a line
                 return (spaceChargeForce / particle->getMass());
             };
 
-    auto timestepWriteFunctionSerial =
-            []( std::vector<BTree::Particle *> &particles, BTree::Tree &tree, double time,
-                int timestep, bool lastTimestep) {};
-
-    auto timestepWriteFunctionParallel =
-            []( std::vector<BTree::Particle *> &particles, BTree::ParallelTreeOriginal &tree, double time,
-                int timestep, bool lastTimestep) {};
-
-    auto timestepWriteFunctionParallelNew =
-            []( std::vector<BTree::Particle *> &particles, BTree::ParallelTree &tree, double time,
-                int timestep, bool lastTimestep) {};
-
-
-
-//a empty other actions function (to do nothing additionally in a timestep)
-    auto otherActionsFunctionSerial = [](Core::Vector &newPartPos, BTree::Particle *particle,
-                                   int particleIndex,
-                                   BTree::Tree &tree, double time, int timestep){
-    };
-
-    auto otherActionsFunctionParallelNew = [](Core::Vector &newPartPos, BTree::Particle *particle,
-                                           int particleIndex,
-                                           BTree::ParallelTree &tree, double time, int timestep){
-    };
-
-    CollisionModel::EmptyCollisionModel emptyCollisionModel;
-
 
     std::vector<std::unique_ptr<BTree::Particle>> particlesSerial;
     std::vector<BTree::Particle*>particlePtrsSerial;
@@ -147,14 +120,10 @@ TEST_CASE("Compare results of serial and parallel varlet integrators with a line
 
     // simulate ===============================================================================================
     ParticleSimulation::VerletIntegrator verletIntegratorSerial(
-            particlePtrsSerial,
-            accelerationFunctionSerial, timestepWriteFunctionSerial, otherActionsFunctionSerial,
-            emptyCollisionModel);
+            particlePtrsSerial, accelerationFunctionSerial);
 
     ParticleSimulation::ParallelVerletIntegrator verletIntegratorParallelNew(
-            particlePtrsParallelNew,
-            accelerationFunctionParallelNew, timestepWriteFunctionParallelNew, otherActionsFunctionParallelNew,
-            emptyCollisionModel);
+            particlePtrsParallelNew, accelerationFunctionParallelNew);
 
     verletIntegratorSerial.run(timeSteps, dt);
     verletIntegratorParallelNew.run(timeSteps, dt);
