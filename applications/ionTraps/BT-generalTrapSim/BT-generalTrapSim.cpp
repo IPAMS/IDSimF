@@ -36,6 +36,7 @@
 #include "PSim_verletIntegrator.hpp"
 #include "PSim_parallelVerletIntegrator.hpp"
 #include "PSim_sampledWaveform.hpp"
+#include "PSim_particleStartSplatTracker.hpp"
 #include "PSim_math.hpp"
 #include "PSim_averageChargePositionWriter.hpp"
 #include "PSim_inductionCurrentWriter.hpp"
@@ -311,7 +312,13 @@ int main(int argc, const char * argv[]) {
                 return ((rfForce + spaceChargeForce) / particle->getMass());
             };
 
-    auto otherActionsFunctionQIT = [&simulationDomainBoundaries, &ionsInactive, &potentialArrays](
+    // Prepare ion start / stop tracker and ion start monitoring / ion termination functions
+    ParticleSimulation::ParticleStartSplatTracker startSplatTracker;
+    auto particleStartMonitoringFct = [&startSplatTracker] (BTree::Particle* particle, double time){
+        startSplatTracker.particleStart(particle, time);
+    };
+
+    auto otherActionsFunctionQIT = [&simulationDomainBoundaries, &ionsInactive, &potentialArrays, &startSplatTracker](
             Core::Vector& newPartPos, BTree::Particle* particle,
             int particleIndex,
             auto& tree, double time, int timestep) {
@@ -329,6 +336,7 @@ int main(int argc, const char * argv[]) {
         {
             particle->setActive(false);
             particle->setSplatTime(time);
+            startSplatTracker.particleSplat(particle, time);
             ionsInactive++;
         }
     };
@@ -340,7 +348,7 @@ int main(int argc, const char * argv[]) {
             particlePtrs, projectName + "_fft.txt",detectionPAs,detectionPAFactors,paSpatialScale);
     auto ionsInactiveWriter = std::make_unique<ParticleSimulation::Scalar_writer>(projectName+ "_ionsInactive.txt");
 
-    ParticleSimulation::additionalPartParamFctType additionalParameterTransformFct =
+    ParticleSimulation::partAttribTransformFctType particleAttributesTransformFct =
             [](BTree::Particle *particle) -> std::vector<double>{
                 std::vector<double> result = {
                         particle->getVelocity().x(),
@@ -356,17 +364,29 @@ int main(int argc, const char * argv[]) {
                 return result;
             };
 
-    std::vector<std::string> auxParamNames = {"velocity x","velocity y","velocity z",
-                                              "rf x","rf y","rf z",
-                                              "spacecharge x","spacecharge y","spacecharge z"};
+    std::vector<std::string> particleAttributesNames = {"velocity x", "velocity y", "velocity z",
+                                                        "rf x", "rf y", "rf z",
+                                                        "spacecharge x", "spacecharge y", "spacecharge z"};
 
-    auto hdf5Writer = std::make_unique<ParticleSimulation::TrajectoryHDF5Writer>(
-            projectName + "_trajectories.hd5", auxParamNames, additionalParameterTransformFct);
+    ParticleSimulation::partAttribTransformFctTypeInteger integerParticleAttributesTransformFct =
+            [](BTree::Particle *particle) -> std::vector<int>{
+                std::vector<int> result = {
+                        particle->getIntegerAttribute("global index")
+                };
+                return result;
+            };
+
+    std::vector<std::string> integerParticleAttributesNames = {"global index"};
+
+
+    auto hdf5Writer = std::make_unique<ParticleSimulation::TrajectoryHDF5Writer>(projectName + "_trajectories.hd5");
+    hdf5Writer->setParticleAttributes(particleAttributesNames, particleAttributesTransformFct);
+    hdf5Writer->setParticleAttributes(integerParticleAttributesNames, integerParticleAttributesTransformFct);
 
     ParticleSimulation::AbstractTimeIntegrator *integratorPtr;
     auto timestepWriteFunction =
             [trajectoryWriteInterval, fftWriteInterval, fftWriteMode, &V_0, &V_rf_export, &ionsInactive,
-             &hdf5Writer, &ionsInactiveWriter, &fftWriter, &integratorPtr](
+             &hdf5Writer, &startSplatTracker, &ionsInactiveWriter, &fftWriter, &integratorPtr](
                     std::vector<BTree::Particle*>& particles, auto& tree, double time, int timestep, bool lastTimestep){
 
                 // check if simulation should be terminated (if all particles are terminated)
@@ -401,7 +421,7 @@ int main(int argc, const char * argv[]) {
                 }
 
                 if (lastTimestep) {
-                    hdf5Writer->writeSplatTimes(particles);
+                    hdf5Writer->writeStartSplatData(startSplatTracker);
                     hdf5Writer->finalizeTrajectory();
                     std::cout << "finished ts:" << timestep << " time:" << time << std::endl;
                 }
@@ -418,16 +438,16 @@ int main(int argc, const char * argv[]) {
     if (integratorMode == VERLET) {
         ParticleSimulation::VerletIntegrator verletIntegrator(
                 particlePtrs,
-                accelerationFunctionQIT, timestepWriteFunction, otherActionsFunctionQIT,
-                hsModel);
+                accelerationFunctionQIT, timestepWriteFunction, otherActionsFunctionQIT, particleStartMonitoringFct,
+                &hsModel);
         integratorPtr = &verletIntegrator;
         verletIntegrator.run(timeSteps, dt);
     }
     else if (integratorMode == PARALLEL_VERLET) {
         ParticleSimulation::ParallelVerletIntegrator verletIntegrator(
                 particlePtrs,
-                accelerationFunctionQIT_parallel, timestepWriteFunction, otherActionsFunctionQIT,
-                hsModel);
+                accelerationFunctionQIT_parallel, timestepWriteFunction, otherActionsFunctionQIT, particleStartMonitoringFct,
+                &hsModel);
 
         integratorPtr = &verletIntegrator;
         verletIntegrator.run(timeSteps, dt);
