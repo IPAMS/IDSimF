@@ -10484,7 +10484,7 @@ namespace Catch {
     void throw_exception(std::exception const& e) {
         Catch::cerr() << "Catch will terminate because it needed to throw an exception.\n"
                       << "The message was: " << e.what() << '\n';
-        std::terminate();
+          std::terminate();
     }
 #endif
 

@@ -49,12 +49,10 @@ namespace ParticleSimulation{
     public:
         TrajectoryHDF5Writer(const std::string &hdf5Filename, bool compression = true);
 
-        TrajectoryHDF5Writer(const std::string &hdf5Filename,
-                             std::vector<std::string> auxParamsNames,
-                             additionalPartParamFctType particleParameterTransformFct, bool compression = true);
+        void setParticleAttributes(std::vector<std::string> attributeNames, partAttribTransformFctType attributesTransformFct);
+        void setParticleAttributes(std::vector<std::string> attributeNames, partAttribTransformFctTypeInteger attributesTransformFct);
 
         void writeTimestep(std::vector<BTree::Particle*>& particles, double time);
-
 
         template <typename DT>
         void writeNumericListDataset(std::string dsName, std::vector<DT> values, H5::Group* group = nullptr);
@@ -72,26 +70,30 @@ namespace ParticleSimulation{
     private:
         constexpr int static FILE_TYPE_VERSION = 3;   ///<File type version identifier of the files written
 
-        void writeAuxTimestep_(std::vector<BTree::Particle*> &particles);
+        void writeTimestepParticleAttributes_(std::vector<BTree::Particle*> &particles);
+        void writeTimestepParticleAttributesInteger_(std::vector<BTree::Particle*> &particles);
         void writeAttribute_(std::unique_ptr<H5::Group>& group, const std::string& attrName, int value);
 
         //int nTimestepsWritten_;
-        bool compression_;
-        bool isAuxWritten_;
+        bool compression_ = true;
+        bool hasParticleAttributes_ = false;
+        bool hasParticleAttributesInteger_ = false;
 
-        std::unique_ptr<H5::H5File > h5f_;
+        std::unique_ptr<H5::H5File> h5f_;
         std::unique_ptr<H5::Group> baseGroup_;
         std::unique_ptr<H5::Group> timeStepGroup_;
         std::unique_ptr<H5::DataSet> dsetTimesteps_;
 
-        hsize_t nAuxParams_;          ///< number auf auxiliary parameters for the parameters
-        hsize_t sizeTimesteps_[1];    ///< ... and the timesteps
-        hsize_t offsetScalarLike_[3]; ///< current offset in the vector of scalars datasets
-        hsize_t slabDimsTimestep_[1]; ///< size of one timestep frame in the timesteps
+        hsize_t nPAttributes_ = 0;          ///< number of particle attributes
+        hsize_t nPAttributesInteger_ = 0;   ///< number of particle attributes
+        hsize_t sizeTimesteps_[1] = {0};    ///< ... and the timesteps
+        hsize_t offsetScalarLike_[3] = {0}; ///< current offset in the vector of scalars datasets
+        hsize_t slabDimsTimestep_[1] = {1}; ///< size of one timestep frame in the timesteps
 
         H5::DataSpace memspaceTimestep_;
 
-        additionalPartParamFctType particleParameterTransformFct_;
+        partAttribTransformFctType particleAttributeTransformFct_;
+        partAttribTransformFctTypeInteger particleAttributeTransformFctInteger_;
     };
 }
 

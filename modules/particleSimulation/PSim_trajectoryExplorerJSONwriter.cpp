@@ -55,7 +55,7 @@ void ParticleSimulation::TrajectoryExplorerJSONwriter::setScales(double scale, d
  * Writes the current timestep to the JSON file without additional parameters.
  *
  * \see ParticleSimulation::TrajectoryExplorerJSONwriter::writeTimestep(Core::Tree&,std::vector<int>,
- *      const ParticleSimulation::additionalPartParamFctType&,
+ *      const ParticleSimulation::partAttribTransformFctType&,
  *      const std::vector<additionalParamPair>,
  *      double,
  *      bool)
@@ -72,7 +72,7 @@ void ParticleSimulation::TrajectoryExplorerJSONwriter::writeTimestep(std::vector
  * Writes the current timestep to the JSON file with additional parameters for the particles.
  *
  * \see ParticleSimulation::TrajectoryExplorerJSONwriter::writeTimestep(Core::Tree&,std::vector<int>,
- *      const ParticleSimulation::additionalPartParamFctType&,
+ *      const ParticleSimulation::partAttribTransformFctType&,
  *      const std::vector<additionalParamPair>,
  *      double,
  *      bool)
@@ -81,7 +81,7 @@ void ParticleSimulation::TrajectoryExplorerJSONwriter::writeTimestep(std::vector
  */
 void ParticleSimulation::TrajectoryExplorerJSONwriter::writeTimestep(
         std::vector<BTree::Particle*>& particles,
-        const additionalPartParamFctType &particleParameterTransformFct,
+        const partAttribTransformFctType &particleParameterTransformFct,
         double time,
         bool lastTime){
 
@@ -110,7 +110,7 @@ void ParticleSimulation::TrajectoryExplorerJSONwriter::writeTimestep(
  */
 void ParticleSimulation::TrajectoryExplorerJSONwriter::writeTimestep(
         std::vector<BTree::Particle*>& particles,
-        const ParticleSimulation::additionalPartParamFctType &particleParameterTransformFct,
+        const ParticleSimulation::partAttribTransformFctType &particleParameterTransformFct,
         const std::vector<additionalParamPair> timestepAdditionalParameters,
         double time,
         bool lastTime){

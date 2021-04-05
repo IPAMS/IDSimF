@@ -32,10 +32,6 @@
  * @param compression If true: the HDF5 file is written with data compression
  */
 ParticleSimulation::TrajectoryHDF5Writer::TrajectoryHDF5Writer(const std::string& hdf5Filename, bool compression):
-        isAuxWritten_(false),
-        sizeTimesteps_{0},
-        offsetScalarLike_{0},
-        slabDimsTimestep_{1},
         memspaceTimestep_(1, slabDimsTimestep_),
         compression_(compression)
 {
@@ -62,25 +58,32 @@ ParticleSimulation::TrajectoryHDF5Writer::TrajectoryHDF5Writer(const std::string
                                                                 propTimesteps));
 }
 
+
 /**
- * Constructs a new HDF5 trajectory filewriter with auxilliary parameters to write to the HDF5 file
+ * FIXME
  *
- * @param hdf5Filename A filename / path of a HDF5 file to write
- * @param auxParamsNames A vector of additional parameter names which are written to the HDF5 file
- * @param particleParameterTransformFct A transformation function, which transforms a given simulated particle
- * to a numeric vector of additional parameters
- * @param compression If true: the HDF5 file is written with data compression
+ * @param attributeNames
+ * @param attributesTransformFct
  */
-ParticleSimulation::TrajectoryHDF5Writer::TrajectoryHDF5Writer(const std::string &hdf5Filename,
-                                                               std::vector<std::string> auxParamsNames,
-                                                               additionalPartParamFctType particleParameterTransformFct,
-                                                               bool compression):
-TrajectoryHDF5Writer(hdf5Filename,compression)
-{
-    isAuxWritten_ = true;
-    particleParameterTransformFct_ = std::move(particleParameterTransformFct);
-    nAuxParams_ = auxParamsNames.size();
-    writeTrajectoryAttribute("auxiliary parameter names",auxParamsNames);
+void ParticleSimulation::TrajectoryHDF5Writer::setParticleAttributes(std::vector<std::string> attributeNames,
+                                                                     partAttribTransformFctType attributesTransformFct) {
+    hasParticleAttributes_ = true;
+    particleAttributeTransformFct_ = std::move(attributesTransformFct);
+    nPAttributes_ = attributeNames.size();
+    writeTrajectoryAttribute("attributes names",attributeNames);
+}
+
+/**
+ *
+ * @param attributeNames
+ * @param attributesTransformFct
+ */
+void ParticleSimulation::TrajectoryHDF5Writer::setParticleAttributes(std::vector<std::string> attributeNames,
+                                                                     partAttribTransformFctTypeInteger attributesTransformFct) {
+    hasParticleAttributesInteger_ = true;
+    particleAttributeTransformFctInteger_ = std::move(attributesTransformFct);
+    nPAttributesInteger_ = attributeNames.size();
+    writeTrajectoryAttribute("integer attributes names",attributeNames);
 }
 
 /**
@@ -100,7 +103,7 @@ void ParticleSimulation::TrajectoryHDF5Writer::writeTimestep(std::vector<BTree::
     H5::DataSpace dSpaceTimestep = dsetTimesteps_->getSpace();
     dSpaceTimestep.selectHyperslab(H5S_SELECT_SET, slabDimsTimestep_, offsetScalarLike_);
     double ts[] = {time};
-    dsetTimesteps_->write(ts,H5::PredType::NATIVE_DOUBLE,memspaceTimestep_,dSpaceTimestep);
+    dsetTimesteps_->write(ts, H5::PredType::NATIVE_DOUBLE, memspaceTimestep_, dSpaceTimestep);
 
     // Create group for this timestep and dataset for the location data:
     std::string timeStepGroupPath = "/particle_trajectory/timesteps/" + std::to_string(sizeTimesteps_[0]-1);
@@ -159,8 +162,11 @@ void ParticleSimulation::TrajectoryHDF5Writer::writeTimestep(std::vector<BTree::
         H5::DataSpace memspaceLocation(2, slabDimsLocation);
         dsetPPositions->write(bufLocation.data(), H5::PredType::NATIVE_DOUBLE, memspaceLocation, dSpaceLocation);
 
-        if (isAuxWritten_) {
-            writeAuxTimestep_(particles);
+        if (hasParticleAttributes_) {
+            writeTimestepParticleAttributes_(particles);
+        }
+        if (hasParticleAttributesInteger_) {
+            writeTimestepParticleAttributesInteger_(particles);
         }
     }
     offsetScalarLike_[0] +=1;
@@ -368,10 +374,10 @@ void ParticleSimulation::TrajectoryHDF5Writer::finalizeTrajectory(){
 }
 
 /**
- * Writes the auxilliary data of a time step
+ * Writes the additional particle attributes of a time step
  * @param particles The simulated particle ensemble to write the auxiliary data for
  */
-void ParticleSimulation::TrajectoryHDF5Writer::writeAuxTimestep_(std::vector<BTree::Particle*> &particles){
+void ParticleSimulation::TrajectoryHDF5Writer::writeTimestepParticleAttributes_(std::vector<BTree::Particle*> &particles){
 
     hsize_t nParticles = particles.size();
 
@@ -382,37 +388,85 @@ void ParticleSimulation::TrajectoryHDF5Writer::writeAuxTimestep_(std::vector<BTr
     }
 
     //prepare location dataset structures:
-    hsize_t dimsAux[2] = {nParticles,nAuxParams_};            // dataset dimensions at creation
-    hsize_t maxdimsAux[2] = {nParticles,nAuxParams_};         // maximum dataset dimensions
-    hsize_t chunkDimsAux[2] = {nParticlesChunk, nAuxParams_};
+    hsize_t dimsAux[2] = {nParticles, nPAttributes_};            // dataset dimensions at creation
+    hsize_t maxdimsAux[2] = {nParticles, nPAttributes_};         // maximum dataset dimensions
+    hsize_t chunkDimsAux[2] = {nParticlesChunk, nPAttributes_};
     H5::DataSpace dataspaceAux(2,dimsAux,maxdimsAux);
 
     H5::DSetCreatPropList propAux;
     propAux.setChunk(2, chunkDimsAux);
 
     //create and prepare dataset for aux parameters:
-    std::unique_ptr<H5::DataSet> dsetAux = std::make_unique<H5::DataSet>(
-            timeStepGroup_->createDataSet("aux_parameters",
+    std::unique_ptr<H5::DataSet> dset = std::make_unique<H5::DataSet>(
+            timeStepGroup_->createDataSet("particle_attributes_float",
                     H5::PredType::IEEE_F32BE, dataspaceAux,
                     propAux));
 
-    H5::DataSpace dSpaceAux = dsetAux ->getSpace();
-    hsize_t slabDimsLocation[2]  = {nParticles,nAuxParams_};
+    H5::DataSpace dSpaceAttrib = dset ->getSpace();
+    hsize_t slabDimsLocation[2]  = {nParticles, nPAttributes_};
     hsize_t offsetLocation[2]  = {0,0};
-    dSpaceAux.selectHyperslab(H5S_SELECT_SET, slabDimsLocation, offsetLocation);
+    dSpaceAttrib.selectHyperslab(H5S_SELECT_SET, slabDimsLocation, offsetLocation);
 
     //create and fill aux data buffer:
-    std::vector<double> bufAux(nParticles*nAuxParams_);
+    std::vector<double> bufAux(nParticles*nPAttributes_);
     for (int i=0; i<nParticles; ++i){
-        std::vector<double> auxDat = particleParameterTransformFct_(particles[i]);
-        for(int j=0;j<nAuxParams_;++j){
-            bufAux[i*nAuxParams_+j] = auxDat[j];
+        std::vector<double> auxDat = particleAttributeTransformFct_(particles[i]);
+        for(int j=0; j<nPAttributes_; ++j){
+            bufAux[i*nPAttributes_+j] = auxDat[j];
         }
     }
 
     //write to the dataset:
     H5::DataSpace memspaceAux(2,slabDimsLocation);
-    dsetAux->write(bufAux.data(),H5::PredType::NATIVE_DOUBLE,memspaceAux,dSpaceAux);
+    dset->write(bufAux.data(),H5::PredType::NATIVE_DOUBLE,memspaceAux,dSpaceAttrib);
+}
+
+/**
+ * FIXME
+ * @param particles The simulated particle ensemble to write the auxiliary data for
+ */
+void ParticleSimulation::TrajectoryHDF5Writer::writeTimestepParticleAttributesInteger_(std::vector<BTree::Particle*> &particles){
+
+    hsize_t nParticles = particles.size();
+
+    //define chunk size in parameter direction:
+    hsize_t nParticlesChunk = 200;
+    if (nParticlesChunk > nParticles){
+        nParticlesChunk = nParticles;
+    }
+
+    //prepare location dataset structures:
+    hsize_t dimsAux[2] = {nParticles, nPAttributesInteger_};            // dataset dimensions at creation
+    hsize_t maxdimsAux[2] = {nParticles, nPAttributesInteger_};         // maximum dataset dimensions
+    hsize_t chunkDimsAux[2] = {nParticlesChunk, nPAttributesInteger_};
+    H5::DataSpace dataspaceAux(2,dimsAux,maxdimsAux);
+
+    H5::DSetCreatPropList propAux;
+    propAux.setChunk(2, chunkDimsAux);
+
+    //create and prepare dataset for aux parameters:
+    std::unique_ptr<H5::DataSet> dset = std::make_unique<H5::DataSet>(
+            timeStepGroup_->createDataSet("particle_attributes_integer",
+                    H5::PredType::NATIVE_INT, dataspaceAux,
+                    propAux));
+
+    H5::DataSpace dSpaceAttrib = dset ->getSpace();
+    hsize_t slabDimsLocation[2]  = {nParticles, nPAttributesInteger_};
+    hsize_t offsetLocation[2]  = {0,0};
+    dSpaceAttrib.selectHyperslab(H5S_SELECT_SET, slabDimsLocation, offsetLocation);
+
+    //create and fill aux data buffer:
+    std::vector<int> bufAux(nParticles*nPAttributesInteger_);
+    for (int i=0; i<nParticles; ++i){
+        std::vector<int> auxDat = particleAttributeTransformFctInteger_(particles[i]);
+        for(int j=0; j<nPAttributesInteger_; ++j){
+            bufAux[i*nPAttributesInteger_+j] = auxDat[j];
+        }
+    }
+
+    //write to the dataset:
+    H5::DataSpace memspaceAux(2, slabDimsLocation);
+    dset->write(bufAux.data(),H5::PredType::NATIVE_INT, memspaceAux, dSpaceAttrib);
 }
 
 

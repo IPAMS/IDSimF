@@ -172,8 +172,8 @@ TEST_CASE( "Test HDF5 trajectory file writer", "[ParticleSimulation][file writer
         //prepare a bare writer:
         ParticleSimulation::TrajectoryHDF5Writer writerBare(filenameBare, false);
 
-        //prepare a hdf5 writer including auxiliary parameters
-        ParticleSimulation::additionalPartParamFctType additionalParameterTransformFct =
+        //prepare a hdf5 writer including parameter attributes
+        ParticleSimulation::partAttribTransformFctType pAttribTransformFct =
                 [](BTree::Particle *particle) -> std::vector<double>{
                     std::vector<double> result = {
                             particle->getVelocity().x(),
@@ -185,11 +185,22 @@ TEST_CASE( "Test HDF5 trajectory file writer", "[ParticleSimulation][file writer
                     };
                     return result;
                 };
-        std::vector<std::string> auxParamNames = {"velocity x", "velocity y", "velocity z",
-                                                  "acceleration x", "acceleration y", "acceleration z"};
-        ParticleSimulation::TrajectoryHDF5Writer writerAux(filenameAux,
-                auxParamNames,
-                additionalParameterTransformFct);
+        std::vector<std::string> pAttribNames = {"velocity x", "velocity y", "velocity z",
+                                                 "acceleration x", "acceleration y", "acceleration z"};
+
+        //prepare a hdf5 writer including parameter attributes
+        ParticleSimulation::partAttribTransformFctTypeInteger pAttribTransformFctInt =
+                [](BTree::Particle *particle) -> std::vector<int>{
+                    std::vector<int> result = {
+                            particle->getIntegerAttribute("global index")
+                    };
+                    return result;
+                };
+        std::vector<std::string> pAttribNamesInt = {"global index"};
+
+        ParticleSimulation::TrajectoryHDF5Writer writerAux(filenameAux);
+        writerAux.setParticleAttributes(pAttribNames, pAttribTransformFct);
+        writerAux.setParticleAttributes(pAttribNamesInt, pAttribTransformFctInt);
 
         // prepare data structures:
         std::vector<BTree::uniquePartPtr>particles;
@@ -255,7 +266,6 @@ TEST_CASE( "Test HDF5 trajectory file writer", "[ParticleSimulation][file writer
 
         REQUIRE(nTimesteps == nFrames);
 
-
         std::array<hsize_t,1> index= {0};
         for (int ts=1; ts<nTimesteps; ++ts) {
             index[0] = ts;
@@ -286,15 +296,19 @@ TEST_CASE( "Test HDF5 trajectory file writer", "[ParticleSimulation][file writer
         }
 
         //check splattimes:
-        H5::DataSet dsSplattimes= bareFile.openDataSet("particle_trajectory/splattimes");
-        auto dFieldSplattimes= readDataset<1>(dsSplattimes);
-        REQUIRE(dFieldSplattimes.rank == 1);
-        index[0] = 0;
-        REQUIRE(Approx(dFieldSplattimes.get(index)) == 1.0);
-        index[0] = 1;
-        REQUIRE(Approx(dFieldSplattimes.get(index)) == nFrames*1.0);
-        index[0] = nParticles-1;
-        REQUIRE(Approx(dFieldSplattimes.get(index)) == 0.99);
+        H5::DataSet dsStartTimes= bareFile.openDataSet("particle_trajectory/start_splat/particle start times");
+        H5::DataSet dsSplatTimes= bareFile.openDataSet("particle_trajectory/start_splat/particle splat times");
+
+        auto dFieldSplattimes= readDataset<2>(dsSplatTimes);
+        REQUIRE(dFieldSplattimes.rank == 2);
+        std::array<hsize_t,2> indices = {0,0};
+        REQUIRE(Approx(dFieldSplattimes.get(indices)) == 1.0);
+        indices[0] = 1;
+        REQUIRE(Approx(dFieldSplattimes.get(indices)) == nFrames*1.0);
+        indices[0] = 2;
+        REQUIRE(Approx(dFieldSplattimes.get(indices)) == 0.0);
+        indices[0] = nParticles-1;
+        REQUIRE(Approx(dFieldSplattimes.get(indices)) == 0.99);
     }
 
     SECTION("Written hdf5 trajectory contains correct aux data"){
@@ -309,7 +323,7 @@ TEST_CASE( "Test HDF5 trajectory file writer", "[ParticleSimulation][file writer
 
         //read that file and check contents:
         for (int ts=1; ts<nTimesteps; ++ts) {
-            std::string tsPath = "/particle_trajectory/timesteps/" + std::to_string(ts) +"/aux_parameters";
+            std::string tsPath = "/particle_trajectory/timesteps/" + std::to_string(ts) +"/particle_attributes_float";
 
             H5::DataSet dsAux= auxFile.openDataSet(tsPath.c_str());
             auto dField = readDataset<2>(dsAux);
@@ -336,13 +350,13 @@ TEST_CASE( "Test HDF5 trajectory file writer", "[ParticleSimulation][file writer
         }
 
         H5::DataSet dsAdditional= auxFile.openDataSet("particle_trajectory/additional_vector_data_set");
-        auto dFieldAdditional = readDataset<1>(dsAdditional);
-        REQUIRE(dFieldAdditional.rank == 1);
+        auto dFieldAdditional = readDataset<2>(dsAdditional);
+        REQUIRE(dFieldAdditional.rank == 2);
         hsize_t nAdditional = dFieldAdditional.dims[0];
         REQUIRE(nAdditional == 5);
 
         //check additional data:
-        std::array<hsize_t,1> indicesAdditional = {0};
+        std::array<hsize_t,2> indicesAdditional = {0,0};
         for (int i=0; i<nAdditional; ++i) {
             indicesAdditional[0] = i;
             REQUIRE(Approx(dFieldAdditional.get(indicesAdditional)) == 10 + i*0.1);

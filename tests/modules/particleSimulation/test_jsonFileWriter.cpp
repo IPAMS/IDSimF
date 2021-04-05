@@ -101,7 +101,7 @@ TEST_CASE("Test JSON trajectory file writer", "[ParticleSimulation][JSONTrajecto
         testIon3.setFloatAttribute(key_testKey, 30.3);
 
 
-        ParticleSimulation::additionalPartParamFctType additionalParameterTransformFct =
+        ParticleSimulation::partAttribTransformFctType additionalParameterTransformFct =
                 [=](BTree::Particle* particle) -> std::vector<double> {
                     std::vector<double> result = {particle->getFloatAttribute(key_testKey)};
                     return result;

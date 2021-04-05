@@ -44,13 +44,17 @@ namespace ParticleSimulation {
     //function to transform additional parameters
     typedef std::function
             <std::vector<double>(BTree::Particle* particle)>
-            additionalPartParamFctType;
+            partAttribTransformFctType;
+
+    typedef std::function
+            <std::vector<int>(BTree::Particle* particle)>
+            partAttribTransformFctTypeInteger;
 
     //a name value pair representing an additional parameter to be exported:
     typedef std::pair<std::string, double> additionalParamPair;
 
     //a empty additional transform function which returns nothing but an empty vector
-    static const additionalPartParamFctType emptyParameterTransformFct =
+    static const partAttribTransformFctType emptyParameterTransformFct =
             [](BTree::Particle *) -> std::vector<double>{ return std::vector<double>(); };
     static const std::vector <additionalParamPair> emptyTimestepAdditionalParameters;
 }

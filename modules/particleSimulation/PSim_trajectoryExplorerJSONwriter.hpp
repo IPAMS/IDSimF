@@ -60,12 +60,12 @@ namespace ParticleSimulation {
 
         void writeTimestep(
                 std::vector<BTree::Particle*>& particles,
-                const additionalPartParamFctType& particleParameterTransformFct,
+                const partAttribTransformFctType& particleParameterTransformFct,
                 double time, bool lastTime);
 
         void writeTimestep(
                 std::vector<BTree::Particle*>& particles,
-                const additionalPartParamFctType& particleParameterTransformFct,
+                const partAttribTransformFctType& particleParameterTransformFct,
                 std::vector<additionalParamPair> timestepAdditionalParameters,
                 double time, bool lastTime);
 
