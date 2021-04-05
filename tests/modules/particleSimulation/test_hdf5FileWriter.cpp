@@ -311,7 +311,7 @@ TEST_CASE( "Test HDF5 trajectory file writer", "[ParticleSimulation][file writer
         REQUIRE(Approx(dFieldSplattimes.get(indices)) == 0.99);
     }
 
-    SECTION("Written hdf5 trajectory contains correct aux data"){
+    SECTION("Written hdf5 trajectory contains correct particle attributes"){
         H5::H5File auxFile(filenameAux.c_str(),H5F_ACC_RDONLY);
         H5::DataSet dsTimes= auxFile.openDataSet("particle_trajectory/times");
         auto dFieldTimes = readDataset<1>(dsTimes);
@@ -323,19 +323,19 @@ TEST_CASE( "Test HDF5 trajectory file writer", "[ParticleSimulation][file writer
 
         //read that file and check contents:
         for (int ts=1; ts<nTimesteps; ++ts) {
-            std::string tsPath = "/particle_trajectory/timesteps/" + std::to_string(ts) +"/particle_attributes_float";
 
-            H5::DataSet dsAux= auxFile.openDataSet(tsPath.c_str());
-            auto dField = readDataset<2>(dsAux);
+            //check float particle attributes:
+            std::string pAttribFloatPath = "/particle_trajectory/timesteps/" + std::to_string(ts) +"/particle_attributes_float";
+
+            H5::DataSet dsAttribFloat= auxFile.openDataSet(pAttribFloatPath.c_str());
+            auto dField = readDataset<2>(dsAttribFloat);
             REQUIRE(dField.rank == 2);
 
             hsize_t nParticles = dField.dims[0];
-            hsize_t nAuxDims = dField.dims[1];
+            hsize_t nAttributeDims = dField.dims[1];
 
             REQUIRE(nParticles == 5);
-            REQUIRE(nAuxDims == 6);
-
-            //check aux data:
+            REQUIRE(nAttributeDims == 6);
             std::array<hsize_t,2> indices = {0,0};
 
             for (int pi = 0; pi < nParticles; ++pi) {
@@ -346,6 +346,26 @@ TEST_CASE( "Test HDF5 trajectory file writer", "[ParticleSimulation][file writer
                 REQUIRE(Approx(dField.get(indices)) == 1.0 * ts);
                 indices[1] = 5;
                 REQUIRE(Approx(dField.get(indices)) == 0.0);
+            }
+
+
+            //check integer particle attributes:
+            std::string pAttribIntegerPath = "/particle_trajectory/timesteps/" + std::to_string(ts) +"/particle_attributes_integer";
+
+            H5::DataSet dsAttribInteger= auxFile.openDataSet(pAttribIntegerPath.c_str());
+            auto dFieldInteger = readDataset<2>(dsAttribInteger);
+            REQUIRE(dFieldInteger.rank == 2);
+
+            nParticles = dFieldInteger.dims[0];
+            nAttributeDims = dFieldInteger.dims[1];
+
+            REQUIRE(nParticles == 5);
+            REQUIRE(nAttributeDims == 1);
+            indices = {0,0};
+
+            for (int pi = 0; pi < nParticles; ++pi) {
+                indices[0] = pi;
+                REQUIRE(dFieldInteger.get(indices) == pi);
             }
         }
 
