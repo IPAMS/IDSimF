@@ -47,8 +47,7 @@ TEST_CASE( "Test velocity integrator", "[ParticleSimulation][VelocityIntegrator]
             return (result);
         };
 
-        auto timestepWriteFct = [](std::vector<BTree::Particle*>& particles, double time, int timestep,
-                                   bool lastTimestep){};
+
 
         std::vector<BTree::uniquePartPtr>particles;
         std::vector<BTree::Particle*>particlesPtrs;
@@ -65,10 +64,31 @@ TEST_CASE( "Test velocity integrator", "[ParticleSimulation][VelocityIntegrator]
             yPos = yPos+0.01;
         }
 
-        SECTION("Simulation run should run through"){
-            auto otherActionsFct = [] (
+        SECTION("Simulation run should run through with bare integrator"){
+            ParticleSimulation::VelocityIntegrator velocityIntegrator(particlesPtrs, velocityFct);
+
+            velocityIntegrator.runSingleStep(dt);
+            velocityIntegrator.run(timeSteps,dt);
+
+            for (int i=0; i<nParticles; i++){
+                Core::Vector ionPos = particles[i]-> getLocation();
+                CHECK(Approx(ionPos.x()).epsilon(1e-6) == 510*dt);
+            }
+        }
+
+        SECTION("Simulation run should run through and functions should be called"){
+
+            int nTimeStepsWritten = 0;
+            auto timestepWriteFct = [&nTimeStepsWritten](std::vector<BTree::Particle*>& particles, double time, int timestep,
+                                       bool lastTimestep){
+                nTimeStepsWritten++;
+            };
+
+            int nParticlesTouched = 0;
+            auto otherActionsFct = [&nParticlesTouched] (
                     Core::Vector& newPartPos,BTree::Particle* particle,
                     int particleIndex, double time,int timestep){
+                nParticlesTouched++;
             };
 
             ParticleSimulation::VelocityIntegrator velocityIntegrator(particlesPtrs, velocityFct, timestepWriteFct, otherActionsFct);
@@ -78,8 +98,11 @@ TEST_CASE( "Test velocity integrator", "[ParticleSimulation][VelocityIntegrator]
 
             for (int i=0; i<nParticles; i++){
                 Core::Vector ionPos = particles[i]-> getLocation();
-                REQUIRE(Approx(ionPos.x()).epsilon(1e-6) == 510*dt);
+                CHECK(Approx(ionPos.x()).epsilon(1e-6) == 510*dt);
             }
+
+            CHECK(nTimeStepsWritten == timeSteps+2);
+            CHECK(nParticlesTouched == (timeSteps+1) * nParticles);
         }
 
         SECTION("Simulation run should be stoppable"){
@@ -95,11 +118,11 @@ TEST_CASE( "Test velocity integrator", "[ParticleSimulation][VelocityIntegrator]
                 }
             };
 
-            ParticleSimulation::VelocityIntegrator velocityIntegrator(particlesPtrs, velocityFct, timestepWriteFct, terminationActionFct);
+            ParticleSimulation::VelocityIntegrator velocityIntegrator(particlesPtrs, velocityFct, nullptr, terminationActionFct);
             integratorPtr = &velocityIntegrator;
 
             velocityIntegrator.run(timeSteps, dt);
-            REQUIRE(velocityIntegrator.timeStep() == 41);
+            CHECK(velocityIntegrator.timeStep() == 41);
         }
     }
 }

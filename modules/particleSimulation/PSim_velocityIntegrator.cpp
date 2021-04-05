@@ -26,11 +26,13 @@
 
 /**
  * Creates a velocity integrator
+ *
  * @param particles group / cloud of charged particles to be integrated
- * @param accelerationFunction a function to calculate the acceleration to the individual particles
- * @param timestepWriteFunction  a function to export data from the simulation
- * @param otherActionsFunction  a function to perform arbitrary other actions in every time step of the simulation
- * @param collisionModel a collision model, modeling the interaction between charged particles and background gas
+ * @param accelerationFunction A function to calculate the acceleration to the individual particles
+ * @param timestepWriteFunction A function to export data from the simulation (can be nullptr to flag non usage)
+ * @param otherActionsFunction A function to perform arbitrary other actions in every time step of the simulation
+ *  (can be nullptr to flag non usage)
+
  */
 ParticleSimulation::VelocityIntegrator::VelocityIntegrator(
         std::vector<BTree::Particle *> particles,
@@ -42,8 +44,8 @@ timestepWriteFunction_(std::move(timestepWriteFunction)),
 otherActionsFunction_(std::move(otherActionsFunction))
 {
     //init velocities and accelerations:
-    for (int i=0; i<particles.size(); ++i){
-        addParticle(particles[i]);
+    for (const auto& particle : particles){
+        addParticle_(particle); //Do not call virtual functions in constructor, call private non virtual function
     }
 }
 
@@ -52,6 +54,10 @@ otherActionsFunction_(std::move(otherActionsFunction))
  * @param particle the particle to add
  */
 void ParticleSimulation::VelocityIntegrator::addParticle(BTree::Particle *particle){
+    addParticle_(particle);
+}
+
+void ParticleSimulation::VelocityIntegrator::addParticle_(BTree::Particle *particle){
     particles_.push_back(particle);
     ++nParticles_;
 }
@@ -79,16 +85,20 @@ void ParticleSimulation::VelocityIntegrator::run(int nTimesteps, double dt) {
  */
 void ParticleSimulation::VelocityIntegrator::runSingleStep(double dt) {
     for (int i=0; i<nParticles_; i++){
-        if (particles_[i]->isActive() == true){
+        if (particles_[i]->isActive()){
             Core::Vector velocity = velocityFunction_(particles_[i],i,time_,timestep_);
             particles_[i]->setVelocity(velocity);
             Core::Vector newPos = particles_[i]->getLocation() + particles_[i]->getVelocity() * dt;
             particles_[i]->setLocation(newPos);
-            otherActionsFunction_(newPos, particles_[i], i, time_, timestep_);
+            if (otherActionsFunction_ !=nullptr) {
+                otherActionsFunction_(newPos, particles_[i], i, time_, timestep_);
+            }
         }
     }
 
-    timestepWriteFunction_(particles_,time_,timestep_,false);
+    if (timestepWriteFunction_ != nullptr) {
+        timestepWriteFunction_(particles_, time_, timestep_, false);
+    }
     timestep_++;
     time_ = time_ + dt;
 
@@ -98,5 +108,7 @@ void ParticleSimulation::VelocityIntegrator::runSingleStep(double dt) {
  * Finalizes the verlet integration run (should be called after the last time step).
  */
 void ParticleSimulation::VelocityIntegrator::finalizeSimulation(){
-    timestepWriteFunction_(particles_,time_,timestep_,true);
+    if (timestepWriteFunction_ != nullptr) {
+        timestepWriteFunction_(particles_, time_, timestep_, true);
+    }
 }

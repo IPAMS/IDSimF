@@ -90,19 +90,21 @@ namespace ParticleSimulation{
         VelocityIntegrator(
                 std::vector<BTree::Particle*> particles,
                 velocityFctType velocityFunction,
-                timestepWriteFctType timestepWriteFunction,
-                otherActionsFctType otherActionsFunction
+                timestepWriteFctType timestepWriteFunction = nullptr,
+                otherActionsFctType otherActionsFunction = nullptr
         );
 
-        void addParticle(BTree::Particle* particle);
-        void run(int nTimesteps, double dt);
-        void runSingleStep(double dt);
-        void finalizeSimulation();
+        void addParticle(BTree::Particle* particle) override;
+        void run(int nTimesteps, double dt) override;
+        void runSingleStep(double dt) override;
+        void finalizeSimulation() override;
 
     private:
-        velocityFctType velocityFunction_; ///< function to calculate particle acceleration
-        timestepWriteFctType timestepWriteFunction_; ///< function to define what is exported in every time step
-        otherActionsFctType otherActionsFunction_; ///< function with other actions done in every time step
+        void addParticle_(BTree::Particle* particle);
+
+        velocityFctType velocityFunction_ = nullptr; ///< function to calculate particle acceleration
+        timestepWriteFctType timestepWriteFunction_ = nullptr; ///< function to define what is exported in every time step
+        otherActionsFctType otherActionsFunction_ = nullptr; ///< function with other actions done in every time step
     };
 }
 #endif /* BTree_velocityIntegrator_hpp */
