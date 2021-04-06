@@ -404,7 +404,7 @@ int main(int argc, const char * argv[]) {
     auto fftWriter = std::make_unique<ParticleSimulation::IdealizedQitFFTWriter>(particlePtrs, projectName + "_fft.txt");
 
     auto ionsInactiveWriter = std::make_unique<ParticleSimulation::Scalar_writer>(projectName+ "_ionsInactive.txt");
-    ParticleSimulation::additionalPartParamFctType additionalParameterTransformFct =
+    ParticleSimulation::partAttribTransformFctType additionalParameterTransformFct =
             [](BTree::Particle *particle) -> std::vector<double>{
                 std::vector<double> result = {
                         particle->getVelocity().x(),

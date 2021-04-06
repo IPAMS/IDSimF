@@ -191,7 +191,7 @@ int main(int argc, const char * argv[]) {
         }
     };
 
-    ParticleSimulation::additionalPartParamFctType additionalParameterTransformFct =
+    ParticleSimulation::partAttribTransformFctType additionalParameterTransformFct =
             [&backgroundGasPressureFunction](BTree::Particle *particle) -> std::vector<double>{
                 double pressure_pa = backgroundGasPressureFunction(particle->getLocation());
                 std::vector<double> result = {

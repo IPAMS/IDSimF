@@ -285,7 +285,7 @@ int main(int argc, const char * argv[]) {
     };
 
 
-    ParticleSimulation::additionalPartParamFctType additionalParameterTransformFct =
+    ParticleSimulation::partAttribTransformFctType additionalParameterTransformFct =
             [=](BTree::Particle* particle) -> std::vector<double> {
                 std::vector<double> result = {particle->getFloatAttribute(key_ChemicalIndex)};
                 return result;

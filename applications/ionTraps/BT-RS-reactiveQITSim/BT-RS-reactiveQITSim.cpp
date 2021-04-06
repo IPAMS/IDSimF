@@ -367,7 +367,7 @@ int main(int argc, const char * argv[]) {
     RS::ConcentrationFileWriter concentrationFilewriter(projectName+ "_concentrations.txt");
     concentrationFilewriter.initFile(simConf);
 
-    ParticleSimulation::additionalPartParamFctType additionalParameterTransformFct =
+    ParticleSimulation::partAttribTransformFctType additionalParameterTransformFct =
             [](BTree::Particle *particle) -> std::vector<double>{
                 double ionVelocity = particle->getVelocity().magnitude();
                 double kineticEnergy_eV = 0.5* particle->getMass() * ionVelocity * ionVelocity * Core::JOULE_TO_EV;

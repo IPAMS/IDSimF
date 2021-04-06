@@ -121,7 +121,7 @@ int main(int argc, const char * argv[]) {
             };
 
     // function to add some additional exported parameters to the exported trajectory file:
-    ParticleSimulation::additionalPartParamFctType additionalParameterTransformFct =
+    ParticleSimulation::partAttribTransformFctType additionalParameterTransformFct =
             [](BTree::Particle *particle) -> std::vector<double>{
                 std::vector<double> result = {
                         particle->getVelocity().x(),

@@ -142,7 +142,7 @@ int main(int argc, const char *argv[]){
     RS::ConcentrationFileWriter resultFilewriter(projectFilename);
 
     //prepare auxiliary parameters transform functions
-    ParticleSimulation::additionalPartParamFctType additionalParamTFct;
+    ParticleSimulation::partAttribTransformFctType additionalParamTFct;
     std::vector<std::string> auxParamNames;
 
     if (writeVelocities) {

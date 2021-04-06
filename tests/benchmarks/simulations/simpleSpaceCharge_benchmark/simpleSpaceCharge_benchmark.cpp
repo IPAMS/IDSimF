@@ -129,36 +129,6 @@ int main(int argc, const char * argv[]) {
             }
     };
 
-    auto timestepWriteFunctionSerialEmpty =
-            []( std::vector<BTree::Particle *> &particles, BTree::Tree &tree, double time,
-                                                    int timestep, bool lastTimestep) {};
-
-    auto timestepWriteFunctionParallel =
-            []( std::vector<BTree::Particle *> &particles, BTree::ParallelTreeOriginal &tree, double time,
-                int timestep, bool lastTimestep) {};
-
-    auto timestepWriteFunctionParallelNew =
-            []( std::vector<BTree::Particle *> &particles, BTree::ParallelTree &tree, double time,
-                int timestep, bool lastTimestep) {};
-
-
-
-//a empty other actions function (to do nothing additionally in a timestep)
-    auto otherActionsFunctionSerial = [](Core::Vector &newPartPos, BTree::Particle *particle,
-                                   int particleIndex,
-                                   BTree::Tree &tree, double time, int timestep){
-    };
-
-    auto otherActionsFunctionParallel = [](Core::Vector &newPartPos, BTree::Particle *particle,
-                                         int particleIndex,
-                                         BTree::ParallelTreeOriginal &tree, double time, int timestep){
-    };
-
-    auto otherActionsFunctionParallelNew = [](Core::Vector &newPartPos, BTree::Particle *particle,
-                                           int particleIndex,
-                                           BTree::ParallelTree &tree, double time, int timestep){
-    };
-
 
     std::vector<std::unique_ptr<BTree::Particle>> particlesSerial;
     std::vector<BTree::Particle*>particlePtrsSerial;
@@ -184,20 +154,18 @@ int main(int argc, const char * argv[]) {
 
     }
     else {
-        collisionModel = &emptyCollisionModel;
+        collisionModel = nullptr;
     }
 
 
     // simulate ===============================================================================================
     ParticleSimulation::VerletIntegrator verletIntegratorSerial(
             particlePtrsSerial,
-            accelerationFunctionSerial, timestepWriteFunctionSerialEmpty, otherActionsFunctionSerial,
-            *collisionModel);
+            accelerationFunctionSerial, nullptr, nullptr, nullptr, collisionModel);
 
     ParticleSimulation::ParallelVerletIntegrator verletIntegratorParallel(
             particlePtrsParallelNew,
-            accelerationFunctionParallelNew, timestepWriteFunctionParallelNew, otherActionsFunctionParallelNew,
-            *collisionModel);
+            accelerationFunctionParallelNew, nullptr, nullptr, nullptr, collisionModel);
 
     runIntegrator(verletIntegratorSerial, timeSteps, dt, "serial");
     runIntegrator(verletIntegratorParallel, timeSteps, dt, "parallel");
