@@ -26,23 +26,24 @@
 
  ****************************/
 
-#include <iostream>
-#include <sstream>
-#include <cmath>
-#include <ctime>
-#include "json.h"
-#include "appUtils_parameterParsing.hpp"
 #include "RS_Simulation.hpp"
 #include "RS_SimulationConfiguration.hpp"
 #include "RS_ConfigFileParser.hpp"
 #include "RS_ConcentrationFileWriter.hpp"
+#include "PSim_util.hpp"
+#include "PSim_constants.hpp"
 #include "PSim_verletIntegrator.hpp"
 #include "PSim_trajectoryExplorerJSONwriter.hpp"
 #include "PSim_scalar_writer.hpp"
-#include "PSim_util.hpp"
 #include "CollisionModel_EmptyCollisionModel.hpp"
 #include "CollisionModel_StatisticalDiffusion.hpp"
 #include "CollisionModel_SpatialFieldFunctions.hpp"
+#include "appUtils_parameterParsing.hpp"
+#include "json.h"
+#include <iostream>
+#include <sstream>
+#include <cmath>
+#include <ctime>
 
 const std::string key_ChemicalIndex = "keyChemicalIndex";
 enum CVMode {STATIC_CV,AUTO_CV};
@@ -389,9 +390,8 @@ int main(int argc, const char * argv[]) {
     //init trajectory simulation object:
     ParticleSimulation::VerletIntegrator verletIntegrator(
             particlesPtrs,
-            accelerationFct, timestepWriteFct, otherActionsFct,
-            *collisionModelPtr
-    );
+            accelerationFct, timestepWriteFct, otherActionsFct, ParticleSimulation::noFunction,
+            collisionModelPtr.get());
     // ======================================================================================
 
 

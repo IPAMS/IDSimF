@@ -126,7 +126,8 @@ int main(int argc, const char * argv[]) {
     std::vector<std::string> auxParamNames = {"velocity x","velocity y","velocity z"};
 
     auto hdf5Writer = std::make_unique<ParticleSimulation::TrajectoryHDF5Writer>(
-            projectName + "_trajectories.hd5", auxParamNames,additionalParameterTransformFct);
+            projectName + "_trajectories.hd5");
+    hdf5Writer->setParticleAttributes(auxParamNames, additionalParameterTransformFct);
 
     /*auto jsonWriter = std::make_unique<ParticleSimulation::TrajectoryExplorerJSONwriter>(
             projectName + "_trajectories.json");*/
@@ -170,21 +171,11 @@ int main(int argc, const char * argv[]) {
                 }
             };
 
-    //a empty other actions function (to do nothing additionally in a timestep)
-    auto otherActionsFunctionQIT = [](Core::Vector &newPartPos, BTree::Particle *particle,
-                                      int particleIndex,
-                                      BTree::Tree &tree, double time, int timestep){
-    };
-
-    CollisionModel::EmptyCollisionModel emptyCollisionModel;
-
-
     // simulate ===============================================================================================
     clock_t begin = std::clock();
     ParticleSimulation::VerletIntegrator verletIntegrator(
             particlePtrs,
-            accelerationFunction, timestepWriteFunction, otherActionsFunctionQIT,
-            emptyCollisionModel);
+            accelerationFunction, timestepWriteFunction);
     verletIntegrator.run(timeSteps, dt);
 
     clock_t end = std::clock();

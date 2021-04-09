@@ -25,12 +25,14 @@
 
  ****************************/
 #include "catch.hpp"
-#include "CollisionModel_StatisticalDiffusion.hpp"
-#include "CollisionStatistic_default.hpp"
+#include "Core_randomGenerators.hpp"
 #include "BTree_particle.hpp"
 #include "BTree_tree.hpp"
-#include "Core_randomGenerators.hpp"
+#include "CollisionModel_StatisticalDiffusion.hpp"
+#include "CollisionStatistic_default.hpp"
+#include "PSim_constants.hpp"
 #include "PSim_verletIntegrator.hpp"
+
 
 TEST_CASE( "Test SDS collison model", "[CollisionModels][SDS]") {
 
@@ -124,17 +126,11 @@ TEST_CASE( "Test SDS collison model", "[CollisionModels][SDS]") {
             return(result);
         };
 
-        auto timestepWriteFct = [] (std::vector<BTree::Particle*>& particles, BTree::Tree& tree, double time, int timestep, bool lastTimestep){};
-
-        auto otherActionsFct = [] (
-                Core::Vector& newPartPos,BTree::Particle* particle,
-                int particleIndex, BTree::Tree& tree, double time,int timestep){
-        };
-
         ParticleSimulation::VerletIntegrator verletIntegrator(
                 particles,
-                accelerationFct, timestepWriteFct, otherActionsFct,
-                sds);
+                accelerationFct,
+                ParticleSimulation::noFunction, ParticleSimulation::noFunction, ParticleSimulation::noFunction,
+                &sds);
 
         verletIntegrator.run(timeSteps,dt);
 

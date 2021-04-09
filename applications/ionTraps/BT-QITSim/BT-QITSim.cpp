@@ -26,10 +26,10 @@
 
  ****************************/
 
-#include "json.h"
 #include "BTree_particle.hpp"
 #include "PSim_trajectoryHDF5Writer.hpp"
 #include "PSim_util.hpp"
+#include "PSim_constants.hpp"
 #include "PSim_verletIntegrator.hpp"
 #include "PSim_parallelVerletIntegrator.hpp"
 #include "PSim_scalar_writer.hpp"
@@ -40,6 +40,7 @@
 #include "CollisionModel_HardSphere.hpp"
 #include "appUtils_parameterParsing.hpp"
 #include "appUtils_ionDefinitionReading.hpp"
+#include "json.h"
 #include <iostream>
 #include <vector>
 #include <ctime>
@@ -424,8 +425,8 @@ int main(int argc, const char * argv[]) {
                                               "rf x","rf y","rf z",
                                               "spacecharge x","spacecharge y","spacecharge z"};
 
-    auto hdf5Writer = std::make_unique<ParticleSimulation::TrajectoryHDF5Writer>(
-            projectName + "_trajectories.hd5", auxParamNames,additionalParameterTransformFct);
+    auto hdf5Writer = std::make_unique<ParticleSimulation::TrajectoryHDF5Writer>(projectName + "_trajectories.hd5");
+    hdf5Writer->setParticleAttributes(auxParamNames, additionalParameterTransformFct);
 
     auto timestepWriteFunction =
             [trajectoryWriteInterval, fftWriteInterval, fftWriteMode, &V_0, &V_rf_export, &ionsInactive, timeSteps,
@@ -474,14 +475,16 @@ int main(int argc, const char * argv[]) {
         ParticleSimulation::VerletIntegrator verletIntegrator(
                 particlePtrs,
                 accelerationFunctionQIT, timestepWriteFunction, otherActionsFunctionQIT,
-                hsModel);
+                ParticleSimulation::noFunction,
+                &hsModel);
         verletIntegrator.run(timeSteps, dt);
     }
     else if (integratorMode == PARALLEL_VERLET) {
         ParticleSimulation::ParallelVerletIntegrator verletIntegrator(
                 particlePtrs,
                 accelerationFunctionQIT_parallel, timestepWriteFunction, otherActionsFunctionQIT,
-                hsModel);
+                ParticleSimulation::noFunction,
+                &hsModel);
         verletIntegrator.run(timeSteps, dt);
     }
 

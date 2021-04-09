@@ -42,7 +42,7 @@ set(SOURCE_FILES
         PSim_cylinderStartZone.cpp
         PSim_cylinderStartZone.hpp
         PSim_boxStartZone.cpp
-        PSim_boxStartZone.hpp PSim_particleStartZone.cpp PSim_particleStartSplatTracker.cpp PSim_particleStartSplatTracker.hpp)
+        PSim_boxStartZone.hpp PSim_particleStartZone.cpp PSim_particleStartSplatTracker.cpp PSim_particleStartSplatTracker.hpp PSim_constants.hpp)
 
 add_library(particlesimulation STATIC ${SOURCE_FILES})
 target_include_directories(particlesimulation PUBLIC .)

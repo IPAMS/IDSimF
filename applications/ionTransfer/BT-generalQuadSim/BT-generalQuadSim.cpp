@@ -26,20 +26,21 @@
 
  ****************************/
 
-#include <iostream>
-#include <vector>
-#include <ctime>
-#include "json.h"
-#include "appUtils_parameterParsing.hpp"
+#include "Core_randomGenerators.hpp"
 #include "BTree_particle.hpp"
 #include "BTree_tree.hpp"
-#include "Core_randomGenerators.hpp"
+#include "PSim_util.hpp"
+#include "PSim_constants.hpp"
 #include "PSim_trajectoryExplorerJSONwriter.hpp"
 #include "PSim_interpolatedField.hpp"
 #include "PSim_boxStartZone.hpp"
-#include "PSim_util.hpp"
 #include "PSim_verletIntegrator.hpp"
 #include "CollisionModel_HardSphere.hpp"
+#include "appUtils_parameterParsing.hpp"
+#include "json.h"
+#include <iostream>
+#include <vector>
+#include <ctime>
 
 // some constants:
 double freq_rf = 1.0e6; //Hz, RF Frequency
@@ -240,8 +241,8 @@ int main(int argc, const char * argv[]) {
     clock_t begin = std::clock();
     ParticleSimulation::VerletIntegrator verletIntegrator(
             particlePtrs,
-            accelerationFunction, timestepWriteFunction, otherActionsFunction,
-            hsModel);
+            accelerationFunction, timestepWriteFunction, otherActionsFunction, ParticleSimulation::noFunction,
+            &hsModel);
     verletIntegrator.run(timeSteps,dt);
 
     clock_t end = std::clock();

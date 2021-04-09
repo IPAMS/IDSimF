@@ -159,21 +159,12 @@ int main(int argc, const char * argv[]) {
                 }
     };
 
-    auto otherActionsFunctionQIT = [](Core::Vector &newPartPos, BTree::Particle *particle,
-                                                                 int particleIndex,
-                                                                 BTree::Tree &tree, double time, int timestep){
-    };
-
-
-    CollisionModel::EmptyCollisionModel emptyCollisionModel;
-
 
     // simulate ===============================================================================================
     clock_t begin = std::clock();
     ParticleSimulation::VerletIntegrator verletIntegrator(
             particlePtrs,
-            accelerationFunction, timestepWriteFunction, otherActionsFunctionQIT,
-            emptyCollisionModel);
+            accelerationFunction, timestepWriteFunction);
     verletIntegrator.run(timeSteps, dt);
 
     clock_t end = std::clock();

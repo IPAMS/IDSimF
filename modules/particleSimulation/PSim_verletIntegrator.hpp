@@ -58,7 +58,8 @@ namespace ParticleSimulation{
      */
     class VerletIntegrator: public AbstractTimeIntegrator{
 
-        public:
+    public:
+
         /**
         * type definition for acceleration calculation functions
         */

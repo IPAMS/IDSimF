@@ -27,22 +27,23 @@
 
  ****************************/
 
-#include "json.h"
-#include "appUtils_parameterParsing.hpp"
 #include "RS_Simulation.hpp"
 #include "RS_SimulationConfiguration.hpp"
 #include "RS_ConfigFileParser.hpp"
 #include "RS_ConcentrationFileWriter.hpp"
-#include "PSim_trajectoryHDF5Writer.hpp"
-#include "PSim_scalar_writer.hpp"
 #include "PSim_util.hpp"
+#include "PSim_constants.hpp"
+#include "PSim_math.hpp"
+#include "PSim_trajectoryHDF5Writer.hpp"
 #include "PSim_verletIntegrator.hpp"
 #include "PSim_sampledWaveform.hpp"
-#include "PSim_math.hpp"
+#include "PSim_scalar_writer.hpp"
 #include "PSim_averageChargePositionWriter.hpp"
 #include "PSim_idealizedQitFFTWriter.hpp"
 #include "CollisionModel_HardSphere.hpp"
 #include "CollisionModel_MultiCollisionModel.hpp"
+#include "json.h"
+#include "appUtils_parameterParsing.hpp"
 #include <iostream>
 #include <vector>
 #include <ctime>
@@ -386,7 +387,8 @@ int main(int argc, const char * argv[]) {
                                               "chemical id"};
 
     auto hdf5Writer = std::make_unique<ParticleSimulation::TrajectoryHDF5Writer>(
-            projectName + "_trajectories.hd5", auxParamNames,additionalParameterTransformFct);
+            projectName + "_trajectories.hd5");
+    hdf5Writer->setParticleAttributes(auxParamNames, additionalParameterTransformFct);
 
     auto timestepWriteFunction =
             [trajectoryWriteInterval, fftWriteInterval, fftWriteMode, &V_0, &V_rf_export, &ionsInactive, timeSteps,
@@ -436,8 +438,8 @@ int main(int argc, const char * argv[]) {
     // simulate ===============================================================================================
     ParticleSimulation::VerletIntegrator verletIntegrator(
             particlePtrs,
-            accelerationFunctionQIT, timestepWriteFunction, otherActionsFunctionQIT,
-            combinedCollisionModel);
+            accelerationFunctionQIT, timestepWriteFunction, otherActionsFunctionQIT, ParticleSimulation::noFunction,
+            &combinedCollisionModel);
 
     clock_t begin = std::clock();
 

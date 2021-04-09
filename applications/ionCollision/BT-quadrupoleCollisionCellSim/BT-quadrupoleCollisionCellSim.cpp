@@ -29,14 +29,15 @@
 
 #include "Core_randomGenerators.hpp"
 #include "BTree_particle.hpp"
-#include "PSim_trajectoryHDF5Writer.hpp"
+#include "PSim_constants.hpp"
 #include "PSim_util.hpp"
+#include "PSim_trajectoryHDF5Writer.hpp"
 #include "PSim_parallelVerletIntegrator.hpp"
 #include "CollisionModel_HardSphere.hpp"
-#include "json.h"
 #include "appUtils_parameterParsing.hpp"
 #include "appUtils_inputFileUtilities.hpp"
 #include "appUtils_ionDefinitionReading.hpp"
+#include "json.h"
 #include <iostream>
 #include <vector>
 #include <ctime>
@@ -184,7 +185,8 @@ int main(int argc, const char * argv[]) {
     //prepare file writers ==============================================================================
     std::vector<std::string> auxParamNames = {"velocity x","velocity y","velocity z"};
     auto hdf5Writer = std::make_unique<ParticleSimulation::TrajectoryHDF5Writer>(
-            projectName + "_trajectories.hd5", auxParamNames, additionalParameterTransformFct);
+            projectName + "_trajectories.hd5");
+    hdf5Writer->setParticleAttributes(auxParamNames, additionalParameterTransformFct);
 
     int ionsInactive = 0;
     auto timestepWriteFunction =
@@ -260,8 +262,8 @@ int main(int argc, const char * argv[]) {
     clock_t begin = std::clock();
     ParticleSimulation::ParallelVerletIntegrator verletIntegrator(
             particlePtrs,
-            accelerationFunction, timestepWriteFunction, otherActionsFunction,
-            hsModel);
+            accelerationFunction, timestepWriteFunction, otherActionsFunction, ParticleSimulation::noFunction,
+            &hsModel);
     verletIntegrator.run(timeSteps,dt);
 
     clock_t end = std::clock();

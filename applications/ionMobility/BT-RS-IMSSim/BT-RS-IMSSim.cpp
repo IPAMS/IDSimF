@@ -26,28 +26,26 @@
  ****************************/
 
 
-#include "json.h"
-#include "appUtils_parameterParsing.hpp"
 #include "RS_Simulation.hpp"
 #include "RS_SimulationConfiguration.hpp"
 #include "RS_ConfigFileParser.hpp"
 #include "RS_ConcentrationFileWriter.hpp"
+#include "PSim_util.hpp"
+#include "PSim_constants.hpp"
 #include "PSim_verletIntegrator.hpp"
 #include "PSim_velocityIntegrator.hpp"
 #include "PSim_trajectoryHDF5Writer.hpp"
-#include "PSim_util.hpp"
 #include "CollisionModel_AbstractCollisionModel.hpp"
-#include "CollisionModel_EmptyCollisionModel.hpp"
 #include "CollisionModel_HardSphere.hpp"
 #include "CollisionModel_StatisticalDiffusion.hpp"
-#include "CollisionModel_util.hpp"
+#include "CollisionModel_MultiCollisionModel.hpp"
+#include "appUtils_parameterParsing.hpp"
+#include "json.h"
 #include <iostream>
-#include <sstream>
 #include <cmath>
 #include <ctime>
 #include <algorithm>
 #include <numeric>
-#include <CollisionModel_MultiCollisionModel.hpp>
 
 enum IntegratorType{
     VERLET, SIMPLE, NO_INTEGRATOR
@@ -171,7 +169,8 @@ int main(int argc, const char *argv[]){
 
     //init hdf5 filewriter
     std::string hdf5Filename = projectFilename + "_trajectories.hd5";
-    ParticleSimulation::TrajectoryHDF5Writer hdf5Writer(hdf5Filename, auxParamNames, additionalParamTFct);
+    ParticleSimulation::TrajectoryHDF5Writer hdf5Writer(hdf5Filename);
+    hdf5Writer.setParticleAttributes(auxParamNames, additionalParamTFct);
 
     int ionsInactive = 0;
 
@@ -369,8 +368,8 @@ int main(int argc, const char *argv[]){
         trajectoryIntegrator = std::make_unique<ParticleSimulation::VerletIntegrator>(
                 particlesPtrs,
                 accelerationFctVerlet, timestepWriteFctVerlet, otherActionsFunctionIMSVerlet,
-                *collisionModelPtr
-        );
+                ParticleSimulation::noFunction,
+                collisionModelPtr.get());
     } else if (integratorType == SIMPLE) {
 
         auto velocityFctSimple = [eFieldMagnitude,backgroundPTRatio](BTree::Particle *particle, int particleIndex, double time, int timestep){
