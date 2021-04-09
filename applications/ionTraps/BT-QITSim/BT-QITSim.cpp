@@ -438,7 +438,7 @@ int main(int argc, const char * argv[]) {
 
     auto timestepWriteFunction =
             [trajectoryWriteInterval, fftWriteInterval, fftWriteMode, &V_0, &V_rf_export, &ionsInactive, timeSteps,
-             &hdf5Writer, &additionalParameterTransformFct, &avgPositionWriter, &ionsInactiveWriter,
+             &hdf5Writer, &ionsInactiveWriter,
              &fftWriter, &startSplatTracker](
                     std::vector<BTree::Particle*>& particles, auto& tree, double time, int timestep, bool lastTimestep){
 
