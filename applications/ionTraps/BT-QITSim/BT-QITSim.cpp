@@ -37,6 +37,7 @@
 #include "PSim_math.hpp"
 #include "PSim_averageChargePositionWriter.hpp"
 #include "PSim_idealizedQitFFTWriter.hpp"
+#include "PSim_particleStartSplatTracker.hpp"
 #include "CollisionModel_HardSphere.hpp"
 #include "appUtils_parameterParsing.hpp"
 #include "appUtils_ionDefinitionReading.hpp"
@@ -389,13 +390,20 @@ int main(int argc, const char * argv[]) {
                 return ((rfForce + spaceChargeForce) / particle->getMass());
             };
 
+    // Prepare ion start / stop tracker and ion start monitoring / ion termination functions
+    ParticleSimulation::ParticleStartSplatTracker startSplatTracker;
+    auto particleStartMonitoringFct = [&startSplatTracker] (BTree::Particle* particle, double time){
+        startSplatTracker.particleStart(particle, time);
+    };
+
     int ionsInactive = 0;
-    auto otherActionsFunctionQIT = [maxIonRadius, &ionsInactive](Core::Vector &newPartPos, BTree::Particle *particle,
-                                                                 int particleIndex,
-                                                                 auto &tree, double time, int timestep){
+    auto otherActionsFunctionQIT = [maxIonRadius, &ionsInactive, &startSplatTracker]
+            (Core::Vector &newPartPos, BTree::Particle *particle, int particleIndex,
+             auto &tree, double time, int timestep){
         if (newPartPos.magnitude() > maxIonRadius) {
             particle->setActive(false);
             particle->setSplatTime(time);
+            startSplatTracker.particleSplat(particle, time);
             ionsInactive++;
         }
     };
@@ -430,7 +438,8 @@ int main(int argc, const char * argv[]) {
 
     auto timestepWriteFunction =
             [trajectoryWriteInterval, fftWriteInterval, fftWriteMode, &V_0, &V_rf_export, &ionsInactive, timeSteps,
-             &hdf5Writer, &additionalParameterTransformFct, &avgPositionWriter, &ionsInactiveWriter, &fftWriter](
+             &hdf5Writer, &additionalParameterTransformFct, &avgPositionWriter, &ionsInactiveWriter,
+             &fftWriter, &startSplatTracker](
                     std::vector<BTree::Particle*>& particles, auto& tree, double time, int timestep, bool lastTimestep){
 
                 if (timestep % fftWriteInterval == 0) {
@@ -443,8 +452,10 @@ int main(int argc, const char * argv[]) {
                     }
                 }
 
+
                 if (lastTimestep) {
                     V_rf_export.emplace_back(V_0);
+                    hdf5Writer->writeStartSplatData(startSplatTracker);
                     hdf5Writer->writeTimestep(particles,time);
                     hdf5Writer->finalizeTrajectory();
                     std::cout << "finished ts:" << timestep << " time:" << time << std::endl;
@@ -474,16 +485,16 @@ int main(int argc, const char * argv[]) {
     if (integratorMode == VERLET) {
         ParticleSimulation::VerletIntegrator verletIntegrator(
                 particlePtrs,
-                accelerationFunctionQIT, timestepWriteFunction, otherActionsFunctionQIT,
-                ParticleSimulation::noFunction,
+                accelerationFunctionQIT, timestepWriteFunction,
+                otherActionsFunctionQIT, particleStartMonitoringFct,
                 &hsModel);
         verletIntegrator.run(timeSteps, dt);
     }
     else if (integratorMode == PARALLEL_VERLET) {
         ParticleSimulation::ParallelVerletIntegrator verletIntegrator(
                 particlePtrs,
-                accelerationFunctionQIT_parallel, timestepWriteFunction, otherActionsFunctionQIT,
-                ParticleSimulation::noFunction,
+                accelerationFunctionQIT_parallel, timestepWriteFunction,
+                otherActionsFunctionQIT, particleStartMonitoringFct,
                 &hsModel);
         verletIntegrator.run(timeSteps, dt);
     }
