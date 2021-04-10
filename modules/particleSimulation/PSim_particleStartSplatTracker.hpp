@@ -54,7 +54,9 @@ namespace ParticleSimulation{
 
         enum particleState {
             STARTED = 1,
-            SPLATTED = 2
+            SPLATTED = 2,
+            RESTARTED = 3,
+            SPLATTED_AND_RESTARTED = 4
         };
 
         struct pMapEntry {
@@ -70,6 +72,7 @@ namespace ParticleSimulation{
         ParticleStartSplatTracker();
 
         void particleStart(BTree::Particle* particle, double time);
+        void particleRestart(BTree::Particle* particle, Core::Vector oldPosition, Core::Vector newPosition, double time);
         void particleSplat(BTree::Particle* particle, double time);
 
         pMapEntry get(BTree::Particle* particle);
@@ -88,6 +91,7 @@ namespace ParticleSimulation{
     private:
 
         std::unordered_map<BTree::Particle*, pMapEntry> pMap_;
+        std::vector<pMapEntry> restartedParticlesData_;
         std::vector<pMapEntry> sortedParticleData_;
         int pInsertIndex_ = 0;
 

@@ -73,13 +73,58 @@ TEST_CASE("TestParticleStartSplatTracker", "[ParticleSimulation][ParticleStartSp
             CHECK(particle_1.getIntegerAttribute("global index")==1);
         }
 
-        SECTION("Test double insert") {
+        SECTION("Particles should be restartable"){
+            BTree::Particle particle_1({1.5, 2.0, 2.5}, 1.0);
+            tracker.particleStart(&particle_1, 1.1);
+            particle_1.setLocation({2.0, 2.0, 2.0});
+            tracker.particleSplat(&particle_1, 2.1);
+
+            BTree::Particle particle_2({-1.5, -2.0, -2.5}, 1.0);
+            tracker.particleStart(&particle_2, 1.1);
+
+            CHECK(particle_2.getIntegerAttribute("global index")==2);
+
+            Core::Vector newLocation({-1.5, -2.0, -3.0});
+            tracker.particleRestart(&particle_2, particle_2.getLocation(), newLocation, 1.5);
+            particle_2.setLocation(newLocation);
+            CHECK(particle_2.getIntegerAttribute("global index")==3);
+
+            Core::Vector newLocation2({-1.5, -2.0, -3.5});
+            tracker.particleRestart(&particle_2, particle_2.getLocation(), newLocation2, 1.6);
+            particle_2.setLocation(newLocation2);
+            CHECK(particle_2.getIntegerAttribute("global index")==4);
+
+            tracker.sortStartSplatData();
+
+            std::vector<double> startTimes = tracker.getStartTimes();
+            std::vector<double> splatTimes = tracker.getSplatTimes();
+            std::vector<Core::Vector> startLocations = tracker.getStartLocations();
+            std::vector<Core::Vector> splatLocations = tracker.getSplatLocations();
+            std::vector<int> status = tracker.getSplatState();
+
+            CHECK(status[0] == ParticleSimulation::ParticleStartSplatTracker::SPLATTED);
+            CHECK(status[1] == ParticleSimulation::ParticleStartSplatTracker::SPLATTED);
+            CHECK(status[2] == ParticleSimulation::ParticleStartSplatTracker::SPLATTED_AND_RESTARTED);
+            CHECK(status[3] == ParticleSimulation::ParticleStartSplatTracker::SPLATTED_AND_RESTARTED);
+            CHECK(status[4] == ParticleSimulation::ParticleStartSplatTracker::RESTARTED);
+
+            CHECK(startTimes == std::vector<double>{1.0, 1.1, 1.1, 1.5, 1.6});
+            CHECK(splatTimes == std::vector<double>{2.0, 2.1, 1.5, 1.6, 0.0});
+
+            CHECK(startLocations[3] == Core::Vector{-1.5, -2.0, -3.0});
+            CHECK(splatLocations[3] == Core::Vector{-1.5, -2.0, -3.0});
+            CHECK(startLocations[4] == Core::Vector{-1.5, -2.0, -3.5});
+
+        }
+
+
+        SECTION("Double insert should throw") {
             REQUIRE_THROWS_AS(
                     tracker.particleStart(&particle_0, 1.2),
                     std::invalid_argument);
         }
 
-        SECTION("Test splat of not started particle") {
+        SECTION("Splat of not started particle should throw") {
             BTree::Particle particle_3({3.0, 3.0, 3-0}, 1.0);
             REQUIRE_THROWS_AS(
                     tracker.particleSplat(&particle_3, 1.1),

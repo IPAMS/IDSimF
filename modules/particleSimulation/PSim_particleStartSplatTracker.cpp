@@ -48,6 +48,32 @@ void ParticleSimulation::ParticleStartSplatTracker::particleStart(BTree::Particl
 
 }
 
+void ParticleSimulation::ParticleStartSplatTracker::particleRestart(BTree::Particle* particle,
+                                                                    Core::Vector oldPosition, Core::Vector newPosition,
+                                                                    double time) {
+    try{
+        pMapEntry& entry = pMap_.at(particle);
+        entry.splatLocation = oldPosition;
+        entry.splatTime = time;
+        entry.state = SPLATTED_AND_RESTARTED;
+        restartedParticlesData_.emplace_back(entry);
+
+        pMapEntry newEntry;
+        newEntry.globalIndex = pInsertIndex_;
+        newEntry.startLocation = newPosition;
+        newEntry.startTime = time;
+        newEntry.state = RESTARTED;
+
+        pMap_.at(particle) = newEntry;
+        particle->setIntegerAttribute("global index", newEntry.globalIndex);
+        pInsertIndex_++;
+    }
+    catch (const std::out_of_range& exception) {
+        throw (std::invalid_argument("Particle to restart was not registered as started before"));
+    }
+}
+
+
 void ParticleSimulation::ParticleStartSplatTracker::particleSplat(BTree::Particle* particle, double time) {
     try{
         pMapEntry& entry = pMap_.at(particle);
@@ -68,9 +94,15 @@ ParticleSimulation::ParticleStartSplatTracker::pMapEntry
 void ParticleSimulation::ParticleStartSplatTracker::sortStartSplatData() {
     sortedParticleData_ = std::vector<pMapEntry>();
 
+
     for (auto const &mapEntry : pMap_){
         sortedParticleData_.emplace_back(mapEntry.second);
     }
+
+    for (auto const &entry : restartedParticlesData_){
+        sortedParticleData_.emplace_back(entry);
+    }
+
     // Sort according to global index:
     std::sort(sortedParticleData_.begin(), sortedParticleData_.end(),
             [](const pMapEntry &e1, const pMapEntry &e2) {return e1.globalIndex < e2.globalIndex;});
