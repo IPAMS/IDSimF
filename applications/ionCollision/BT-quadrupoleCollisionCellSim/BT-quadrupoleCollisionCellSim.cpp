@@ -29,9 +29,9 @@
 
 #include "Core_randomGenerators.hpp"
 #include "BTree_particle.hpp"
-#include "PSim_constants.hpp"
 #include "PSim_util.hpp"
 #include "PSim_trajectoryHDF5Writer.hpp"
+#include "PSim_particleStartSplatTracker.hpp"
 #include "PSim_parallelVerletIntegrator.hpp"
 #include "CollisionModel_HardSphere.hpp"
 #include "appUtils_parameterParsing.hpp"
@@ -188,15 +188,21 @@ int main(int argc, const char * argv[]) {
             projectName + "_trajectories.hd5");
     hdf5Writer->setParticleAttributes(auxParamNames, additionalParameterTransformFct);
 
+    // Prepare ion start / stop tracker and ion start monitoring / ion termination functions
+    ParticleSimulation::ParticleStartSplatTracker startSplatTracker;
+    auto particleStartMonitoringFct = [&startSplatTracker] (BTree::Particle* particle, double time){
+        startSplatTracker.particleStart(particle, time);
+    };
+
     int ionsInactive = 0;
     auto timestepWriteFunction =
-            [trajectoryWriteInterval, &ionsInactive, &additionalParameterTransformFct, &hdf5Writer](
+            [trajectoryWriteInterval, &ionsInactive, &hdf5Writer, &startSplatTracker](
                     std::vector<BTree::Particle*>& particles, auto& tree,
                     double time, int timestep, bool lastTimestep){
 
                 if (lastTimestep) {
                     hdf5Writer->writeTimestep(particles,time);
-                    hdf5Writer->writeSplatTimes(particles);
+                    hdf5Writer->writeStartSplatData(startSplatTracker);
                     hdf5Writer->finalizeTrajectory();
                     std::cout << "finished ts:" << timestep << " time:" << time << std::endl;
                 }
@@ -228,7 +234,7 @@ int main(int argc, const char * argv[]) {
     ParticleSimulation::ParallelVerletIntegrator::otherActionsFctType otherActionsFunction;
 
     if (ionTerminationMode == TERMINATE){
-        otherActionsFunction = [&isIonTerminated, &ionsInactive](
+        otherActionsFunction = [&isIonTerminated, &ionsInactive, &startSplatTracker](
                 Core::Vector& newPartPos, BTree::Particle* particle,
                 int particleIndex,
                 auto& tree, double time, int timestep)
@@ -236,6 +242,7 @@ int main(int argc, const char * argv[]) {
             // if the ion is out of the boundary box or ion has hit an electrode: Terminate
             if(isIonTerminated(newPartPos))
             {
+                startSplatTracker.particleSplat(particle, time);
                 particle->setActive(false);
                 particle->setSplatTime(time);
                 ionsInactive++;
@@ -246,13 +253,14 @@ int main(int argc, const char * argv[]) {
         std::shared_ptr<ParticleSimulation::ParticleStartZone> particleStartZone =
                 AppUtils::getStartZoneFromIonDefinition(confRoot);
 
-        otherActionsFunction = [&isIonTerminated, pz = std::move(particleStartZone)](
+        otherActionsFunction = [&isIonTerminated, pz = std::move(particleStartZone), &startSplatTracker](
                 Core::Vector& newPartPos, BTree::Particle* particle,
                 int particleIndex,
                 auto& tree, double time, int timestep) {
             // if the ion is out of the boundary box or ion has hit an electrode: Restart in ion start zone
             if (isIonTerminated(newPartPos)) {
                 newPartPos  = pz->getRandomParticlePosition();
+                startSplatTracker.particleRestart(particle, particle->getLocation(), newPartPos, time);
             }
         };
     }
@@ -262,7 +270,7 @@ int main(int argc, const char * argv[]) {
     clock_t begin = std::clock();
     ParticleSimulation::ParallelVerletIntegrator verletIntegrator(
             particlePtrs,
-            accelerationFunction, timestepWriteFunction, otherActionsFunction, ParticleSimulation::noFunction,
+            accelerationFunction, timestepWriteFunction, otherActionsFunction, particleStartMonitoringFct,
             &hsModel);
     verletIntegrator.run(timeSteps,dt);
 
