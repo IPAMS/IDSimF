@@ -181,12 +181,22 @@ int main(int argc, const char * argv[]) {
                 return result;
             };
 
+    ParticleSimulation::partAttribTransformFctTypeInteger integerParticleAttributesTransformFct =
+            [](BTree::Particle *particle) -> std::vector<int>{
+                std::vector<int> result = {
+                        particle->getIntegerAttribute("global index")
+                };
+                return result;
+            };
+
+    std::vector<std::string> integerParticleAttributesNames = {"global index"};
 
     //prepare file writers ==============================================================================
     std::vector<std::string> auxParamNames = {"velocity x","velocity y","velocity z"};
     auto hdf5Writer = std::make_unique<ParticleSimulation::TrajectoryHDF5Writer>(
             projectName + "_trajectories.hd5");
     hdf5Writer->setParticleAttributes(auxParamNames, additionalParameterTransformFct);
+    hdf5Writer->setParticleAttributes(integerParticleAttributesNames, integerParticleAttributesTransformFct);
 
     // Prepare ion start / stop tracker and ion start monitoring / ion termination functions
     ParticleSimulation::ParticleStartSplatTracker startSplatTracker;

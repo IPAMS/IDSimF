@@ -114,7 +114,6 @@ TEST_CASE("TestParticleStartSplatTracker", "[ParticleSimulation][ParticleStartSp
             CHECK(startLocations[3] == Core::Vector{-1.5, -2.0, -3.0});
             CHECK(splatLocations[3] == Core::Vector{-1.5, -2.0, -3.0});
             CHECK(startLocations[4] == Core::Vector{-1.5, -2.0, -3.5});
-
         }
 
 

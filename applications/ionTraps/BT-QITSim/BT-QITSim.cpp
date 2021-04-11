@@ -433,8 +433,19 @@ int main(int argc, const char * argv[]) {
                                               "rf x","rf y","rf z",
                                               "spacecharge x","spacecharge y","spacecharge z"};
 
+    ParticleSimulation::partAttribTransformFctTypeInteger integerParticleAttributesTransformFct =
+            [](BTree::Particle *particle) -> std::vector<int>{
+                std::vector<int> result = {
+                        particle->getIntegerAttribute("global index")
+                };
+                return result;
+            };
+
+    std::vector<std::string> integerParticleAttributesNames = {"global index"};
+
     auto hdf5Writer = std::make_unique<ParticleSimulation::TrajectoryHDF5Writer>(projectName + "_trajectories.hd5");
     hdf5Writer->setParticleAttributes(auxParamNames, additionalParameterTransformFct);
+    hdf5Writer->setParticleAttributes(integerParticleAttributesNames, integerParticleAttributesTransformFct);
 
     auto timestepWriteFunction =
             [trajectoryWriteInterval, fftWriteInterval, fftWriteMode, &V_0, &V_rf_export, &ionsInactive, timeSteps,
