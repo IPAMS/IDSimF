@@ -193,7 +193,12 @@ bool RS::Simulation::react(int index, RS::ReactionConditions& conditions, double
             // despite the possible illness of the reaction event: now REACT!
 
             RS::Substance* product = reaction->discreteProducts()->begin()->first;
-            doReaction(reaction, particle, product);
+
+            #pragma omp critical (do_reaction)
+            {
+                doReaction(reaction, particle, product);
+            }
+
 
             //end the independent reactions loop => the actual educt particle does not longer exist
             return true;

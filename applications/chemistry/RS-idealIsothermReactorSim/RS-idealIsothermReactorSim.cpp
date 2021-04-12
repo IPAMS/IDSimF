@@ -102,6 +102,7 @@ int main(int argc, const char * argv[]) {
             resultFilewriter.writeTimestep(sim);
         }
 
+        #pragma omp parallel for
         for (int i = 0; i < nParticlesTotal; i++) {
             sim.react(i, reactionConditions, dt_s);
         }
