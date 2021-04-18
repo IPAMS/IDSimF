@@ -222,9 +222,7 @@ int main(int argc, const char * argv[]) {
                               <<" ions existing: "<<particles.size()<< " ions inactive: "
                               << ionsInactive << std::endl;
 
-                    if (particles.size() > 0) {
-                        hdf5Writer->writeTimestep(particles, time);
-                    }
+                    hdf5Writer->writeTimestep(particles, time);
                 }
             };
 

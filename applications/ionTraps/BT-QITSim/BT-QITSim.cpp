@@ -477,10 +477,8 @@ int main(int argc, const char * argv[]) {
                               <<" ions existing: "<<particles.size()<< " ions inactive: "
                               << ionsInactive << std::endl;
 
-                    if (particles.size() > 0) {
                         V_rf_export.emplace_back(V_0);
                         hdf5Writer->writeTimestep(particles, time);
-                    }
                 }
     };
 
