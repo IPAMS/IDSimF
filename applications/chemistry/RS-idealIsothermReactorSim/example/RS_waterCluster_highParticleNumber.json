@@ -1,0 +1,8 @@
+{
+  "sim_time_steps":1000,
+  "dt_s":2e-5,
+  "n_particles":[50000,0,0,0,0,0],
+  "background_temperature_K":298,
+  "reaction_configuration":"RS_ReacSys_waterClusters.conf",
+  "concentrations_write_interval":10
+}
