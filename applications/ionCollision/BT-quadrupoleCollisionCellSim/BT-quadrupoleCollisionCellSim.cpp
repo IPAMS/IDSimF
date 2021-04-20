@@ -115,7 +115,6 @@ int main(int argc, const char * argv[]) {
         throw std::invalid_argument("missing configuration value: simulation_domain_boundaries");
     }
 
-
     // Read ion termination mode configuration from simulation config
     std::string ionTerminationMode_str = stringConfParameter("termination_mode", confRoot);
     IonTerminationMode ionTerminationMode;

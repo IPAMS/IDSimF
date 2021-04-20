@@ -44,6 +44,18 @@ Simulation configuration description
 ``background_gas_pressure_Pa`` : float
     Pressure of the background / collision gas in Pa. 
 
+``termination_mode`` : string
+    Particle termination mode: Defines if simulated particles should be terminated or restarted when leaving the simulation domain or hitting an electrode.
+
+    Valid modes are: 
+
+    * ``terminate`` Particles are terminated and not restarted 
+    * ``restart`` Particles are restarted in their start zone
+
+    .. note::
+
+        Currently ``restart`` can not be used with an particle cloud start file, only with an particle start zone definition. 
+    
 ``simulation_domain_boundaries`` : vector of vector of floats
     Defines the outer boundaries of the simulation domain around the coordinate system origin, where ions are terminated. Is defined as vector of three two component vectors, defining the minimum and maximum in the spatial dimensions: 
     
