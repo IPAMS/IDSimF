@@ -94,7 +94,8 @@ int main(int argc, const char * argv[]) {
 
 
     // simulate   ===========================================================================
-    clock_t begin = std::clock();
+    clock_t beginCpu = std::clock();
+    auto beginWall = std::chrono::system_clock::now();
 
     for (int step=0; step<nSteps; step++) {
         if (step % concentrationWriteInterval ==0) {
@@ -102,15 +103,14 @@ int main(int argc, const char * argv[]) {
             resultFilewriter.writeTimestep(sim);
         }
 
-        #pragma omp parallel for
-        for (int i = 0; i < nParticlesTotal; i++) {
-            sim.react(i, reactionConditions, dt_s);
-        }
+        sim.performTimestep(reactionConditions, dt_s);
         sim.advanceTimestep(dt_s);
     }
 
-    clock_t end = std::clock();
-    double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
+    clock_t endCpu = std::clock();
+    double elapsedSecsCPU = double(endCpu - beginCpu) / CLOCKS_PER_SEC;
+
+    std::chrono::duration<double> durationWall = (std::chrono::system_clock::now() - beginWall);
 
 
     std::cout << "----------------------"<<std::endl;
@@ -120,8 +120,8 @@ int main(int argc, const char * argv[]) {
     std::cout << "total reaction events:" << sim.totalReactionEvents() << " ill events:" << sim.illEvents() << std::endl;
     std::cout << "ill fraction: " << sim.illEvents() / (double) sim.totalReactionEvents() << std::endl;
 
-    std::cout << "elapsed seconds "<< elapsed_secs<<std::endl;
-
+    std::cout << "CPU time: " << elapsedSecsCPU <<" s"<< std::endl;
+    std::cout << "Finished in " << durationWall.count() << " seconds [Wall Clock]" << std::endl;
 
     // ======================================================================================
 

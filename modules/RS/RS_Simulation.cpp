@@ -20,6 +20,7 @@
  ****************************/
 
 #include "RS_Simulation.hpp"
+#include "Core_randomGenerators.hpp"
 
 RS::Simulation::Simulation(std::string configFileName){
     RS::ConfigFileParser parser = RS::ConfigFileParser();
@@ -41,6 +42,7 @@ RS::Simulation::Simulation(std::unique_ptr<RS::SimulationConfiguration> simConf)
         //std::cout << subst <<std::endl;
         reacInd_[subst] = std::vector<AbstractReaction*>();
         reacDep_[subst] = std::vector<AbstractReaction*>();
+
         if (subst->type() == RS::Substance::substanceType::discrete){
             discreteConcentrations_[subst] = 0;
         }
@@ -135,6 +137,23 @@ long RS::Simulation::reactionEvents(RS::AbstractReaction* reaction) const {
     return reactionEvents_.at(reaction);
 }
 
+
+void RS::Simulation::performTimestep(RS::ReactionConditions& conditions, double dt) {
+
+    int nParticles = particleMap_.size();
+
+    #pragma omp parallel
+    {
+        reactionMap indMap = indReactDeepCopy_(); // get local copy of independent reaction maps
+
+        #pragma omp for
+        for (int i = 0; i<nParticles; i++) {
+            react_(i, conditions, dt, indMap);
+        }
+    }
+
+}
+
 /**
  * Actually perform a reaction: The particle with index "index" is changed into the product species
  * @param particle the particle to react
@@ -170,6 +189,8 @@ void RS::Simulation::doReaction(RS::AbstractReaction* reaction, RS::ReactivePart
     discreteConcentrations_[product]++;
 }
 
+
+
 /**
  * Let a particle react: The independent reactions of that particle are tested if they occur,
  * if one reaction occurs, that reaction is performed
@@ -179,10 +200,17 @@ void RS::Simulation::doReaction(RS::AbstractReaction* reaction, RS::ReactivePart
  * @return true if a reaction had occurred
  */
 bool RS::Simulation::react(int index, RS::ReactionConditions& conditions, double dt) {
-    RS::ReactiveParticle* particle = particleMap_[index];
-    const std::vector<AbstractReaction*>* iReactions = &reacInd_[particle->getSpecies()];
+    return react_(index, conditions, dt, reacInd_);
+}
 
-    for(const auto& reaction: *iReactions){ //iterate through all independent reactions
+bool RS::Simulation::react_(int index, RS::ReactionConditions& conditions, double dt, reactionMap &reacInd) {
+    RS::ReactiveParticle* particle = particleMap_[index];
+
+    std::vector<AbstractReaction*> &iReactions = reacInd[particle->getSpecies()];
+    // shuffle the order of the reaction for every time step to prevent simulation artifacts:
+    std::shuffle(iReactions.begin(), iReactions.end(), Core::internalRNG);
+
+    for (const auto& reaction: iReactions){ //iterate through all independent reactions
 
         RS::ReactionEvent reactionEvent = reaction->attemptReaction(conditions, particle, dt);
 
@@ -299,6 +327,18 @@ std::ostream& operator<<(std::ostream& os, const RS::Simulation& sim)
     for(const auto& p: sim.discreteConcentrations_){
         os << *p.first << " | " << p.second <<std::endl;
     }
-
     return os;
+}
+
+RS::Simulation::reactionMap RS::Simulation::indReactDeepCopy_() {
+    reactionMap result;
+
+    auto it = reacInd_.begin();
+    while(it != reacInd_.end())
+    {
+        result[it->first] = it->second;
+        ++it;
+    }
+
+    return result;
 }
