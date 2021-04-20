@@ -17,6 +17,19 @@ Simulation configuration description
 ``sim_time_steps`` : ion_start_geometry
     Number of simulation time steps
 
+``record_mode`` : string
+    Particle data record mode: Defines if a simple or an extended set of particle attributes is recorded in the trajectory files.
+
+    Valid modes are: 
+
+    * ``full`` mode records 
+        * velocity
+        * electric field acting on the particles and 
+        * space charge force acting on the particles
+    * ``simple`` records only the velocity
+
+    The recorded particle attributes are recorded as separated (:math:`x,y,z`) components. 
+
 ``dt`` : float
     Time step length in seconds 
 
