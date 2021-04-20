@@ -11,6 +11,9 @@ target_link_libraries(${PROJECT_NAME} ${VTK_LIBRARIES})
 add_test(NAME BT-quadrupoleCollisionCellSim_simpleCapacitor COMMAND ${PROJECT_NAME}
         "example/BTree_quadCollisionCell_simpleCapacitor.json" "run_BT-quadrupoleCollisionCellSim_simpleCapacitor")
 
+add_test(NAME BT-quadrupoleCollisionCellSim_simpleCapacitor_simpleRec COMMAND ${PROJECT_NAME}
+        "example/BTree_quadCollisionCell_simpleCapacitor_simpleRec.json" "run_BT-quadrupoleCollisionCellSim_simpleCapacitor_simpleRec")
+
 add_test(NAME BT-quadrupoleCollisionCellSim_simpleCapacitor_cylinder COMMAND ${PROJECT_NAME}
         "example/BTree_quadCollisionCell_simpleCapacitor_cylinder.json" "run_BT-quadrupoleCollisionCellSim_simpleCapacitor_cylinder")
 

@@ -51,6 +51,10 @@ enum IonTerminationMode{
     TERMINATE, RESTART
 };
 
+enum IonDataRecordMode{
+    FULL, SIMPLE
+};
+
 // constants:
 const double rho_per_pa = 2.504e20; //(particles / m^3) / Pa
 
@@ -126,6 +130,17 @@ int main(int argc, const char * argv[]) {
         throw std::invalid_argument("Invalid ion termination mode");
     }
 
+    // Read ion data record mode configuration from simulation config
+    std::string ionRecordMode_str = stringConfParameter("record_mode", confRoot);
+    IonDataRecordMode ionRecordMode;
+    if (ionRecordMode_str == "full") {
+        ionRecordMode = FULL;
+    } else if (ionRecordMode_str == "simple") {
+        ionRecordMode = SIMPLE;
+    } else{
+        throw std::invalid_argument("Invalid ion record mode");
+    }
+
     //Read ion configuration and initialize ions:
     std::vector<std::unique_ptr<BTree::Particle>>particles;
     std::vector<BTree::Particle*>particlePtrs;
@@ -139,7 +154,7 @@ int main(int argc, const char * argv[]) {
 
     // define functions for the trajectory integration ==================================================
     auto accelerationFunction =
-            [spaceChargeFactor, omega_rf, V_rf, &potentialArrays, &potentialsDc, &potentialFactorsRf](
+            [spaceChargeFactor, omega_rf, V_rf, ionRecordMode, &potentialArrays, &potentialsDc, &potentialFactorsRf](
                     BTree::Particle* particle, int particleIndex, BTree::ParallelTree& tree, double time,
                     int timestep) -> Core::Vector {
 
@@ -158,24 +173,47 @@ int main(int argc, const char * argv[]) {
 
                     eField = eField + paEffectiveField;
                 }
-                //std::cout << "eField: " << eField << std::endl;
-                //std::cout << "Pos: " << pos << std::endl;
                 Core::Vector spaceChargeField(0,0,0);
                 if (spaceChargeFactor > 0) {
                     spaceChargeField = tree.computeEFieldFromTree(*particle) * spaceChargeFactor;
                 }
-//              std::cout << particle->getVelocity() << std::endl;
-                return ((eField + spaceChargeField) * particleCharge / particle->getMass());
 
+                if (ionRecordMode == FULL){
+                    particle->setFloatAttribute("field x", eField.x());
+                    particle->setFloatAttribute("field y", eField.y());
+                    particle->setFloatAttribute("field z", eField.z());
+                    particle->setFloatAttribute("space charge x", spaceChargeField.x());
+                    particle->setFloatAttribute("space charge y", spaceChargeField.y());
+                    particle->setFloatAttribute("space charge z", spaceChargeField.z());
+                }
+
+                return ((eField + spaceChargeField) * particleCharge / particle->getMass());
             };
 
 
-    ParticleSimulation::partAttribTransformFctType additionalParameterTransformFct =
+    ParticleSimulation::partAttribTransformFctType particleAttributeTransformFct_simple =
             [](BTree::Particle *particle) -> std::vector<double>{
                 std::vector<double> result = {
                         particle->getVelocity().x(),
                         particle->getVelocity().y(),
                         particle->getVelocity().z()
+                };
+
+                return result;
+            };
+
+    ParticleSimulation::partAttribTransformFctType particleAttributeTransformFct_full =
+            [](BTree::Particle *particle) -> std::vector<double>{
+                std::vector<double> result = {
+                        particle->getVelocity().x(),
+                        particle->getVelocity().y(),
+                        particle->getVelocity().z(),
+                        particle->getFloatAttribute("field x"),
+                        particle->getFloatAttribute("field y"),
+                        particle->getFloatAttribute("field z"),
+                        particle->getFloatAttribute("space charge x"),
+                        particle->getFloatAttribute("space charge y"),
+                        particle->getFloatAttribute("space charge z")
                 };
 
                 return result;
@@ -192,10 +230,18 @@ int main(int argc, const char * argv[]) {
     std::vector<std::string> integerParticleAttributesNames = {"global index"};
 
     //prepare file writers ==============================================================================
-    std::vector<std::string> auxParamNames = {"velocity x","velocity y","velocity z"};
     auto hdf5Writer = std::make_unique<ParticleSimulation::TrajectoryHDF5Writer>(
             projectName + "_trajectories.hd5");
-    hdf5Writer->setParticleAttributes(auxParamNames, additionalParameterTransformFct);
+
+    if (ionRecordMode == FULL){
+        std::vector<std::string> particleAttributeNames = {"velocity x", "velocity y", "velocity z",
+                                                           "rf field x", "rf field y", "rf field z",
+                                                           "space charge x", "space charge y", "space charge z"};
+        hdf5Writer->setParticleAttributes(particleAttributeNames, particleAttributeTransformFct_full);
+    } else {
+        std::vector<std::string> particleAttributeNames = {"velocity x", "velocity y", "velocity z"};
+        hdf5Writer->setParticleAttributes(particleAttributeNames, particleAttributeTransformFct_simple);
+    }
     hdf5Writer->setParticleAttributes(integerParticleAttributesNames, integerParticleAttributesTransformFct);
 
     // Prepare ion start / stop tracker and ion start monitoring / ion termination functions
