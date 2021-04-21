@@ -1,5 +1,6 @@
 {
   "termination_mode": "terminate",
+  "record_mode": "full",
   "sim_time_steps":200,
   "dt":5e-12,
   "trajectory_write_interval":20,

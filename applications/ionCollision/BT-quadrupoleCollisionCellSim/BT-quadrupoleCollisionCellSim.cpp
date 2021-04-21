@@ -26,7 +26,6 @@
 
  ****************************/
 
-
 #include "Core_randomGenerators.hpp"
 #include "BTree_particle.hpp"
 #include "PSim_util.hpp"
@@ -128,6 +127,7 @@ int main(int argc, const char * argv[]) {
     } else{
         throw std::invalid_argument("Invalid ion termination mode");
     }
+
 
     // Read ion data record mode configuration from simulation config
     std::string ionRecordMode_str = stringConfParameter("record_mode", confRoot);
@@ -251,9 +251,22 @@ int main(int argc, const char * argv[]) {
 
     int ionsInactive = 0;
     auto timestepWriteFunction =
-            [trajectoryWriteInterval, &ionsInactive, &hdf5Writer, &startSplatTracker](
+            [trajectoryWriteInterval, ionRecordMode, &ionsInactive, &hdf5Writer, &startSplatTracker](
                     std::vector<BTree::Particle*>& particles, auto& tree,
                     double time, int timestep, bool lastTimestep){
+
+                if (timestep == 0 && ionRecordMode==FULL){
+                    //if initial time step (integrator was not run) and full record mode:
+                    //(if attributes are not initalized, attribute transform function will crash)
+                    for (BTree::Particle* particle: particles){
+                        particle->setFloatAttribute("field x", 0.0);
+                        particle->setFloatAttribute("field y", 0.0);
+                        particle->setFloatAttribute("field z", 0.0);
+                        particle->setFloatAttribute("space charge x", 0.0);
+                        particle->setFloatAttribute("space charge y", 0.0);
+                        particle->setFloatAttribute("space charge z", 0.0);
+                    }
+                }
 
                 if (lastTimestep) {
                     hdf5Writer->writeTimestep(particles,time);
