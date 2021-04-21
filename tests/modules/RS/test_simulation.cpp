@@ -198,7 +198,7 @@ TEST_CASE( "Test RS simulations", "[RS][Simulation]") {
         RS::Substance* Cl1 = simConf->substanceByName("Cl_1");
         RS::Substance* H2O = simConf->substanceByName("H2O");
         H2O->staticConcentration(0.0);
-        int nParticles = 10000;
+        int nParticles = 100000;
         int nSteps = 200;
         double dt = 1.0e-4;
         std::vector<uniqueReactivePartPtr> particles;
@@ -228,8 +228,8 @@ TEST_CASE( "Test RS simulations", "[RS][Simulation]") {
         RS::AbstractReaction* reacCl2Forward = simConf->reaction(2);
         REQUIRE(reacCl1Forward->getLabel() == "cl1_forward");
         REQUIRE(reacCl2Forward->getLabel() == "cl2_forward");
-        CHECK( ( sim.reactionEvents(reacCl1Forward) > 8500 && sim.reactionEvents(reacCl1Forward) < 8650) );
-        CHECK( ( sim.reactionEvents(reacCl2Forward) > 5900 && sim.reactionEvents(reacCl2Forward) < 6050) );
+        CHECK( ( sim.reactionEvents(reacCl1Forward) > 85000 && sim.reactionEvents(reacCl1Forward) < 86500) );
+        CHECK( ( sim.reactionEvents(reacCl2Forward) > 58500 && sim.reactionEvents(reacCl2Forward) < 61000) );
     }
 
     SECTION("Result of collision based simulation with configuration file should be correct"){
