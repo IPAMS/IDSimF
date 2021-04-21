@@ -64,63 +64,59 @@ int main(int argc, const char * argv[]) {
         std::cout << "no conf project name or conf file given"<<std::endl;
         return(1);
     }
-
     std::string confFileName = argv[1];
-    std::string confBasePath = confFileBasePath(confFileName);
+    AppUtils::SimulationConfiguration simConf(confFileName);
     std::cout << confFileName << std::endl;
-
-    Json::Value confRoot = readConfigurationJson(confFileName);
-    std::cout<<confRoot<<std::endl;
 
     std::string projectName = argv[2];
     std::cout << projectName << std::endl;
 
     // read basic simulation parameters =============================================================
-    int timeSteps = intConfParameter("sim_time_steps",confRoot);
-    int trajectoryWriteInterval = intConfParameter("trajectory_write_interval", confRoot);
-    double dt = doubleConfParameter("dt", confRoot);
+    int timeSteps = simConf.intParameter("sim_time_steps");
+    int trajectoryWriteInterval = simConf.intParameter("trajectory_write_interval");
+    double dt = simConf.doubleParameter("dt");
 
     // read physical and geometrical simulation parameters
-    double spaceChargeFactor = doubleConfParameter("space_charge_factor", confRoot);
-    double collisionGasMass_amu = doubleConfParameter("collision_gas_mass_amu", confRoot);
-    double collisionGasDiameter_m = doubleConfParameter("collision_gas_diameter_angstrom", confRoot)*1e-10;
-    double backgroundGasTemperature_K = doubleConfParameter("background_gas_temperature_K",confRoot);
-    double backgroundGasPressure_pa = doubleConfParameter("background_gas_pressure_Pa",confRoot);
+    double spaceChargeFactor = simConf.doubleParameter("space_charge_factor");
+    double collisionGasMass_amu = simConf.doubleParameter("collision_gas_mass_amu");
+    double collisionGasDiameter_m = simConf.doubleParameter("collision_gas_diameter_angstrom")*1e-10;
+    double backgroundGasTemperature_K = simConf.doubleParameter("background_gas_temperature_K");
+    double backgroundGasPressure_pa = simConf.doubleParameter("background_gas_pressure_Pa");
 
-    double V_rf = doubleConfParameter("V_rf", confRoot); //volts, RF voltage
-    double freq_rf = doubleConfParameter("frequency_rf", confRoot); //Hz, RF Frequency
+    double V_rf = simConf.doubleParameter("V_rf"); //volts, RF voltage
+    double freq_rf = simConf.doubleParameter("frequency_rf"); //Hz, RF Frequency
     double omega_rf = freq_rf * M_PI *2.0;
 
 
     //read potential arrays and potential array configuration =================================================
     // Note that fast adjust PAs are expected here
-    std::vector<std::string> potentialArraysNames = stringVectorConfParameter("potential_arrays", confRoot);
-    double potentialArrayScale = doubleConfParameter("potential_array_scale", confRoot);
+    std::vector<std::string> potentialArraysNames = simConf.stringVectorParameter("potential_arrays");
+    double potentialArrayScale = simConf.doubleParameter("potential_array_scale");
     std::vector<std::unique_ptr<ParticleSimulation::SimionPotentialArray>> potentialArrays =
-            AppUtils::readPotentialArrayFiles(potentialArraysNames, confBasePath, potentialArrayScale, true);
+            AppUtils::readPotentialArrayFiles(potentialArraysNames, simConf.confBasePath(), potentialArrayScale, true);
 
     //scaling factor of 0.1 because SIMION uses a value of 10000 in  Fast Adjust PAs and  mm to m is 1000 = 0.1
-    std::vector<double> potentialsDc = doubleVectorConfParameter("dc_potentials", confRoot);
-    std::vector<double> potentialFactorsRf = doubleVectorConfParameter("rf_potential_factors", confRoot);
+    std::vector<double> potentialsDc = simConf.doubleVectorParameter("dc_potentials");
+    std::vector<double> potentialFactorsRf = simConf.doubleVectorParameter("rf_potential_factors");
 
 
     // defining simulation domain box (used for ion termination):
     std::array<std::array<double,2>,3> simulationDomainBoundaries;
-    if (confRoot.isMember("simulation_domain_boundaries")){
+    if (simConf.isParameter("simulation_domain_boundaries")){
         // get manual simulation domain boundaries from config file
-        simulationDomainBoundaries = double3dBox("simulation_domain_boundaries", confRoot);
+        simulationDomainBoundaries = simConf.double3dBox("simulation_domain_boundaries");
     } else {
         // TODO: use minimal Potential Array bounds as simulation domain
         throw std::invalid_argument("missing configuration value: simulation_domain_boundaries");
     }
 
     // Read ion termination mode configuration from simulation config
-    std::string ionTerminationMode_str = stringConfParameter("termination_mode", confRoot);
+    std::string ionTerminationMode_str = simConf.stringParameter("termination_mode");
     IonTerminationMode ionTerminationMode;
     if (ionTerminationMode_str == "terminate") {
         ionTerminationMode = TERMINATE;
     } else if (ionTerminationMode_str == "restart") {
-        if (AppUtils::isIonCloudDefinitionPresent(confRoot)){
+        if (AppUtils::isIonCloudDefinitionPresent(simConf)){
             throw std::invalid_argument("Ion restart mode is not possible with ion cloud file");
         }
         ionTerminationMode = RESTART;
@@ -130,7 +126,7 @@ int main(int argc, const char * argv[]) {
 
 
     // Read ion data record mode configuration from simulation config
-    std::string ionRecordMode_str = stringConfParameter("record_mode", confRoot);
+    std::string ionRecordMode_str = simConf.stringParameter("record_mode");
     IonDataRecordMode ionRecordMode;
     if (ionRecordMode_str == "full") {
         ionRecordMode = FULL;
@@ -144,7 +140,7 @@ int main(int argc, const char * argv[]) {
     std::vector<std::unique_ptr<BTree::Particle>>particles;
     std::vector<BTree::Particle*>particlePtrs;
 
-    AppUtils::readIonDefinition(particles, particlePtrs, confRoot, confBasePath);
+    AppUtils::readIonDefinition(particles, particlePtrs, simConf);
 
     //init gas collision models:
     CollisionModel::HardSphereModel hsModel = CollisionModel::HardSphereModel(
@@ -317,7 +313,7 @@ int main(int argc, const char * argv[]) {
     }
     else { //ion termination mode is RESTART
         std::shared_ptr<ParticleSimulation::ParticleStartZone> particleStartZone =
-                AppUtils::getStartZoneFromIonDefinition(confRoot);
+                AppUtils::getStartZoneFromIonDefinition(simConf);
 
         otherActionsFunction = [&isIonTerminated, pz = std::move(particleStartZone), &startSplatTracker](
                 Core::Vector& newPartPos, BTree::Particle* particle,

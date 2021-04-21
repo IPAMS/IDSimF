@@ -56,7 +56,7 @@ void AppUtils::readIonDefinitionFromIonCloudFile(
 
 
     std::string ionCloudFileName = simConf.pathRelativeToConfBasePath(
-            simConf.stringConfParameter("ion_cloud_init_file"));
+            simConf.stringParameter("ion_cloud_init_file"));
 
     ParticleSimulation::IonCloudReader reader = ParticleSimulation::IonCloudReader();
     particles = reader.readIonCloud(ionCloudFileName);
@@ -74,7 +74,7 @@ void AppUtils::readIonDefinitionFromIonCloudFile(
 std::unique_ptr<ParticleSimulation::ParticleStartZone> AppUtils::getStartZoneFromIonDefinition(
         const SimulationConfiguration& simConf) {
 
-    std::string ionStartGeom_str = simConf.stringConfParameter("ion_start_geometry");
+    std::string ionStartGeom_str = simConf.stringParameter("ion_start_geometry");
 
     Core::Vector ionsBasePos_m = simConf.vector3dParameter("ion_start_base_position_m");
 

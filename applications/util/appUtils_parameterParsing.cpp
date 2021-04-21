@@ -86,7 +86,7 @@ std::array<std::array<double, 2>, 3> AppUtils::SimulationConfiguration::double3d
     return (result);
 }
 
-std::string AppUtils::SimulationConfiguration::stringConfParameter(const std::string& jsonName) const {
+std::string AppUtils::SimulationConfiguration::stringParameter(const std::string& jsonName) const {
     if (isParameter(jsonName)) {
         std::string result = confRoot_.get(jsonName, 0).asString();
         std::cout << jsonName << ":" << result << std::endl;
@@ -146,6 +146,10 @@ std::string AppUtils::SimulationConfiguration::pathRelativeToConfFile(const std:
 
 std::string AppUtils::SimulationConfiguration::pathRelativeToConfBasePath(const std::string& pathStr) const {
     return confFileBasePath_ / std::filesystem::path(pathStr);
+}
+
+std::string AppUtils::SimulationConfiguration::confBasePath() const {
+    return confFileBasePath_;
 }
 
 Json::Value AppUtils::SimulationConfiguration::readConfigurationJson_(const std::string& confFileName) {

@@ -8,7 +8,6 @@
 #include <fstream>
 #include <iostream>
 
-
 namespace AppUtils{
     class SimulationConfiguration{
     public:
@@ -20,7 +19,7 @@ namespace AppUtils{
         std::vector<double> doubleVectorParameter(const std::string& jsonName, double multiplicator = 1.0) const;
         Core::Vector vector3dParameter(const std::string& jsonName) const;
         std::array<std::array<double,2>,3> double3dBox(const std::string& jsonName) const;
-        std::string stringConfParameter(const std::string& jsonName) const;
+        std::string stringParameter(const std::string& jsonName) const;
         std::vector<std::string> stringVectorParameter(const std::string& jsonName) const;
         bool boolParameter(const std::string& jsonName) const;
 
@@ -29,6 +28,7 @@ namespace AppUtils{
 
         std::string pathRelativeToConfFile(const std::string& pathStr) const;
         std::string pathRelativeToConfBasePath(const std::string& pathStr) const;
+        std::string confBasePath() const;
 
     private:
         Json::Value readConfigurationJson_(const std::string& confFileName);
