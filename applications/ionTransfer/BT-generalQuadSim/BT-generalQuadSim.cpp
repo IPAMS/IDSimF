@@ -36,7 +36,7 @@
 #include "PSim_boxStartZone.hpp"
 #include "PSim_verletIntegrator.hpp"
 #include "CollisionModel_HardSphere.hpp"
-#include "appUtils_parameterParsing.hpp"
+#include "appUtils_simulationConfiguration.hpp"
 #include "json.h"
 #include <iostream>
 #include <vector>
@@ -56,71 +56,49 @@ int main(int argc, const char * argv[]) {
     }
 
     std::string confFileName = argv[1];
-    std::string confBasePath = confFileBasePath(confFileName);
+    AppUtils::SimulationConfiguration simConf(confFileName);
+    std::string confBasePath = simConf.confBasePath();
     std::cout << confFileName << std::endl;
-
-    Json::Value confRoot = readConfigurationJson(confFileName);
-    std::cout<<confRoot<<std::endl;
 
     std::string projectName = argv[2];
     std::cout << projectName << std::endl;
 
-
     // read basic simulation parameters =============================================================
-    int timeSteps = intConfParameter("sim_time_steps",confRoot);
-    int trajectoryWriteInterval = intConfParameter("trajectory_write_interval", confRoot);
-    double dt = doubleConfParameter("dt", confRoot);
+    int timeSteps = simConf.intParameter("sim_time_steps");
+    int trajectoryWriteInterval = simConf.intParameter("trajectory_write_interval");
+    double dt = simConf.doubleParameter("dt");
 
     // read interpolated fields ======================
-    std::unique_ptr<ParticleSimulation::InterpolatedField> rhoField = readInterpolatedField(confBasePath, "rho_field_file", confRoot);
-    std::unique_ptr<ParticleSimulation::InterpolatedField> flowField =readInterpolatedField(confBasePath, "flow_field_file", confRoot);
-    std::unique_ptr<ParticleSimulation::InterpolatedField> electricFieldQuadRF = readInterpolatedField(confBasePath, "electric_field_rf_file", confRoot);
-    std::unique_ptr<ParticleSimulation::InterpolatedField> electricFieldQuadEntrance = readInterpolatedField(confBasePath, "electric_field_entrance_file", confRoot);
+    std::unique_ptr<ParticleSimulation::InterpolatedField> rhoField = simConf.readInterpolatedField("rho_field_file");
+    std::unique_ptr<ParticleSimulation::InterpolatedField> flowField = simConf.readInterpolatedField("flow_field_file");
+    std::unique_ptr<ParticleSimulation::InterpolatedField> electricFieldQuadRF = simConf.readInterpolatedField("electric_field_rf_file");
+    std::unique_ptr<ParticleSimulation::InterpolatedField> electricFieldQuadEntrance = simConf.readInterpolatedField("electric_field_entrance_file");
 
     // read physical and geometrical simulation parameters
-    int collisionMode = intConfParameter("collision_mode", confRoot);
-    double spaceChargeFactor = doubleConfParameter("space_charge_factor", confRoot);
-    double collisionGasMassAmu = doubleConfParameter("collision_gas_mass_amu", confRoot);
-    double collisionGasDiameterM = doubleConfParameter("collision_gas_diameter_angstrom", confRoot)*1e-10;
-    double backgroundTemperture = doubleConfParameter("background_temperature",confRoot);
+    int collisionMode = simConf.intParameter("collision_mode");
+    double spaceChargeFactor = simConf.doubleParameter("space_charge_factor");
+    double collisionGasMassAmu = simConf.doubleParameter("collision_gas_mass_amu");
+    double collisionGasDiameterM = simConf.doubleParameter("collision_gas_diameter_angstrom")*1e-10;
+    double backgroundTemperture = simConf.doubleParameter("background_temperature");
 
-    double V_rf = doubleConfParameter("V_rf", confRoot);//600; //volts, RF voltage
-    double V_entrance = doubleConfParameter("V_entrance", confRoot);
-    double P_factor = doubleConfParameter("P_factor", confRoot);
+    double V_rf = simConf.doubleParameter("V_rf");//600; //volts, RF voltage
+    double V_entrance = simConf.doubleParameter("V_entrance");
+    double P_factor = simConf.doubleParameter("P_factor");
 
-    double entranceAperture = doubleConfParameter("entrance_aperture_mm", confRoot) / 1000.0;
+    double entranceAperture = simConf.doubleParameter("entrance_aperture_mm") / 1000.0;
 
-    double qStartBoxCenter = doubleConfParameter("start_center_mm", confRoot) / 1000.0;
-    double qStartBoxLength = doubleConfParameter("start_length_mm", confRoot) / 1000.0; //the start position on the q length (x) axis
+    double qStartBoxCenter = simConf.doubleParameter("start_center_mm") / 1000.0;
+    double qStartBoxLength = simConf.doubleParameter("start_length_mm") / 1000.0; //the start position on the q length (x) axis
 
-    double maxQLength = doubleConfParameter("max_q_length_mm", confRoot) / 1000.0;
-    double maxRadius = doubleConfParameter("max_r_mm", confRoot) / 1000.0;
+    double maxQLength = simConf.doubleParameter("max_q_length_mm") / 1000.0;
+    double maxRadius = simConf.doubleParameter("max_r_mm") / 1000.0;
 
     // read ion configuration ========================
-    std::vector<int> nIons = std::vector<int>();
-    std::vector<double> ionMasses = std::vector<double>();
-
-    if (confRoot.isMember("n_ions")==true){
-        Json::Value n_ions_json = confRoot.get("n_ions",0);
-        for (int i=0; i<n_ions_json.size(); i++){
-            nIons.push_back(n_ions_json.get(i,0.0).asInt());
-        }
-    }else{
-        throw std::invalid_argument("missing configuration value: n_ions");
-    }
-
-    if (confRoot.isMember("ion_masses")==true){
-        Json::Value ions_masses_json = confRoot.get("ion_masses",0);
-        for (int i=0; i<ions_masses_json.size(); i++){
-            ionMasses.push_back(ions_masses_json.get(i,0.0).asDouble());
-        }
-    }else{
-        throw std::invalid_argument("missing configuration value: ions_masses");
-    }
+    std::vector<int> nIons = simConf.intVectorParameter("n_ions");
+    std::vector<double> ionMasses = simConf.doubleVectorParameter("ion_masses");
 
     std::vector<std::unique_ptr<BTree::Particle>>particles;
     std::vector<BTree::Particle*>particlePtrs;
-
 
     //prepare file writers ==============================================================================
     auto jsonWriter = std::make_unique<ParticleSimulation::TrajectoryExplorerJSONwriter>

@@ -29,7 +29,7 @@
 #include <vector>
 #include <ctime>
 #include "json.h"
-#include "appUtils_parameterParsing.hpp"
+#include "appUtils_simulationConfiguration.hpp"
 #include "BTree_particle.hpp"
 #include "BTree_parallelTree.hpp"
 #include "PSim_trajectoryExplorerJSONwriter.hpp"
@@ -49,19 +49,19 @@ int main(int argc, const char * argv[]) {
     }
 
     std::string confFileName = argv[1];
-    Json::Value confRoot = readConfigurationJson(confFileName);
+    AppUtils::SimulationConfiguration simConf(confFileName);
 
     std::string projectName = argv[2];
     std::cout << projectName<<std::endl;
 
 
     // read basic simulation parameters =============================================================
-    int timeSteps = intConfParameter("sim_time_steps", confRoot);
-    int trajectoryWriteInterval = intConfParameter("trajectory_write_interval", confRoot);
-    double dt = doubleConfParameter("dt", confRoot);
+    int timeSteps = simConf.intParameter("sim_time_steps");
+    int trajectoryWriteInterval = simConf.intParameter("trajectory_write_interval");
+    double dt = simConf.doubleParameter("dt");
 
     //read physical configuration ===================================================================
-    double spaceChargeFactor = doubleConfParameter("space_charge_factor", confRoot);
+    double spaceChargeFactor = simConf.doubleParameter("space_charge_factor");
 
 
     //read ion configuration =======================================================================
@@ -73,10 +73,9 @@ int main(int argc, const char * argv[]) {
     std::vector<int> nIons = std::vector<int>();
     std::vector<double> ionMasses = std::vector<double>();
 
-    if (confRoot.isMember("ion_cloud_init_file") == true) {
-        std::string ionCloudFileName = pathRelativeToConfFile(
-                confFileName,
-                confRoot.get("ion_cloud_init_file", 0).asString());
+    if (simConf.isParameter("ion_cloud_init_file")) {
+        std::string ionCloudFileName = simConf.pathRelativeToConfFile(
+                simConf.stringParameter("ion_cloud_init_file"));
         ParticleSimulation::IonCloudReader reader = ParticleSimulation::IonCloudReader();
         particles = reader.readIonCloud(ionCloudFileName);
         //prepare a vector of raw pointers
@@ -84,23 +83,8 @@ int main(int argc, const char * argv[]) {
             particlePtrs.push_back(part.get());
         }
     } else {
-        if (confRoot.isMember("n_ions") == true) {
-            Json::Value n_ions_json = confRoot.get("n_ions", 0);
-            for (int i = 0; i < n_ions_json.size(); i++) {
-                nIons.push_back(n_ions_json.get(i, 0.0).asInt());
-            }
-        } else {
-            throw std::invalid_argument("missing configuration value: n_ions");
-        }
-
-        if (confRoot.isMember("ion_masses") == true) {
-            Json::Value ions_masses_json = confRoot.get("ion_masses", 0);
-            for (int i = 0; i < ions_masses_json.size(); i++) {
-                ionMasses.push_back(ions_masses_json.get(i, 0.0).asDouble());
-            }
-        } else {
-            throw std::invalid_argument("missing configuration value: ion_masses");
-        }
+        nIons = simConf.intVectorParameter("n_ions");
+        ionMasses = simConf.doubleVectorParameter("ion_masses");
     }
 
 

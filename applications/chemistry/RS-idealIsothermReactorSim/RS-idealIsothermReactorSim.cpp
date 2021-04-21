@@ -28,7 +28,7 @@
 #include <cmath>
 #include <ctime>
 #include "json.h"
-#include "appUtils_parameterParsing.hpp"
+#include "appUtils_simulationConfiguration.hpp"
 #include "RS_Simulation.hpp"
 #include "RS_SimulationConfiguration.hpp"
 #include "RS_ConfigFileParser.hpp"
@@ -42,20 +42,19 @@ int main(int argc, const char * argv[]) {
         return(1);
     }
     std::string confFileName = argv[1];
-    Json::Value confRoot = readConfigurationJson(confFileName);
+    AppUtils::SimulationConfiguration simConf(confFileName);
 
-    std::string rsConfigFileName = pathRelativeToConfFile(
-            confFileName,
-            stringConfParameter("reaction_configuration",confRoot));
+    std::string rsConfigFileName = simConf.pathRelativeToConfFile(
+            simConf.stringParameter("reaction_configuration"));
     RS::ConfigFileParser parser = RS::ConfigFileParser();
     RS::Simulation sim = RS::Simulation(parser.parseFile(rsConfigFileName));
-    RS::SimulationConfiguration* simConf = sim.simulationConfiguration();
+    RS::SimulationConfiguration* rsSimConf = sim.simulationConfiguration();
 
-    std::vector<int> nParticles = intVectorConfParameter("n_particles",confRoot);
-    int nSteps = intConfParameter("sim_time_steps",confRoot);
-    int concentrationWriteInterval = intConfParameter("concentrations_write_interval",confRoot);
-    double dt_s = doubleConfParameter("dt_s",confRoot);
-    double backgroundTemperature_K = doubleConfParameter("background_temperature_K",confRoot);
+    std::vector<int> nParticles = simConf.intVectorParameter("n_particles");
+    int nSteps = simConf.intParameter("sim_time_steps");
+    int concentrationWriteInterval = simConf.intParameter("concentrations_write_interval");
+    double dt_s = simConf.doubleParameter("dt_s");
+    double backgroundTemperature_K = simConf.doubleParameter("background_temperature_K");
 
     std::string resultFilename;
     if (argc == 3){
@@ -76,7 +75,7 @@ int main(int argc, const char * argv[]) {
     int nParticlesTotal = 0;
     std::vector<uniqueReactivePartPtr> particles;
     for (int i=0; i<nParticles.size();i++) {
-        RS::Substance *subst = simConf->getAllDiscreteSubstances().at(i);
+        RS::Substance *subst = rsSimConf->getAllDiscreteSubstances().at(i);
         for (int k = 0; k < nParticles[i]; k++) {
             uniqueReactivePartPtr particle = std::make_unique<RS::ReactiveParticle>(subst);
             sim.addParticle(particle.get(), nParticlesTotal);
@@ -89,7 +88,7 @@ int main(int argc, const char * argv[]) {
     reactionConditions.electricField = 0.0;
     reactionConditions.pressure = 0.0;
 
-    resultFilewriter.initFile(simConf);
+    resultFilewriter.initFile(rsSimConf);
     // ======================================================================================
 
 

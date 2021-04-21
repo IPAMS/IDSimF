@@ -39,7 +39,7 @@
 #include "CollisionModel_HardSphere.hpp"
 #include "CollisionModel_StatisticalDiffusion.hpp"
 #include "CollisionModel_MultiCollisionModel.hpp"
-#include "appUtils_parameterParsing.hpp"
+#include "appUtils_simulationConfiguration.hpp"
 #include "json.h"
 #include <iostream>
 #include <cmath>
@@ -66,28 +66,28 @@ int main(int argc, const char *argv[]){
     }
 
     std::string confFileName = argv[1];
-    Json::Value confRoot = readConfigurationJson(confFileName);
+    AppUtils::SimulationConfiguration simConf(confFileName);
 
-    std::vector<int> nParticles = intVectorConfParameter("n_particles", confRoot);
-    int nSteps = intConfParameter("sim_time_steps", confRoot);
-    int concentrationWriteInterval = intConfParameter("concentrations_write_interval", confRoot);
-    int trajectoryWriteInterval = intConfParameter("trajectory_write_interval", confRoot);
-    bool writeVelocities = boolConfParameter("trajectory_write_velocities", confRoot);
-    double dt_s = doubleConfParameter("dt_s", confRoot);
-    double eFieldMagnitude = doubleConfParameter("electric_field_mag_Vm-1", confRoot);
-    double spaceChargeFactor = doubleConfParameter("space_charge_factor", confRoot);
+    std::vector<int> nParticles = simConf.intVectorParameter("n_particles");
+    int nSteps = simConf.intParameter("sim_time_steps");
+    int concentrationWriteInterval = simConf.intParameter("concentrations_write_interval");
+    int trajectoryWriteInterval = simConf.intParameter("trajectory_write_interval");
+    bool writeVelocities = simConf.boolParameter("trajectory_write_velocities");
+    double dt_s = simConf.doubleParameter("dt_s");
+    double eFieldMagnitude = simConf.doubleParameter("electric_field_mag_Vm-1");
+    double spaceChargeFactor = simConf.doubleParameter("space_charge_factor");
 
-    double startWidthX_m = doubleConfParameter("start_width_x_mm", confRoot) / 1000.0;
-    double startWidthYZ_m = doubleConfParameter("start_width_yz_mm", confRoot) / 1000.0;
-    double stopPosX_m = doubleConfParameter("stop_position_x_mm", confRoot) / 1000.0;
+    double startWidthX_m = simConf.doubleParameter("start_width_x_mm") / 1000.0;
+    double startWidthYZ_m = simConf.doubleParameter("start_width_yz_mm") / 1000.0;
+    double stopPosX_m = simConf.doubleParameter("stop_position_x_mm") / 1000.0;
 
     //read and check gas parameters:
-    std::string transportModelType = stringConfParameter("transport_model_type", confRoot);
-    double backgroundTemperature_K = doubleConfParameter("background_temperature_K", confRoot);
+    std::string transportModelType = simConf.stringParameter("transport_model_type");
+    double backgroundTemperature_K = simConf.doubleParameter("background_temperature_K");
 
-    std::vector<double> backgroundPartialPressures_Pa = doubleVectorConfParameter("background_partial_pressures_Pa", confRoot);
-    std::vector<double> collisionGasMasses_Amu = doubleVectorConfParameter("collision_gas_masses_amu", confRoot);
-    std::vector<double> collisionGasDiameters_angstrom = doubleVectorConfParameter("collision_gas_diameters_angstrom", confRoot);
+    std::vector<double> backgroundPartialPressures_Pa = simConf.doubleVectorParameter("background_partial_pressures_Pa");
+    std::vector<double> collisionGasMasses_Amu = simConf.doubleVectorParameter("collision_gas_masses_amu");
+    std::vector<double> collisionGasDiameters_angstrom = simConf.doubleVectorParameter("collision_gas_diameters_angstrom");
 
     int nBackgroundGases = backgroundPartialPressures_Pa.size();
     if (collisionGasMasses_Amu.size() != nBackgroundGases ||
@@ -121,16 +121,14 @@ int main(int argc, const char *argv[]){
     // ======================================================================================
 
     //read and prepare chemical configuration ===============================================
-    std::string rsConfFileName = pathRelativeToConfFile(
-                                    confFileName,
-                                    stringConfParameter("reaction_configuration", confRoot));
+    std::string rsConfFileName = simConf.pathRelativeToConfFile(simConf.stringParameter("reaction_configuration"));
     RS::ConfigFileParser parser = RS::ConfigFileParser();
     RS::Simulation rsSim = RS::Simulation(parser.parseFile(rsConfFileName));
-    RS::SimulationConfiguration *simConf = rsSim.simulationConfiguration();
+    RS::SimulationConfiguration *rsSimConf = rsSim.simulationConfiguration();
     //prepare a map for retrieval of the substance index:
     std::map<RS::Substance *, int> substanceIndices;
-    std::vector<RS::Substance *> discreteSubstances = simConf->getAllDiscreteSubstances();
-    std::vector<double> ionMobility; // = doubleVectorConfParameter("ion_mobility",confRoot);
+    std::vector<RS::Substance *> discreteSubstances = rsSimConf->getAllDiscreteSubstances();
+    std::vector<double> ionMobility; // = simConf.doubleVectorParameter("ion_mobility",confRoot);
     for (int i = 0; i < discreteSubstances.size(); i++) {
         substanceIndices.insert(std::pair<RS::Substance *, int>(discreteSubstances[i], i));
         ionMobility.push_back(discreteSubstances[i]->mobility());
@@ -192,7 +190,7 @@ int main(int argc, const char *argv[]){
     Core::Vector initBoxSize(startWidthX_m, startWidthYZ_m, startWidthYZ_m);
 
     for (int i = 0; i < nParticles.size(); i++) {
-        RS::Substance *subst = simConf->substance(i);
+        RS::Substance *subst = rsSimConf->substance(i);
         std::vector<Core::Vector> initialPositions =
                 ParticleSimulation::util::getRandomPositionsInBox(nParticles[i], initCorner, initBoxSize);
         for (int k = 0; k < nParticles[i]; k++) {
@@ -213,7 +211,7 @@ int main(int argc, const char *argv[]){
     reactionConditions.electricField = eFieldMagnitude;
     reactionConditions.totalReactionEnergy = 0.0;
 
-    resultFilewriter.initFile(simConf);
+    resultFilewriter.initFile(rsSimConf);
     // ======================================================================================
 
     //check which integrator type we have to setup:
@@ -313,10 +311,9 @@ int main(int argc, const char *argv[]){
 
         //create sds collision model, if statistics file is given: create with custom statistics
         std::unique_ptr<CollisionModel::StatisticalDiffusionModel> collisionModel;
-        if (isConfFileKey("sds_collision_statistics", confRoot)){
-            std::string sdsCollisionStatisticsFileName = pathRelativeToConfFile(
-                    confFileName,
-                    stringConfParameter("sds_collision_statistics",confRoot));
+        if (simConf.isParameter("sds_collision_statistics")){
+            std::string sdsCollisionStatisticsFileName = simConf.pathRelativeToConfFile(
+                    simConf.stringParameter("sds_collision_statistics"));
             std::cout << "SDS with custom collision statistics file: " << sdsCollisionStatisticsFileName << std::endl;
             CollisionModel::CollisionStatistics cs(sdsCollisionStatisticsFileName);
             collisionModel =

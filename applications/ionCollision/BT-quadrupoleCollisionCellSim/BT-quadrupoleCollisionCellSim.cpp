@@ -33,7 +33,7 @@
 #include "PSim_particleStartSplatTracker.hpp"
 #include "PSim_parallelVerletIntegrator.hpp"
 #include "CollisionModel_HardSphere.hpp"
-#include "appUtils_parameterParsing.hpp"
+#include "appUtils_simulationConfiguration.hpp"
 #include "appUtils_inputFileUtilities.hpp"
 #include "appUtils_ionDefinitionReading.hpp"
 #include "json.h"

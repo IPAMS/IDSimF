@@ -27,7 +27,7 @@ RS::ConcentrationFileWriter::ConcentrationFileWriter(std::string transientFilena
     transientFile_.open(transientFilename);
 }
 
-void RS::ConcentrationFileWriter::initFile(SimulationConfiguration *simConf) {
+void RS::ConcentrationFileWriter::initFile(RS::SimulationConfiguration *simConf) {
     //write header:
     transientFile_<<"RS C++ result"<<std::endl;
     transientFile_<<"Timestep ; Time ; ";

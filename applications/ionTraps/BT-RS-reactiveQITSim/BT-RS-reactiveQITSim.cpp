@@ -43,7 +43,7 @@
 #include "CollisionModel_HardSphere.hpp"
 #include "CollisionModel_MultiCollisionModel.hpp"
 #include "json.h"
-#include "appUtils_parameterParsing.hpp"
+#include "appUtils_simulationConfiguration.hpp"
 #include <iostream>
 #include <vector>
 #include <ctime>
@@ -91,20 +91,17 @@ int main(int argc, const char * argv[]) {
     std::string projectName = argv[2];
     std::cout << projectName<<std::endl;
 
-    Json::Value confRoot = readConfigurationJson(confFileName);
-    std::cout<<confRoot<<std::endl;
+    AppUtils::SimulationConfiguration simConf(confFileName);
 
 
     // read basic simulation parameters =============================================================
-    int timeSteps = intConfParameter("sim_time_steps", confRoot);
-    int concentrationWriteInterval = intConfParameter("concentrations_write_interval",confRoot);
+    int timeSteps = simConf.intParameter("sim_time_steps");
+    int concentrationWriteInterval = simConf.intParameter("concentrations_write_interval");
 
-    int trajectoryWriteInterval = intConfParameter("trajectory_write_interval", confRoot);
-    int fftWriteInterval = intConfParameter("fft_write_interval",confRoot);
-    double dt = doubleConfParameter("dt", confRoot);
-    std::vector<int> nIons = std::vector<int>();
-    std::vector<double> ionMasses = std::vector<double>();
-    std::string fftWriteMode_str = stringConfParameter("fft_mode",confRoot);
+    int trajectoryWriteInterval = simConf.intParameter("trajectory_write_interval");
+    int fftWriteInterval = simConf.intParameter("fft_write_interval");
+    double dt = simConf.doubleParameter("dt");
+    std::string fftWriteMode_str = simConf.stringParameter("fft_mode");
     FftWriteMode fftWriteMode;
     if(fftWriteMode_str== "off") {
         fftWriteMode = OFF;
@@ -123,7 +120,7 @@ int main(int argc, const char * argv[]) {
     double r_0 = 0.0;
     double z_0 = 0.0;
 
-    std::string geometryMode_str = stringConfParameter("geometry_mode",confRoot);
+    std::string geometryMode_str = simConf.stringParameter("geometry_mode");
     GeometryMode geometryMode;
     if (geometryMode_str == "default"){
         geometryMode= DEFAULT;
@@ -131,12 +128,12 @@ int main(int argc, const char * argv[]) {
         z_0 = z_0_default;
     }else if(geometryMode_str== "variable") {
         geometryMode= VARIABLE;
-        r_0 = doubleConfParameter("r_0",confRoot);
-        z_0 = doubleConfParameter("z_0",confRoot);
+        r_0 = simConf.doubleParameter("r_0");
+        z_0 = simConf.doubleParameter("z_0");
     }
     else if(geometryMode_str== "scaled") {
         geometryMode= SCALED;
-        double geomScale = doubleConfParameter("geometry_scale",confRoot);
+        double geomScale = simConf.doubleParameter("geometry_scale");
         r_0 = r_0_default*geomScale;
         z_0 = z_0_default*geomScale;
     }
@@ -150,34 +147,34 @@ int main(int argc, const char * argv[]) {
 
 
     //read physical configuration ===================================================================
-    double maxIonRadius_m = doubleConfParameter("max_ion_radius_m",confRoot);
-    double spaceChargeFactor = doubleConfParameter("space_charge_factor", confRoot);
-    double backgroundTemperature_K = doubleConfParameter("background_temperature_K", confRoot);
+    double maxIonRadius_m = simConf.doubleParameter("max_ion_radius_m");
+    double spaceChargeFactor = simConf.doubleParameter("space_charge_factor");
+    double backgroundTemperature_K = simConf.doubleParameter("background_temperature_K");
 
     //read collision gas / background gas configuration =============================================
-    std::vector<std::string> collisionGasNames = stringVectorConfParameter("collision_gas_names", confRoot);
-    std::vector<double> partialPressures = doubleVectorConfParameter("partial_pressures_Pa", confRoot);
-    std::vector<double> collisionGasMasses_Amu = doubleVectorConfParameter("collision_gas_masses_amu", confRoot);
-    std::vector<double> collisionGasDiameters_m = doubleVectorConfParameter("collision_gas_diameters_angstrom", confRoot);
+    std::vector<std::string> collisionGasNames = simConf.stringVectorParameter("collision_gas_names");
+    std::vector<double> partialPressures = simConf.doubleVectorParameter("partial_pressures_Pa");
+    std::vector<double> collisionGasMasses_Amu = simConf.doubleVectorParameter("collision_gas_masses_amu");
+    std::vector<double> collisionGasDiameters_m = simConf.doubleVectorParameter("collision_gas_diameters_angstrom");
     collisionGasDiameters_m[0]*=1e-10;
     collisionGasDiameters_m[1]*=1e-10;
 
     double totalBackgroundPressure_Pa = partialPressures[0] + partialPressures[1];
 
-    double startWidth_m = doubleConfParameter("start_width_m",confRoot);
+    double startWidth_m = simConf.doubleParameter("start_width_m");
 
     //read rf configuration =========================================================================
-    double f_rf= doubleConfParameter("f_rf", confRoot); //RF frequency 1e6;
+    double f_rf= simConf.doubleParameter("f_rf"); //RF frequency 1e6;
     double omega = f_rf * 2.0 * M_PI; //RF angular frequencyf_rf* 2.0 * M_PI;
 
     RfAmplitudeMode rfMode;
     std::vector<double> V_0_ramp;
     double V_0 = 0.0;
-    if (confRoot.isMember("rf_ramp_start_V")){
+    if (simConf.isParameter("rf_ramp_start_V")){
         rfMode = RAMPED_RF;
-        int V_rf_waiting_ts = intConfParameter("rf_ramp_waiting_timesteps", confRoot);
-        double V_rf_start = doubleConfParameter("rf_ramp_start_V", confRoot);
-        double V_rf_stop = doubleConfParameter("rf_ramp_stop_V", confRoot);
+        int V_rf_waiting_ts = simConf.intParameter("rf_ramp_waiting_timesteps");
+        double V_rf_start = simConf.doubleParameter("rf_ramp_start_V");
+        double V_rf_stop = simConf.doubleParameter("rf_ramp_stop_V");
 
         auto vRf = ParticleSimulation::fillVector(V_rf_start,V_rf_waiting_ts);
         auto vRamp = ParticleSimulation::linspace(V_rf_start,V_rf_stop,timeSteps-V_rf_waiting_ts);
@@ -186,7 +183,7 @@ int main(int argc, const char * argv[]) {
     }
     else {
         rfMode = STATIC_RF;
-        V_0 = doubleConfParameter("rf_V", confRoot);
+        V_0 = simConf.doubleParameter("rf_V");
     }
 
 
@@ -197,17 +194,17 @@ int main(int argc, const char * argv[]) {
     double exciteDivisor = 0.0;
 
 
-    std::string exciteMode_str = stringConfParameter("excite_mode",confRoot);
+    std::string exciteMode_str = simConf.stringParameter("excite_mode");
     if(exciteMode_str== "off") {
         exciteMode= NOEXCITE;
     }else if(exciteMode_str == "rect_pulse"){
-        excitePulseLength = doubleConfParameter("excite_pulse_length", confRoot);
+        excitePulseLength = simConf.doubleParameter("excite_pulse_length");
         exciteMode= RECTPULSE;
     }else if(exciteMode_str== "waveform") {
         exciteMode= SWIFT;
-        if (confRoot.isMember("excite_waveform_csv_file") ){
+        if (simConf.isParameter("excite_waveform_csv_file") ){
             exciteMode = SWIFT;
-            std::string swiftFileName = confRoot.get("excite_waveform_csv_file",0).asString();
+            std::string swiftFileName = simConf.stringParameter("excite_waveform_csv_file");
             swiftWaveForm = std::make_unique<ParticleSimulation::SampledWaveform>(swiftFileName);
             if (! swiftWaveForm->good()){
                 std::cout << "swift transient file not accessible"<<std::endl;
@@ -216,21 +213,20 @@ int main(int argc, const char * argv[]) {
         }
     }else if(exciteMode_str== "continuous_sine") {
         exciteMode= CONTINUOUSSINE;
-        exciteDivisor = doubleConfParameter("excite_divisor", confRoot);
+        exciteDivisor = simConf.doubleParameter("excite_divisor");
     }else{
         throw std::invalid_argument("wrong configuration value: excite_mode");
     }
     double excitePotential;
     if (exciteMode != NOEXCITE) {
-        excitePotential = doubleConfParameter("excite_potential", confRoot);
+        excitePotential = simConf.doubleParameter("excite_potential");
     }
 
     //read and prepare chemical configuration ===============================================
     RS::ConfigFileParser parser = RS::ConfigFileParser();
-    std::string rsFilePath = pathRelativeToConfFile(
-            confFileName,stringConfParameter("reaction_configuration",confRoot) );
+    std::string rsFilePath = simConf.pathRelativeToConfFile(simConf.stringParameter("reaction_configuration") );
     RS::Simulation rsSim = RS::Simulation(parser.parseFile(rsFilePath));
-    RS::SimulationConfiguration* simConf = rsSim.simulationConfiguration();
+    RS::SimulationConfiguration* rsSimConf = rsSim.simulationConfiguration();
     //prepare a map for retrieval of the substances from their index:
     std::map<RS::Substance*,int> substanceIndices;
 
@@ -239,7 +235,7 @@ int main(int argc, const char * argv[]) {
     std::vector<double> discreteSubstanceMasses;
     std::vector<double> V_rf_export;
 
-    std::vector<RS::Substance*> discreteSubstances = simConf->getAllDiscreteSubstances();
+    std::vector<RS::Substance*> discreteSubstances = rsSimConf->getAllDiscreteSubstances();
     for (int i=0; i<discreteSubstances.size(); i++){
         substanceIndices.insert(std::pair<RS::Substance*,int>(discreteSubstances[i], i));
         discreteSubstanceNames.emplace_back(discreteSubstances[i]->name());
@@ -253,14 +249,8 @@ int main(int argc, const char * argv[]) {
     std::vector<BTree::Particle*>particlePtrs;
 
     // read and init random ion box configuration
-    if (confRoot.isMember("n_ions") == true) {
-        Json::Value n_ions_json = confRoot.get("n_ions", 0);
-        for (int i = 0; i < n_ions_json.size(); i++) {
-            nIons.push_back(n_ions_json.get(i, 0.0).asInt());
-        }
-    } else {
-        throw std::invalid_argument("missing configuration value: n_ions");
-    }
+    std::vector<int> nIons = simConf.intVectorParameter("n_ions");
+
     Core::Vector initCorner(-startWidth_m/2.0,-startWidth_m/2.0,-startWidth_m/2.0);
     Core::Vector initBoxSize(startWidth_m,startWidth_m,startWidth_m);
 
@@ -374,7 +364,7 @@ int main(int argc, const char * argv[]) {
     auto ionsInactiveWriter = std::make_unique<ParticleSimulation::Scalar_writer>(projectName+ "_ionsInactive.txt");
 
     RS::ConcentrationFileWriter concentrationFilewriter(projectName+ "_concentrations.txt");
-    concentrationFilewriter.initFile(simConf);
+    concentrationFilewriter.initFile(rsSimConf);
 
     ParticleSimulation::partAttribTransformFctType additionalParameterTransformFct =
             [](BTree::Particle *particle) -> std::vector<double>{
@@ -446,7 +436,7 @@ int main(int argc, const char * argv[]) {
     std::vector<std::unique_ptr<CollisionModel::AbstractCollisionModel>> collisionModels;
 
     for (int i=0; i<collisionGasNames.size(); ++i){
-        RS::Substance* collisionPartnerSubst = simConf->substanceByName(collisionGasNames[i]);
+        RS::Substance* collisionPartnerSubst = rsSimConf->substanceByName(collisionGasNames[i]);
         std::unique_ptr<CollisionModel::HardSphereModel> hsModel = std::make_unique<CollisionModel::HardSphereModel>(
                 partialPressures[i], backgroundTemperature_K,
                 collisionGasMasses_Amu[i], collisionGasDiameters_m[i],

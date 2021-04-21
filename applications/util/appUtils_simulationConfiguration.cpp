@@ -1,4 +1,4 @@
-#include "appUtils_parameterParsing.hpp"
+#include "appUtils_simulationConfiguration.hpp"
 #include "Core_vector.hpp"
 
 AppUtils::SimulationConfiguration::SimulationConfiguration(const std::string& confFileName) {

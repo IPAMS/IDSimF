@@ -38,7 +38,7 @@
 #include "CollisionModel_EmptyCollisionModel.hpp"
 #include "CollisionModel_StatisticalDiffusion.hpp"
 #include "CollisionModel_SpatialFieldFunctions.hpp"
-#include "appUtils_parameterParsing.hpp"
+#include "appUtils_simulationConfiguration.hpp"
 #include "json.h"
 #include <iostream>
 #include <sstream>
@@ -60,29 +60,29 @@ int main(int argc, const char * argv[]) {
     }
 
     std::string confFileName = argv[1];
-    Json::Value confRoot = readConfigurationJson(confFileName);
+    AppUtils::SimulationConfiguration simConf(confFileName);
 
-    std::vector<int> nParticles = intVectorConfParameter("n_particles",confRoot);
-    int nSteps = intConfParameter("sim_time_steps",confRoot);
-    int nStepsPerOscillation = intConfParameter("sim_time_steps_per_sv_oscillation",confRoot);
-    int concentrationWriteInterval = intConfParameter("concentrations_write_interval",confRoot);
-    int trajectoryWriteInterval = intConfParameter("trajectory_write_interval",confRoot);
-    double spaceChargeFactor = doubleConfParameter("space_charge_factor",confRoot);
+    std::vector<int> nParticles = simConf.intVectorParameter("n_particles");
+    int nSteps = simConf.intParameter("sim_time_steps");
+    int nStepsPerOscillation = simConf.intParameter("sim_time_steps_per_sv_oscillation");
+    int concentrationWriteInterval = simConf.intParameter("concentrations_write_interval");
+    int trajectoryWriteInterval = simConf.intParameter("trajectory_write_interval");
+    double spaceChargeFactor = simConf.doubleParameter("space_charge_factor");
 
 
 
     //geometric parameters:
-    double startWidthX_m = doubleConfParameter("start_width_x_mm",confRoot)/1000.0;
-    double startWidthY_m = doubleConfParameter("start_width_y_mm",confRoot)/1000.0;
-    double startWidthZ_m = doubleConfParameter("start_width_z_mm",confRoot)/1000.0;
-    double electrodeDistance_m = doubleConfParameter("electrode_distance_mm",confRoot)/1000.0;
-    double electrodeLength_m = doubleConfParameter("electrode_length_mm",confRoot)/1000.0;
+    double startWidthX_m = simConf.doubleParameter("start_width_x_mm")/1000.0;
+    double startWidthY_m = simConf.doubleParameter("start_width_y_mm")/1000.0;
+    double startWidthZ_m = simConf.doubleParameter("start_width_z_mm")/1000.0;
+    double electrodeDistance_m = simConf.doubleParameter("electrode_distance_mm")/1000.0;
+    double electrodeLength_m = simConf.doubleParameter("electrode_length_mm")/1000.0;
     double electrodeHalfDistance_m = electrodeDistance_m / 2.0;
     double electrodeHalfDistanceSquared_m = electrodeHalfDistance_m * electrodeHalfDistance_m;
 
 
     //background gas parameters:
-    std::string collisionTypeStr = stringConfParameter("collision_model",confRoot);
+    std::string collisionTypeStr = simConf.stringParameter("collision_model");
     CollisionType collisionType;
     if (collisionTypeStr== "SDS"){
         collisionType = SDS;
@@ -94,7 +94,7 @@ int main(int argc, const char * argv[]) {
         throw std::invalid_argument("wrong configuration value: collision_model_type");
     }
 
-    std::string flowModeStr = stringConfParameter("flow_mode",confRoot);
+    std::string flowModeStr = simConf.stringParameter("flow_mode");
     FlowMode flowMode;
     if (flowModeStr == "uniform"){
         flowMode = UNIFORM_FLOW;
@@ -109,16 +109,16 @@ int main(int argc, const char * argv[]) {
     //Define background temperature function for chemical reaction and collision model
     BackgroundTemperatureMode  backgroundTempMode;
     std::function<double(Core::Vector&)> backgroundTemperatureFct;
-    std::string backgroundTempStr = stringConfParameter("background_temperature_mode",confRoot);
+    std::string backgroundTempStr = simConf.stringParameter("background_temperature_mode");
     if (backgroundTempStr == "isotherm"){
         backgroundTempMode = ISOTHERM;
-        double backgroundTemperature_K = doubleConfParameter("background_temperature_K",confRoot);
+        double backgroundTemperature_K = simConf.doubleParameter("background_temperature_K");
         backgroundTemperatureFct = CollisionModel::getConstantDoubleFunction(backgroundTemperature_K);
     }
     else if (backgroundTempStr == "linear_gradient"){
         backgroundTempMode = LINEAR_GRADIENT;
-        double backgroundTemp_start =  doubleConfParameter("background_temperature_start_K",confRoot);
-        double backgroundTemp_stop =  doubleConfParameter("background_temperature_stop_K",confRoot);
+        double backgroundTemp_start = simConf. doubleParameter("background_temperature_start_K");
+        double backgroundTemp_stop = simConf. doubleParameter("background_temperature_stop_K");
         double backgroundTemp_diff = backgroundTemp_stop - backgroundTemp_start;
 
         backgroundTemperatureFct =
@@ -139,14 +139,14 @@ int main(int argc, const char * argv[]) {
         throw std::invalid_argument("wrong configuration value: background_temperature_mode");
     }
 
-    double backgroundPressure_Pa = doubleConfParameter("background_pressure_Pa",confRoot);
-    double gasVelocityX = doubleConfParameter("collision_gas_velocity_x_ms-1",confRoot);
-    double collisionGasMass_Amu = doubleConfParameter("collision_gas_mass_amu",confRoot);
-    double collisionGasDiameter_nm = doubleConfParameter("collision_gas_diameter_nm",confRoot);
+    double backgroundPressure_Pa = simConf.doubleParameter("background_pressure_Pa");
+    double gasVelocityX = simConf.doubleParameter("collision_gas_velocity_x_ms-1");
+    double collisionGasMass_Amu = simConf.doubleParameter("collision_gas_mass_amu");
+    double collisionGasDiameter_nm = simConf.doubleParameter("collision_gas_diameter_nm");
 
 
     //field parameters:
-    std::string cvModeStr = stringConfParameter("cv_mode",confRoot);
+    std::string cvModeStr = simConf.stringParameter("cv_mode");
     CVMode cvMode;
     double meanZPos = 0.0; //variable used for automatic CV correction
     double cvRelaxationParameter;
@@ -155,15 +155,15 @@ int main(int argc, const char * argv[]) {
     }
     else if (cvModeStr == "auto"){
         cvMode = AUTO_CV;
-        cvRelaxationParameter = doubleConfParameter("cv_relaxation_parameter",confRoot);
+        cvRelaxationParameter = simConf.doubleParameter("cv_relaxation_parameter");
     }
     else{
         throw std::invalid_argument("wrong configuration value: cv_mode");
     }
 
-    double fieldSV_VPerM = doubleConfParameter("sv_Vmm-1",confRoot) * 1000.0;
-    double fieldCV_VPerM = doubleConfParameter("cv_Vmm-1",confRoot) * 1000.0;
-    double fieldFrequency = doubleConfParameter("sv_frequency_s-1",confRoot);
+    double fieldSV_VPerM = simConf.doubleParameter("sv_Vmm-1") * 1000.0;
+    double fieldCV_VPerM = simConf.doubleParameter("cv_Vmm-1") * 1000.0;
+    double fieldFrequency = simConf.doubleParameter("sv_frequency_s-1");
     double fieldWavePeriod = 1.0/fieldFrequency;
     double field_h = 2.0;
     double field_F = 2.0;
@@ -186,15 +186,13 @@ int main(int argc, const char * argv[]) {
 
     //read and prepare chemical configuration ===============================================
     RS::ConfigFileParser parser = RS::ConfigFileParser();
-    std::string rsConfFileName = pathRelativeToConfFile(
-                                    confFileName,
-                                    stringConfParameter("reaction_configuration",confRoot));
+    std::string rsConfFileName = simConf.pathRelativeToConfFile(simConf.stringParameter("reaction_configuration"));
     RS::Simulation rsSim = RS::Simulation(parser.parseFile(rsConfFileName));
-    RS::SimulationConfiguration* simConf = rsSim.simulationConfiguration();
+    RS::SimulationConfiguration* rsSimConf = rsSim.simulationConfiguration();
     //prepare a map for retrieval of the substance index:
     std::map<RS::Substance*,int> substanceIndices;
-    std::vector<RS::Substance*> discreteSubstances = simConf->getAllDiscreteSubstances();
-    std::vector<double> ionMobility; // = doubleVectorConfParameter("ion_mobility",confRoot);
+    std::vector<RS::Substance*> discreteSubstances = rsSimConf->getAllDiscreteSubstances();
+    std::vector<double> ionMobility; // = simConf.doubleVectorParameter("ion_mobility");
     for (int i=0; i<discreteSubstances.size(); i++){
         substanceIndices.insert(std::pair<RS::Substance*,int>(discreteSubstances[i], i));
         ionMobility.push_back(discreteSubstances[i]->mobility());
@@ -234,7 +232,7 @@ int main(int argc, const char * argv[]) {
     Core::Vector initBoxSize(startWidthX_m,startWidthY_m,startWidthZ_m);
 
     for (int i=0; i<nParticles.size();i++) {
-        RS::Substance *subst = simConf->substance(i);
+        RS::Substance *subst = rsSimConf->substance(i);
         std::vector<Core::Vector> initialPositions =
                 ParticleSimulation::util::getRandomPositionsInBox(nParticles[i],initCorner,initBoxSize);
         for (int k = 0; k < nParticles[i]; k++) {
@@ -256,7 +254,7 @@ int main(int argc, const char * argv[]) {
     reactionConditions.electricField = 0.0;
     reactionConditions.totalReactionEnergy = 0.0;
 
-    resultFilewriter.initFile(simConf);
+    resultFilewriter.initFile(rsSimConf);
     // ======================================================================================
 
 

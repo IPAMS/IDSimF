@@ -26,7 +26,7 @@
  ****************************/
 
 #include "json.h"
-#include "appUtils_parameterParsing.hpp"
+#include "appUtils_simulationConfiguration.hpp"
 #include "BTree_particle.hpp"
 #include "BTree_tree.hpp"
 #include "PSim_trajectoryExplorerJSONwriter.hpp"
@@ -47,28 +47,27 @@ int main(int argc, const char * argv[]) {
     }
 
     std::string confFileName = argv[1];
-    Json::Value confRoot = readConfigurationJson(confFileName);
+    AppUtils::SimulationConfiguration simConf(confFileName);
 
     std::string projectName = argv[2];
     std::cout << projectName<<std::endl;
 
     // read basic simulation parameters =============================================================
-    int timeSteps = intConfParameter("sim_time_steps", confRoot);
-    int trajectoryWriteInterval = intConfParameter("trajectory_write_interval", confRoot);
-    double dt = doubleConfParameter("dt", confRoot);
+    int timeSteps = simConf.intParameter("sim_time_steps");
+    int trajectoryWriteInterval = simConf.intParameter("trajectory_write_interval");
+    double dt = simConf.doubleParameter("dt");
 
     //read physical configuration ===================================================================
-    double spaceChargeFactor = doubleConfParameter("space_charge_factor", confRoot);
+    double spaceChargeFactor = simConf.doubleParameter("space_charge_factor");
 
 
     //read ion configuration =======================================================================
     std::vector<std::unique_ptr<BTree::Particle>>particles;
     std::vector<BTree::Particle*>particlePtrs;
 
-    if (confRoot.isMember("ion_cloud_init_file") == true) {
-        std::string ionCloudFileName = pathRelativeToConfFile(
-                                        confFileName,
-                                        confRoot.get("ion_cloud_init_file", 0).asString());
+    if (simConf.isParameter("ion_cloud_init_file")) {
+        std::string ionCloudFileName = simConf.pathRelativeToConfFile(
+                simConf.stringParameter("ion_cloud_init_file"));
         ParticleSimulation::IonCloudReader reader = ParticleSimulation::IonCloudReader();
         particles = reader.readIonCloud(ionCloudFileName);
         //prepare a vector of raw pointers

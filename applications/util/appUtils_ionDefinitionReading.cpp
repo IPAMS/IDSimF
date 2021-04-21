@@ -20,7 +20,7 @@
  ****************************/
 
 #include "appUtils_ionDefinitionReading.hpp"
-#include "appUtils_parameterParsing.hpp"
+#include "appUtils_simulationConfiguration.hpp"
 #include "PSim_ionCloudReader.hpp"
 #include "PSim_particleStartZone.hpp"
 #include "PSim_boxStartZone.hpp"

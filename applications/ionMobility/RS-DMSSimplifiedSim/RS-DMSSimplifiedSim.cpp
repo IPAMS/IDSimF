@@ -31,7 +31,7 @@
 #include <cmath>
 #include <ctime>
 #include "json.h"
-#include "appUtils_parameterParsing.hpp"
+#include "appUtils_simulationConfiguration.hpp"
 #include "RS_Simulation.hpp"
 #include "RS_SimulationConfiguration.hpp"
 #include "RS_ConfigFileParser.hpp"
@@ -53,26 +53,26 @@ int main(int argc, const char * argv[]) {
     }
 
     std::string confFileName = argv[1];
-    Json::Value confRoot = readConfigurationJson(confFileName);
+    AppUtils::SimulationConfiguration simConf(confFileName);
 
-    std::vector<int> nParticles = intVectorConfParameter("n_particles",confRoot);
-    int nSteps = intConfParameter("sim_time_steps",confRoot);
-    int nStepsPerOscillation = intConfParameter("sim_time_steps_per_sv_oscillation",confRoot);
-    int concentrationWriteInterval = intConfParameter("concentrations_write_interval",confRoot);
-    int trajectoryWriteInterval = intConfParameter("trajectory_write_interval",confRoot);
+    std::vector<int> nParticles = simConf.intVectorParameter("n_particles");
+    int nSteps = simConf.intParameter("sim_time_steps");
+    int nStepsPerOscillation = simConf.intParameter("sim_time_steps_per_sv_oscillation");
+    int concentrationWriteInterval = simConf.intParameter("concentrations_write_interval");
+    int trajectoryWriteInterval = simConf.intParameter("trajectory_write_interval");
 
     //geometric parameters:
-    double startWidthX_m = doubleConfParameter("start_width_x_mm",confRoot)/1000.0;
-    double startWidthY_m = doubleConfParameter("start_width_y_mm",confRoot)/1000.0;
-    double startWidthZ_m = doubleConfParameter("start_width_z_mm",confRoot)/1000.0;
+    double startWidthX_m = simConf.doubleParameter("start_width_x_mm")/1000.0;
+    double startWidthY_m = simConf.doubleParameter("start_width_y_mm")/1000.0;
+    double startWidthZ_m = simConf.doubleParameter("start_width_z_mm")/1000.0;
 
 
     //Define background temperature
-    double backgroundTemperature_K = doubleConfParameter("background_temperature_K",confRoot);
-    double backgroundPressure_Pa = doubleConfParameter("background_pressure_Pa",confRoot);
+    double backgroundTemperature_K = simConf.doubleParameter("background_temperature_K");
+    double backgroundPressure_Pa = simConf.doubleParameter("background_pressure_Pa");
 
     //field parameters:
-    std::string cvModeStr = stringConfParameter("cv_mode",confRoot);
+    std::string cvModeStr = simConf.stringParameter("cv_mode");
     CVMode cvMode;
     double meanZPos = 0.0; //variable used for automatic CV correction
     double cvRelaxationParameter;
@@ -81,15 +81,15 @@ int main(int argc, const char * argv[]) {
     }
     else if (cvModeStr == "auto"){
         cvMode = AUTO_CV;
-        cvRelaxationParameter = doubleConfParameter("cv_relaxation_parameter",confRoot);
+        cvRelaxationParameter = simConf.doubleParameter("cv_relaxation_parameter");
     }
     else{
         throw std::invalid_argument("wrong configuration value: cv_mode");
     }
 
-    double fieldSV_VPerM = doubleConfParameter("sv_Vmm-1",confRoot) * 1000.0;
-    double fieldCV_VPerM = doubleConfParameter("cv_Vmm-1",confRoot) * 1000.0;
-    double fieldFrequency = doubleConfParameter("sv_frequency_s-1",confRoot);
+    double fieldSV_VPerM = simConf.doubleParameter("sv_Vmm-1") * 1000.0;
+    double fieldCV_VPerM = simConf.doubleParameter("cv_Vmm-1") * 1000.0;
+    double fieldFrequency = simConf.doubleParameter("sv_frequency_s-1");
     double fieldWavePeriod = 1.0/fieldFrequency;
     double field_h = 2.0;
     double field_F = 2.0;
@@ -109,18 +109,15 @@ int main(int argc, const char * argv[]) {
     }
     // ======================================================================================
 
-
     //read and prepare chemical configuration ===============================================
     RS::ConfigFileParser parser = RS::ConfigFileParser();
-    std::string rsConfFileName = pathRelativeToConfFile(
-                                    confFileName,
-                                    stringConfParameter("reaction_configuration",confRoot));
+    std::string rsConfFileName = simConf.pathRelativeToConfFile(simConf.stringParameter("reaction_configuration"));
     RS::Simulation rsSim = RS::Simulation(parser.parseFile(rsConfFileName));
-    RS::SimulationConfiguration* simConf = rsSim.simulationConfiguration();
+    RS::SimulationConfiguration* rsSimConf = rsSim.simulationConfiguration();
     //prepare a map for retrieval of the substance index:
     std::map<RS::Substance*,int> substanceIndices;
-    std::vector<RS::Substance*> discreteSubstances = simConf->getAllDiscreteSubstances();
-    std::vector<double> ionMobility; // = doubleVectorConfParameter("ion_mobility",confRoot);
+    std::vector<RS::Substance*> discreteSubstances = rsSimConf->getAllDiscreteSubstances();
+    std::vector<double> ionMobility; // = simConf.doubleVectorParameter("ion_mobility");
     for (int i=0; i<discreteSubstances.size(); i++){
         substanceIndices.insert(std::pair<RS::Substance*,int>(discreteSubstances[i], i));
         ionMobility.push_back(discreteSubstances[i]->mobility());
@@ -160,7 +157,7 @@ int main(int argc, const char * argv[]) {
     Core::Vector initBoxSize(startWidthX_m,startWidthY_m,startWidthZ_m);
 
     for (int i=0; i<nParticles.size();i++) {
-        RS::Substance *subst = simConf->substance(i);
+        RS::Substance *subst = rsSimConf->substance(i);
         std::vector<Core::Vector> initialPositions =
                 ParticleSimulation::util::getRandomPositionsInBox(nParticles[i],initCorner,initBoxSize);
         for (int k = 0; k < nParticles[i]; k++) {
@@ -185,7 +182,7 @@ int main(int argc, const char * argv[]) {
     reactionConditions.electricField = 0.0;
     reactionConditions.totalReactionEnergy = 0.0;
 
-    resultFilewriter.initFile(simConf);
+    resultFilewriter.initFile(rsSimConf);
     // ======================================================================================
 
 
