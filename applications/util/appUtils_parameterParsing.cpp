@@ -6,11 +6,11 @@ AppUtils::SimulationConfiguration::SimulationConfiguration(const std::string& co
     confRoot_ = readConfigurationJson_(confFileName);
 }
 
-bool AppUtils::SimulationConfiguration::isParameter(const std::string& keyName) {
+bool AppUtils::SimulationConfiguration::isParameter(const std::string& keyName) const {
     return confRoot_.isMember(keyName);
 }
 
-int AppUtils::SimulationConfiguration::intConfParameter(const std::string& jsonName) {
+int AppUtils::SimulationConfiguration::intParameter(const std::string& jsonName) const {
     if (isParameter(jsonName)) {
         int result = confRoot_.get(jsonName, 0).asInt();
         std::cout << jsonName << ":" << result << std::endl;
@@ -20,7 +20,7 @@ int AppUtils::SimulationConfiguration::intConfParameter(const std::string& jsonN
     }
 }
 
-std::vector<int> AppUtils::SimulationConfiguration::intVectorParameter(const std::string& jsonName) {
+std::vector<int> AppUtils::SimulationConfiguration::intVectorParameter(const std::string& jsonName) const {
     std::vector<int> result;
     if (isParameter(jsonName)) {
         Json::Value jsonNode = confRoot_.get(jsonName,0);
@@ -33,7 +33,7 @@ std::vector<int> AppUtils::SimulationConfiguration::intVectorParameter(const std
     return (result);
 }
 
-double AppUtils::SimulationConfiguration::doubleParameter(const std::string& jsonName) {
+double AppUtils::SimulationConfiguration::doubleParameter(const std::string& jsonName) const {
     if (isParameter(jsonName)) {
         double result = confRoot_.get(jsonName, 0).asDouble();
         std::cout << jsonName << ":" << result << std::endl;
@@ -44,7 +44,7 @@ double AppUtils::SimulationConfiguration::doubleParameter(const std::string& jso
 }
 
 std::vector<double> AppUtils::SimulationConfiguration::doubleVectorParameter(const std::string& jsonName,
-                                                                             double multiplicator) {
+                                                                             double multiplicator) const {
     std::vector<double> result;
     if (isParameter(jsonName)) {
         Json::Value jsonNode = confRoot_.get(jsonName,0);
@@ -57,13 +57,13 @@ std::vector<double> AppUtils::SimulationConfiguration::doubleVectorParameter(con
     return (result);
 }
 
-Core::Vector AppUtils::SimulationConfiguration::vector3dConfParameter(const std::string& jsonName) {
+Core::Vector AppUtils::SimulationConfiguration::vector3dParameter(const std::string& jsonName) const {
     std::vector<double> vectorRaw = doubleVectorParameter(jsonName);
     return {vectorRaw[0], vectorRaw[1], vectorRaw[2]};
 }
 
 
-std::array<std::array<double, 2>, 3> AppUtils::SimulationConfiguration::double3dBox(const std::string& jsonName) {
+std::array<std::array<double, 2>, 3> AppUtils::SimulationConfiguration::double3dBox(const std::string& jsonName) const {
     std::array<std::array<double, 2>, 3> result{{{0, 0}, {0, 0}, {0, 0}}};
     if (isParameter(jsonName)) {
         Json::Value jsonNode = confRoot_.get(jsonName,0);
@@ -86,7 +86,7 @@ std::array<std::array<double, 2>, 3> AppUtils::SimulationConfiguration::double3d
     return (result);
 }
 
-std::string AppUtils::SimulationConfiguration::stringConfParameter(const std::string& jsonName) {
+std::string AppUtils::SimulationConfiguration::stringConfParameter(const std::string& jsonName) const {
     if (isParameter(jsonName)) {
         std::string result = confRoot_.get(jsonName, 0).asString();
         std::cout << jsonName << ":" << result << std::endl;
@@ -96,7 +96,7 @@ std::string AppUtils::SimulationConfiguration::stringConfParameter(const std::st
     }
 }
 
-std::vector<std::string> AppUtils::SimulationConfiguration::stringVectorConfParameter(const std::string& jsonName) {
+std::vector<std::string> AppUtils::SimulationConfiguration::stringVectorParameter(const std::string& jsonName) const {
     std::vector<std::string> result;
     if (isParameter(jsonName)) {
         Json::Value jsonNode = confRoot_.get(jsonName,0);
@@ -109,7 +109,7 @@ std::vector<std::string> AppUtils::SimulationConfiguration::stringVectorConfPara
     return (result);
 }
 
-bool AppUtils::SimulationConfiguration::boolConfParameter(const std::string& jsonName) {
+bool AppUtils::SimulationConfiguration::boolParameter(const std::string& jsonName) const {
     if (isParameter(jsonName)) {
         std::string confString = confRoot_.get(jsonName, 0).asString();
         std::cout << jsonName << ":" << confString << std::endl;
@@ -128,7 +128,7 @@ bool AppUtils::SimulationConfiguration::boolConfParameter(const std::string& jso
 }
 
 std::unique_ptr<ParticleSimulation::InterpolatedField> AppUtils::SimulationConfiguration::readInterpolatedField(
-        const std::string& jsonName) {
+        const std::string& jsonName) const {
         if (isParameter(jsonName)){
             std::string fieldFileName = confRoot_.get(jsonName,0).asString();
             std::filesystem::path fieldPath(confFileBasePath_ / std::filesystem::path(fieldFileName));
@@ -140,11 +140,11 @@ std::unique_ptr<ParticleSimulation::InterpolatedField> AppUtils::SimulationConfi
         }
 }
 
-std::string AppUtils::SimulationConfiguration::pathRelativeToConfFile(const std::string& pathStr) {
+std::string AppUtils::SimulationConfiguration::pathRelativeToConfFile(const std::string& pathStr) const {
     return confFilePath_.parent_path() / std::filesystem::path(pathStr);
 }
 
-std::string AppUtils::SimulationConfiguration::pathRelativeToConfBasePath(const std::string& pathStr) {
+std::string AppUtils::SimulationConfiguration::pathRelativeToConfBasePath(const std::string& pathStr) const {
     return confFileBasePath_ / std::filesystem::path(pathStr);
 }
 

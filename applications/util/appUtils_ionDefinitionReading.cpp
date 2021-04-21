@@ -33,8 +33,8 @@
  *
  * @param confRoot a simulation configuration
  */
-bool AppUtils::isIonCloudDefinitionPresent(const Json::Value& confRoot) {
-    return confRoot.isMember(AppUtils::ION_CLOUD_FILE_KEY);
+bool AppUtils::isIonCloudDefinitionPresent(const SimulationConfiguration& simConf) {
+    return simConf.isParameter(AppUtils::ION_CLOUD_FILE_KEY);
 }
 
 
@@ -52,12 +52,11 @@ bool AppUtils::isIonCloudDefinitionPresent(const Json::Value& confRoot) {
 void AppUtils::readIonDefinitionFromIonCloudFile(
         std::vector<std::unique_ptr<BTree::Particle>>& particles,
         std::vector<BTree::Particle*>& particlePtrs,
-        const Json::Value& confRoot,
-        const std::string& confBasePath) {
+        const AppUtils::SimulationConfiguration& simConf) {
 
-    std::string ionCloudFileName = pathRelativeToConfBasePath(
-            confBasePath,
-            confRoot.get("ion_cloud_init_file", 0).asString());
+
+    std::string ionCloudFileName = simConf.pathRelativeToConfBasePath(
+            simConf.stringConfParameter("ion_cloud_init_file"));
 
     ParticleSimulation::IonCloudReader reader = ParticleSimulation::IonCloudReader();
     particles = reader.readIonCloud(ionCloudFileName);
@@ -72,22 +71,23 @@ void AppUtils::readIonDefinitionFromIonCloudFile(
  *
  * @param confRoot a simulation configuration
  */
-std::unique_ptr<ParticleSimulation::ParticleStartZone> AppUtils::getStartZoneFromIonDefinition(const Json::Value &confRoot) {
+std::unique_ptr<ParticleSimulation::ParticleStartZone> AppUtils::getStartZoneFromIonDefinition(
+        const SimulationConfiguration& simConf) {
 
-    std::string ionStartGeom_str = stringConfParameter("ion_start_geometry",confRoot);
+    std::string ionStartGeom_str = simConf.stringConfParameter("ion_start_geometry");
 
-    Core::Vector ionsBasePos_m =  vector3dConfParameter("ion_start_base_position_m", confRoot);
+    Core::Vector ionsBasePos_m = simConf.vector3dParameter("ion_start_base_position_m");
 
     std::unique_ptr<ParticleSimulation::ParticleStartZone> particleStartZone;
     if (ionStartGeom_str == "box"){
-        Core::Vector ionsBoxSize_m = vector3dConfParameter("ion_start_box_size_m", confRoot);
+        Core::Vector ionsBoxSize_m = simConf.vector3dParameter("ion_start_box_size_m");
         particleStartZone = std::make_unique<ParticleSimulation::BoxStartZone>(
                 ionsBoxSize_m, ionsBasePos_m);
     }
     else if (ionStartGeom_str == "cylinder"){
-        double radius = doubleConfParameter("ion_start_radius_m", confRoot);
-        double length = doubleConfParameter("ion_start_length_m", confRoot);
-        Core::Vector normal_vector = vector3dConfParameter("ion_start_cylinder_normal_vector", confRoot);
+        double radius = simConf.doubleParameter("ion_start_radius_m");
+        double length = simConf.doubleParameter("ion_start_length_m");
+        Core::Vector normal_vector = simConf.vector3dParameter("ion_start_cylinder_normal_vector");
         particleStartZone = std::make_unique<ParticleSimulation::CylinderStartZone>(
                 radius, length, normal_vector, ionsBasePos_m);
     }
@@ -109,11 +109,11 @@ std::unique_ptr<ParticleSimulation::ParticleStartZone> AppUtils::getStartZoneFro
  */
 void AppUtils::setIonsKineticEnergy(
         std::vector<std::unique_ptr<BTree::Particle>>& particles,
-        const Json::Value& confRoot) {
+        const SimulationConfiguration& simConf) {
 
-    if (confRoot.isMember("ion_kinetic_energy_eV")){
-        double ion_ke = doubleConfParameter("ion_kinetic_energy_eV", confRoot) / Core::JOULE_TO_EV;
-        std::vector<double> direction_raw = doubleVectorConfParameter("ion_direction_vector", confRoot);
+    if (simConf.isParameter("ion_kinetic_energy_eV")){
+        double ion_ke = simConf.doubleParameter("ion_kinetic_energy_eV") / Core::JOULE_TO_EV;
+        std::vector<double> direction_raw = simConf.doubleVectorParameter("ion_direction_vector");
         Core::Vector ion_dir(direction_raw[0], direction_raw[1], direction_raw[2]);
         Core::Vector ion_dir_normalized(ion_dir * (1.0/ion_dir.magnitude()));
         // iterate through all ion groups
@@ -134,20 +134,20 @@ void AppUtils::setIonsKineticEnergy(
 void AppUtils::readRandomIonDefinition(
         std::vector<std::unique_ptr<BTree::Particle>>& particles,
         std::vector<BTree::Particle*>& particlePtrs,
-        const Json::Value& confRoot) {
+        const SimulationConfiguration& simConf) {
 
     // ions are not given in an init file, read and init random ion box configuration
-    std::vector<int> nIons = intVectorConfParameter("n_ions", confRoot);
-    std::vector<double> ionMasses = doubleVectorConfParameter("ion_masses", confRoot);
-    std::vector<double> ionCharges = doubleVectorConfParameter("ion_charges",confRoot);
-    std::vector<double> ionCollisionDiameters_angstrom = doubleVectorConfParameter("ion_collision_gas_diameters_angstrom", confRoot);
+    std::vector<int> nIons = simConf.intVectorParameter("n_ions");
+    std::vector<double> ionMasses = simConf.doubleVectorParameter("ion_masses");
+    std::vector<double> ionCharges = simConf.doubleVectorParameter("ion_charges");
+    std::vector<double> ionCollisionDiameters_angstrom = simConf.doubleVectorParameter("ion_collision_gas_diameters_angstrom");
 
     double ions_tob_range = 0.0;
-    if (confRoot.isMember("ion_time_of_birth_range_s")){
-        ions_tob_range = doubleConfParameter("ion_time_of_birth_range_s", confRoot);
+    if (simConf.isParameter("ion_time_of_birth_range_s")){
+        ions_tob_range = simConf.doubleParameter("ion_time_of_birth_range_s");
     }
 
-    std::unique_ptr<ParticleSimulation::ParticleStartZone> particleStartZone = getStartZoneFromIonDefinition(confRoot);
+    std::unique_ptr<ParticleSimulation::ParticleStartZone> particleStartZone = getStartZoneFromIonDefinition(simConf);
 
     // iterate through all ion groups
     for (int i = 0; i < nIons.size(); i++) {
@@ -167,7 +167,7 @@ void AppUtils::readRandomIonDefinition(
             ion->setMassAMU(mass);
             ion->setDiameter(collisionDiameter_m);
         }
-        setIonsKineticEnergy(ions, confRoot);
+        setIonsKineticEnergy(ions, simConf);
 
         // and push particles to vectors containing all particles
         for (std::unique_ptr<BTree::Particle>& ion: ions){
@@ -187,14 +187,13 @@ void AppUtils::readRandomIonDefinition(
  */
 void AppUtils::readIonDefinition(std::vector<std::unique_ptr<BTree::Particle>>& particles,
                                  std::vector<BTree::Particle*>& particlePtrs,
-                                 const Json::Value& confRoot,
-                                 const std::string& confBasePath) {
+                                 const SimulationConfiguration& simConf) {
 
-    if (AppUtils::isIonCloudDefinitionPresent(confRoot)) {
-        AppUtils::readIonDefinitionFromIonCloudFile(particles, particlePtrs, confRoot, confBasePath);
+    if (AppUtils::isIonCloudDefinitionPresent(simConf)) {
+        AppUtils::readIonDefinitionFromIonCloudFile(particles, particlePtrs, simConf);
     }
     else {
-        AppUtils::readRandomIonDefinition(particles, particlePtrs, confRoot);
+        AppUtils::readRandomIonDefinition(particles, particlePtrs, simConf);
     }
 }
 

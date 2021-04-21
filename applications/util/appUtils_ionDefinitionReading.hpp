@@ -28,9 +28,9 @@
 #ifndef IDSIMF_APPUTILS_IONDEFINITIONREADING_HPP
 #define IDSIMF_APPUTILS_IONDEFINITIONREADING_HPP
 
-#include "json.h"
 #include "BTree_particle.hpp"
 #include "PSim_particleStartZone.hpp"
+#include "appUtils_parameterParsing.hpp"
 #include <vector>
 #include <string>
 #include <memory>
@@ -40,31 +40,28 @@ namespace AppUtils{
 
     const std::string ION_CLOUD_FILE_KEY = "ion_cloud_init_file";
 
-    bool isIonCloudDefinitionPresent(const Json::Value& confRoot);
+    bool isIonCloudDefinitionPresent(const SimulationConfiguration& simConf);
 
     void readIonDefinitionFromIonCloudFile(
             std::vector<std::unique_ptr<BTree::Particle>>& particles,
             std::vector<BTree::Particle*>& particlePtrs,
-            const Json::Value& confRoot,
-            const std::string& confBasePath);
+            const SimulationConfiguration& simConf);
 
-    std::unique_ptr<ParticleSimulation::ParticleStartZone> getStartZoneFromIonDefinition(const Json::Value& confRoot);
+    std::unique_ptr<ParticleSimulation::ParticleStartZone> getStartZoneFromIonDefinition(const SimulationConfiguration& simConf);
 
     void setIonsKineticEnergy(
             std::vector<std::unique_ptr<BTree::Particle>>& particles,
-            const Json::Value& confRoot);
+            const SimulationConfiguration& simConf);
 
     void readRandomIonDefinition(
             std::vector<std::unique_ptr<BTree::Particle>>& particles,
             std::vector<BTree::Particle*>& particlePtrs,
-            const Json::Value& confRoot);
+            const SimulationConfiguration& simConf);
 
     void readIonDefinition(
             std::vector<std::unique_ptr<BTree::Particle>>& particles,
             std::vector<BTree::Particle*>& particlePtrs,
-            const Json::Value& confRoot,
-            const std::string& confBasePath);
-
+            const SimulationConfiguration& simConf);
 }
 
 #endif //IDSIMF_APPUTILS_IONDEFINITIONREADING_HPP

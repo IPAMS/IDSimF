@@ -13,22 +13,22 @@ namespace AppUtils{
     class SimulationConfiguration{
     public:
         SimulationConfiguration(const std::string& confFileName);
-        bool isParameter(const std::string& keyName);
-        int intConfParameter(const std::string& jsonName);
-        std::vector<int> intVectorParameter(const std::string& jsonName);
-        double doubleParameter(const std::string& jsonName);
-        std::vector<double> doubleVectorParameter(const std::string& jsonName, double multiplicator = 1.0);
-        Core::Vector vector3dConfParameter(const std::string& jsonName);
-        std::array<std::array<double,2>,3> double3dBox(const std::string& jsonName);
-        std::string stringConfParameter(const std::string& jsonName);
-        std::vector<std::string> stringVectorConfParameter(const std::string& jsonName);
-        bool boolConfParameter(const std::string& jsonName);
+        bool isParameter(const std::string& keyName) const;
+        int intParameter(const std::string& jsonName) const;
+        std::vector<int> intVectorParameter(const std::string& jsonName) const;
+        double doubleParameter(const std::string& jsonName) const;
+        std::vector<double> doubleVectorParameter(const std::string& jsonName, double multiplicator = 1.0) const;
+        Core::Vector vector3dParameter(const std::string& jsonName) const;
+        std::array<std::array<double,2>,3> double3dBox(const std::string& jsonName) const;
+        std::string stringConfParameter(const std::string& jsonName) const;
+        std::vector<std::string> stringVectorParameter(const std::string& jsonName) const;
+        bool boolParameter(const std::string& jsonName) const;
 
         std::unique_ptr<ParticleSimulation::InterpolatedField> readInterpolatedField(
-                const std::string& jsonName);
+                const std::string& jsonName) const;
 
-        std::string pathRelativeToConfFile(const std::string& pathStr);
-        std::string pathRelativeToConfBasePath(const std::string& pathStr);
+        std::string pathRelativeToConfFile(const std::string& pathStr) const;
+        std::string pathRelativeToConfBasePath(const std::string& pathStr) const;
 
     private:
         Json::Value readConfigurationJson_(const std::string& confFileName);
