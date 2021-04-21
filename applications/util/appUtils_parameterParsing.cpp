@@ -1,30 +1,18 @@
 #include "appUtils_parameterParsing.hpp"
 #include "Core_vector.hpp"
 
-Json::Value readConfigurationJson(const std::string& confFileName){
-    std::cout << confFileName<<std::endl;
-    std::filesystem::path confFilePath(confFileName);
-    if (!std::filesystem::exists(confFilePath)){
-        throw std::invalid_argument("Configuration file not existing: " + confFilePath.string());
-    }
+AppUtils::SimulationConfiguration::SimulationConfiguration(const std::string& confFileName) {
 
-    std::ifstream confFile;
-    confFile.open(confFilePath);
-    Json::Value confRoot;
-    confFile >> confRoot;
-    confFile.close();
-    std::cout<<confRoot<<std::endl;
-
-    return confRoot;
+    confRoot_ = readConfigurationJson_(confFileName);
 }
 
-bool isConfFileKey(const std::string& keyName, const Json::Value& confRoot) {
-    return confRoot.isMember(keyName);
+bool AppUtils::SimulationConfiguration::isParameter(const std::string& keyName) {
+    return confRoot_.isMember(keyName);
 }
 
-int intConfParameter(const std::string& jsonName, const Json::Value& confRoot){
-    if (confRoot.isMember(jsonName)) {
-        int result = confRoot.get(jsonName, 0).asInt();
+int AppUtils::SimulationConfiguration::intConfParameter(const std::string& jsonName) {
+    if (isParameter(jsonName)) {
+        int result = confRoot_.get(jsonName, 0).asInt();
         std::cout << jsonName << ":" << result << std::endl;
         return(result);
     } else {
@@ -32,10 +20,10 @@ int intConfParameter(const std::string& jsonName, const Json::Value& confRoot){
     }
 }
 
-std::vector<int> intVectorConfParameter(const std::string& jsonName, const Json::Value& confRoot){
+std::vector<int> AppUtils::SimulationConfiguration::intVectorParameter(const std::string& jsonName) {
     std::vector<int> result;
-    if (confRoot.isMember(jsonName)) {
-        Json::Value jsonNode = confRoot.get(jsonName,0);
+    if (isParameter(jsonName)) {
+        Json::Value jsonNode = confRoot_.get(jsonName,0);
         for (int i=0; i<jsonNode.size(); i++){
             result.push_back(jsonNode.get(i,0).asInt());
         }
@@ -45,9 +33,9 @@ std::vector<int> intVectorConfParameter(const std::string& jsonName, const Json:
     return (result);
 }
 
-double doubleConfParameter(const std::string& jsonName, const Json::Value& confRoot){
-    if (confRoot.isMember(jsonName) == true) {
-        double result = confRoot.get(jsonName, 0).asDouble();
+double AppUtils::SimulationConfiguration::doubleParameter(const std::string& jsonName) {
+    if (isParameter(jsonName)) {
+        double result = confRoot_.get(jsonName, 0).asDouble();
         std::cout << jsonName << ":" << result << std::endl;
         return(result);
     } else {
@@ -55,10 +43,11 @@ double doubleConfParameter(const std::string& jsonName, const Json::Value& confR
     }
 }
 
-std::vector<double> doubleVectorConfParameter(const std::string& jsonName, const Json::Value& confRoot, double multiplicator){
+std::vector<double> AppUtils::SimulationConfiguration::doubleVectorParameter(const std::string& jsonName,
+                                                                             double multiplicator) {
     std::vector<double> result;
-    if (confRoot.isMember(jsonName) == true) {
-        Json::Value jsonNode = confRoot.get(jsonName,0);
+    if (isParameter(jsonName)) {
+        Json::Value jsonNode = confRoot_.get(jsonName,0);
         for (int i=0; i<jsonNode.size(); i++){
             result.push_back(jsonNode.get(i,0).asDouble()*multiplicator);
         }
@@ -68,15 +57,16 @@ std::vector<double> doubleVectorConfParameter(const std::string& jsonName, const
     return (result);
 }
 
-Core::Vector vector3dConfParameter(const std::string& jsonName, const Json::Value& confRoot){
-    std::vector<double> vectorRaw = doubleVectorConfParameter(jsonName, confRoot);
+Core::Vector AppUtils::SimulationConfiguration::vector3dConfParameter(const std::string& jsonName) {
+    std::vector<double> vectorRaw = doubleVectorParameter(jsonName);
     return {vectorRaw[0], vectorRaw[1], vectorRaw[2]};
 }
 
-std::array<std::array<double,2>,3> double3dBox(const std::string& jsonName, const Json::Value& confRoot){
+
+std::array<std::array<double, 2>, 3> AppUtils::SimulationConfiguration::double3dBox(const std::string& jsonName) {
     std::array<std::array<double, 2>, 3> result{{{0, 0}, {0, 0}, {0, 0}}};
-    if (confRoot.isMember(jsonName) == true) {
-        Json::Value jsonNode = confRoot.get(jsonName,0);
+    if (isParameter(jsonName)) {
+        Json::Value jsonNode = confRoot_.get(jsonName,0);
 
         if (jsonNode.size() != 3){
             throw std::invalid_argument("3d box definition has not 3 dimensions");
@@ -96,9 +86,9 @@ std::array<std::array<double,2>,3> double3dBox(const std::string& jsonName, cons
     return (result);
 }
 
-std::string stringConfParameter(const std::string& jsonName, const Json::Value& confRoot){
-    if (confRoot.isMember(jsonName) == true) {
-        std::string result = confRoot.get(jsonName, 0).asString();
+std::string AppUtils::SimulationConfiguration::stringConfParameter(const std::string& jsonName) {
+    if (isParameter(jsonName)) {
+        std::string result = confRoot_.get(jsonName, 0).asString();
         std::cout << jsonName << ":" << result << std::endl;
         return(result);
     } else {
@@ -106,10 +96,10 @@ std::string stringConfParameter(const std::string& jsonName, const Json::Value& 
     }
 }
 
-std::vector<std::string> stringVectorConfParameter(const std::string& jsonName, const Json::Value& confRoot){
+std::vector<std::string> AppUtils::SimulationConfiguration::stringVectorConfParameter(const std::string& jsonName) {
     std::vector<std::string> result;
-    if (confRoot.isMember(jsonName) == true) {
-        Json::Value jsonNode = confRoot.get(jsonName,0);
+    if (isParameter(jsonName)) {
+        Json::Value jsonNode = confRoot_.get(jsonName,0);
         for (int i=0; i<jsonNode.size(); i++){
             result.push_back(jsonNode.get(i,0).asString());
         }
@@ -119,9 +109,9 @@ std::vector<std::string> stringVectorConfParameter(const std::string& jsonName, 
     return (result);
 }
 
-bool boolConfParameter(const std::string& jsonName, const Json::Value& confRoot){
-    if (confRoot.isMember(jsonName) == true) {
-        std::string confString = confRoot.get(jsonName, 0).asString();
+bool AppUtils::SimulationConfiguration::boolConfParameter(const std::string& jsonName) {
+    if (isParameter(jsonName)) {
+        std::string confString = confRoot_.get(jsonName, 0).asString();
         std::cout << jsonName << ":" << confString << std::endl;
         if (confString == "true") {
             return true;
@@ -137,29 +127,41 @@ bool boolConfParameter(const std::string& jsonName, const Json::Value& confRoot)
     }
 }
 
-std::unique_ptr<ParticleSimulation::InterpolatedField> readInterpolatedField(
-        const std::string& confBasePathStr,
-        const std::string& jsonName,
-        const Json::Value& confRoot){
-    if (confRoot.isMember(jsonName)==true){
-        std::string fieldFileName = confRoot.get(jsonName,0).asString();
-        std::filesystem::path fieldPath(std::filesystem::path(confBasePathStr) / std::filesystem::path(fieldFileName));
-        std::cout << "Reading field "<<fieldPath <<" \n";
-        auto fieldPtr = std::make_unique<ParticleSimulation::InterpolatedField>(fieldPath);
-        return move(fieldPtr);
-    }else{
-        throw std::invalid_argument("missing configuration value: " + jsonName);
+std::unique_ptr<ParticleSimulation::InterpolatedField> AppUtils::SimulationConfiguration::readInterpolatedField(
+        const std::string& jsonName) {
+        if (isParameter(jsonName)){
+            std::string fieldFileName = confRoot_.get(jsonName,0).asString();
+            std::filesystem::path fieldPath(confFileBasePath_ / std::filesystem::path(fieldFileName));
+            std::cout << "Reading field "<<fieldPath <<" \n";
+            auto fieldPtr = std::make_unique<ParticleSimulation::InterpolatedField>(fieldPath);
+            return move(fieldPtr);
+        }else{
+            throw std::invalid_argument("missing configuration value: " + jsonName);
+        }
+}
+
+std::string AppUtils::SimulationConfiguration::pathRelativeToConfFile(const std::string& pathStr) {
+    return confFilePath_.parent_path() / std::filesystem::path(pathStr);
+}
+
+std::string AppUtils::SimulationConfiguration::pathRelativeToConfBasePath(const std::string& pathStr) {
+    return confFileBasePath_ / std::filesystem::path(pathStr);
+}
+
+Json::Value AppUtils::SimulationConfiguration::readConfigurationJson_(const std::string& confFileName) {
+    std::cout << confFileName<<std::endl;
+    confFilePath_ = std::filesystem::path(confFileName);
+    if (!std::filesystem::exists(confFilePath_)){
+        throw std::invalid_argument("Configuration file not existing: " + confFilePath_.string());
     }
-}
+    confFileBasePath_ = confFilePath_.parent_path();
 
-std::string pathRelativeToConfFile(const std::string& confFilePathStr, const std::string& pathStr){
-    return std::filesystem::path(confFilePathStr).parent_path() / std::filesystem::path(pathStr);
-}
+    std::ifstream confFile;
+    confFile.open(confFilePath_);
+    Json::Value confRoot;
+    confFile >> confRoot;
+    confFile.close();
+    std::cout<<confRoot<<std::endl;
 
-std::string pathRelativeToConfBasePath(const std::string& confBasePath, const std::string& pathStr){
-    return std::filesystem::path(confBasePath) / std::filesystem::path(pathStr);
-}
-
-std::string confFileBasePath(const std::string& confFilePathStr){
-    return std::filesystem::path(confFilePathStr).parent_path();
+    return confRoot;
 }
