@@ -153,9 +153,9 @@ void AppUtils::readRandomIonDefinition(
     for (int i = 0; i < nIons.size(); i++) {
 
         // get ion group parameters
-        int nParticles = nIons[i];
-        double mass = ionMasses[i];
-        double charge = ionCharges[i];
+        int nParticles = nIons.at(i);
+        double mass = ionMasses.at(i);
+        double charge = ionCharges.at(i);
         double collisionDiameter_m = ionCollisionDiameters_angstrom[i]*1e-10;
 
         // get actual ions for the group
