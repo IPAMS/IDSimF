@@ -303,6 +303,7 @@ std::string  ParticleSimulation::SimionPotentialArray::getHeaderString() {
 }
 
 void ParticleSimulation::SimionPotentialArray::readPa_(std::string filename) {
+    std::cout << "Reading " <<filename<<std::endl;
     paFilename_ = filename;
     std::ifstream inStream(filename, std::ios::binary);
     readBinaryPa_(inStream);
