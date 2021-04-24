@@ -31,15 +31,21 @@ ParticleSimulation::AbstractTimeIntegrator::AbstractTimeIntegrator(std::vector<B
         particleStartMonitorFct_(std::move(ionStartMonitorFct))
 {
     //particleTOBs_ = std::vector<std::pair<double,Core::Particle*>>();
+    bool tobLargerZeroFound = false;
     for (const auto &part: particles){
+        if (part->getTimeOfBirth() > 0.0){
+            tobLargerZeroFound = true;
+        }
         particleTOBs_.emplace_back(
                 part->getTimeOfBirth(),
                 part);
     }
 
     // + sort particleTOBs_ according to time of birth
-    std::sort(particleTOBs_.begin(), particleTOBs_.end(),
-            [](const pTobPair_t &p1, const pTobPair_t &p2) {return p1.first < p2.first;});
+    if (tobLargerZeroFound) {
+        std::sort(particleTOBs_.begin(), particleTOBs_.end(),
+                [](const pTobPair_t& p1, const pTobPair_t& p2) { return p1.first<p2.first; });
+    }
 }
 
 /**

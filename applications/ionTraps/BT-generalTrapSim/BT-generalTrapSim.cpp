@@ -205,6 +205,7 @@ int main(int argc, const char * argv[]) {
     std::vector<std::unique_ptr<BTree::Particle>>particles;
     std::vector<BTree::Particle*>particlePtrs;
     AppUtils::readIonDefinition(particles, particlePtrs, simConf);
+
     // init additional ion parameters:
     for(const auto& particle: particles){
         particle->setFloatAttribute(key_trapForce_x, 0.0);
@@ -360,23 +361,27 @@ int main(int argc, const char * argv[]) {
                         particle->getFloatAttribute(key_spaceCharge_x),
                         particle->getFloatAttribute(key_spaceCharge_y),
                         particle->getFloatAttribute(key_spaceCharge_z),
+                        particle->getMass() / Core::AMU_TO_KG,
+                        particle->getCharge()
                 };
                 return result;
             };
 
     std::vector<std::string> particleAttributesNames = {"velocity x", "velocity y", "velocity z",
                                                         "rf x", "rf y", "rf z",
-                                                        "spacecharge x", "spacecharge y", "spacecharge z"};
+                                                        "spacecharge x", "spacecharge y", "spacecharge z",
+                                                        "mass", "charge"};
 
     ParticleSimulation::partAttribTransformFctTypeInteger integerParticleAttributesTransformFct =
             [](BTree::Particle *particle) -> std::vector<int>{
                 std::vector<int> result = {
-                        particle->getIntegerAttribute("global index")
+                        particle->getIntegerAttribute("global index"),
+                        particle->getIndex()
                 };
                 return result;
             };
 
-    std::vector<std::string> integerParticleAttributesNames = {"global index"};
+    std::vector<std::string> integerParticleAttributesNames = {"global index", "index"};
 
 
     auto hdf5Writer = std::make_unique<ParticleSimulation::TrajectoryHDF5Writer>(projectName + "_trajectories.hd5");
