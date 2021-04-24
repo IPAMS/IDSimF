@@ -360,28 +360,24 @@ int main(int argc, const char * argv[]) {
                         particle->getFloatAttribute(key_trapForce_z),
                         particle->getFloatAttribute(key_spaceCharge_x),
                         particle->getFloatAttribute(key_spaceCharge_y),
-                        particle->getFloatAttribute(key_spaceCharge_z),
-                        particle->getMass() / Core::AMU_TO_KG,
-                        particle->getCharge()
+                        particle->getFloatAttribute(key_spaceCharge_z)
                 };
                 return result;
             };
 
     std::vector<std::string> particleAttributesNames = {"velocity x", "velocity y", "velocity z",
                                                         "rf x", "rf y", "rf z",
-                                                        "spacecharge x", "spacecharge y", "spacecharge z",
-                                                        "mass", "charge"};
+                                                        "spacecharge x", "spacecharge y", "spacecharge z"};
 
     ParticleSimulation::partAttribTransformFctTypeInteger integerParticleAttributesTransformFct =
             [](BTree::Particle *particle) -> std::vector<int>{
                 std::vector<int> result = {
-                        particle->getIntegerAttribute("global index"),
-                        particle->getIndex()
+                        particle->getIntegerAttribute("global index")
                 };
                 return result;
             };
 
-    std::vector<std::string> integerParticleAttributesNames = {"global index", "index"};
+    std::vector<std::string> integerParticleAttributesNames = {"global index"};
 
 
     auto hdf5Writer = std::make_unique<ParticleSimulation::TrajectoryHDF5Writer>(projectName + "_trajectories.hd5");
