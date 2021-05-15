@@ -27,6 +27,9 @@ option (USE_CPP_FSLIB "Use stdc++fs" OFF)
 option (USE_EIGEN "Use Eigen based tests / experimental implementations" OFF)
 #-------------------------------
 
+# third party libraries ------------------------------------
+add_subdirectory(libs/spdlog)
+
 add_subdirectory (modules/Core)
 add_subdirectory (modules/BTree)
 add_subdirectory (modules/RS)
