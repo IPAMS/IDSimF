@@ -27,7 +27,6 @@
 
 #include "catch.hpp"
 #include "appUtils_logging.hpp"
-#include "appUtils_simulationConfiguration.hpp"
 #include "test_util.hpp"
 #include <string>
 

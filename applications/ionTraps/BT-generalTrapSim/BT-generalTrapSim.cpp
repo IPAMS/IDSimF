@@ -26,9 +26,10 @@
 
  ****************************/
 
-#include "json.h"
+#include "spdlog/spdlog.h"
 #include "appUtils_simulationConfiguration.hpp"
 #include "appUtils_ionDefinitionReading.hpp"
+#include "appUtils_logging.hpp"
 #include "BTree_particle.hpp"
 #include "PSim_trajectoryHDF5Writer.hpp"
 #include "PSim_scalar_writer.hpp"
@@ -61,6 +62,7 @@ const std::string key_trapForce_z = "keyTrapForceZ";
 
 int main(int argc, const char * argv[]) {
 
+
     // read configuration file ======================================================================
     if (argc <2){
         std::cout << "no conf project name or conf file given"<<std::endl;
@@ -73,7 +75,7 @@ int main(int argc, const char * argv[]) {
 
     std::string projectName = argv[2];
     std::cout << projectName<<std::endl;
-
+    auto logger = AppUtils::createLogger(projectName + ".log");
 
     // read basic simulation parameters =============================================================
     std::string integratorMode_str = simConf.stringParameter("integrator_mode");
@@ -191,7 +193,7 @@ int main(int argc, const char * argv[]) {
         std::string swiftFileName = simConf.stringParameter("excite_waveform_csv_file");
         swiftWaveForm = std::make_unique<ParticleSimulation::SampledWaveform>(swiftFileName);
         if (! swiftWaveForm->good()){
-            std::cout << "swift transient file not accessible"<<std::endl;
+            logger->error("swift transient file not accessible");
             return(0);
         }
     }
@@ -387,7 +389,7 @@ int main(int argc, const char * argv[]) {
     ParticleSimulation::AbstractTimeIntegrator *integratorPtr;
     auto timestepWriteFunction =
             [trajectoryWriteInterval, fftWriteInterval, fftWriteMode, &V_0, &V_rf_export, &ionsInactive,
-             &hdf5Writer, &startSplatTracker, &ionsInactiveWriter, &fftWriter, &integratorPtr](
+             &hdf5Writer, &startSplatTracker, &ionsInactiveWriter, &fftWriter, &integratorPtr, &logger](
                     std::vector<BTree::Particle*>& particles, auto& tree, double time, int timestep, bool lastTimestep){
 
                 // check if simulation should be terminated (if all particles are terminated)
@@ -411,9 +413,8 @@ int main(int argc, const char * argv[]) {
 
                 if (timestep % trajectoryWriteInterval == 0 || lastTimestep) {
 
-                    std::cout << "ts:" << timestep << " time:" << time << " V_rf:" << V_0
-                              <<" ions existing: "<<particles.size()<< " ions inactive: "
-                              << ionsInactive << std::endl;
+                    logger->info("ts:{} time:{:.2e} V_rf:{} ions existing:{} ions inactive:{}",
+                            timestep, time, V_0, particles.size(), ionsInactive);
 
                     V_rf_export.emplace_back(V_0);
                     hdf5Writer->writeTimestep(particles, time);
@@ -422,7 +423,7 @@ int main(int argc, const char * argv[]) {
                 if (lastTimestep) {
                     hdf5Writer->writeStartSplatData(startSplatTracker);
                     hdf5Writer->finalizeTrajectory();
-                    std::cout << "finished ts:" << timestep << " time:" << time << std::endl;
+                    logger->info("finished ts:{} time:{:.2e}", timestep, time);
                 }
     };
 
@@ -460,7 +461,7 @@ int main(int argc, const char * argv[]) {
     clock_t end = std::clock();
     double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
 
-    std::cout << particles[0]->getLocation()<<std::endl;
-    std::cout << "elapsed secs"<< elapsed_secs<<std::endl;
+
+    logger->info("elapsed secs {}", elapsed_secs);
     return 0;
 }

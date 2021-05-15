@@ -5,6 +5,7 @@
 #include "PSim_boxStartZone.hpp"
 #include <string>
 #include <sstream>
+#include <fstream>
 #include "catch.hpp"
 
 const std::string vectorsApproxEqual("Vectors approximately equal");
@@ -45,5 +46,13 @@ inline std::vector<std::unique_ptr<BTree::Particle>> getRandomIonsInBox(int numI
     return startZone.getRandomParticlesInStartZone(numIons, 1.0);
 }
 
+inline std::string readTextFile(std::string filename){
+    std::ifstream inputFilestream(filename);
+    std::string result(
+            (std::istreambuf_iterator<char>(inputFilestream)),
+            (std::istreambuf_iterator<char>()));
+
+    return result;
+}
 
 #endif //IONSIMULATION_CPP_TEST_UTIL_HPP

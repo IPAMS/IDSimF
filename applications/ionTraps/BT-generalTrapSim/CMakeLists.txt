@@ -5,7 +5,10 @@ set(SOURCE_FILES
 
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 target_link_libraries(${PROJECT_NAME} core apputils collisionmodels particlesimulation)
-target_link_libraries(${PROJECT_NAME} ${VTK_LIBRARIES} ${HDF5_CXX_LIBRARIES} ${HDF5_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} ${HDF5_CXX_LIBRARIES} ${HDF5_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} spdlog::spdlog)
+#target_include_directories(${PROJECT_NAME} PRIVATE
+#        ${CMAKE_SOURCE_DIR}/libs)
 
 add_test(NAME BT-generalTrapSim_simpleCapacitor COMMAND ${PROJECT_NAME}
         "example/simpleCapacitor.json" "run_BT-generalTrapSim_simpleCapacitor")
