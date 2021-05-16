@@ -35,10 +35,10 @@
 #include "PSim_simionPotentialArray.hpp"
 #include "CollisionModel_EmptyCollisionModel.hpp"
 #include "appUtils_simulationConfiguration.hpp"
+#include "appUtils_logging.hpp"
 #include "appUtils_stopwatch.hpp"
 #include <iostream>
 #include <vector>
-#include <ctime>
 
 
 int main(int argc, const char * argv[]) {
@@ -48,12 +48,13 @@ int main(int argc, const char * argv[]) {
         std::cout << "no conf project name or conf file given"<<std::endl;
         return(1);
     }
-
-    std::string confFileName = argv[1];
-    AppUtils::SimulationConfiguration simConf(confFileName);
-
     std::string projectName = argv[2];
     std::cout << projectName<<std::endl;
+    auto logger = AppUtils::createLogger(projectName + ".log");
+
+    std::string confFileName = argv[1];
+    AppUtils::SimulationConfiguration simConf(confFileName, logger);
+
 
     // read basic simulation parameters =============================================================
     int timeSteps = simConf.intParameter("sim_time_steps");
@@ -124,7 +125,7 @@ int main(int argc, const char * argv[]) {
 
 
     auto timestepWriteFunction =
-            [trajectoryWriteInterval, &jsonWriter, &additionalParameterTransformFct](
+            [trajectoryWriteInterval, &jsonWriter, &additionalParameterTransformFct, &logger](
                     std::vector<BTree::Particle *> &particles, BTree::Tree &tree, double time, int timestep,
                     bool lastTimestep){
 
@@ -137,12 +138,12 @@ int main(int argc, const char * argv[]) {
                     jsonWriter->writeSplatTimes(particles);
                     jsonWriter->writeIonMasses(particles);
 
-                    std::cout << "finished ts:" << timestep << " time:" << time << std::endl;
+                    logger->info("finished ts:{} time:{:.2e}", timestep, time);
                 }
 
                 else if (timestep % trajectoryWriteInterval == 0) {
 
-                    std::cout << "ts:" << timestep << " time:" << time << std::endl;
+                    logger->info("ts:{} time:{:.2e}", timestep, time);
                     jsonWriter->writeTimestep(
                             particles,
                             additionalParameterTransformFct,
@@ -161,7 +162,7 @@ int main(int argc, const char * argv[]) {
 
     stopWatch.stop();
 
-    std::cout << particles[0]->getLocation()<<std::endl;
-    std::cout << "elapsed wall time:"<< stopWatch.elapsedSecondsWall()<<std::endl;
+    logger->info("elapsed secs (wall time) {}", stopWatch.elapsedSecondsWall());
+    logger->info("elapsed secs (cpu time) {}", stopWatch.elapsedSecondsCPU());
     return 0;
 }

@@ -35,6 +35,7 @@
 #include "PSim_ionCloudReader.hpp"
 #include "appUtils_simulationConfiguration.hpp"
 #include "appUtils_stopwatch.hpp"
+#include "appUtils_logging.hpp"
 #include <iostream>
 #include <vector>
 
@@ -46,13 +47,12 @@ int main(int argc, const char * argv[]) {
         std::cout << "no conf project name or conf file given"<<std::endl;
         return(1);
     }
-
-    std::string confFileName = argv[1];
-    AppUtils::SimulationConfiguration simConf(confFileName);
-
     std::string projectName = argv[2];
     std::cout << projectName<<std::endl;
+    auto logger = AppUtils::createLogger(projectName + ".log");
 
+    std::string confFileName = argv[1];
+    AppUtils::SimulationConfiguration simConf(confFileName, logger);
 
     // read basic simulation parameters =============================================================
     int timeSteps = simConf.intParameter("sim_time_steps");
@@ -140,7 +140,7 @@ int main(int argc, const char * argv[]) {
             };
 
     auto timestepWriteFunction =
-            [trajectoryWriteInterval, &hdf5Writer, &additionalParameterTransformFct](
+            [trajectoryWriteInterval, &hdf5Writer, &logger](
                     std::vector<BTree::Particle*>& particles, BTree::ParallelTree& tree, double time, int timestep, bool lastTimestep){
 
                 if (lastTimestep) {
@@ -148,13 +148,11 @@ int main(int argc, const char * argv[]) {
 
                     hdf5Writer->writeSplatTimes(particles);
                     hdf5Writer->finalizeTrajectory();
-                    std::cout << "finished ts:" << timestep << " time:" << time << std::endl;
+                    logger->info("finished ts:{} time:{:.2e}", timestep, time);
                 }
 
                 else if (timestep % trajectoryWriteInterval == 0) {
-
-                    std::cout << "ts:" << timestep << " time:" << time << std::endl;
-
+                    logger->info("ts:{} time:{:.2e}", timestep, time);
                     hdf5Writer->writeTimestep(particles,time);
                 }
             };
@@ -170,8 +168,7 @@ int main(int argc, const char * argv[]) {
 
     stopWatch.stop();
 
-
-    std::cout << particlePtrs[0]->getLocation()<<std::endl;
-    std::cout << "elapsed wall time:"<< stopWatch.elapsedSecondsWall()<<std::endl;
+    logger->info("elapsed secs (wall time) {}", stopWatch.elapsedSecondsWall());
+    logger->info("elapsed secs (cpu time) {}", stopWatch.elapsedSecondsCPU());
     return 0;
 }
