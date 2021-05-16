@@ -16,6 +16,7 @@
 
 #include "CollisionModel_HardSphere.hpp"
 #include "BTree_particle.hpp"
+#include "appUtils_stopwatch.hpp"
 
 #include <ctime>
 #include <iostream>
@@ -32,7 +33,8 @@ int main(int argc, const char * argv[]) {
     int n = 200000;
 
     std::cout << "Generate field free ion velocity samples" << std::endl;
-    clock_t begin = std::clock();
+    AppUtils::Stopwatch stopWatch;
+    stopWatch.start();
     std::ofstream outputFile ("fieldfree_ion_samples.txt");
 
     for (int i =0; i<n; i++){
@@ -42,9 +44,9 @@ int main(int argc, const char * argv[]) {
 
     outputFile.close();
 
-    clock_t end = std::clock();
-    double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
+    stopWatch.stop();
+    std::cout << "elapsed wall time:"<< stopWatch.elapsedSecondsWall()<<std::endl;
+    std::cout << "elapsed cpu time:"<< stopWatch.elapsedSecondsCPU()<<std::endl;
 
-    std::cout << "elapsed secs: "<< elapsed_secs<<std::endl;
     return 0;
 }

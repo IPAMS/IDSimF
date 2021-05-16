@@ -1,8 +1,8 @@
 #include "CollisionModel_MathFunctions.hpp"
+#include "appUtils_stopwatch.hpp"
 #include <iostream>
 #include <algorithm>
 #include <vector>
-#include <ctime>
 #include <cmath>
 
 double generateFct()
@@ -15,7 +15,8 @@ double generateFct()
 int main(int argc, const char * argv[]) {
     // insert code here...
     std::cout << "Benchmark errorfunction" << std::endl;
-    clock_t begin = std::clock();
+    AppUtils::Stopwatch stopWatch;
+    stopWatch.start();
 
     int nSamples = 80000000;
     std::vector<double> xVec(nSamples);
@@ -26,10 +27,10 @@ int main(int argc, const char * argv[]) {
         result_std[i] = std::erf(xVec[i]);
     }
 
-    clock_t end = std::clock();
-    double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
+    stopWatch.stop();
 
-    std::cout << "elapsed secs: "<< elapsed_secs<<std::endl;
+    std::cout << "elapsed wall time:"<< stopWatch.elapsedSecondsWall()<<std::endl;
+    std::cout << "elapsed cpu time:"<< stopWatch.elapsedSecondsCPU()<<std::endl;
     std::cout << "result[0]: " << result_std[0] << std::endl;
     return 0;
 }

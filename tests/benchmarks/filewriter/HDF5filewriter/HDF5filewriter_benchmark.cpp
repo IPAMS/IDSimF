@@ -1,9 +1,9 @@
 #include "PSim_trajectoryHDF5Writer.hpp"
 #include "BTree_particle.hpp"
+#include "appUtils_stopwatch.hpp"
 #include <iostream>
 #include <memory>
 #include <vector>
-#include <ctime>
 #include <cmath>
 
 
@@ -16,7 +16,8 @@ int main(int argc, const char * argv[]) {
 
     int nIons = 1e7;
 
-    clock_t begin = std::clock();
+    AppUtils::Stopwatch stopWatch;
+    stopWatch.start();
 
     std::vector<std::unique_ptr<BTree::Particle>> particles;
     std::vector<BTree::Particle*> particlePtrs;
@@ -34,9 +35,9 @@ int main(int argc, const char * argv[]) {
     trajectoryWriter.writeSplatTimes(particlePtrs);
 
 
-    clock_t end = std::clock();
-    double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
+    stopWatch.stop();
 
-    std::cout << "elapsed secs: "<< elapsed_secs<<std::endl;
+    std::cout << "elapsed wall time:"<< stopWatch.elapsedSecondsWall()<<std::endl;
+    std::cout << "elapsed cpu time:"<< stopWatch.elapsedSecondsCPU()<<std::endl;
     return 0;
 }

@@ -10,4 +10,4 @@ set(TEST_FILES
 file(COPY ${TEST_FILES} DESTINATION .)
 
 add_executable(benchmark_rs_runtime ${SOURCE_FILES})
-target_link_libraries(benchmark_rs_runtime core particlesimulation rs)
+target_link_libraries(benchmark_rs_runtime core particlesimulation rs apputils)

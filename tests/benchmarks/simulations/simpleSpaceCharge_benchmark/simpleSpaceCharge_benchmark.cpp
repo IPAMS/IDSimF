@@ -10,20 +10,21 @@
 #include "PSim_util.hpp"
 #include "CollisionModel_EmptyCollisionModel.hpp"
 #include "CollisionModel_StatisticalDiffusion.hpp"
+#include "appUtils_stopwatch.hpp"
 #include <iostream>
-#include <cmath>
-#include <ctime>
 #include <numeric>
 
 void runIntegrator(ParticleSimulation::AbstractTimeIntegrator &integrator, int timeSteps, double dt, std::string message){
     std::cout << "Benchmark " <<message << std::endl;
-    time_t begin = std::time(NULL);
+    AppUtils::Stopwatch stopWatch;
+    stopWatch.start();
 
     integrator.run(timeSteps, dt);
 
-    time_t end = std::time(NULL);
-    double elapsed_secs = difftime(end, begin);
-    std::cout << "elapsed secs: "<< elapsed_secs<<std::endl;
+    stopWatch.stop();
+    std::cout << "elapsed wall time:"<< stopWatch.elapsedSecondsWall()<<std::endl;
+    std::cout << "elapsed cpu time:"<< stopWatch.elapsedSecondsCPU()<<std::endl;
+
 }
 
 

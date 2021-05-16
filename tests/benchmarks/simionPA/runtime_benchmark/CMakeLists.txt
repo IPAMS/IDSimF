@@ -16,4 +16,4 @@ include_directories(${CMAKE_SOURCE_DIR}/modules/BTree)
 include_directories(${CMAKE_SOURCE_DIR}/modules/particleSimulation)
 
 add_executable(benchmark_simionpa_runtime ${SOURCE_FILES})
-target_link_libraries(benchmark_simionpa_runtime core particlesimulation)
+target_link_libraries(benchmark_simionpa_runtime core particlesimulation apputils)

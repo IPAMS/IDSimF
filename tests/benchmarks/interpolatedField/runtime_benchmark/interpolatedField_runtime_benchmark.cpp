@@ -61,7 +61,5 @@ int main(int argc, const char * argv[]) {
 
     int n = 40000000;
     testResult resultOwn = performFieldTest<ParticleSimulation::InterpolatedField>("Own implementation", n);
-
-
     return 0;
 }

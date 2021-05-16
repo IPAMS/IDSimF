@@ -26,10 +26,6 @@
 
  ****************************/
 
-#include "spdlog/spdlog.h"
-#include "appUtils_simulationConfiguration.hpp"
-#include "appUtils_ionDefinitionReading.hpp"
-#include "appUtils_logging.hpp"
 #include "BTree_particle.hpp"
 #include "PSim_trajectoryHDF5Writer.hpp"
 #include "PSim_scalar_writer.hpp"
@@ -43,6 +39,10 @@
 #include "PSim_inductionCurrentWriter.hpp"
 #include "PSim_simionPotentialArray.hpp"
 #include "CollisionModel_HardSphere.hpp"
+#include "appUtils_simulationConfiguration.hpp"
+#include "appUtils_ionDefinitionReading.hpp"
+#include "appUtils_logging.hpp"
+#include "appUtils_stopwatch.hpp"
 #include <iostream>
 #include <vector>
 #include <ctime>
@@ -434,7 +434,8 @@ int main(int argc, const char * argv[]) {
                                             collisionGasDiameterM);
 
     // simulate ===============================================================================================
-    clock_t begin = std::clock();
+    AppUtils::Stopwatch stopWatch;
+    stopWatch.start();
 
     if (integratorMode == VERLET) {
         ParticleSimulation::VerletIntegrator verletIntegrator(
@@ -459,10 +460,9 @@ int main(int argc, const char * argv[]) {
         hdf5Writer->writeNumericListDataset("V_rf", V_rf_export);
     }
 
-    clock_t end = std::clock();
-    double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
+    stopWatch.stop();
 
-
-    logger->info("elapsed secs {}", elapsed_secs);
+    logger->info("elapsed secs (wall time) {}", stopWatch.elapsedSecondsWall());
+    logger->info("elapsed secs (cpu time) {}", stopWatch.elapsedSecondsCPU());
     return 0;
 }

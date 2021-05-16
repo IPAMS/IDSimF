@@ -27,11 +27,6 @@
  ****************************/
 
 
-#include <iostream>
-#include <vector>
-#include <ctime>
-#include "json.h"
-#include "parameterParsing_macro.hpp"
 #include "BTree_particle.hpp"
 #include "BTree_tree.hpp"
 #include "PSim_simpleVTKwriter.hpp"
@@ -39,6 +34,12 @@
 #include "PSim_util.hpp"
 #include "PSim_verletIntegrator.hpp"
 #include "CollisionModel_HardSphere.hpp"
+#include "parameterParsing_macro.hpp"
+#include "appUtils_stopwatch.hpp"
+#include "json.h"
+#include <iostream>
+#include <vector>
+#include <ctime>
 
 
 int timeSteps = 0;
@@ -185,15 +186,16 @@ int main(int argc, const char * argv[]) {
         otherActionsFct = otherActionsFunctionQuad_3dSim;
     }
 
-    clock_t begin = std::clock();
+    AppUtils::Stopwatch stopWatch;
+    stopWatch.start();
     ParticleSimulation::verletIntegrationSimulation(
             particles,dt,timeSteps,accelerationFunctionQuad, timestepWriteFunction,otherActionsFct,hsModel,projectName);
 
-    clock_t end = std::clock();
-    double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
-
+    stopWatch.stop();
     std::cout << particles[0]->getLocation()<<std::endl;
-    std::cout << "elapsed secs"<< elapsed_secs<<std::endl;
+    std::cout << "elapsed wall time:"<< stopWatch.elapsedSecondsWall()<<std::endl;
+    std::cout << "elapsed cpu time:"<< stopWatch.elapsedSecondsCPU()<<std::endl;
+
 
 
     return 0;

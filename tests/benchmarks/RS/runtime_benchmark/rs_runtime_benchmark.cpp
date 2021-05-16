@@ -24,13 +24,13 @@
 
  ***************************/
 
-#include <iostream>
-#include <cmath>
-#include <ctime>
 #include "RS_Simulation.hpp"
 #include "RS_SimulationConfiguration.hpp"
 #include "RS_ConfigFileParser.hpp"
 #include "RS_ConcentrationFileWriter.hpp"
+#include "appUtils_stopwatch.hpp"
+#include <iostream>
+#include <cmath>
 
 int main(int argc, const char * argv[]) {
 
@@ -72,7 +72,8 @@ int main(int argc, const char * argv[]) {
     int concentrationPrintInterval = 100;
     double dt_s = 5e-11;
 
-    clock_t begin = std::clock();
+    AppUtils::Stopwatch stopWatch;
+    stopWatch.start();
 
     for (int step=0; step<nSteps; step++) {
 
@@ -87,11 +88,12 @@ int main(int argc, const char * argv[]) {
 
     }
 
-    clock_t end = std::clock();
-    double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
+    stopWatch.stop();
+
     std::cout << "reaction events:" << rsSim.totalReactionEvents() << " ill events:" << rsSim.illEvents() << std::endl;
     std::cout << "ill fraction: " << rsSim.illEvents() / (double) rsSim.totalReactionEvents() << std::endl;
-    std::cout << "elapsed seconds "<< elapsed_secs<<std::endl;
+    std::cout << "elapsed wall time:"<< stopWatch.elapsedSecondsWall()<<std::endl;
+    std::cout << "elapsed cpu time:"<< stopWatch.elapsedSecondsCPU()<<std::endl;
 
     // ======================================================================================
 

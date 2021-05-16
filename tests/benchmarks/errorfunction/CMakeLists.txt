@@ -10,5 +10,4 @@ include_directories(${CMAKE_SOURCE_DIR}/modules/BTree)
 include_directories(${CMAKE_SOURCE_DIR}/modules/backgroundInteraction/collisionModels)
 
 add_executable(benchmark_errorfunction ${SOURCE_FILES})
-add_dependencies(benchmark_errorfunction core collisionmodels)
-target_link_libraries(benchmark_errorfunction core collisionmodels)
+target_link_libraries(benchmark_errorfunction core collisionmodels apputils)

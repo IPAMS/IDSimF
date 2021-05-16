@@ -42,8 +42,9 @@
 #include "PSim_idealizedQitFFTWriter.hpp"
 #include "CollisionModel_HardSphere.hpp"
 #include "CollisionModel_MultiCollisionModel.hpp"
-#include "json.h"
 #include "appUtils_simulationConfiguration.hpp"
+#include "appUtils_stopwatch.hpp"
+#include "json.h"
 #include <iostream>
 #include <vector>
 #include <ctime>
@@ -451,7 +452,8 @@ int main(int argc, const char * argv[]) {
             accelerationFunctionQIT, timestepWriteFunction, otherActionsFunctionQIT, particleStartMonitoringFct,
             &combinedCollisionModel);
 
-    clock_t begin = std::clock();
+    AppUtils::Stopwatch stopWatch;
+    stopWatch.start();
 
     for (int step=0; step<timeSteps; ++step) {
         if (step % concentrationWriteInterval == 0) {
@@ -480,10 +482,10 @@ int main(int argc, const char * argv[]) {
     }
     verletIntegrator.finalizeSimulation();
 
-    clock_t end = std::clock();
-    double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
+    stopWatch.stop();
 
     std::cout << particles[0]->getLocation()<<std::endl;
-    std::cout << "elapsed secs"<< elapsed_secs<<std::endl;
+    std::cout << "elapsed wall time:"<< stopWatch.elapsedSecondsWall()<<std::endl;
+    std::cout << "elapsed cpu time:"<< stopWatch.elapsedSecondsCPU()<<std::endl;
     return 0;
 }

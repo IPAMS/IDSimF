@@ -16,8 +16,8 @@
 #include "PSim_simionPotentialArray.hpp"
 #include "PSim_math.hpp"
 #include "PSim_scalar_writer.hpp"
+#include "appUtils_stopwatch.hpp"
 
-#include <ctime>
 #include <iostream>
 //#include <string>
 
@@ -35,7 +35,8 @@ void performBenchmark(int nSamples,
     ParticleSimulation::Scalar_writer scalarWriter("test.csv");
 
     std::cout << "Benchmark SIMION potential array " <<message << std::endl;
-    clock_t begin = std::clock();
+    AppUtils::Stopwatch stopWatch;
+    stopWatch.start();
 
     for (int i=0; i< nSamples; ++i){
 
@@ -49,9 +50,9 @@ void performBenchmark(int nSamples,
         }
     }
 
-    clock_t end = std::clock();
-    double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
-    std::cout << "elapsed secs: "<< elapsed_secs<<std::endl;
+    stopWatch.stop();
+    std::cout << "elapsed wall time:"<< stopWatch.elapsedSecondsWall()<<std::endl;
+    std::cout << "elapsed cpu time:"<< stopWatch.elapsedSecondsCPU()<<std::endl;
 }
 
 int main(int argc, const char * argv[]) {

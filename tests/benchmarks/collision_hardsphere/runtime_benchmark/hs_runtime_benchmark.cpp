@@ -14,6 +14,7 @@
 
 #include "CollisionModel_HardSphere.hpp"
 #include "BTree_particle.hpp"
+#include "appUtils_stopwatch.hpp"
 
 #include <ctime>
 #include <iostream>
@@ -36,7 +37,8 @@ void performBenchmark(int nSamples, bool maxwellApproximation){
         std::cout << "without Maxwell approximation" << std::endl;
     }
 
-    clock_t begin = std::clock();
+    AppUtils::Stopwatch stopWatch;
+    stopWatch.start();
 
     for (int i =0; i<nSamples; ++i){
         hs.modifyVelocity(ion, 4e-6);
@@ -44,10 +46,9 @@ void performBenchmark(int nSamples, bool maxwellApproximation){
     Core::Vector ionVelo = ion.getVelocity();
 
 
-    clock_t end = std::clock();
-    double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
-
-    std::cout << "elapsed secs: "<< elapsed_secs<<std::endl;
+    stopWatch.stop();
+    std::cout << "elapsed wall time:"<< stopWatch.elapsedSecondsWall()<<std::endl;
+    std::cout << "elapsed cpu time:"<< stopWatch.elapsedSecondsCPU()<<std::endl;
     std::cout << "ion velocity: "<< ionVelo<<std::endl;
 }
 

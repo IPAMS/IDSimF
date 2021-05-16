@@ -40,6 +40,7 @@
 #include "CollisionModel_StatisticalDiffusion.hpp"
 #include "CollisionModel_MultiCollisionModel.hpp"
 #include "appUtils_simulationConfiguration.hpp"
+#include "appUtils_stopwatch.hpp"
 #include "json.h"
 #include <iostream>
 #include <cmath>
@@ -385,7 +386,8 @@ int main(int argc, const char *argv[]){
 
 
     // simulate   ===========================================================================
-    clock_t begin = std::clock();
+    AppUtils::Stopwatch stopWatch;
+    stopWatch.start();
 
     for (int step = 0; step < nSteps; step++) {
         if (step % concentrationWriteInterval == 0) {
@@ -417,8 +419,7 @@ int main(int argc, const char *argv[]){
         trajectoryIntegrator->finalizeSimulation();
     }
 
-    clock_t end = std::clock();
-    double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
+    stopWatch.stop();
     std::cout << "----------------------"<<std::endl;
     std::cout << "Reaction Events:"<<std::endl;
     rsSim.printReactionStatistics();
@@ -426,7 +427,9 @@ int main(int argc, const char *argv[]){
     std::cout << "total reaction events:" << rsSim.totalReactionEvents() << " ill events:" << rsSim.illEvents() << std::endl;
     std::cout << "ill fraction: " << rsSim.illEvents() / (double) rsSim.totalReactionEvents() << std::endl;
 
-    std::cout << "elapsed seconds " << elapsed_secs << std::endl;
+    std::cout << "elapsed wall time:"<< stopWatch.elapsedSecondsWall()<<std::endl;
+    std::cout << "elapsed cpu time:"<< stopWatch.elapsedSecondsCPU()<<std::endl;
+
 
     // ======================================================================================
 

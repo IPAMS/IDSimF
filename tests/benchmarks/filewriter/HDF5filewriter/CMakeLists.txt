@@ -6,4 +6,4 @@ set(SOURCE_FILES
 
 add_executable(benchmark_hdf5Writer ${SOURCE_FILES})
 
-target_link_libraries(benchmark_hdf5Writer core particlesimulation)
+target_link_libraries(benchmark_hdf5Writer core particlesimulation apputils)

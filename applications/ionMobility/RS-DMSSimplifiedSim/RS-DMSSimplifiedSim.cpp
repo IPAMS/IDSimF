@@ -27,11 +27,6 @@
 
  ****************************/
 
-#include <iostream>
-#include <cmath>
-#include <ctime>
-#include "json.h"
-#include "appUtils_simulationConfiguration.hpp"
 #include "RS_Simulation.hpp"
 #include "RS_SimulationConfiguration.hpp"
 #include "RS_ConfigFileParser.hpp"
@@ -39,6 +34,12 @@
 #include "PSim_trajectoryExplorerJSONwriter.hpp"
 #include "PSim_scalar_writer.hpp"
 #include "PSim_util.hpp"
+#include "appUtils_simulationConfiguration.hpp"
+#include "appUtils_stopwatch.hpp"
+#include "json.h"
+#include <iostream>
+#include <cmath>
+#include <ctime>
 
 const std::string key_ChemicalIndex = "keyChemicalIndex";
 const double standardPressure_Pa = 102300; //101325
@@ -241,7 +242,8 @@ int main(int argc, const char * argv[]) {
 
 
     // simulate   ===========================================================================
-    clock_t begin = std::clock();
+    AppUtils::Stopwatch stopWatch;
+    stopWatch.start();
 
     reactionConditions.temperature = backgroundTemperature_K;
     double reducedPressure = standardPressure_Pa / backgroundPressure_Pa;
@@ -290,11 +292,13 @@ int main(int argc, const char * argv[]) {
     }
     timestepWriteFct(particlesPtrs, rsSim.simulationTime(), nSteps, true);
 
-    clock_t end = std::clock();
-    double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
+
+    stopWatch.stop();
     std::cout << "reaction events:" << rsSim.totalReactionEvents() << " ill events:" << rsSim.illEvents() << std::endl;
     std::cout << "ill fraction: " << rsSim.illEvents() / (double) rsSim.totalReactionEvents() << std::endl;
-    std::cout << "elapsed seconds "<< elapsed_secs<<std::endl;
+    std::cout << "elapsed wall time:"<< stopWatch.elapsedSecondsWall()<<std::endl;
+    std::cout << "elapsed cpu time:"<< stopWatch.elapsedSecondsCPU()<<std::endl;
+
 
     // ======================================================================================
 

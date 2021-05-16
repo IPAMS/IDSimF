@@ -15,10 +15,8 @@
 #include "Core_debug.hpp"
 #include "PSim_simionPotentialArray.hpp"
 #include "PSim_math.hpp"
-
-#include <ctime>
+#include "appUtils_stopwatch.hpp"
 #include <iostream>
-//#include <string>
 
 template<typename PAType>
 void performBenchmark(int nSamples,
@@ -32,7 +30,8 @@ void performBenchmark(int nSamples,
     PAType simPa(filename);
 
     std::cout << "Benchmark SIMION potential array " <<message << std::endl;
-    clock_t begin = std::clock();
+    AppUtils::Stopwatch stopWatch;
+    stopWatch.start();
 
     for (int i=0; i< nSamples; ++i){
 
@@ -41,9 +40,10 @@ void performBenchmark(int nSamples,
         simPa.getField(xVec[i], y, z);
     }
 
-    clock_t end = std::clock();
-    double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
-    std::cout << "elapsed secs: "<< elapsed_secs<<std::endl;
+    stopWatch.stop();
+    std::cout << "elapsed wall time:"<< stopWatch.elapsedSecondsWall()<<std::endl;
+    std::cout << "elapsed cpu time:"<< stopWatch.elapsedSecondsCPU()<<std::endl;
+
 }
 
 int main(int argc, const char * argv[]) {

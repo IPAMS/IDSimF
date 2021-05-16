@@ -14,14 +14,15 @@
 
 #include "CollisionModel_StatisticalDiffusion.hpp"
 #include "BTree_particle.hpp"
+#include "appUtils_stopwatch.hpp"
 
-#include <ctime>
 #include <iostream>
 
 void performBenchmark(int nSamples, double dt){
 
     std::cout << "Benchmark SDS collision model dt="<<dt << std::endl;
-    clock_t begin = std::clock();
+    AppUtils::Stopwatch stopWatch;
+    stopWatch.start();
 
     CollisionModel::StatisticalDiffusionModel sds(100000,298,28,0.366 * 1.0e-9);
     BTree::Particle ion;
@@ -38,11 +39,12 @@ void performBenchmark(int nSamples, double dt){
 
     Core::Vector ionLoc = ion.getLocation();
 
-    clock_t end = std::clock();
-    double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
+    stopWatch.stop();
 
     std::cout << "ion location: "<< ionLoc << std::endl;
-    std::cout << "elapsed secs: "<< elapsed_secs<<std::endl;
+    std::cout << "elapsed wall time:"<< stopWatch.elapsedSecondsWall()<<std::endl;
+    std::cout << "elapsed cpu time:"<< stopWatch.elapsedSecondsCPU()<<std::endl;
+
 }
 
 int main(int argc, const char * argv[]) {

@@ -39,9 +39,9 @@
 #include "CollisionModel_StatisticalDiffusion.hpp"
 #include "CollisionModel_SpatialFieldFunctions.hpp"
 #include "appUtils_simulationConfiguration.hpp"
+#include "appUtils_stopwatch.hpp"
 #include "json.h"
 #include <iostream>
-#include <sstream>
 #include <cmath>
 #include <ctime>
 
@@ -394,7 +394,8 @@ int main(int argc, const char * argv[]) {
 
 
     // simulate   ===========================================================================
-    clock_t begin = std::clock();
+    AppUtils::Stopwatch stopWatch;
+    stopWatch.start();
 
     for (int step=0; step<nSteps; step++) {
         for (int i = 0; i < nParticlesTotal; i++) {
@@ -439,12 +440,13 @@ int main(int argc, const char * argv[]) {
         }
     }
     verletIntegrator.finalizeSimulation();
+    stopWatch.stop();
 
-    clock_t end = std::clock();
-    double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
     std::cout << "reaction events:" << rsSim.totalReactionEvents() << " ill events:" << rsSim.illEvents() << std::endl;
     std::cout << "ill fraction: " << rsSim.illEvents() / (double) rsSim.totalReactionEvents() << std::endl;
-    std::cout << "elapsed seconds "<< elapsed_secs<<std::endl;
+    std::cout << "elapsed wall time:"<< stopWatch.elapsedSecondsWall()<<std::endl;
+    std::cout << "elapsed cpu time:"<< stopWatch.elapsedSecondsCPU()<<std::endl;
+
 
     // ======================================================================================
 
