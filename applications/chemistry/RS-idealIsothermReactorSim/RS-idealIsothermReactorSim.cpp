@@ -26,9 +26,9 @@
  ****************************/
 #include <iostream>
 #include <cmath>
-#include <ctime>
 #include "json.h"
 #include "appUtils_simulationConfiguration.hpp"
+#include "appUtils_stopwatch.hpp"
 #include "RS_Simulation.hpp"
 #include "RS_SimulationConfiguration.hpp"
 #include "RS_ConfigFileParser.hpp"
@@ -93,9 +93,9 @@ int main(int argc, const char * argv[]) {
 
 
     // simulate   ===========================================================================
-    clock_t beginCpu = std::clock();
-    auto beginWall = std::chrono::system_clock::now();
+    AppUtils::Stopwatch stopWatch;
 
+    stopWatch.start();
     for (int step=0; step<nSteps; step++) {
         if (step % concentrationWriteInterval ==0) {
             sim.printConcentrations();
@@ -106,11 +106,7 @@ int main(int argc, const char * argv[]) {
         sim.advanceTimestep(dt_s);
     }
 
-    clock_t endCpu = std::clock();
-    double elapsedSecsCPU = double(endCpu - beginCpu) / CLOCKS_PER_SEC;
-
-    std::chrono::duration<double> durationWall = (std::chrono::system_clock::now() - beginWall);
-
+    stopWatch.stop();
 
     std::cout << "----------------------"<<std::endl;
     std::cout << "Reaction Events:"<<std::endl;
@@ -119,8 +115,8 @@ int main(int argc, const char * argv[]) {
     std::cout << "total reaction events:" << sim.totalReactionEvents() << " ill events:" << sim.illEvents() << std::endl;
     std::cout << "ill fraction: " << sim.illEvents() / (double) sim.totalReactionEvents() << std::endl;
 
-    std::cout << "CPU time: " << elapsedSecsCPU <<" s"<< std::endl;
-    std::cout << "Finished in " << durationWall.count() << " seconds [Wall Clock]" << std::endl;
+    std::cout << "CPU time: " << stopWatch.elapsedSecondsCPU() <<" s"<< std::endl;
+    std::cout << "Finished in " << stopWatch.elapsedSecondsWall() << " seconds [Wall Clock]" << std::endl;
 
     // ======================================================================================
 
