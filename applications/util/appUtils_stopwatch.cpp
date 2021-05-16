@@ -17,26 +17,26 @@
 
  You should have received a copy of the GNU General Public License
  along with IDSimF.  If not, see <https://www.gnu.org/licenses/>.
-
- ------------
- test_logging.cpp
-
- Tests of logging facilities
-
  ****************************/
 
-#include "catch.hpp"
-#include "appUtils_logging.hpp"
-#include "test_util.hpp"
-#include <string>
+#include "appUtils_stopwatch.hpp"
 
-TEST_CASE( "Test logging", "[ApplicationUtils]") {
-    auto logger = AppUtils::createLogger("test.log");
-    logger->info("First log message");
-    logger->info("Second log message");
-    logger->flush();
-
-    // test written contents:
-    std::string lfContents = readTextFile("test.log");
-    CHECK(lfContents.find("[I] Second log message") != std::string::npos);
+void AppUtils::Stopwatch::start() {
+    beginCpu_ = std::clock();
+    beginWall_ = std::chrono::system_clock::now();
 }
+
+void AppUtils::Stopwatch::stop() {
+    clock_t endCpu = std::clock();
+    elapsedSecsCPU_ += double(endCpu - beginCpu_) / CLOCKS_PER_SEC;
+    elapsedWall_ += (std::chrono::system_clock::now() - beginWall_);
+}
+
+double AppUtils::Stopwatch::elapsedSecondsCPU() {
+    return elapsedSecsCPU_;
+}
+
+double AppUtils::Stopwatch::elapsedSecondsWall() {
+    return elapsedWall_.count();
+}
+

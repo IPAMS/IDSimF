@@ -3,7 +3,7 @@ project(test_Applications)
 set(SOURCE_FILES
         test_main.cpp
         test_ionDefinitionReading.cpp
-        test_logging.cpp)
+        test_logging_timing.cpp)
 
 set(TEST_FILE_FOLDER ${CMAKE_SOURCE_DIR}/tests/testfields/simulation_configurations)
 set(TEST_FILES

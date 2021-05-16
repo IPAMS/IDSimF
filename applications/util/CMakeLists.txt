@@ -6,7 +6,7 @@ set(SOURCE_FILES
         appUtils_inputFileUtilities.hpp
         appUtils_inputFileUtilities.cpp
         appUtils_ionDefinitionReading.cpp
-        appUtils_ionDefinitionReading.hpp appUtils_simulationConfiguration.cpp appUtils_logging.cpp appUtils_logging.hpp)
+        appUtils_ionDefinitionReading.hpp appUtils_simulationConfiguration.cpp appUtils_logging.cpp appUtils_logging.hpp appUtils_stopwatch.cpp appUtils_stopwatch.hpp)
 
 add_library(apputils STATIC ${SOURCE_FILES})
 target_include_directories(apputils PUBLIC
