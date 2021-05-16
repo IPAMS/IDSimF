@@ -34,8 +34,8 @@
 #include "PSim_ionCloudReader.hpp"
 #include "PSim_simionPotentialArray.hpp"
 #include "CollisionModel_EmptyCollisionModel.hpp"
-#include "json.h"
 #include "appUtils_simulationConfiguration.hpp"
+#include "appUtils_stopwatch.hpp"
 #include <iostream>
 #include <vector>
 #include <ctime>
@@ -152,16 +152,16 @@ int main(int argc, const char * argv[]) {
 
 
     // simulate ===============================================================================================
-    clock_t begin = std::clock();
+    AppUtils::Stopwatch stopWatch;
+    stopWatch.start();
     ParticleSimulation::VerletIntegrator verletIntegrator(
             particlePtrs,
             accelerationFunction, timestepWriteFunction);
     verletIntegrator.run(timeSteps, dt);
 
-    clock_t end = std::clock();
-    double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
+    stopWatch.stop();
 
     std::cout << particles[0]->getLocation()<<std::endl;
-    std::cout << "elapsed secs"<< elapsed_secs<<std::endl;
+    std::cout << "elapsed wall time:"<< stopWatch.elapsedSecondsWall()<<std::endl;
     return 0;
 }

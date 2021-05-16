@@ -25,11 +25,6 @@
 
  ****************************/
 
-#include <iostream>
-#include <vector>
-#include <ctime>
-#include "json.h"
-#include "appUtils_simulationConfiguration.hpp"
 #include "BTree_particle.hpp"
 #include "BTree_parallelTree.hpp"
 #include "PSim_trajectoryExplorerJSONwriter.hpp"
@@ -38,7 +33,11 @@
 #include "PSim_boxStartZone.hpp"
 #include "PSim_parallelVerletIntegrator.hpp"
 #include "PSim_ionCloudReader.hpp"
-#include "CollisionModel_EmptyCollisionModel.hpp"
+#include "appUtils_simulationConfiguration.hpp"
+#include "appUtils_stopwatch.hpp"
+#include <iostream>
+#include <vector>
+
 
 int main(int argc, const char * argv[]) {
 
@@ -162,15 +161,17 @@ int main(int argc, const char * argv[]) {
 
 
     // simulate ===============================================================================================
-    clock_t begin = std::clock();
+    AppUtils::Stopwatch stopWatch;
+    stopWatch.start();
+
     ParticleSimulation::ParallelVerletIntegrator verletIntegrator(
             particlePtrs, accelerationFunction, timestepWriteFunction);
     verletIntegrator.run(timeSteps, dt);
 
-    clock_t end = std::clock();
-    double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
+    stopWatch.stop();
+
 
     std::cout << particlePtrs[0]->getLocation()<<std::endl;
-    std::cout << "elapsed secs"<< elapsed_secs<<std::endl;
+    std::cout << "elapsed wall time:"<< stopWatch.elapsedSecondsWall()<<std::endl;
     return 0;
 }
