@@ -29,11 +29,11 @@
 #define Particle_simulation_simion_potential_array
 
 
+#include "Core_vector.hpp"
 #include <iostream>
 #include <string>
 #include <array>
 #include <vector>
-#include "Core_vector.hpp"
 
 
 namespace ParticleSimulation{

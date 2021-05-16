@@ -69,13 +69,14 @@ int main(int argc, const char * argv[]) {
         return(1);
     }
 
-    std::string confFileName = argv[1];
-    AppUtils::SimulationConfiguration simConf(confFileName);
-    std::filesystem::path confBasePath = simConf.confBasePath();
-
     std::string projectName = argv[2];
     std::cout << projectName<<std::endl;
     auto logger = AppUtils::createLogger(projectName + ".log");
+
+    std::string confFileName = argv[1];
+    AppUtils::SimulationConfiguration simConf(confFileName, logger);
+    std::filesystem::path confBasePath = simConf.confBasePath();
+
 
     // read basic simulation parameters =============================================================
     std::string integratorMode_str = simConf.stringParameter("integrator_mode");

@@ -48,4 +48,4 @@ add_library(particlesimulation STATIC ${SOURCE_FILES})
 target_include_directories(particlesimulation PUBLIC .)
 
 target_link_libraries(particlesimulation core btree collisionmodels)
-target_link_libraries(particlesimulation ${HDF5_CXX_LIBRARIES} ${HDF5_LIBRARIES})
+target_link_libraries(particlesimulation ${HDF5_CXX_LIBRARIES} ${HDF5_LIBRARIES} spdlog::spdlog)

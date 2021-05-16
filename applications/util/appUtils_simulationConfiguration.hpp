@@ -2,16 +2,19 @@
 #define IONSIMULATION_CPP_PARAMETERPARSING_HPP
 
 #include "json.h"
+#include "spdlog/spdlog.h"
 #include "PSim_interpolatedField.hpp"
 #include <filesystem>
 #include <vector>
 #include <fstream>
 #include <iostream>
+#include <memory>
 
 namespace AppUtils{
     class SimulationConfiguration{
     public:
         SimulationConfiguration(const std::string& confFileName);
+        SimulationConfiguration(const std::string& confFileName, std::shared_ptr<spdlog::logger> logger);
         bool isParameter(const std::string& keyName) const;
         int intParameter(const std::string& jsonName) const;
         std::vector<int> intVectorParameter(const std::string& jsonName) const;
@@ -36,6 +39,7 @@ namespace AppUtils{
         Json::Value confRoot_;
         std::filesystem::path confFilePath_;
         std::filesystem::path confFileBasePath_;
+        std::shared_ptr<spdlog::logger> logger_ = nullptr;
     };
 }
 #endif //IONSIMULATION_CPP_PARAMETERPARSING_HPP

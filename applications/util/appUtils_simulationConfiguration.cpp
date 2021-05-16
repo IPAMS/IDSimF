@@ -6,6 +6,13 @@ AppUtils::SimulationConfiguration::SimulationConfiguration(const std::string& co
     confRoot_ = readConfigurationJson_(confFileName);
 }
 
+AppUtils::SimulationConfiguration::SimulationConfiguration(const std::string& confFileName,
+                                                           std::shared_ptr<spdlog::logger> logger):
+    logger_(logger)
+{
+    confRoot_ = readConfigurationJson_(confFileName);
+}
+
 bool AppUtils::SimulationConfiguration::isParameter(const std::string& keyName) const {
     return confRoot_.isMember(keyName);
 }
@@ -13,7 +20,9 @@ bool AppUtils::SimulationConfiguration::isParameter(const std::string& keyName) 
 int AppUtils::SimulationConfiguration::intParameter(const std::string& jsonName) const {
     if (isParameter(jsonName)) {
         int result = confRoot_.get(jsonName, 0).asInt();
-        std::cout << jsonName << ":" << result << std::endl;
+        if (logger_){
+            logger_->info("{}:{}",jsonName, result);
+        }
         return(result);
     } else {
         throw std::invalid_argument("missing configuration value: " + jsonName);
@@ -36,7 +45,9 @@ std::vector<int> AppUtils::SimulationConfiguration::intVectorParameter(const std
 double AppUtils::SimulationConfiguration::doubleParameter(const std::string& jsonName) const {
     if (isParameter(jsonName)) {
         double result = confRoot_.get(jsonName, 0).asDouble();
-        std::cout << jsonName << ":" << result << std::endl;
+        if (logger_){
+            logger_->info("{}:{}",jsonName, result);
+        }
         return(result);
     } else {
         throw std::invalid_argument("missing configuration value: " + jsonName);
@@ -89,7 +100,9 @@ std::array<std::array<double, 2>, 3> AppUtils::SimulationConfiguration::double3d
 std::string AppUtils::SimulationConfiguration::stringParameter(const std::string& jsonName) const {
     if (isParameter(jsonName)) {
         std::string result = confRoot_.get(jsonName, 0).asString();
-        std::cout << jsonName << ":" << result << std::endl;
+        if (logger_){
+            logger_->info("{}:{}",jsonName, result);
+        }
         return(result);
     } else {
         throw std::invalid_argument("missing configuration value: " + jsonName);
@@ -112,7 +125,9 @@ std::vector<std::string> AppUtils::SimulationConfiguration::stringVectorParamete
 bool AppUtils::SimulationConfiguration::boolParameter(const std::string& jsonName) const {
     if (isParameter(jsonName)) {
         std::string confString = confRoot_.get(jsonName, 0).asString();
-        std::cout << jsonName << ":" << confString << std::endl;
+        if (logger_){
+            logger_->info("{}:{}",jsonName, confString);
+        }
         if (confString == "true") {
             return true;
         }
@@ -132,7 +147,10 @@ std::unique_ptr<ParticleSimulation::InterpolatedField> AppUtils::SimulationConfi
         if (isParameter(jsonName)){
             std::string fieldFileName = confRoot_.get(jsonName,0).asString();
             std::filesystem::path fieldPath(confFileBasePath_ / std::filesystem::path(fieldFileName));
-            std::cout << "Reading field "<<fieldPath <<" \n";
+            if (logger_){
+                logger_->info("Reading field {}", fieldPath.string());
+            }
+
             auto fieldPtr = std::make_unique<ParticleSimulation::InterpolatedField>(fieldPath);
             return move(fieldPtr);
         }else{
@@ -153,7 +171,9 @@ std::string AppUtils::SimulationConfiguration::confBasePath() const {
 }
 
 Json::Value AppUtils::SimulationConfiguration::readConfigurationJson_(const std::string& confFileName) {
-    std::cout << confFileName<<std::endl;
+    if (logger_){
+        logger_->info("Reading configuration file:{}", confFileName);
+    }
     confFilePath_ = std::filesystem::path(confFileName);
     if (!std::filesystem::exists(confFilePath_)){
         throw std::invalid_argument("Configuration file not existing: " + confFilePath_.string());
@@ -165,7 +185,5 @@ Json::Value AppUtils::SimulationConfiguration::readConfigurationJson_(const std:
     Json::Value confRoot;
     confFile >> confRoot;
     confFile.close();
-    std::cout<<confRoot<<std::endl;
-
     return confRoot;
 }

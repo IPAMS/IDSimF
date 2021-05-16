@@ -21,6 +21,7 @@
 
 #include "Core_debug.hpp"
 #include "PSim_simionPotentialArray.hpp"
+#include "spdlog/spdlog.h"
 #include <sstream>
 #include <cmath>
 
@@ -303,7 +304,10 @@ std::string  ParticleSimulation::SimionPotentialArray::getHeaderString() {
 }
 
 void ParticleSimulation::SimionPotentialArray::readPa_(std::string filename) {
-    std::cout << "Reading " <<filename<<std::endl;
+    auto logger = spdlog::get("logger");
+    if (logger){
+        logger->info("Reading PA: {}", filename);
+    }
     paFilename_ = filename;
     std::ifstream inStream(filename, std::ios::binary);
     readBinaryPa_(inStream);
