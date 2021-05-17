@@ -24,25 +24,33 @@
  Simple chemical kinetics in an isotherm ideally mixed reactor
 
  ****************************/
-#include <iostream>
-#include <cmath>
-#include "json.h"
-#include "appUtils_simulationConfiguration.hpp"
-#include "appUtils_stopwatch.hpp"
 #include "RS_Simulation.hpp"
 #include "RS_SimulationConfiguration.hpp"
 #include "RS_ConfigFileParser.hpp"
 #include "RS_ConcentrationFileWriter.hpp"
+#include "appUtils_simulationConfiguration.hpp"
+#include "appUtils_logging.hpp"
+#include "appUtils_stopwatch.hpp"
+#include "json.h"
+#include <iostream>
+#include <cmath>
 
 int main(int argc, const char * argv[]) {
 
     // open configuration, parse configuration file =========================================
     if (argc <2){
-        std::cout << "no configuration file given"<<std::endl;
+        std::cout << "no conf project name or conf file given"<<std::endl;
         return(1);
     }
+
+    std::string projectName = argv[2];
+    std::cout << projectName<<std::endl;
+    std::string resultFilename = projectName + "_result.txt";
+    auto logger = AppUtils::createLogger(projectName + ".log");
+
+
     std::string confFileName = argv[1];
-    AppUtils::SimulationConfiguration simConf(confFileName);
+    AppUtils::SimulationConfiguration simConf(confFileName, logger);
 
     std::string rsConfigFileName = simConf.pathRelativeToConfFile(
             simConf.stringParameter("reaction_configuration"));
@@ -55,16 +63,6 @@ int main(int argc, const char * argv[]) {
     int concentrationWriteInterval = simConf.intParameter("concentrations_write_interval");
     double dt_s = simConf.doubleParameter("dt_s");
     double backgroundTemperature_K = simConf.doubleParameter("background_temperature_K");
-
-    std::string resultFilename;
-    if (argc == 3){
-        resultFilename = argv[2];
-    }
-    else {
-        std::stringstream ss;
-        ss << argv[1] << "_result.txt";
-        resultFilename = ss.str();
-    }
 
     RS::ConcentrationFileWriter resultFilewriter(resultFilename);
     // ======================================================================================
@@ -98,7 +96,7 @@ int main(int argc, const char * argv[]) {
     stopWatch.start();
     for (int step=0; step<nSteps; step++) {
         if (step % concentrationWriteInterval ==0) {
-            sim.printConcentrations();
+            sim.logConcentrations(logger);
             resultFilewriter.writeTimestep(sim);
         }
 
@@ -108,15 +106,15 @@ int main(int argc, const char * argv[]) {
 
     stopWatch.stop();
 
-    std::cout << "----------------------"<<std::endl;
-    std::cout << "Reaction Events:"<<std::endl;
-    sim.printReactionStatistics();
-    std::cout << "----------------------"<<std::endl;
-    std::cout << "total reaction events:" << sim.totalReactionEvents() << " ill events:" << sim.illEvents() << std::endl;
-    std::cout << "ill fraction: " << sim.illEvents() / (double) sim.totalReactionEvents() << std::endl;
+    logger->info("----------------------");
+    logger->info("Reaction Events:");
+    sim.logReactionStatistics(logger);
+    logger->info("----------------------");
+    logger->info("total reaction events: {} ill events: {}", sim.totalReactionEvents(), sim.illEvents());
+    logger->info("ill fraction: {}", sim.illEvents() / (double) sim.totalReactionEvents());
 
-    std::cout << "CPU time: " << stopWatch.elapsedSecondsCPU() <<" s"<< std::endl;
-    std::cout << "Finished in " << stopWatch.elapsedSecondsWall() << " seconds [Wall Clock]" << std::endl;
+    logger->info("CPU time: {} s", stopWatch.elapsedSecondsCPU());
+    logger->info("Finished in {} seconds [Wall Clock]",stopWatch.elapsedSecondsWall());
 
     // ======================================================================================
 

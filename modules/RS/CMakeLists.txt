@@ -25,8 +25,10 @@ set(SOURCE_FILES
         RS_SimpleCollisionStepReaction.cpp
         RS_SimpleCollisionStepReaction.hpp
         RS_StaticThermalizingReaction.cpp
-        RS_StaticThermalizingReaction.hpp RS_util.cpp RS_util.hpp)
+        RS_StaticThermalizingReaction.hpp
+        RS_util.cpp
+        RS_util.hpp)
 
 add_library(rs STATIC ${SOURCE_FILES})
 target_include_directories(rs PUBLIC .)
-target_link_libraries(rs core btree)
+target_link_libraries(rs core btree spdlog::spdlog)

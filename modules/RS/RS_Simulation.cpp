@@ -274,21 +274,40 @@ double RS::Simulation::simulationTime() {
 }
 
 void RS::Simulation::printConcentrations() {
-    std::cout <<"t= "<<sumTime_<<" ts="<<nTimesteps_<<" | ";
-    for(const auto& p: simConf_->getAllDiscreteSubstances()){
-        std::cout << p->name() <<" "<< discreteConcentrations_.at(p)<<" | " ;
-    }
+    std::cout << concentrationString_();
     std::cout << std::endl;
 }
 
 void RS::Simulation::printReactionStatistics() {
-    std::cout <<"t= "<<sumTime_<<" ts="<<nTimesteps_<<" | \n";
-    for(const auto& reaction: simConf_->getAllReactions()){
-        std::cout << reaction->getLabel() <<": "<< reactionEvents_.at(reaction)<<" |"<<std::endl;
-    }
+    std::cout << reactionStatisticsString_();
     std::cout << std::endl;
 }
 
+void RS::Simulation::logConcentrations(std::shared_ptr<spdlog::logger>& logger) {
+    logger->info(concentrationString_());
+}
+
+void RS::Simulation::logReactionStatistics(std::shared_ptr<spdlog::logger>& logger) {
+    logger->info(reactionStatisticsString_());
+}
+
+std::string RS::Simulation::concentrationString_() {
+    std::stringstream ss;
+    ss <<"t= "<<sumTime_<<" ts="<<nTimesteps_<<" | ";
+    for(const auto& p: simConf_->getAllDiscreteSubstances()){
+        ss << p->name() <<" "<< discreteConcentrations_.at(p)<<" | " ;
+    }
+    return ss.str();
+}
+
+std::string RS::Simulation::reactionStatisticsString_() {
+    std::stringstream ss;
+    ss <<"t= "<<sumTime_<<" ts="<<nTimesteps_<<" | \n";
+    for(const auto& reaction: simConf_->getAllReactions()){
+        ss << reaction->getLabel() <<": "<< reactionEvents_.at(reaction)<<" |"<<std::endl;
+    }
+    return ss.str();
+}
 
 std::ostream& operator<<(std::ostream& os, const RS::Simulation& sim)
 {

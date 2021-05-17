@@ -28,6 +28,11 @@
 #ifndef RS_Simulation_hpp
 #define RS_Simulation_hpp
 
+#include "RS_Substance.hpp"
+#include "RS_AbstractReaction.hpp"
+#include "RS_ReactiveParticle.hpp"
+#include "RS_ConfigFileParser.hpp"
+#include "spdlog/spdlog.h"
 #include <stdio.h>
 #include <string>
 #include <vector>
@@ -35,10 +40,6 @@
 #include <unordered_map>
 #include <list>
 #include <utility>
-#include "RS_Substance.hpp"
-#include "RS_AbstractReaction.hpp"
-#include "RS_ReactiveParticle.hpp"
-#include "RS_ConfigFileParser.hpp"
 
 namespace RS{class Simulation;}
 std::ostream& operator<<(std::ostream& os, const RS::Simulation& sim);
@@ -79,6 +80,8 @@ namespace RS {
 
         void printConcentrations();
         void printReactionStatistics();
+        void logConcentrations(std::shared_ptr<spdlog::logger>& logger);
+        void logReactionStatistics(std::shared_ptr<spdlog::logger>& logger);
         friend std::ostream& ::operator<<(std::ostream& os, const RS::Simulation& sim);
 
 
@@ -91,6 +94,8 @@ namespace RS {
         reactionMap indReactDeepCopy_();
         bool react_(int index, ReactionConditions& conditions, double dt, reactionMap &reacInd);
 
+        std::string concentrationString_();
+        std::string reactionStatisticsString_();
 
         //implement private members / data structures / methods
         long totalReactionEvents_; ///< the total number of reaction events in the simulation
