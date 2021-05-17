@@ -43,11 +43,11 @@
 #include "CollisionModel_HardSphere.hpp"
 #include "CollisionModel_MultiCollisionModel.hpp"
 #include "appUtils_simulationConfiguration.hpp"
+#include "appUtils_logging.hpp"
 #include "appUtils_stopwatch.hpp"
 #include "json.h"
 #include <iostream>
 #include <vector>
-#include <ctime>
 
 enum GeometryMode {DEFAULT,SCALED,VARIABLE};
 enum RfAmplitudeMode {STATIC_RF,RAMPED_RF};
@@ -85,15 +85,12 @@ int main(int argc, const char * argv[]) {
         std::cout << "no conf project name or conf file given"<<std::endl;
         return(1);
     }
-
-    std::string confFileName = argv[1];
-    std::cout << confFileName<<std::endl;
-
     std::string projectName = argv[2];
     std::cout << projectName<<std::endl;
+    auto logger = AppUtils::createLogger(projectName + ".log");
 
-    AppUtils::SimulationConfiguration simConf(confFileName);
-
+    std::string confFileName = argv[1];
+    AppUtils::SimulationConfiguration simConf(confFileName, logger);
 
     // read basic simulation parameters =============================================================
     int timeSteps = simConf.intParameter("sim_time_steps");
@@ -194,7 +191,6 @@ int main(int argc, const char * argv[]) {
     double excitePulseLength = 0.0;
     double exciteDivisor = 0.0;
 
-
     std::string exciteMode_str = simConf.stringParameter("excite_mode");
     if(exciteMode_str== "off") {
         exciteMode= NOEXCITE;
@@ -208,8 +204,8 @@ int main(int argc, const char * argv[]) {
             std::string swiftFileName = simConf.stringParameter("excite_waveform_csv_file");
             swiftWaveForm = std::make_unique<ParticleSimulation::SampledWaveform>(swiftFileName);
             if (! swiftWaveForm->good()){
-                std::cout << "swift transient file not accessible"<<std::endl;
-                return(0);
+                logger->error("swift transient file not accessible");
+                return EXIT_FAILURE;
             }
         }
     }else if(exciteMode_str== "continuous_sine") {
@@ -402,7 +398,7 @@ int main(int argc, const char * argv[]) {
 
     auto timestepWriteFunction =
             [trajectoryWriteInterval, fftWriteInterval, fftWriteMode, &V_0, &V_rf_export, &ionsInactive,
-             &hdf5Writer, &avgPositionWriter, &ionsInactiveWriter, &fftWriter, &startSplatTracker](
+             &hdf5Writer, &avgPositionWriter, &ionsInactiveWriter, &fftWriter, &startSplatTracker, &logger](
                     std::vector<BTree::Particle*>& particles,BTree::Tree& tree, double time, int timestep, bool lastTimestep){
 
                 if (timestep % fftWriteInterval == 0) {
@@ -421,15 +417,14 @@ int main(int argc, const char * argv[]) {
                     hdf5Writer->writeStartSplatData(startSplatTracker);
                     hdf5Writer->writeTimestep(particles,time);
                     hdf5Writer->finalizeTrajectory();
-                    std::cout << "finished ts:" << timestep << " time:" << time << std::endl;
+                    logger->info("finished ts:{} time:{:.2e}", timestep, time);
                 }
 
                 else if (timestep % trajectoryWriteInterval == 0) {
-                    std::cout << "ts:" << timestep << " time:" << time << " V_rf:" << V_0 << " ions inactive:" << ionsInactive
-                              << std::endl;
+                    logger->info("ts:{} time:{:.2e} V_rf:{:.1f} ions existing:{} ions inactive:{}",
+                            timestep, time, V_0, particles.size(), ionsInactive);
                     V_rf_export.emplace_back(V_0);
                     hdf5Writer->writeTimestep(particles,time);
-
                 }
     };
 
@@ -457,8 +452,10 @@ int main(int argc, const char * argv[]) {
 
     for (int step=0; step<timeSteps; ++step) {
         if (step % concentrationWriteInterval == 0) {
-            rsSim.printConcentrations();
             concentrationFilewriter.writeTimestep(rsSim);
+        }
+        if (step % trajectoryWriteInterval == 0) {
+            rsSim.logConcentrations(logger);
         }
         for (int i = 0; i < nParticlesTotal; i++) {
             if (particles[i]->isActive()) {
@@ -484,8 +481,7 @@ int main(int argc, const char * argv[]) {
 
     stopWatch.stop();
 
-    std::cout << particles[0]->getLocation()<<std::endl;
-    std::cout << "elapsed wall time:"<< stopWatch.elapsedSecondsWall()<<std::endl;
-    std::cout << "elapsed cpu time:"<< stopWatch.elapsedSecondsCPU()<<std::endl;
+    logger->info("CPU time: {} s", stopWatch.elapsedSecondsCPU());
+    logger->info("Finished in {} seconds (wall clock time)",stopWatch.elapsedSecondsWall());
     return 0;
 }

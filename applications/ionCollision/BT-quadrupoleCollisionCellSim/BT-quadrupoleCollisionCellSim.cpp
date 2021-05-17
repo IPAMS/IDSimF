@@ -277,7 +277,6 @@ int main(int argc, const char * argv[]) {
                         logger->info("finished ts:{} time:{:.2e}", timestep, time);
                     }
                     else if (timestep%trajectoryWriteInterval==0) {
-
                         logger->info("ts:{} time:{:.2e} ions existing:{} ions inactive:{}", timestep, time, particles.size(), ionsInactive);
                         hdf5Writer->writeTimestep(particles, time);
                     }

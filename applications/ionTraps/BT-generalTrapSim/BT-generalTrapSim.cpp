@@ -459,10 +459,9 @@ int main(int argc, const char * argv[]) {
     if (rfMode == RAMPED_RF) {
         hdf5Writer->writeNumericListDataset("V_rf", V_rf_export);
     }
-
     stopWatch.stop();
 
-    logger->info("elapsed secs (wall time) {}", stopWatch.elapsedSecondsWall());
-    logger->info("elapsed secs (cpu time) {}", stopWatch.elapsedSecondsCPU());
+    logger->info("CPU time: {} s", stopWatch.elapsedSecondsCPU());
+    logger->info("Finished in {} seconds (wall clock time)",stopWatch.elapsedSecondsWall());
     return 0;
 }

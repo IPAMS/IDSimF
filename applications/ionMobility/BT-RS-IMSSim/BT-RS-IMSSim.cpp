@@ -45,7 +45,6 @@
 #include "json.h"
 #include <iostream>
 #include <cmath>
-#include <ctime>
 #include <algorithm>
 #include <numeric>
 
@@ -265,7 +264,7 @@ int main(int argc, const char *argv[]){
             }
             else if (timestep%trajectoryWriteInterval==0) {
                 hdf5Writer.writeTimestep(particles, time);
-                logger->info("finished ts:{} time:{:.2e} splatted ions:{}", timestep, time, ionsInactive);
+                logger->info("ts:{} time:{:.2e} splatted ions:{}", timestep, time, ionsInactive);
             }
         };
 

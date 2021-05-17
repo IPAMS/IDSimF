@@ -35,8 +35,8 @@
 #include "PSim_scalar_writer.hpp"
 #include "PSim_util.hpp"
 #include "appUtils_simulationConfiguration.hpp"
-#include "appUtils_stopwatch.hpp"
 #include "appUtils_logging.hpp"
+#include "appUtils_stopwatch.hpp"
 #include "json.h"
 #include <iostream>
 #include <cmath>

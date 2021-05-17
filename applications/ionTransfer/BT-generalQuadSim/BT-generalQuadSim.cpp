@@ -37,6 +37,7 @@
 #include "PSim_verletIntegrator.hpp"
 #include "CollisionModel_HardSphere.hpp"
 #include "appUtils_simulationConfiguration.hpp"
+#include "appUtils_logging.hpp"
 #include "appUtils_stopwatch.hpp"
 #include <iostream>
 #include <vector>
@@ -55,13 +56,15 @@ int main(int argc, const char * argv[]) {
         return(1);
     }
 
-    std::string confFileName = argv[1];
-    AppUtils::SimulationConfiguration simConf(confFileName);
-    std::string confBasePath = simConf.confBasePath();
-    std::cout << confFileName << std::endl;
-
     std::string projectName = argv[2];
     std::cout << projectName << std::endl;
+    auto logger = AppUtils::createLogger(projectName + ".log");
+
+    std::string confFileName = argv[1];
+    AppUtils::SimulationConfiguration simConf(confFileName, logger);
+    std::string confBasePath = simConf.confBasePath();
+
+
 
     // read basic simulation parameters =============================================================
     int timeSteps = simConf.intParameter("sim_time_steps");
@@ -133,8 +136,6 @@ int main(int argc, const char * argv[]) {
     auto backgroundGasPressureFunction = [&rhoField,P_factor](Core::Vector& location){
         double rho =rhoField->getInterpolatedScalar(location.x(), location.y(), location.z(), 0);
         double pressure_pa = rho / rho_per_pa * P_factor;
-
-        //std::cout << "rho "<<rho<<" pressure_pa "<<pressure_pa<<std::endl;
         return pressure_pa;
     };
 
@@ -182,11 +183,10 @@ int main(int argc, const char * argv[]) {
                 return result;
             };
 
-    auto timestepWriteFunction = [trajectoryWriteInterval, &additionalParameterTransformFct, &jsonWriter](
+    auto timestepWriteFunction = [trajectoryWriteInterval, &additionalParameterTransformFct, &jsonWriter, &logger](
             std::vector<BTree::Particle *> &particles, BTree::Tree &tree, double time, int timestep, bool lastTimestep){
         if (timestep % trajectoryWriteInterval ==0){
-
-            std::cout<<"ts:"<<timestep<<" time:"<<time<<std::endl;
+            logger->info("ts:{} time:{:.2e}", timestep, time);
             char buffer [100];
             int cx;
             cx = snprintf ( buffer, 100, "%06d", timestep );
@@ -196,7 +196,7 @@ int main(int argc, const char * argv[]) {
             jsonWriter->writeTimestep(particles,additionalParameterTransformFct, time,true);
             jsonWriter->writeSplatTimes(particles);
             jsonWriter->writeIonMasses(particles);
-            std::cout<<"finished ts:"<<timestep<<" time:"<<time<<std::endl;
+            logger->info("finished ts:{} time:{:.2e}", timestep, time);
         }
     };
 
@@ -225,8 +225,6 @@ int main(int argc, const char * argv[]) {
     verletIntegrator.run(timeSteps,dt);
 
     stopWatch.stop();
-    std::cout << particles[0]->getLocation()<<std::endl;
-    std::cout << "elapsed wall time:"<< stopWatch.elapsedSecondsWall()<<std::endl;
-    std::cout << "elapsed cpu time:"<< stopWatch.elapsedSecondsCPU()<<std::endl;
-
+    logger->info("CPU time: {} s", stopWatch.elapsedSecondsCPU());
+    logger->info("Finished in {} seconds (wall clock time)",stopWatch.elapsedSecondsWall());
 }
