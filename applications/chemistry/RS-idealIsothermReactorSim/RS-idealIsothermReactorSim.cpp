@@ -114,7 +114,7 @@ int main(int argc, const char * argv[]) {
     logger->info("ill fraction: {}", sim.illEvents() / (double) sim.totalReactionEvents());
 
     logger->info("CPU time: {} s", stopWatch.elapsedSecondsCPU());
-    logger->info("Finished in {} seconds [Wall Clock]",stopWatch.elapsedSecondsWall());
+    logger->info("Finished in {} seconds (wall clock time)",stopWatch.elapsedSecondsWall());
 
     // ======================================================================================
 

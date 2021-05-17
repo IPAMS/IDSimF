@@ -36,8 +36,8 @@
 #include "appUtils_simulationConfiguration.hpp"
 #include "appUtils_inputFileUtilities.hpp"
 #include "appUtils_ionDefinitionReading.hpp"
+#include "appUtils_logging.hpp"
 #include "appUtils_stopwatch.hpp"
-#include "json.h"
 #include <iostream>
 #include <vector>
 
@@ -65,12 +65,12 @@ int main(int argc, const char * argv[]) {
             std::cout << "no conf project name or conf file given" << std::endl;
             return (1);
         }
-        std::string confFileName = argv[1];
-        AppUtils::SimulationConfiguration simConf(confFileName);
-        std::cout << confFileName << std::endl;
-
         std::string projectName = argv[2];
         std::cout << projectName << std::endl;
+        auto logger = AppUtils::createLogger(projectName + ".log");
+
+        std::string confFileName = argv[1];
+        AppUtils::SimulationConfiguration simConf(confFileName, logger);
 
         // read basic simulation parameters =============================================================
         int timeSteps = simConf.intParameter("sim_time_steps");
@@ -253,7 +253,7 @@ int main(int argc, const char * argv[]) {
 
         int ionsInactive = 0;
         auto timestepWriteFunction =
-                [trajectoryWriteInterval, ionRecordMode, &ionsInactive, &hdf5Writer, &startSplatTracker](
+                [trajectoryWriteInterval, ionRecordMode, &ionsInactive, &hdf5Writer, &startSplatTracker, &logger](
                         std::vector<BTree::Particle*>& particles, auto& tree,
                         double time, int timestep, bool lastTimestep) {
 
@@ -274,14 +274,11 @@ int main(int argc, const char * argv[]) {
                         hdf5Writer->writeTimestep(particles, time);
                         hdf5Writer->writeStartSplatData(startSplatTracker);
                         hdf5Writer->finalizeTrajectory();
-                        std::cout << "finished ts:" << timestep << " time:" << time << std::endl;
+                        logger->info("finished ts:{} time:{:.2e}", timestep, time);
                     }
                     else if (timestep%trajectoryWriteInterval==0) {
 
-                        std::cout << "ts:" << timestep << " time:" << time
-                                  << " ions existing: " << particles.size() << " ions inactive: "
-                                  << ionsInactive << std::endl;
-
+                        logger->info("ts:{} time:{:.2e} ions existing:{} ions inactive:{}", timestep, time, particles.size(), ionsInactive);
                         hdf5Writer->writeTimestep(particles, time);
                     }
                 };
@@ -344,10 +341,8 @@ int main(int argc, const char * argv[]) {
 
         stopWatch.stop();
 
-
-        std::cout << particles[0]->getLocation() << std::endl;
-        std::cout << "elapsed wall time:"<< stopWatch.elapsedSecondsWall()<<std::endl;
-        std::cout << "elapsed cpu time:"<< stopWatch.elapsedSecondsCPU()<<std::endl;
+        logger->info("CPU time: {} s", stopWatch.elapsedSecondsCPU());
+        logger->info("Finished in {} seconds (wall clock time)",stopWatch.elapsedSecondsWall());
     }
     catch(const ParticleSimulation::PotentialArrayException& pe)
     {

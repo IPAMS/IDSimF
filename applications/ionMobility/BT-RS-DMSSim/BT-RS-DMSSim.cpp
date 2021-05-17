@@ -39,11 +39,11 @@
 #include "CollisionModel_StatisticalDiffusion.hpp"
 #include "CollisionModel_SpatialFieldFunctions.hpp"
 #include "appUtils_simulationConfiguration.hpp"
+#include "appUtils_logging.hpp"
 #include "appUtils_stopwatch.hpp"
 #include "json.h"
 #include <iostream>
 #include <cmath>
-#include <ctime>
 
 const std::string key_ChemicalIndex = "keyChemicalIndex";
 enum CVMode {STATIC_CV,AUTO_CV};
@@ -54,13 +54,16 @@ enum CollisionType {SDS,NO_COLLISION};
 int main(int argc, const char * argv[]) {
 
     // open configuration, parse configuration file =========================================
-    if (argc <2){
-        std::cout << "no configuration file given"<<std::endl;
-        return(1);
+    if (argc<2) {
+        std::cout << "no conf project name or conf file given" << std::endl;
+        return (1);
     }
+    std::string projectName = argv[2];
+    std::cout << projectName << std::endl;
+    auto logger = AppUtils::createLogger(projectName + ".log");
 
     std::string confFileName = argv[1];
-    AppUtils::SimulationConfiguration simConf(confFileName);
+    AppUtils::SimulationConfiguration simConf(confFileName, logger);
 
     std::vector<int> nParticles = simConf.intVectorParameter("n_particles");
     int nSteps = simConf.intParameter("sim_time_steps");
@@ -68,7 +71,6 @@ int main(int argc, const char * argv[]) {
     int concentrationWriteInterval = simConf.intParameter("concentrations_write_interval");
     int trajectoryWriteInterval = simConf.intParameter("trajectory_write_interval");
     double spaceChargeFactor = simConf.doubleParameter("space_charge_factor");
-
 
 
     //geometric parameters:
@@ -171,16 +173,6 @@ int main(int argc, const char * argv[]) {
     double fieldMagnitude = 0; //actual field magnitude
 
     double dt_s = fieldWavePeriod / nStepsPerOscillation;
-
-    std::string projectFilename;
-    if (argc == 3){
-        projectFilename = argv[2];
-    }
-    else {
-        std::stringstream ss;
-        ss << argv[1] << "_result.txt";
-        projectFilename = ss.str();
-    }
     // ======================================================================================
 
 
@@ -200,9 +192,9 @@ int main(int argc, const char * argv[]) {
 
 
     // prepare file writer  =================================================================
-    RS::ConcentrationFileWriter resultFilewriter(projectFilename+"_conc.csv");
+    RS::ConcentrationFileWriter resultFilewriter(projectName+"_conc.csv");
 
-    auto jsonWriter = std::make_unique<ParticleSimulation::TrajectoryExplorerJSONwriter>(projectFilename+ "_trajectories.json");
+    auto jsonWriter = std::make_unique<ParticleSimulation::TrajectoryExplorerJSONwriter>(projectName+ "_trajectories.json");
     jsonWriter->setScales(1000,1);
 
     int ionsInactive = 0;
@@ -213,11 +205,11 @@ int main(int argc, const char * argv[]) {
 
     std::unique_ptr<ParticleSimulation::Scalar_writer> cvFieldWriter;
     if (cvMode == AUTO_CV){
-        cvFieldWriter = std::make_unique<ParticleSimulation::Scalar_writer>(projectFilename+ "_cv.csv");
+        cvFieldWriter = std::make_unique<ParticleSimulation::Scalar_writer>(projectName+ "_cv.csv");
     }
 
     std::unique_ptr<ParticleSimulation::Scalar_writer> voltageWriter;
-    voltageWriter = std::make_unique<ParticleSimulation::Scalar_writer>(projectFilename+ "_voltages.csv");
+    voltageWriter = std::make_unique<ParticleSimulation::Scalar_writer>(projectName+ "_voltages.csv");
 
 
     // init simulation  =====================================================================
@@ -293,13 +285,11 @@ int main(int argc, const char * argv[]) {
 
     auto timestepWriteFct =
             [&jsonWriter, &voltageWriter, &additionalParameterTransformFct, trajectoryWriteInterval,
-                    &rsSim, &resultFilewriter, concentrationWriteInterval, nSteps,
-                    &fieldMagnitude, &ionsInactive]
+                    &rsSim, &resultFilewriter, concentrationWriteInterval, &fieldMagnitude, &logger]
                     (std::vector<BTree::Particle *> &particles, BTree::Tree &tree, double time, int timestep,
                      bool lastTimestep){
 
         if (timestep % concentrationWriteInterval ==0) {
-            rsSim.printConcentrations();
             resultFilewriter.writeTimestep(rsSim);
             voltageWriter->writeTimestep(fieldMagnitude,time);
         }
@@ -309,19 +299,17 @@ int main(int argc, const char * argv[]) {
 
             jsonWriter->writeSplatTimes(particles);
             jsonWriter->writeIonMasses(particles);
-
-            std::cout << "finished ts:" << timestep << " time:" << time << std::endl;
+            logger->info("finished ts:{} time:{:.2e}", timestep, time);
         }
 
         else if (timestep % trajectoryWriteInterval ==0){
-            std::cout<<"ts:"<<timestep<<" time:"<<time<<" average cloud position:"<<
-                     tree.getRoot()->getCenterOfCharge()<<std::endl;
-
+            Core::Vector cof = tree.getRoot()->getCenterOfCharge();
+            logger->info("ts:{}  time:{:.2e} average cloud position:({:.2e},{:.2e},{:.2e})", timestep, time, cof.x(), cof.y(), cof.z());
+            rsSim.logConcentrations(logger);
             jsonWriter->writeTimestep(
                     particles, additionalParameterTransformFct, time, false);
         }
     };
-
 
     auto otherActionsFct = [electrodeHalfDistance_m, electrodeLength_m, &ionsInactive] (
             Core::Vector& newPartPos,BTree::Particle* particle,
@@ -402,8 +390,6 @@ int main(int argc, const char * argv[]) {
             reactionConditions.electricField = fieldMagnitude;
             reactionConditions.temperature = backgroundTemperatureFct(particles[i]->getLocation());
 
-            //std::cout<<" i: "<<i<<" pos:"<<particles[i]->getLocation()<<" temp:"<<reactionConditions.temperature<<" \n";
-
             bool reacted = rsSim.react(i, reactionConditions, dt_s);
             int substIndex = substanceIndices.at(particles[i]->getSpecies());
             particles[i]->setFloatAttribute(key_ChemicalIndex, substIndex);
@@ -431,7 +417,7 @@ int main(int argc, const char * argv[]) {
             fieldCV_VPerM = fieldCV_VPerM + diffMeanZPos * cvRelaxationParameter;
             cvFieldWriter->writeTimestep(std::vector<double>{fieldCV_VPerM,currentMeanZPos},rsSim.simulationTime());
             meanZPos = currentMeanZPos;
-            std::cout << "CV corrected ts:"<< step << " time:"<<rsSim.simulationTime()<< " new val:"<<fieldCV_VPerM<<std::endl;
+            logger->info("CV corrected ts:{} time:{:.2e} new CV:", step, rsSim.simulationTime(), fieldCV_VPerM);
         }
 
 
@@ -442,12 +428,10 @@ int main(int argc, const char * argv[]) {
     verletIntegrator.finalizeSimulation();
     stopWatch.stop();
 
-    std::cout << "reaction events:" << rsSim.totalReactionEvents() << " ill events:" << rsSim.illEvents() << std::endl;
-    std::cout << "ill fraction: " << rsSim.illEvents() / (double) rsSim.totalReactionEvents() << std::endl;
-    std::cout << "elapsed wall time:"<< stopWatch.elapsedSecondsWall()<<std::endl;
-    std::cout << "elapsed cpu time:"<< stopWatch.elapsedSecondsCPU()<<std::endl;
-
-
+    logger->info("total reaction events: {} ill events: {}", rsSim.totalReactionEvents(), rsSim.illEvents());
+    logger->info("ill fraction: {}", rsSim.illEvents() / (double) rsSim.totalReactionEvents());
+    logger->info("CPU time: {} s", stopWatch.elapsedSecondsCPU());
+    logger->info("Finished in {} seconds (wall clock time)",stopWatch.elapsedSecondsWall());
     // ======================================================================================
 
     return 0;
