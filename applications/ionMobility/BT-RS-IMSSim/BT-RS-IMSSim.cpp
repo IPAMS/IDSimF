@@ -40,6 +40,7 @@
 #include "CollisionModel_StatisticalDiffusion.hpp"
 #include "CollisionModel_MultiCollisionModel.hpp"
 #include "appUtils_simulationConfiguration.hpp"
+#include "appUtils_logging.hpp"
 #include "appUtils_stopwatch.hpp"
 #include "json.h"
 #include <iostream>
@@ -61,13 +62,16 @@ std::string key_ChemicalIndex = "keyChemicalIndex";
 int main(int argc, const char *argv[]){
 
     // open configuration, parse configuration file =========================================
-    if (argc < 2) {
-        std::cout << "no configuration file given" << std::endl;
+    if (argc<2) {
+        std::cout << "no conf project name or conf file given" << std::endl;
         return (1);
     }
+    std::string projectName = argv[2];
+    std::cout << projectName << std::endl;
+    auto logger = AppUtils::createLogger(projectName + ".log");
 
     std::string confFileName = argv[1];
-    AppUtils::SimulationConfiguration simConf(confFileName);
+    AppUtils::SimulationConfiguration simConf(confFileName, logger);
 
     std::vector<int> nParticles = simConf.intVectorParameter("n_particles");
     int nSteps = simConf.intParameter("sim_time_steps");
@@ -110,15 +114,6 @@ int main(int argc, const char *argv[]){
             std::back_inserter(collisionGasDiameters_m),
             [](double cgd)-> double {return cgd*1e-10;} );
 
-    std::string projectFilename;
-    if (argc==3) {
-        projectFilename = argv[2];
-    }
-    else {
-        std::stringstream ss;
-        ss << argv[1] << "_result.txt";
-        projectFilename = ss.str();
-    }
     // ======================================================================================
 
     //read and prepare chemical configuration ===============================================
@@ -136,7 +131,7 @@ int main(int argc, const char *argv[]){
     }
 
     // prepare file writer  =================================================================
-    RS::ConcentrationFileWriter resultFilewriter(projectFilename);
+    RS::ConcentrationFileWriter resultFilewriter(projectName+"_conc.csv");
 
     //prepare auxiliary parameters transform functions
     ParticleSimulation::partAttribTransformFctType additionalParamTFct;
@@ -167,7 +162,7 @@ int main(int argc, const char *argv[]){
     }
 
     //init hdf5 filewriter
-    std::string hdf5Filename = projectFilename + "_trajectories.hd5";
+    std::string hdf5Filename = projectName + "_trajectories.hd5";
     ParticleSimulation::TrajectoryHDF5Writer hdf5Writer(hdf5Filename);
     hdf5Writer.setParticleAttributes(auxParamNames, additionalParamTFct);
 
@@ -222,13 +217,13 @@ int main(int argc, const char *argv[]){
     IntegratorType integratorType;
     if (vType != std::end(verletTypes)) {
         integratorType = VERLET;
-        std::cout << "Verlet type simulation" << '\n';
+        logger->info("Verlet type simulation");
     } else if (transportModelType == "simple") {
         integratorType = SIMPLE;
-        std::cout << "Simple transport simulation" << '\n';
+        logger->info("Simple transport simulation");
     } else if (transportModelType == "no_transport") {
         integratorType = NO_INTEGRATOR;
-        std::cout << "No transport simulation" << '\n';
+        logger->info("No transport simulation");
     } else {
         throw std::invalid_argument("illegal transport simulation type");
     }
@@ -259,18 +254,18 @@ int main(int argc, const char *argv[]){
 
 
     auto timestepWriteFctSimple =
-        [&hdf5Writer, trajectoryWriteInterval, &ionsInactive, nSteps]
+        [&hdf5Writer, trajectoryWriteInterval, &ionsInactive, &logger]
         (std::vector<BTree::Particle*> &particles, double time, int timestep, bool lastTimestep)
         {
             if (lastTimestep) {
                 hdf5Writer.writeTimestep(particles, time);
                 hdf5Writer.writeSplatTimes(particles);
                 hdf5Writer.finalizeTrajectory();
-                std::cout << "finished ts:" << timestep << " time:" << time << std::endl;
+                logger->info("finished ts:{} time:{:.2e}", timestep, time);
             }
             else if (timestep%trajectoryWriteInterval==0) {
                 hdf5Writer.writeTimestep(particles, time);
-                std::cout << "ts:" << timestep << " time:" << time << " splatted ions:" << ionsInactive << std::endl;
+                logger->info("finished ts:{} time:{:.2e} splatted ions:{}", timestep, time, ionsInactive);
             }
         };
 
@@ -315,7 +310,8 @@ int main(int argc, const char *argv[]){
         if (simConf.isParameter("sds_collision_statistics")){
             std::string sdsCollisionStatisticsFileName = simConf.pathRelativeToConfFile(
                     simConf.stringParameter("sds_collision_statistics"));
-            std::cout << "SDS with custom collision statistics file: " << sdsCollisionStatisticsFileName << std::endl;
+
+            logger->info("SDS with custom collision statistics file: {}", sdsCollisionStatisticsFileName);
             CollisionModel::CollisionStatistics cs(sdsCollisionStatisticsFileName);
             collisionModel =
                     std::make_unique<CollisionModel::StatisticalDiffusionModel>(
@@ -391,8 +387,10 @@ int main(int argc, const char *argv[]){
 
     for (int step = 0; step < nSteps; step++) {
         if (step % concentrationWriteInterval == 0) {
-            rsSim.printConcentrations();
             resultFilewriter.writeTimestep(rsSim);
+        }
+        if (step % trajectoryWriteInterval == 0) {
+            rsSim.logConcentrations(logger);
         }
         for (int i = 0; i < nParticlesTotal; i++) {
             bool reacted = rsSim.react(i, reactionConditions, dt_s);
@@ -420,16 +418,15 @@ int main(int argc, const char *argv[]){
     }
 
     stopWatch.stop();
-    std::cout << "----------------------"<<std::endl;
-    std::cout << "Reaction Events:"<<std::endl;
-    rsSim.printReactionStatistics();
-    std::cout << "----------------------"<<std::endl;
-    std::cout << "total reaction events:" << rsSim.totalReactionEvents() << " ill events:" << rsSim.illEvents() << std::endl;
-    std::cout << "ill fraction: " << rsSim.illEvents() / (double) rsSim.totalReactionEvents() << std::endl;
+    logger->info("----------------------");
+    logger->info("Reaction Events:");
+    rsSim.logReactionStatistics(logger);
+    logger->info("----------------------");
+    logger->info("total reaction events: {} ill events: {}", rsSim.totalReactionEvents(), rsSim.illEvents());
+    logger->info("ill fraction: {}", rsSim.illEvents() / (double) rsSim.totalReactionEvents());
 
-    std::cout << "elapsed wall time:"<< stopWatch.elapsedSecondsWall()<<std::endl;
-    std::cout << "elapsed cpu time:"<< stopWatch.elapsedSecondsCPU()<<std::endl;
-
+    logger->info("CPU time: {} s", stopWatch.elapsedSecondsCPU());
+    logger->info("Finished in {} seconds (wall clock time)",stopWatch.elapsedSecondsWall());
 
     // ======================================================================================
 
