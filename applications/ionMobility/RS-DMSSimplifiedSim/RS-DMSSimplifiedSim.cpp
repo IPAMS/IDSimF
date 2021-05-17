@@ -36,10 +36,10 @@
 #include "PSim_util.hpp"
 #include "appUtils_simulationConfiguration.hpp"
 #include "appUtils_stopwatch.hpp"
+#include "appUtils_logging.hpp"
 #include "json.h"
 #include <iostream>
 #include <cmath>
-#include <ctime>
 
 const std::string key_ChemicalIndex = "keyChemicalIndex";
 const double standardPressure_Pa = 102300; //101325
@@ -48,13 +48,16 @@ enum CVMode {STATIC_CV, AUTO_CV};
 int main(int argc, const char * argv[]) {
 
     // open configuration, parse configuration file =========================================
-    if (argc <2){
-        std::cout << "no configuration file given"<<std::endl;
-        return(1);
+    if (argc<2) {
+        std::cout << "no conf project name or conf file given" << std::endl;
+        return (1);
     }
+    std::string projectName = argv[2];
+    std::cout << projectName << std::endl;
+    auto logger = AppUtils::createLogger(projectName + ".log");
 
     std::string confFileName = argv[1];
-    AppUtils::SimulationConfiguration simConf(confFileName);
+    AppUtils::SimulationConfiguration simConf(confFileName, logger);
 
     std::vector<int> nParticles = simConf.intVectorParameter("n_particles");
     int nSteps = simConf.intParameter("sim_time_steps");
@@ -99,15 +102,6 @@ int main(int argc, const char * argv[]) {
 
     double dt_s = fieldWavePeriod / nStepsPerOscillation;
 
-    std::string projectFilename;
-    if (argc == 3){
-        projectFilename = argv[2];
-    }
-    else {
-        std::stringstream ss;
-        ss << argv[1] << "_result.txt";
-        projectFilename = ss.str();
-    }
     // ======================================================================================
 
     //read and prepare chemical configuration ===============================================
@@ -125,9 +119,9 @@ int main(int argc, const char * argv[]) {
     }
 
     // prepare file writer  =================================================================
-    RS::ConcentrationFileWriter resultFilewriter(projectFilename+"_conc.csv");
+    RS::ConcentrationFileWriter resultFilewriter(projectName+"_conc.csv");
 
-    auto jsonWriter = std::make_unique<ParticleSimulation::TrajectoryExplorerJSONwriter>(projectFilename+ "_trajectories.json");
+    auto jsonWriter = std::make_unique<ParticleSimulation::TrajectoryExplorerJSONwriter>(projectName+ "_trajectories.json");
     jsonWriter->setScales(1000,1);
 
     // read particle configuration ==========================================================
@@ -139,11 +133,11 @@ int main(int argc, const char * argv[]) {
 
     std::unique_ptr<ParticleSimulation::Scalar_writer> cvFieldWriter;
     if (cvMode == AUTO_CV){
-        cvFieldWriter = std::make_unique<ParticleSimulation::Scalar_writer>(projectFilename+ "_cv.csv");
+        cvFieldWriter = std::make_unique<ParticleSimulation::Scalar_writer>(projectName+ "_cv.csv");
     }
 
     std::unique_ptr<ParticleSimulation::Scalar_writer> voltageWriter;
-    voltageWriter = std::make_unique<ParticleSimulation::Scalar_writer>(projectFilename+ "_voltages.csv");
+    voltageWriter = std::make_unique<ParticleSimulation::Scalar_writer>(projectName+ "_voltages.csv");
 
 
     // init simulation  =====================================================================
@@ -199,10 +193,6 @@ int main(int argc, const char * argv[]) {
                                     + sin(field_h * field_W * time - 0.5 * M_PI))
                                     * voltageSVgp / (field_F + 1);
 
-        //fieldMagnitude = voltageSVt; //// / electrodeDistance_m;
-
-        //Core::Vector fieldForce(0, 0, fieldMagnitude * particleCharge);
-
         return voltageSVt;
     };
 
@@ -216,11 +206,10 @@ int main(int argc, const char * argv[]) {
 
     auto timestepWriteFct =
             [&jsonWriter, &voltageWriter, &additionalParameterTransformFct, trajectoryWriteInterval,
-                    &rsSim, &resultFilewriter, concentrationWriteInterval, &fieldMagnitude]
+                    &rsSim, &resultFilewriter, concentrationWriteInterval, &fieldMagnitude, &logger]
                     (std::vector<BTree::Particle *> &particles, double time, int timestep, bool lastTimestep){
 
         if (timestep % concentrationWriteInterval ==0) {
-            rsSim.printConcentrations();
             resultFilewriter.writeTimestep(rsSim);
             voltageWriter->writeTimestep(fieldMagnitude,time);
         }
@@ -230,11 +219,11 @@ int main(int argc, const char * argv[]) {
 
             jsonWriter->writeSplatTimes(particles);
             jsonWriter->writeIonMasses(particles);
-
-            std::cout << "finished ts:" << timestep << " time:" << time << std::endl;
+            logger->info("finished ts:{} time:{:.2e}", timestep, time);
         }
 
         else if (timestep % trajectoryWriteInterval ==0){
+            rsSim.logConcentrations(logger);
             jsonWriter->writeTimestep(
                     particles, additionalParameterTransformFct, time, false);
         }
@@ -283,7 +272,7 @@ int main(int argc, const char * argv[]) {
             fieldCV_VPerM = fieldCV_VPerM + diffMeanZPos * cvRelaxationParameter;
             cvFieldWriter->writeTimestep(std::vector<double>{fieldCV_VPerM,currentMeanZPos},rsSim.simulationTime());
             meanZPos = currentMeanZPos;
-            std::cout << "CV corrected ts:"<< step << " time:"<<rsSim.simulationTime()<< " new val:"<<fieldCV_VPerM<<std::endl;
+            logger->info("CV corrected ts:{} time:{:.2e} new CV:{}", step, rsSim.simulationTime(), fieldCV_VPerM);
         }
 
         if (ionsInactive >= nAllParticles){
@@ -291,17 +280,13 @@ int main(int argc, const char * argv[]) {
         }
     }
     timestepWriteFct(particlesPtrs, rsSim.simulationTime(), nSteps, true);
-
-
     stopWatch.stop();
-    std::cout << "reaction events:" << rsSim.totalReactionEvents() << " ill events:" << rsSim.illEvents() << std::endl;
-    std::cout << "ill fraction: " << rsSim.illEvents() / (double) rsSim.totalReactionEvents() << std::endl;
-    std::cout << "elapsed wall time:"<< stopWatch.elapsedSecondsWall()<<std::endl;
-    std::cout << "elapsed cpu time:"<< stopWatch.elapsedSecondsCPU()<<std::endl;
 
-
+    logger->info("total reaction events: {} ill events: {}", rsSim.totalReactionEvents(), rsSim.illEvents());
+    logger->info("ill fraction: {}", rsSim.illEvents() / (double) rsSim.totalReactionEvents());
+    logger->info("CPU time: {} s", stopWatch.elapsedSecondsCPU());
+    logger->info("Finished in {} seconds (wall clock time)",stopWatch.elapsedSecondsWall());
     // ======================================================================================
-
 
     return 0;
 }
