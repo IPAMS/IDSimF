@@ -38,89 +38,95 @@
 
 int main(int argc, const char * argv[]) {
 
-    // open configuration, parse configuration file =========================================
-    if (argc <2){
-        std::cout << "no conf project name or conf file given"<<std::endl;
-        return(1);
-    }
-
-    std::string projectName = argv[2];
-    std::cout << projectName<<std::endl;
-    std::string resultFilename = projectName + "_result.txt";
-    auto logger = AppUtils::createLogger(projectName + ".log");
-
-
-    std::string confFileName = argv[1];
-    AppUtils::SimulationConfiguration simConf(confFileName, logger);
-
-    std::string rsConfigFileName = simConf.pathRelativeToConfFile(
-            simConf.stringParameter("reaction_configuration"));
-    RS::ConfigFileParser parser = RS::ConfigFileParser();
-    RS::Simulation sim = RS::Simulation(parser.parseFile(rsConfigFileName));
-    RS::SimulationConfiguration* rsSimConf = sim.simulationConfiguration();
-
-    std::vector<int> nParticles = simConf.intVectorParameter("n_particles");
-    int nSteps = simConf.intParameter("sim_time_steps");
-    int concentrationWriteInterval = simConf.intParameter("concentrations_write_interval");
-    double dt_s = simConf.doubleParameter("dt_s");
-    double backgroundTemperature_K = simConf.doubleParameter("background_temperature_K");
-
-    RS::ConcentrationFileWriter resultFilewriter(resultFilename);
-    // ======================================================================================
-
-    // init simulation  =====================================================================
-
-    // create and add simulation particles:
-    int nParticlesTotal = 0;
-    std::vector<uniqueReactivePartPtr> particles;
-    for (int i=0; i<nParticles.size();i++) {
-        RS::Substance *subst = rsSimConf->getAllDiscreteSubstances().at(i);
-        for (int k = 0; k < nParticles[i]; k++) {
-            uniqueReactivePartPtr particle = std::make_unique<RS::ReactiveParticle>(subst);
-            sim.addParticle(particle.get(), nParticlesTotal);
-            particles.push_back(std::move(particle));
-            nParticlesTotal++;
-        }
-    }
-    RS::ReactionConditions reactionConditions = RS::ReactionConditions();
-    reactionConditions.temperature = backgroundTemperature_K;
-    reactionConditions.electricField = 0.0;
-    reactionConditions.pressure = 0.0;
-
-    resultFilewriter.initFile(rsSimConf);
-    // ======================================================================================
-
-
-    // simulate   ===========================================================================
-    AppUtils::SignalHandler::registerSignalHandler();
-    AppUtils::Stopwatch stopWatch;
-    stopWatch.start();
-    for (int step=0; step<nSteps; step++) {
-        if (AppUtils::SignalHandler::isTerminationSignaled()){ // terminate simulation loop if termination was signaled
-            break;
-        }
-        if (step % concentrationWriteInterval ==0) {
-            sim.logConcentrations(logger);
-            resultFilewriter.writeTimestep(sim);
+    try{
+        // open configuration, parse configuration file =========================================
+        if (argc<=2) {
+            std::cout << "Run abort: No run configuration or project name given." << std::endl;
+            return EXIT_FAILURE;
         }
 
-        sim.performTimestep(reactionConditions, dt_s);
-        sim.advanceTimestep(dt_s);
+        std::string projectName = argv[2];
+        std::cout << projectName<<std::endl;
+        std::string resultFilename = projectName + "_result.txt";
+        auto logger = AppUtils::createLogger(projectName + ".log");
+
+
+        std::string confFileName = argv[1];
+        AppUtils::SimulationConfiguration simConf(confFileName, logger);
+
+        std::string rsConfigFileName = simConf.pathRelativeToConfFile(
+                simConf.stringParameter("reaction_configuration"));
+        RS::ConfigFileParser parser = RS::ConfigFileParser();
+        RS::Simulation sim = RS::Simulation(parser.parseFile(rsConfigFileName));
+        RS::SimulationConfiguration* rsSimConf = sim.simulationConfiguration();
+
+        std::vector<int> nParticles = simConf.intVectorParameter("n_particles");
+        int nSteps = simConf.intParameter("sim_time_steps");
+        int concentrationWriteInterval = simConf.intParameter("concentrations_write_interval");
+        double dt_s = simConf.doubleParameter("dt_s");
+        double backgroundTemperature_K = simConf.doubleParameter("background_temperature_K");
+
+        RS::ConcentrationFileWriter resultFilewriter(resultFilename);
+        // ======================================================================================
+
+        // init simulation  =====================================================================
+
+        // create and add simulation particles:
+        int nParticlesTotal = 0;
+        std::vector<uniqueReactivePartPtr> particles;
+        for (int i=0; i<nParticles.size();i++) {
+            RS::Substance *subst = rsSimConf->getAllDiscreteSubstances().at(i);
+            for (int k = 0; k < nParticles[i]; k++) {
+                uniqueReactivePartPtr particle = std::make_unique<RS::ReactiveParticle>(subst);
+                sim.addParticle(particle.get(), nParticlesTotal);
+                particles.push_back(std::move(particle));
+                nParticlesTotal++;
+            }
+        }
+        RS::ReactionConditions reactionConditions = RS::ReactionConditions();
+        reactionConditions.temperature = backgroundTemperature_K;
+        reactionConditions.electricField = 0.0;
+        reactionConditions.pressure = 0.0;
+
+        resultFilewriter.initFile(rsSimConf);
+        // ======================================================================================
+
+
+        // simulate   ===========================================================================
+        AppUtils::SignalHandler::registerSignalHandler();
+        AppUtils::Stopwatch stopWatch;
+        stopWatch.start();
+        for (int step=0; step<nSteps; step++) {
+            if (AppUtils::SignalHandler::isTerminationSignaled()){ // terminate simulation loop if termination was signaled
+                break;
+            }
+            if (step % concentrationWriteInterval ==0) {
+                sim.logConcentrations(logger);
+                resultFilewriter.writeTimestep(sim);
+            }
+
+            sim.performTimestep(reactionConditions, dt_s);
+            sim.advanceTimestep(dt_s);
+        }
+
+        stopWatch.stop();
+
+        logger->info("----------------------");
+        logger->info("Reaction Events:");
+        sim.logReactionStatistics(logger);
+        logger->info("----------------------");
+        logger->info("total reaction events: {} ill events: {}", sim.totalReactionEvents(), sim.illEvents());
+        logger->info("ill fraction: {}", sim.illEvents() / (double) sim.totalReactionEvents());
+
+        logger->info("CPU time: {} s", stopWatch.elapsedSecondsCPU());
+        logger->info("Finished in {} seconds (wall clock time)",stopWatch.elapsedSecondsWall());
+
+        // ======================================================================================
+
+        return 0;
     }
-
-    stopWatch.stop();
-
-    logger->info("----------------------");
-    logger->info("Reaction Events:");
-    sim.logReactionStatistics(logger);
-    logger->info("----------------------");
-    logger->info("total reaction events: {} ill events: {}", sim.totalReactionEvents(), sim.illEvents());
-    logger->info("ill fraction: {}", sim.illEvents() / (double) sim.totalReactionEvents());
-
-    logger->info("CPU time: {} s", stopWatch.elapsedSecondsCPU());
-    logger->info("Finished in {} seconds (wall clock time)",stopWatch.elapsedSecondsWall());
-
-    // ======================================================================================
-
-    return 0;
+    catch(const std::invalid_argument& ia){
+        std::cout << ia.what() << std::endl;
+        return EXIT_FAILURE;
+    }
 }

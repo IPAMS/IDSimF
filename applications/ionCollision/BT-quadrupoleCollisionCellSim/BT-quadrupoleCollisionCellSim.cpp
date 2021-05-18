@@ -38,6 +38,7 @@
 #include "appUtils_ionDefinitionReading.hpp"
 #include "appUtils_logging.hpp"
 #include "appUtils_stopwatch.hpp"
+#include "appUtils_signalHandler.hpp"
 #include <iostream>
 #include <vector>
 
@@ -61,9 +62,9 @@ int main(int argc, const char * argv[]) {
 
     try {
         // read configuration file ======================================================================
-        if (argc<2) {
-            std::cout << "no conf project name or conf file given" << std::endl;
-            return (1);
+        if (argc<=2) {
+            std::cout << "Run abort: No run configuration or project name given." << std::endl;
+            return EXIT_FAILURE;
         }
         std::string projectName = argv[2];
         std::cout << projectName << std::endl;
@@ -252,10 +253,17 @@ int main(int argc, const char * argv[]) {
         };
 
         int ionsInactive = 0;
+        ParticleSimulation::AbstractTimeIntegrator *integratorPtr;
         auto timestepWriteFunction =
-                [trajectoryWriteInterval, ionRecordMode, &ionsInactive, &hdf5Writer, &startSplatTracker, &logger](
+                [trajectoryWriteInterval, ionRecordMode, &ionsInactive, &hdf5Writer, &startSplatTracker,
+                 &integratorPtr, &logger](
                         std::vector<BTree::Particle*>& particles, auto& tree,
                         double time, int timestep, bool lastTimestep) {
+
+                    // check if simulation should be terminated (if all particles are terminated)
+                    if (ionsInactive >= particles.size() && particles.size() > 0){
+                        integratorPtr->setTerminationState();
+                    }
 
                     if (timestep==0 && ionRecordMode==FULL) {
                         //if initial time step (integrator was not run) and full record mode:
@@ -336,6 +344,8 @@ int main(int argc, const char * argv[]) {
                 particlePtrs,
                 accelerationFunction, timestepWriteFunction, otherActionsFunction, particleStartMonitoringFct,
                 &hsModel);
+        integratorPtr = &verletIntegrator;
+        AppUtils::SignalHandler::setReceiver(verletIntegrator);
         verletIntegrator.run(timeSteps, dt);
 
         stopWatch.stop();

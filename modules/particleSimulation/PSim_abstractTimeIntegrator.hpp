@@ -71,6 +71,7 @@ namespace ParticleSimulation{
         virtual void finalizeSimulation() = 0;
 
         void setTerminationState();
+        RunState runState();
         double time();
         int timeStep();
 

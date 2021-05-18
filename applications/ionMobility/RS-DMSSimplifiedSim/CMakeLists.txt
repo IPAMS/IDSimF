@@ -1,4 +1,4 @@
-project(BT-RS-DMSSimplifiedSim)
+project(RS-DMSSimplifiedSim)
 
 set(SOURCE_FILES
         RS-DMSSimplifiedSim.cpp)

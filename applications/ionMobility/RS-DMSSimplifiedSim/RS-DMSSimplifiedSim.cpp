@@ -37,6 +37,7 @@
 #include "appUtils_simulationConfiguration.hpp"
 #include "appUtils_logging.hpp"
 #include "appUtils_stopwatch.hpp"
+#include "appUtils_signalHandler.hpp"
 #include "json.h"
 #include <iostream>
 #include <cmath>
@@ -47,246 +48,253 @@ enum CVMode {STATIC_CV, AUTO_CV};
 
 int main(int argc, const char * argv[]) {
 
-    // open configuration, parse configuration file =========================================
-    if (argc<2) {
-        std::cout << "no conf project name or conf file given" << std::endl;
-        return (1);
-    }
-    std::string projectName = argv[2];
-    std::cout << projectName << std::endl;
-    auto logger = AppUtils::createLogger(projectName + ".log");
-
-    std::string confFileName = argv[1];
-    AppUtils::SimulationConfiguration simConf(confFileName, logger);
-
-    std::vector<int> nParticles = simConf.intVectorParameter("n_particles");
-    int nSteps = simConf.intParameter("sim_time_steps");
-    int nStepsPerOscillation = simConf.intParameter("sim_time_steps_per_sv_oscillation");
-    int concentrationWriteInterval = simConf.intParameter("concentrations_write_interval");
-    int trajectoryWriteInterval = simConf.intParameter("trajectory_write_interval");
-
-    //geometric parameters:
-    double startWidthX_m = simConf.doubleParameter("start_width_x_mm")/1000.0;
-    double startWidthY_m = simConf.doubleParameter("start_width_y_mm")/1000.0;
-    double startWidthZ_m = simConf.doubleParameter("start_width_z_mm")/1000.0;
-
-
-    //Define background temperature
-    double backgroundTemperature_K = simConf.doubleParameter("background_temperature_K");
-    double backgroundPressure_Pa = simConf.doubleParameter("background_pressure_Pa");
-
-    //field parameters:
-    std::string cvModeStr = simConf.stringParameter("cv_mode");
-    CVMode cvMode;
-    double meanZPos = 0.0; //variable used for automatic CV correction
-    double cvRelaxationParameter;
-    if (cvModeStr == "static"){
-        cvMode = STATIC_CV;
-    }
-    else if (cvModeStr == "auto"){
-        cvMode = AUTO_CV;
-        cvRelaxationParameter = simConf.doubleParameter("cv_relaxation_parameter");
-    }
-    else{
-        throw std::invalid_argument("wrong configuration value: cv_mode");
-    }
-
-    double fieldSV_VPerM = simConf.doubleParameter("sv_Vmm-1") * 1000.0;
-    double fieldCV_VPerM = simConf.doubleParameter("cv_Vmm-1") * 1000.0;
-    double fieldFrequency = simConf.doubleParameter("sv_frequency_s-1");
-    double fieldWavePeriod = 1.0/fieldFrequency;
-    double field_h = 2.0;
-    double field_F = 2.0;
-    double field_W = (1/fieldWavePeriod) * 2 * M_PI;
-    double fieldMagnitude = 0; //actual field magnitude
-
-    double dt_s = fieldWavePeriod / nStepsPerOscillation;
-
-    // ======================================================================================
-
-    //read and prepare chemical configuration ===============================================
-    RS::ConfigFileParser parser = RS::ConfigFileParser();
-    std::string rsConfFileName = simConf.pathRelativeToConfFile(simConf.stringParameter("reaction_configuration"));
-    RS::Simulation rsSim = RS::Simulation(parser.parseFile(rsConfFileName));
-    RS::SimulationConfiguration* rsSimConf = rsSim.simulationConfiguration();
-    //prepare a map for retrieval of the substance index:
-    std::map<RS::Substance*,int> substanceIndices;
-    std::vector<RS::Substance*> discreteSubstances = rsSimConf->getAllDiscreteSubstances();
-    std::vector<double> ionMobility; // = simConf.doubleVectorParameter("ion_mobility");
-    for (int i=0; i<discreteSubstances.size(); i++){
-        substanceIndices.insert(std::pair<RS::Substance*,int>(discreteSubstances[i], i));
-        ionMobility.push_back(discreteSubstances[i]->mobility());
-    }
-
-    // prepare file writer  =================================================================
-    RS::ConcentrationFileWriter resultFilewriter(projectName+"_conc.csv");
-
-    auto jsonWriter = std::make_unique<ParticleSimulation::TrajectoryExplorerJSONwriter>(projectName+ "_trajectories.json");
-    jsonWriter->setScales(1000,1);
-
-    // read particle configuration ==========================================================
-    int ionsInactive = 0;
-    int nAllParticles = 0;
-    for (const auto ni: nParticles){
-        nAllParticles += ni;
-    }
-
-    std::unique_ptr<ParticleSimulation::Scalar_writer> cvFieldWriter;
-    if (cvMode == AUTO_CV){
-        cvFieldWriter = std::make_unique<ParticleSimulation::Scalar_writer>(projectName+ "_cv.csv");
-    }
-
-    std::unique_ptr<ParticleSimulation::Scalar_writer> voltageWriter;
-    voltageWriter = std::make_unique<ParticleSimulation::Scalar_writer>(projectName+ "_voltages.csv");
-
-
-    // init simulation  =====================================================================
-
-    // create and add simulation particles:
-    int nParticlesTotal = 0;
-    std::vector<uniqueReactivePartPtr>particles;
-    std::vector<BTree::Particle*>particlesPtrs;
-    std::vector<std::vector<double>> trajectoryAdditionalParams;
-
-    Core::Vector initCorner(0,-startWidthY_m/2.0,-startWidthZ_m/2.0);
-    Core::Vector initBoxSize(startWidthX_m,startWidthY_m,startWidthZ_m);
-
-    for (int i=0; i<nParticles.size();i++) {
-        RS::Substance *subst = rsSimConf->substance(i);
-        std::vector<Core::Vector> initialPositions =
-                ParticleSimulation::util::getRandomPositionsInBox(nParticles[i],initCorner,initBoxSize);
-        for (int k = 0; k < nParticles[i]; k++) {
-            uniqueReactivePartPtr particle = std::make_unique<RS::ReactiveParticle>(subst);
-
-            // init position and initial chemical species of the particle:
-            particle->setLocation(initialPositions[k]);
-            int substIndex = substanceIndices.at(particle->getSpecies());
-            particle->setFloatAttribute(key_ChemicalIndex, substIndex);
-
-            particlesPtrs.push_back(particle.get());
-            rsSim.addParticle(particle.get(), nParticlesTotal);
-            particles.push_back(std::move(particle));
-            trajectoryAdditionalParams.emplace_back(std::vector<double>(1));
-            nParticlesTotal++;
+    try{
+        // open configuration, parse configuration file =========================================
+        if (argc<=2) {
+            std::cout << "Run abort: No run configuration or project name given." << std::endl;
+            return EXIT_FAILURE;
         }
-    }
+        std::string projectName = argv[2];
+        std::cout << projectName << std::endl;
+        auto logger = AppUtils::createLogger(projectName + ".log");
 
-    RS::ReactionConditions reactionConditions = RS::ReactionConditions();
-    reactionConditions.temperature = 0.0;//backgroundTemperature_K;
-    reactionConditions.pressure = backgroundPressure_Pa;
-    reactionConditions.electricField = 0.0;
-    reactionConditions.totalReactionEnergy = 0.0;
+        std::string confFileName = argv[1];
+        AppUtils::SimulationConfiguration simConf(confFileName, logger);
 
-    resultFilewriter.initFile(rsSimConf);
-    // ======================================================================================
+        std::vector<int> nParticles = simConf.intVectorParameter("n_particles");
+        int nSteps = simConf.intParameter("sim_time_steps");
+        int nStepsPerOscillation = simConf.intParameter("sim_time_steps_per_sv_oscillation");
+        int concentrationWriteInterval = simConf.intParameter("concentrations_write_interval");
+        int trajectoryWriteInterval = simConf.intParameter("trajectory_write_interval");
 
-
-    // define trajectory integration parameters / functions =================================
-
-    auto fieldFct =
-            [&fieldSV_VPerM, &fieldCV_VPerM, field_F, field_W, field_h]
-            (double time) -> double{
-
-        //double particleCharge = particle->getCharge();
-        double voltageSVgp = fieldSV_VPerM * 0.6667; // V/m (1V/m peak to peak is 0.6667V/m ground to peak)
-        double voltageSVt = fieldCV_VPerM + (field_F * sin(field_W * time)
-                                    + sin(field_h * field_W * time - 0.5 * M_PI))
-                                    * voltageSVgp / (field_F + 1);
-
-        return voltageSVt;
-    };
+        //geometric parameters:
+        double startWidthX_m = simConf.doubleParameter("start_width_x_mm")/1000.0;
+        double startWidthY_m = simConf.doubleParameter("start_width_y_mm")/1000.0;
+        double startWidthZ_m = simConf.doubleParameter("start_width_z_mm")/1000.0;
 
 
-    ParticleSimulation::partAttribTransformFctType additionalParameterTransformFct =
-            [=](BTree::Particle* particle) -> std::vector<double> {
-                std::vector<double> result = {particle->getFloatAttribute(key_ChemicalIndex)};
-                return result;
-            };
+        //Define background temperature
+        double backgroundTemperature_K = simConf.doubleParameter("background_temperature_K");
+        double backgroundPressure_Pa = simConf.doubleParameter("background_pressure_Pa");
 
-
-    auto timestepWriteFct =
-            [&jsonWriter, &voltageWriter, &additionalParameterTransformFct, trajectoryWriteInterval,
-                    &rsSim, &resultFilewriter, concentrationWriteInterval, &fieldMagnitude, &logger]
-                    (std::vector<BTree::Particle *> &particles, double time, int timestep, bool lastTimestep){
-
-        if (timestep % concentrationWriteInterval ==0) {
-            resultFilewriter.writeTimestep(rsSim);
-            voltageWriter->writeTimestep(fieldMagnitude,time);
+        //field parameters:
+        std::string cvModeStr = simConf.stringParameter("cv_mode");
+        CVMode cvMode;
+        double meanZPos = 0.0; //variable used for automatic CV correction
+        double cvRelaxationParameter;
+        if (cvModeStr == "static"){
+            cvMode = STATIC_CV;
         }
-        if (lastTimestep) {
-            jsonWriter->writeTimestep(
-                    particles, additionalParameterTransformFct, time, true);
-
-            jsonWriter->writeSplatTimes(particles);
-            jsonWriter->writeIonMasses(particles);
-            logger->info("finished ts:{} time:{:.2e}", timestep, time);
+        else if (cvModeStr == "auto"){
+            cvMode = AUTO_CV;
+            cvRelaxationParameter = simConf.doubleParameter("cv_relaxation_parameter");
+        }
+        else{
+            throw std::invalid_argument("wrong configuration value: cv_mode");
         }
 
-        else if (timestep % trajectoryWriteInterval ==0){
-            rsSim.logConcentrations(logger);
-            jsonWriter->writeTimestep(
-                    particles, additionalParameterTransformFct, time, false);
+        double fieldSV_VPerM = simConf.doubleParameter("sv_Vmm-1") * 1000.0;
+        double fieldCV_VPerM = simConf.doubleParameter("cv_Vmm-1") * 1000.0;
+        double fieldFrequency = simConf.doubleParameter("sv_frequency_s-1");
+        double fieldWavePeriod = 1.0/fieldFrequency;
+        double field_h = 2.0;
+        double field_F = 2.0;
+        double field_W = (1/fieldWavePeriod) * 2 * M_PI;
+        double fieldMagnitude = 0; //actual field magnitude
+
+        double dt_s = fieldWavePeriod / nStepsPerOscillation;
+
+        // ======================================================================================
+
+        //read and prepare chemical configuration ===============================================
+        RS::ConfigFileParser parser = RS::ConfigFileParser();
+        std::string rsConfFileName = simConf.pathRelativeToConfFile(simConf.stringParameter("reaction_configuration"));
+        RS::Simulation rsSim = RS::Simulation(parser.parseFile(rsConfFileName));
+        RS::SimulationConfiguration* rsSimConf = rsSim.simulationConfiguration();
+        //prepare a map for retrieval of the substance index:
+        std::map<RS::Substance*,int> substanceIndices;
+        std::vector<RS::Substance*> discreteSubstances = rsSimConf->getAllDiscreteSubstances();
+        std::vector<double> ionMobility; // = simConf.doubleVectorParameter("ion_mobility");
+        for (int i=0; i<discreteSubstances.size(); i++){
+            substanceIndices.insert(std::pair<RS::Substance*,int>(discreteSubstances[i], i));
+            ionMobility.push_back(discreteSubstances[i]->mobility());
         }
-    };
+
+        // prepare file writer  =================================================================
+        RS::ConcentrationFileWriter resultFilewriter(projectName+"_conc.csv");
+
+        auto jsonWriter = std::make_unique<ParticleSimulation::TrajectoryExplorerJSONwriter>(projectName+ "_trajectories.json");
+        jsonWriter->setScales(1000,1);
+
+        // read particle configuration ==========================================================
+        int ionsInactive = 0;
+        int nAllParticles = 0;
+        for (const auto ni: nParticles){
+            nAllParticles += ni;
+        }
+
+        std::unique_ptr<ParticleSimulation::Scalar_writer> cvFieldWriter;
+        if (cvMode == AUTO_CV){
+            cvFieldWriter = std::make_unique<ParticleSimulation::Scalar_writer>(projectName+ "_cv.csv");
+        }
+
+        std::unique_ptr<ParticleSimulation::Scalar_writer> voltageWriter;
+        voltageWriter = std::make_unique<ParticleSimulation::Scalar_writer>(projectName+ "_voltages.csv");
 
 
-    // simulate   ===========================================================================
-    AppUtils::Stopwatch stopWatch;
-    stopWatch.start();
+        // init simulation  =====================================================================
 
-    reactionConditions.temperature = backgroundTemperature_K;
-    double reducedPressure = standardPressure_Pa / backgroundPressure_Pa;
-    for (int step=0; step<nSteps; step++) {
+        // create and add simulation particles:
+        int nParticlesTotal = 0;
+        std::vector<uniqueReactivePartPtr>particles;
+        std::vector<BTree::Particle*>particlesPtrs;
+        std::vector<std::vector<double>> trajectoryAdditionalParams;
 
-        fieldMagnitude = fieldFct(rsSim.simulationTime());
-        reactionConditions.electricField = fieldMagnitude;
+        Core::Vector initCorner(0,-startWidthY_m/2.0,-startWidthZ_m/2.0);
+        Core::Vector initBoxSize(startWidthX_m,startWidthY_m,startWidthZ_m);
 
-        for (int i = 0; i < nParticlesTotal; i++) {
-            bool reacted = rsSim.react(i, reactionConditions, dt_s);
+        for (int i=0; i<nParticles.size();i++) {
+            RS::Substance *subst = rsSimConf->substance(i);
+            std::vector<Core::Vector> initialPositions =
+                    ParticleSimulation::util::getRandomPositionsInBox(nParticles[i],initCorner,initBoxSize);
+            for (int k = 0; k < nParticles[i]; k++) {
+                uniqueReactivePartPtr particle = std::make_unique<RS::ReactiveParticle>(subst);
 
-            if (reacted){
-                //we had an reaction event: Update the chemical species for the trajectory
-                int substIndex = substanceIndices.at(particles[i]->getSpecies());
-                particles[i]->setFloatAttribute(key_ChemicalIndex, substIndex);
+                // init position and initial chemical species of the particle:
+                particle->setLocation(initialPositions[k]);
+                int substIndex = substanceIndices.at(particle->getSpecies());
+                particle->setFloatAttribute(key_ChemicalIndex, substIndex);
+
+                particlesPtrs.push_back(particle.get());
+                rsSim.addParticle(particle.get(), nParticlesTotal);
+                particles.push_back(std::move(particle));
+                trajectoryAdditionalParams.emplace_back(std::vector<double>(1));
+                nParticlesTotal++;
             }
-            // move particle in z axis according to particle mobility:
-            double particleShift = particles[i]->getMobility() * reducedPressure * fieldMagnitude * dt_s;
-            Core::Vector particleLocation = particles[i]->getLocation();
-            particleLocation.z( particleLocation.z() + particleShift);
-            particles[i]->setLocation(particleLocation);
         }
-        rsSim.advanceTimestep(dt_s);
-        timestepWriteFct(particlesPtrs, rsSim.simulationTime(), step, false);
 
-        //autocorrect compensation voltage, to minimize z drift (once for every single SV oscillation):
-        if (cvMode == AUTO_CV && step % nStepsPerOscillation == 0) {
-            //calculate current mean z-position:
-            double buf = 0.0;
+        RS::ReactionConditions reactionConditions = RS::ReactionConditions();
+        reactionConditions.temperature = 0.0;//backgroundTemperature_K;
+        reactionConditions.pressure = backgroundPressure_Pa;
+        reactionConditions.electricField = 0.0;
+        reactionConditions.totalReactionEnergy = 0.0;
+
+        resultFilewriter.initFile(rsSimConf);
+        // ======================================================================================
+
+
+        // define trajectory integration parameters / functions =================================
+
+        auto fieldFct =
+                [&fieldSV_VPerM, &fieldCV_VPerM, field_F, field_W, field_h]
+                (double time) -> double{
+
+            //double particleCharge = particle->getCharge();
+            double voltageSVgp = fieldSV_VPerM * 0.6667; // V/m (1V/m peak to peak is 0.6667V/m ground to peak)
+            double voltageSVt = fieldCV_VPerM + (field_F * sin(field_W * time)
+                                        + sin(field_h * field_W * time - 0.5 * M_PI))
+                                        * voltageSVgp / (field_F + 1);
+
+            return voltageSVt;
+        };
+
+
+        ParticleSimulation::partAttribTransformFctType additionalParameterTransformFct =
+                [=](BTree::Particle* particle) -> std::vector<double> {
+                    std::vector<double> result = {particle->getFloatAttribute(key_ChemicalIndex)};
+                    return result;
+                };
+
+
+        auto timestepWriteFct =
+                [&jsonWriter, &voltageWriter, &additionalParameterTransformFct, trajectoryWriteInterval,
+                        &rsSim, &resultFilewriter, concentrationWriteInterval, &fieldMagnitude, &logger]
+                        (std::vector<BTree::Particle *> &particles, double time, int timestep, bool lastTimestep){
+
+            if (timestep % concentrationWriteInterval ==0) {
+                resultFilewriter.writeTimestep(rsSim);
+                voltageWriter->writeTimestep(fieldMagnitude,time);
+            }
+            if (lastTimestep) {
+                jsonWriter->writeTimestep(
+                        particles, additionalParameterTransformFct, time, true);
+
+                jsonWriter->writeSplatTimes(particles);
+                jsonWriter->writeIonMasses(particles);
+                logger->info("finished ts:{} time:{:.2e}", timestep, time);
+            }
+
+            else if (timestep % trajectoryWriteInterval ==0){
+                rsSim.logConcentrations(logger);
+                jsonWriter->writeTimestep(
+                        particles, additionalParameterTransformFct, time, false);
+            }
+        };
+
+
+        // simulate   ===========================================================================
+        AppUtils::SignalHandler::registerSignalHandler();
+        AppUtils::Stopwatch stopWatch;
+        stopWatch.start();
+
+        reactionConditions.temperature = backgroundTemperature_K;
+        double reducedPressure = standardPressure_Pa / backgroundPressure_Pa;
+        for (int step=0; step<nSteps; step++) {
+
+            fieldMagnitude = fieldFct(rsSim.simulationTime());
+            reactionConditions.electricField = fieldMagnitude;
+
             for (int i = 0; i < nParticlesTotal; i++) {
-                buf += particles[i]->getLocation().z();
+                bool reacted = rsSim.react(i, reactionConditions, dt_s);
+
+                if (reacted){
+                    //we had an reaction event: Update the chemical species for the trajectory
+                    int substIndex = substanceIndices.at(particles[i]->getSpecies());
+                    particles[i]->setFloatAttribute(key_ChemicalIndex, substIndex);
+                }
+                // move particle in z axis according to particle mobility:
+                double particleShift = particles[i]->getMobility() * reducedPressure * fieldMagnitude * dt_s;
+                Core::Vector particleLocation = particles[i]->getLocation();
+                particleLocation.z( particleLocation.z() + particleShift);
+                particles[i]->setLocation(particleLocation);
             }
-            double currentMeanZPos = buf / nParticlesTotal;
+            rsSim.advanceTimestep(dt_s);
+            timestepWriteFct(particlesPtrs, rsSim.simulationTime(), step, false);
 
-            //update cv value:
-            double diffMeanZPos = meanZPos - currentMeanZPos;
-            fieldCV_VPerM = fieldCV_VPerM + diffMeanZPos * cvRelaxationParameter;
-            cvFieldWriter->writeTimestep(std::vector<double>{fieldCV_VPerM,currentMeanZPos},rsSim.simulationTime());
-            meanZPos = currentMeanZPos;
-            logger->info("CV corrected ts:{} time:{:.2e} new CV:{}", step, rsSim.simulationTime(), fieldCV_VPerM);
-        }
+            //autocorrect compensation voltage, to minimize z drift (once for every single SV oscillation):
+            if (cvMode == AUTO_CV && step % nStepsPerOscillation == 0) {
+                //calculate current mean z-position:
+                double buf = 0.0;
+                for (int i = 0; i < nParticlesTotal; i++) {
+                    buf += particles[i]->getLocation().z();
+                }
+                double currentMeanZPos = buf / nParticlesTotal;
 
-        if (ionsInactive >= nAllParticles){
-            break;
+                //update cv value:
+                double diffMeanZPos = meanZPos - currentMeanZPos;
+                fieldCV_VPerM = fieldCV_VPerM + diffMeanZPos * cvRelaxationParameter;
+                cvFieldWriter->writeTimestep(std::vector<double>{fieldCV_VPerM,currentMeanZPos},rsSim.simulationTime());
+                meanZPos = currentMeanZPos;
+                logger->info("CV corrected ts:{} time:{:.2e} new CV:{}", step, rsSim.simulationTime(), fieldCV_VPerM);
+            }
+
+            if (ionsInactive>=nAllParticles || AppUtils::SignalHandler::isTerminationSignaled()){
+                timestepWriteFct(particlesPtrs, rsSim.simulationTime(), step, true);
+                break;
+            }
         }
+        stopWatch.stop();
+
+        logger->info("total reaction events: {} ill events: {}", rsSim.totalReactionEvents(), rsSim.illEvents());
+        logger->info("ill fraction: {}", rsSim.illEvents() / (double) rsSim.totalReactionEvents());
+        logger->info("CPU time: {} s", stopWatch.elapsedSecondsCPU());
+        logger->info("Finished in {} seconds (wall clock time)",stopWatch.elapsedSecondsWall());
+        // ======================================================================================
+
+        return 0;
     }
-    timestepWriteFct(particlesPtrs, rsSim.simulationTime(), nSteps, true);
-    stopWatch.stop();
-
-    logger->info("total reaction events: {} ill events: {}", rsSim.totalReactionEvents(), rsSim.illEvents());
-    logger->info("ill fraction: {}", rsSim.illEvents() / (double) rsSim.totalReactionEvents());
-    logger->info("CPU time: {} s", stopWatch.elapsedSecondsCPU());
-    logger->info("Finished in {} seconds (wall clock time)",stopWatch.elapsedSecondsWall());
-    // ======================================================================================
-
-    return 0;
+    catch(const std::invalid_argument& ia){
+        std::cout << ia.what() << std::endl;
+        return EXIT_FAILURE;
+    }
 }

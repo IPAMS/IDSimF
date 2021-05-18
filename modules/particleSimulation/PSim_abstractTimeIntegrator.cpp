@@ -55,6 +55,13 @@ void ParticleSimulation::AbstractTimeIntegrator::setTerminationState() {
     runState_ = ParticleSimulation::AbstractTimeIntegrator::IN_TERMINATION;
 }
 
+/**
+ * Returns the run state of the integrator
+ */
+ParticleSimulation::AbstractTimeIntegrator::RunState ParticleSimulation::AbstractTimeIntegrator::runState() {
+    return runState_;
+}
+
 
 /**
  * Gets the simulated time
