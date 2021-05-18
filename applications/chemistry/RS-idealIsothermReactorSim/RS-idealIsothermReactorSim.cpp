@@ -31,6 +31,7 @@
 #include "appUtils_simulationConfiguration.hpp"
 #include "appUtils_logging.hpp"
 #include "appUtils_stopwatch.hpp"
+#include "appUtils_signalHandler.hpp"
 #include "json.h"
 #include <iostream>
 #include <cmath>
@@ -91,10 +92,13 @@ int main(int argc, const char * argv[]) {
 
 
     // simulate   ===========================================================================
+    AppUtils::SignalHandler::registerSignalHandler();
     AppUtils::Stopwatch stopWatch;
-
     stopWatch.start();
     for (int step=0; step<nSteps; step++) {
+        if (AppUtils::SignalHandler::isTerminationSignaled()){ // terminate simulation loop if termination was signaled
+            break;
+        }
         if (step % concentrationWriteInterval ==0) {
             sim.logConcentrations(logger);
             resultFilewriter.writeTimestep(sim);
