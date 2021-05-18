@@ -41,7 +41,7 @@ void exitSignalHandler_(int _ignored) {
 void AppUtils::SignalHandler::setReceiver(ParticleSimulation::AbstractTimeIntegrator& receiver) {
     receiver_ = &receiver;
 
-    if (signal((int) SIGTERM, exitSignalHandler_) == SIG_ERR)
+    if (signal((int) SIGINT, exitSignalHandler_) == SIG_ERR)
     {
         throw SignalException("Error setting up signal handlers");
     }
