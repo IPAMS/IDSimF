@@ -44,9 +44,9 @@
 int main(int argc, const char * argv[]) {
     try {
         // read configuration file ======================================================================
-        if (argc<2) {
-            std::cout << "no conf project name or conf file given" << std::endl;
-            return (1);
+        if (argc<=2) {
+            std::cout << "Run abort: No run configuration or project name given." << std::endl;
+            return EXIT_FAILURE;
         }
         std::string projectName = argv[2];
         std::cout << projectName << std::endl;
