@@ -35,22 +35,35 @@ void exitSignalHandler_(int _ignored) {
     AppUtils::SignalHandler::sendTerminateToReceiver();
 }
 
+
+
 /**
  * Sets a new receiver time integrator which should be terminated by SIGTERM
  */
 void AppUtils::SignalHandler::setReceiver(ParticleSimulation::AbstractTimeIntegrator& receiver) {
     receiver_ = &receiver;
+    registerSignalHandler();
+}
 
+void AppUtils::SignalHandler::registerSignalHandler() {
     if (signal((int) SIGINT, exitSignalHandler_) == SIG_ERR)
     {
         throw SignalException("Error setting up signal handlers");
     }
 }
 
+bool AppUtils::SignalHandler::isTerminationSignaled() {
+    return terminationSignaled_;
+}
 /**
  * Send a termination signal to the receiving time integrator
  */
 void AppUtils::SignalHandler::sendTerminateToReceiver() {
-    receiver_->setTerminationState();
+    if (receiver_ !=nullptr) {
+        receiver_->setTerminationState();
+    }
+    terminationSignaled_ = true;
 }
+
+
 
