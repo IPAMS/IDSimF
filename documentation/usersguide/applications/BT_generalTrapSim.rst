@@ -38,10 +38,10 @@ Simulation configuration description
 ``space_charge_factor`` : float
     Multiplication factor for particle-particle interaction (space charge).
 
-``background_pressure_Pa`` : float
+``background_gas_pressure_Pa`` : float
     Pressure of the neutral background as in Pa. 
 
-``background_temperature_K`` : float
+``background_gas_temperature_K`` : float
     Temperature of the background gas in K. 
 
 ``collision_gas_mass_amu`` : float
@@ -65,7 +65,7 @@ Simulation configuration description
 Potential Array Configuration / Trap Field Configuration 
 --------------------------------------------------------
 
-``f_rf`` : float
+``frequency_rf`` : float
     Frequency of the RF trapping field in Hz. 
 
 ``V_rf`` : float
@@ -78,7 +78,7 @@ Potential Array Configuration / Trap Field Configuration
 
     The file paths are relative to the simulation run configuration file. 
 
-``potential_array_scaling`` : float
+``potential_array_scale`` : float
     Geometric scaling factor for the potential arrays specified in ``potential_arrays``. 
 
 ``dc_potentials`` : Vector of float

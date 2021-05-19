@@ -108,7 +108,7 @@ int main(int argc, const char * argv[]) {
         }
 
         //read potential array configuration of the trap =================================================
-        double paSpatialScale = simConf.doubleParameter("potential_array_scaling");
+        double paSpatialScale = simConf.doubleParameter("potential_array_scale");
         std::vector<std::unique_ptr<ParticleSimulation::SimionPotentialArray>> potentialArrays;
         std::vector<std::string> potentialArraysNames = simConf.stringVectorParameter("potential_arrays");
         for (const auto& paName: potentialArraysNames) {
@@ -162,15 +162,14 @@ int main(int argc, const char * argv[]) {
         }
 
         //read physical configuration ===================================================================
-        double backgroundPressure = simConf.doubleParameter("background_pressure_Pa");
-        double backgroundTemperature = simConf.doubleParameter("background_temperature_K");
+        double backgroundPressure = simConf.doubleParameter("background_gas_pressure_Pa");
+        double backgroundTemperature = simConf.doubleParameter("background_gas_temperature_K");
         double spaceChargeFactor = simConf.doubleParameter("space_charge_factor");
         double collisionGasMassAmu = simConf.doubleParameter("collision_gas_mass_amu");
         double collisionGasDiameterM = simConf.doubleParameter("collision_gas_diameter_angstrom")*1e-10;
 
-
         //read rf configuration =========================================================================
-        double f_rf = simConf.doubleParameter("f_rf"); //RF frequency 1e6;
+        double f_rf = simConf.doubleParameter("frequency_rf"); //RF frequency 1e6;
         double omega = f_rf*2.0*M_PI; //RF angular frequencyf_rf* 2.0 * M_PI;
 
         RfAmplitudeMode rfMode;
