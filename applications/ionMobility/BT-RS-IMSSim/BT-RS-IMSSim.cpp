@@ -407,15 +407,16 @@ int main(int argc, const char *argv[]){
                 }
             }
             rsSim.advanceTimestep(dt_s);
+
+            //terminate simualation loop if all particles are terminated or termination of the integrator was requested
+            //from somewhere (e.g. signal from outside)
             if (trajectoryIntegrator) {
                 trajectoryIntegrator->runSingleStep(dt_s);
+                if (trajectoryIntegrator->runState()==ParticleSimulation::AbstractTimeIntegrator::IN_TERMINATION){
+                    break;
+                }
             }
-
-            //terminate simualation loops if all particles are terminated or termination of the integrator was requested
-            //from somewhere (e.g. signal from outside)
-            if (ionsInactive>=nAllParticles ||
-                    trajectoryIntegrator->runState()==ParticleSimulation::AbstractTimeIntegrator::IN_TERMINATION)
-            {
+            if (ionsInactive>=nAllParticles){
                 break;
             }
         }
