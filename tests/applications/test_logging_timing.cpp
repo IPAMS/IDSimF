@@ -31,6 +31,7 @@
 #include "test_util.hpp"
 #include <string>
 #include <chrono>
+#include <thread>
 
 TEST_CASE( "Test logging", "[ApplicationUtils]") {
     auto logger = AppUtils::createLogger("test.log");
