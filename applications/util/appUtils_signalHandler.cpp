@@ -35,8 +35,6 @@ void exitSignalHandler_(int _ignored) {
     AppUtils::SignalHandler::sendTerminateToReceiver();
 }
 
-
-
 /**
  * Sets a new receiver time integrator which should be terminated by SIGTERM
  */
