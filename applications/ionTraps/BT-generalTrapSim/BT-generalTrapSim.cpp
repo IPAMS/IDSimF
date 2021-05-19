@@ -347,9 +347,6 @@ int main(int argc, const char * argv[]) {
         };
 
         //prepare file writers and data writing functions ==============================================================================
-        auto avgPositionWriter = std::make_unique<ParticleSimulation::AverageChargePositionWriter>(
-                projectName+"_averagePosition.txt");
-
         auto fftWriter = std::make_unique<ParticleSimulation::InductionCurrentWriter>(
                 particlePtrs, projectName+"_fft.txt", detectionPAs, detectionPAFactors, paSpatialScale);
         auto ionsInactiveWriter = std::make_unique<ParticleSimulation::Scalar_writer>(projectName+"_ionsInactive.txt");
