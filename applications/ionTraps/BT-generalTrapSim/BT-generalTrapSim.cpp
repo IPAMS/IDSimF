@@ -44,6 +44,7 @@
 #include "appUtils_logging.hpp"
 #include "appUtils_stopwatch.hpp"
 #include "appUtils_signalHandler.hpp"
+#include "PSim_ionCloudReader.hpp"
 #include <iostream>
 #include <vector>
 #include <ctime>
@@ -472,6 +473,11 @@ int main(int argc, const char * argv[]) {
     catch(const ParticleSimulation::PotentialArrayException& pe)
     {
         std::cout << pe.what() << std::endl;
+        return EXIT_FAILURE;
+    }
+    catch(const ParticleSimulation::IonCloudFileException& ie)
+    {
+        std::cout << ie.what() << std::endl;
         return EXIT_FAILURE;
     }
     catch(const std::invalid_argument& ia){

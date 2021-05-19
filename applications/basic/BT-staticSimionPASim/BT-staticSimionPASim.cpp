@@ -173,6 +173,11 @@ int main(int argc, const char * argv[]) {
         std::cout << pe.what() << std::endl;
         return EXIT_FAILURE;
     }
+    catch(const ParticleSimulation::IonCloudFileException& ie)
+    {
+        std::cout << ie.what() << std::endl;
+        return EXIT_FAILURE;
+    }
     catch(const std::invalid_argument& ia){
         std::cout << ia.what() << std::endl;
         return EXIT_FAILURE;
