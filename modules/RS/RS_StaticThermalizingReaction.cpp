@@ -55,7 +55,6 @@ RS::ReactionEvent RS::StaticThermalizingReaction::attemptReaction(RS::ReactionCo
  * This is a purely stochastic reaction, thus the collision based probability is always zero
  * and this method should not be called
  */
-RS::ReactionEvent RS::StaticThermalizingReaction::attemptReaction(CollisionConditions conditions,
-                                                                  RS::ReactiveParticle *particle) const{
+RS::ReactionEvent RS::StaticThermalizingReaction::attemptReaction(CollisionConditions, RS::ReactiveParticle*) const{
     throw ("Collision based reaction probability requested for purely stochastic reaction StaticReaction");
 }

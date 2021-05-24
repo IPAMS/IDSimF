@@ -38,9 +38,9 @@ RS::AbstractReaction::AbstractReaction(
 :
 educts_(educts),
 products_(products),
-collisionReaction_(isCollisionReaction),
 typeLabel_(typeLabel),
-label_(label)
+label_(label),
+collisionReaction_(isCollisionReaction)
 {
     //init educts table
     //search discrete educts, calculate static reaction probability

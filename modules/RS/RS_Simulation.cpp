@@ -22,74 +22,21 @@
 #include "RS_Simulation.hpp"
 #include "Core_randomGenerators.hpp"
 
-RS::Simulation::Simulation(std::string configFileName){
+/**
+ * Constructs a RS Simulation with a simulation configuration given by a simulation configuration file
+ */
+RS::Simulation::Simulation(const std::string& configFileName){
     RS::ConfigFileParser parser = RS::ConfigFileParser();
-    RS::Simulation(parser.getTestConfigWaterClusters());
+    std::unique_ptr<RS::SimulationConfiguration> simConf = parser.parseFile(configFileName);
+    initFromSimulationConfig_(std::move(simConf));
 }
 
-RS::Simulation::Simulation(std::unique_ptr<RS::SimulationConfiguration> simConf):
-        nTimesteps_(0),
-        sumTime_(0.0),
-        totalReactionEvents_(0),
-        illEvents_(0)
+/**
+ * Constructs a RS Simulation with a given simulation configuration
+ */
+RS::Simulation::Simulation(std::unique_ptr<RS::SimulationConfiguration> simConf)
 {
-
-    simConf_ = std::move(simConf);
-    substances_ = simConf_->getAllSubstances();
-    reactions_ = simConf_->getAllReactions();
-
-    for(const auto& subst: substances_){
-        //std::cout << subst <<std::endl;
-        reacInd_[subst] = std::vector<AbstractReaction*>();
-        reacDep_[subst] = std::vector<AbstractReaction*>();
-
-        if (subst->type() == RS::Substance::substanceType::discrete){
-            discreteConcentrations_[subst] = 0;
-        }
-    }
-
-    for(const auto& reac: reactions_){
-
-        //prepare reaction event counter:
-        reactionEvents_.insert({reac, 0});
-
-        if (reac->isCollisionReaction()){
-            //the reaction is a collision based reaction: there is only one discrete educt and one non discrete educt
-            RS::Substance* particleSubstance;
-            RS::Substance* backgroundSubstance;
-
-            for(const auto& substPair: *reac->educts()){
-                RS::Substance* subst = substPair.first;
-                int factor = substPair.second;
-                if (factor == 1){
-                    if (subst->type() == RS::Substance::discrete){
-                        particleSubstance = subst;
-                    }else{
-                        backgroundSubstance = subst;
-                    }
-                }
-            }
-            //add reaction to collision reaction table
-            std::pair<RS::Substance*,RS::Substance*> eductPair(particleSubstance,backgroundSubstance);
-            if (reacCollision_.count(eductPair) == 0){
-                reacCollision_[eductPair] = std::vector<AbstractReaction*>();
-            }
-            reacCollision_.at(eductPair).push_back(reac);
-            //throw (RS::ConfigurationFileException("Illegal reaction in configuration file"));
-        }
-        else if (reac->isIndependent()){
-            //the reaction is independent: there is only one discrete educt
-            auto discreteEduct = reac->discreteEducts()->begin();
-            reacInd_.at(discreteEduct->first).push_back(reac);
-            //staticProbabilities_.at(discreteEduct->first).push_back(reac->staticReactionConcentration());
-        }
-        else{
-            //the reaction is dependent on more than one discrete educt: add it to the reaction maps of all educts
-            for(const auto& discreteEduct: *reac->discreteEducts()){
-                reacDep_.at(discreteEduct.first).push_back(reac);
-            }
-        }
-    }
+    initFromSimulationConfig_(std::move(simConf));
 }
 
 RS::SimulationConfiguration* RS::Simulation::simulationConfiguration() {
@@ -347,6 +294,65 @@ std::ostream& operator<<(std::ostream& os, const RS::Simulation& sim)
         os << *p.first << " | " << p.second <<std::endl;
     }
     return os;
+}
+
+void RS::Simulation::initFromSimulationConfig_(std::unique_ptr<RS::SimulationConfiguration> simConf) {
+    simConf_ = std::move(simConf);
+    substances_ = simConf_->getAllSubstances();
+    reactions_ = simConf_->getAllReactions();
+
+    for(const auto& subst: substances_){
+        //std::cout << subst <<std::endl;
+        reacInd_[subst] = std::vector<AbstractReaction*>();
+        reacDep_[subst] = std::vector<AbstractReaction*>();
+
+        if (subst->type() == RS::Substance::substanceType::discrete){
+            discreteConcentrations_[subst] = 0;
+        }
+    }
+
+    for(const auto& reac: reactions_){
+
+        //prepare reaction event counter:
+        reactionEvents_.insert({reac, 0});
+
+        if (reac->isCollisionReaction()){
+            //the reaction is a collision based reaction: there is only one discrete educt and one non discrete educt
+            RS::Substance* particleSubstance;
+            RS::Substance* backgroundSubstance;
+
+            for(const auto& substPair: *reac->educts()){
+                RS::Substance* subst = substPair.first;
+                int factor = substPair.second;
+                if (factor == 1){
+                    if (subst->type() == RS::Substance::discrete){
+                        particleSubstance = subst;
+                    }else{
+                        backgroundSubstance = subst;
+                    }
+                }
+            }
+            //add reaction to collision reaction table
+            std::pair<RS::Substance*,RS::Substance*> eductPair(particleSubstance,backgroundSubstance);
+            if (reacCollision_.count(eductPair) == 0){
+                reacCollision_[eductPair] = std::vector<AbstractReaction*>();
+            }
+            reacCollision_.at(eductPair).push_back(reac);
+            //throw (RS::ConfigurationFileException("Illegal reaction in configuration file"));
+        }
+        else if (reac->isIndependent()){
+            //the reaction is independent: there is only one discrete educt
+            auto discreteEduct = reac->discreteEducts()->begin();
+            reacInd_.at(discreteEduct->first).push_back(reac);
+            //staticProbabilities_.at(discreteEduct->first).push_back(reac->staticReactionConcentration());
+        }
+        else{
+            //the reaction is dependent on more than one discrete educt: add it to the reaction maps of all educts
+            for(const auto& discreteEduct: *reac->discreteEducts()){
+                reacDep_.at(discreteEduct.first).push_back(reac);
+            }
+        }
+    }
 }
 
 RS::Simulation::reactionMap RS::Simulation::indReactDeepCopy_() {

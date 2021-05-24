@@ -91,7 +91,7 @@ Core::Vector BTree::ParallelTree::computeEFieldFromTree(BTree::Particle &particl
     Core::Vector efield= Core::Vector(0.0,0.0,0.0);
     Core::Vector loc=particle.getLocation();
 
-    int cur=0; // index for the current position in the working array
+    std::vector<BTree::ParallelNode*>::size_type cur=0; // index for the current position in the working array
 
     // construct a linear node list to store the nodes to process in:
     std::vector<BTree::ParallelNode*> nodesToProcess;

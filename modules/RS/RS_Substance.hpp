@@ -62,7 +62,7 @@ namespace RS {
         Substance(std::string name, std::string typeLabel) noexcept(false);
         
         std::string name() const;
-        const substanceType type() const;
+        substanceType type() const;
         
         double charge() const;
         void charge(double newCharge);
@@ -80,11 +80,11 @@ namespace RS {
         
     private:
         std::string name_; ///< The name of this substance
-        double staticConcentration_; ///< the static background concentration (for isotropic substances)
-        double mass_; ///< the mass of molecules of this substance
-        double charge_; ///< the charge of molecules of this substance
-        double mobility_; ///< the electrical ion mobility of molecules of this substance
-        double collisionDiameter_; ///< the effective collision diameter of molecules of this substance
+        double staticConcentration_ = 0.0; ///< the static background concentration (for isotropic substances)
+        double mass_ = 0.0; ///< the mass of molecules of this substance
+        double charge_ = 0.0; ///< the charge of molecules of this substance
+        double mobility_ = 0.0; ///< the electrical ion mobility of molecules of this substance
+        double collisionDiameter_ = 0.0; ///< the effective collision diameter of molecules of this substance
         substanceType type_; ///< the type of this substance
 
         Substance(std::string name);

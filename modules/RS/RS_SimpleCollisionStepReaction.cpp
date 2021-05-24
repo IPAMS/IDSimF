@@ -32,13 +32,12 @@ activationEnergy_(activationEnergy_eV / Core::JOULE_TO_EV)
  * This is a collision based reaction, thus the stochastic based probability is always zero
  * and this method should not be called
  */
-RS::ReactionEvent RS::SimpleCollisionStepReaction::attemptReaction(RS::ReactionConditions conditions,
-                                                                   ReactiveParticle *particle, double dt) const{
+RS::ReactionEvent RS::SimpleCollisionStepReaction::attemptReaction(RS::ReactionConditions,
+                                                                   ReactiveParticle*, double) const{
     throw ("Stochastic probability requested for collision based reaction SimpleCollisionStepReaction");
 }
 
-RS::ReactionEvent RS::SimpleCollisionStepReaction::attemptReaction(CollisionConditions conditions,
-                                                                   ReactiveParticle *particle) const{
+RS::ReactionEvent RS::SimpleCollisionStepReaction::attemptReaction(CollisionConditions conditions, ReactiveParticle*) const{
     if (conditions.totalCollisionEnergy > activationEnergy_) {
         return ReactionEvent{true, 1.0};
     } else {

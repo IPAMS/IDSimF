@@ -36,7 +36,7 @@ k_backward_(k_backward)
 
 
 RS::ReactionEvent RS::VantHoffReaction::attemptReaction(RS::ReactionConditions conditions,
-                                                        ReactiveParticle *particle,
+                                                        ReactiveParticle* /*particle*/,
                                                         double dt) const{
     double k_forward =
             1.0 /
@@ -54,6 +54,6 @@ RS::ReactionEvent RS::VantHoffReaction::attemptReaction(RS::ReactionConditions c
  * and this method should not be called
  */
 RS::ReactionEvent RS::VantHoffReaction::attemptReaction(
-        CollisionConditions conditions, ReactiveParticle *particle) const{
+        CollisionConditions /*conditions*/, ReactiveParticle* /*particle*/) const{
     throw ("Collision based reaction probability requested for purely stochastic reaction VantHoffReaction");
 }

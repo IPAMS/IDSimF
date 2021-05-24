@@ -21,39 +21,26 @@
 
 #include "RS_Substance.hpp"
 
-RS::Substance::Substance(std::string name)
-        :
-        charge_(0.0),
-        mass_(0.0),
-        mobility_(0.0),
-        collisionDiameter_(0.0),
-        staticConcentration_(0.0),
-        name_(name)
-{}
+RS::Substance::Substance(std::string name) :
+        name_(name) { }
 
-RS::Substance::Substance(std::string name, RS::Substance::substanceType type)
-:
-RS::Substance(name)
-{
+RS::Substance::Substance(std::string name, RS::Substance::substanceType type) :
+        RS::Substance(name) {
     type_ = type;
 }
 
-
-RS::Substance::Substance(std::string name, std::string typeLabel) noexcept(false)
-:
-RS::Substance(name)
-{
-    RS::Substance::substanceType sType;
-    if (typeLabel =="discrete"){
-        type_= RS::Substance::substanceType::discrete;
+RS::Substance::Substance(std::string name, std::string typeLabel) noexcept(false):
+        RS::Substance(name) {
+    if (typeLabel=="discrete") {
+        type_ = RS::Substance::substanceType::discrete;
     }
-    else if (typeLabel =="isotropic"){
-        type_= RS::Substance::substanceType::isotropic;
+    else if (typeLabel=="isotropic") {
+        type_ = RS::Substance::substanceType::isotropic;
     }
-    else if (typeLabel =="field"){
-        type_= RS::Substance::substanceType::field;
+    else if (typeLabel=="field") {
+        type_ = RS::Substance::substanceType::field;
     }
-    else{
+    else {
         throw RS::SubstanceException("illegal substance type");
     }
 }
@@ -73,7 +60,7 @@ std::string RS::Substance::name() const{
  
  \returns the type of the substance (isotropic, discrete or field)
  */
-const RS::Substance::substanceType RS::Substance::type() const{
+RS::Substance::substanceType RS::Substance::type() const{
     return type_;
 }
 

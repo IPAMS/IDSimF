@@ -103,8 +103,7 @@ namespace CollisionModel {
 
 
             double collisionGasMass_amu_;    ///< Mass of the collision gas particles in amu
-            double collisionGasDiameter_m_;  ///< Effective diamenter of collision gas particles in m
-            double collisionGasDiameter_nm_; ///< Effective diamenter of collision gas particles in m
+            double collisionGasDiameter_nm_; ///< Effective diamenter of collision gas particles in nanometer
 
             double randomWalkDistance(double logParticleMassRatio) const;
 

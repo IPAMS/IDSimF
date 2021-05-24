@@ -53,7 +53,6 @@ namespace RS {
         double K_s_;         ///< Equilibrium constant for the forward reaction
         double kBackward_;   ///< Rate constant for the backward reaction
         double mobility_;    ///< Electrical mobility of the charged particle
-        double collisionGasMass_amu_; ///< Mass of the collision background gas in amu
         double collisionGasMass_kg_;  ///< Mass of the collision background gas in kg
 
         double const P0_pa_ = 101325; ///< The default pressure in Pa
@@ -67,7 +66,7 @@ namespace RS {
                 double K_s,
                 double kBackward,
                 double electricMobility,
-                double collisionGasMass,
+                double collisionGasMassAmu,
                 std::string label
         );
 

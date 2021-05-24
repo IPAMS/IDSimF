@@ -44,7 +44,8 @@ using sPair= sMap::value_type;
 TEST_CASE( "Test basic RS simulation semantics", "[RS][Simulation]") {
 
     //create a simulation and add some particles:
-    RS::Simulation sim = RS::Simulation("test_config_file");
+    RS::ConfigFileParser confParser;
+    RS::Simulation sim = RS::Simulation(confParser.getTestConfigWaterClusters());
     RS::Substance Cluster_1 = RS::Substance("[H3O]+",RS::Substance::substanceType::discrete);
     RS::Substance Cluster_2 = RS::Substance("[H2O+H3O]+",RS::Substance::substanceType::discrete);
     RS::Substance Cluster_3 = RS::Substance("[H4O2+H3O]+",RS::Substance::substanceType::discrete);

@@ -257,7 +257,6 @@ std::pair<std::vector<std::string>,std::vector<std::string>> RS::ConfigFileParse
     std::smatch m;
     //std::regex_search (str, m, pattern);
 
-    int pos=0;
     while (std::regex_search (str, m, pattern)) {
         if (m.position(0)>0) {
             outResults.push_back(str.substr(0, m.position(0)));

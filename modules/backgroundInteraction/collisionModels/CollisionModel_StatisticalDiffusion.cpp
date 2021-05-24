@@ -95,7 +95,6 @@ pressureFunction_(pressureFunction),
 temperatureFunction_(temperatureFunction),
 velocityFunction_(velocityFunction),
 collisionGasMass_amu_(collisionGasMassAmu),
-collisionGasDiameter_m_(collisionGasDiameterM),
 collisionGasDiameter_nm_(collisionGasDiameterM * 1.0e9)
 {
     // Init collision statistics:

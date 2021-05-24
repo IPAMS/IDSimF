@@ -29,13 +29,13 @@
  * Default constructor: Inits collision statistics with a default dataset
  */
 CollisionModel::CollisionStatistics::CollisionStatistics():
-        icdfs_(CollisionModel::ICDF_DEFAULT),
+        nDist_(CollisionModel::N_DIST_DEFAULT),
+        nDistPoints_(CollisionModel::N_DIST_DEFAULT_POINTS),
+        nDistCollisions_(CollisionModel::N_DIST_DEFAULT_COLLISIONS),
         massRatios_(CollisionModel::MASSRATIO_DEFAULT),
         logMassRatios_(CollisionModel::LOG_MASSRATIO_DEFAULT),
         logMassRatioDists_(CollisionModel::LOG_MASSRATIO_DISTANCES_DEFAULT),
-        nDist_(CollisionModel::N_DIST_DEFAULT),
-        nDistCollisions_(CollisionModel::N_DIST_DEFAULT_COLLISIONS),
-        nDistPoints_(CollisionModel::N_DIST_DEFAULT_POINTS)
+        icdfs_(CollisionModel::ICDF_DEFAULT)
 {}
 
 /**
@@ -44,14 +44,7 @@ CollisionModel::CollisionStatistics::CollisionStatistics():
  *
  * @param statisticsFilename the name / path to a collision statistics parameter file
  */
-CollisionModel::CollisionStatistics::CollisionStatistics(std::string statisticsFilename):
-        icdfs_(0),
-        massRatios_(0),
-        logMassRatios_(),
-        nDist_(-1),
-        nDistPoints_(-1),
-        nDistCollisions_(-1)
-{
+CollisionModel::CollisionStatistics::CollisionStatistics(std::string statisticsFilename) {
     initCollisionModelFromStatisticsFile_(statisticsFilename);
     std::transform(massRatios_.begin(), massRatios_.end(), std::back_inserter(logMassRatios_),
             [](double mr) -> double { return log10(mr); });

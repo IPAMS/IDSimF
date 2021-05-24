@@ -59,9 +59,9 @@ namespace CollisionModel{
 
 
         private:
-            int nDist_; ///< Number of ICDFs in represented in distribution data
-            int nDistPoints_; ///< Number of data points per ICDF.
-            int nDistCollisions_; ///< Number of collisions represented in distribution data
+            int nDist_ = 0; ///< Number of ICDFs in represented in distribution data
+            int nDistPoints_ = 0; ///< Number of data points per ICDF.
+            int nDistCollisions_ = 0; ///< Number of collisions represented in distribution data
             std::vector<double> massRatios_; ///< Mass ratios in the individual ICDFs
             std::vector<double> logMassRatios_; ///< Logarithm of the mass ratios
             std::vector<double> logMassRatioDists_; ///< Logarithmic distances between the mass ratios

@@ -31,7 +31,7 @@
  * @param kBackward the backward reaction rate (reaction rate of the background reaction)
  * @param electricMobility the electrical mobility (in SI units, pressure is in Pa) at
  * standard conditions (101325 Pa and 271.15 K)
- * @param collisionGasMass the molecular mass of the background gas particles (in AMU)
+ * @param collisionGasMassAmu the molecular mass of the background gas particles (in AMU)
  * @param label a texutal label to identify the reaction
  */
 RS::FieldDependentVantHoffReaction::FieldDependentVantHoffReaction(
@@ -41,20 +41,19 @@ RS::FieldDependentVantHoffReaction::FieldDependentVantHoffReaction(
         double K_s,
         double kBackward,
         double electricMobility,
-        double collisionGasMass,
+        double collisionGasMassAmu,
         std::string label):
 AbstractReaction(educts, products, false, "vanthoff_field", label),
 H_R_(H_R),
 K_s_(K_s),
 kBackward_(kBackward),
 mobility_(electricMobility),
-collisionGasMass_amu_(collisionGasMass),
-collisionGasMass_kg_ (collisionGasMass * RS::kgPerAmu)
+collisionGasMass_kg_ (collisionGasMassAmu * RS::kgPerAmu)
 {}
 
 
 RS::ReactionEvent RS::FieldDependentVantHoffReaction::attemptReaction(
-        RS::ReactionConditions conditions, ReactiveParticle *particle, double dt) const{
+        RS::ReactionConditions conditions, ReactiveParticle* /*particle*/, double dt) const{
     double KT = mobility_ * P0_pa_ / conditions.pressure * conditions.temperature / T0_K_;
     double ionTemperature = conditions.temperature +
                             (collisionGasMass_kg_ * pow(KT * conditions.electricField, 2.0)) /
@@ -76,6 +75,6 @@ RS::ReactionEvent RS::FieldDependentVantHoffReaction::attemptReaction(
  * and this method should not be called
  */
 RS::ReactionEvent RS::FieldDependentVantHoffReaction::attemptReaction(
-        CollisionConditions conditions, ReactiveParticle* particle) const{
+        CollisionConditions /*conditions*/, ReactiveParticle* /*particle*/) const{
     throw("Collision based reaction probability requested for purely stochastic reaction FieldDependentVantHoffReaction");
 }

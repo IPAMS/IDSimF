@@ -31,8 +31,8 @@ AbstractReaction(educts, products,false, "static",label),
 rateConstant_(rateConstant)
 {}
 
-RS::ReactionEvent RS::StaticReaction::attemptReaction(RS::ReactionConditions conditions,
-                                                      RS::ReactiveParticle *particle, double dt) const{
+RS::ReactionEvent RS::StaticReaction::attemptReaction(RS::ReactionConditions /*conditions*/,
+                                                      RS::ReactiveParticle* /*particle*/, double dt) const{
 
     double reactionProbability = rateConstant_ * this->staticReactionConcentration() * dt;
     bool reactionHappened = generateRandomDecision(reactionProbability);
@@ -44,7 +44,7 @@ RS::ReactionEvent RS::StaticReaction::attemptReaction(RS::ReactionConditions con
  * This is a purely stochastic reaction, thus the collision based probability is always zero
  * and this method should not be called
  */
-RS::ReactionEvent RS::StaticReaction::attemptReaction(CollisionConditions conditions,
-                                                      RS::ReactiveParticle *particle) const{
+RS::ReactionEvent RS::StaticReaction::attemptReaction(CollisionConditions /*conditions*/,
+                                                      RS::ReactiveParticle* /*particle*/) const{
     throw ("Collision based reaction probability requested for purely stochastic reaction StaticReaction");
 }

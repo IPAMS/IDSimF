@@ -227,10 +227,6 @@ TEST_CASE("Test parsing of chemical systems with RS config file parser", "[RS][C
                 "a field dependent vant hoff test reaction");
 
         reactionConditions.electricField= 10000;
-
-
-        double k_test = reac_compare.attemptReaction(reactionConditions, &dummyParticle, 1.0).reactionProbability;
-        double k_8 = r8->attemptReaction(reactionConditions, &dummyParticle, 1.0).reactionProbability;
     }
 
     SECTION("Exception conditions in substance parsing should throw exceptions"){

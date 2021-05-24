@@ -51,13 +51,8 @@ namespace RS {
     using reactionMap = std::map<Substance* const, std::vector<AbstractReaction*>>;
 
     public:
-        explicit Simulation(
-                std::string configFileName
-        );
-
-        explicit Simulation(
-                std::unique_ptr<RS::SimulationConfiguration> simConf
-        );
+        explicit Simulation(const std::string& configFileName);
+        explicit Simulation(std::unique_ptr<RS::SimulationConfiguration> simConf);
 
         SimulationConfiguration* simulationConfiguration();
 
@@ -91,6 +86,7 @@ namespace RS {
         using pPair= pMap::value_type;
         pMap particleMap_;
 
+        void initFromSimulationConfig_(std::unique_ptr<RS::SimulationConfiguration> simConf);
         reactionMap indReactDeepCopy_();
         bool react_(int index, ReactionConditions& conditions, double dt, reactionMap &reacInd);
 
@@ -98,10 +94,10 @@ namespace RS {
         std::string reactionStatisticsString_();
 
         //implement private members / data structures / methods
-        long totalReactionEvents_; ///< the total number of reaction events in the simulation
-        long illEvents_;  ///< the number of illegal / ill events (events with reacion probabilties > 1)
-        double sumTime_; ///< the cumulative time (sum of all time steps)
-        int nTimesteps_; ///< the total number of timesteps in the simulation
+        long totalReactionEvents_ = 0; ///< the total number of reaction events in the simulation
+        long illEvents_= 0;  ///< the number of illegal / ill events (events with reacion probabilties > 1)
+        double sumTime_ = 0.0; ///< the cumulative time (sum of all time steps)
+        int nTimesteps_ = 0; ///< the total number of timesteps in the simulation
         std::unique_ptr<RS::SimulationConfiguration> simConf_;
         std::vector<Substance*> substances_; ///< the vector of all chemical substances in the simulation
         std::vector<AbstractReaction*> reactions_; ///< the vector of all chemical reactions in the simulation

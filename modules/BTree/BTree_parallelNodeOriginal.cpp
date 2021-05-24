@@ -452,7 +452,6 @@ void BTree::ParallelNodeOriginal::update(std::vector<BTree::ParallelNodeOriginal
     {
         int k=begin.at(i-1);
         int l=begin.at(i-2);
-        int zaehl=0;
         #pragma omp parallel for
         for(j=k-1;j>=l;j--)
         {
@@ -556,7 +555,7 @@ Core::Vector BTree::ParallelNodeOriginal::computeEFieldFromTree(BTree::Particle&
     }
 }
 
-Core::Vector BTree::ParallelNodeOriginal::computeElectricForceFromTree(BTree::Particle &targetP){
+Core::Vector BTree::ParallelNodeOriginal::computeElectricForceFromTree(BTree::Particle&){
     std::stringstream ss;
     ss << "Method not implemented: Core::ParallelNodeOriginal::computeElectricFieldFromTree";
     throw (std::runtime_error(ss.str()));
