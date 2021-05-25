@@ -64,7 +64,7 @@ std::vector<DTYPE> ParticleSimulation::HDF5Reader::readAttributeVector(std::stri
 
         H5::StrType strdatatype(H5::PredType::C_S1, H5T_VARIABLE); // of length 256 characters
         attr.read(strdatatype, datBuf);
-        for (int i = 0; i<dims[0]; ++i) {
+        for (hsize_t i = 0; i<dims[0]; ++i) {
             result.emplace_back(datBuf[i]);
         }
     } else if constexpr(std::is_same<DTYPE, int>::value || std::is_same<DTYPE, double>::value) {
@@ -78,7 +78,7 @@ std::vector<DTYPE> ParticleSimulation::HDF5Reader::readAttributeVector(std::stri
 
             DTYPE datBuf[dims[0]];
             attr.read(*datType, datBuf);
-            for (int i=0; i<dims[0]; ++i){
+            for (hsize_t i=0; i<dims[0]; ++i){
                 result.emplace_back(datBuf[i]);
             }
     } else {
@@ -99,7 +99,7 @@ ParticleSimulation::HDF5Reader::readDataset_(H5::DataSet ds)
 
     //get dimensions:
     hsize_t dims[NDIMS];
-    int nDims = dataspace.getSimpleExtentDims(dims,NULL);
+    //int nDims = dataspace.getSimpleExtentDims(dims,NULL);
 
     //prepare return object and prepare to read from HDF5 file:
     DataField<NDIMS,double> dField;
@@ -107,7 +107,7 @@ ParticleSimulation::HDF5Reader::readDataset_(H5::DataSet ds)
     hsize_t nElements = 1;
     hsize_t offset[NDIMS];
 
-    for (int i=0; i<NDIMS; ++i){
+    for (hsize_t i=0; i<NDIMS; ++i){
         nElements *= dims[i];
         dField.dims[i] = dims[i];
         offset[i] = 0;

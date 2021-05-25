@@ -21,7 +21,7 @@
 
 #include "PSim_HDF5Reader.hpp"
 
-ParticleSimulation::HDF5Reader::HDF5Reader(const std::string &hdf5Filename, bool compression) {
+ParticleSimulation::HDF5Reader::HDF5Reader(const std::string &hdf5Filename) {
     h5f_ = std::make_unique<H5::H5File>(hdf5Filename.c_str(), H5F_ACC_RDONLY);
 }
 
@@ -31,7 +31,7 @@ hsize_t ParticleSimulation::HDF5Reader::numberOfObjectsInGroup(std::string group
 }
 
 
-herr_t collectObjectNames(hid_t loc_id, const char *name, const H5L_info_t *linfo, void *opdata)
+herr_t collectObjectNames(hid_t /*loc_id*/, const char *name, const H5L_info_t* /*linfo*/, void *opdata)
 {
     auto *nameVec =  static_cast<std::vector<std::string>*>(opdata);
     nameVec->emplace_back(std::string(name));
@@ -39,12 +39,12 @@ herr_t collectObjectNames(hid_t loc_id, const char *name, const H5L_info_t *linf
     return 0;
 }
 
-herr_t collectDatasetNames(hid_t loc_id, const char *name, const H5L_info_t *linfo, void *opdata)
+herr_t collectDatasetNames(hid_t loc_id, const char *name, const H5L_info_t* /*linfo*/, void *opdata)
 {
     // Open the object using its name.
     hid_t object = H5Oopen(loc_id, name, H5P_DEFAULT);
     H5O_info_t object_info;
-    herr_t idx = H5Oget_info(object, &object_info);
+    H5Oget_info(object, &object_info);
 
     //Write object name to vector if it is a dataset:
     if (object_info.type == H5O_TYPE_DATASET){
@@ -58,14 +58,14 @@ herr_t collectDatasetNames(hid_t loc_id, const char *name, const H5L_info_t *lin
 std::vector<std::string> ParticleSimulation::HDF5Reader::namesOfObjectsInGroup(std::string groupName) {
     H5::Group group = h5f_->openGroup(groupName.c_str());
     std::vector<std::string> objectNames;
-    herr_t idx = H5Literate(group.getId(), H5_INDEX_NAME, H5_ITER_INC, NULL, collectObjectNames, &objectNames);
+    H5Literate(group.getId(), H5_INDEX_NAME, H5_ITER_INC, NULL, collectObjectNames, &objectNames);
     return objectNames;
 }
 
 std::vector<std::string> ParticleSimulation::HDF5Reader::namesOfDatasetsInGroup(std::string groupName) {
     H5::Group group = h5f_->openGroup(groupName.c_str());
     std::vector<std::string> objectNames;
-    herr_t idx = H5Literate(group.getId(), H5_INDEX_NAME, H5_ITER_INC, NULL, collectDatasetNames, &objectNames);
+    H5Literate(group.getId(), H5_INDEX_NAME, H5_ITER_INC, NULL, collectDatasetNames, &objectNames);
     return objectNames;
 }
 

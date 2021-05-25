@@ -42,7 +42,7 @@ TEST_CASE( "Test velocity integrator", "[ParticleSimulation][VelocityIntegrator]
 
         double ionVelocity = 10.0;
 
-        auto velocityFct = [ionVelocity](BTree::Particle *particle, int particleIndex, double time, int timestep){
+        auto velocityFct = [ionVelocity](BTree::Particle* /*particle*/, int /*particleIndex*/, double /*time*/, int /*timestep*/){
             Core::Vector result(ionVelocity, 0, ionVelocity*0.1);
             return (result);
         };
@@ -79,15 +79,15 @@ TEST_CASE( "Test velocity integrator", "[ParticleSimulation][VelocityIntegrator]
         SECTION("Simulation run should run through and functions should be called"){
 
             int nTimeStepsWritten = 0;
-            auto timestepWriteFct = [&nTimeStepsWritten](std::vector<BTree::Particle*>& particles, double time, int timestep,
-                                       bool lastTimestep){
+            auto timestepWriteFct = [&nTimeStepsWritten](std::vector<BTree::Particle*>& /*particles*/, double /*time*/,
+                    int /*timestep*/,bool /*lastTimestep*/){
                 nTimeStepsWritten++;
             };
 
             int nParticlesTouched = 0;
             auto otherActionsFct = [&nParticlesTouched] (
-                    Core::Vector& newPartPos,BTree::Particle* particle,
-                    int particleIndex, double time,int timestep){
+                    Core::Vector& /*newPartPos*/,BTree::Particle* /*particle*/,
+                    int /*particleIndex*/, double /*time*/, int /*timestep*/){
                 nParticlesTouched++;
             };
 
@@ -111,8 +111,8 @@ TEST_CASE( "Test velocity integrator", "[ParticleSimulation][VelocityIntegrator]
             int terminationTimeStep = 40;
 
             auto terminationActionFct = [&integratorPtr, terminationTimeStep] (
-                    Core::Vector& newPartPos, BTree::Particle* particle,
-                    int particleIndex, double time,int timestep){
+                    Core::Vector& /*newPartPos*/, BTree::Particle* /*particle*/,
+                    int /*particleIndex*/, double /*time*/, int timestep){
                 if (timestep >= terminationTimeStep){
                     integratorPtr->setTerminationState();
                 }

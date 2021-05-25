@@ -87,7 +87,7 @@ int ParticleSimulation::AbstractTimeIntegrator::timeStep() {
 bool ParticleSimulation::AbstractTimeIntegrator::bearParticles_(double time){
 
     if (particlesBornIdx_ < particleTOBs_.size()) {
-        int oldParticlesBornIdx = particlesBornIdx_;
+        std::size_t oldParticlesBornIdx = particlesBornIdx_;
 
         while (particlesBornIdx_ < particleTOBs_.size() && particleTOBs_[particlesBornIdx_].first <= time) {
             BTree::Particle *part = particleTOBs_[particlesBornIdx_].second;

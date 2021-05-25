@@ -46,7 +46,7 @@ namespace ParticleSimulation{
             DTYPE get(std::array<hsize_t, NDIMS> indices);
         };
 
-        explicit HDF5Reader(const std::string &hdf5Filename, bool compression = true);
+        explicit HDF5Reader(const std::string &hdf5Filename);
 
         template <hsize_t NDIMS> DataField<NDIMS, double>
         readDataset(std::string datasetName);
