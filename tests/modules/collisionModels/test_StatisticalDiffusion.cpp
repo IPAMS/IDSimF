@@ -121,7 +121,8 @@ TEST_CASE( "Test SDS collison model", "[CollisionModels][SDS]") {
 
         double ionAcceleration = 9.6485335276142e9; //((1000V / 100mm) * elementary charge) / 100 amu = 9.64e9 m/s^2
 
-        auto accelerationFct = [ionAcceleration] (BTree::Particle* particle, int particleIndex, BTree::Tree& tree, double time,int timestep){
+        auto accelerationFct = [ionAcceleration] (BTree::Particle* /*particle*/, int /*particleIndex*/,
+                BTree::Tree& /*tree*/, double /*time*/, int /*timestep*/){
             Core::Vector result(ionAcceleration,0,0);
             return(result);
         };

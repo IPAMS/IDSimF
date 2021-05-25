@@ -81,13 +81,13 @@ CollisionModel::HardSphereModel::HardSphereModel(
         double collisionGasDiameterM,
         bool maxwellianApproximation)
         :
+        maxwellianApproximation_(maxwellianApproximation),
+        temperature_K_(staticTemperature),
         collisionGasMass_Amu_(collisionGasMassAmu),
         collisionGasMass_kg_(collisionGasMassAmu*Core::AMU_TO_KG),
-        temperature_K_(staticTemperature),
         collisionGasDiameter_m_(collisionGasDiameterM),
-        maxwellianApproximation_(maxwellianApproximation),
-        pressureFunction_(pressureFunction),
-        velocityFunction_(velocityFunction) { }
+        pressureFunction_(std::move(pressureFunction)),
+        velocityFunction_(std::move(velocityFunction)) { }
 
 /**
  * Constructor for location dependent pressure and velocity, given as spatially resolved
@@ -102,21 +102,21 @@ CollisionModel::HardSphereModel::HardSphereModel(
         std::function<void(RS::CollisionConditions, BTree::Particle&)> afterCollisionFunction,
         bool maxwellianApproximation)
         :
+        maxwellianApproximation_(maxwellianApproximation),
+        temperature_K_(staticTemperature),
         collisionGasMass_Amu_(collisionGasMassAmu),
         collisionGasMass_kg_(collisionGasMassAmu*Core::AMU_TO_KG),
-        temperature_K_(staticTemperature),
         collisionGasDiameter_m_(collisionGasDiameterM),
-        pressureFunction_(pressureFunction),
-        velocityFunction_(velocityFunction),
-        afterCollisionActionFunction_(afterCollisionFunction),
-        maxwellianApproximation_(maxwellianApproximation) { }
+        pressureFunction_(std::move(pressureFunction)),
+        velocityFunction_(std::move(velocityFunction)),
+        afterCollisionActionFunction_(std::move(afterCollisionFunction)) { }
 
-void CollisionModel::HardSphereModel::updateModelParameters(BTree::Particle &ion) const {}
+void CollisionModel::HardSphereModel::updateModelParameters(BTree::Particle& /*ion*/) const {}
 
-void CollisionModel::HardSphereModel::initializeModelParameters(BTree::Particle &ion) const {}
+void CollisionModel::HardSphereModel::initializeModelParameters(BTree::Particle& /*ion*/) const {}
 
-void CollisionModel::HardSphereModel::modifyAcceleration(Core::Vector &acceleration, BTree::Particle &ion,
-                                                         double dt) {}
+void CollisionModel::HardSphereModel::modifyAcceleration(Core::Vector& /*acceleration*/, BTree::Particle& /*ion*/,
+                                                         double /*dt*/) {}
 
  /**
   * Modify the velocity of a charged particle "ion" with a potential random collision in time step "dt"
@@ -310,4 +310,4 @@ void CollisionModel::HardSphereModel::modifyVelocity(BTree::Particle &ion, doubl
     }
 }
 
-void CollisionModel::HardSphereModel::modifyPosition(Core::Vector &position, BTree::Particle &ion, double dt) {}
+void CollisionModel::HardSphereModel::modifyPosition(Core::Vector& /*position*/, BTree::Particle& /*ion*/, double /*dt*/) {}

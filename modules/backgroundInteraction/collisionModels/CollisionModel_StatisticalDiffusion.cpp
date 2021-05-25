@@ -90,10 +90,10 @@ CollisionModel::StatisticalDiffusionModel::StatisticalDiffusionModel(
         double collisionGasMassAmu,
         double collisionGasDiameterM,
         CollisionModel::CollisionStatistics cs):
+pressureFunction_(std::move(pressureFunction)),
+temperatureFunction_(std::move(temperatureFunction)),
+velocityFunction_(std::move(velocityFunction)),
 cs_(std::move(cs)),
-pressureFunction_(pressureFunction),
-temperatureFunction_(temperatureFunction),
-velocityFunction_(velocityFunction),
 collisionGasMass_amu_(collisionGasMassAmu),
 collisionGasDiameter_nm_(collisionGasDiameterM * 1.0e9)
 {
@@ -241,7 +241,7 @@ void CollisionModel::StatisticalDiffusionModel::modifyAcceleration(Core::Vector&
 /**
  * The ion velocity is not modified by the SDS model
  */
-void CollisionModel::StatisticalDiffusionModel::modifyVelocity(BTree::Particle& ion, const double dt) {}
+void CollisionModel::StatisticalDiffusionModel::modifyVelocity(BTree::Particle& /*ion*/, const double /*dt*/) {}
 
 /**
  * Modifies the position of a particle according to the background gas interaction modeled with the SDS approach
