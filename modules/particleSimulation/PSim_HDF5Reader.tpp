@@ -99,7 +99,7 @@ ParticleSimulation::HDF5Reader::readDataset_(H5::DataSet ds)
 
     //get dimensions:
     hsize_t dims[NDIMS];
-    //int nDims = dataspace.getSimpleExtentDims(dims,NULL);
+    dataspace.getSimpleExtentDims(dims,NULL);
 
     //prepare return object and prepare to read from HDF5 file:
     DataField<NDIMS,double> dField;
