@@ -34,7 +34,6 @@
 #include "PSim_verletIntegrator.hpp"
 #include "PSim_parallelVerletIntegrator.hpp"
 #include "PSim_util.hpp"
-#include "CollisionModel_EmptyCollisionModel.hpp"
 #include <iostream>
 #include <cmath>
 #include <numeric>

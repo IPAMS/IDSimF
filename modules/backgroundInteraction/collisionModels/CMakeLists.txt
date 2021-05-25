@@ -10,8 +10,6 @@ set(SOURCE_FILES
         CollisionModel_StatisticalDiffusion.cpp
         CollisionModel_StatisticalDiffusion.hpp
         CollisionModel_AbstractCollisionModel.hpp
-        CollisionModel_EmptyCollisionModel.cpp
-        CollisionModel_EmptyCollisionModel.hpp
         CollisionModel_util.cpp
         CollisionModel_util.hpp
         CollisionModel_MultiCollisionModel.cpp

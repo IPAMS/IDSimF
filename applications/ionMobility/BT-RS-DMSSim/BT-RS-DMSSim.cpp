@@ -35,7 +35,6 @@
 #include "PSim_verletIntegrator.hpp"
 #include "PSim_trajectoryExplorerJSONwriter.hpp"
 #include "PSim_scalar_writer.hpp"
-#include "CollisionModel_EmptyCollisionModel.hpp"
 #include "CollisionModel_StatisticalDiffusion.hpp"
 #include "CollisionModel_SpatialFieldFunctions.hpp"
 #include "appUtils_simulationConfiguration.hpp"
@@ -187,7 +186,7 @@ int main(int argc, const char * argv[]) {
         std::map<RS::Substance*, int> substanceIndices;
         std::vector<RS::Substance*> discreteSubstances = rsSimConf->getAllDiscreteSubstances();
         std::vector<double> ionMobility; // = simConf.doubleVectorParameter("ion_mobility");
-        for (int i = 0; i<discreteSubstances.size(); i++) {
+        for (std::size_t i = 0; i<discreteSubstances.size(); ++i) {
             substanceIndices.insert(std::pair<RS::Substance*, int>(discreteSubstances[i], i));
             ionMobility.push_back(discreteSubstances[i]->mobility());
         }
@@ -226,7 +225,7 @@ int main(int argc, const char * argv[]) {
         Core::Vector initCorner(0, -startWidthY_m/2.0, -startWidthZ_m/2.0);
         Core::Vector initBoxSize(startWidthX_m, startWidthY_m, startWidthZ_m);
 
-        for (int i = 0; i<nParticles.size(); i++) {
+        for (std::size_t i = 0; i<nParticles.size(); i++) {
             RS::Substance* subst = rsSimConf->substance(i);
             std::vector<Core::Vector> initialPositions =
                     ParticleSimulation::util::getRandomPositionsInBox(nParticles[i], initCorner, initBoxSize);
@@ -256,8 +255,8 @@ int main(int argc, const char * argv[]) {
         // define trajectory integration parameters / functions =================================
 
         auto accelerationFct =
-                [&fieldSV_VPerM, &fieldCV_VPerM, field_F, field_W, field_h, &fieldMagnitude, spaceChargeFactor, electrodeDistance_m]
-                        (BTree::Particle* particle, int particleIndex, BTree::Tree& tree, double time, int timestep) {
+                [&fieldSV_VPerM, &fieldCV_VPerM, field_F, field_W, field_h, &fieldMagnitude, spaceChargeFactor]
+                        (BTree::Particle* particle, int /*particleIndex*/, BTree::Tree& tree, double time, int /*timestep*/) {
 
                     double particleCharge = particle->getCharge();
                     double voltageSVgp = fieldSV_VPerM*0.6667; // V/m (1V/m peak to peak is 0.6667V/m ground to peak)
@@ -316,7 +315,7 @@ int main(int argc, const char * argv[]) {
 
         auto otherActionsFct = [electrodeHalfDistance_m, electrodeLength_m, &ionsInactive](
                 Core::Vector& newPartPos, BTree::Particle* particle,
-                int particleIndex, BTree::Tree& tree, double time, int timestep) {
+                int /*particleIndex*/, BTree::Tree& /*tree*/, double time, int /*timestep*/) {
 
             if (std::fabs(newPartPos.z())>=electrodeHalfDistance_m) {
                 particle->setActive(false);
@@ -340,7 +339,7 @@ int main(int argc, const char * argv[]) {
 
             if (flowMode==UNIFORM_FLOW) {
                 velocityFct =
-                        [gasVelocityX](Core::Vector& pos) {
+                        [gasVelocityX](Core::Vector& /*pos*/) {
                             return Core::Vector(gasVelocityX, 0.0, 0.0);
                         };
             }
@@ -371,11 +370,8 @@ int main(int argc, const char * argv[]) {
             collisionModelPtr = std::move(collisionModel);
         }
         else if (collisionType==NO_COLLISION) {
-            std::unique_ptr<CollisionModel::EmptyCollisionModel> collisionModel =
-                    std::make_unique<CollisionModel::EmptyCollisionModel>();
-            collisionModelPtr = std::move(collisionModel);
+            collisionModelPtr = nullptr;
         }
-
 
         //init trajectory simulation object:
         ParticleSimulation::VerletIntegrator verletIntegrator(
@@ -399,7 +395,7 @@ int main(int argc, const char * argv[]) {
                 int substIndex = substanceIndices.at(particles[i]->getSpecies());
                 particles[i]->setFloatAttribute(key_ChemicalIndex, substIndex);
 
-                if (reacted) {
+                if (reacted && collisionModelPtr != nullptr) {
                     //we had an reaction event: update the collision model parameters for the particle which are not
                     //based on location (mostly STP parameters in SDS)
                     collisionModelPtr->initializeModelParameters(*particles[i]);

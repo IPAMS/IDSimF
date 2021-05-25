@@ -9,6 +9,9 @@ target_link_libraries(${PROJECT_NAME} core apputils rs collisionmodels particles
 add_test(NAME BT-RS-DMSSim_waterCluster_benchmarkRun COMMAND ${PROJECT_NAME}
         "example/RS_waterCluster_benchmarkRun.json" "run_BT-RS-DMSSim_waterCluster_benchmarkRun")
 
+add_test(NAME BT-RS-DMSSim_waterCluster_benchmarkRun_noCollison COMMAND ${PROJECT_NAME}
+        "example/RS_waterCluster_benchmarkRun_noCollision.json" "run_BT-RS-DMSSim_waterCluster_benchmarkRun_noCollision")
+
 add_test(NAME BT-RS-DMSSim_waterCluster_temperatureGradient COMMAND ${PROJECT_NAME}
         "example/RS_waterCluster_temperatureGradient.json" "run_BT-RS-DMSSim_waterCluster_temperatureGradient")
 

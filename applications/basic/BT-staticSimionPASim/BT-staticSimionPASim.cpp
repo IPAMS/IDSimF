@@ -33,7 +33,6 @@
 #include "PSim_verletIntegrator.hpp"
 #include "PSim_ionCloudReader.hpp"
 #include "PSim_simionPotentialArray.hpp"
-#include "CollisionModel_EmptyCollisionModel.hpp"
 #include "appUtils_simulationConfiguration.hpp"
 #include "appUtils_logging.hpp"
 #include "appUtils_stopwatch.hpp"

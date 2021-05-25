@@ -8,7 +8,6 @@
 #include "PSim_parallelVerletIntegrator.hpp"
 #include "PSim_trajectoryHDF5Writer.hpp"
 #include "PSim_util.hpp"
-#include "CollisionModel_EmptyCollisionModel.hpp"
 #include "CollisionModel_StatisticalDiffusion.hpp"
 #include "appUtils_stopwatch.hpp"
 #include <iostream>
@@ -141,8 +140,7 @@ int main(int argc, const char * argv[]) {
     int nIonsTotal = prepareIons(particlesSerial, particlePtrsSerial, nIonsPerDirection);
     prepareIons(particlesParallel, particlePtrsParallel, nIonsPerDirection);
     prepareIons(particlesParallelNew, particlePtrsParallelNew, nIonsPerDirection);
-
-    CollisionModel::EmptyCollisionModel emptyCollisionModel;
+    
     CollisionModel::StatisticalDiffusionModel sdsCollisionModel(100000.0, 298, 28, 3.64e-9);
     CollisionModel::AbstractCollisionModel *collisionModel;
     if (useCollisionModel){
