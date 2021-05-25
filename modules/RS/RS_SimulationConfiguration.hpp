@@ -57,13 +57,13 @@ namespace RS {
 
     public:
         bool addSubstance(std::unique_ptr<Substance>& subst);
-        Substance* substance(int index);
+        Substance* substance(std::size_t index);
         Substance* substanceByName(std::string substanceName);
         std::vector<Substance*> getAllSubstances();
         std::vector<Substance*> getAllDiscreteSubstances();
 
         bool addReaction(std::unique_ptr<AbstractReaction>& reac);
-        AbstractReaction* reaction(int index);
+        AbstractReaction* reaction(std::size_t index);
         std::vector<AbstractReaction*> getAllReactions();
 
         void updateConfiguration();

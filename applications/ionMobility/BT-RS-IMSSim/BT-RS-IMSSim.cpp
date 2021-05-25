@@ -97,10 +97,8 @@ int main(int argc, const char *argv[]){
         std::vector<double> collisionGasDiameters_angstrom = simConf.doubleVectorParameter(
                 "collision_gas_diameters_angstrom");
 
-        int nBackgroundGases = backgroundPartialPressures_Pa.size();
-        if (collisionGasMasses_Amu.size()!=nBackgroundGases ||
-                collisionGasMasses_Amu.size()!=nBackgroundGases ||
-                collisionGasDiameters_angstrom.size()!=nBackgroundGases) {
+        std::size_t nBackgroundGases = backgroundPartialPressures_Pa.size();
+        if (collisionGasMasses_Amu.size()!=nBackgroundGases || collisionGasDiameters_angstrom.size()!=nBackgroundGases) {
             throw std::invalid_argument("Inconsistent background gas configuration");
         }
 
@@ -127,7 +125,7 @@ int main(int argc, const char *argv[]){
         std::map<RS::Substance*, int> substanceIndices;
         std::vector<RS::Substance*> discreteSubstances = rsSimConf->getAllDiscreteSubstances();
         std::vector<double> ionMobility; // = simConf.doubleVectorParameter("ion_mobility",confRoot);
-        for (int i = 0; i<discreteSubstances.size(); i++) {
+        for (std::size_t i = 0; i<discreteSubstances.size(); i++) {
             substanceIndices.insert(std::pair<RS::Substance*, int>(discreteSubstances[i], i));
             ionMobility.push_back(discreteSubstances[i]->mobility());
         }
@@ -185,7 +183,8 @@ int main(int argc, const char *argv[]){
         Core::Vector initCorner(0, 0, 0);
         Core::Vector initBoxSize(startWidthX_m, startWidthYZ_m, startWidthYZ_m);
 
-        for (int i = 0; i<nParticles.size(); i++) {
+
+        for (std::size_t i = 0; i<nParticles.size(); i++) {
             RS::Substance* subst = rsSimConf->substance(i);
             std::vector<Core::Vector> initialPositions =
                     ParticleSimulation::util::getRandomPositionsInBox(nParticles[i], initCorner, initBoxSize);
@@ -196,7 +195,7 @@ int main(int argc, const char *argv[]){
                 particlesPtrs.push_back(particle.get());
                 rsSim.addParticle(particle.get(), nParticlesTotal);
                 particles.push_back(std::move(particle));
-                trajectoryAdditionalParams.push_back(std::vector<double>(1));
+                trajectoryAdditionalParams.emplace_back(std::vector<double>(1));
                 nParticlesTotal++;
             }
         }
@@ -240,7 +239,7 @@ int main(int argc, const char *argv[]){
 
         auto accelerationFctVerlet =
                 [eFieldMagnitude, spaceChargeFactor]
-                        (BTree::Particle* particle, int particleIndex, BTree::Tree& tree, double time, int timestep) {
+                        (BTree::Particle* particle, int /*particleIndex*/, BTree::Tree& tree, double /*time*/, int /*timestep*/) {
                     double particleCharge = particle->getCharge();
 
                     Core::Vector fieldForce(eFieldMagnitude*particleCharge, 0, 0);
@@ -272,15 +271,15 @@ int main(int argc, const char *argv[]){
 
         auto timestepWriteFctVerlet =
                 [&timestepWriteFctSimple]
-                        (std::vector<BTree::Particle*>& particles, BTree::Tree& tree, double time, int timestep,
+                        (std::vector<BTree::Particle*>& particles, BTree::Tree& /*tree*/, double time, int timestep,
                          bool lastTimestep) {
                     timestepWriteFctSimple(particles, time, timestep, lastTimestep);
                 };
 
         auto otherActionsFunctionIMSSimple =
                 [stopPosX_m, &ionsInactive]
-                        (Core::Vector& newPartPos, BTree::Particle* particle, int particleIndex, double time,
-                         int timestep) {
+                        (Core::Vector& newPartPos, BTree::Particle* particle, int /*particleIndex*/, double time,
+                         int /*timestep*/) {
                     if (newPartPos.x()>=stopPosX_m) {
                         particle->setActive(false);
                         particle->setSplatTime(time);
@@ -291,7 +290,7 @@ int main(int argc, const char *argv[]){
         auto otherActionsFunctionIMSVerlet =
                 [&otherActionsFunctionIMSSimple]
                         (Core::Vector& newPartPos, BTree::Particle* particle, int particleIndex,
-                         BTree::Tree& tree, double time, int timestep) {
+                         BTree::Tree& /*tree*/, double time, int timestep) {
                     otherActionsFunctionIMSSimple(newPartPos, particle, particleIndex, time, timestep);
                 };
 
@@ -340,7 +339,7 @@ int main(int argc, const char *argv[]){
         else if (transportModelType=="btree_HS") {
             //prepare multimodel with multiple Hard Sphere models (one per collision gas)
             std::vector<std::unique_ptr<CollisionModel::AbstractCollisionModel>> hsModels;
-            for (int i = 0; i<nBackgroundGases; ++i) {
+            for (std::size_t i = 0; i<nBackgroundGases; ++i) {
                 auto hsModel = std::make_unique<CollisionModel::HardSphereModel>(
                         backgroundPartialPressures_Pa[i],
                         backgroundTemperature_K,
@@ -367,8 +366,8 @@ int main(int argc, const char *argv[]){
         }
         else if (integratorType==SIMPLE) {
 
-            auto velocityFctSimple = [eFieldMagnitude, backgroundPTRatio](BTree::Particle* particle, int particleIndex,
-                                                                          double time, int timestep) {
+            auto velocityFctSimple = [eFieldMagnitude, backgroundPTRatio](BTree::Particle* particle, int /*particleIndex*/,
+                                                                          double /*time*/, int /*timestep*/) {
                 double particleMobility = particle->getMobility();
 
                 Core::Vector velocity(eFieldMagnitude*particleMobility*backgroundPTRatio, 0, 0);

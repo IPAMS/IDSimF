@@ -39,7 +39,7 @@ bool RS::SimulationConfiguration::addSubstance(std::unique_ptr<RS::Substance>& s
     }
 }
 
-RS::Substance* RS::SimulationConfiguration::substance(int index) {
+RS::Substance* RS::SimulationConfiguration::substance(std::size_t index) {
     return substances_.at(index).get();
 }
 
@@ -72,7 +72,7 @@ bool RS::SimulationConfiguration::addReaction(std::unique_ptr<RS::AbstractReacti
     return true;
 }
 
-RS::AbstractReaction* RS::SimulationConfiguration::reaction(int index) {
+RS::AbstractReaction* RS::SimulationConfiguration::reaction(std::size_t index) {
     return reactions_[index].get();
 }
 
