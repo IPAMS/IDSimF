@@ -99,7 +99,7 @@ int main(int argc, const char * argv[]) {
         double dt = simConf.doubleParameter("dt");
 
         std::string fftWriteMode_str = simConf.stringParameter("fft_write_mode");
-        FftWriteMode fftWriteMode;
+        FftWriteMode fftWriteMode = UNRESOLVED;
         if (fftWriteMode_str=="unresolved") {
             fftWriteMode = UNRESOLVED;
         }

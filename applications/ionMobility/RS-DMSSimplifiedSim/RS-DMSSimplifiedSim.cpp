@@ -81,7 +81,7 @@ int main(int argc, const char * argv[]) {
         std::string cvModeStr = simConf.stringParameter("cv_mode");
         CVMode cvMode;
         double meanZPos = 0.0; //variable used for automatic CV correction
-        double cvRelaxationParameter;
+        double cvRelaxationParameter = 0.0;
         if (cvModeStr == "static"){
             cvMode = STATIC_CV;
         }

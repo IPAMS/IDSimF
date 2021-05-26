@@ -195,9 +195,6 @@ int main(int argc, const char * argv[]) {
                 bool lastTimestep) {
             if (timestep%trajectoryWriteInterval==0) {
                 logger->info("ts:{} time:{:.2e}", timestep, time);
-                char buffer[100];
-                int cx;
-                cx = snprintf(buffer, 100, "%06d", timestep);
                 jsonWriter->writeTimestep(particles, additionalParameterTransformFct, time, false);
             }
             if (lastTimestep) {

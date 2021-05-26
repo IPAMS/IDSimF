@@ -47,7 +47,7 @@ RS::Substance* RS::SimulationConfiguration::substanceByName(std::string substanc
     try{
         return (substancesNameMap_.at(substanceName));
     }
-    catch(std::out_of_range){
+    catch(std::out_of_range&){
         std::stringstream ss;
         ss << "Substance "<< substanceName<< " is not existing";
         throw (RS::SimulationConfigurationException(ss.str()));

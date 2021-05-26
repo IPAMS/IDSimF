@@ -123,19 +123,15 @@ int main(int argc, const char * argv[]) {
         double z_0 = 0.0;
 
         std::string geometryMode_str = simConf.stringParameter("geometry_mode");
-        GeometryMode geometryMode;
         if (geometryMode_str=="default") {
-            geometryMode = DEFAULT;
             r_0 = r_0_default;
             z_0 = z_0_default;
         }
         else if (geometryMode_str=="variable") {
-            geometryMode = VARIABLE;
             r_0 = simConf.doubleParameter("r_0");
             z_0 = simConf.doubleParameter("z_0");
         }
         else if (geometryMode_str=="scaled") {
-            geometryMode = SCALED;
             double geomScale = simConf.doubleParameter("geometry_scale");
             r_0 = r_0_default*geomScale;
             z_0 = z_0_default*geomScale;
@@ -223,7 +219,7 @@ int main(int argc, const char * argv[]) {
         else {
             throw std::invalid_argument("wrong configuration value: excite_mode");
         }
-        double excitePotential;
+        double excitePotential = 0.0;
         if (exciteMode!=NOEXCITE) {
             excitePotential = simConf.doubleParameter("excite_potential");
         }

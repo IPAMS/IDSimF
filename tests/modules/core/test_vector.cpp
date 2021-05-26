@@ -73,8 +73,9 @@ TEST_CASE("Test Vector operations","[Core][Vector]") {
     SECTION("Vector accessors return copies of the values") {
         Core::Vector d = Core::Vector(1.0, 2.5, 5.0);
         double x = d.x();
+        REQUIRE(x == 1.0);
         x = 2.0;
-        REQUIRE(a.x()==1.0);
+        REQUIRE(a.x() == 1.0);
     }
 
     SECTION("Vector setter is working") {

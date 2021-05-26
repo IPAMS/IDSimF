@@ -110,16 +110,16 @@ int main(int argc, const char * argv[]) {
         }
 
         //Define background temperature function for chemical reaction and collision model
-        BackgroundTemperatureMode backgroundTempMode;
+        //BackgroundTemperatureMode backgroundTempMode;
         std::function<double(Core::Vector&)> backgroundTemperatureFct;
         std::string backgroundTempStr = simConf.stringParameter("background_temperature_mode");
         if (backgroundTempStr=="isotherm") {
-            backgroundTempMode = ISOTHERM;
+            //backgroundTempMode = ISOTHERM;
             double backgroundTemperature_K = simConf.doubleParameter("background_temperature_K");
             backgroundTemperatureFct = CollisionModel::getConstantDoubleFunction(backgroundTemperature_K);
         }
         else if (backgroundTempStr=="linear_gradient") {
-            backgroundTempMode = LINEAR_GRADIENT;
+            //backgroundTempMode = LINEAR_GRADIENT;
             double backgroundTemp_start = simConf.doubleParameter("background_temperature_start_K");
             double backgroundTemp_stop = simConf.doubleParameter("background_temperature_stop_K");
             double backgroundTemp_diff = backgroundTemp_stop-backgroundTemp_start;
@@ -152,7 +152,7 @@ int main(int argc, const char * argv[]) {
         std::string cvModeStr = simConf.stringParameter("cv_mode");
         CVMode cvMode;
         double meanZPos = 0.0; //variable used for automatic CV correction
-        double cvRelaxationParameter;
+        double cvRelaxationParameter = 0.0;
         if (cvModeStr=="static") {
             cvMode = STATIC_CV;
         }

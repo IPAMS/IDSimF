@@ -45,9 +45,9 @@ namespace Core {
         explicit Vector(double*);
         
         // Accessors:
-        double x() const;
-        double y() const;
-        double z() const;
+        [[nodiscard]] double x() const;
+        [[nodiscard]] double y() const;
+        [[nodiscard]] double z() const;
         
         // Setters:
         void set(double x,double y,double z);

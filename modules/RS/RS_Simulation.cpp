@@ -318,8 +318,8 @@ void RS::Simulation::initFromSimulationConfig_(std::unique_ptr<RS::SimulationCon
 
         if (reac->isCollisionReaction()){
             //the reaction is a collision based reaction: there is only one discrete educt and one non discrete educt
-            RS::Substance* particleSubstance;
-            RS::Substance* backgroundSubstance;
+            RS::Substance* particleSubstance = nullptr;
+            RS::Substance* backgroundSubstance = nullptr;
 
             for(const auto& substPair: *reac->educts()){
                 RS::Substance* subst = substPair.first;

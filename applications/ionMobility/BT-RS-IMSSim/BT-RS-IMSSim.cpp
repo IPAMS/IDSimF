@@ -356,7 +356,7 @@ int main(int argc, const char *argv[]){
         }
 
         //init trajectory simulation object:
-        std::unique_ptr<ParticleSimulation::AbstractTimeIntegrator> trajectoryIntegrator;
+        std::unique_ptr<ParticleSimulation::AbstractTimeIntegrator> trajectoryIntegrator = nullptr;
         if (integratorType==VERLET) {
             trajectoryIntegrator = std::make_unique<ParticleSimulation::VerletIntegrator>(
                     particlesPtrs,
@@ -383,7 +383,7 @@ int main(int argc, const char *argv[]){
 
 
         // simulate   ===========================================================================
-        AppUtils::SignalHandler::setReceiver(*trajectoryIntegrator);
+        AppUtils::SignalHandler::registerSignalHandler(); //this method is used because trajectory integrator can be null
         AppUtils::Stopwatch stopWatch;
         stopWatch.start();
 
@@ -409,9 +409,9 @@ int main(int argc, const char *argv[]){
 
             //terminate simualation loop if all particles are terminated or termination of the integrator was requested
             //from somewhere (e.g. signal from outside)
-            if (trajectoryIntegrator) {
+            if (trajectoryIntegrator !=nullptr) {
                 trajectoryIntegrator->runSingleStep(dt_s);
-                if (trajectoryIntegrator->runState()==ParticleSimulation::AbstractTimeIntegrator::IN_TERMINATION){
+                if (AppUtils::SignalHandler::isTerminationSignaled()){
                     break;
                 }
             }
