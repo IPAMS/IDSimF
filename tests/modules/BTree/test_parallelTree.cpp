@@ -161,7 +161,7 @@ TEST_CASE( "Test parallel tree charge distribution calculation","[Tree]"){
         testTree.insertParticle(testIon2,2);
         testTree.insertParticle(testIon3,3);
 
-        int numberOfNodesInTree = testTree.init();
+        testTree.init();
         REQUIRE(testTree.getNumberOfParticles() == 3);
         REQUIRE(testTree.getRoot()->getCharge() == 3.0*Core::ELEMENTARY_CHARGE);
 
@@ -181,7 +181,7 @@ TEST_CASE( "Test parallel tree charge distribution calculation","[Tree]"){
         testTree.insertParticle(testIon2,2);
         testTree.insertParticle(testIon3,3);
 
-        int numberOfNodesInTree = testTree.init();
+        testTree.init();
         REQUIRE(testTree.computeEFieldFromTree(testIon1) != Core::Vector(0.0,0.0,0.0));
         REQUIRE(
                 vectorApproxCompare(
@@ -235,7 +235,7 @@ TEST_CASE( "Test parallel tree charge distribution calculation","[Tree]"){
         }
 
         //testTree.computeChargeDistributionRecursive();
-        int numberOfNodesInTree = testTree.init();
+        testTree.init();
         REQUIRE(testTree.getNumberOfParticles() == 6 * nions);
         Core::Vector centralForce = testTree.computeEFieldFromTree(testIon1);
         Core::Vector leftForce = testTree.computeEFieldFromTree(testIon2);

@@ -309,7 +309,6 @@ TEST_CASE( "Test particle management in parallel node", "[Node]") {
                 delete (hostNode);
             }
         }
-        int numberOfParticles =testNode.getNumberOfParticles();
         REQUIRE(testNode.getNumberOfParticles() == 0);
         REQUIRE( (testNode.getCharge() - 0.0) < 1e-100);
         REQUIRE( testNode.getNumberOfNodes() == nNodesOriginal);
