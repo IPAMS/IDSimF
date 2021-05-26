@@ -44,12 +44,12 @@ ParticleSimulation::InductionCurrentWriter::InductionCurrentWriter(
     scale_mm_per_gu_ = scale_mm_per_gu;
     particles_ = particles;
 
-    int nFields = weightFields.size();
+    std::size_t nFields = weightFields.size();
     if (nFields != weightFactors.size()){
         throw std::invalid_argument("Field and field factor vectors differ in size");
     }
 
-    for (int i=0; i<nFields; ++i){
+    for (std::size_t i=0; i<nFields; ++i){
         weightFields_.emplace_back(
                 std::make_pair(weightFields[i],weightFactors[i]));
     }

@@ -43,8 +43,8 @@ TEST_CASE("Test serial verlet integrator", "[ParticleSimulation][VerletIntegrato
 
     double ionAcceleration = 10.0; //((1000V / 100mm) * elementary charge) / 100 amu = 9.64e9 m/s^2
 
-    auto accelerationFct = [ionAcceleration](BTree::Particle *particle, int particleIndex, BTree::Tree &tree,
-                                             double time, int timestep){
+    auto accelerationFct = [ionAcceleration](BTree::Particle* /*particle*/, int /*particleIndex*/, BTree::Tree& /*tree*/,
+                                             double /*time*/, int /*timestep*/){
         Core::Vector result(ionAcceleration, 0, ionAcceleration * 0.5);
         return (result);
     };
@@ -117,20 +117,20 @@ TEST_CASE("Test serial verlet integrator", "[ParticleSimulation][VerletIntegrato
         SECTION("Verlet integrator should run through and should call functions"){
 
             int nTimeStepsRecorded = 0;
-            auto timestepWriteFct = [&nTimeStepsRecorded](std::vector<BTree::Particle*>& particles, BTree::Tree& tree, double time, int timestep,
-                                       bool lastTimestep){
+            auto timestepWriteFct = [&nTimeStepsRecorded](std::vector<BTree::Particle*>& /*particles*/, BTree::Tree& /*tree*/, double /*time*/, int /*timestep*/,
+                                       bool /*lastTimestep*/){
                 nTimeStepsRecorded++;
             };
 
             int nParticlesTouched = 0;
             auto otherActionsFct = [&nParticlesTouched] (
-                    Core::Vector& newPartPos,BTree::Particle* particle,
-                    int particleIndex, BTree::Tree& tree, double time,int timestep){
+                    Core::Vector& /*newPartPos*/,BTree::Particle* /*particle*/,
+                    int /*particleIndex*/, BTree::Tree& /*tree*/, double /*time*/, int /*timestep*/){
                 nParticlesTouched++;
             };
 
             int nParticlesStartMonitored = 0;
-            auto particleStartMonitoringFct = [&nParticlesStartMonitored] (BTree::Particle* particle, double time){
+            auto particleStartMonitoringFct = [&nParticlesStartMonitored] (BTree::Particle* /*particle*/, double /*time*/){
                 nParticlesStartMonitored++;
             };
 
@@ -169,8 +169,8 @@ TEST_CASE("Test serial verlet integrator", "[ParticleSimulation][VerletIntegrato
             int terminationTimeStep = 50;
 
             auto timestepStopFct = [&integratorPtr, terminationTimeStep](
-                    std::vector<BTree::Particle*>& particles, BTree::Tree& tree,
-                    double time, int timestep, bool lastTimestep){
+                    std::vector<BTree::Particle*>& /*particles*/, BTree::Tree& /*tree*/,
+                    double /*time*/, int timestep, bool /*lastTimestep*/){
                 if (timestep >= terminationTimeStep){
                     integratorPtr->setTerminationState();
                 }
@@ -193,12 +193,10 @@ TEST_CASE("Test serial verlet integrator", "[ParticleSimulation][VerletIntegrato
         double dt = 1e-4;
         int timeSteps = 50;
 
-        auto accelerationFctReactive = [ionAcceleration] (BTree::Particle* particle, int particleIndex,
-                BTree::Tree& tree, double time,int timestep){
-
-            Core::Vector result(
-                    ionAcceleration * particle->getCharge() / particle->getMass(),
-                    0,0);
+        auto accelerationFctReactive = [ionAcceleration] (
+                BTree::Particle* particle, int /*particleIndex*/,
+                BTree::Tree& /*tree*/, double /*time*/, int /*timestep*/){
+            Core::Vector result(ionAcceleration * particle->getCharge() / particle->getMass(), 0,0);
             return(result);
         };
 
@@ -227,7 +225,7 @@ TEST_CASE("Test serial verlet integrator", "[ParticleSimulation][VerletIntegrato
 
             yPos = yPos+0.01;
         }
-        for (int i=0; i<particles.size(); i++){
+        for (std::size_t i=0; i<particles.size(); i++){
             rsSim.addParticle(particles[i].get(),i);
         }
 
@@ -254,7 +252,7 @@ TEST_CASE("Test serial verlet integrator", "[ParticleSimulation][VerletIntegrato
         reactionConditions.pressure = 100000.0;
 
         for (int ts=0; ts<timeSteps; ts++){
-            for (int i=0; i<particles.size(); i++){
+            for (std::size_t i=0; i<particles.size(); i++){
                 rsSim.react(i, reactionConditions, dt);
             }
             rsSim.advanceTimestep(dt);

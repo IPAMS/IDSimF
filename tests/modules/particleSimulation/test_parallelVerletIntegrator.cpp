@@ -44,8 +44,8 @@ TEST_CASE( "Test parallel verlet integrator", "[ParticleSimulation][ParallelVerl
     double ionAcceleration = 10.0; //((1000V / 100mm) * elementary charge) / 100 amu = 9.64e9 m/s^2
     double dt = 1e-4;
 
-    auto accelerationFct = [ionAcceleration](BTree::Particle *particle, int particleIndex, BTree::ParallelTree &tree,
-                                             double time, int timestep){
+    auto accelerationFct = [ionAcceleration](BTree::Particle* /*particle*/, int /*particleIndex*/, BTree::ParallelTree& /*tree*/,
+                                             double /*time*/, int /*timestep*/){
         Core::Vector result(ionAcceleration, 0, ionAcceleration * 0.5);
         return (result);
     };
@@ -153,20 +153,20 @@ TEST_CASE( "Test parallel verlet integrator", "[ParticleSimulation][ParallelVerl
             SECTION("Integration should run through and functions should be called") {
 
                 int nTimestepsRecorded = 0;
-                auto timestepWriteFct = [&nTimestepsRecorded](std::vector<BTree::Particle*>& particles, BTree::ParallelTree& tree, double time, int timestep,
-                                                              bool lastTimestep){
+                auto timestepWriteFct = [&nTimestepsRecorded](std::vector<BTree::Particle*>& /*particles*/, BTree::ParallelTree& /*tree*/,
+                                                              double /*time*/, int /*timestep*/, bool /*lastTimestep*/){
                     nTimestepsRecorded++;
                 };
 
                 int nParticlesTouched = 0;
                 auto otherActionsFct = [&nParticlesTouched] (
-                        Core::Vector& newPartPos, BTree::Particle* particle,
-                        int particleIndex, BTree::ParallelTree& tree, double time,int timestep){
+                        Core::Vector& /*newPartPos*/, BTree::Particle* /*particle*/,
+                        int /*particleIndex*/, BTree::ParallelTree& /*tree*/, double /*time*/, int /*timestep*/){
                     nParticlesTouched++;
                 };
 
                 int nParticlesStartMonitored = 0;
-                auto particleStartMonitoringFct = [&nParticlesStartMonitored] (BTree::Particle* particle, double time){
+                auto particleStartMonitoringFct = [&nParticlesStartMonitored] (BTree::Particle* /*particle*/, double /*time*/){
                     nParticlesStartMonitored++;
                 };
 
@@ -204,17 +204,17 @@ TEST_CASE( "Test parallel verlet integrator", "[ParticleSimulation][ParallelVerl
                 int terminationTimeStep = 40;
 
                 int nTimestepsRecorded = 0;
-                auto timestepWriteFct = [&nTimestepsRecorded](std::vector<BTree::Particle*>& particles, BTree::ParallelTree& tree, double time, int timestep,
-                                                              bool lastTimestep){
+                auto timestepWriteFct = [&nTimestepsRecorded](std::vector<BTree::Particle*>& /*particles*/, BTree::ParallelTree& /*tree*/,
+                                                              double /*time*/, int /*timestep*/, bool /*lastTimestep*/){
                     nTimestepsRecorded++;
                 };
 
                 auto terminationActionFct = [&integratorPtr, terminationTimeStep] (
-                        Core::Vector& newPartPos,BTree::Particle* particle,
-                        int particleIndex, BTree::ParallelTree& tree, double time,int timestep){
-                            if (timestep >= terminationTimeStep){
-                                integratorPtr->setTerminationState();
-                            }
+                        Core::Vector& /*newPartPos*/, BTree::Particle* /*particle*/,
+                        int /*particleIndex*/, BTree::ParallelTree& /*tree*/, double /*time*/, int timestep){
+                    if (timestep >= terminationTimeStep){
+                        integratorPtr->setTerminationState();
+                    }
                 };
 
                 ParticleSimulation::ParallelVerletIntegrator verletIntegrator(

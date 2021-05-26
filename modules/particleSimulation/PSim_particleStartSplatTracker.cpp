@@ -23,10 +23,9 @@
 #include "BTree_particle.hpp"
 #include <algorithm>
 
-ParticleSimulation::ParticleStartSplatTracker::ParticleStartSplatTracker()
-:
-    pInsertIndex_(0),
-    pMap_()
+ParticleSimulation::ParticleStartSplatTracker::ParticleStartSplatTracker():
+    pMap_(),
+    pInsertIndex_(0)
 {}
 
 void ParticleSimulation::ParticleStartSplatTracker::particleStart(BTree::Particle* particle, double time) {

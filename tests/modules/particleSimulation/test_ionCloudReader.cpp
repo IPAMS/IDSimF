@@ -72,7 +72,7 @@ TEST_CASE("Test ion cloud reader", "[ParticleSimulation][IonCloudReader][file re
 
         REQUIRE(iCl.size() == 4);
 
-        for (int i=0; i<iCl.size(); i++){
+        for (std::size_t i=0; i<iCl.size(); i++){
             REQUIRE( (*iCl[i]).getLocation() == iClRef[i].getLocation() );
             REQUIRE( (*iCl[i]).getVelocity() == iClRef[i].getVelocity() );
             REQUIRE( (*iCl[i]).getCharge() == iClRef[i].getCharge() );

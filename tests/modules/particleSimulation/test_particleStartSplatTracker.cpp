@@ -194,8 +194,8 @@ TEST_CASE("TestParticleStartSplatTracker", "[ParticleSimulation][ParticleStartSp
         double dt = 1e-4;
 
 
-        auto accelerationFct = [ionAcceleration](BTree::Particle *particle, int particleIndex, BTree::ParallelTree &tree,
-                                                 double time, int timestep){
+        auto accelerationFct = [ionAcceleration](BTree::Particle* /*particle*/, int /*particleIndex*/, BTree::ParallelTree& /*tree*/,
+                                                 double /*time*/, int /*timestep*/){
             Core::Vector result(ionAcceleration, 0, ionAcceleration * 0.5);
             return (result);
         };
@@ -230,8 +230,8 @@ TEST_CASE("TestParticleStartSplatTracker", "[ParticleSimulation][ParticleStartSp
 
         double zMax = 1e-4;
         auto otherActionsFct = [zMax, &tracker] (
-                Core::Vector& newPartPos, BTree::Particle* particle,
-                int particleIndex, BTree::ParallelTree& tree, double time,int timestep){
+                Core::Vector& /*newPartPos*/, BTree::Particle* particle,
+                int /*particleIndex*/, BTree::ParallelTree& /*tree*/, double time, int /*timestep*/){
             if (particle->getLocation().z() > zMax){
                 particle->setActive(false);
                 particle->setSplatTime(time);

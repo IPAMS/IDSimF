@@ -46,8 +46,6 @@ TEST_CASE( "The VTK writer should at least write a file without exception",
     BTree::Particle testIon3 = BTree::Particle(Core::Vector(1.65,1.2,1.2),2.0);
     BTree::Particle testIon4 = BTree::Particle(Core::Vector(1.66,1.2,1.2),2.0);
     BTree::Particle testIon5 = BTree::Particle(Core::Vector(1.665,1.2,1.2),2.0);
-    
-    BTree::Node* root = testTree->getRoot();
 
     testTree->insertParticle(testIon1,1);
     testTree->insertParticle(testIon2,2);

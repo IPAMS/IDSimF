@@ -32,8 +32,8 @@
  * @param compression If true: the HDF5 file is written with data compression
  */
 ParticleSimulation::TrajectoryHDF5Writer::TrajectoryHDF5Writer(const std::string& hdf5Filename, bool compression):
-        memspaceTimestep_(1, slabDimsTimestep_),
-        compression_(compression)
+        compression_(compression),
+        memspaceTimestep_(1, slabDimsTimestep_)
 {
     h5f_ = std::make_unique<H5::H5File>(hdf5Filename.c_str(), H5F_ACC_TRUNC);
     baseGroup_ = std::make_unique<H5::Group>(h5f_->createGroup("particle_trajectory"));
@@ -151,7 +151,7 @@ void ParticleSimulation::TrajectoryHDF5Writer::writeTimestep(std::vector<BTree::
 
         //create location data buffer:
         std::vector<double> bufLocation(nParticles*3);
-        for (int i = 0; i<nParticles; ++i) {
+        for (hsize_t i = 0; i<nParticles; ++i) {
             Core::Vector loc = particles[i]->getLocation();
             bufLocation[i*3] = loc.x();
             bufLocation[i*3+1] = loc.y();
@@ -246,7 +246,7 @@ void ParticleSimulation::TrajectoryHDF5Writer::writeArrayDataSet(std::string dsN
 
     // Define memory space.
     std::vector<DT> datBuf(nValues*NCOLUMNS);
-    for (int i=0; i<nValues; ++i){
+    for (std::size_t i=0; i<nValues; ++i){
         for(int j=0; j<NCOLUMNS; ++j){
             datBuf[i*NCOLUMNS+j] = values[i][j];
         }
@@ -348,7 +348,7 @@ void ParticleSimulation::TrajectoryHDF5Writer::writeSplatTimes(std::vector<BTree
     H5::DataSpace memspaceSplattimes(1, slabDimsSplattimes);
 
     std::vector<double> datBuf(nParticles); //use a vector to prevent stack overflows
-    for(int i=0; i<nParticles; ++i){
+    for(hsize_t i=0; i<nParticles; ++i){
         datBuf[i] = particles[i]->getSplatTime();
     }
     dsetSplattimes->write(datBuf.data(),H5::PredType::NATIVE_DOUBLE,memspaceSplattimes,dataspaceSplattimes);
@@ -409,9 +409,9 @@ void ParticleSimulation::TrajectoryHDF5Writer::writeTimestepParticleAttributes_(
 
     //create and fill aux data buffer:
     std::vector<double> bufAux(nParticles*nPAttributes_);
-    for (int i=0; i<nParticles; ++i){
+    for (hsize_t i=0; i<nParticles; ++i){
         std::vector<double> auxDat = particleAttributeTransformFct_(particles[i]);
-        for(int j=0; j<nPAttributes_; ++j){
+        for(hsize_t j=0; j<nPAttributes_; ++j){
             bufAux[i*nPAttributes_+j] = auxDat[j];
         }
     }
@@ -457,9 +457,9 @@ void ParticleSimulation::TrajectoryHDF5Writer::writeTimestepParticleAttributesIn
 
     //create and fill aux data buffer:
     std::vector<int> bufAux(nParticles*nPAttributesInteger_);
-    for (int i=0; i<nParticles; ++i){
+    for (hsize_t i=0; i<nParticles; ++i){
         std::vector<int> auxDat = particleAttributeTransformFctInteger_(particles[i]);
-        for(int j=0; j<nPAttributesInteger_; ++j){
+        for(hsize_t j=0; j<nPAttributesInteger_; ++j){
             bufAux[i*nPAttributesInteger_+j] = auxDat[j];
         }
     }

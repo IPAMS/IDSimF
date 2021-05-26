@@ -80,7 +80,7 @@ template <hsize_t NDIMS>DataField<NDIMS,double> readDataset(H5::DataSet& ds){
     hsize_t offset[nDims];
     //hsize_t count[nDims];
 
-    for (int i=0; i<NDIMS; ++i){
+    for (hsize_t i=0; i<NDIMS; ++i){
         nElements *= dims[i];
         dField.dims[i] = dims[i];
         offset[i] = 0;
@@ -100,7 +100,7 @@ template <hsize_t NDIMS>DataField<NDIMS,double> readDataset(H5::DataSet& ds){
     nativeType = &H5::PredType::NATIVE_DOUBLE;
     ds.read(datBuf,*nativeType,memspace,dataspace);
 
-    for (int i=0; i<nElements; ++i){
+    for (hsize_t i=0; i<nElements; ++i){
         dField.data.emplace_back(datBuf[i]);
     }
 
@@ -119,7 +119,7 @@ std::vector<std::string> readStringAttribute(H5::Group& group, std::string attrN
     char **datBuf = new char*[dims[0]];
     H5::StrType strdatatype(H5::PredType::C_S1, H5T_VARIABLE); // of length 256 characters
     attr.read(strdatatype, datBuf);
-    for (int i = 0; i < dims[0]; ++i) {
+    for (hsize_t i = 0; i < dims[0]; ++i) {
         result.emplace_back(datBuf[i]);
     }
     return (result);
@@ -136,7 +136,7 @@ std::vector<int> readIntAttribute(H5::Group& group,std::string attrName){
     std::vector<int> result;
     int datBuf[dims[0]];
     attr.read(H5::PredType::NATIVE_INT,datBuf);
-    for (int i=0; i<dims[0]; ++i){
+    for (hsize_t i=0; i<dims[0]; ++i){
         result.emplace_back(datBuf[i]);
     }
     return result;
@@ -153,7 +153,7 @@ std::vector<double> readDoubleAttribute(H5::Group& group,std::string attrName){
     std::vector<double> result;
     double datBuf[dims[0]];
     attr.read(H5::PredType::NATIVE_DOUBLE,datBuf);
-    for (int i=0; i<dims[0]; ++i){
+    for (hsize_t i=0; i<dims[0]; ++i){
         result.emplace_back(datBuf[i]);
     }
     return result;
@@ -338,7 +338,7 @@ TEST_CASE( "Test HDF5 trajectory file writer", "[ParticleSimulation][file writer
             REQUIRE(nAttributeDims == 6);
             std::array<hsize_t,2> indices = {0,0};
 
-            for (int pi = 0; pi < nParticles; ++pi) {
+            for (hsize_t pi = 0; pi < nParticles; ++pi) {
                 indices[0] = pi;
                 indices[1] = 0;
                 REQUIRE(Approx(dField.get(indices)) == 0.01 * pi);
@@ -363,7 +363,7 @@ TEST_CASE( "Test HDF5 trajectory file writer", "[ParticleSimulation][file writer
             REQUIRE(nAttributeDims == 1);
             indices = {0,0};
 
-            for (int pi = 0; pi < nParticles; ++pi) {
+            for (hsize_t pi = 0; pi < nParticles; ++pi) {
                 indices[0] = pi;
                 REQUIRE(dFieldInteger.get(indices) == pi);
             }
@@ -377,7 +377,7 @@ TEST_CASE( "Test HDF5 trajectory file writer", "[ParticleSimulation][file writer
 
         //check additional data:
         std::array<hsize_t,2> indicesAdditional = {0,0};
-        for (int i=0; i<nAdditional; ++i) {
+        for (hsize_t i=0; i<nAdditional; ++i) {
             indicesAdditional[0] = i;
             REQUIRE(Approx(dFieldAdditional.get(indicesAdditional)) == 10 + i*0.1);
         }
