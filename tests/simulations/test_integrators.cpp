@@ -60,10 +60,9 @@ TEST_CASE("Compare results of serial and parallel varlet integrators with a line
     // define functions for the trajectory integration ==================================================
     auto accelerationFunctionSerial =
             [spaceChargeFactor](
-                    BTree::Particle *particle, int particleIndex,
-                    BTree::Tree &tree, double time, int timestep) -> Core::Vector{
+                    BTree::Particle *particle, int /*particleIndex*/,
+                    BTree::Tree &tree, double /*time*/, int /*timestep*/) -> Core::Vector{
 
-                Core::Vector pos = particle->getLocation();
                 double particleCharge = particle->getCharge();
 
                 Core::Vector spaceChargeForce(0,0,0);
@@ -74,29 +73,11 @@ TEST_CASE("Compare results of serial and parallel varlet integrators with a line
                 return (spaceChargeForce / particle->getMass());
             };
 
-
-    auto accelerationFunctionParallel =
-            [spaceChargeFactor](
-                    BTree::Particle *particle, int particleIndex,
-                    BTree::ParallelTreeOriginal &tree, double time, int timestep,std::vector<BTree::ParallelNodeOriginal*> &MyNodes) -> Core::Vector{
-
-                Core::Vector pos = particle->getLocation();
-                double particleCharge = particle->getCharge();
-
-                Core::Vector spaceChargeForce(0,0,0);
-                if (spaceChargeFactor > 0) {
-                    spaceChargeForce =
-                            tree.computeEFieldFromTree(*particle,MyNodes) * (particleCharge * spaceChargeFactor);
-                }
-                return (spaceChargeForce / particle->getMass());
-            };
-
     auto accelerationFunctionParallelNew =
             [spaceChargeFactor](
-                    BTree::Particle *particle, int particleIndex,
-                    BTree::ParallelTree &tree, double time, int timestep) -> Core::Vector{
+                    BTree::Particle *particle, int /*particleIndex*/,
+                    BTree::ParallelTree &tree, double /*time*/, int /*timestep*/) -> Core::Vector{
 
-                Core::Vector pos = particle->getLocation();
                 double particleCharge = particle->getCharge();
 
                 Core::Vector spaceChargeForce(0,0,0);
