@@ -35,7 +35,7 @@ TEST_CASE("Test basic instantiation and setting of species in reactive particle"
     RS::Substance sub1("Testsubstance",RS::Substance::substanceType::discrete);
     RS::ReactiveParticle rp = RS::ReactiveParticle(&sub1);
 
-    REQUIRE(rp.getCharge() == 0.0);
+    CHECK(rp.getCharge() == 0.0);
 
     RS::Substance sub2("Testsubstance2",RS::Substance::substanceType::discrete);
     sub2.collisionDiameter(100.0);
@@ -45,15 +45,15 @@ TEST_CASE("Test basic instantiation and setting of species in reactive particle"
 
     rp.setSpecies(&sub2);
 
-    REQUIRE(rp.getDiameter() == 100.0);
-    REQUIRE(rp.getMass() == 10.0*Core::AMU_TO_KG);
-    REQUIRE(rp.getMobility() == 0.1);
-    REQUIRE(rp.getCharge() == 20.0*Core::ELEMENTARY_CHARGE);
+    CHECK(rp.getDiameter() == 100.0);
+    CHECK(rp.getMass() == 10.0*Core::AMU_TO_KG);
+    CHECK(rp.getMobility() == 0.1);
+    CHECK(rp.getCharge() == 20.0*Core::ELEMENTARY_CHARGE);
 
     RS::ReactiveParticle rp2 = RS::ReactiveParticle(&sub2);
 
-    REQUIRE(rp2.getDiameter() == 100.0);
-    REQUIRE(rp2.getMass() == 10.0*Core::AMU_TO_KG);
-    REQUIRE(rp2.getMobility() == 0.1);
-    REQUIRE(rp2.getCharge() == 20.0*Core::ELEMENTARY_CHARGE);
+    CHECK(rp2.getDiameter() == 100.0);
+    CHECK(rp2.getMass() == 10.0*Core::AMU_TO_KG);
+    CHECK(rp2.getMobility() == 0.1);
+    CHECK(rp2.getCharge() == 20.0*Core::ELEMENTARY_CHARGE);
 }

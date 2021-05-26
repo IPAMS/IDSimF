@@ -46,20 +46,20 @@ TEST_CASE("Test RS simulation configuration", "[RS][SimulationConfiguration]") {
         simConf.addSubstance(Cluster_1);
         simConf.addSubstance(N2);
 
-        REQUIRE(simConf.substance(0)->name() == "[H3O]+");
-        REQUIRE(simConf.substance(0)->type() == RS::Substance::substanceType::discrete);
-        REQUIRE(simConf.substance(1)->name() == "N2");
-        REQUIRE(simConf.substance(1)->type() == RS::Substance::substanceType::isotropic);
+        CHECK(simConf.substance(0)->name() == "[H3O]+");
+        CHECK(simConf.substance(0)->type() == RS::Substance::substanceType::discrete);
+        CHECK(simConf.substance(1)->name() == "N2");
+        CHECK(simConf.substance(1)->type() == RS::Substance::substanceType::isotropic);
     }
 
     SECTION("Substances can be added to SimulationConfiguration and retrieved by name") {
         simConf.addSubstance(Cluster_1);
         simConf.addSubstance(N2);
 
-        REQUIRE(simConf.substanceByName("[H3O]+")->name() == "[H3O]+");
-        REQUIRE(simConf.substanceByName("[H3O]+")->type() == RS::Substance::substanceType::discrete);
-        REQUIRE(simConf.substanceByName("N2")->name() == "N2");
-        REQUIRE(simConf.substanceByName("N2")->type() == RS::Substance::substanceType::isotropic);
+        CHECK(simConf.substanceByName("[H3O]+")->name() == "[H3O]+");
+        CHECK(simConf.substanceByName("[H3O]+")->type() == RS::Substance::substanceType::discrete);
+        CHECK(simConf.substanceByName("N2")->name() == "N2");
+        CHECK(simConf.substanceByName("N2")->type() == RS::Substance::substanceType::isotropic);
     }
 
     SECTION("Discrete Substances can be retrieved by name") {
@@ -67,20 +67,20 @@ TEST_CASE("Test RS simulation configuration", "[RS][SimulationConfiguration]") {
         simConf.addSubstance(N2);
         simConf.addSubstance(Cluster_2);
 
-        REQUIRE(simConf.getAllDiscreteSubstances().size() == 2);
-        REQUIRE(simConf.getAllDiscreteSubstances()[0]->name() == "[H3O]+");
-        REQUIRE(simConf.getAllDiscreteSubstances()[1]->name() == "Cl_2");
+        CHECK(simConf.getAllDiscreteSubstances().size() == 2);
+        CHECK(simConf.getAllDiscreteSubstances()[0]->name() == "[H3O]+");
+        CHECK(simConf.getAllDiscreteSubstances()[1]->name() == "Cl_2");
     }
 
     SECTION("Substances with the same name cannot be added") {
         std::unique_ptr<RS::Substance> Cluster1_duplicate = std::unique_ptr<RS::Substance>(
                 new RS::Substance("[H3O]+",RS::Substance::substanceType::isotropic));
 
-        REQUIRE(simConf.addSubstance(Cluster_1) == true);
-        REQUIRE(simConf.addSubstance(Cluster1_duplicate) == false);
+        CHECK(simConf.addSubstance(Cluster_1) == true);
+        CHECK(simConf.addSubstance(Cluster1_duplicate) == false);
 
-        REQUIRE(simConf.substanceByName("[H3O]+")->name() == "[H3O]+");
-        REQUIRE(simConf.substanceByName("[H3O]+")->type() == RS::Substance::substanceType::discrete);
+        CHECK(simConf.substanceByName("[H3O]+")->name() == "[H3O]+");
+        CHECK(simConf.substanceByName("[H3O]+")->type() == RS::Substance::substanceType::discrete);
         REQUIRE(simConf.getAllSubstances().size() == 1);
     }
 

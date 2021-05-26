@@ -66,12 +66,12 @@ template <hsize_t NDIMS>DataField<NDIMS,double> readDataset(H5::DataSet& ds){
 
     //get the rank:
     int rank = dataspace.getSimpleExtentNdims();
-    REQUIRE(NDIMS == rank);
+    CHECK(NDIMS == rank);
 
     //get dimensions:
     hsize_t dims[NDIMS];
     int nDims = dataspace.getSimpleExtentDims(dims,NULL);
-    REQUIRE(NDIMS == nDims);
+    CHECK(NDIMS == nDims);
 
     //prepare return object and prepare to read from HDF5 file:
     DataField<NDIMS,double> dField;
@@ -114,7 +114,7 @@ std::vector<std::string> readStringAttribute(H5::Group& group, std::string attrN
     //get dimensions:
     hsize_t dims[1];
     int nDims = dataspace.getSimpleExtentDims(dims, NULL);
-    REQUIRE(nDims == 1);
+    CHECK(nDims == 1);
     std::vector<std::string> result;
     char **datBuf = new char*[dims[0]];
     H5::StrType strdatatype(H5::PredType::C_S1, H5T_VARIABLE); // of length 256 characters
@@ -132,7 +132,7 @@ std::vector<int> readIntAttribute(H5::Group& group,std::string attrName){
     //get dimensions:
     hsize_t dims[1];
     int nDims = dataspace.getSimpleExtentDims(dims, NULL);
-    REQUIRE(nDims == 1);
+    CHECK(nDims == 1);
     std::vector<int> result;
     int datBuf[dims[0]];
     attr.read(H5::PredType::NATIVE_INT,datBuf);
@@ -149,7 +149,7 @@ std::vector<double> readDoubleAttribute(H5::Group& group,std::string attrName){
     //get dimensions:
     hsize_t dims[1];
     int nDims = dataspace.getSimpleExtentDims(dims, NULL);
-    REQUIRE(nDims == 1);
+    CHECK(nDims == 1);
     std::vector<double> result;
     double datBuf[dims[0]];
     attr.read(H5::PredType::NATIVE_DOUBLE,datBuf);
@@ -260,27 +260,27 @@ TEST_CASE( "Test HDF5 trajectory file writer", "[ParticleSimulation][file writer
         //check timesteps:
         H5::DataSet dsTimes= bareFile.openDataSet("particle_trajectory/times");
         auto dFieldTimes = readDataset<1>(dsTimes);
-        REQUIRE(dFieldTimes.rank == 1);
+        CHECK(dFieldTimes.rank == 1);
         std::vector<double> times = dFieldTimes.data;
         int nTimesteps = times.size();
 
-        REQUIRE(nTimesteps == nFrames);
+        CHECK(nTimesteps == nFrames);
 
         std::array<hsize_t,1> index= {0};
         for (int ts=1; ts<nTimesteps; ++ts) {
             index[0] = ts;
-            REQUIRE(Approx(dFieldTimes.get(index)) == ts * 1.0);
+            CHECK(Approx(dFieldTimes.get(index)) == ts * 1.0);
             std::string tsPath = "/particle_trajectory/timesteps/" + std::to_string(ts) +"/positions";
 
             H5::DataSet dsPositions = bareFile.openDataSet(tsPath.c_str());
             auto dField = readDataset<2>(dsPositions);
-            REQUIRE(dField.rank == 2);
+            CHECK(dField.rank == 2);
 
             hsize_t nParticles = dField.dims[0];
             hsize_t nSpatialDims = dField.dims[1];
 
-            REQUIRE(nParticles == 5);
-            REQUIRE(nSpatialDims == 3);
+            CHECK(nParticles == 5);
+            CHECK(nSpatialDims == 3);
 
             //check position data:
             std::array<hsize_t,2> indices = {0,0};

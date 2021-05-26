@@ -61,19 +61,19 @@ TEST_CASE("Test RS config file parser methods", "[RS][ConfigFileParser]") {
         std::string pattern = "\\[\\w+\\]";
         std::pair<std::vector<std::string>,std::vector<std::string>> splitResult = parser.splitString(testString,pattern);
         std::vector<std::string> result1 = {"ABC","123","DEF"};
-        REQUIRE(splitResult.first == result1);
+        CHECK(splitResult.first == result1);
 
 
         testString = "[token1]XYZ[token2]ABC";
         splitResult = parser.splitString(testString,pattern);
         std::vector<std::string> result2 = {"XYZ","ABC"};
-        REQUIRE(splitResult.first == result2);
+        CHECK(splitResult.first == result2);
 
 
         testString = "XYZ[token2]ABC[token3]DEF[token4]";
         splitResult = parser.splitString(testString,pattern);
         std::vector<std::string> result3 = {"XYZ","ABC","DEF"};
-        REQUIRE(splitResult.first == result3);
+        CHECK(splitResult.first == result3);
     }
 }
 
@@ -104,11 +104,11 @@ TEST_CASE("Test parsing of chemical systems with RS config file parser", "[RS][C
         RS::AbstractReaction* r3 = simConf->reaction(3);
         RS::AbstractReaction* r4 = simConf->reaction(4);
         RS::AbstractReaction* r5 = simConf->reaction(5);
-        REQUIRE(r0->getTypeLabel() == "static");
-        REQUIRE(r1->getTypeLabel() == "vanthoff");
-        REQUIRE(r3->getTypeLabel() == "vanthoff_field");
-        REQUIRE(r4->getTypeLabel() == "simple_step");
-        REQUIRE(r5->getTypeLabel() == "static_thermalizing");
+        CHECK(r0->getTypeLabel() == "static");
+        CHECK(r1->getTypeLabel() == "vanthoff");
+        CHECK(r3->getTypeLabel() == "vanthoff_field");
+        CHECK(r4->getTypeLabel() == "simple_step");
+        CHECK(r5->getTypeLabel() == "static_thermalizing");
 
         //Test if the rate constants are calculated correctly
 
@@ -122,7 +122,7 @@ TEST_CASE("Test parsing of chemical systems with RS config file parser", "[RS][C
         double k_test = reac_compare_1.attemptReaction(reactionConditions, &dummyParticle, 1.0).reactionProbability;
         double k_1 = r1->attemptReaction(reactionConditions, &dummyParticle, 1.0).reactionProbability;
 
-        REQUIRE(Approx(k_1).epsilon(1e-1) == k_test);
+        CHECK(Approx(k_1).epsilon(1e-1) == k_test);
 
         RS::FieldDependentVantHoffReaction reac_compare_3(
                 educts,products,
@@ -139,7 +139,7 @@ TEST_CASE("Test parsing of chemical systems with RS config file parser", "[RS][C
         k_test = reac_compare_3.attemptReaction(reactionConditions, &dummyParticle, 1.0).reactionProbability;
         double k_3 = r3->attemptReaction(reactionConditions, &dummyParticle, 1.0).reactionProbability;
 
-        REQUIRE(Approx(k_3) == k_test);
+        CHECK(Approx(k_3) == k_test);
 
         RS::SimpleCollisionStepReaction reac_compare_4(
                 educts,products,
@@ -150,7 +150,7 @@ TEST_CASE("Test parsing of chemical systems with RS config file parser", "[RS][C
         k_test = reac_compare_4.attemptReaction(collisionConditions, &dummyParticle).reactionProbability;
         double k_4 = r4->attemptReaction(collisionConditions, &dummyParticle).reactionProbability;
 
-        REQUIRE(Approx(k_4) == k_test);
+        CHECK(Approx(k_4) == k_test);
 
         dummyParticle.setMassAMU(200);
         RS::StaticThermalizingReaction reac_compare_5(
@@ -160,20 +160,20 @@ TEST_CASE("Test parsing of chemical systems with RS config file parser", "[RS][C
         k_test = reac_compare_5.attemptReaction(reactionConditions, &dummyParticle, 1e-5).reactionProbability;
         double k_5 = r5->attemptReaction(reactionConditions, &dummyParticle, 1e-5).reactionProbability;
 
-        REQUIRE(Approx(k_5) == k_test);
+        CHECK(Approx(k_5) == k_test);
     }
 
     SECTION ("Existing water cluster RS config file should parse correctly") {
         std::unique_ptr<RS::SimulationConfiguration> simConf = parser.parseFile("RS_waterCluster_test.conf");
-        REQUIRE(simConf->substance(6)->type() == RS::Substance::substanceType::isotropic);
-        REQUIRE(simConf->substance(6)->name() == "N2");
-        REQUIRE(Approx(simConf->substance(6)->staticConcentration()) == 3.58e16);
+        CHECK(simConf->substance(6)->type() == RS::Substance::substanceType::isotropic);
+        CHECK(simConf->substance(6)->name() == "N2");
+        CHECK(Approx(simConf->substance(6)->staticConcentration()) == 3.58e16);
 
-        REQUIRE(simConf->substance(2)->name() == "Cl_3");
-        REQUIRE(simConf->substance(2)->type() == RS::Substance::substanceType::discrete);
-        REQUIRE(simConf->substance(2)->mass() == 55);
-        REQUIRE(simConf->substance(2)->charge() == 1.0);
-        REQUIRE(simConf->substance(2)->mobility() == Approx(0.000235).epsilon(1e-6));
+        CHECK(simConf->substance(2)->name() == "Cl_3");
+        CHECK(simConf->substance(2)->type() == RS::Substance::substanceType::discrete);
+        CHECK(simConf->substance(2)->mass() == 55);
+        CHECK(simConf->substance(2)->charge() == 1.0);
+        CHECK(simConf->substance(2)->mobility() == Approx(0.000235).epsilon(1e-6));
         REQUIRE(simConf->substance(2)->collisionDiameter() == Approx(7.0e-10).epsilon(1e-5));
 
         REQUIRE(simConf->substance(3)->name() == "Cl_4");

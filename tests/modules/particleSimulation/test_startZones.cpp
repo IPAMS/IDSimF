@@ -123,7 +123,7 @@ TEST_CASE( "Test cylinder particle start zone",
 
     SECTION("Check if two random position samples are different"){
         ParticleSimulation::CylinderStartZone cylinderStartZone(radius, length);
-        REQUIRE(cylinderStartZone.getRandomParticlePosition() != cylinderStartZone.getRandomParticlePosition());
+        CHECK(cylinderStartZone.getRandomParticlePosition() != cylinderStartZone.getRandomParticlePosition());
     }
 
     SECTION("Test generation of particle cloud in cylindrical start zone"){
@@ -153,7 +153,7 @@ TEST_CASE( "Test cylinder particle start zone",
         }
         REQUIRE_FALSE(incorrectIonFound);
 
-        REQUIRE(ions[0]->getLocation() != ions[1]->getLocation());
+        CHECK(ions[0]->getLocation() != ions[1]->getLocation());
     }
 
 }

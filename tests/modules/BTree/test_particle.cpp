@@ -37,9 +37,9 @@ TEST_CASE( "Basic Particle semantics tests", "[Particle]") {
 
     SECTION("Basic Particle creation tests") {
         //Test ion location:
-        REQUIRE(testIon.getLocation()==Core::Vector(1.0, 2.0, 3.0));
-        REQUIRE(testIon.getCharge()==2.0*Core::ELEMENTARY_CHARGE);
-        REQUIRE(testIon.isActive());
+        CHECK(testIon.getLocation()==Core::Vector(1.0, 2.0, 3.0));
+        CHECK(testIon.getCharge()==2.0*Core::ELEMENTARY_CHARGE);
+        CHECK(testIon.isActive());
     }
 
     SECTION("Test particle constructors") {
@@ -52,11 +52,11 @@ TEST_CASE( "Basic Particle semantics tests", "[Particle]") {
                     1.0,
                     100.0,
                     1e-5);
-            REQUIRE(testIon2.getLocation()==Core::Vector(2.0, 3.0, 4.0));
-            REQUIRE(testIon2.getCharge()==1.0*Core::ELEMENTARY_CHARGE);
-            REQUIRE(testIon2.getMass()==100.0*Core::AMU_TO_KG);
-            REQUIRE(testIon2.getTimeOfBirth()==1e-5);
-            REQUIRE(testIon2.isActive());
+            CHECK(testIon2.getLocation()==Core::Vector(2.0, 3.0, 4.0));
+            CHECK(testIon2.getCharge()==1.0*Core::ELEMENTARY_CHARGE);
+            CHECK(testIon2.getMass()==100.0*Core::AMU_TO_KG);
+            CHECK(testIon2.getTimeOfBirth()==1e-5);
+            CHECK(testIon2.isActive());
         }
 
         SECTION("Test constructor with time of birth and collision diameter"){
@@ -68,12 +68,12 @@ TEST_CASE( "Basic Particle semantics tests", "[Particle]") {
                     100.0,
                     3.2e-10,
                     1e-5);
-            REQUIRE(testIon2.getLocation()==Core::Vector(2.0, 3.0, 4.0));
-            REQUIRE(testIon2.getCharge()==1.0*Core::ELEMENTARY_CHARGE);
-            REQUIRE(testIon2.getMass()==100.0*Core::AMU_TO_KG);
-            REQUIRE(testIon2.getDiameter()==3.2e-10);
-            REQUIRE(testIon2.getTimeOfBirth()==1e-5);
-            REQUIRE(testIon2.isActive());
+            CHECK(testIon2.getLocation()==Core::Vector(2.0, 3.0, 4.0));
+            CHECK(testIon2.getCharge()==1.0*Core::ELEMENTARY_CHARGE);
+            CHECK(testIon2.getMass()==100.0*Core::AMU_TO_KG);
+            CHECK(testIon2.getDiameter()==3.2e-10);
+            CHECK(testIon2.getTimeOfBirth()==1e-5);
+            CHECK(testIon2.isActive());
         }
 
     }
@@ -81,15 +81,15 @@ TEST_CASE( "Basic Particle semantics tests", "[Particle]") {
     SECTION("Basic Particle setter tests") {
 
         testIon.setActive(false);
-        REQUIRE(!testIon.isActive());
+        CHECK(!testIon.isActive());
 
         testIon.setChargeElementary(1.0);
-        REQUIRE(testIon.getCharge()==1.0*Core::ELEMENTARY_CHARGE);
+        CHECK(testIon.getCharge()==1.0*Core::ELEMENTARY_CHARGE);
 
         testIon.setLocation(Core::Vector(2.0, 2.0, 2.0));
-        REQUIRE(testIon.getLocation()==Core::Vector(2.0, 2.0, 2.0));
+        CHECK(testIon.getLocation()==Core::Vector(2.0, 2.0, 2.0));
 
-        REQUIRE(testIon.getHostNode()==nullptr);
+        CHECK(testIon.getHostNode()==nullptr);
 
         BTree::Node testNode = BTree::Node(
                 Core::Vector(1.0, 1.0, 1.0),
@@ -98,12 +98,12 @@ TEST_CASE( "Basic Particle semantics tests", "[Particle]") {
         );
 
         testIon.setHostNode(&testNode);
-        REQUIRE(testIon.getHostNode()==&testNode);
+        CHECK(testIon.getHostNode()==&testNode);
     }
 
     SECTION("Particle location modification possible, location is a reference") {
         testIon.getLocation().set(10.0, 20.0, 30.0);
-        REQUIRE(testIon.getLocation()==Core::Vector(10.0, 20.0, 30.0));
+        CHECK(testIon.getLocation()==Core::Vector(10.0, 20.0, 30.0));
     }
 
     SECTION("Test particle attributes") {
@@ -112,7 +112,7 @@ TEST_CASE( "Basic Particle semantics tests", "[Particle]") {
             std::string testKey = "a testkey";
 
             testIon.setFloatAttribute(testKey, 100.0);
-            REQUIRE(testIon.getFloatAttribute(testKey)==100.0);
+            CHECK(testIon.getFloatAttribute(testKey)==100.0);
 
             testIon.setFloatAttribute(testKey, 200.0);
             REQUIRE(testIon.getFloatAttribute(testKey)==200.0);

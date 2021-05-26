@@ -51,11 +51,11 @@ TEST_CASE("Test basic reaction semantics", "[RS][Reaction]") {
         RS::Substance sub_2 = RS::Substance("BBB_testsubstance", RS::Substance::substanceType::discrete);
 
         st[sub_1] = 1;
-        REQUIRE(st[sub_1] == 1);
+        CHECK(st[sub_1] == 1);
         st[sub_1] = 2;
-        REQUIRE(st[sub_1] == 2);
+        CHECK(st[sub_1] == 2);
         st[sub_2] = 4;
-        REQUIRE(st[sub_2] == 4);
+        CHECK(st[sub_2] == 4);
     }
 
     SECTION("RS ubstances should be usable in substance table of a RS reaction") {
@@ -80,19 +80,19 @@ TEST_CASE("Test basic reaction semantics", "[RS][Reaction]") {
 
         RS::StaticReaction reac = RS::StaticReaction(educts, products, 1.0, "a test reaction");
 
-        REQUIRE(reac.getLabel() == "a test reaction");
+        CHECK(reac.getLabel() == "a test reaction");
 
         sMapPtr ret_dist_educts = reac.discreteEducts();
         sMapPtr ret_dist_products = reac.discreteProducts();
 
-        REQUIRE(ret_dist_educts->at(&ed_1) == 2);
-        REQUIRE(ret_dist_educts->count(&ed_3) == 0);
-        REQUIRE(ret_dist_educts->count(&ed_4) == 0);
+        CHECK(ret_dist_educts->at(&ed_1) == 2);
+        CHECK(ret_dist_educts->count(&ed_3) == 0);
+        CHECK(ret_dist_educts->count(&ed_4) == 0);
 
-        REQUIRE(ret_dist_products->at(&pro_1) == 4);
-        REQUIRE(ret_dist_products->at(&pro_2) == 2);
-        REQUIRE(ret_dist_products->count(&pro_3) == 0);
-        REQUIRE(ret_dist_products->count(&pro_4) == 0);
+        CHECK(ret_dist_products->at(&pro_1) == 4);
+        CHECK(ret_dist_products->at(&pro_2) == 2);
+        CHECK(ret_dist_products->count(&pro_3) == 0);
+        CHECK(ret_dist_products->count(&pro_4) == 0);
     }
 }
 
@@ -113,8 +113,8 @@ TEST_CASE("Test chemical semantics of RS reaction types", "[RS][Reaction]") {
 
     SECTION("Reaction probability of static reaction should be correct") {
         RS::StaticReaction reac = RS::StaticReaction(educts, products, 1.5e10, "a test reaction");
-        REQUIRE(reac.attemptReaction(reactionConditions, &dummyParticle, 1.0).reactionProbability == 1.5e10);
-        REQUIRE(reac.attemptReaction(reactionConditions, &dummyParticle, 0.1).reactionProbability == 1.5e9);
+        CHECK(reac.attemptReaction(reactionConditions, &dummyParticle, 1.0).reactionProbability == 1.5e10);
+        CHECK(reac.attemptReaction(reactionConditions, &dummyParticle, 0.1).reactionProbability == 1.5e9);
     }
 
     SECTION("Static thermalizing reaction should calculate correct reaction probabilities and thermalize reacted particle") {
@@ -128,7 +128,7 @@ TEST_CASE("Test chemical semantics of RS reaction types", "[RS][Reaction]") {
 
         // test if linearized reaction probability is correct:
         RS::ReactiveParticle productParticle(&pro_1);
-        REQUIRE(reac.attemptReaction(reactionConditions, &productParticle, 1.0).reactionProbability == 10.0);
+        CHECK(reac.attemptReaction(reactionConditions, &productParticle, 1.0).reactionProbability == 10.0);
 
         // test if the velocity is reinitialized thermally:
         // Generate 100000 test samples and determine mean velocity and mean velocity magnitude after collision

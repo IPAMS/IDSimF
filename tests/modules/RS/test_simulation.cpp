@@ -62,29 +62,29 @@ TEST_CASE( "Test basic RS simulation semantics", "[RS][Simulation]") {
         Cluster_2.charge(5.0);
         Cluster_2.mobility(20);
         uniqueReactivePartPtr p2_2 = std::make_unique<RS::ReactiveParticle>(&Cluster_2);
-        REQUIRE( Approx(p2_2->getCharge() - 5.0*Core::ELEMENTARY_CHARGE) == 0.0);
+        CHECK( Approx(p2_2->getCharge() - 5.0*Core::ELEMENTARY_CHARGE) == 0.0);
 
         sim.addParticle(p1.get(),1);
         sim.addParticle(p2_2.get(),2);
 
 
         //particles are initialized by reference, the internals of the simulation saves a reference to the particle:
-        REQUIRE(p1.get() == &sim.getParticle(1));
-        REQUIRE(p1.get() != &sim.getParticle(2));
+        CHECK(p1.get() == &sim.getParticle(1));
+        CHECK(p1.get() != &sim.getParticle(2));
 
         //FIXME: mobility is currently NOT taken from the species, (somewhat inconsistent currently)
         //Cluster_2.mobility(30);
         //p2->updateParticleParametersFromSpecies_();
-        //REQUIRE(p2->getMobility() == 30);
-        //REQUIRE(p1->getMobility() == 10);
+        //CHECK(p2->getMobility() == 30);
+        //CHECK(p1->getMobility() == 10);
 
-        REQUIRE(p2_2->getSpecies() == &Cluster_2);
+        CHECK(p2_2->getSpecies() == &Cluster_2);
 
         p2_2->setSpecies(&Cluster_1);
-        REQUIRE( p2_2->getSpecies() == &Cluster_1);
+        CHECK( p2_2->getSpecies() == &Cluster_1);
 
         //particle in the simulation was initalized by reference, thus particle 2 in the simulation is affected:
-        REQUIRE( sim.getParticle(2).getSpecies() == &Cluster_1);
+        CHECK( sim.getParticle(2).getSpecies() == &Cluster_1);
     }
 
     SECTION( "Particle double insertion in simulation is not possible") {
