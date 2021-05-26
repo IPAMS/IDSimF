@@ -32,7 +32,7 @@
 #include <iostream>
 #include <cmath>
 
-int main(int argc, const char * argv[]) {
+int main() {
 
     //read and prepare chemical configuration ===============================================
     std::string confFileName = "RS_waterCl_static.conf";

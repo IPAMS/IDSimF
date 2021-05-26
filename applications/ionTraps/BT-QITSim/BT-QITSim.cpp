@@ -246,10 +246,10 @@ int main(int argc, const char * argv[]) {
         // define functions for the trajectory integration ==================================================
         auto trapFieldFunction =
                 [exciteMode, rfWaveMode, rfAmplitudeMode, fieldMode, excitePulseLength, excitePulsePotential,
-                        spaceChargeFactor, omega, z_0, U_0, d_square_2,
+                        omega, z_0, U_0, d_square_2,
                         &rfSampledWaveForm, &higherFieldOrdersCoefficients, &swiftWaveForm, &V_0, &V_0_ramp](
-                        BTree::Particle* particle, int particleIndex,
-                        auto& tree, double time, int timestep) -> Core::Vector {
+                        BTree::Particle* particle, int /*particleIndex*/,
+                        auto& /*tree*/, double time, int timestep) -> Core::Vector {
 
                     Core::Vector pos = particle->getLocation();
                     double particleCharge = particle->getCharge();
@@ -327,13 +327,10 @@ int main(int argc, const char * argv[]) {
                 };
 
         auto accelerationFunctionQIT =
-                [exciteMode, rfAmplitudeMode, fieldMode, excitePulseLength, excitePulsePotential,
-                        spaceChargeFactor, omega, z_0, U_0, d_square_2,
-                        &higherFieldOrdersCoefficients, &swiftWaveForm, &V_0, &V_0_ramp, &trapFieldFunction](
+                [spaceChargeFactor, &trapFieldFunction](
                         BTree::Particle* particle, int particleIndex,
                         auto& tree, double time, int timestep) -> Core::Vector {
 
-                    Core::Vector pos = particle->getLocation();
                     double particleCharge = particle->getCharge();
 
                     Core::Vector rfForce = trapFieldFunction(particle, particleIndex, tree, time, timestep);
@@ -356,13 +353,10 @@ int main(int argc, const char * argv[]) {
                 };
 
         auto accelerationFunctionQIT_parallel =
-                [exciteMode, rfAmplitudeMode, fieldMode, excitePulseLength, excitePulsePotential,
-                        spaceChargeFactor, omega, z_0, U_0, d_square_2,
-                        &higherFieldOrdersCoefficients, &swiftWaveForm, &V_0, &V_0_ramp, &trapFieldFunction](
+                [spaceChargeFactor, &trapFieldFunction](
                         BTree::Particle* particle, int particleIndex,
                         auto& tree, double time, int timestep) -> Core::Vector {
 
-                    Core::Vector pos = particle->getLocation();
                     double particleCharge = particle->getCharge();
 
                     Core::Vector rfForce = trapFieldFunction(particle, particleIndex, tree, time, timestep);
@@ -393,8 +387,8 @@ int main(int argc, const char * argv[]) {
 
         int ionsInactive = 0;
         auto otherActionsFunctionQIT = [maxIonRadius, &ionsInactive, &startSplatTracker]
-                (Core::Vector& newPartPos, BTree::Particle* particle, int particleIndex,
-                 auto& tree, double time, int timestep) {
+                (Core::Vector& newPartPos, BTree::Particle* particle, int /*particleIndex*/,
+                 auto& /*tree*/, double time, int /*timestep*/) {
             if (newPartPos.magnitude()>maxIonRadius) {
                 particle->setActive(false);
                 particle->setSplatTime(time);
@@ -448,7 +442,7 @@ int main(int argc, const char * argv[]) {
                 [trajectoryWriteInterval, fftWriteInterval, fftWriteMode, &V_0, &V_rf_export, &ionsInactive,
                         &hdf5Writer, &ionsInactiveWriter,
                         &fftWriter, &startSplatTracker, &logger](
-                        std::vector<BTree::Particle*>& particles, auto& tree, double time, int timestep,
+                        std::vector<BTree::Particle*>& particles, auto& /*tree*/, double time, int timestep,
                         bool lastTimestep) {
 
                     if (timestep%fftWriteInterval==0) {

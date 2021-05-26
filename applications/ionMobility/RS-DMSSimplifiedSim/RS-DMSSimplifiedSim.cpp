@@ -115,7 +115,7 @@ int main(int argc, const char * argv[]) {
         std::map<RS::Substance*,int> substanceIndices;
         std::vector<RS::Substance*> discreteSubstances = rsSimConf->getAllDiscreteSubstances();
         std::vector<double> ionMobility; // = simConf.doubleVectorParameter("ion_mobility");
-        for (int i=0; i<discreteSubstances.size(); i++){
+        for (std::size_t i=0; i<discreteSubstances.size(); i++){
             substanceIndices.insert(std::pair<RS::Substance*,int>(discreteSubstances[i], i));
             ionMobility.push_back(discreteSubstances[i]->mobility());
         }
@@ -153,7 +153,7 @@ int main(int argc, const char * argv[]) {
         Core::Vector initCorner(0,-startWidthY_m/2.0,-startWidthZ_m/2.0);
         Core::Vector initBoxSize(startWidthX_m,startWidthY_m,startWidthZ_m);
 
-        for (int i=0; i<nParticles.size();i++) {
+        for (std::size_t i=0; i<nParticles.size(); ++i) {
             RS::Substance *subst = rsSimConf->substance(i);
             std::vector<Core::Vector> initialPositions =
                     ParticleSimulation::util::getRandomPositionsInBox(nParticles[i],initCorner,initBoxSize);

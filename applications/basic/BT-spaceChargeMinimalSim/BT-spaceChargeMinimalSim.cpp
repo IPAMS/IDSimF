@@ -107,10 +107,9 @@ int main(int argc, const char * argv[]) {
 
         auto accelerationFunction =
                 [spaceChargeFactor](
-                        BTree::Particle* particle, int particleIndex,
-                        BTree::Tree& tree, double time, int timestep) -> Core::Vector {
+                        BTree::Particle* particle, int /*particleIndex*/,
+                        BTree::Tree& tree, double /*time*/, int /*timestep*/) -> Core::Vector {
 
-                    Core::Vector pos = particle->getLocation();
                     double particleCharge = particle->getCharge();
 
                     Core::Vector spaceChargeForce(0, 0, 0);
@@ -123,7 +122,7 @@ int main(int argc, const char * argv[]) {
 
         auto timestepWriteFunction =
                 [trajectoryWriteInterval, &hdf5Writer, &logger](
-                        std::vector<BTree::Particle*>& particles, BTree::Tree& tree, double time,
+                        std::vector<BTree::Particle*>& particles, BTree::Tree& /*tree*/, double time,
                         int timestep, bool lastTimestep) {
 
                     if (lastTimestep) {

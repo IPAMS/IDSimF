@@ -223,12 +223,12 @@ int main(int argc, const char * argv[]) {
         }
 
         // define functions for the trajectory integration ==================================================
-        int ionsInactive = 0;
+        std::size_t ionsInactive = 0;
         auto trapFieldFunction =
                 [exciteMode, rfMode, excitePulseLength, excitePulsePotential,
-                        spaceChargeFactor, omega, &swiftWaveForm, &V_0, &V_0_ramp, &ionsInactive,
+                        omega, &swiftWaveForm, &V_0, &V_0_ramp,
                         &potentialArrays, &potentialsFactorsDc, &potentialFactorsRf, &potentialFactorsExcite]
-                        (BTree::Particle* particle, int particleIndex, auto& tree, double time, int timestep)
+                        (BTree::Particle* particle, int /*particleIndex*/, auto& /*tree*/, double time, int timestep)
                         -> Core::Vector {
 
                     Core::Vector pos = particle->getLocation();
@@ -269,7 +269,6 @@ int main(int argc, const char * argv[]) {
                         BTree::Particle* particle, int particleIndex,
                         auto& tree, double time, int timestep) -> Core::Vector {
 
-                    Core::Vector pos = particle->getLocation();
                     double particleCharge = particle->getCharge();
 
                     Core::Vector trapForce = trapFieldFunction(particle, particleIndex, tree, time, timestep);
@@ -296,7 +295,6 @@ int main(int argc, const char * argv[]) {
                         BTree::Particle* particle, int particleIndex,
                         auto& tree, double time, int timestep) -> Core::Vector {
 
-                    Core::Vector pos = particle->getLocation();
                     double particleCharge = particle->getCharge();
 
                     Core::Vector rfForce = trapFieldFunction(particle, particleIndex, tree, time, timestep);
@@ -326,8 +324,8 @@ int main(int argc, const char * argv[]) {
 
         auto otherActionsFunctionQIT = [&simulationDomainBoundaries, &ionsInactive, &potentialArrays, &startSplatTracker](
                 Core::Vector& newPartPos, BTree::Particle* particle,
-                int particleIndex,
-                auto& tree, double time, int timestep) {
+                int /*particleIndex*/,
+                auto& /*tree*/, double time, int /*timestep*/) {
             // if the ion is out of the boundary box or ends up in an electrode:
             // Terminate the ion
             // (since all potential arrays of the simulation define the basis functions of a linear combination,

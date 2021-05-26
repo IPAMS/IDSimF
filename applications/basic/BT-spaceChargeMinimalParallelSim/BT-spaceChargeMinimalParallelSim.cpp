@@ -87,7 +87,7 @@ int main(int argc, const char * argv[]) {
             ionMasses = simConf.doubleVectorParameter("ion_masses");
         }
 
-        for (int i = 0; i<nIons.size(); i++) {
+        for (std::size_t i = 0; i<nIons.size(); i++) {
             int nParticles = nIons[i];
             double mass = ionMasses[i];
             ParticleSimulation::BoxStartZone startZone(Core::Vector(3, 3, 3)/1000.0);
@@ -126,8 +126,8 @@ int main(int argc, const char * argv[]) {
 
         auto accelerationFunction =
                 [spaceChargeFactor](
-                        BTree::Particle* particle, int particleIndex,
-                        BTree::ParallelTree& tree, double time, int timestep) -> Core::Vector {
+                        BTree::Particle* particle, int /*particleIndex*/,
+                        BTree::ParallelTree& tree, double /*time*/, int /*timestep*/) -> Core::Vector {
 
                     double particleCharge = particle->getCharge();
 
@@ -141,7 +141,7 @@ int main(int argc, const char * argv[]) {
 
         auto timestepWriteFunction =
                 [trajectoryWriteInterval, &hdf5Writer, &logger](
-                        std::vector<BTree::Particle*>& particles, BTree::ParallelTree& tree, double time, int timestep,
+                        std::vector<BTree::Particle*>& particles, BTree::ParallelTree& /*tree*/, double time, int timestep,
                         bool lastTimestep) {
 
                     if (lastTimestep) {
