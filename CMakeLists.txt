@@ -29,6 +29,7 @@ option (USE_EIGEN "Use Eigen based tests / experimental implementations" OFF)
 
 # third party libraries ------------------------------------
 add_subdirectory(libs/spdlog)
+add_subdirectory(libs/cxxopts)
 
 add_subdirectory (modules/Core)
 add_subdirectory (modules/BTree)

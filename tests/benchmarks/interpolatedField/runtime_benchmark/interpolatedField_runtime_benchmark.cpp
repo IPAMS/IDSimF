@@ -57,9 +57,8 @@ testResult performFieldTest(std::string implementationName, int repeats){
     return {sum, vecSum};
 }
 
-int main(int argc, const char * argv[]) {
-
+int main() {
     int n = 40000000;
-    testResult resultOwn = performFieldTest<ParticleSimulation::InterpolatedField>("Own implementation", n);
+    performFieldTest<ParticleSimulation::InterpolatedField>("Own implementation", n);
     return 0;
 }

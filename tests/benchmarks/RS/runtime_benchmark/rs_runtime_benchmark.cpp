@@ -78,7 +78,7 @@ int main(int argc, const char * argv[]) {
     for (int step=0; step<nSteps; step++) {
 
         for (int i = 0; i < nParticles; i++) {
-            bool reacted = rsSim.react(i, reactionConditions, dt_s);
+            rsSim.react(i, reactionConditions, dt_s);
         }
         rsSim.advanceTimestep(dt_s);
 

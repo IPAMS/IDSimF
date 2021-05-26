@@ -52,7 +52,7 @@ void performBenchmark(int nSamples, bool maxwellApproximation){
     std::cout << "ion velocity: "<< ionVelo<<std::endl;
 }
 
-int main(int argc, const char * argv[]) {
+int main() {
 
     int n = 4000000;
     performBenchmark(n,false);

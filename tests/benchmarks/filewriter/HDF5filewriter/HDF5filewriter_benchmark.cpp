@@ -8,8 +8,7 @@
 
 
 
-int main(int argc, const char * argv[]) {
-    // insert code here...
+int main() {
     std::cout << "Benchmark HDF5 file writer" << std::endl;
 
     ParticleSimulation::TrajectoryHDF5Writer trajectoryWriter("test_hdf5_writer_trajectory.hd5");

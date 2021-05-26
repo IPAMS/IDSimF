@@ -21,7 +21,7 @@
 #include <ctime>
 #include <iostream>
 
-int main(int argc, const char * argv[]) {
+int main() {
 
     double diameterN2 = CollisionModel::HardSphereModel::DIAMETER_N2;
     CollisionModel::HardSphereModel hs = CollisionModel::HardSphereModel(10.0,298,28.0, diameterN2);

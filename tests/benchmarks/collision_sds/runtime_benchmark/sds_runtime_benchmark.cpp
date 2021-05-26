@@ -47,7 +47,7 @@ void performBenchmark(int nSamples, double dt){
 
 }
 
-int main(int argc, const char * argv[]) {
+int main() {
 
     int n = 4000000;
     performBenchmark(n, 1e-2);

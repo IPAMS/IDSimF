@@ -10,6 +10,7 @@
 #include "PSim_util.hpp"
 #include "CollisionModel_StatisticalDiffusion.hpp"
 #include "appUtils_stopwatch.hpp"
+#include <cxxopts.hpp>
 #include <iostream>
 #include <numeric>
 
@@ -48,23 +49,36 @@ int prepareIons(std::vector<std::unique_ptr<BTree::Particle>> &particles,
     return nTotal;
 }
 
-int main(int argc, const char * argv[]) {
+int main(int argc, char** argv) {
 
-    bool useCollisionModel = false;
-    bool verbose = false;
+    cxxopts::Options options("simpleSpaceCharge benchmark", "Simple benchmark of space charge calculation");
+
+    options.add_options()
+            ("c,collisonModel", "Use collision model", cxxopts::value<bool>()->default_value("false"))
+            ("v,verbose", "be verbose", cxxopts::value<bool>()->default_value("false"))
+            ("h,help", "Print usage");
+
+    auto optionsResult = options.parse(argc, argv);
+    if (optionsResult.count("help"))
+    {
+        std::cout << options.help() << std::endl;
+        exit(0);
+    }
+
+    bool useCollisionModel = optionsResult["collisonModel"].as<bool>();
+    bool verbose = optionsResult["verbose"].as<bool>();
+
     int nIonsPerDirection = 23;
     int timeSteps = 200;
-    int trajectoryWriteInterval = 10;
     double dt = 1e-3;
     double spaceChargeFactor = 1.0;
 
     // define functions for the trajectory integration ==================================================
     auto accelerationFunctionSerial =
             [spaceChargeFactor](
-                    BTree::Particle *particle, int particleIndex,
-                    BTree::Tree &tree, double time, int timestep) -> Core::Vector{
+                    BTree::Particle *particle, int /*particleIndex*/,
+                    BTree::Tree &tree, double /*time*/, int /*timestep*/) -> Core::Vector{
 
-                Core::Vector pos = particle->getLocation();
                 double particleCharge = particle->getCharge();
 
                 Core::Vector spaceChargeForce(0,0,0);
@@ -76,26 +90,10 @@ int main(int argc, const char * argv[]) {
             };
 
 
-    auto accelerationFunctionParallel =
-            [spaceChargeFactor](
-                    BTree::Particle *particle, int particleIndex,
-                    BTree::ParallelTreeOriginal &tree, double time, int timestep,std::vector<BTree::ParallelNodeOriginal*> &MyNodes) -> Core::Vector{
-
-                Core::Vector pos = particle->getLocation();
-                double particleCharge = particle->getCharge();
-
-                Core::Vector spaceChargeForce(0,0,0);
-                if (spaceChargeFactor > 0) {
-                    spaceChargeForce =
-                            tree.computeEFieldFromTree(*particle,MyNodes) * (particleCharge * spaceChargeFactor);
-                }
-                return (spaceChargeForce / particle->getMass());
-            };
-
     auto accelerationFunctionParallelNew =
             [spaceChargeFactor](
-                    BTree::Particle *particle, int particleIndex,
-                    BTree::ParallelTree &tree, double time, int timestep) -> Core::Vector{
+                    BTree::Particle *particle, int /*particleIndex*/,
+                    BTree::ParallelTree &tree, double /*time*/, int /*timestep*/) -> Core::Vector{
 
                 double particleCharge = particle->getCharge();
 
@@ -109,26 +107,6 @@ int main(int argc, const char * argv[]) {
 
     auto hdf5Writer = std::make_unique<ParticleSimulation::TrajectoryHDF5Writer>(
             "test_trajectories.hd5");
-
-    auto timestepWriteFunctionSerialWriting =
-            [trajectoryWriteInterval, &hdf5Writer]( std::vector<BTree::Particle *> &particles, BTree::Tree &tree, double time,
-                int timestep, bool lastTimestep) {
-
-            if (lastTimestep) {
-                hdf5Writer->writeTimestep(particles,time);
-
-                hdf5Writer->writeSplatTimes(particles);
-                hdf5Writer->finalizeTrajectory();
-                std::cout << "finished ts:" << timestep << " time:" << time << std::endl;
-            }
-
-            else if (timestep % trajectoryWriteInterval == 0) {
-
-                std::cout << "ts:" << timestep << " time:" << time << std::endl;
-                hdf5Writer->writeTimestep(particles,time);
-            }
-    };
-
 
     std::vector<std::unique_ptr<BTree::Particle>> particlesSerial;
     std::vector<BTree::Particle*>particlePtrsSerial;
@@ -176,10 +154,7 @@ int main(int argc, const char * argv[]) {
         diffMagsParallel.push_back( (particlesParallel[i]->getLocation() - particlesParallelNew[i]->getLocation()).magnitude() );
     }
     double sum = std::accumulate(diffMags.begin(), diffMags.end(), 0.0);
-    double maximumDiff = *std::max_element(diffMags.begin(), diffMags.end());
-
     double sumParallel = std::accumulate(diffMagsParallel.begin(), diffMagsParallel.end(), 0.0);
-    double maximumDiffParallel = *std::max_element(diffMagsParallel.begin(), diffMagsParallel.end());
 
     if (verbose) {
         for (int i = 0; i<nIonsTotal; ++i) {

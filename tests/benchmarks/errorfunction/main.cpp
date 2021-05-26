@@ -12,8 +12,7 @@ double generateFct()
     return v;
 }
 
-int main(int argc, const char * argv[]) {
-    // insert code here...
+int main() {
     std::cout << "Benchmark errorfunction" << std::endl;
     AppUtils::Stopwatch stopWatch;
     stopWatch.start();

@@ -55,7 +55,7 @@ void performBenchmark(int nSamples,
     std::cout << "elapsed cpu time:"<< stopWatch.elapsedSecondsCPU()<<std::endl;
 }
 
-int main(int argc, const char * argv[]) {
+int main() {
 
     Core::safetyGuards = true;
 
