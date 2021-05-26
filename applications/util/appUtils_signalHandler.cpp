@@ -31,7 +31,7 @@
  * Sigterm handler: Calls the static terminate receiver method
  * @param _ignored
  */
-void exitSignalHandler_(int _ignored) {
+void exitSignalHandler_(int /*_ignored*/) {
     AppUtils::SignalHandler::sendTerminateToReceiver();
 }
 

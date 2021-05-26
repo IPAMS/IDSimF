@@ -150,7 +150,7 @@ void AppUtils::readRandomIonDefinition(
     std::unique_ptr<ParticleSimulation::ParticleStartZone> particleStartZone = getStartZoneFromIonDefinition(simConf);
 
     // iterate through all ion groups
-    for (int i = 0; i < nIons.size(); i++) {
+    for (std::size_t i = 0; i < nIons.size(); i++) {
 
         // get ion group parameters
         int nParticles = nIons.at(i);

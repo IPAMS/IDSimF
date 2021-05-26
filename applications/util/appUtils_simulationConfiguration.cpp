@@ -33,7 +33,7 @@ std::vector<int> AppUtils::SimulationConfiguration::intVectorParameter(const std
     std::vector<int> result;
     if (isParameter(jsonName)) {
         Json::Value jsonNode = confRoot_.get(jsonName,0);
-        for (int i=0; i<jsonNode.size(); i++){
+        for (std::size_t i=0; i<jsonNode.size(); i++){
             result.push_back(jsonNode.get(i,0).asInt());
         }
     } else {
@@ -59,7 +59,7 @@ std::vector<double> AppUtils::SimulationConfiguration::doubleVectorParameter(con
     std::vector<double> result;
     if (isParameter(jsonName)) {
         Json::Value jsonNode = confRoot_.get(jsonName,0);
-        for (int i=0; i<jsonNode.size(); i++){
+        for (std::size_t i=0; i<jsonNode.size(); i++){
             result.push_back(jsonNode.get(i,0).asDouble()*multiplicator);
         }
     } else {
@@ -113,7 +113,7 @@ std::vector<std::string> AppUtils::SimulationConfiguration::stringVectorParamete
     std::vector<std::string> result;
     if (isParameter(jsonName)) {
         Json::Value jsonNode = confRoot_.get(jsonName,0);
-        for (int i=0; i<jsonNode.size(); i++){
+        for (std::size_t i=0; i<jsonNode.size(); i++){
             result.push_back(jsonNode.get(i,0).asString());
         }
     } else {
@@ -151,8 +151,7 @@ std::unique_ptr<ParticleSimulation::InterpolatedField> AppUtils::SimulationConfi
                 logger_->info("Reading field {}", fieldPath.string());
             }
 
-            auto fieldPtr = std::make_unique<ParticleSimulation::InterpolatedField>(fieldPath);
-            return move(fieldPtr);
+            return std::make_unique<ParticleSimulation::InterpolatedField>(fieldPath);
         }else{
             throw std::invalid_argument("missing configuration value: " + jsonName);
         }
