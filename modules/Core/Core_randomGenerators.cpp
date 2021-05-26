@@ -30,8 +30,7 @@ std::unique_ptr<Core::AbstractRandomGenerator> Core::globalRandomGenerator =
 /**
  * Constructs a uniform random distribution in the interval [0.0, 1.0]
  */
-Core::UniformRandomDistribution::UniformRandomDistribution():
-internalUniformDist_(0.0, 1.0)
+Core::UniformRandomDistribution::UniformRandomDistribution(): internalUniformDist_(0.0, 1.0)
 {}
 
 /**
@@ -39,8 +38,7 @@ internalUniformDist_(0.0, 1.0)
  * @param min lower boundary of the interval
  * @param max upper boundary of the interval
  */
-Core::UniformRandomDistribution::UniformRandomDistribution(double min, double max):
-        internalUniformDist_(min, max)
+Core::UniformRandomDistribution::UniformRandomDistribution(double min, double max): internalUniformDist_(min, max)
 {}
 
 /**
@@ -55,7 +53,7 @@ double Core::UniformRandomDistribution::rndValue() {
  * Construct normal random distribution
  */
 Core::NormalRandomDistribution::NormalRandomDistribution():
-internalNormalDist_()
+    internalNormalDist_()
 {}
 
 /**
@@ -70,9 +68,9 @@ double Core::NormalRandomDistribution::rndValue() {
  * Constructs a test distribution in the interval [0.0, 1.0]
  */
 Core::UniformTestDistribution::UniformTestDistribution():
-sampleIndex_(0),
-min_(0),
-interval_(1.0)
+    sampleIndex_(0),
+    min_(0),
+    interval_(1.0)
 {}
 
 /**
@@ -81,9 +79,9 @@ interval_(1.0)
  * @param max upper boundary of the interval
  */
 Core::UniformTestDistribution::UniformTestDistribution(double min, double max):
-sampleIndex_(0),
-min_(min),
-interval_(max-min)
+    sampleIndex_(0),
+    min_(min),
+    interval_(max-min)
 {}
 
 /**
@@ -98,8 +96,7 @@ double Core::UniformTestDistribution::rndValue() {
 /**
  * Construct normal test distribution
  */
-Core::NormalTestDistribution::NormalTestDistribution():
-sampleIndex_(0)
+Core::NormalTestDistribution::NormalTestDistribution(): sampleIndex_(0)
 {}
 
 /**
@@ -150,8 +147,8 @@ std::unique_ptr<Core::RandomDistribution> Core::RandomGenerator::getUniformDistr
  * Construct test value random generator
  */
 Core::TestRandomGenerator::TestRandomGenerator():
-uniformDistribution_(),
-normalDistribution_()
+    uniformDistribution_(),
+    normalDistribution_()
 {}
 
 /**

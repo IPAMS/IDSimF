@@ -24,16 +24,6 @@
 #include <cmath>
 
 /**
- * Constructs zero vector
- */
-Core::Vector::Vector()
-        :
-        x_(0),
-        y_(0),
-        z_(0)
-{}
-
-/**
  * Constructs vector with components
  * @param x x component
  * @param y y component
@@ -59,7 +49,7 @@ Core::Vector::Vector(double* coord){
 /**
  * Prints vector state / vector components
  */
-void Core::Vector::printState(){
+void Core::Vector::printState() const{
     std::cout << "x="<<x_<< " y="<<y_<<" z="<<z_<<"\n";
 }
 
@@ -126,14 +116,14 @@ void Core::Vector::z(double z){
 /**
  * Returns the magnitude of the vector
  */
-double Core::Vector::magnitude(){
+double Core::Vector::magnitude() const{
     return sqrt(x_*x_ + y_*y_ + z_*z_);
 }
 
 /**
  * Returns the square of magnitude of the vector
  */
-double Core::Vector::magnitudeSquared(){
+double Core::Vector::magnitudeSquared() const{
     return (x_*x_ + y_*y_ + z_*z_);
 }
 

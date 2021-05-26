@@ -40,7 +40,7 @@ namespace Core {
 
     public:
         // Constructors:
-        Vector();
+        Vector() = default;
         Vector(double x, double y, double z);
         explicit Vector(double*);
         
@@ -56,8 +56,8 @@ namespace Core {
         void z(double z);
         
         //mathematical methods:
-        double magnitude();
-        double magnitudeSquared();
+        [[nodiscard]] double magnitude() const;
+        [[nodiscard]] double magnitudeSquared() const;
 
         // overloaded operators:
         friend Vector operator+(const Vector &lhs, const Vector &rhs);
@@ -70,10 +70,13 @@ namespace Core {
         friend bool operator!=(const Vector &lhs, const Vector &rhs);
 
         // Public member methods:
-        void printState();
+        void printState() const;
 
     private:
-        double x_,y_,z_; ///< the x,y,z components of the vector
+        // the x,y,z components of the vector
+        double x_= 0.0;
+        double y_= 0.0;
+        double z_= 0.0;
     };
 
 
