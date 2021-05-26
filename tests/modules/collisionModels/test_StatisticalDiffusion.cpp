@@ -112,6 +112,7 @@ TEST_CASE( "Test SDS collison model", "[CollisionModels][SDS]") {
 
         ion.setDiameter(diameterIon);
         ion.setMassAMU(massIon_amu);
+        ion.setMobility(3.5e-4);
 
         std::vector<BTree::Particle*>particles= std::vector<BTree::Particle*>();
         particles.push_back(&ion);

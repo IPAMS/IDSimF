@@ -39,7 +39,7 @@ BTree::Tree::Tree(Core::Vector min, Core::Vector max){
 /**
  * Gets the tree root
  */
-BTree::Node* BTree::Tree::getRoot(){
+BTree::Node* BTree::Tree::getRoot() const {
     return(root_.get());
 }
 
@@ -56,7 +56,7 @@ std::list<BTree::Particle*>* BTree::Tree::getParticleList(){
  *
  * @returns the number of particles in the tree
  */
-int BTree::Tree::getNumberOfParticles(){
+int BTree::Tree::getNumberOfParticles() const{
     return(root_->getNumberOfParticles());
 }
 
@@ -99,7 +99,7 @@ void BTree::Tree::removeParticle(int ext_index){
  * @param ext_index the external particle index
  * @returns the retrieved particle
  */
-BTree::Particle* BTree::Tree::getParticle(int ext_index){
+BTree::Particle* BTree::Tree::getParticle(int ext_index) const{
     std::list<Particle*>::const_iterator iter =(*iMap_)[ext_index];
     BTree::Particle* particle = *iter;
     return (particle);
@@ -170,7 +170,7 @@ Core::Vector BTree::Tree::computeEFieldFromTree(BTree::Particle &particle){
 /**
  * Prints the particles in the tree to cout
  */
-void BTree::Tree::printParticles(){
+void BTree::Tree::printParticles() const{
     int i =0;
     for (BTree::Particle* particle : *iVec_) {
 

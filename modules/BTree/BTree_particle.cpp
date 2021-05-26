@@ -23,46 +23,14 @@
 #include <iostream>
 
 /**
- * Creates an empty particle
- */
-BTree::Particle::Particle()
-        :
-        location_(Core::Vector(0.0, 0.0, 0.0)),
-        velocity_(Core::Vector(0.0, 0.0, 0.0)),
-        acceleration_(Core::Vector(0.0, 0.0, 0.0)),
-        charge_(0.0),
-        mobility_(3.5e-4),
-        mass_(0.0),
-        diameter_(0.0),
-        STP_meanFreePath_(0.0),
-        STP_meanThermalVelocity_(0.0),
-        active_(true),
-        invalid_(false),
-        timeOfBirth_(0.0),
-        splatTime_(0.0),
-        hostNode_(nullptr){}
-
-/**
  * Creates a massless charged particle at a location
  * @param location the location of the created particle
  * @param chargeElemCharges the charge of the particle (in units of elementary charges)
  */
-BTree::Particle::Particle(const Core::Vector &location, double chargeElemCharges)
-        :
-        location_(location),
-        velocity_(Core::Vector(0.0, 0.0, 0.0)),
-        acceleration_(Core::Vector(0.0, 0.0, 0.0)),
-        charge_(chargeElemCharges * Core::ELEMENTARY_CHARGE),
-        mobility_(3.5e-4),
-        mass_(0.0),
-        diameter_(0.0),
-        STP_meanFreePath_(0.0),
-        STP_meanThermalVelocity_(0.0),
-        active_(true),
-        invalid_(false),
-        timeOfBirth_(0.0),
-        splatTime_(0.0),
-        hostNode_(nullptr){}
+BTree::Particle::Particle(const Core::Vector &location, double chargeElemCharges) :
+    location_(location),
+    charge_(chargeElemCharges * Core::ELEMENTARY_CHARGE)
+{}
 
 /**
  * Creates a charged particle at a location
@@ -72,22 +40,13 @@ BTree::Particle::Particle(const Core::Vector &location, double chargeElemCharges
  * @param chargeElemCharges the charge of the particle (in units of elementary charges)
  * @param massAMU the mass of the charged particle (in atomic mass units)
  */
-BTree::Particle::Particle(const Core::Vector &location, const Core::Vector &velocity, double chargeElemCharges, double massAMU)
-        :
-        location_(location),
-        velocity_(velocity),
-        acceleration_(Core::Vector(0.0, 0.0, 0.0)),
-        charge_(chargeElemCharges * Core::ELEMENTARY_CHARGE),
-        mobility_(3.5e-4),
-        mass_(massAMU * Core::AMU_TO_KG),
-        diameter_(0.0),
-        STP_meanFreePath_(0.0),
-        STP_meanThermalVelocity_(0.0),
-        active_(true),
-        invalid_(false),
-        timeOfBirth_(0.0),
-        splatTime_(0.0),
-        hostNode_(nullptr){}
+BTree::Particle::Particle(const Core::Vector &location, const Core::Vector &velocity,
+                          double chargeElemCharges, double massAMU):
+    location_(location),
+    velocity_(velocity),
+    charge_(chargeElemCharges * Core::ELEMENTARY_CHARGE),
+    mass_(massAMU * Core::AMU_TO_KG)
+{}
 
 /**
  * Creates a charged particle at a location
@@ -97,23 +56,14 @@ BTree::Particle::Particle(const Core::Vector &location, const Core::Vector &velo
  * @param massAMU the mass of the charged particle (in atomic mass units)
  * @param timeOfBirth the time when this particle was created
  */
-BTree::Particle::Particle(const Core::Vector &location, const Core::Vector &velocity, double chargeElemCharges, double massAMU,
-                          double timeOfBirth)
-        :
-        location_(location),
-        velocity_(velocity),
-        acceleration_(Core::Vector(0.0, 0.0, 0.0)),
-        charge_(chargeElemCharges * Core::ELEMENTARY_CHARGE),
-        mobility_(3.5e-4),
-        mass_(massAMU * Core::AMU_TO_KG),
-        diameter_(0.0),
-        STP_meanFreePath_(0.0),
-        STP_meanThermalVelocity_(0.0),
-        active_(true),
-        invalid_(false),
-        timeOfBirth_(timeOfBirth),
-        splatTime_(0.0),
-        hostNode_(nullptr){}
+BTree::Particle::Particle(const Core::Vector &location, const Core::Vector &velocity, double chargeElemCharges,
+                          double massAMU, double timeOfBirth):
+    location_(location),
+    velocity_(velocity),
+    charge_(chargeElemCharges * Core::ELEMENTARY_CHARGE),
+    mass_(massAMU * Core::AMU_TO_KG),
+    timeOfBirth_(timeOfBirth)
+{}
 
 /**
 * Creates a charged particle at a location
@@ -124,29 +74,23 @@ BTree::Particle::Particle(const Core::Vector &location, const Core::Vector &velo
 * @param collisionDiameterM the effective collision diameter of the particle (in m)
 * @param timeOfBirth the time when this particle was created
 */
-BTree::Particle::Particle(const Core::Vector &location, const Core::Vector &velocity, double chargeElemCharges, double massAMU,
-        double collisionDiameterM, double timeOfBirth)
-        :
-        location_(location),
-        velocity_(velocity),
-        acceleration_(Core::Vector(0.0, 0.0, 0.0)),
-        charge_(chargeElemCharges * Core::ELEMENTARY_CHARGE),
-        mobility_(3.5e-4),
-        mass_(massAMU * Core::AMU_TO_KG),
-        diameter_(collisionDiameterM),
-        STP_meanFreePath_(0.0),
-        STP_meanThermalVelocity_(0.0),
-        active_(true),
-        invalid_(false),
-        timeOfBirth_(timeOfBirth),
-        splatTime_(0.0),
-        hostNode_(nullptr){}
+BTree::Particle::Particle(const Core::Vector &location, const Core::Vector &velocity,
+                          double chargeElemCharges, double massAMU,
+                          double collisionDiameterM, double timeOfBirth):
+    location_(location),
+    velocity_(velocity),
+    charge_(chargeElemCharges * Core::ELEMENTARY_CHARGE),
+    mobility_(3.5e-4),
+    mass_(massAMU * Core::AMU_TO_KG),
+    diameter_(collisionDiameterM),
+    timeOfBirth_(timeOfBirth)
+{}
 
 
 /**
  * Sets a new location
  */
-void BTree::Particle::setLocation(const Core::Vector &location){
+void BTree::Particle::setLocation(Core::Vector location){
         this->location_ = location;
 }
 
@@ -160,7 +104,7 @@ Core::Vector& BTree::Particle::getLocation(){
 /**
  * Sets a velocity
  */
-void BTree::Particle::setVelocity(const Core::Vector &velocity){
+void BTree::Particle::setVelocity(Core::Vector velocity){
     this->velocity_ = velocity;
 }
 
@@ -174,7 +118,7 @@ Core::Vector& BTree::Particle::getVelocity(){
 /**
  * Sets the acceleration
  */
-void BTree::Particle::setAcceleration(const Core::Vector &acceleration) {
+void BTree::Particle::setAcceleration(Core::Vector acceleration) {
     this->acceleration_ = acceleration;
 }
 
@@ -196,7 +140,7 @@ void BTree::Particle::setHostNode(BTree::AbstractNode* newHostNode){
 /**
  * Gets the host node of this particle
  */
-BTree::AbstractNode* BTree::Particle::getHostNode(){
+BTree::AbstractNode* BTree::Particle::getHostNode() const{
     return (hostNode_);
 }
 
@@ -210,7 +154,7 @@ void BTree::Particle::setIndex(int index){
 /**
  * Gets the external index of the particle
  */
-int BTree::Particle::getIndex(){
+int BTree::Particle::getIndex() const{
     return (index_);
 }
 

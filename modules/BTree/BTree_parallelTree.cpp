@@ -43,21 +43,21 @@ BTree::ParallelTree::ParallelTree(Core::Vector min, Core::Vector max){
 /** 
   Get the tree root node
  */
-BTree::ParallelNode* BTree::ParallelTree::getRoot(){
+BTree::ParallelNode* BTree::ParallelTree::getRoot() const{
     return(root_.get());
 }
 
 /**
  Get a linear particle linked list of the particles in the tree
  */
-std::list<BTree::Particle*>* BTree::ParallelTree::getParticleList(){
+std::list<BTree::Particle*>* BTree::ParallelTree::getParticleList() const{
     return(iVec_.get());
 }
 
 /**
  Gets the number of particles in the tree
  */
-int BTree::ParallelTree::getNumberOfParticles(){
+int BTree::ParallelTree::getNumberOfParticles() const{
     return(root_->getNumberOfParticles());
 }
 
@@ -170,7 +170,7 @@ void BTree::ParallelTree::removeParticle(int ext_index){
  \param ext_index the external particle index
  \returns the retrieved particle 
  */
-BTree::Particle* BTree::ParallelTree::getParticle(int ext_index){
+BTree::Particle* BTree::ParallelTree::getParticle(int ext_index) const{
     std::list<Particle*>::const_iterator iter =(*iMap_)[ext_index];
     BTree::Particle* particle = *iter;
     return (particle);
@@ -238,7 +238,7 @@ int BTree::ParallelTree::updateNodes(int ver) {
 }
 
 
-void BTree::ParallelTree::printParticles(){
+void BTree::ParallelTree::printParticles() const{
     int i =0;
     for (BTree::Particle* particle : *iVec_) {
         
@@ -257,8 +257,7 @@ void BTree::ParallelTree::printParticles(){
 /**
  * Get number of tree levels in this tree
  */
-int BTree::ParallelTree::getTreeDepth_()
-{
+int BTree::ParallelTree::getTreeDepth_() const {
     return root_->maximumRecursionDepth();
 }
 

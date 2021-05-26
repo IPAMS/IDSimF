@@ -60,41 +60,40 @@ namespace BTree {
         static Core::Vector calculateElectricField(const Core::Vector &r1, const Core::Vector &r2, double charge2);
 
         // Accessors:
-        int getNumberOfParticles();
-        Particle* getParticle();
-        Core::Vector getCenter();
-        Core::Vector getMax();
-        Core::Vector getMin();
-        double getCharge();
-        Core::Vector getCenterOfCharge();
-        Octant getOctant(Core::Vector location);
+        [[nodiscard]] int getNumberOfParticles() const;
+        [[nodiscard]] Particle* getParticle() const;
+        [[nodiscard]] Core::Vector getCenter() const;
+        [[nodiscard]] Core::Vector getMax() const;
+        [[nodiscard]] Core::Vector getMin() const;
+        [[nodiscard]] double getCharge() const;
+        [[nodiscard]] Core::Vector getCenterOfCharge() const;
+        [[nodiscard]] Octant getOctant(Core::Vector location) const;
 
         // Virtual member methods:
-        virtual void initAsRoot() =0;
-        virtual bool isRoot() =0;
-        virtual void updateParents() =0;
-        virtual void updateSelf() =0;
+        virtual void initAsRoot() = 0;
+        [[nodiscard]] virtual bool isRoot() const = 0;
+        virtual void updateParents() = 0;
+        virtual void updateSelf() = 0;
         virtual void removeMyselfFromTree() = 0;
         virtual void insertParticle(Particle* particle) = 0;
         virtual void computeChargeDistributionRecursive() = 0;
 
         //export methods:
-        virtual std::string toString() = 0;
+        [[nodiscard]] virtual std::string toString() const = 0;
 
     protected:
-
-        static double theta; ///< Theta (distance criterion) factor
-        static int nNodes_;  ///< Number of total nodes existing
+        static inline double theta = 0.9; ///< Theta (distance criterion) factor
+        static inline int nNodes_ = 0;  ///< Number of total nodes existing
 
         //member fields:
-        double charge_; ///< Total charge in the node (and the subnodes)
-        Core::Vector centerOfCharge_; ///< The center of charge in the node
-        int numP_; ///< Total number of particles
+        double charge_ = 0.0; ///< Total charge in the node (and the subnodes)
+        Core::Vector centerOfCharge_ = Core::Vector(0,0,0); ///< The center of charge in the node
+        int numP_ = 0; ///< Total number of particles
 
-        Core::Vector min_; ///< Minimal corner (xlo,ylo,zlo corner) of the node
-        Core::Vector max_; ///< Maximal corner (xhi,yhi,zhi corner) of the node
-        Core::Vector center_; ///< Geometric center of the node
-        Particle* particle_; ///< A particle potentially located in the node
+        Core::Vector min_ = Core::Vector(0,0,0); ///< Minimal corner (xlo,ylo,zlo corner) of the node
+        Core::Vector max_ = Core::Vector(0,0,0); ///< Maximal corner (xhi,yhi,zhi corner) of the node
+        Core::Vector center_ = Core::Vector(0,0,0); ///< Geometric center of the node
+        Particle* particle_ = nullptr; ///< A particle potentially located in the node
     };
 }
 

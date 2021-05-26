@@ -77,7 +77,7 @@ void ParticleSimulation::SimpleVTKwriter::write(BTree::Tree& tree,bool writeTree
                          "DATASET POLYDATA\n"
                          "POINTS ";
     *particleFile_<<header<<nIons<<" float\n";
-    root->writeToStream(*particleFile_,&SimpleVTKwriter::writeIonPosition); //pass the particle position function to the tree
+    root->writeToStream(*particleFile_, &SimpleVTKwriter::writeIonPosition); //pass the particle position function to the tree
     *particleFile_<<"POINT_DATA "<<nIons<<"\n";
     *particleFile_<<"SCALARS active integer 1\nLOOKUP_TABLE default\n";
     root->writeToStream(*particleFile_,&SimpleVTKwriter::writeIonActive); //pass the "particle active" function to the tree
@@ -102,7 +102,7 @@ void ParticleSimulation::SimpleVTKwriter::write(BTree::Tree& tree,bool writeTree
  * @param filestream the filestream to write to
  * @param rootnode root node of the tree
  */
-void ParticleSimulation::SimpleVTKwriter::writeIonPosition(std::ostream& filestream, BTree::Node* rootnode){
+void ParticleSimulation::SimpleVTKwriter::writeIonPosition(std::ostream& filestream, const BTree::Node* rootnode){
     if (rootnode->getNumberOfParticles() == 1){
         BTree::Particle* ion = rootnode->getParticle();
         filestream<<ion->getLocation()<<"\n";
@@ -114,7 +114,7 @@ void ParticleSimulation::SimpleVTKwriter::writeIonPosition(std::ostream& filestr
  * @param filestream the filestream to write to
  * @param rootnode root node of the tree
  */
-void ParticleSimulation::SimpleVTKwriter::writeIonActive(std::ostream& filestream, BTree::Node* rootnode){
+void ParticleSimulation::SimpleVTKwriter::writeIonActive(std::ostream& filestream, const BTree::Node* rootnode){
     if (rootnode->getNumberOfParticles() == 1){
         BTree::Particle* ion = rootnode->getParticle();
         if (ion->isActive() == true){
@@ -131,7 +131,7 @@ void ParticleSimulation::SimpleVTKwriter::writeIonActive(std::ostream& filestrea
  * @param filestream the filestream to write to
  * @param rootnode root node of the tree
  * */
-void ParticleSimulation::SimpleVTKwriter::writeTreeBlockCornerCoordinates(std::ostream& filestream, BTree::Node* rootnode){
+void ParticleSimulation::SimpleVTKwriter::writeTreeBlockCornerCoordinates(std::ostream& filestream, const BTree::Node* rootnode){
     Core::Vector min= rootnode->getMin();
     Core::Vector max= rootnode->getMax();
     filestream<<min.x()<<" "<<min.y()<<" "<<min.z()<<"\n";

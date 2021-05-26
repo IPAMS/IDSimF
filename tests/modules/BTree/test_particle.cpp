@@ -101,6 +101,15 @@ TEST_CASE( "Basic Particle semantics tests", "[Particle]") {
         CHECK(testIon.getHostNode()==&testNode);
     }
 
+    SECTION("Particle saves copies of spatial vectors") {
+
+        Core::Vector velocity{3.0, 3.0, 3.0};
+        testIon.setVelocity(velocity);
+        CHECK(testIon.getVelocity()==Core::Vector(3.0, 3.0, 3.0));
+        velocity.x(4.0);
+        CHECK(testIon.getVelocity()==Core::Vector(3.0, 3.0, 3.0));
+    }
+
     SECTION("Particle location modification possible, location is a reference") {
         testIon.getLocation().set(10.0, 20.0, 30.0);
         CHECK(testIon.getLocation()==Core::Vector(10.0, 20.0, 30.0));

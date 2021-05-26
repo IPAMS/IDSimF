@@ -67,7 +67,7 @@ namespace BTree {
         
         // Member methods:
         void initAsRoot() override;
-        bool isRoot() override;
+        bool isRoot() const override;
         Octant getOctant(Core::Vector location);
         ParallelNodeOriginal* createOctNode(Octant oct);
         void insertParticle(Particle* particle) override;
@@ -81,9 +81,9 @@ namespace BTree {
         Core::Vector computeElectricForceFromTree(Particle &targetP);
         
         //mostly diagnostic methods:
-        std::string toString() override;
-        void printTree(int level);
-        void writeToStream(std::ostream& filestream,void (*writeFct)(std::ostream& filestream, BTree::ParallelNodeOriginal* node));
+        std::string toString() const override;
+        void printTree(int level) const;
+        void writeToStream(std::ostream& filestream, void (*writeFct)(std::ostream& filestream, const BTree::ParallelNodeOriginal* node)) const;
 
     private:
         //member fields:

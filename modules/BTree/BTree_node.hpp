@@ -49,8 +49,8 @@ namespace BTree {
         //mostly diagnostic methods:
         void testSpatialTreeIntegrity();
         void testNodeParticleIntegrity();
-        bool isNodeInSubtree(Node *nodeToFind, bool debug);
-        bool isParticleInSubtree(Particle *particle, bool debug);
+        bool isNodeInSubtree(const Node *nodeToFind, bool debug) const;
+        bool isParticleInSubtree(const Particle *particle, bool debug) const;
     };
 }
 

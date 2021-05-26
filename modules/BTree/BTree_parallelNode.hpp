@@ -54,12 +54,12 @@ namespace BTree {
         void serializeIntoVector(std::vector<BTree::ParallelNode*> &serializedNodes, int treeLevel,
                                  std::vector<int> &insertPositions);
 
-        int maximumRecursionDepth();
-        void countNodesOnLevel(int level, std::vector<int> &numOfNodesOnLevels);
+        int maximumRecursionDepth() const;
+        void countNodesOnLevel(int level, std::vector<int> &numOfNodesOnLevels) const;
 
     private:
 
-        double edgeLengthSquaredNormalized_;  ///< Squared edge length normalized by theta
+        double edgeLengthSquaredNormalized_ = 0.0;  ///< Squared edge length normalized by theta
         void updateNormalizedEdgeLength_();
     };
 }

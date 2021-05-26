@@ -25,9 +25,6 @@
 #include <sstream>
 #include <iostream>
 
-int BTree::AbstractNode::nNodes_ = 0;
-double BTree::AbstractNode::theta = 0.9;
-
 /**
  * Constructs a tree node
  * @param min the lower corner of the node (spatial xlo,ylo,zlo corner)
@@ -36,13 +33,9 @@ double BTree::AbstractNode::theta = 0.9;
  */
 BTree::AbstractNode::AbstractNode(Core::Vector min, Core::Vector max)
         :
-        charge_(0.0),
-        centerOfCharge_(Core::Vector(0,0,0)),
-        numP_(0),
         min_(min),
         max_(max),
-        center_(min+(max-min)/2),
-        particle_(nullptr)
+        center_(min+(max-min)/2)
 {}
 
 /**
@@ -93,49 +86,49 @@ Core::Vector BTree::AbstractNode::calculateElectricField(const Core::Vector &r1,
  * Gets the number of particles in the node including the suboctant nodes and thus all particles in the
  * spatial extend of the node
  */
-int BTree::AbstractNode::getNumberOfParticles(){
+int BTree::AbstractNode::getNumberOfParticles() const{
     return numP_;
 }
 
 /**
  * Gets a pointer to the particle in the node
  */
-BTree::Particle* BTree::AbstractNode::getParticle(){
+BTree::Particle* BTree::AbstractNode::getParticle() const{
     return particle_;
 }
 
 /**
  * Returns the spatial center of the node
  */
-Core::Vector BTree::AbstractNode::getCenter(){
+Core::Vector BTree::AbstractNode::getCenter() const{
     return center_;
 }
 
 /**
  * Returns the "lower" corner of the node (corner with xLo, yLo, zLo coordinates)
  */
-Core::Vector BTree::AbstractNode::getMin(){
+Core::Vector BTree::AbstractNode::getMin() const{
     return min_;
 }
 
 /**
  * Returns the "upper" corner of the  node (corner with xHi, yHi, zHi coordinates)
  */
-Core::Vector BTree::AbstractNode::getMax(){
+Core::Vector BTree::AbstractNode::getMax() const{
     return max_;
 }
 
 /**
  * Returns the total charge of the node (including the contributions of the subnodes)
  */
-double BTree::AbstractNode::getCharge(){
+double BTree::AbstractNode::getCharge() const{
     return charge_;
 }
 
 /**
  * Returns the geometric center of charge of the node (including the contribution of the subnodes)
  */
-Core::Vector BTree::AbstractNode::getCenterOfCharge(){
+Core::Vector BTree::AbstractNode::getCenterOfCharge() const{
     return centerOfCharge_;
 }
 
@@ -144,7 +137,7 @@ Core::Vector BTree::AbstractNode::getCenterOfCharge(){
  * @param location a location to get the  sub-octant for
  * @return the sub octant in which given location falls into
  */
-BTree::AbstractNode::Octant BTree::AbstractNode::getOctant(Core::Vector location){
+BTree::AbstractNode::Octant BTree::AbstractNode::getOctant(Core::Vector location) const{
     if (location.z()<=center_.z()){
         if(location.x()<=center_.x()){
             if(location.y()<=center_.y()){

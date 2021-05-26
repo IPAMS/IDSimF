@@ -97,9 +97,9 @@ Core::Vector BTree::Node::computeElectricFieldFromTree(BTree::Particle &targetP)
  * @throws logic_error if an inconsistent node is found
  */
 void BTree::Node::testSpatialTreeIntegrity(){
-    for (int i=0; i<8; i++){
-        if(octNodes_[i] != nullptr){
-            octNodes_[i]->testSpatialTreeIntegrity();
+    for (auto & octNode : octNodes_){
+        if(octNode != nullptr){
+            octNode->testSpatialTreeIntegrity();
         }
     }
 
@@ -146,9 +146,9 @@ void BTree::Node::testNodeParticleIntegrity(){
         }
     }
     
-    for (int i=0; i<8; i++){
-        if(octNodes_[i] != nullptr){
-            octNodes_[i]->testNodeParticleIntegrity();
+    for (auto & octNode : octNodes_){
+        if(octNode != nullptr){
+            octNode->testNodeParticleIntegrity();
         }
     }
 }
@@ -160,7 +160,7 @@ void BTree::Node::testNodeParticleIntegrity(){
  * @param debug prints information about the found node to cout if true
  * @return true if the given node is found in the subtree
  */
-bool BTree::Node::isNodeInSubtree(BTree::Node *nodeToFind, bool debug){
+bool BTree::Node::isNodeInSubtree(const BTree::Node *nodeToFind, bool debug) const{
     bool result = false;
     if (this == nodeToFind){
         if (debug) {
@@ -170,9 +170,9 @@ bool BTree::Node::isNodeInSubtree(BTree::Node *nodeToFind, bool debug){
         return true;
     }
 
-    for (int i=0; i<8; i++){
-        if(octNodes_[i] != nullptr){
-            if (octNodes_[i]->isNodeInSubtree(nodeToFind, debug) == true){
+    for (auto & octNode : octNodes_){
+        if(octNode != nullptr){
+            if (octNode->isNodeInSubtree(nodeToFind, debug)){
                 result = true;
             };
         }
@@ -187,7 +187,7 @@ bool BTree::Node::isNodeInSubtree(BTree::Node *nodeToFind, bool debug){
  * @param debug prints informatio about the found particle if true
  * @return true if the particle is found in the subtree
  */
-bool BTree::Node::isParticleInSubtree(BTree::Particle *particle, bool debug){
+bool BTree::Node::isParticleInSubtree(const BTree::Particle *particle, bool debug) const{
 
     bool result = false;
     if (this->particle_ == particle){
@@ -199,9 +199,9 @@ bool BTree::Node::isParticleInSubtree(BTree::Particle *particle, bool debug){
     }
     
     
-    for (int i=0; i<8; i++){
-        if(octNodes_[i] != nullptr){
-            if (octNodes_[i]->isParticleInSubtree(particle, debug) == true){
+    for (auto & octNode : octNodes_){
+        if(octNode != nullptr){
+            if (octNode->isParticleInSubtree(particle, debug) == true){
                 result = true;
             };
         }

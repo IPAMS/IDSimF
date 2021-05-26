@@ -40,9 +40,9 @@ namespace BTree {
         ParallelTree(Core::Vector min, Core::Vector max);
 
         // Public member methods:
-        ParallelNode* getRoot();
-        std::list<Particle*>* getParticleList();
-        int getNumberOfParticles();
+        [[nodiscard]] ParallelNode* getRoot() const;
+        std::list<Particle*>* getParticleList() const;
+        [[nodiscard]] int getNumberOfParticles() const;
 
         int init();
         std::vector<int> countNodesOnLevels();
@@ -50,11 +50,11 @@ namespace BTree {
 
         void insertParticle(Particle &particle, int ext_index);
         void removeParticle(int ext_index);
-        Particle* getParticle(int ext_index);
+        Particle* getParticle(int ext_index) const;
         void updateParticleLocation(int extIndex, Core::Vector newLocation, int* numNodesChanged);
         int updateNodes(int ver);
         
-        void printParticles();
+        void printParticles() const;
 
     private:
         std::unique_ptr<ParallelNode> root_;
@@ -63,12 +63,12 @@ namespace BTree {
 
         std::vector<int> nodesOnLevels_;
         std::vector<int> nodeStartIndicesOnLevels_; ///< Vector of serialized indices of the first nodes on the individual tree levels
-        int numberOfNodesTotal_;
-        int nodesReserveSize_; ///< Number of nodes which should be reserved in the serialized field calculation
+        int numberOfNodesTotal_ = 0;
+        int nodesReserveSize_ = 0; ///< Number of nodes which should be reserved in the serialized field calculation
         std::vector<BTree::ParallelNode*>nodesSerialized_; ///< Serial vector of links to the tree nodes, used for parallelized access to the nodes
-        int nTreeLevels_; //number of levels in the tree
+        int nTreeLevels_ = 0; //number of levels in the tree
 
-        int getTreeDepth_();
+        [[nodiscard]] int getTreeDepth_() const;
         void updateLevelStartIndices_();
         void serializeNodes_();
         void updateNodeChargeState_();

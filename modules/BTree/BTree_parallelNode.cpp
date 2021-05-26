@@ -58,8 +58,7 @@ BTree::ParallelNode& BTree::ParallelNode::operator=(const BTree::ParallelNode& t
  *
  * @return The maximum number of tree levels of the subtree with this node as root
  */
-int BTree::ParallelNode::maximumRecursionDepth()
-{
+int BTree::ParallelNode::maximumRecursionDepth() const {
         int maxChilds =
                 std::max(
                     std::max(
@@ -88,15 +87,14 @@ int BTree::ParallelNode::maximumRecursionDepth()
  * @param numOfNodesOnLevels a vector, one element per tree level, to count the
  * the nodes number into
  */
-void BTree::ParallelNode::countNodesOnLevel(int level, std::vector<int> &numOfNodesOnLevels)
-{
+void BTree::ParallelNode::countNodesOnLevel(int level, std::vector<int> &numOfNodesOnLevels) const {
             if(this->isRoot())
                 numOfNodesOnLevels[0]++;
-            for(int i=0;i<8;i++)
+            for(auto octNode : octNodes_)
             {
-                if(octNodes_[i]!=nullptr)
+                if(octNode!=nullptr)
                 {
-                    octNodes_[i]->countNodesOnLevel(level+1, numOfNodesOnLevels);
+                    octNode->countNodesOnLevel(level+1, numOfNodesOnLevels);
                     numOfNodesOnLevels[level]++;
                 }
             }

@@ -53,9 +53,9 @@ namespace BTree {
         Tree(Core::Vector min, Core::Vector max);
 
         //simple getter:
-        Node* getRoot();
+        Node* getRoot() const;
         std::list<Particle*>* getParticleList();
-        int getNumberOfParticles();
+        [[nodiscard]] int getNumberOfParticles() const;
 
         //charge calculation methods:
         void computeChargeDistribution();
@@ -64,10 +64,10 @@ namespace BTree {
         //particle modification methods:
         void insertParticle(Particle &particle, int ext_index);
         void removeParticle(int ext_index);
-        Particle* getParticle(int ext_index);
+        [[nodiscard]] Particle* getParticle(int ext_index) const;
         void updateParticleLocation(int ext_index, Core::Vector newLocation);
         
-        void printParticles();
+        void printParticles() const;
 
     private:
         std::unique_ptr<Node> root_; ///< the root node of the tree

@@ -51,9 +51,9 @@ namespace ParticleSimulation {
         std::ofstream* particleFile_; ///< filestream to write particle data to
         std::ofstream* treeFile_; ///< filestream to write tree data to
 
-        static void writeIonPosition(std::ostream& filestream, BTree::Node* rootnode);
-        static void writeIonActive(std::ostream& filestream, BTree::Node* rootnode);
-        static void writeTreeBlockCornerCoordinates(std::ostream& filestream, BTree::Node* rootnode);
+        static void writeIonPosition(std::ostream& filestream, const BTree::Node* rootnode);
+        static void writeIonActive(std::ostream& filestream, const BTree::Node* rootnode);
+        static void writeTreeBlockCornerCoordinates(std::ostream& filestream, const BTree::Node* rootnode);
         static void writeTreeBlockPolygon(std::ostream& filestream, int startIndex);
     };
 }

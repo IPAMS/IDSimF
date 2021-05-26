@@ -109,7 +109,7 @@ void BTree::ParallelNodeOriginal::initAsRoot(){
 /**
  * Returns true if the node is a root (has no parent)
  */
-bool BTree::ParallelNodeOriginal::isRoot(){
+bool BTree::ParallelNodeOriginal::isRoot() const{
     if (parent_ == nullptr){
         return true;
     }
@@ -592,7 +592,7 @@ void BTree::ParallelNodeOriginal::computeChargeDistributionRecursive(){
 /**
  * Returns a string which reflects the state of the node
  */
-std::string BTree::ParallelNodeOriginal::toString(){
+std::string BTree::ParallelNodeOriginal::toString() const{
     std::stringstream ss;
     ss<<"this: "<<this<<" min "<<this->min_<<" max "<<this->max_<<" part "<<this->numP_<<" charge "<<this->charge_/Core::ELEMENTARY_CHARGE<<std::endl;
 
@@ -619,7 +619,7 @@ std::string BTree::ParallelNodeOriginal::toString(){
  * Prints the tree with this node as root to cout
  * @param level level of the current tree node with respect to the tree root (should be 0 when called manually)
  */
-void BTree::ParallelNodeOriginal::printTree(int level){
+void BTree::ParallelNodeOriginal::printTree(int level) const{
 
     for (int i=0; i<8; i++){
         if(octNodes_[i] != nullptr){
@@ -639,7 +639,8 @@ void BTree::ParallelNodeOriginal::printTree(int level){
     std::cout<<std::endl;
 }
 
-void BTree::ParallelNodeOriginal::writeToStream(std::ostream& filestream, void (*writeFct)(std::ostream& filestream, BTree::ParallelNodeOriginal* node) ){
+void BTree::ParallelNodeOriginal::writeToStream(std::ostream& filestream,
+                                                void (*writeFct)(std::ostream& filestream, const BTree::ParallelNodeOriginal* node) ) const{
     
     writeFct(filestream,this);
     

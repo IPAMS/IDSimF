@@ -58,11 +58,11 @@ namespace BTree{
         GenericBaseNode& operator=(const GenericBaseNode& that);
 
         // Destructor:
-        virtual ~GenericBaseNode() override;
+        ~GenericBaseNode() override;
 
         // Generic node / tree management methods:
         void initAsRoot() override;
-        bool isRoot() override;
+        bool isRoot() const override;
         NodType* createOctNode(Octant oct);
         NodType** getOctants();
         void removeMyselfFromTree() override;
@@ -72,9 +72,9 @@ namespace BTree{
         void computeChargeDistributionRecursive() override;
 
         // Diagnostic methods:
-        std::string toString() override;
-        virtual void printTree(int level);
-        void writeToStream(std::ostream& filestream,void (*writeFct)(std::ostream& filestream, NodType* node));
+        [[nodiscard]] std::string toString() const override;
+        virtual void printTree(int level) const;
+        void writeToStream(std::ostream& filestream,void (*writeFct)(std::ostream& filestream, const NodType* node)) const;
         virtual void testNodeIntegrity(int level);
 
 
@@ -157,7 +157,7 @@ namespace BTree{
      * Returns true if the node is a root (has no parent)
      */
     template<class NodType>
-    bool GenericBaseNode<NodType>::isRoot(){
+    bool GenericBaseNode<NodType>::isRoot() const{
         if (parent_ == nullptr){
             return true;
         }
@@ -426,7 +426,7 @@ namespace BTree{
      * Returns a string which reflects the state of the node
      */
     template<class NodType>
-    std::string GenericBaseNode<NodType>::toString(){
+    std::string GenericBaseNode<NodType>::toString() const{
         std::stringstream ss;
         ss<<"this: "<<this<<" min "<<this->min_<<" max "<<this->max_<<" part "<<this->numP_<<" charge "<<this->charge_/Core::ELEMENTARY_CHARGE<<std::endl;
 
@@ -455,7 +455,7 @@ namespace BTree{
      * @param level level of the current tree node with respect to the tree root (should be 0 when called manually)
      */
     template<class NodType>
-    void GenericBaseNode<NodType>::printTree(int level){
+    void GenericBaseNode<NodType>::printTree(int level) const{
 
         for (int i=0; i<8; i++){
             if(octNodes_[i] != nullptr){
@@ -485,9 +485,9 @@ namespace BTree{
      */
     template<class NodType>
     void GenericBaseNode<NodType>::writeToStream(std::ostream& filestream,
-                                                 void (*writeFct)(std::ostream& filestream, NodType* node) ){
+                                                 void (*writeFct)(std::ostream& filestream, const NodType* node) ) const{
 
-        writeFct(filestream, static_cast<NodType*>(this));
+        writeFct(filestream, static_cast<const NodType*>(this));
 
         for (int i=0; i<8; i++){
             if(octNodes_[i] != nullptr){

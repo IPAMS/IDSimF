@@ -48,7 +48,7 @@ namespace BTree {
     public:
 
         //Constructors:
-        Particle();
+        Particle() = default;
         virtual ~Particle()= default;
         Particle(const Core::Vector &location, double chargeElemCharges);
         Particle(const Core::Vector &location, const Core::Vector &velocity, double chargeElemCharges, double massAMU);
@@ -56,66 +56,66 @@ namespace BTree {
         Particle(const Core::Vector &location, const Core::Vector &velocity, double chargeElemCharges, double massAMU, double collisionDiameterM, double timeOfBirth);
 
         //setters and getters for the members of the particle:
-        void setLocation(const Core::Vector &location);
-        Core::Vector& getLocation();
-        void setVelocity(const Core::Vector &velocity);
-        Core::Vector& getVelocity();
-        void setAcceleration(const Core::Vector &velocity);
-        Core::Vector& getAcceleration();
+        void setLocation(Core::Vector location);
+        [[nodiscard]] Core::Vector& getLocation();
+        void setVelocity(Core::Vector velocity);
+        [[nodiscard]] Core::Vector& getVelocity();
+        void setAcceleration(Core::Vector velocity);
+        [[nodiscard]] Core::Vector& getAcceleration();
 
         void setHostNode(AbstractNode* newHostNode);
-        AbstractNode* getHostNode();
+        [[nodiscard]] AbstractNode* getHostNode()  const;
 
         void setIndex(int index);
-        int getIndex();
+        [[nodiscard]] int getIndex() const;
 
         void setChargeElementary(double chargeElemCharges);
-        double getCharge() const;
+        [[nodiscard]] double getCharge() const;
         void setActive(bool active);
-        bool isActive() const;
+        [[nodiscard]] bool isActive() const;
         void setInvalid(bool invalid);
-        bool isInvalid() const;
+        [[nodiscard]] bool isInvalid() const;
 
-        double getFloatAttribute(const std::string& key) const;
+        [[nodiscard]] double getFloatAttribute(const std::string& key) const;
         void setFloatAttribute(const std::string& key, double value);
-        int getIntegerAttribute(const std::string& key) const;
+        [[nodiscard]] int getIntegerAttribute(const std::string& key) const;
         void setIntegerAttribute(const std::string& key, int value);
         std::array<double, 3>& getAuxCollisionParams();
 
         void setMobility(double mobility);
-        double getMobility() const;
+        [[nodiscard]] double getMobility() const;
         void setMeanFreePathSTP(double meanFreePathSTP);
-        double getMeanFreePathSTP() const;
+        [[nodiscard]] double getMeanFreePathSTP() const;
         void setMeanThermalVelocitySTP(double meanVelocitySTP);
-        double getMeanThermalVelocitySTP() const;
+        [[nodiscard]] double getMeanThermalVelocitySTP() const;
         void setMassAMU(double massAMU);
-        double getMass() const;
+        [[nodiscard]] double getMass() const;
         void setDiameter(double diameter);
-        double getDiameter() const;
+        [[nodiscard]] double getDiameter() const;
 
         void setTimeOfBirth(double timeOfBirth);
-        double getTimeOfBirth() const;
+        [[nodiscard]] double getTimeOfBirth() const;
         void setSplatTime(double splatTime);
-        double getSplatTime() const;
+        [[nodiscard]] double getSplatTime() const;
 
     private:
         //all internal variable are in SI units
-        int index_; ///< an external index (mostly the index of the particle in the reaction model)
-        Core::Vector location_; ///< The spatial location of the particle (m)
-        Core::Vector velocity_; ///< The velocity of the particle (m/s)
-        Core::Vector acceleration_; ///< The acceleration of the particle (m/s^2)
-        double charge_;       ///< The charge of the particle (C)
-        double mobility_;     ///< The electrical mobility of the charged particle (m^2 / (V*s))
-        double mass_;         ///< The mass of the particle (kg)
-        double diameter_;         ///< (collision) diameter of the particle (m^2)
-        double STP_meanFreePath_; ///< mean free path at standard temperature and pressure (m)
-        double STP_meanThermalVelocity_; ///< mean thermal velocity at standard temperature and pressure (m/s)
+        int index_ = -1; ///< an external index (mostly the index of the particle in the reaction model)
+        Core::Vector location_= Core::Vector(0.0, 0.0, 0.0); ///< The spatial location of the particle (m)
+        Core::Vector velocity_ = Core::Vector(0.0, 0.0, 0.0); ///< The velocity of the particle (m/s)
+        Core::Vector acceleration_ = Core::Vector(0.0, 0.0, 0.0); ///< The acceleration of the particle (m/s^2)
+        double charge_ = 0.0;           ///< The charge of the particle (C)
+        double mobility_ = 0.0;         ///< The electrical mobility of the charged particle (m^2 / (V*s))
+        double mass_ = 0.0;             ///< The mass of the particle (kg)
+        double diameter_ = 0.0;         ///< (collision) diameter of the particle (m^2)
+        double STP_meanFreePath_ = 0.0; ///< mean free path at standard temperature and pressure (m)
+        double STP_meanThermalVelocity_ = 0.0; ///< mean thermal velocity at standard temperature and pressure (m/s)
 
-        bool active_;   ///< Flag if the particle is active in the simulation, false if the particle is already terminated
-        bool invalid_;  ///< Flag if the particle has an invalid state in the simulation
-        double timeOfBirth_; ///< Time when the particle was created
-        double splatTime_;   ///< Time when the particle was terminated ("splatted")
-        AbstractNode* hostNode_;     ///< A link to a tree node to which the particle is belonging currently
+        bool active_ = true;       ///< Flag if the particle is active in the simulation, false if the particle is already terminated
+        bool invalid_ = false;     ///< Flag if the particle has an invalid state in the simulation
+        double timeOfBirth_ = 0.0; ///< Time when the particle was created
+        double splatTime_= 0.0;    ///< Time when the particle was terminated ("splatted")
+        AbstractNode* hostNode_ = nullptr; ///< A link to a tree node to which the particle is belonging currently
 
         std::unordered_map<std::string, double> attributesFloat_; ///< an arbitrary set of additional floating point attributes, accessible by a name
         std::unordered_map<std::string, int> attributesInteger_; ///< an arbitrary set of additional integer attributes, accessible by a name
