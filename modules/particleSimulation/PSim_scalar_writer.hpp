@@ -48,6 +48,7 @@ namespace ParticleSimulation {
         ~Scalar_writer();
 
         void writeTimestep(int intValue, double time);
+        void writeTimestep(std::size_t sizeValue, double time);
         void writeTimestep(double doubleValue, double time);
         void writeTimestep(std::vector<double> doubleValues, double time);
 

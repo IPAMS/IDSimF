@@ -53,6 +53,15 @@ void ParticleSimulation::Scalar_writer::writeTimestep(int intValue, double time)
 
 /**
  * Writes a scalar value to the result file
+ * @param sizeValue the scalar value to write
+ * @param time the time of the current time step
+ */
+void ParticleSimulation::Scalar_writer::writeTimestep(std::size_t sizeValue, double time){
+    *transientFile_<<time<<" "<<sizeValue<<std::endl;
+}
+
+/**
+ * Writes a scalar value to the result file
  * @param doubleValue the scalar value to write
  * @param time the time of the current time step
  */

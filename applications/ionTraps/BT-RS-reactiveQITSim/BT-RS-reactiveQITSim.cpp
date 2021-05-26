@@ -62,7 +62,7 @@ double r_0_default = 10.0 / 1000.0;
 double z_0_default = 7.0  / 1000.0;
 
 std::function<void(double,BTree::Particle&)> createCollisionCountFunction(std::string key){
-    return [=](double collisionEnergy,BTree::Particle& ion)->void{
+    return [=](double /*collisionEnergy*/, BTree::Particle& ion)->void{
         int nCollisions = ion.getFloatAttribute(key);
         ion.setFloatAttribute(key, nCollisions+1);
     };
@@ -242,7 +242,7 @@ int main(int argc, const char * argv[]) {
         std::vector<double> V_rf_export;
 
         std::vector<RS::Substance*> discreteSubstances = rsSimConf->getAllDiscreteSubstances();
-        for (int i = 0; i<discreteSubstances.size(); i++) {
+        for (std::size_t i = 0; i<discreteSubstances.size(); i++) {
             substanceIndices.insert(std::pair<RS::Substance*, int>(discreteSubstances[i], i));
             discreteSubstanceNames.emplace_back(discreteSubstances[i]->name());
             discreteSubstanceMasses.emplace_back(discreteSubstances[i]->mass());
@@ -260,7 +260,7 @@ int main(int argc, const char * argv[]) {
         Core::Vector initCorner(-startWidth_m/2.0, -startWidth_m/2.0, -startWidth_m/2.0);
         Core::Vector initBoxSize(startWidth_m, startWidth_m, startWidth_m);
 
-        for (int i = 0; i<nIons.size(); i++) {
+        for (std::size_t i = 0; i<nIons.size(); i++) {
             RS::Substance* subst = discreteSubstances[i];
             std::vector<Core::Vector> initialPositions =
                     ParticleSimulation::util::getRandomPositionsInBox(nIons[i], initCorner, initBoxSize);
@@ -296,7 +296,7 @@ int main(int argc, const char * argv[]) {
                 [exciteMode, rfMode, excitePulseLength, excitePotential,
                         spaceChargeFactor, omega, z_0, U_0, d_square_2,
                         &swiftWaveForm, exciteDivisor, &V_0, &V_0_ramp, &lastTimestep, &parameter_a, &exciteCos](
-                        BTree::Particle* particle, int particleIndex,
+                        BTree::Particle* particle, int /*particleIndex*/,
                         BTree::Tree& tree, double time, int timestep) -> Core::Vector {
 
                     Core::Vector pos = particle->getLocation();
@@ -353,7 +353,7 @@ int main(int argc, const char * argv[]) {
         int ionsInactive = 0;
         auto otherActionsFunctionQIT = [maxIonRadius_m, &ionsInactive, &startSplatTracker]
                 (Core::Vector& newPartPos, BTree::Particle* particle,
-                 int particleIndex, BTree::Tree& tree, double time, int timestep) {
+                 int /*particleIndex*/, BTree::Tree& /*tree*/, double time, int /*timestep*/) {
             if (newPartPos.magnitude()>maxIonRadius_m) {
 
                 particle->setActive(false);
@@ -446,7 +446,7 @@ int main(int argc, const char * argv[]) {
         //prepare background gas collision models and collision based chemical reactions
         std::vector<std::unique_ptr<CollisionModel::AbstractCollisionModel>> collisionModels;
 
-        for (int i = 0; i<collisionGasNames.size(); ++i) {
+        for (std::size_t i = 0; i<collisionGasNames.size(); ++i) {
             RS::Substance* collisionPartnerSubst = rsSimConf->substanceByName(collisionGasNames[i]);
             std::unique_ptr<CollisionModel::HardSphereModel> hsModel = std::make_unique<CollisionModel::HardSphereModel>(
                     partialPressures[i], backgroundTemperature_K,
@@ -475,7 +475,7 @@ int main(int argc, const char * argv[]) {
             }
             for (int i = 0; i<nParticlesTotal; i++) {
                 if (particles[i]->isActive()) {
-                    bool reacted = rsSim.react(i, reactionConditions, dt);
+                    rsSim.react(i, reactionConditions, dt);
                     int substIndex = substanceIndices.at(particles[i]->getSpecies());
                     particles[i]->setFloatAttribute(key_ChemicalIndex, substIndex);
                 }

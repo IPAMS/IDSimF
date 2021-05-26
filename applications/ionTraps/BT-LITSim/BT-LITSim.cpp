@@ -224,11 +224,11 @@ int main(int argc, const char * argv[]) {
         }
 
         // define functions for the trajectory integration ==================================================
-        int ionsInactive = 0;
+        std::size_t ionsInactive = 0;
         auto trapFieldFunction =
                 [exciteMode, rfMode, excitePulseLength, excitePulsePotential, omega, &swiftWaveForm, &V_0, &V_0_ramp,
                         &potentialArrays, &potentialsFactorsDc, &potentialFactorsRf, &potentialFactorsExcite]
-                        (BTree::Particle* particle, int particleIndex, auto& tree, double time, int timestep)
+                        (BTree::Particle* particle, int /*particleIndex*/, auto& /*tree*/, double time, int timestep)
                         -> Core::Vector {
 
                     Core::Vector pos = particle->getLocation();
@@ -311,8 +311,7 @@ int main(int argc, const char * argv[]) {
 
         auto otherActionsFunctionQIT = [&simulationDomainBoundaries, &ionsInactive, &potentialArrays, &startSplatTracker](
                 Core::Vector& newPartPos, BTree::Particle* particle,
-                int particleIndex,
-                auto& tree, double time, int timestep) {
+                int /*particleIndex*/, auto& /*tree*/, double time, int /*timestep*/) {
             // if the ion is out of the boundary box or ends up in an electrode:
             // Terminate the ion
             // (since all potential arrays of the simulation define the basis functions of a linear combination,
@@ -381,7 +380,7 @@ int main(int argc, const char * argv[]) {
         auto timestepWriteFunction =
                 [trajectoryWriteInterval, fftWriteInterval, fftWriteMode, &V_0, &V_rf_export, &ionsInactive,
                         &hdf5Writer, &startSplatTracker, &ionsInactiveWriter, &fftWriter, &integratorPtr, &logger](
-                        std::vector<BTree::Particle*>& particles, auto& tree, double time, int timestep,
+                        std::vector<BTree::Particle*>& particles, auto& /*tree*/, double time, int timestep,
                         bool lastTimestep) {
 
                     // check if simulation should be terminated (if all particles are terminated)

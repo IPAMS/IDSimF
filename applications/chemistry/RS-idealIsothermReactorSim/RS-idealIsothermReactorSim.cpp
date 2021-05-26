@@ -74,9 +74,9 @@ int main(int argc, const char * argv[]) {
         // create and add simulation particles:
         int nParticlesTotal = 0;
         std::vector<uniqueReactivePartPtr> particles;
-        for (int i=0; i<nParticles.size();i++) {
+        for (std::size_t i=0; i<nParticles.size(); ++i) {
             RS::Substance *subst = rsSimConf->getAllDiscreteSubstances().at(i);
-            for (int k = 0; k < nParticles[i]; k++) {
+            for (int k = 0; k < nParticles[i]; ++k) {
                 uniqueReactivePartPtr particle = std::make_unique<RS::ReactiveParticle>(subst);
                 sim.addParticle(particle.get(), nParticlesTotal);
                 particles.push_back(std::move(particle));
@@ -96,7 +96,7 @@ int main(int argc, const char * argv[]) {
         AppUtils::SignalHandler::registerSignalHandler();
         AppUtils::Stopwatch stopWatch;
         stopWatch.start();
-        for (int step=0; step<nSteps; step++) {
+        for (int step=0; step<nSteps; ++step) {
             if (AppUtils::SignalHandler::isTerminationSignaled()){ // terminate simulation loop if termination was signaled
                 break;
             }

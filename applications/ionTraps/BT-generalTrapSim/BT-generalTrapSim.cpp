@@ -387,7 +387,7 @@ int main(int argc, const char * argv[]) {
         auto timestepWriteFunction =
                 [trajectoryWriteInterval, fftWriteInterval, fftWriteMode, &V_0, &V_rf_export, &ionsInactive,
                         &hdf5Writer, &startSplatTracker, &ionsInactiveWriter, &fftWriter, &integratorPtr, &logger](
-                        std::vector<BTree::Particle*>& particles, auto& tree, double time, int timestep,
+                        std::vector<BTree::Particle*>& particles, auto& /*tree*/, double time, int timestep,
                         bool lastTimestep) {
 
                     // check if simulation should be terminated (if all particles are terminated)
