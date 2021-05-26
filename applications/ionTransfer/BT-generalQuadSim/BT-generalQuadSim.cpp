@@ -83,7 +83,6 @@ int main(int argc, const char * argv[]) {
                 "electric_field_entrance_file");
 
         // read physical and geometrical simulation parameters
-        int collisionMode = simConf.intParameter("collision_mode");
         double spaceChargeFactor = simConf.doubleParameter("space_charge_factor");
         double collisionGasMassAmu = simConf.doubleParameter("collision_gas_mass_amu");
         double collisionGasDiameterM = simConf.doubleParameter("collision_gas_diameter_angstrom")*1e-10;
@@ -121,7 +120,7 @@ int main(int argc, const char * argv[]) {
                 {qStartBoxCenter, 0.0, 0.0});
 
         //init ions:
-        for (int i = 0; i<nIons.size(); i++) {
+        for (std::size_t i = 0; i<nIons.size(); i++) {
             int nParticles = nIons[i];
             double mass = ionMasses[i];
             auto ions = startZone.getRandomParticlesInStartZone(nParticles, 1.0);
@@ -156,8 +155,8 @@ int main(int argc, const char * argv[]) {
 
 
         // define functions for the trajectory integration ==================================================
-        auto accelerationFunction = [V_rf, V_entrance, spaceChargeFactor, collisionMode, &electricFieldQuadRF, &electricFieldQuadEntrance](
-                BTree::Particle* particle, int particleIndex, BTree::Tree& tree, double time, int timestep) {
+        auto accelerationFunction = [V_rf, V_entrance, spaceChargeFactor, &electricFieldQuadRF, &electricFieldQuadEntrance](
+                BTree::Particle* particle, int /*particleIndex*/, BTree::Tree& tree, double time, int /*timestep*/) {
             //x is the long quad axis
             Core::Vector pos = particle->getLocation();
             double particleCharge = particle->getCharge();
@@ -192,7 +191,7 @@ int main(int argc, const char * argv[]) {
                 };
 
         auto timestepWriteFunction = [trajectoryWriteInterval, &additionalParameterTransformFct, &jsonWriter, &logger](
-                std::vector<BTree::Particle*>& particles, BTree::Tree& tree, double time, int timestep,
+                std::vector<BTree::Particle*>& particles, BTree::Tree& /*tree*/, double time, int timestep,
                 bool lastTimestep) {
             if (timestep%trajectoryWriteInterval==0) {
                 logger->info("ts:{} time:{:.2e}", timestep, time);
@@ -210,8 +209,8 @@ int main(int argc, const char * argv[]) {
         };
 
         auto otherActionsFunction = [maxQLength, maxRadius, &startZone](Core::Vector& newPartPos,
-                                                                        BTree::Particle* particle, int particleIndex,
-                                                                        BTree::Tree& tree, double time, int timestep) {
+                                                                        BTree::Particle* particle, int /*particleIndex*/,
+                                                                        BTree::Tree& /*tree*/, double /*time*/, int /*timestep*/) {
 
             double r_pos = std::sqrt(newPartPos.y()*newPartPos.y()+newPartPos.z()*newPartPos.z());
 

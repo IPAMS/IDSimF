@@ -22,9 +22,6 @@ Simulation configuration description
 ``trajectory_write_interval`` : integer
     Interval, in time steps, between writes to the trajectory result file.
 
-``collision_mode`` : integer
-    if ``0``: Particles will be invalidated when leaving the potential arrays defining the electric field. (Parameter will be removed).
-
 ``dt`` : float
     Time step length in seconds.
 

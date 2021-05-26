@@ -1,7 +1,6 @@
 {
   "sim_time_steps":200,
   "trajectory_write_interval":20,
-  "collision_mode":0,
   "dt":5e-8,
   "n_ions":[600,600],
   "ion_masses":[35,37],
