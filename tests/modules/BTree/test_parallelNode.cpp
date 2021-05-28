@@ -54,26 +54,6 @@ TEST_CASE( "Test basic parallel node semantics", "[Node]"){
         REQUIRE( testNode.getMax() == Core::Vector(2.0,2.0,2.0));
     }
 
-    SECTION("Copy constructor and assignment operator should work"){
-        BTree::ParallelNode testNode(
-                Core::Vector(1.0,1.0,1.0),
-                Core::Vector(2.0,2.0,3.0),
-                nullptr
-        );
-        int nNodesOriginal= testNode.getNumberOfNodes();
-        BTree::ParallelNode copiedNode(testNode);
-        REQUIRE(copiedNode.getMax() == Core::Vector(2.0,2.0,3.0));
-        REQUIRE(copiedNode.getNumberOfNodes() == nNodesOriginal+1);
-
-        BTree::ParallelNode assignedNode({-10,-10,-10},{10,10,10}, &testNode);
-        BTree::Particle testParticle({1.0,1.0,1.0},1.0);
-        copiedNode.insertParticle(&testParticle);
-        assignedNode = copiedNode;
-        REQUIRE(assignedNode.getMax() == Core::Vector(2.0,2.0,3.0));
-        REQUIRE(assignedNode.getNumberOfNodes() == nNodesOriginal+2);
-        REQUIRE(assignedNode.getParticle() == &testParticle);
-    }
-
     SECTION( "Sub octants should have the correct geometry / locations", "[Node]") {
         //Test ion location:
         BTree::ParallelNode testNode = BTree::ParallelNode(

@@ -54,8 +54,8 @@ namespace BTree{
 
         //Constructors:
         GenericBaseNode(Core::Vector min, Core::Vector max, NodType* parent);
-        GenericBaseNode(const GenericBaseNode& that);
-        GenericBaseNode& operator=(const GenericBaseNode& that);
+        GenericBaseNode(const GenericBaseNode& that) = delete;
+        GenericBaseNode& operator=(const GenericBaseNode& that) = delete;
 
         // Destructor:
         ~GenericBaseNode() override;
@@ -99,34 +99,6 @@ namespace BTree{
             this->octNodes_[i] = nullptr;
         }
         nNodes_++;
-    }
-
-    /**
-     * Copy constructor
-     */
-    template<class NodType>
-    GenericBaseNode<NodType>::GenericBaseNode(const GenericBaseNode<NodType> &that):
-        AbstractNode(that),
-        parent_(that.parent_)
-    {
-        for (int i=0; i<8; i++){
-            this->octNodes_[i] = that.octNodes_[i];
-        }
-        nNodes_++;
-    }
-
-    /**
-     * Assignment operator
-     */
-    template<class NodType>
-    GenericBaseNode<NodType>& GenericBaseNode<NodType>::operator=(const GenericBaseNode<NodType>& that)
-    {
-        AbstractNode::operator=(that);
-        parent_=that.parent_;
-        for (int i=0; i<8; i++){
-            this->octNodes_[i] = that.octNodes_[i];
-        }
-        return *this;
     }
 
     /**

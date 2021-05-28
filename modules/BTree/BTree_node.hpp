@@ -40,8 +40,8 @@ namespace BTree {
 
         // Constructors and assignment operators:
         Node(Core::Vector min, Core::Vector max, Node* parent);
-        Node(const Node& that);
-        Node& operator=(const Node& that);
+        Node(const Node& that) = delete;
+        Node& operator=(const Node& that) = delete;
 
         // Member methods:
         Core::Vector computeElectricFieldFromTree(Particle &targetP);

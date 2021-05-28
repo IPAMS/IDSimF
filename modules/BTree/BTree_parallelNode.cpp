@@ -34,25 +34,6 @@ BTree::ParallelNode::ParallelNode(Core::Vector min, Core::Vector max, BTree::Par
         GenericBaseNode<ParallelNode>(min,max,parent)
 {}
 
-
-/**
- * Copy constructor
- */
-BTree::ParallelNode::ParallelNode(const BTree::ParallelNode& that):
-        GenericBaseNode<ParallelNode>(that)
-{}
-
-
-/**
- * Asssignment operator
- */
-BTree::ParallelNode& BTree::ParallelNode::operator=(const BTree::ParallelNode& that){
-
-    GenericBaseNode::operator=(that);
-    return *this;
-}
-
-
 /**
  * Determines the maximum depth, in terms of tree levels, of the (sub) tree with this node as root
  *

@@ -58,23 +58,6 @@ TEST_CASE( "Test basic serial node semantics", "[Node]"){
         REQUIRE(testNode.getMax() == Core::Vector(2.0,2.0,2.0));
     }
 
-    SECTION("Node copy and assignment should work"){
-        int nNodesExisting = testNode.getNumberOfNodes();
-        BTree::Node copiedNode(testNode);
-        REQUIRE(copiedNode.getMax() == Core::Vector(2.0,2.0,2.0));
-        REQUIRE(copiedNode.getNumberOfNodes() == nNodesExisting+1);
-
-        BTree::Particle testParticle({1.5,1.5,1.5},1.0);
-        copiedNode.insertParticle(&testParticle);
-
-
-        BTree::Node assignedNode({-10,-10,-10},{10,10,10}, &testNode);
-        assignedNode = copiedNode;
-        REQUIRE(assignedNode.getMax() == Core::Vector(2.0,2.0,2.0));
-        REQUIRE(assignedNode.getNumberOfNodes() == nNodesExisting+2);
-        REQUIRE(assignedNode.getParticle() == &testParticle);
-    }
-
     SECTION("Test node octant / sub nodes semantics") {
         SECTION("Test node octant determination") {
             BTree::Node testNode2(

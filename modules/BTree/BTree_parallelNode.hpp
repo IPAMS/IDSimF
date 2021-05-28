@@ -47,8 +47,8 @@ namespace BTree {
 
         // Constructors and assignment operators:
         ParallelNode(Core::Vector min, Core::Vector max, ParallelNode* parent);
-        ParallelNode(const ParallelNode& that);
-        ParallelNode& operator=(const ParallelNode& that);
+        ParallelNode(const ParallelNode& that) = delete;
+        ParallelNode& operator=(const ParallelNode& that) = delete;
 
         // Member methods:
         void serializeIntoVector(std::vector<BTree::ParallelNode*> &serializedNodes, int treeLevel,

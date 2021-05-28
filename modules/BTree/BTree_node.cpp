@@ -35,22 +35,6 @@ BTree::Node::Node(Core::Vector min, Core::Vector max, BTree::Node* parent):
         GenericBaseNode<Node>(min,max,parent)
 {}
 
-/**
- * Copy constructor
- */
-BTree::Node::Node(const BTree::Node& that):
-        GenericBaseNode<Node>(that)
-{}
-
-/**
- * Assign operator: assigns node "that" to a new node
- */
-BTree::Node& BTree::Node::operator=(const BTree::Node& that){
-    GenericBaseNode<Node>::operator=(that);
-    return *this;
-}
-
-
 // Public member methods:
 /**
  * Computes the electric field on a given particle from the charged particles in a tree
