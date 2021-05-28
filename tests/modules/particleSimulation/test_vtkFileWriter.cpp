@@ -58,5 +58,5 @@ TEST_CASE( "The VTK writer should at least write a file without exception",
     testWriter->write(*testTree,true);
     delete(testTree);
 
-    REQUIRE(testIon1.getLocation() != testIon2.getLocation());
+    CHECK(testIon1.getLocation() != testIon2.getLocation());
 }

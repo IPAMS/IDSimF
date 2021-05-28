@@ -65,7 +65,7 @@ TEST_CASE( "Test multi collision model with multiple hard sphere models ","[Coll
         multiModel.modifyVelocity(ion, 2e-5);
     }
 
-    REQUIRE(collisionCounts[0] == 25);
-    REQUIRE(collisionCounts[1] == 2);
+    CHECK(collisionCounts[0] == 25);
+    CHECK(collisionCounts[1] == 2);
 }
 

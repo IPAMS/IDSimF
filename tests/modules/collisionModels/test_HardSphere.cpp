@@ -53,9 +53,9 @@ TEST_CASE( "Basic test Hard Sphere model", "[CollisionModels][HardSphereModel]")
         }
         Core::Vector ionVelo = ion.getVelocity();
 
-        REQUIRE(Approx(ionVelo.x()) ==  -27.2881052);
-        REQUIRE(Approx(ionVelo.y()) ==  32.5138876);
-        REQUIRE(Approx(ionVelo.z()) ==  -128.48497);
+        CHECK(Approx(ionVelo.x()) ==  -27.2881052);
+        CHECK(Approx(ionVelo.y()) ==  32.5138876);
+        CHECK(Approx(ionVelo.z()) ==  -128.48497);
     }
 
     SECTION("Test with maxwellian approximation"){
@@ -67,9 +67,9 @@ TEST_CASE( "Basic test Hard Sphere model", "[CollisionModels][HardSphereModel]")
         }
         Core::Vector ionVelo = ion.getVelocity();
 
-        REQUIRE(Approx(ionVelo.x()) ==  147.714697438);
-        REQUIRE(Approx(ionVelo.y()) ==  58.6209442494);
-        REQUIRE(Approx(ionVelo.z()) ==  -91.735975867);
+        CHECK(Approx(ionVelo.x()) ==  147.714697438);
+        CHECK(Approx(ionVelo.y()) ==  58.6209442494);
+        CHECK(Approx(ionVelo.z()) ==  -91.735975867);
     }
 }
 
@@ -96,9 +96,9 @@ TEST_CASE( "Test Hard Sphere model after collision function", "[CollisionModels]
         hs.modifyVelocity(ion, 1e-6);
     }
 
-    REQUIRE(nTotalCollisions == 6);
-    REQUIRE(collisionEnergies.size() == 6);
-    REQUIRE(Approx(collisionEnergies[0]) == 0.007162);
-    REQUIRE(Approx(collisionEnergies[1]) == 0.0224838);
+    CHECK(nTotalCollisions == 6);
+    CHECK(collisionEnergies.size() == 6);
+    CHECK(Approx(collisionEnergies[0]) == 0.007162);
+    CHECK(Approx(collisionEnergies[1]) == 0.0224838);
 }
 

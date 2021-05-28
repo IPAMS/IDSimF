@@ -8,11 +8,11 @@ TEST_CASE( "Test ion parameter estimation functions", "[CollisionModels][Util]")
 
         //n=6, m=91, d=0.541621(est), Ko=1.89928(est), MFPo=3.2037e-005, Vo=0.252097 [*]
         double diamFromMass_nm = CollisionModel::util::estimateCollisionDiameterFromMass(91);
-        REQUIRE(Approx(diamFromMass_nm)== 0.541621);
+        CHECK(Approx(diamFromMass_nm)== 0.541621);
 
         //n=4, m=55, d=0.457934(est), Ko=2.34714(est), MFPo=4.39026e-005, Vo=0.32427 [*]
         diamFromMass_nm = CollisionModel::util::estimateCollisionDiameterFromMass(55);
-        REQUIRE(Approx(diamFromMass_nm)== 0.457934);
+        CHECK(Approx(diamFromMass_nm)== 0.457934);
     }
 
     SECTION( "Estimation function for mobility should be correct") {
@@ -28,6 +28,6 @@ TEST_CASE( "Test ion parameter estimation functions", "[CollisionModels][Util]")
         double mobility = CollisionModel::util::estimateMobility(
                 massIon_amu, diameterIon_nm,massGas_amu,diameterGas_nm);
 
-        REQUIRE(Approx(mobility)== 1.89928);
+        CHECK(Approx(mobility)== 1.89928);
     }
 }

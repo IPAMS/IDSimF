@@ -96,15 +96,15 @@ TEST_CASE( "Test basic RS simulation semantics", "[RS][Simulation]") {
         sim.addParticle(p1.get(),1);
         sim.addParticle(p2.get(),2);
 
-        REQUIRE(p1->getSpecies() == sim.getParticle(1).getSpecies());
+        CHECK(p1->getSpecies() == sim.getParticle(1).getSpecies());
 
         bool insertSuccessful = sim.addParticle(p3.get(),1);
 
-        REQUIRE(!insertSuccessful);
-        REQUIRE(p1->getSpecies() == sim.getParticle(1).getSpecies());
-        REQUIRE(p1->getCharge() == sim.getParticle(1).getCharge());
-        REQUIRE(sim.discreteConcentrations().at(&Cluster_1) == 1);
-        REQUIRE(sim.discreteConcentrations().count(&Cluster_3) == 0);
+        CHECK(!insertSuccessful);
+        CHECK(p1->getSpecies() == sim.getParticle(1).getSpecies());
+        CHECK(p1->getCharge() == sim.getParticle(1).getCharge());
+        CHECK(sim.discreteConcentrations().at(&Cluster_1) == 1);
+        CHECK(sim.discreteConcentrations().count(&Cluster_3) == 0);
     }
 
     SECTION( "Discrete particle concentration calculation should be correct", "[RS Simulation]") {
@@ -120,15 +120,15 @@ TEST_CASE( "Test basic RS simulation semantics", "[RS][Simulation]") {
 
         sim.addParticle(p2.get(), 200);
 
-        REQUIRE(sim.discreteConcentrations().at(&Cluster_1) == 100);
-        REQUIRE(sim.discreteConcentrations().at(&Cluster_2) == 1);
+        CHECK(sim.discreteConcentrations().at(&Cluster_1) == 100);
+        CHECK(sim.discreteConcentrations().at(&Cluster_2) == 1);
 
         for (int i=50; i < 60; ++i){
             sim.removeParticle(i);
         }
 
-        REQUIRE(sim.discreteConcentrations().at(&Cluster_1) == 90);
-        REQUIRE(sim.discreteConcentrations().at(&Cluster_2) == 1);
+        CHECK(sim.discreteConcentrations().at(&Cluster_1) == 90);
+        CHECK(sim.discreteConcentrations().at(&Cluster_2) == 1);
     }
 }
 
@@ -172,17 +172,17 @@ TEST_CASE( "Test RS simulations", "[RS][Simulation]") {
         }
 
         std::map<RS::Substance* const, int> finalConcs = sim.discreteConcentrations();
-        REQUIRE(finalConcs[subst_A] == 37);
-        REQUIRE(finalConcs[sim.simulationConfiguration()->getAllSubstances()[2]] == 63);
-        REQUIRE(sim.getParticle(2).getSpecies() == subst_C);
-        REQUIRE(sim.getParticle(1).getSpecies() == subst_A);
+        CHECK(finalConcs[subst_A] == 37);
+        CHECK(finalConcs[sim.simulationConfiguration()->getAllSubstances()[2]] == 63);
+        CHECK(sim.getParticle(2).getSpecies() == subst_C);
+        CHECK(sim.getParticle(1).getSpecies() == subst_A);
 
         //Check if simulation updates particles according to substances:
-        REQUIRE(sim.getParticle(2).getMobility() == subst_C->mobility());
-        REQUIRE(sim.getParticle(1).getMobility() == subst_A->mobility());
+        CHECK(sim.getParticle(2).getMobility() == subst_C->mobility());
+        CHECK(sim.getParticle(1).getMobility() == subst_A->mobility());
 
-        REQUIRE(sim.getParticle(2).getDiameter() == subst_C->collisionDiameter());
-        REQUIRE(sim.getParticle(1).getDiameter() == subst_A->collisionDiameter());
+        CHECK(sim.getParticle(2).getDiameter() == subst_C->collisionDiameter());
+        CHECK(sim.getParticle(1).getDiameter() == subst_A->collisionDiameter());
 
         REQUIRE(sim.getParticle(2).getCharge() == subst_C->charge()*Core::ELEMENTARY_CHARGE);
         REQUIRE(sim.getParticle(1).getCharge() == subst_A->charge()*Core::ELEMENTARY_CHARGE);

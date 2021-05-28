@@ -52,7 +52,7 @@ TEST_CASE( "Test random particle generation","[ParticleSimulation][utilities][ra
                 invalidIonFound = true;
             }
         }
-        REQUIRE(! invalidIonFound);
+        CHECK(! invalidIonFound);
     }
 }
 
@@ -67,9 +67,9 @@ TEST_CASE("Test utility functions","[ParticleSimulation][utilities]") {
         std::vector<std::tuple<double,double,Core::Vector>> result =
                 ParticleSimulation::util::probeForces(particles,ParticleSimulation::Plane::XZ,10,10,0.0,0.0,2.0,10.0,1.0);
 
-        REQUIRE(result.size() == 100);
+        CHECK(result.size() == 100);
         auto lastrow = result.back();
-        REQUIRE(std::get<0>(lastrow) == 1.8);
-        REQUIRE(std::get<1>(lastrow) == 9.0);
+        CHECK(std::get<0>(lastrow) == 1.8);
+        CHECK(std::get<1>(lastrow) == 9.0);
     }
 }

@@ -38,25 +38,25 @@ TEST_CASE( "Test basic collision statistics semantics", "[CollisionModels][Colli
         CollisionModel::CollisionStatistics cs;
 
         SECTION("CollisionStatistics should initialized with default statistics if no file is given") {
-            REQUIRE(cs.getNCollisions() == 100000);
-            REQUIRE(cs.getICDFs()[0][6] == Approx(111.8694458));
+            CHECK(cs.getNCollisions() == 100000);
+            CHECK(cs.getICDFs()[0][6] == Approx(111.8694458));
         }
 
         SECTION("CollisionStatistics statistics index lookup should work correctly", "[Collision::CollisionStatistics]") {
-            REQUIRE(cs.findUpperDistIndex(log10(1.5)) == 0);
-            REQUIRE(cs.findUpperDistIndex(log10(9.999)) == 0);
-            REQUIRE(cs.findUpperDistIndex(log10(10)) == 1);
-            REQUIRE(cs.findUpperDistIndex(log10(20)) == 1);
-            REQUIRE(cs.findUpperDistIndex(log10(100.1)) == 2);
-            REQUIRE(cs.findUpperDistIndex(log10(5000)) == 3);
-            REQUIRE(cs.findUpperDistIndex(log10(100000)) == 4);
-            REQUIRE(cs.findUpperDistIndex(log10(10000000)) == 4);
+            CHECK(cs.findUpperDistIndex(log10(1.5)) == 0);
+            CHECK(cs.findUpperDistIndex(log10(9.999)) == 0);
+            CHECK(cs.findUpperDistIndex(log10(10)) == 1);
+            CHECK(cs.findUpperDistIndex(log10(20)) == 1);
+            CHECK(cs.findUpperDistIndex(log10(100.1)) == 2);
+            CHECK(cs.findUpperDistIndex(log10(5000)) == 3);
+            CHECK(cs.findUpperDistIndex(log10(100000)) == 4);
+            CHECK(cs.findUpperDistIndex(log10(10000000)) == 4);
         }
     }
 
     SECTION("CollisionStatistics should be constructable with existing statistics file correctly"){
         CollisionModel::CollisionStatistics cs("cs_icdf_2020_02_27_001_test.dat");
-        REQUIRE(cs.getNDist() == 5);
+        CHECK(cs.getNDist() == 5);
         REQUIRE(cs.getNDistPoints() == 1002);
         REQUIRE(cs.getNCollisions() == 10000);
 

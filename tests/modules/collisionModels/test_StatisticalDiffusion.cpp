@@ -51,9 +51,9 @@ TEST_CASE( "Test SDS collison model", "[CollisionModels][SDS]") {
             //ion.setLocation(position);
         }
         Core::Vector ionLoc = ion.getLocation();
-        REQUIRE(Approx(ionLoc.x()) == 0.0451560);
-        REQUIRE(Approx(ionLoc.y()) == 0.0164318);
-        REQUIRE(Approx(ionLoc.z()) == 0.0204592);
+        CHECK(Approx(ionLoc.x()) == 0.0451560);
+        CHECK(Approx(ionLoc.y()) == 0.0164318);
+        CHECK(Approx(ionLoc.z()) == 0.0204592);
     }
 
     SECTION( "SDS random jumps with modified statistics should be correct") {
@@ -69,8 +69,8 @@ TEST_CASE( "Test SDS collison model", "[CollisionModels][SDS]") {
             //ion.setLocation(position);
         }
         Core::Vector ionLoc = ion.getLocation();
-        REQUIRE(Approx(ionLoc.x()) == 0.0884540);
-        REQUIRE(Approx(ionLoc.y()) == 0.0316142);
+        CHECK(Approx(ionLoc.x()) == 0.0884540);
+        CHECK(Approx(ionLoc.y()) == 0.0316142);
         REQUIRE(Approx(ionLoc.z()) == 0.0400663);
     }
 

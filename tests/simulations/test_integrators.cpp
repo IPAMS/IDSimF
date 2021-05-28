@@ -123,6 +123,6 @@ TEST_CASE("Compare results of serial and parallel varlet integrators with a line
         << std::endl;
     }
 
-    REQUIRE(sum <= 1e-12);
-    REQUIRE(maximumDiff <= 1e-14);
+    CHECK(sum <= 1e-12);
+    CHECK(maximumDiff <= 1e-14);
 }

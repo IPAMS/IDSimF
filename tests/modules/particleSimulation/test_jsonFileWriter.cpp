@@ -75,9 +75,9 @@ TEST_CASE("Test JSON trajectory file writer", "[ParticleSimulation][JSONTrajecto
         Json::Value steps = particleRoot.get("steps", 0);
         Json::Value step_2 = steps[1];
 
-        REQUIRE(step_2["time"].asDouble() == 0.1);
+        CHECK(step_2["time"].asDouble() == 0.1);
         Json::Value step_2_pos = step_2["ions"];
-        REQUIRE(step_2_pos[1][1].asDouble()  == 1.2);
+        CHECK(step_2_pos[1][1].asDouble()  == 1.2);
     }
 
     SECTION("Json trajectory file writer should write a correct file without additional parameters") {
@@ -132,19 +132,19 @@ TEST_CASE("Test JSON trajectory file writer", "[ParticleSimulation][JSONTrajecto
         }
         delete(testWriter);
 
-        REQUIRE(testIon1.getLocation() != testIon2.getLocation());
+        CHECK(testIon1.getLocation() != testIon2.getLocation());
 
         Json::Value particleRoot = importParticleTrajectoryFile("trajectoryExplorerTest_additionalParam.json");
         Json::Value steps = particleRoot.get("steps", 0);
         Json::Value step_4 = steps[4];
 
-        REQUIRE(step_4["time"].asDouble() == 0.4);
-        REQUIRE(step_4["aux_param_2"].asDouble() == 100.4);
+        CHECK(step_4["time"].asDouble() == 0.4);
+        CHECK(step_4["aux_param_2"].asDouble() == 100.4);
 
         Json::Value step_4_2 = step_4["ions"][2];
 
-        REQUIRE(step_4_2[0][0].asDouble()  == 1.65);
-        REQUIRE(step_4_2[1].asDouble()  == 30.3);
+        CHECK(step_4_2[0][0].asDouble()  == 1.65);
+        CHECK(step_4_2[1].asDouble()  == 30.3);
     }
 }
 

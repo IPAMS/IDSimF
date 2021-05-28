@@ -46,7 +46,7 @@ TEST_CASE("Test self implemented interpolated field", "[ParticleSimulation][Inte
             std::vector<std::vector<double>> grid = intField.getGrid();
 
             std::vector<double> gridX = {0, 2, 5, 15};
-            REQUIRE(gridX==grid[0]);
+            CHECK(gridX==grid[0]);
             std::vector<double> gridY = {0, 2, 10};
             REQUIRE(gridY==grid[1]);
             std::vector<double> gridZ = {0, 2, 5, 7, 10};

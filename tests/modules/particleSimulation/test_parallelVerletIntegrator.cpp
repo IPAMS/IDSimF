@@ -80,9 +80,9 @@ TEST_CASE( "Test parallel verlet integrator", "[ParticleSimulation][ParallelVerl
         verletIntegrator.run(nSteps,dt);
 
         Core::Vector ionPos = testParticle2.getLocation();
-        REQUIRE(Approx(ionPos.x()).epsilon(1e-6) == 0.00199);
-        REQUIRE(Approx(ionPos.y()).epsilon(1e-2) == 0.01);
-        REQUIRE(Approx(ionPos.z()).epsilon(1e-7) == 0.000995);
+        CHECK(Approx(ionPos.x()).epsilon(1e-6) == 0.00199);
+        CHECK(Approx(ionPos.y()).epsilon(1e-2) == 0.01);
+        CHECK(Approx(ionPos.z()).epsilon(1e-7) == 0.000995);
     }
 
     SECTION("Tests with particle lists"){
@@ -127,9 +127,9 @@ TEST_CASE( "Test parallel verlet integrator", "[ParticleSimulation][ParallelVerl
                 double xCalculated= 0.5 * ionAcceleration * diffTime * diffTime;
                 double zCalculated= 0.5 * xCalculated;
 
-                REQUIRE(Approx(ionPos.x()).epsilon(0.05) == xCalculated);
-                REQUIRE(Approx(ionPos.y()).epsilon(1e-7) == i*0.01);
-                REQUIRE(Approx(ionPos.z()).epsilon(0.05) == zCalculated);
+                CHECK(Approx(ionPos.x()).epsilon(0.05) == xCalculated);
+                CHECK(Approx(ionPos.y()).epsilon(1e-7) == i*0.01);
+                CHECK(Approx(ionPos.z()).epsilon(0.05) == zCalculated);
             }
         }
 
@@ -175,8 +175,8 @@ TEST_CASE( "Test parallel verlet integrator", "[ParticleSimulation][ParallelVerl
 
                 verletIntegrator.run(timeSteps, dt);
 
-                REQUIRE(verletIntegrator.time() == Approx(timeSteps*dt));
-                REQUIRE(verletIntegrator.timeStep() == timeSteps);
+                CHECK(verletIntegrator.time() == Approx(timeSteps*dt));
+                CHECK(verletIntegrator.timeStep() == timeSteps);
 
                 double endTime = timeSteps*dt;
                 for (int i = 0; i<nParticles; ++i) {
@@ -188,9 +188,9 @@ TEST_CASE( "Test parallel verlet integrator", "[ParticleSimulation][ParallelVerl
                     double xCalculated = 0.5*ionAcceleration*diffTime*diffTime;
                     double zCalculated = 0.5*xCalculated;
 
-                    REQUIRE(Approx(ionPos.x()).epsilon(0.05)==xCalculated);
-                    REQUIRE(Approx(ionPos.y()).epsilon(1e-7)==i*0.01);
-                    REQUIRE(Approx(ionPos.z()).epsilon(0.05)==zCalculated);
+                    CHECK(Approx(ionPos.x()).epsilon(0.05)==xCalculated);
+                    CHECK(Approx(ionPos.y()).epsilon(1e-7)==i*0.01);
+                    CHECK(Approx(ionPos.z()).epsilon(0.05)==zCalculated);
                 }
 
                 CHECK(nTimestepsRecorded == timeSteps + 2);
@@ -224,9 +224,9 @@ TEST_CASE( "Test parallel verlet integrator", "[ParticleSimulation][ParallelVerl
                 integratorPtr = &verletIntegrator;
 
                 verletIntegrator.run(timeSteps, dt);
-                REQUIRE(nTimestepsRecorded == terminationTimeStep+3);
-                REQUIRE(verletIntegrator.timeStep() == terminationTimeStep+1);
-                REQUIRE(verletIntegrator.time() == Approx(dt*(terminationTimeStep+1)));
+                CHECK(nTimestepsRecorded == terminationTimeStep+3);
+                CHECK(verletIntegrator.timeStep() == terminationTimeStep+1);
+                CHECK(verletIntegrator.time() == Approx(dt*(terminationTimeStep+1)));
             }
         }
     }

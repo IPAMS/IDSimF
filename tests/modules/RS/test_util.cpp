@@ -49,5 +49,5 @@ TEST_CASE("Random sampled Maxwell-Boltzmann velocity vectors should be correct",
 
     double meanVelocity = std::accumulate(velocities.begin(), velocities.end(), 0.0) / velocities.size();
     double analyticalMeanVelocity = std::sqrt( (8.0*RS::kBoltzmann*temperature)/(M_PI*mass_amu*RS::kgPerAmu));
-    REQUIRE(meanVelocity == Approx(analyticalMeanVelocity).margin(5));
+    CHECK(meanVelocity == Approx(analyticalMeanVelocity).margin(5));
 }

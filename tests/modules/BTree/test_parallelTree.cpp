@@ -47,12 +47,12 @@ TEST_CASE( "Test parallel tree semantics / particle management","[Tree]") {
         testTree.insertParticle(testIon3,3);
 
         BTree::ParallelNode* root = testTree.getRoot();
-        REQUIRE(testTree.getParticleList()->size() == 3);
-        REQUIRE(root->getNumberOfParticles() == 3);
+        CHECK(testTree.getParticleList()->size() == 3);
+        CHECK(root->getNumberOfParticles() == 3);
 
         //test particle removement by particle reference:
         testTree.removeParticle(1);
-        REQUIRE(testTree.getParticleList()->size() == 2);
+        CHECK(testTree.getParticleList()->size() == 2);
         REQUIRE(root->getNumberOfParticles() == 2);
         REQUIRE( (root->getCharge() - 11*Core::ELEMENTARY_CHARGE) < 1e-100);
 

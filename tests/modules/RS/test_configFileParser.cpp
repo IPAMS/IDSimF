@@ -174,21 +174,21 @@ TEST_CASE("Test parsing of chemical systems with RS config file parser", "[RS][C
         CHECK(simConf->substance(2)->mass() == 55);
         CHECK(simConf->substance(2)->charge() == 1.0);
         CHECK(simConf->substance(2)->mobility() == Approx(0.000235).epsilon(1e-6));
-        REQUIRE(simConf->substance(2)->collisionDiameter() == Approx(7.0e-10).epsilon(1e-5));
+        CHECK(simConf->substance(2)->collisionDiameter() == Approx(7.0e-10).epsilon(1e-5));
 
-        REQUIRE(simConf->substance(3)->name() == "Cl_4");
-        REQUIRE(simConf->substance(3)->type() == RS::Substance::substanceType::discrete);
-        REQUIRE(simConf->substance(3)->mass() == 73);
-        REQUIRE(simConf->substance(3)->charge() == 1.0);
-        REQUIRE(simConf->substance(3)->mobility() == Approx(2.09e-4).epsilon(1e-6));
-        REQUIRE(simConf->substance(3)->collisionDiameter() == Approx(9.0e-10).epsilon(1e-5));
+        CHECK(simConf->substance(3)->name() == "Cl_4");
+        CHECK(simConf->substance(3)->type() == RS::Substance::substanceType::discrete);
+        CHECK(simConf->substance(3)->mass() == 73);
+        CHECK(simConf->substance(3)->charge() == 1.0);
+        CHECK(simConf->substance(3)->mobility() == Approx(2.09e-4).epsilon(1e-6));
+        CHECK(simConf->substance(3)->collisionDiameter() == Approx(9.0e-10).epsilon(1e-5));
 
         std::vector<RS::Substance*> discreteSubstances = simConf->getAllDiscreteSubstances();
-        REQUIRE(discreteSubstances[2]->name() == "Cl_3");
-        REQUIRE(discreteSubstances[3]->name() == "Cl_4");
+        CHECK(discreteSubstances[2]->name() == "Cl_3");
+        CHECK(discreteSubstances[3]->name() == "Cl_4");
 
         RS::AbstractReaction* r0 = simConf->reaction(0);
-        REQUIRE(r0->getTypeLabel() == "static");
+        CHECK(r0->getTypeLabel() == "static");
         REQUIRE(r0->getLabel() == "cl1_forward");
         REQUIRE(r0->discreteEducts()->at(simConf->substanceByName("Cl_1"))== 1);
         REQUIRE(r0->educts()->at(simConf->substanceByName("H2O"))== 1);

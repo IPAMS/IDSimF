@@ -94,20 +94,20 @@ TEST_CASE( "Test ion definition reading", "[ApplicationUtils]") {
 
         SECTION("Ion definition reading: If ion cloud file is present should be recognized") {
             REQUIRE_FALSE(AppUtils::isIonCloudDefinitionPresent(simConf_box));
-            REQUIRE(AppUtils::isIonCloudDefinitionPresent(simConf_ionCloud));
+            CHECK(AppUtils::isIonCloudDefinitionPresent(simConf_ionCloud));
         }
 
         SECTION("Ion definition reading: Ion cloud file should be readable") {
             AppUtils::readIonDefinitionFromIonCloudFile(particles, particlePtrs, simConf_ionCloud);
 
-            REQUIRE(particles[1]->getCharge()==Approx(-1.0*Core::ELEMENTARY_CHARGE));
-            REQUIRE(vectorApproxCompare(particles[1]->getLocation(), Core::Vector(1.0, 2.0, 1.0))
+            CHECK(particles[1]->getCharge()==Approx(-1.0*Core::ELEMENTARY_CHARGE));
+            CHECK(vectorApproxCompare(particles[1]->getLocation(), Core::Vector(1.0, 2.0, 1.0))
                     =="Vectors approximately equal");
         }
 
         SECTION("Ion definition reading: Full ion definition reading with ion cloud file should work") {
             AppUtils::readIonDefinition(particles, particlePtrs, simConf_ionCloud);
-            REQUIRE(vectorApproxCompare(particles[1]->getLocation(), Core::Vector(1.0, 2.0, 1.0))
+            CHECK(vectorApproxCompare(particles[1]->getLocation(), Core::Vector(1.0, 2.0, 1.0))
                     =="Vectors approximately equal");
         }
     }
@@ -117,13 +117,13 @@ TEST_CASE( "Test ion definition reading", "[ApplicationUtils]") {
         SECTION("Ion definition reading: Random ion box definition should be readable") {
             AppUtils::readRandomIonDefinition(particles, particlePtrs, simConf_box);
             bool particleOutOfBoxFound = testParticleBox(particles);
-            REQUIRE(!particleOutOfBoxFound);
+            CHECK(!particleOutOfBoxFound);
         }
 
         SECTION("Ion definition reading: Full ion definition reading with random box should work") {
             AppUtils::readIonDefinition(particles, particlePtrs, simConf_box);
             bool particleOutOfBoxFound = testParticleBox(particles);
-            REQUIRE(!particleOutOfBoxFound);
+            CHECK(!particleOutOfBoxFound);
 
 
         }
@@ -134,13 +134,13 @@ TEST_CASE( "Test ion definition reading", "[ApplicationUtils]") {
         SECTION("Ion definition reading: Minimal random ion cylinder definition should be readable") {
             AppUtils::readRandomIonDefinition(particles, particlePtrs, simConf_cylinder_minimal);
             bool particleOutOfCylinderFound = testParticleCylinder(particles);
-            REQUIRE(!particleOutOfCylinderFound);
+            CHECK(!particleOutOfCylinderFound);
         }
 
         SECTION("Ion definition reading: Full ion definition reading with minimal cylinder definition should work") {
             AppUtils::readIonDefinition(particles, particlePtrs, simConf_cylinder_minimal);
             bool particleOutOfCylinderFound = testParticleCylinder(particles);
-            REQUIRE(!particleOutOfCylinderFound);
+            CHECK(!particleOutOfCylinderFound);
         }
     }
 
