@@ -108,16 +108,16 @@ namespace CollisionModel{
                 double dt) override;
 
     private:
-        bool maxwellianApproximation_ = false;  ///< flag if a pure maxwellian approximation for the gas particles is used
-
-        double temperature_K_ = 298;    ///< static background temperature in K
-        double collisionGasMass_Amu_;   ///< mass of the neutral colliding gas particles in amu
-        double collisionGasMass_kg_;    ///< mass of the neutral colliding gas particles in kg
-        double collisionGasDiameter_m_; ///< effective collision diameter of the neutral collision gas particles in m
-
         const double PI_SQRT = std::sqrt(M_PI);
         const double PI_2 = 2.0*M_PI;
         const double SQRT3_3 = std::sqrt(3) * 3;
+
+        bool maxwellianApproximation_ = false;  ///< flag if a pure maxwellian approximation for the gas particles is used
+        double temperature_K_ = 298;    ///< static background temperature in K
+        double collisionGasMass_Amu_ = 0.0;   ///< mass of the neutral colliding gas particles in amu
+        double collisionGasMass_kg_ = 0.0;    ///< mass of the neutral colliding gas particles in kg
+
+        double collisionGasDiameter_m_ = 0.0; ///< effective collision diameter of the neutral collision gas particles in m
 
         std::function<double(Core::Vector&)> pressureFunction_ = nullptr; ///< a spatial pressure function
         std::function<Core::Vector(Core::Vector&)> velocityFunction_ = nullptr; ///< a spatial velocity function

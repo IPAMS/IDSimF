@@ -41,7 +41,7 @@ namespace CollisionModel {
         const double D_AIR    = 0.366;    ///<Effective diameter of air (nm)
 
 
-        double getAirToGas(double massIon_amu,double diameterIon_nm,
+        double getAirToGas(double massIon_amu, double diameterIon_nm,
                            double collisionGasDiameter_nm, double collisionGasMass_amu);
 
         double estimateCollisionDiameterFromMass(double massIon_amu);

@@ -34,8 +34,8 @@
 
 namespace CollisionModel{
     
-    std::function<double(Core::Vector&)>getConstantDoubleFunction(double constantValue);
-    std::function<Core::Vector(Core::Vector&)>getConstantVectorFunction(Core::Vector constantValue);
+    std::function<double(const Core::Vector&)>getConstantDoubleFunction(double constantValue);
+    std::function<Core::Vector(const Core::Vector&)>getConstantVectorFunction(Core::Vector constantValue);
 
 }
 

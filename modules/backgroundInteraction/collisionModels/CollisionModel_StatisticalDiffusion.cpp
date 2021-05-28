@@ -64,13 +64,14 @@ CollisionModel::StatisticalDiffusionModel::StatisticalDiffusionModel(
         double collisionGasMassAmu,
         double collisionGasDiameterM,
         CollisionStatistics cs):
-StatisticalDiffusionModel(
-        getConstantDoubleFunction(staticPressure),
-        getConstantDoubleFunction(staticTemperature),
-        getConstantVectorFunction(staticGasVelocity),
-    collisionGasMassAmu,
-    collisionGasDiameterM,
-    cs) {}
+            StatisticalDiffusionModel(
+                getConstantDoubleFunction(staticPressure),
+                getConstantDoubleFunction(staticTemperature),
+                getConstantVectorFunction(staticGasVelocity),
+                collisionGasMassAmu,
+                collisionGasDiameterM,
+                cs)
+{}
 
 /**
  * Constructs a statistical diffusion model with variable background gas
@@ -84,18 +85,18 @@ StatisticalDiffusionModel(
  * @param cs normalized diffusive collision statistics
  */
 CollisionModel::StatisticalDiffusionModel::StatisticalDiffusionModel(
-        std::function<double(Core::Vector &location)> pressureFunction,
-        std::function<double(Core::Vector &location)> temperatureFunction,
-        std::function<Core::Vector(Core::Vector &location)>velocityFunction,
+        std::function<double(const Core::Vector &location)> pressureFunction,
+        std::function<double(const Core::Vector &location)> temperatureFunction,
+        std::function<Core::Vector(const Core::Vector &location)>velocityFunction,
         double collisionGasMassAmu,
         double collisionGasDiameterM,
         CollisionModel::CollisionStatistics cs):
-pressureFunction_(std::move(pressureFunction)),
-temperatureFunction_(std::move(temperatureFunction)),
-velocityFunction_(std::move(velocityFunction)),
-cs_(std::move(cs)),
-collisionGasMass_amu_(collisionGasMassAmu),
-collisionGasDiameter_nm_(collisionGasDiameterM * 1.0e9)
+            pressureFunction_(std::move(pressureFunction)),
+            temperatureFunction_(std::move(temperatureFunction)),
+            velocityFunction_(std::move(velocityFunction)),
+            cs_(std::move(cs)),
+            collisionGasMass_amu_(collisionGasMassAmu),
+            collisionGasDiameter_nm_(collisionGasDiameterM * 1.0e9)
 {
     // Init collision statistics:
     icdfs_ = cs_.getICDFs();
@@ -110,7 +111,7 @@ collisionGasDiameter_nm_(collisionGasDiameterM * 1.0e9)
  * @param logParticleMassRatio decadic log of the mass ratio between particle and background gas particles
  * @return A normalized random walk distance
  */
-double CollisionModel::StatisticalDiffusionModel::randomWalkDistance(double logParticleMassRatio) const {
+double CollisionModel::StatisticalDiffusionModel::randomWalkDistance_(double logParticleMassRatio) const {
     // Find from the logarithmic mass ratio the indices of two ICFSs
     // in the collison statistics to interpolate between them.
     size_t upperDistIndex = cs_.findUpperDistIndex(logParticleMassRatio);
@@ -221,7 +222,7 @@ void CollisionModel::StatisticalDiffusionModel::initializeModelParameters(BTree:
  * @param dt The length of the current time step
  */
 void CollisionModel::StatisticalDiffusionModel::modifyAcceleration(Core::Vector& acceleration, BTree::Particle& ion,
-                                                                   const double dt) {
+                                                                   double dt) {
 
     Core::Vector gasVelocity = velocityFunction_(ion.getLocation());
     double ionLocalDamping = ion.getAuxCollisionParams()[index_ionSTPdamping]/
@@ -241,7 +242,7 @@ void CollisionModel::StatisticalDiffusionModel::modifyAcceleration(Core::Vector&
 /**
  * The ion velocity is not modified by the SDS model
  */
-void CollisionModel::StatisticalDiffusionModel::modifyVelocity(BTree::Particle& /*ion*/, const double /*dt*/) {}
+void CollisionModel::StatisticalDiffusionModel::modifyVelocity(BTree::Particle& /*ion*/, double /*dt*/) {}
 
 /**
  * Modifies the position of a particle according to the background gas interaction modeled with the SDS approach
@@ -252,7 +253,7 @@ void CollisionModel::StatisticalDiffusionModel::modifyVelocity(BTree::Particle& 
  * @param dt The length of the current time step
   */
 void CollisionModel::StatisticalDiffusionModel::modifyPosition(
-        Core::Vector& position, BTree::Particle &ion, const double dt) {
+        Core::Vector& position, BTree::Particle &ion, double dt) {
 
     Core::Vector oldPosition = position;
     double ionMass_amu = ion.getMass() / Core::AMU_TO_KG;
@@ -266,7 +267,7 @@ void CollisionModel::StatisticalDiffusionModel::modifyPosition(
     double ionThermalVelocityLocal = ion.getMeanThermalVelocitySTP() * sqrt(t_ratio);
 
     // Calculate normalized RWD and the average number of collisions the ion experiences:
-    double randomWalkDistanceNormalized = randomWalkDistance(massRatioLog);
+    double randomWalkDistanceNormalized = randomWalkDistance_(massRatioLog);
     double nCollisions=
             ionThermalVelocityLocal  // (m/s)
             / ionMfpLocal            // (1/m)

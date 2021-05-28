@@ -111,7 +111,7 @@ int main(int argc, const char * argv[]) {
 
         //Define background temperature function for chemical reaction and collision model
         //BackgroundTemperatureMode backgroundTempMode;
-        std::function<double(Core::Vector&)> backgroundTemperatureFct;
+        std::function<double(const Core::Vector&)> backgroundTemperatureFct;
         std::string backgroundTempStr = simConf.stringParameter("background_temperature_mode");
         if (backgroundTempStr=="isotherm") {
             //backgroundTempMode = ISOTHERM;
@@ -128,7 +128,7 @@ int main(int argc, const char * argv[]) {
                     [backgroundTemp_start,
                             backgroundTemp_stop,
                             backgroundTemp_diff,
-                            electrodeLength_m](Core::Vector& particleLocation) -> double {
+                            electrodeLength_m](const Core::Vector& particleLocation) -> double {
 
                         if (particleLocation.x()>electrodeLength_m) {
                             return backgroundTemp_stop;
@@ -335,17 +335,17 @@ int main(int argc, const char * argv[]) {
             // prepare static pressure and temperature functions
             auto staticPressureFct = CollisionModel::getConstantDoubleFunction(backgroundPressure_Pa);
 
-            std::function<Core::Vector(Core::Vector&)> velocityFct;
+            std::function<Core::Vector(const Core::Vector&)> velocityFct;
 
             if (flowMode==UNIFORM_FLOW) {
                 velocityFct =
-                        [gasVelocityX](Core::Vector& /*pos*/) {
+                        [gasVelocityX](const Core::Vector& /*pos*/) {
                             return Core::Vector(gasVelocityX, 0.0, 0.0);
                         };
             }
             else if (flowMode==PARABOLIC_FLOW) {
                 velocityFct =
-                        [gasVelocityX, electrodeHalfDistanceSquared_m](Core::Vector& pos) {
+                        [gasVelocityX, electrodeHalfDistanceSquared_m](const Core::Vector& pos) {
                             //parabolic profile is vX = 2 * Vavg * (1 - r^2 / R^2) with the radius / electrode distance R
                             double xVelo = gasVelocityX*2.0*(1-pos.z()*pos.z()/electrodeHalfDistanceSquared_m);
                             return Core::Vector(xVelo, 0.0, 0.0);

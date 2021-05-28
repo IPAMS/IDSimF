@@ -65,9 +65,9 @@ namespace CollisionModel {
                     CollisionStatistics cs = CollisionStatistics());
 
             StatisticalDiffusionModel(
-                    std::function<double(Core::Vector& location)>pressureFunction,
-                    std::function<double(Core::Vector& location)>temperatureFunction,
-                    std::function<Core::Vector(Core::Vector& location)>velocityFunction,
+                    std::function<double(const Core::Vector& location)>pressureFunction,
+                    std::function<double(const Core::Vector& location)>temperatureFunction,
+                    std::function<Core::Vector(const Core::Vector& location)>velocityFunction,
                     double collisionGasMassAmu,
                     double collisionGasDiameterM,
                     CollisionStatistics cs = CollisionStatistics());
@@ -84,7 +84,6 @@ namespace CollisionModel {
                     BTree::Particle& ion,
                     double dt) override;
 
-
         private:
             constexpr double static STP_TEMP = 273.15;        ///< Standard temperature (K)
             constexpr double static STP_PRESSURE = 100000.0;  ///< Standard pressure (Pa)
@@ -93,19 +92,17 @@ namespace CollisionModel {
 
 
         // Spatial parameter functions for the background gas:
-            std::function<double(Core::Vector&)>pressureFunction_;        ///< Spatial pressure function
-            std::function<double(Core::Vector&)>temperatureFunction_;     ///< Spatial temperature function
-            std::function<Core::Vector(Core::Vector&)>velocityFunction_;  ///< Spatial velocity function
+            std::function<double(const Core::Vector&)>pressureFunction_;        ///< Spatial pressure function
+            std::function<double(const Core::Vector&)>temperatureFunction_;     ///< Spatial temperature function
+            std::function<Core::Vector(const Core::Vector&)>velocityFunction_;  ///< Spatial velocity function
             CollisionStatistics cs_; ///< CollisionStatistics
             // FIXME: this vector should be set to const...
             std::vector<std::vector<double>> icdfs_;
 
+            double collisionGasMass_amu_ = 0.0;    ///< Mass of the collision gas particles in amu
+            double collisionGasDiameter_nm_ = 0.0; ///< Effective diamenter of collision gas particles in nanometer
 
-
-            double collisionGasMass_amu_;    ///< Mass of the collision gas particles in amu
-            double collisionGasDiameter_nm_; ///< Effective diamenter of collision gas particles in nanometer
-
-            double randomWalkDistance(double logParticleMassRatio) const;
+            double randomWalkDistance_(double logParticleMassRatio) const;
 
     };
 }
