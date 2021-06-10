@@ -32,7 +32,7 @@ using sPair= sMap::value_type;
  * @param input the input string to parse (substances section of a config file in a string)
  * @return if the parsing was completed sucessfully
  */
-bool RS::ConfigFileParser::parseSubstances(SimulationConfiguration *simConf, std::string input) {
+bool RS::ConfigFileParser::parseSubstances(SimulationConfiguration *simConf, const std::string& input) const{
 
     std::istringstream iss(input);
     std::regex pattern(R"(([\w-]+)[ \t]*(\w+)[ \t]*([\deE._\+\-]*)[ \t]*([\deE._\-]*)[ \t]*([\deE._\-]*)[ \t]*([\deE._\-]*))");
@@ -81,7 +81,7 @@ bool RS::ConfigFileParser::parseSubstances(SimulationConfiguration *simConf, std
     return true;
 }
 
-bool RS::ConfigFileParser::parseReactions(SimulationConfiguration *simConf, std::string input) {
+bool RS::ConfigFileParser::parseReactions(SimulationConfiguration *simConf, const std::string& input) const {
     std::istringstream iss(input);
     std::regex patternLine(R"(([\+\-_ \w]+)\s*=>\s*([\+\-_ \w]+)\s*\|\s*(\w+)\s*((?:\s*;\s*(?:[\deE._\+\-]+))+)\s*#?\s*(\w*))");
     //std::regex patternLine(R"(([\+\-_ \w]+)\s*=>\s*([\+\-_ \w]+)\s*;\s*(\w+)\s*(.*)\s*#?\s*(\w*))");
@@ -223,7 +223,7 @@ bool RS::ConfigFileParser::parseReactions(SimulationConfiguration *simConf, std:
     return true;
 }
 
-std::pair<int,std::string> RS::ConfigFileParser::parseReactionPartnerString(std::string input) {
+std::pair<int,std::string> RS::ConfigFileParser::parseReactionPartnerString(const std::string& input) const{
     std::regex patternFull(R"((\d+)([\w_\-]+))");
     std::regex patternSymbol(R"([\w_\-]+)");
     std::smatch matches;
@@ -248,7 +248,8 @@ std::pair<int,std::string> RS::ConfigFileParser::parseReactionPartnerString(std:
 }
 
 
-std::pair<std::vector<std::string>,std::vector<std::string>> RS::ConfigFileParser::splitString(std::string str, std::string patterntxt){
+std::pair<std::vector<std::string>,std::vector<std::string>> RS::ConfigFileParser::splitString(
+        std::string str, const std::string& patterntxt) const{
 
     std::vector<std::string> outMatches = std::vector<std::string>();
     std::vector<std::string> outResults = std::vector<std::string>();
@@ -270,7 +271,7 @@ std::pair<std::vector<std::string>,std::vector<std::string>> RS::ConfigFileParse
     return std::make_pair(outResults,outMatches);
 }
 
-std::unique_ptr<RS::SimulationConfiguration> RS::ConfigFileParser::parseFile(std::string filename) noexcept(false) {
+std::unique_ptr<RS::SimulationConfiguration> RS::ConfigFileParser::parseFile(const std::string& filename) const{
     //open stream:
     std::ifstream in;
     in.open(filename);
@@ -287,8 +288,7 @@ std::unique_ptr<RS::SimulationConfiguration> RS::ConfigFileParser::parseFile(std
     }
 }
 
-std::unique_ptr<RS::SimulationConfiguration> RS::ConfigFileParser::parseText(std::string& confStr) noexcept(false) {
-
+std::unique_ptr<RS::SimulationConfiguration> RS::ConfigFileParser::parseText(const std::string& confStr) const {
 
     std::unique_ptr<RS::SimulationConfiguration> simConf =
             std::unique_ptr<RS::SimulationConfiguration>(new RS::SimulationConfiguration());
@@ -314,7 +314,7 @@ std::unique_ptr<RS::SimulationConfiguration> RS::ConfigFileParser::parseText(std
  *
  * @return
  */
-std::unique_ptr<RS::SimulationConfiguration> RS::ConfigFileParser::getTestConfigWaterClusters() {
+std::unique_ptr<RS::SimulationConfiguration> RS::ConfigFileParser::getTestConfigWaterClusters() const {
     std::unique_ptr<RS::SimulationConfiguration> simConf =
             std::unique_ptr<RS::SimulationConfiguration>(new RS::SimulationConfiguration());
 
@@ -380,7 +380,7 @@ std::unique_ptr<RS::SimulationConfiguration> RS::ConfigFileParser::getTestConfig
  *
  * @return
  */
-std::unique_ptr<RS::SimulationConfiguration> RS::ConfigFileParser::getTestConfigSimple() {
+std::unique_ptr<RS::SimulationConfiguration> RS::ConfigFileParser::getTestConfigSimple() const{
     std::unique_ptr<RS::SimulationConfiguration> simConf =
             std::unique_ptr<RS::SimulationConfiguration>(new RS::SimulationConfiguration());
 

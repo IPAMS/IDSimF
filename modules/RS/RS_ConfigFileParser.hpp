@@ -61,18 +61,20 @@ namespace RS {
     };
 
     class ConfigFileParser {
-    private:
-        bool parseReactions(SimulationConfiguration* simConf,std::string input);
-        std::pair<int,std::string> parseReactionPartnerString(std::string input);
-        bool parseSubstances(SimulationConfiguration* simConf,std::string input);
 
     public:
-        std::pair<std::vector<std::string>,std::vector<std::string>> splitString(std::string str, std::string patterntxt);
-        std::unique_ptr<SimulationConfiguration> parseText(std::string& confStr) noexcept(false);
-        std::unique_ptr<SimulationConfiguration> parseFile(std::string filename) noexcept(false);
+        std::pair<std::vector<std::string>,std::vector<std::string>>
+            splitString(std::string str, const std::string& patterntxt) const;
+        std::unique_ptr<SimulationConfiguration> parseText(const std::string& confStr) const;
+        std::unique_ptr<SimulationConfiguration> parseFile(const std::string& filename) const;
 
-        std::unique_ptr<SimulationConfiguration> getTestConfigWaterClusters();
-        std::unique_ptr<SimulationConfiguration> getTestConfigSimple();
+        std::unique_ptr<SimulationConfiguration> getTestConfigWaterClusters() const;
+        std::unique_ptr<SimulationConfiguration> getTestConfigSimple() const;
+
+    private:
+        bool parseReactions(SimulationConfiguration* simConf, const std::string& input) const;
+        std::pair<int,std::string> parseReactionPartnerString(const std::string& input) const;
+        bool parseSubstances(SimulationConfiguration* simConf, const std::string& input)const;
     };
 }
 
