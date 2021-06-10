@@ -20,6 +20,8 @@
  ****************************/
 
 #include "RS_FieldDependentVantHoffReaction.hpp"
+#include <stdexcept>
+
 
 /**
  * Default constructor: Constructs and initialized the reaction
@@ -76,5 +78,6 @@ RS::ReactionEvent RS::FieldDependentVantHoffReaction::attemptReaction(
  */
 RS::ReactionEvent RS::FieldDependentVantHoffReaction::attemptReaction(
         CollisionConditions /*conditions*/, ReactiveParticle* /*particle*/) const{
-    throw("Collision based reaction probability requested for purely stochastic reaction FieldDependentVantHoffReaction");
+    throw std::logic_error(
+            "Collision based reaction probability requested for purely stochastic reaction FieldDependentVantHoffReaction");
 }
