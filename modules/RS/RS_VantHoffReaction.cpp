@@ -40,7 +40,7 @@ RS::ReactionEvent RS::VantHoffReaction::attemptReaction(RS::ReactionConditions c
                                                         double dt) const{
     double k_forward =
             1.0 /
-            (std::exp(H_R_ / RGas * (1.0 / conditions.temperature - 1.0 / T_standard)) * K_s_)
+            (std::exp(H_R_ / R_GAS * (1.0 / conditions.temperature - 1.0 / T_STANDARD)) * K_s_)
             * k_backward_;
 
     double reactionProbability = k_forward* this->staticReactionConcentration() * dt;

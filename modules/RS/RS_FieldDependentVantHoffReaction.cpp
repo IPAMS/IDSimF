@@ -48,7 +48,7 @@ H_R_(H_R),
 K_s_(K_s),
 kBackward_(kBackward),
 mobility_(electricMobility),
-collisionGasMass_kg_ (collisionGasMassAmu * RS::kgPerAmu)
+collisionGasMass_kg_ (collisionGasMassAmu * RS::KG_PER_AMU)
 {}
 
 
@@ -57,11 +57,11 @@ RS::ReactionEvent RS::FieldDependentVantHoffReaction::attemptReaction(
     double KT = mobility_ * P0_pa_ / conditions.pressure * conditions.temperature / T0_K_;
     double ionTemperature = conditions.temperature +
                             (collisionGasMass_kg_ * pow(KT * conditions.electricField, 2.0)) /
-                            (3.0 * RS::kBoltzmann);
+                            (3.0 * RS::K_BOLTZMANN);
 
     double k_forward =
             1.0 /
-            (std::exp(H_R_ / RGas * (1.0 / ionTemperature - 1.0 / T0_K_)) * K_s_)
+            (std::exp(H_R_ / R_GAS * (1.0 / ionTemperature - 1.0 / T0_K_)) * K_s_)
             * kBackward_;
 
     double reactionProbability = k_forward * this->staticReactionConcentration() * dt;
