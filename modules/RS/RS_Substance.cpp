@@ -29,7 +29,7 @@ RS::Substance::Substance(std::string name, RS::Substance::substanceType type) :
     type_ = type;
 }
 
-RS::Substance::Substance(std::string name, std::string typeLabel) noexcept(false):
+RS::Substance::Substance(std::string name, std::string typeLabel):
         RS::Substance(name) {
     if (typeLabel=="discrete") {
         type_ = RS::Substance::substanceType::discrete;
@@ -155,7 +155,7 @@ void RS::Substance::mobility(double newMobility){
     mobility_ = newMobility;
 }
 
-bool RS::operator<(const RS::Substance a, const RS::Substance b){
+bool RS::operator<(const RS::Substance& a, const RS::Substance& b){
     return a.name() < b.name();
 }
 

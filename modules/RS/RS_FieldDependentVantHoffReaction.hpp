@@ -50,8 +50,8 @@ namespace RS {
 
     public:
         FieldDependentVantHoffReaction(
-                std::map<Substance*,int> educts,
-                std::map<Substance*,int> products,
+                const std::map<Substance*,int>& educts,
+                const std::map<Substance*,int>& products,
                 double H_R,
                 double K_s,
                 double kBackward,

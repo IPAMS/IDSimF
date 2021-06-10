@@ -21,13 +21,15 @@
 
 #include "RS_VantHoffReaction.hpp"
 
+#include <utility>
+
 RS::VantHoffReaction::VantHoffReaction(
-        std::map<Substance*, int> educts,
-        std::map<Substance*, int> products,
+        const std::map<Substance*, int>& educts,
+        const std::map<Substance*, int>& products,
         double H_R,
         double K_s,
         double k_backward,
-        std::string label):
+        const std::string label):
 AbstractReaction(educts, products, false, "vanthoff", label),
 H_R_(H_R),
 K_s_(K_s),
@@ -55,5 +57,6 @@ RS::ReactionEvent RS::VantHoffReaction::attemptReaction(RS::ReactionConditions c
  */
 RS::ReactionEvent RS::VantHoffReaction::attemptReaction(
         CollisionConditions /*conditions*/, ReactiveParticle* /*particle*/) const{
-    throw ("Collision based reaction probability requested for purely stochastic reaction VantHoffReaction");
+    throw std::logic_error(
+            "Collision based reaction probability requested for purely stochastic reaction VantHoffReaction");
 }

@@ -30,10 +30,8 @@
 
 #include "Core_vector.hpp"
 
-namespace RS{
-    namespace util{
-        Core::Vector maxwellBoltzmannRandomVelocity(double temperature_K, double gasParticleMass_amu);
-    }
+namespace RS::util{
+    [[nodiscard]] Core::Vector maxwellBoltzmannRandomVelocity(double temperature_K, double gasParticleMass_amu);
 }
 
 #endif //RS_util_hpp

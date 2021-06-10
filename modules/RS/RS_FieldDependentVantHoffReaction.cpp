@@ -37,14 +37,14 @@
  * @param label a texutal label to identify the reaction
  */
 RS::FieldDependentVantHoffReaction::FieldDependentVantHoffReaction(
-        std::map<Substance*, int> educts,
-        std::map<Substance*, int> products,
+        const std::map<Substance*, int>& educts,
+        const std::map<Substance*, int>& products,
         double H_R,
         double K_s,
         double kBackward,
         double electricMobility,
         double collisionGasMassAmu,
-        std::string label):
+        const std::string label):
 AbstractReaction(educts, products, false, "vanthoff_field", label),
 H_R_(H_R),
 K_s_(K_s),

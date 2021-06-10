@@ -36,8 +36,8 @@ namespace RS {
 
     public:
         SimpleCollisionStepReaction(
-                std::map<Substance*,int> educts,
-                std::map<Substance*,int> products,
+                const std::map<Substance*,int>& educts,
+                const std::map<Substance*,int>& products,
                 double activationEnergy_eV,
                 std::string label
         );
