@@ -39,11 +39,11 @@ bool RS::SimulationConfiguration::addSubstance(std::unique_ptr<RS::Substance>& s
     }
 }
 
-RS::Substance* RS::SimulationConfiguration::substance(std::size_t index) {
+RS::Substance* RS::SimulationConfiguration::substance(std::size_t index) const{
     return substances_.at(index).get();
 }
 
-RS::Substance* RS::SimulationConfiguration::substanceByName(std::string substanceName) {
+RS::Substance* RS::SimulationConfiguration::substanceByName(std::string substanceName) const{
     try{
         return (substancesNameMap_.at(substanceName));
     }
@@ -54,7 +54,7 @@ RS::Substance* RS::SimulationConfiguration::substanceByName(std::string substanc
     }
 }
 
-std::vector<RS::Substance*> RS::SimulationConfiguration::getAllSubstances() {
+std::vector<RS::Substance*> RS::SimulationConfiguration::getAllSubstances() const{
     std::vector<RS::Substance*> result = std::vector<RS::Substance*>();
     for(const auto& subst: substances_){
         result.push_back(subst.get());
@@ -62,7 +62,7 @@ std::vector<RS::Substance*> RS::SimulationConfiguration::getAllSubstances() {
     return result;
 }
 
-std::vector<RS::Substance*> RS::SimulationConfiguration::getAllDiscreteSubstances() {
+std::vector<RS::Substance*> RS::SimulationConfiguration::getAllDiscreteSubstances() const{
     return discreteSubstances_;
 }
 
@@ -72,11 +72,11 @@ bool RS::SimulationConfiguration::addReaction(std::unique_ptr<RS::AbstractReacti
     return true;
 }
 
-RS::AbstractReaction* RS::SimulationConfiguration::reaction(std::size_t index) {
+RS::AbstractReaction* RS::SimulationConfiguration::reaction(std::size_t index) const{
     return reactions_[index].get();
 }
 
-std::vector<RS::AbstractReaction*> RS::SimulationConfiguration::getAllReactions() {
+std::vector<RS::AbstractReaction*> RS::SimulationConfiguration::getAllReactions() const{
     std::vector<RS::AbstractReaction*> result = std::vector<RS::AbstractReaction*>();
     for(const auto& reac: reactions_){
         result.push_back(reac.get());

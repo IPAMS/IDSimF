@@ -49,24 +49,25 @@ namespace RS {
     };
 
     class SimulationConfiguration {
+
+    public:
+        bool addSubstance(std::unique_ptr<Substance>& subst);
+        [[nodiscard]] Substance* substance(std::size_t index) const;
+        [[nodiscard]] Substance* substanceByName(std::string substanceName) const;
+        [[nodiscard]] std::vector<Substance*> getAllSubstances() const;
+        [[nodiscard]] std::vector<Substance*> getAllDiscreteSubstances() const;
+
+        bool addReaction(std::unique_ptr<AbstractReaction>& reac);
+        [[nodiscard]] AbstractReaction* reaction(std::size_t index) const;
+        [[nodiscard]] std::vector<AbstractReaction*> getAllReactions() const;
+
+        void updateConfiguration();
+
     private:
         std::vector <std::unique_ptr<Substance>> substances_; ///< a vector of substances (owned by this simulation configuration)
         std::vector <Substance*> discreteSubstances_; ///< Vector of substances modeled as discrete particles
         std::vector <std::unique_ptr<AbstractReaction>> reactions_; ///< a vector of abstract reactions
         std::map <std::string,Substance*> substancesNameMap_; ////< a map from the substance names to the substance pointers
-
-    public:
-        bool addSubstance(std::unique_ptr<Substance>& subst);
-        Substance* substance(std::size_t index);
-        Substance* substanceByName(std::string substanceName);
-        std::vector<Substance*> getAllSubstances();
-        std::vector<Substance*> getAllDiscreteSubstances();
-
-        bool addReaction(std::unique_ptr<AbstractReaction>& reac);
-        AbstractReaction* reaction(std::size_t index);
-        std::vector<AbstractReaction*> getAllReactions();
-
-        void updateConfiguration();
     };
 }
 

@@ -34,7 +34,8 @@ activationEnergy_(activationEnergy_eV / Core::JOULE_TO_EV)
  */
 RS::ReactionEvent RS::SimpleCollisionStepReaction::attemptReaction(RS::ReactionConditions,
                                                                    ReactiveParticle*, double) const{
-    throw ("Stochastic probability requested for collision based reaction SimpleCollisionStepReaction");
+    throw std::logic_error(
+        "Stochastic probability requested for collision based reaction SimpleCollisionStepReaction");
 }
 
 RS::ReactionEvent RS::SimpleCollisionStepReaction::attemptReaction(CollisionConditions conditions, ReactiveParticle*) const{
