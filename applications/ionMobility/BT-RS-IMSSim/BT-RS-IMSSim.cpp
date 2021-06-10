@@ -204,7 +204,6 @@ int main(int argc, const char *argv[]){
         reactionConditions.temperature = backgroundTemperature_K;
         reactionConditions.pressure = totalBackgroundPressure_Pa;
         reactionConditions.electricField = eFieldMagnitude;
-        reactionConditions.totalReactionEnergy = 0.0;
 
         resultFilewriter.initFile(rsSimConf);
         // ======================================================================================
@@ -423,6 +422,7 @@ int main(int argc, const char *argv[]){
         if (trajectoryIntegrator) {
             trajectoryIntegrator->finalizeSimulation();
         }
+        resultFilewriter.closeFile();
 
         stopWatch.stop();
         logger->info("----------------------");

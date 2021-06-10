@@ -35,19 +35,18 @@
 
 namespace RS {
     class ConcentrationFileWriter {
-    private:
-        std::ofstream transientFile_;
-        static const std::string partSeparatorString;
 
     public:
-
         explicit ConcentrationFileWriter (std::string transientFilename);
-        //~ConcentrationFileWriter ();
 
         void initFile(SimulationConfiguration* simConf);
         void closeFile();
         void writeTimestep(Simulation& sim);
         void writeReactionStatistics(Simulation& sim);
+
+    private:
+        std::ofstream transientFile_;
+        static const std::string partSeparatorString;
     };
 }
 

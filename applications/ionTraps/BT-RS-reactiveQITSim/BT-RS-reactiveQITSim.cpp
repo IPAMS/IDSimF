@@ -492,6 +492,7 @@ int main(int argc, const char * argv[]) {
             hdf5Writer->writeNumericListDataset("V_rf", V_rf_export);
         }
         verletIntegrator.finalizeSimulation();
+        concentrationFilewriter.closeFile();
 
         stopWatch.stop();
 

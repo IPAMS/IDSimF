@@ -40,6 +40,7 @@ void RS::ConcentrationFileWriter::initFile(RS::SimulationConfiguration *simConf)
 
 void RS::ConcentrationFileWriter::closeFile() {
     transientFile_.flush();
+    transientFile_.close();
 }
 
 void RS::ConcentrationFileWriter::writeTimestep(Simulation& sim) {

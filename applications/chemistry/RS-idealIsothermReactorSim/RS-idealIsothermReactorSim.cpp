@@ -108,7 +108,7 @@ int main(int argc, const char * argv[]) {
             sim.performTimestep(reactionConditions, dt_s);
             sim.advanceTimestep(dt_s);
         }
-
+        resultFilewriter.closeFile();
         stopWatch.stop();
 
         logger->info("----------------------");

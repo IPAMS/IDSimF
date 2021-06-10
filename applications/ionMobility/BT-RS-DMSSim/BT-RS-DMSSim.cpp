@@ -246,7 +246,6 @@ int main(int argc, const char * argv[]) {
         reactionConditions.temperature = 0.0;//backgroundTemperature_K;
         reactionConditions.pressure = backgroundPressure_Pa;
         reactionConditions.electricField = 0.0;
-        reactionConditions.totalReactionEnergy = 0.0;
 
         resultFilewriter.initFile(rsSimConf);
         // ======================================================================================
@@ -431,6 +430,7 @@ int main(int argc, const char * argv[]) {
             }
         }
         verletIntegrator.finalizeSimulation();
+        resultFilewriter.closeFile();
         stopWatch.stop();
 
         logger->info("total reaction events: {} ill events: {}", rsSim.totalReactionEvents(), rsSim.illEvents());

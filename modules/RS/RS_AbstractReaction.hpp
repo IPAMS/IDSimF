@@ -49,7 +49,6 @@ namespace RS {
         double temperature;   ///< the background temperature at the location of reaction (K)
         double electricField; ///< the background electric field at the location of reaction (V/m)
         double pressure;      ///< the background pressure at the location of reaction (Pa)
-        double totalReactionEnergy; ///< total energy available in an reaction event (J)
     };
 
     /**
@@ -80,19 +79,6 @@ namespace RS {
      *
      */
     class AbstractReaction {
-    private:
-        std::map<Substance*,int> educts_;           ///< Map of all educts
-        std::map<Substance*,int> products_;         ///< Map of all products
-        std::map<Substance*,int> discreteEducts_;   ///< Map of all discrete educts (educts modeled as discrete particles)
-        std::map<Substance*,int> discreteProducts_; ///< Map of all discrete products (products modeled as discrete particles)
-
-        double staticReactionConcentration_; ///< The static reaction concentration (product of all static / isotropic educt concentrations)
-
-        std::string typeLabel_; ///< A textual identifier for the type of the reaction
-        std::string label_; ///< A textual label (which is also used for equality check of reactions)
-
-        bool independent_;  ///< "Independent" reactions depend only on one discrete educt
-        bool collisionReaction_; ///< Collision reactions are modeled by discrete collision events of a particle tracing model
 
     public:
         AbstractReaction(
@@ -104,24 +90,38 @@ namespace RS {
                  );
         virtual ~AbstractReaction() = default;
 
-        std::string getLabel() const;
-        std::string getTypeLabel() const;
+        [[nodiscard]] std::string getLabel() const;
+        [[nodiscard]] std::string getTypeLabel() const;
         //virtual double rateConstant(ReactionConditions) const = 0;
-        bool generateRandomDecision(double probability) const;
+        [[nodiscard]] bool generateRandomDecision(double probability) const;
         //a particle pointer is passed to the attemptReaction methods to allow modifications of the particles in the reaction
         virtual ReactionEvent attemptReaction(ReactionConditions conditions, ReactiveParticle* particle, double dt) const = 0;
         virtual ReactionEvent attemptReaction(CollisionConditions conditions, ReactiveParticle* particle) const = 0;
 
-        bool isIndependent() const;
-        bool isCollisionReaction() const;
-        double staticReactionConcentration() const;
+        [[nodiscard]] bool isIndependent() const;
+        [[nodiscard]] bool isCollisionReaction() const;
+        [[nodiscard]] double staticReactionConcentration() const;
         void updateStaticReactionConcentration();
-        const std::map<Substance*,int>* products() const;
-        const std::map<Substance*,int>* educts() const;
-        const std::map<Substance*,int>* discreteProducts() const;
-        const std::map<Substance*,int>* discreteEducts() const;
+        [[nodiscard]] const std::map<Substance*,int>* products() const;
+        [[nodiscard]] const std::map<Substance*,int>* educts() const;
+        [[nodiscard]] const std::map<Substance*,int>* discreteProducts() const;
+        [[nodiscard]] const std::map<Substance*,int>* discreteEducts() const;
 
         friend std::ostream& ::operator<<(std::ostream& os, const RS::AbstractReaction& reac);
+
+    private:
+        std::map<Substance*,int> educts_;           ///< Map of all educts
+        std::map<Substance*,int> products_;         ///< Map of all products
+        std::map<Substance*,int> discreteEducts_;   ///< Map of all discrete educts (educts modeled as discrete particles)
+        std::map<Substance*,int> discreteProducts_; ///< Map of all discrete products (products modeled as discrete particles)
+
+        double staticReactionConcentration_ = 0.0; ///< The static reaction concentration (product of all static / isotropic educt concentrations)
+
+        std::string typeLabel_; ///< A textual identifier for the type of the reaction
+        std::string label_; ///< A textual label (which is also used for equality check of reactions)
+
+        bool independent_ = false;  ///< "Independent" reactions depend only on one discrete educt
+        bool collisionReaction_ = false; ///< Collision reactions are modeled by discrete collision events of a particle tracing model
     };
 }
 
