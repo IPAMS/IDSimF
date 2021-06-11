@@ -160,7 +160,7 @@ TEST_CASE("Test chemical semantics of RS reaction types", "[RS][Reaction]") {
 
         //calculate analytical result:
         double analyticalMeanVelocityMagnitude = std::sqrt(
-                (8.0 * RS::kBoltzmann * reactionConditions.temperature) / (M_PI * productParticle.getMass() ));
+                (8.0 * RS::K_BOLTZMANN * reactionConditions.temperature) / (M_PI * productParticle.getMass() ));
 
         REQUIRE(meanVelocityMagnitude == Approx(analyticalMeanVelocityMagnitude).margin(2));
     }
