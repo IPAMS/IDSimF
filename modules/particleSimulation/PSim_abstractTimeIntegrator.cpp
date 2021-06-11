@@ -58,7 +58,7 @@ void ParticleSimulation::AbstractTimeIntegrator::setTerminationState() {
 /**
  * Returns the run state of the integrator
  */
-ParticleSimulation::AbstractTimeIntegrator::RunState ParticleSimulation::AbstractTimeIntegrator::runState() {
+ParticleSimulation::AbstractTimeIntegrator::RunState ParticleSimulation::AbstractTimeIntegrator::runState() const{
     return runState_;
 }
 
@@ -66,14 +66,14 @@ ParticleSimulation::AbstractTimeIntegrator::RunState ParticleSimulation::Abstrac
 /**
  * Gets the simulated time
  */
-double ParticleSimulation::AbstractTimeIntegrator::time() {
+double ParticleSimulation::AbstractTimeIntegrator::time() const{
     return time_;
 }
 
 /**
  * Gets the current time step
  */
-int ParticleSimulation::AbstractTimeIntegrator::timeStep() {
+int ParticleSimulation::AbstractTimeIntegrator::timeStep() const{
     return timestep_;
 }
 

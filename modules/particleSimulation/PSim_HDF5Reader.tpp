@@ -22,7 +22,7 @@ DTYPE ParticleSimulation::HDF5Reader::DataField<NDIMS, DTYPE>::get(std::array<hs
 
 template <hsize_t NDIMS>
 ParticleSimulation::HDF5Reader::DataField<NDIMS, double>
-    ParticleSimulation::HDF5Reader::readDataset(std::string datasetName)
+    ParticleSimulation::HDF5Reader::readDataset(std::string datasetName) const
 {
     //get the dataspace
     H5::DataSet ds = h5f_->openDataSet(datasetName.c_str());
@@ -42,7 +42,7 @@ ParticleSimulation::HDF5Reader::DataField<NDIMS, double>
  * @return A std::vector with the data from the attribute vector
  */
 template<typename DTYPE>
-std::vector<DTYPE> ParticleSimulation::HDF5Reader::readAttributeVector(std::string groupName, std::string attributeName) {
+std::vector<DTYPE> ParticleSimulation::HDF5Reader::readAttributeVector(std::string groupName, std::string attributeName) const{
 
     H5::Group group (h5f_->openGroup(groupName.c_str()));
     H5::Attribute attr(group.openAttribute(attributeName.c_str()));
@@ -92,7 +92,7 @@ std::vector<DTYPE> ParticleSimulation::HDF5Reader::readAttributeVector(std::stri
 
 template <hsize_t NDIMS>
 ParticleSimulation::HDF5Reader::DataField<NDIMS, double>
-ParticleSimulation::HDF5Reader::readDataset_(H5::DataSet ds)
+ParticleSimulation::HDF5Reader::readDataset_(H5::DataSet ds) const
 {
     //get the dataspace
     H5::DataSpace dataspace = ds.getSpace();

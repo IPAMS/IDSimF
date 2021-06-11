@@ -40,7 +40,7 @@ namespace ParticleSimulation{
     public:
         BoxStartZone(Core::Vector size, Core::Vector centerPosition = {0.0, 0.0, 0.0});
 
-        Core::Vector getRandomParticlePosition() override;
+        [[nodiscard]] Core::Vector getRandomParticlePosition() override;
 
     private:
         Core::RndDistPtr rnd_x; ///< random distribution of positions in x direction

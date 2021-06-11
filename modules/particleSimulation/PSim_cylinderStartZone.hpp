@@ -42,15 +42,14 @@ namespace ParticleSimulation{
                           Core::Vector normalVector = {0.0, 0.0, 0.0},
                           Core::Vector baseVector = {0.0, 0.0, 0.0});
 
-        Core::Vector getRandomParticlePosition() override;
+        [[nodiscard]] Core::Vector getRandomParticlePosition() override;
 
     private:
-        double radius_;
-        double length_;
+        double radius_ = 0.0;
+        double length_ = 0.0;
 
         bool isRotated_ = false;
         bool isShifted_ = false;
-        Core::Vector normalVector_;
         double azimuth_ = 0.0;
         double elevation_ = 0.0;
         Core::Vector baseVector_;

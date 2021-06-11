@@ -48,6 +48,6 @@ ParticleSimulation::AverageChargePositionWriter::~AverageChargePositionWriter(){
  * @param tree a valid Core which contains the charged particles
  * @param time the time of the current time step
  */
-void ParticleSimulation::AverageChargePositionWriter::writeTimestep(BTree::Tree &tree, double time){
+void ParticleSimulation::AverageChargePositionWriter::writeTimestep(const BTree::Tree &tree, double time){
     *transientFile_<<time<<" "<<tree.getRoot()->getCenterOfCharge()<<std::endl;
 }

@@ -71,9 +71,9 @@ namespace ParticleSimulation{
         virtual void finalizeSimulation() = 0;
 
         void setTerminationState();
-        RunState runState();
-        double time();
-        int timeStep();
+        [[nodiscard]] RunState runState() const;
+        [[nodiscard]] double time() const;
+        [[nodiscard]] int timeStep() const;
 
     protected:
         RunState runState_ = STOPPED; ///< the current state the integrator is in
