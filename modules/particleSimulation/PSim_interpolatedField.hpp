@@ -52,20 +52,20 @@ namespace ParticleSimulation{
     public:
         explicit InterpolatedField(const std::string &hdf5Filename);
 
-        double getScalar(int ix, int iy, int iz, int fieldIndex);
-        double getInterpolatedScalar(double x,double y, double z, int fieldIndex);
-        Core::Vector getVector(int ix, int iy, int iz, int fieldIndex);
-        Core::Vector getInterpolatedVector(double x,double y, double z, int fieldIndex);
-        
-        std::vector<std::vector<double>> getGrid();
-        std::array<double,6> getBounds();
-        std::array<int ,3> findLowerBoundIndices(double x, double y, double z);
+        [[nodiscard]] double getScalar(int ix, int iy, int iz, int fieldIndex) const;
+        [[nodiscard]] double getInterpolatedScalar(double x,double y, double z, int fieldIndex) const;
+        [[nodiscard]] Core::Vector getVector(int ix, int iy, int iz, int fieldIndex) const;
+        [[nodiscard]] Core::Vector getInterpolatedVector(double x,double y, double z, int fieldIndex) const;
+
+        [[nodiscard]] std::vector<std::vector<double>> getGrid() const;
+        [[nodiscard]] std::array<double,6> getBounds() const;
+        [[nodiscard]] std::array<std::size_t, 3> findLowerBoundIndices(double x, double y, double z) const;
 
     private:
         std::vector<double> gridPointsX_; ///< points of the spatial grid in X direction
         std::vector<double> gridPointsY_; ///< points of the spatial grid in Y direction
         std::vector<double> gridPointsZ_; ///< points of the spatial grid in Z direction
-        int gridDimensions_[3];           ///< numbers of spatial grid points in the directions
+        std::size_t gridDimensions_[3];           ///< numbers of spatial grid points in the directions
         std::array<double,6> bounds_;     ///< lower and upper bounds of the spatial grid in the directions
 
         //std::vector<int> fieldsComponents_;            ///< number of components of the individual data fields
@@ -74,11 +74,10 @@ namespace ParticleSimulation{
         std::vector<std::vector<double>> linearizedFields_;
 
         void updateBounds_();
-        inline void enforceScalar_(int fieldIndex);
-        int linearizedIndexScalar_(int ix, int iy, int iz);
-        int linearizedIndexVector_(int ix, int iy, int iz);
-        template<typename datT> datT interpolate_(double x, double y, double z, int fieldIndex);
-
+        inline void enforceScalar_(int fieldIndex) const;
+        [[nodiscard]] std::size_t linearizedIndexScalar_(std::size_t ix, std::size_t iy, std::size_t iz) const;
+        [[nodiscard]] std::size_t linearizedIndexVector_(std::size_t ix, std::size_t iy, std::size_t iz) const;
+        template<typename datT> [[nodiscard]] datT interpolate_(double x, double y, double z, int fieldIndex) const;
     };
 }
 
