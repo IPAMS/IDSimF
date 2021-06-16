@@ -74,9 +74,9 @@ namespace ParticleSimulation{
         double time_ = 0.0; ///< the current time in the simulation
         int timestep_ = 0; ///< the current time step
         std::vector<BTree::Particle*> particles_; ///< links to the simulated particles
-        long nParticles_ = 0; ///< number of particles
+        std::size_t nParticles_ = 0; ///< number of particles
         std::vector<pTobPair_t> particleTOBs_; ///< Time of births of the individual particles
-        size_t particlesBornIdx_ = 0; ///< index in particleTOBs_ indicating the particles already born
+        std::size_t particlesBornIdx_ = 0; ///< index in particleTOBs_ indicating the particles already born
         particleStartMonitoringFctType particleStartMonitorFct_ = nullptr; ///< Monitoring function for
         bool bearParticles_(double time);
     };

@@ -53,7 +53,7 @@ namespace ParticleSimulation{
      */
     class IonCloudReader {
         public:
-            std::vector<std::unique_ptr<BTree::Particle>> readIonCloud(std::string filename);
+            [[nodiscard]] std::vector<std::unique_ptr<BTree::Particle>> readIonCloud(std::string filename);
 
         private:
             const std::string delimiter_ = ";"; ///<A delimiter for the columns in the ion cloud files

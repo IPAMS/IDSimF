@@ -33,7 +33,7 @@ BTree::ParallelTree::ParallelTree(Core::Vector min, Core::Vector max){
     root_->initAsRoot();
     
     iVec_ = std::make_unique<std::list<Particle*>>();
-    iMap_ = std::make_unique<std::unordered_map<int,std::list<Particle*>::const_iterator>>();
+    iMap_ = std::make_unique<std::unordered_map<std::size_t, std::list<Particle*>::const_iterator>>();
 }
 
 /* copy operator missing
@@ -137,7 +137,7 @@ Core::Vector BTree::ParallelTree::computeEFieldFromTree(BTree::Particle &particl
  \param particle the particle to insert
  \param ext_index an external index number for the particle / numerical particle id (most likely from simion)
  */
-void BTree::ParallelTree::insertParticle(BTree::Particle &particle, int ext_index){
+void BTree::ParallelTree::insertParticle(BTree::Particle &particle, std::size_t ext_index){
     
     root_->insertParticle(&particle);
     iVec_->push_front(&particle);
@@ -150,9 +150,9 @@ void BTree::ParallelTree::insertParticle(BTree::Particle &particle, int ext_inde
  
  \param ext_index the external numerical particle id
  */
-void BTree::ParallelTree::removeParticle(int ext_index){
+void BTree::ParallelTree::removeParticle(std::size_t ext_index){
     
-    std::list<Particle*>::const_iterator iter =(*iMap_)[ext_index];
+    auto iter =(*iMap_)[ext_index];
     BTree::Particle* particle = *iter;//[int_index];
     BTree::AbstractNode* pHostNode = particle->getHostNode();
     pHostNode->removeMyselfFromTree();
@@ -170,8 +170,8 @@ void BTree::ParallelTree::removeParticle(int ext_index){
  \param ext_index the external particle index
  \returns the retrieved particle 
  */
-BTree::Particle* BTree::ParallelTree::getParticle(int ext_index) const{
-    std::list<Particle*>::const_iterator iter =(*iMap_)[ext_index];
+BTree::Particle* BTree::ParallelTree::getParticle(std::size_t ext_index) const{
+    auto iter =(*iMap_)[ext_index];
     BTree::Particle* particle = *iter;
     return (particle);
 }
@@ -182,7 +182,7 @@ BTree::Particle* BTree::ParallelTree::getParticle(int ext_index) const{
  * @param newLocation Location to set for the selected particle
  * @param numNodesChanged an integer reference to count the number of structurally changed nodes
  */
-void BTree::ParallelTree::updateParticleLocation(int extIndex, Core::Vector newLocation, int* numNodesChanged){
+void BTree::ParallelTree::updateParticleLocation(std::size_t extIndex, Core::Vector newLocation, int* numNodesChanged){
 
     BTree::Particle* particle = getParticle(extIndex);
     BTree::AbstractNode* pNode = particle->getHostNode();

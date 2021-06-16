@@ -48,10 +48,10 @@ namespace BTree {
         std::vector<int> countNodesOnLevels();
         Core::Vector computeEFieldFromTree(Particle &particle);
 
-        void insertParticle(Particle &particle, int ext_index);
-        void removeParticle(int ext_index);
-        Particle* getParticle(int ext_index) const;
-        void updateParticleLocation(int extIndex, Core::Vector newLocation, int* numNodesChanged);
+        void insertParticle(Particle &particle, std::size_t ext_index);
+        void removeParticle(std::size_t ext_index);
+        Particle* getParticle(std::size_t ext_index) const;
+        void updateParticleLocation(std::size_t extIndex, Core::Vector newLocation, int* numNodesChanged);
         int updateNodes(int ver);
         
         void printParticles() const;
@@ -59,7 +59,7 @@ namespace BTree {
     private:
         std::unique_ptr<ParallelNode> root_;
         std::unique_ptr<std::list<Particle*>> iVec_; ///< a linked particle list, stores the particles in a linear order
-        std::unique_ptr<std::unordered_map<int, std::list<Particle *>::const_iterator>> iMap_; ///< a map between the ion indices (keys used by SIMION) and the pointers into the internal particle list
+        std::unique_ptr<std::unordered_map<std::size_t, std::list<Particle *>::const_iterator>> iMap_; ///< a map between the ion indices (keys used by SIMION) and the pointers into the internal particle list
 
         std::vector<int> nodesOnLevels_;
         std::vector<int> nodeStartIndicesOnLevels_; ///< Vector of serialized indices of the first nodes on the individual tree levels

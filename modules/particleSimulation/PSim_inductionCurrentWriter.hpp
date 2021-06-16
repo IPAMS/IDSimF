@@ -62,7 +62,7 @@ namespace ParticleSimulation{
         void writeTimestep(double time);
 
     private:
-        double scale_mm_per_gu_;
+        double scale_mm_per_gu_ = 0.0;
         std::unique_ptr<std::ofstream> transientFile_;
         std::vector<BTree::Particle*> particles_;
         std::vector<std::pair<SimionPotentialArray*, double>> weightFields_;

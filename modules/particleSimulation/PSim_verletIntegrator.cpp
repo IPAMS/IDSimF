@@ -114,7 +114,7 @@ void ParticleSimulation::VerletIntegrator::runSingleStep(double dt) {
 
     bearParticles_(time_);
 
-    for (int i=0; i<nParticles_; ++i){
+    for (std::size_t i=0; i<nParticles_; ++i){
         if (particles_[i]->isActive() == true){
 
             if (collisionModel_ !=nullptr) {
@@ -143,7 +143,7 @@ void ParticleSimulation::VerletIntegrator::runSingleStep(double dt) {
     // First find all new positions, then perform arbitrary otherActions and update tree.
     // This ensures that all new particle positions are found with the state from
     // last time step. No particle positions are found with a partly updated tree.
-    for (int i=0; i<nParticles_; ++i){
+    for (std::size_t i=0; i<nParticles_; ++i){
         if (particles_[i]->isActive() == true){
 
             if (otherActionsFunction_ != nullptr) {

@@ -21,12 +21,10 @@
 
 #include "PSim_parallelVerletIntegrator.hpp"
 #include <utility>
-#include <iostream>
 #include <algorithm>
-#include <iostream>
 
 ParticleSimulation::ParallelVerletIntegrator::ParallelVerletIntegrator(
-        std::vector<BTree::Particle *> particles,
+        const std::vector<BTree::Particle *>& particles,
         ParticleSimulation::ParallelVerletIntegrator::accelerationFctType accelerationFunction,
         ParticleSimulation::ParallelVerletIntegrator::timestepWriteFctType timestepWriteFunction,
         ParticleSimulation::ParallelVerletIntegrator::otherActionsFctType otherActionsFunction,
@@ -61,9 +59,9 @@ ParticleSimulation::ParallelVerletIntegrator::ParallelVerletIntegrator(
  */
 void ParticleSimulation::ParallelVerletIntegrator::addParticle(BTree::Particle *particle){
     particles_.push_back(particle);
-    newPos_.push_back(Core::Vector(0,0,0));
-    a_t_.push_back(Core::Vector(0,0,0));
-    a_tdt_.push_back(Core::Vector(0,0,0));
+    newPos_.emplace_back(Core::Vector(0,0,0));
+    a_t_.emplace_back(Core::Vector(0,0,0));
+    a_tdt_.emplace_back(Core::Vector(0,0,0));
 
     tree_.insertParticle(*particle, nParticles_);
     ++nParticles_;
@@ -75,7 +73,7 @@ void ParticleSimulation::ParallelVerletIntegrator::bearParticles_(double time) {
 }
 
 void ParticleSimulation::ParallelVerletIntegrator::initInternalState_(){
-    numberOfNodes_ = tree_.init();
+    tree_.init();
 }
 
 void ParticleSimulation::ParallelVerletIntegrator::run(int nTimesteps, double dt) {
@@ -113,7 +111,7 @@ void ParticleSimulation::ParallelVerletIntegrator::runSingleStep(double dt){
     //std::vector<BTree::ParallelNode*> MyNod(numberOfNodes_, nullptr);
 
     //
-    int i;
+    std::size_t i;
     #pragma omp parallel \
             default(none) shared(newPos_, a_tdt_, a_t_, dt, particles_) \
             private(i) //firstprivate(MyNod)
@@ -122,7 +120,7 @@ void ParticleSimulation::ParallelVerletIntegrator::runSingleStep(double dt){
         #pragma omp for
         for (i=0; i<nParticles_; i++){
 
-            if (particles_[i]->isActive() == true){
+            if (particles_[i]->isActive()){
 
                 if (collisionModel_ != nullptr) {
                     collisionModel_->updateModelParameters(*(particles_[i]));
@@ -151,8 +149,8 @@ void ParticleSimulation::ParallelVerletIntegrator::runSingleStep(double dt){
     // This ensures that all new particle positions are found with the state from
     // last time step. No particle positions are found with a partly updated tree.
     // Additionally, the update step is not (yet) parallel.
-    for (int i=0; i<nParticles_; i++){
-        if (particles_[i]->isActive() == true){
+    for (std::size_t i=0; i<nParticles_; i++){
+        if (particles_[i]->isActive()){
             //position changes due to background interaction:
             if (collisionModel_ != nullptr) {
                 collisionModel_->modifyPosition(newPos_[i], *(particles_[i]), dt);
@@ -166,7 +164,7 @@ void ParticleSimulation::ParallelVerletIntegrator::runSingleStep(double dt){
     }
 
     // Update serialized tree structure:
-    numberOfNodes_ = tree_.updateNodes(ver);
+    tree_.updateNodes(ver);
     time_ = time_ + dt;
     timestep_++;
     if (timestepWriteFunction_ != nullptr) {

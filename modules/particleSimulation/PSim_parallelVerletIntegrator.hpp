@@ -31,7 +31,6 @@
 #ifndef BTree_parallelVerletIntegrator_hpp
 #define BTree_parallelVerletIntegrator_hpp
 
-#include <vector>
 #include "BTree_particle.hpp"
 #include "Core_vector.hpp"
 #include "BTree_parallelTree.hpp"
@@ -40,6 +39,7 @@
 #include "PSim_trajectoryExplorerJSONwriter.hpp"
 #include "PSim_averageChargePositionWriter.hpp"
 #include "CollisionModel_AbstractCollisionModel.hpp"
+#include <vector>
 
 namespace ParticleSimulation{
 
@@ -82,7 +82,7 @@ namespace ParticleSimulation{
                     otherActionsFctType;
 
             ParallelVerletIntegrator(
-                    std::vector<BTree::Particle*> particles,
+                    const std::vector<BTree::Particle*>& particles,
                     accelerationFctType accelerationFunction,
                     timestepWriteFctType timestepWriteFunction = nullptr,
                     otherActionsFctType otherActionsFunction = nullptr,
@@ -105,9 +105,7 @@ namespace ParticleSimulation{
 
     private:
 
-        size_t numberOfNodes_; ///< number of nodes in the parallel BTree attached to this integrator
-
-        CollisionModel::AbstractCollisionModel* collisionModel_; ///< the gas collision model to perform while integrating
+        CollisionModel::AbstractCollisionModel* collisionModel_ = nullptr; ///< the gas collision model to perform while integrating
 
         accelerationFctType accelerationFunction_ = nullptr;   ///< function to calculate particle acceleration
         timestepWriteFctType timestepWriteFunction_ = nullptr; ///< function to export / write time step results

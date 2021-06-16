@@ -31,8 +31,8 @@
 #include <vector>
 
 namespace ParticleSimulation {
-    std::vector<double> linspace(double lower, double upper, int n);
-    std::vector<double> fillVector(double value, int n);
+    [[nodiscard]] std::vector<double> linspace(double lower, double upper, int n);
+    [[nodiscard]] std::vector<double> fillVector(double value, int n);
 }
 
 

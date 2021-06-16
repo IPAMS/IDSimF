@@ -84,7 +84,7 @@ void ParticleSimulation::VelocityIntegrator::run(int nTimesteps, double dt) {
  * @param dt time step length
  */
 void ParticleSimulation::VelocityIntegrator::runSingleStep(double dt) {
-    for (int i=0; i<nParticles_; i++){
+    for (std::size_t i=0; i<nParticles_; i++){
         if (particles_[i]->isActive()){
             Core::Vector velocity = velocityFunction_(particles_[i],i,time_,timestep_);
             particles_[i]->setVelocity(velocity);
