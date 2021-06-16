@@ -63,7 +63,6 @@ int main() {
     reactionConditions.temperature = 300;
     reactionConditions.pressure = 100000;
     reactionConditions.electricField = 0.0;
-    reactionConditions.totalReactionEnergy = 0.0;
     // ======================================================================================
 
 

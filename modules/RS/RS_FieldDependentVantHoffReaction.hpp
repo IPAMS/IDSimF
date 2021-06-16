@@ -48,20 +48,10 @@ namespace RS {
      */
     class FieldDependentVantHoffReaction : public AbstractReaction {
 
-    private:
-        double H_R_;         ///< Reaction enthalphy for the forward reaction
-        double K_s_;         ///< Equilibrium constant for the forward reaction
-        double kBackward_;   ///< Rate constant for the backward reaction
-        double mobility_;    ///< Electrical mobility of the charged particle
-        double collisionGasMass_kg_;  ///< Mass of the collision background gas in kg
-
-        double const P0_pa_ = 101325; ///< The default pressure in Pa
-        double const T0_K_ = 298.15;  ///< The default / standard temperature in K
-
     public:
         FieldDependentVantHoffReaction(
-                std::map<Substance*,int> educts,
-                std::map<Substance*,int> products,
+                const std::map<Substance*,int>& educts,
+                const std::map<Substance*,int>& products,
                 double H_R,
                 double K_s,
                 double kBackward,
@@ -70,8 +60,18 @@ namespace RS {
                 std::string label
         );
 
-        RS::ReactionEvent attemptReaction(ReactionConditions conditions, ReactiveParticle* particle, double dt) const;
-        RS::ReactionEvent attemptReaction(CollisionConditions conditions, ReactiveParticle* particle) const;
+        RS::ReactionEvent attemptReaction(ReactionConditions conditions, ReactiveParticle* particle, double dt) const override;
+        RS::ReactionEvent attemptReaction(CollisionConditions conditions, ReactiveParticle* particle) const override;
+
+    private:
+        double H_R_ = 0.0;         ///< Reaction enthalphy for the forward reaction
+        double K_s_ = 0.0;         ///< Equilibrium constant for the forward reaction
+        double kBackward_ = 0.0;   ///< Rate constant for the backward reaction
+        double mobility_ = 0.0;    ///< Electrical mobility of the charged particle
+        double collisionGasMass_kg_= 0.0;  ///< Mass of the collision background gas in kg
+
+        double const P0_pa_ = 101325; ///< The default pressure in Pa
+        double const T0_K_ = 298.15;  ///< The default / standard temperature in K
     };
 }
 

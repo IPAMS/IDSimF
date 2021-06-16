@@ -27,7 +27,7 @@
  * @param location the location of the created particle
  * @param chargeElemCharges the charge of the particle (in units of elementary charges)
  */
-BTree::Particle::Particle(const Core::Vector &location, double chargeElemCharges) :
+BTree::Particle::Particle(const Core::Vector &location, double chargeElemCharges):
     location_(location),
     charge_(chargeElemCharges * Core::ELEMENTARY_CHARGE)
 {}

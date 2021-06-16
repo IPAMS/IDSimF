@@ -48,10 +48,9 @@ namespace RS {
         std::string message;
     };
 
-    
     class Substance {
+
     public:
-        
         enum substanceType {
             isotropic, ///< isotropic continuous substance with isotropic concentration
             discrete, ///< substance modeled as individual simulated molecules
@@ -59,25 +58,24 @@ namespace RS {
         };
         
         Substance(std::string name, substanceType type);
-        Substance(std::string name, std::string typeLabel) noexcept(false);
-        
-        std::string name() const;
-        substanceType type() const;
-        
-        double charge() const;
+        Substance(std::string name, std::string typeLabel);
+
+        [[nodiscard]] std::string name() const;
+        [[nodiscard]] substanceType type() const;
+
+        [[nodiscard]] double charge() const;
         void charge(double newCharge);
-        double mass() const;
+        [[nodiscard]] double mass() const;
         void mass(double newMass);
-        double mobility() const;
+        [[nodiscard]] double mobility() const;
         void mobility(double newMobility);
-        double collisionDiameter() const;
+        [[nodiscard]] double collisionDiameter() const;
         void collisionDiameter(double newCollisionDiameter);
-        double staticConcentration() const;
+        [[nodiscard]] double staticConcentration() const;
         void staticConcentration(double newStaticConcentration);
 
         friend std::ostream& ::operator<<(std::ostream& os, const RS::Substance& subst);
 
-        
     private:
         std::string name_; ///< The name of this substance
         double staticConcentration_ = 0.0; ///< the static background concentration (for isotropic substances)
@@ -87,11 +85,10 @@ namespace RS {
         double collisionDiameter_ = 0.0; ///< the effective collision diameter of molecules of this substance
         substanceType type_; ///< the type of this substance
 
-        Substance(std::string name);
-
+        explicit Substance(std::string name);
     };
 
-    bool operator<(const Substance a, const Substance b);
+    bool operator<(const Substance& a, const Substance& b);
 }
 
 #endif /* RS_Substance_hpp */

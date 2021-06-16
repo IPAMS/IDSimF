@@ -20,6 +20,8 @@
  ****************************/
 
 #include "RS_FieldDependentVantHoffReaction.hpp"
+#include <stdexcept>
+
 
 /**
  * Default constructor: Constructs and initialized the reaction
@@ -35,20 +37,20 @@
  * @param label a texutal label to identify the reaction
  */
 RS::FieldDependentVantHoffReaction::FieldDependentVantHoffReaction(
-        std::map<Substance*, int> educts,
-        std::map<Substance*, int> products,
+        const std::map<Substance*, int>& educts,
+        const std::map<Substance*, int>& products,
         double H_R,
         double K_s,
         double kBackward,
         double electricMobility,
         double collisionGasMassAmu,
-        std::string label):
+        const std::string label):
 AbstractReaction(educts, products, false, "vanthoff_field", label),
 H_R_(H_R),
 K_s_(K_s),
 kBackward_(kBackward),
 mobility_(electricMobility),
-collisionGasMass_kg_ (collisionGasMassAmu * RS::kgPerAmu)
+collisionGasMass_kg_ (collisionGasMassAmu * RS::KG_PER_AMU)
 {}
 
 
@@ -57,11 +59,11 @@ RS::ReactionEvent RS::FieldDependentVantHoffReaction::attemptReaction(
     double KT = mobility_ * P0_pa_ / conditions.pressure * conditions.temperature / T0_K_;
     double ionTemperature = conditions.temperature +
                             (collisionGasMass_kg_ * pow(KT * conditions.electricField, 2.0)) /
-                            (3.0 * RS::kBoltzmann);
+                            (3.0 * RS::K_BOLTZMANN);
 
     double k_forward =
             1.0 /
-            (std::exp(H_R_ / RGas * (1.0 / ionTemperature - 1.0 / T0_K_)) * K_s_)
+            (std::exp(H_R_ / R_GAS * (1.0 / ionTemperature - 1.0 / T0_K_)) * K_s_)
             * kBackward_;
 
     double reactionProbability = k_forward * this->staticReactionConcentration() * dt;
@@ -76,5 +78,6 @@ RS::ReactionEvent RS::FieldDependentVantHoffReaction::attemptReaction(
  */
 RS::ReactionEvent RS::FieldDependentVantHoffReaction::attemptReaction(
         CollisionConditions /*conditions*/, ReactiveParticle* /*particle*/) const{
-    throw("Collision based reaction probability requested for purely stochastic reaction FieldDependentVantHoffReaction");
+    throw std::logic_error(
+            "Collision based reaction probability requested for purely stochastic reaction FieldDependentVantHoffReaction");
 }

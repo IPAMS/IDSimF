@@ -26,15 +26,13 @@ RS::ReactiveParticle::ReactiveParticle(Substance* species){
     this->setSpecies(species);
 }
 
-RS::ReactiveParticle::ReactiveParticle(Substance* species,Core::Vector location)
-        :
-        BTree::Particle(location,species->charge())
+RS::ReactiveParticle::ReactiveParticle(Substance* species, Core::Vector location):
+    BTree::Particle(location, species->charge())
 {
     this->setSpecies(species);
 }
 
-RS::ReactiveParticle::ReactiveParticle(Substance* species,Core::Vector location, double charge)
-    :
+RS::ReactiveParticle::ReactiveParticle(Substance* species, Core::Vector location, double charge):
     BTree::Particle(location,charge)
 {
     this->setSpecies(species);
@@ -45,8 +43,8 @@ void RS::ReactiveParticle::setSpecies(RS::Substance* species){
     this->updateParticleParametersFromSpecies_();
 }
 
-RS::Substance* RS::ReactiveParticle::getSpecies(){
-    return (species_);
+RS::Substance* RS::ReactiveParticle::getSpecies() const{
+    return species_;
 }
 
 void RS::ReactiveParticle::updateParticleParametersFromSpecies_() {

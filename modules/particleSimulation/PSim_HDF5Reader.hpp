@@ -48,23 +48,23 @@ namespace ParticleSimulation{
 
         explicit HDF5Reader(const std::string &hdf5Filename);
 
-        template <hsize_t NDIMS> DataField<NDIMS, double>
-        readDataset(std::string datasetName);
+        template <hsize_t NDIMS> [[nodiscard]] DataField<NDIMS, double>
+            readDataset(std::string datasetName) const;
 
         template<typename DTYPE>
-        std::vector<DTYPE> readAttributeVector(std::string groupName, std::string attributeName);
+        [[nodiscard]] std::vector<DTYPE> readAttributeVector(std::string groupName, std::string attributeName) const;
 
-        hsize_t numberOfObjectsInGroup(std::string groupName);
-        std::vector<std::string> namesOfObjectsInGroup(std::string groupName);
-        std::vector<std::string> namesOfDatasetsInGroup(std::string groupName);
-        int datasetNDims(std::string datasetName);
+        [[nodiscard]] hsize_t numberOfObjectsInGroup(std::string groupName) const;
+        [[nodiscard]] std::vector<std::string> namesOfObjectsInGroup(std::string groupName) const;
+        [[nodiscard]] std::vector<std::string> namesOfDatasetsInGroup(std::string groupName) const;
+        [[nodiscard]] int datasetNDims(std::string datasetName) const;
 
 
     private:
         std::unique_ptr<H5::H5File > h5f_;
 
-        template <hsize_t NDIMS> DataField<NDIMS, double>
-        readDataset_(H5::DataSet ds);
+        template <hsize_t NDIMS> [[nodiscard]] DataField<NDIMS, double>
+        readDataset_(H5::DataSet ds) const;
     };
 }
 

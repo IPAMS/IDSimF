@@ -44,7 +44,7 @@ namespace ParticleSimulation {
     public:
         explicit AverageChargePositionWriter(std::string transientFilename);
         ~AverageChargePositionWriter();
-        void writeTimestep(BTree::Tree& tree, double time);
+        void writeTimestep(const BTree::Tree& tree, double time);
 
     private:
         std::ofstream* transientFile_; ///< file handle of the file to write to

@@ -31,10 +31,10 @@
 namespace RS {
     //typedef std::mt19937 MyRNG;  // the Mersenne Twister with a popular choice of parameters
 
-    const double T_standard = 298.15; ///< the standard temperature (K)
-    const double kBoltzmann = 1.3806505e-23;       //Boltzmann constant (J/K)
-    const double RGas = 8.3145;                    //Ideal gas constant (J/(mol*K))
-    const double kgPerAmu = 1.66053873e-27;        //mass per atomic mass unit
+    const double T_STANDARD = 298.15; ///< the standard temperature (K)
+    const double K_BOLTZMANN = 1.3806505e-23;       //Boltzmann constant (J/K)
+    const double R_GAS = 8.3145;                    //Ideal gas constant (J/(mol*K))
+    const double KG_PER_AMU = 1.66053873e-27;        //mass per atomic mass unit
 }
 
 

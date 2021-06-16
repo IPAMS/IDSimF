@@ -37,23 +37,23 @@
 namespace RS {
     class VantHoffReaction : public AbstractReaction {
 
-    private:
-        double H_R_;
-        double K_s_;
-        double k_backward_;
-
     public:
         VantHoffReaction(
-                std::map<Substance*,int> educts,
-                std::map<Substance*,int> products,
+                const std::map<Substance*,int>& educts,
+                const std::map<Substance*,int>& products,
                 double H_R,
                 double K_s,
                 double k_backward,
                 std::string label
         );
 
-        RS::ReactionEvent attemptReaction(ReactionConditions conditions, ReactiveParticle* particle, double dt) const;
-        RS::ReactionEvent attemptReaction(CollisionConditions conditions, ReactiveParticle* particle) const;
+        RS::ReactionEvent attemptReaction(ReactionConditions conditions, ReactiveParticle* particle, double dt) const override;
+        RS::ReactionEvent attemptReaction(CollisionConditions conditions, ReactiveParticle* particle) const override;
+
+    private:
+        double H_R_ = 0.0;
+        double K_s_ = 0.0;
+        double k_backward_ = 0.0;
     };
 }
 

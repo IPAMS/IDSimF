@@ -21,7 +21,7 @@
 
 #include "RS_AbstractReaction.hpp"
 #include "Core_randomGenerators.hpp"
-
+#include <utility>
 /**
  * The default constructor of an abstract reaction
  *
@@ -36,10 +36,10 @@ RS::AbstractReaction::AbstractReaction(
                        std::string typeLabel,
                        std::string label)
 :
-educts_(educts),
-products_(products),
-typeLabel_(typeLabel),
-label_(label),
+educts_(std::move(educts)),
+products_(std::move(products)),
+typeLabel_(std::move(typeLabel)),
+label_(std::move(label)),
 collisionReaction_(isCollisionReaction)
 {
     //init educts table

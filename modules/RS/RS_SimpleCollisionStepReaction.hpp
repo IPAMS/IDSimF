@@ -34,19 +34,19 @@
 namespace RS {
     class SimpleCollisionStepReaction: public AbstractReaction {
 
-    private:
-        double activationEnergy_;
-
     public:
         SimpleCollisionStepReaction(
-                std::map<Substance*,int> educts,
-                std::map<Substance*,int> products,
+                const std::map<Substance*,int>& educts,
+                const std::map<Substance*,int>& products,
                 double activationEnergy_eV,
                 std::string label
         );
 
-        RS::ReactionEvent attemptReaction(ReactionConditions conditions, ReactiveParticle* particle, double dt) const;
-        RS::ReactionEvent attemptReaction(CollisionConditions conditions, ReactiveParticle* particle) const;
+        RS::ReactionEvent attemptReaction(ReactionConditions conditions, ReactiveParticle* particle, double dt) const override;
+        RS::ReactionEvent attemptReaction(CollisionConditions conditions, ReactiveParticle* particle) const override;
+
+    private:
+        double activationEnergy_= 0.0;
     };
 }
 

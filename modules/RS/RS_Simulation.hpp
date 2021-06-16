@@ -44,7 +44,6 @@
 namespace RS{class Simulation;}
 std::ostream& operator<<(std::ostream& os, const RS::Simulation& sim);
 
-
 namespace RS {
     class Simulation {
 
@@ -54,15 +53,15 @@ namespace RS {
         explicit Simulation(const std::string& configFileName);
         explicit Simulation(std::unique_ptr<RS::SimulationConfiguration> simConf);
 
-        SimulationConfiguration* simulationConfiguration();
+        [[nodiscard]] SimulationConfiguration* simulationConfiguration() const;
 
         bool addParticle(RS::ReactiveParticle* particle,int index);
         void removeParticle(int index);
-        ReactiveParticle& getParticle(int index);
-        std::map<Substance* const,int> discreteConcentrations();
-        long totalReactionEvents();
-        long illEvents();
-        long reactionEvents(AbstractReaction* reaction) const;
+        [[nodiscard]] ReactiveParticle& getParticle(int index) const;
+        [[nodiscard]] std::map<Substance* const,int> discreteConcentrations() const;
+        [[nodiscard]] long totalReactionEvents() const;
+        [[nodiscard]] long illEvents() const;
+        [[nodiscard]] long reactionEvents(AbstractReaction* reaction) const;
 
         void performTimestep(ReactionConditions& conditions, double dt);
         void doReaction(RS::AbstractReaction* reaction, RS::ReactiveParticle* particle, RS::Substance* product);
@@ -70,18 +69,16 @@ namespace RS {
         bool collisionReact(int index, RS::Substance* reactionPartnerSpecies, CollisionConditions& conditions);
         void advanceTimestep(double dt);
 
-        int timestep();
-        double simulationTime();
+        [[nodiscard]] int timestep() const;
+        [[nodiscard]] double simulationTime() const;
 
-        void printConcentrations();
-        void printReactionStatistics();
-        void logConcentrations(std::shared_ptr<spdlog::logger>& logger);
-        void logReactionStatistics(std::shared_ptr<spdlog::logger>& logger);
+        void printConcentrations() const;
+        void printReactionStatistics() const;
+        void logConcentrations(std::shared_ptr<spdlog::logger>& logger) const;
+        void logReactionStatistics(std::shared_ptr<spdlog::logger>& logger) const;
         friend std::ostream& ::operator<<(std::ostream& os, const RS::Simulation& sim);
 
-
     private:
-
         using pMap = std::unordered_map<int, RS::ReactiveParticle*>;
         using pPair= pMap::value_type;
         pMap particleMap_;
@@ -90,8 +87,8 @@ namespace RS {
         reactionMap indReactDeepCopy_();
         bool react_(int index, ReactionConditions& conditions, double dt, reactionMap &reacInd);
 
-        std::string concentrationString_();
-        std::string reactionStatisticsString_();
+        std::string concentrationString_() const;
+        std::string reactionStatisticsString_() const;
 
         //implement private members / data structures / methods
         long totalReactionEvents_ = 0; ///< the total number of reaction events in the simulation
@@ -107,8 +104,6 @@ namespace RS {
         std::map<std::pair<Substance* const, Substance* const>, std::vector<AbstractReaction*>> reacCollision_; ///< map of collision based reactions
         std::map<Substance* const,std::vector<double>> staticProbabilities_; ///< substance specific static reaction probabilities
         std::map<Substance* const,int> discreteConcentrations_; ///< substance specific discrete particle concentrations
-
-        //std::list<ReactiveParticle> particles_;
     };
 }
 

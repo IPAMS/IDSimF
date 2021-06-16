@@ -35,21 +35,20 @@
 namespace RS {
     class StaticThermalizingReaction : public AbstractReaction {
 
-    private:
-        double rateConstant_;
-
     public:
         StaticThermalizingReaction(
-            std::map<Substance*,int> educts,
-            std::map<Substance*,int> products,
+            const std::map<Substance*,int>& educts,
+            const std::map<Substance*,int>& products,
             double rateConstant,
             std::string label
         );
 
         //double rateConstant(ReactionConditions) const;
-        RS::ReactionEvent attemptReaction(ReactionConditions conditions, ReactiveParticle* particle, double dt) const;
-        RS::ReactionEvent attemptReaction(CollisionConditions conditions, ReactiveParticle* particle) const;
+        RS::ReactionEvent attemptReaction(ReactionConditions conditions, ReactiveParticle* particle, double dt) const override;
+        RS::ReactionEvent attemptReaction(CollisionConditions conditions, ReactiveParticle* particle) const override;
 
+    private:
+        double rateConstant_ = 0.0;
     };
 }
 

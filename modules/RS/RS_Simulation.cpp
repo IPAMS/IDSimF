@@ -39,7 +39,7 @@ RS::Simulation::Simulation(std::unique_ptr<RS::SimulationConfiguration> simConf)
     initFromSimulationConfig_(std::move(simConf));
 }
 
-RS::SimulationConfiguration* RS::Simulation::simulationConfiguration() {
+RS::SimulationConfiguration* RS::Simulation::simulationConfiguration() const {
     return simConf_.get();
 }
 
@@ -57,18 +57,18 @@ void RS::Simulation::removeParticle(int index) {
     particleMap_.erase(index);
 }
 
-RS::ReactiveParticle& RS::Simulation::getParticle(int index) {
+RS::ReactiveParticle& RS::Simulation::getParticle(int index) const{
     return *particleMap_.at(index);
 }
 
-std::map<RS::Substance* const,int> RS::Simulation::discreteConcentrations(){
+std::map<RS::Substance* const,int> RS::Simulation::discreteConcentrations() const{
     return discreteConcentrations_;
 };
 
 /*
  * Gets the number of total reaction events happened in this RS simulation
  */
-long RS::Simulation::totalReactionEvents(){
+long RS::Simulation::totalReactionEvents() const{
     return totalReactionEvents_;
 }
 
@@ -76,7 +76,7 @@ long RS::Simulation::totalReactionEvents(){
  * Gets the total number of "ill" events, which are reaction events with a
  * linearized probability => 1
  */
-long RS::Simulation::illEvents(){
+long RS::Simulation::illEvents() const{
     return illEvents_;
 }
 
@@ -212,33 +212,33 @@ void RS::Simulation::advanceTimestep(double dt) {
     nTimesteps_ ++;
 }
 
-int RS::Simulation::timestep() {
+int RS::Simulation::timestep() const{
     return nTimesteps_;
 }
 
-double RS::Simulation::simulationTime() {
+double RS::Simulation::simulationTime() const{
     return sumTime_;
 }
 
-void RS::Simulation::printConcentrations() {
+void RS::Simulation::printConcentrations() const{
     std::cout << concentrationString_();
     std::cout << std::endl;
 }
 
-void RS::Simulation::printReactionStatistics() {
+void RS::Simulation::printReactionStatistics() const{
     std::cout << reactionStatisticsString_();
     std::cout << std::endl;
 }
 
-void RS::Simulation::logConcentrations(std::shared_ptr<spdlog::logger>& logger) {
+void RS::Simulation::logConcentrations(std::shared_ptr<spdlog::logger>& logger) const{
     logger->info(concentrationString_());
 }
 
-void RS::Simulation::logReactionStatistics(std::shared_ptr<spdlog::logger>& logger) {
+void RS::Simulation::logReactionStatistics(std::shared_ptr<spdlog::logger>& logger) const{
     logger->info(reactionStatisticsString_());
 }
 
-std::string RS::Simulation::concentrationString_() {
+std::string RS::Simulation::concentrationString_() const{
     std::stringstream ss;
     ss <<"t= "<<sumTime_<<" ts="<<nTimesteps_<<" | ";
     for(const auto& p: simConf_->getAllDiscreteSubstances()){
@@ -247,7 +247,7 @@ std::string RS::Simulation::concentrationString_() {
     return ss.str();
 }
 
-std::string RS::Simulation::reactionStatisticsString_() {
+std::string RS::Simulation::reactionStatisticsString_() const{
     std::stringstream ss;
     ss <<"t= "<<sumTime_<<" ts="<<nTimesteps_<<" | \n";
     for(const auto& reaction: simConf_->getAllReactions()){

@@ -42,6 +42,5 @@ ParticleSimulation::BoxStartZone::BoxStartZone(Core::Vector size, Core::Vector c
  * Gets a random position in the box particle start zone.
  */
 Core::Vector ParticleSimulation::BoxStartZone::getRandomParticlePosition() {
-
     return {rnd_x->rndValue(), rnd_y->rndValue(), rnd_z->rndValue()};
 }

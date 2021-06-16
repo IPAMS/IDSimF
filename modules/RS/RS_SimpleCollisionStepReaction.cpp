@@ -21,10 +21,10 @@
 
 #include "RS_SimpleCollisionStepReaction.hpp"
 
-RS::SimpleCollisionStepReaction::SimpleCollisionStepReaction(std::map<RS::Substance *, int> educts,
-                                                             std::map<RS::Substance *, int> products,
-                                                             double activationEnergy_eV, std::string label):
-AbstractReaction(educts, products, true, "simple_step",label),
+RS::SimpleCollisionStepReaction::SimpleCollisionStepReaction(const std::map<RS::Substance *, int>& educts,
+                                                             const std::map<RS::Substance *, int>& products,
+                                                             double activationEnergy_eV, const std::string label):
+AbstractReaction(educts, products, true, "simple_step", label),
 activationEnergy_(activationEnergy_eV / Core::JOULE_TO_EV)
 {}
 
@@ -34,7 +34,8 @@ activationEnergy_(activationEnergy_eV / Core::JOULE_TO_EV)
  */
 RS::ReactionEvent RS::SimpleCollisionStepReaction::attemptReaction(RS::ReactionConditions,
                                                                    ReactiveParticle*, double) const{
-    throw ("Stochastic probability requested for collision based reaction SimpleCollisionStepReaction");
+    throw std::logic_error(
+        "Stochastic probability requested for collision based reaction SimpleCollisionStepReaction");
 }
 
 RS::ReactionEvent RS::SimpleCollisionStepReaction::attemptReaction(CollisionConditions conditions, ReactiveParticle*) const{

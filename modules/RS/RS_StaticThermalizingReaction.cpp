@@ -23,11 +23,11 @@
 #include "RS_util.hpp"
 
 RS::StaticThermalizingReaction::StaticThermalizingReaction(
-        const std::map<RS::Substance*, int> educts,
-        const std::map<RS::Substance*, int> products,
+        const std::map<RS::Substance*, int>& educts,
+        const std::map<RS::Substance*, int>& products,
         double rateConstant,
         const std::string label):
-AbstractReaction(educts, products,false, "static_thermalizing",label),
+AbstractReaction(educts, products, false, "static_thermalizing", label),
 rateConstant_(rateConstant)
 {}
 
@@ -56,5 +56,6 @@ RS::ReactionEvent RS::StaticThermalizingReaction::attemptReaction(RS::ReactionCo
  * and this method should not be called
  */
 RS::ReactionEvent RS::StaticThermalizingReaction::attemptReaction(CollisionConditions, RS::ReactiveParticle*) const{
-    throw ("Collision based reaction probability requested for purely stochastic reaction StaticReaction");
+    throw std::logic_error(
+            "Collision based reaction probability requested for purely stochastic reaction StaticReaction");
 }

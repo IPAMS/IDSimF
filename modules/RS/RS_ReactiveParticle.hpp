@@ -43,16 +43,16 @@ namespace RS {
 
     public:
         explicit ReactiveParticle(Substance* species);
-        ReactiveParticle(Substance* species,Core::Vector location);
-        ReactiveParticle(Substance* species,Core::Vector location, double charge);
+        ReactiveParticle(Substance* species, Core::Vector location);
+        ReactiveParticle(Substance* species, Core::Vector location, double charge);
 
         void setSpecies(Substance* species);
-        Substance* getSpecies();
+        [[nodiscard]] Substance* getSpecies() const;
 
         friend std::ostream& ::operator<<(std::ostream& os, const RS::ReactiveParticle& particle);
 
     private:
-        Substance *species_; ///< a link to a chemical substance this particle is made of
+        Substance *species_{}; ///< a link to a chemical substance this particle is made of
         void updateParticleParametersFromSpecies_();
     };
 }

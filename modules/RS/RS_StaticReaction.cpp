@@ -23,11 +23,11 @@
 
 
 RS::StaticReaction::StaticReaction(
-        const std::map<RS::Substance*, int> educts,
-        const std::map<RS::Substance*, int> products,
+        const std::map<RS::Substance*, int>& educts,
+        const std::map<RS::Substance*, int>& products,
         double rateConstant,
         const std::string label):
-AbstractReaction(educts, products,false, "static",label),
+AbstractReaction(educts, products,false, "static", label),
 rateConstant_(rateConstant)
 {}
 
@@ -46,5 +46,6 @@ RS::ReactionEvent RS::StaticReaction::attemptReaction(RS::ReactionConditions /*c
  */
 RS::ReactionEvent RS::StaticReaction::attemptReaction(CollisionConditions /*conditions*/,
                                                       RS::ReactiveParticle* /*particle*/) const{
-    throw ("Collision based reaction probability requested for purely stochastic reaction StaticReaction");
+    throw std::logic_error(
+        "Collision based reaction probability requested for purely stochastic reaction StaticReaction");
 }
