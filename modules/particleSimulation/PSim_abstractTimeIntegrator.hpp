@@ -28,17 +28,11 @@
 #ifndef BTree_abstractTimeIntegrator_hpp
 #define BTree_abstractTimeIntegrator_hpp
 
-#include <stdio.h>
-#include <vector>
-#include <functional>
-
 #include "BTree_particle.hpp"
 #include "Core_vector.hpp"
-
-//forward declare own classes:
-/*namespace BTree{
-    class Particle;
-}*/
+#include <cstdio>
+#include <vector>
+#include <functional>
 
 namespace ParticleSimulation{
 
@@ -59,8 +53,8 @@ namespace ParticleSimulation{
                        double time)>
                 particleStartMonitoringFctType;
 
-        AbstractTimeIntegrator(particleStartMonitoringFctType ionStartMonitorFct = nullptr);
-        AbstractTimeIntegrator(std::vector<BTree::Particle*> particles,
+        explicit AbstractTimeIntegrator(particleStartMonitoringFctType ionStartMonitorFct = nullptr);
+        explicit AbstractTimeIntegrator(const std::vector<BTree::Particle*>& particles,
                                particleStartMonitoringFctType ionStartMonitorFct = nullptr);
 
         virtual ~AbstractTimeIntegrator() = default;
@@ -71,9 +65,9 @@ namespace ParticleSimulation{
         virtual void finalizeSimulation() = 0;
 
         void setTerminationState();
-        RunState runState();
-        double time();
-        int timeStep();
+        [[nodiscard]] RunState runState() const;
+        [[nodiscard]] double time() const;
+        [[nodiscard]] int timeStep() const;
 
     protected:
         RunState runState_ = STOPPED; ///< the current state the integrator is in
@@ -84,7 +78,6 @@ namespace ParticleSimulation{
         std::vector<pTobPair_t> particleTOBs_; ///< Time of births of the individual particles
         size_t particlesBornIdx_ = 0; ///< index in particleTOBs_ indicating the particles already born
         particleStartMonitoringFctType particleStartMonitorFct_ = nullptr; ///< Monitoring function for
-
         bool bearParticles_(double time);
     };
 }

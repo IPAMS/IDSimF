@@ -37,7 +37,6 @@ length_(length),
 baseVector_(baseVector)
 {
     if (normalVector.magnitude() > 0.0){
-        normalVector_ = normalVector/normalVector.magnitude();
         isRotated_ = true;
         Core::Vector normalPolarCoords = Core::cartesianToPolar(normalVector);
         azimuth_ = normalPolarCoords.y();
