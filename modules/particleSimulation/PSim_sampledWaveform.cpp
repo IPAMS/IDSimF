@@ -47,7 +47,7 @@ ParticleSimulation::SampledWaveform::SampledWaveform(std::string filename){
  * Checks if the input file was read correctly and waveform data is ready
  * @return true if the data was read correctly
  */
-bool ParticleSimulation::SampledWaveform::good(){
+bool ParticleSimulation::SampledWaveform::good() const{
     return dataIsGood_;
 }
 
@@ -56,7 +56,7 @@ bool ParticleSimulation::SampledWaveform::good(){
  *
  * @return the number of elements in the waveform vector
  */
-std::size_t ParticleSimulation::SampledWaveform::size(){
+std::size_t ParticleSimulation::SampledWaveform::size() const{
     return size_;
 }
 
@@ -65,7 +65,7 @@ std::size_t ParticleSimulation::SampledWaveform::size(){
  * @param index an numeric index in the data vector of the waveform
  * @return Voltage value of the timestep specified by the index
  */
-double ParticleSimulation::SampledWaveform::getValue(std::size_t index){
+double ParticleSimulation::SampledWaveform::getValue(std::size_t index) const{
     return wfTable_.at(index);
 }
 
@@ -76,7 +76,7 @@ double ParticleSimulation::SampledWaveform::getValue(std::size_t index){
  * @param index an numeric index in the data vector of the waveform
  * @return Voltage value of the timestep specified by the index
  */
-double ParticleSimulation::SampledWaveform::getValueLooped(std::size_t index){
+double ParticleSimulation::SampledWaveform::getValueLooped(std::size_t index) const{
     return this->getValue(index % this->size_);
 }
 
@@ -85,6 +85,6 @@ double ParticleSimulation::SampledWaveform::getValueLooped(std::size_t index){
  * @param index an numeric index in the data vector of the sampled waveform
  * @return Voltage value specified by index
  */
-double ParticleSimulation::SampledWaveform::operator[](std::size_t index){
+double ParticleSimulation::SampledWaveform::operator[](std::size_t index) const{
     return this->getValue(index);
 }

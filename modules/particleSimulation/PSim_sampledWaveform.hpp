@@ -44,16 +44,16 @@ namespace ParticleSimulation{
 
     public:
         explicit SampledWaveform(std::string filename);
-        bool good();
-        std::size_t size();
-        double getValue(std::size_t index);
-        double getValueLooped(std::size_t index);
-        double operator[](std::size_t index);
+        [[nodiscard]] bool good() const;
+        [[nodiscard]] std::size_t size() const;
+        [[nodiscard]] double getValue(std::size_t index) const;
+        [[nodiscard]] double getValueLooped(std::size_t index) const;
+        [[nodiscard]] double operator[](std::size_t index) const;
 
     private:
         std::vector<double> wfTable_;
-        std::size_t size_;
-        bool dataIsGood_;
+        std::size_t size_ = 0;
+        bool dataIsGood_ = false;
     };
 }
 

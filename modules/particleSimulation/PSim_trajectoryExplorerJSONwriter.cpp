@@ -30,14 +30,14 @@
 ParticleSimulation::TrajectoryExplorerJSONwriter::TrajectoryExplorerJSONwriter(std::string jsonFilename){
     jsonFile_ = std::make_unique<std::ofstream>();
     jsonFile_->open(jsonFilename);
-    initFile();
+    initFile_();
 }
 
 /**
  * Destructor: Closes the JSON file and destroys the file writer
  */
 ParticleSimulation::TrajectoryExplorerJSONwriter::~TrajectoryExplorerJSONwriter(){
-    closeFile();
+    closeFile_();
 }
 
 /**
@@ -129,14 +129,14 @@ void ParticleSimulation::TrajectoryExplorerJSONwriter::writeTimestep(
 
         if (! additionalParameters.empty()){
             *jsonFile_ << "[";
-            this->writeIonPosition(particle);
+            this->writeIonPosition_(particle);
             for (auto &val : additionalParameters) {
                 *jsonFile_ << "," << val;
             }
             *jsonFile_ << "]";
         }
         else{
-            this->writeIonPosition(particle);
+            this->writeIonPosition_(particle);
         }
 
         if(std::next(it) != particles.end()) { //not the last element: write comma
@@ -163,9 +163,9 @@ void ParticleSimulation::TrajectoryExplorerJSONwriter::writeSplatTimes(std::vect
 
      for(auto it = particles.begin(); it != particles.end(); ++it){
          if(std::next(it) != particles.end()) {
-            this->writeIonSplatTime(*it, false);
+             this->writeIonSplatTime_(*it, false);
         } else {
-            this->writeIonSplatTime(*it, true);
+             this->writeIonSplatTime_(*it, true);
         }
     }
     *jsonFile_ << "]";
@@ -196,7 +196,7 @@ void ParticleSimulation::TrajectoryExplorerJSONwriter::writeIonMasses(std::vecto
 /**
  * Initializes the JSON file
  */
-void ParticleSimulation::TrajectoryExplorerJSONwriter::initFile(){
+void ParticleSimulation::TrajectoryExplorerJSONwriter::initFile_(){
     std::string header = "{\n"
                          "\"steps\":[";
     *jsonFile_ << header;
@@ -205,7 +205,7 @@ void ParticleSimulation::TrajectoryExplorerJSONwriter::initFile(){
 /**
  * Closes the JSON file
  */
-void ParticleSimulation::TrajectoryExplorerJSONwriter::closeFile(){
+void ParticleSimulation::TrajectoryExplorerJSONwriter::closeFile_(){
     std::string footer = "}";
     *jsonFile_ << footer;
     jsonFile_->flush();
@@ -216,7 +216,7 @@ void ParticleSimulation::TrajectoryExplorerJSONwriter::closeFile(){
  *
  * @param particle a particle which position should be written to the JSON file
  */
-void ParticleSimulation::TrajectoryExplorerJSONwriter::writeIonPosition(BTree::Particle* particle){
+void ParticleSimulation::TrajectoryExplorerJSONwriter::writeIonPosition_(BTree::Particle* particle){
 
     const Core::Vector* ionPos = &particle->getLocation();
     *jsonFile_ << "[" << ionPos->x() * scale_ << "," << ionPos->y() * scale_ << "," << ionPos->z() * scale_ << "]";
@@ -230,7 +230,7 @@ void ParticleSimulation::TrajectoryExplorerJSONwriter::writeIonPosition(BTree::P
  * @param lastParticle has to be true for the last splat time written to the JSON file
  * (to close the vector of splat times in the JSON file)
  */
-void ParticleSimulation::TrajectoryExplorerJSONwriter::writeIonSplatTime(BTree::Particle *particle, bool lastParticle){
+void ParticleSimulation::TrajectoryExplorerJSONwriter::writeIonSplatTime_(BTree::Particle *particle, bool lastParticle){
 
     *jsonFile_ << particle->getSplatTime() * this->timeScale_;
     if (lastParticle) {

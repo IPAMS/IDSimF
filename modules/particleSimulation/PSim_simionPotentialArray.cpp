@@ -76,7 +76,7 @@ double ParticleSimulation::SimionPotentialArray::getPotential(index_t ix, index_
     return pot;
 }
 
-double ParticleSimulation::SimionPotentialArray::getInterpolatedPotential(double xPt, double yPt, double zPt) {
+double ParticleSimulation::SimionPotentialArray::getInterpolatedPotential(double xPt, double yPt, double zPt) const{
 
     double pot = 0.0;
     if (symmetry_ == CYLINDRICAL){
@@ -107,7 +107,7 @@ double ParticleSimulation::SimionPotentialArray::getInterpolatedPotential(double
 }
 
 
-Core::Vector ParticleSimulation::SimionPotentialArray::getField(double xPt, double yPt, double zPt) {
+Core::Vector ParticleSimulation::SimionPotentialArray::getField(double xPt, double yPt, double zPt) const{
 
      Core::Vector field;
     if (symmetry_ == CYLINDRICAL){
@@ -219,7 +219,7 @@ Core::Vector ParticleSimulation::SimionPotentialArray::getField(double xPt, doub
 }
 
 
-bool ParticleSimulation::SimionPotentialArray::isElectrode(double xPt, double yPt, double zPt) {
+bool ParticleSimulation::SimionPotentialArray::isElectrode(double xPt, double yPt, double zPt) const{
     std::array<double,3> posTransformed = transformAndCheckCoordinates_(xPt, yPt, zPt);
     double xT = posTransformed[0];
     double yT = posTransformed[1];
@@ -286,20 +286,20 @@ bool ParticleSimulation::SimionPotentialArray::isElectrode(double xPt, double yP
 }
 
 
-bool ParticleSimulation::SimionPotentialArray::isInside(double xPt, double yPt, double zPt) {
+bool ParticleSimulation::SimionPotentialArray::isInside(double xPt, double yPt, double zPt) const{
     std::array<double,3> posTransformed = scaleAndShiftCoordinates_(xPt, yPt, zPt);
     return isInside_(posTransformed[0], posTransformed[1], posTransformed[2]);
 }
 
-std::array<double,6> ParticleSimulation::SimionPotentialArray::getBounds() {
+std::array<double,6> ParticleSimulation::SimionPotentialArray::getBounds() const{
     return bounds_;
 }
 
-std::array<ParticleSimulation::index_t,3> ParticleSimulation::SimionPotentialArray::getNumberOfGridPoints() {
+std::array<ParticleSimulation::index_t,3> ParticleSimulation::SimionPotentialArray::getNumberOfGridPoints() const{
     return {nx_,ny_,nz_};
 }
 
-std::string  ParticleSimulation::SimionPotentialArray::getHeaderString() {
+std::string  ParticleSimulation::SimionPotentialArray::getHeaderString() const{
     return "not yet implemented";
 }
 
@@ -669,11 +669,11 @@ bool ParticleSimulation::SimionPotentialArray::isInside_(double x, double y, dou
     }
 }
 
-bool ParticleSimulation::SimionPotentialArray::isElectrode_(index_t ix, index_t iy, index_t iz) {
+bool ParticleSimulation::SimionPotentialArray::isElectrode_(index_t ix, index_t iy, index_t iz) const{
     return rawPotential_(ix, iy, iz) > maxVoltage_;
 }
 
-void ParticleSimulation::SimionPotentialArray::printState() {
+void ParticleSimulation::SimionPotentialArray::printState() const{
 
     std::cout << "SIMION PA ---------------------------------"<<std::endl;
     std::cout << "corner position: " << cornerLocation_[0] << " " << cornerLocation_[1] << " " << cornerLocation_[2] << " scale:" << spatialScale_ << std::endl;

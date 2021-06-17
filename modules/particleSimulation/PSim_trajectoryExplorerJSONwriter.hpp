@@ -77,11 +77,11 @@ namespace ParticleSimulation {
         double scale_ = 1.0; ///< spatial scaling factor
         double timeScale_ = 1.0; ///< time scaling factor
 
-        void initFile();
-        void closeFile();
+        void initFile_();
+        void closeFile_();
 
-        void writeIonPosition(BTree::Particle* particle);
-        void writeIonSplatTime(BTree::Particle* particle, bool lastParticle);
+        void writeIonPosition_(BTree::Particle* particle);
+        void writeIonSplatTime_(BTree::Particle* particle, bool lastParticle);
     };
 }
 

@@ -71,16 +71,16 @@ namespace ParticleSimulation{
         //disable copies:
         SimionPotentialArray(const SimionPotentialArray&) = delete;
 
-        double getPotential(index_t ix, index_t iy, index_t iz) const;
-        double getInterpolatedPotential(double xPt, double yPt, double zPt);
-        Core::Vector getField(double xPt, double yPt, double zPt);
-        bool isElectrode(double xPt, double yPt, double zPt);
-        bool isInside(double xPt, double yPt, double zPt);
+        [[nodiscard]] double getPotential(index_t ix, index_t iy, index_t iz) const;
+        [[nodiscard]] double getInterpolatedPotential(double xPt, double yPt, double zPt) const;
+        [[nodiscard]] Core::Vector getField(double xPt, double yPt, double zPt) const;
+        [[nodiscard]] bool isElectrode(double xPt, double yPt, double zPt) const;
+        [[nodiscard]] bool isInside(double xPt, double yPt, double zPt) const;
 
-        std::array<double, 6> getBounds();
-        std::array<index_t, 3> getNumberOfGridPoints();
-        std::string getHeaderString();
-        void printState();
+        [[nodiscard]] std::array<double, 6> getBounds() const;
+        [[nodiscard]] std::array<index_t, 3> getNumberOfGridPoints() const;
+        [[nodiscard]] std::string getHeaderString() const;
+        void printState() const;
 
     private:
 
@@ -88,17 +88,17 @@ namespace ParticleSimulation{
         void readPa_(std::string filename);
         void readBinaryPa_(std::ifstream& inStream);
         void updateBounds_();
-        std::array<double,3> transformAndCheckCoordinates_(double xPt, double yPt, double zPt) const;
-        std::array<double,3> scaleAndShiftCoordinates_(double xPt, double yPt, double zPt) const;
+        [[nodiscard]] std::array<double,3> transformAndCheckCoordinates_(double xPt, double yPt, double zPt) const;
+        [[nodiscard]] std::array<double,3> scaleAndShiftCoordinates_(double xPt, double yPt, double zPt) const;
 
-        double interpolatedPotentialCylindrical_(double xT, double rT) const;
-        double interpolatedPotentialCartesian2D_(double xT, double yT) const;
-        double interpolatedPotentialCartesian3D_(double xT, double yT, double zT) const;
-        double potential_(index_t ix, index_t iy, index_t iz) const;
-        double rawPotential_(index_t ix, index_t iy, index_t iz) const;
-        size_t linearIndex_(index_t  ix, index_t  iy, index_t  iz) const;
-        bool isInside_(double x, double y, double z) const;
-        bool isElectrode_(index_t ix, index_t iy, index_t iz);
+        [[nodiscard]] double interpolatedPotentialCylindrical_(double xT, double rT) const;
+        [[nodiscard]] double interpolatedPotentialCartesian2D_(double xT, double yT) const;
+        [[nodiscard]] double interpolatedPotentialCartesian3D_(double xT, double yT, double zT) const;
+        [[nodiscard]] double potential_(index_t ix, index_t iy, index_t iz) const;
+        [[nodiscard]] double rawPotential_(index_t ix, index_t iy, index_t iz) const;
+        [[nodiscard]] size_t linearIndex_(index_t  ix, index_t  iy, index_t  iz) const;
+        [[nodiscard]] bool isInside_(double x, double y, double z) const;
+        [[nodiscard]] bool isElectrode_(index_t ix, index_t iy, index_t iz) const;
 
         //members:
         std::string paFilename_; ///< Name of the PA file
@@ -132,7 +132,6 @@ namespace ParticleSimulation{
         bool mirrorx_ = false; ///< Flag if mirrored in x direction
         bool mirrory_ = false; ///< Flag if mirrored in y direction
         bool mirrorz_ = false; ///< Flag if mirrored in z direction
-
     };
 }
 
