@@ -60,7 +60,7 @@ namespace ParticleSimulation{
         };
 
         struct pMapEntry {
-            int globalIndex;             ///< A particle index to identify the particle globally
+            std::size_t globalIndex;     ///< A particle index to identify the particle globally
             particleState state;         ///< The current state of the tracked particle
             double startTime=0;          ///< The start time of a particle
             double splatTime=0;          ///< The splat time of a particle
@@ -75,26 +75,23 @@ namespace ParticleSimulation{
         void particleRestart(BTree::Particle* particle, Core::Vector oldPosition, Core::Vector newPosition, double time);
         void particleSplat(BTree::Particle* particle, double time);
 
-        pMapEntry get(BTree::Particle* particle);
+        [[nodiscard]] pMapEntry get(BTree::Particle* particle) const;
         void sortStartSplatData();
 
-        std::vector<pMapEntry> getStartSplatData();
+        std::vector<pMapEntry> getStartSplatData() const;
 
-        std::vector<int> getSplatState();
-        std::vector<double> getStartTimes();
-        std::vector<double> getSplatTimes();
-        std::vector<Core::Vector> getStartLocations();
-        std::vector<Core::Vector> getSplatLocations();
-
-        //std::vector
+        [[nodiscard]] std::vector<int> getSplatState() const;
+        [[nodiscard]] std::vector<double> getStartTimes() const;
+        [[nodiscard]] std::vector<double> getSplatTimes() const;
+        [[nodiscard]] std::vector<Core::Vector> getStartLocations() const;
+        [[nodiscard]] std::vector<Core::Vector> getSplatLocations() const;
 
     private:
 
         std::unordered_map<BTree::Particle*, pMapEntry> pMap_;
         std::vector<pMapEntry> restartedParticlesData_;
         std::vector<pMapEntry> sortedParticleData_;
-        int pInsertIndex_ = 0;
-
+        std::size_t pInsertIndex_ = 0;
     };
 }
 

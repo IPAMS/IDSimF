@@ -39,7 +39,7 @@ void ParticleSimulation::ParticleStartSplatTracker::particleStart(BTree::Particl
 
     auto emplaceResult = pMap_.try_emplace(particle, entry);
     if (emplaceResult.second){ //emplace was successful, key was not already existing
-        particle->setIntegerAttribute("global index", entry.globalIndex);
+        particle->setIntegerAttribute("global index", (int) entry.globalIndex);
         pInsertIndex_++;
     } else {
         throw (std::invalid_argument("Illegal double insert into start splat tracker: Particle is already existing"));
@@ -64,7 +64,7 @@ void ParticleSimulation::ParticleStartSplatTracker::particleRestart(BTree::Parti
         newEntry.state = RESTARTED;
 
         pMap_.at(particle) = newEntry;
-        particle->setIntegerAttribute("global index", newEntry.globalIndex);
+        particle->setIntegerAttribute("global index", (int) newEntry.globalIndex);
         pInsertIndex_++;
     }
     catch (const std::out_of_range& exception) {
@@ -86,7 +86,7 @@ void ParticleSimulation::ParticleStartSplatTracker::particleSplat(BTree::Particl
 }
 
 ParticleSimulation::ParticleStartSplatTracker::pMapEntry
-        ParticleSimulation::ParticleStartSplatTracker::get(BTree::Particle* particle) {
+        ParticleSimulation::ParticleStartSplatTracker::get(BTree::Particle* particle) const{
     return pMap_.at(particle);
 }
 
@@ -109,11 +109,11 @@ void ParticleSimulation::ParticleStartSplatTracker::sortStartSplatData() {
 
 
 std::vector<ParticleSimulation::ParticleStartSplatTracker::pMapEntry>
-        ParticleSimulation::ParticleStartSplatTracker::getStartSplatData() {
+        ParticleSimulation::ParticleStartSplatTracker::getStartSplatData() const{
     return sortedParticleData_;
 }
 
-std::vector<int> ParticleSimulation::ParticleStartSplatTracker::getSplatState() {
+std::vector<int> ParticleSimulation::ParticleStartSplatTracker::getSplatState() const{
     std::vector<int> result;
     for (auto const &entry: sortedParticleData_){
         result.emplace_back(entry.state);
@@ -121,7 +121,7 @@ std::vector<int> ParticleSimulation::ParticleStartSplatTracker::getSplatState() 
     return result;
 }
 
-std::vector<double> ParticleSimulation::ParticleStartSplatTracker::getStartTimes() {
+std::vector<double> ParticleSimulation::ParticleStartSplatTracker::getStartTimes() const{
     std::vector<double> result;
     for (auto const &entry: sortedParticleData_){
         result.emplace_back(entry.startTime);
@@ -129,7 +129,7 @@ std::vector<double> ParticleSimulation::ParticleStartSplatTracker::getStartTimes
     return result;
 }
 
-std::vector<double> ParticleSimulation::ParticleStartSplatTracker::getSplatTimes() {
+std::vector<double> ParticleSimulation::ParticleStartSplatTracker::getSplatTimes() const{
     std::vector<double> result;
     for (auto const &entry: sortedParticleData_){
         result.emplace_back(entry.splatTime);
@@ -137,7 +137,7 @@ std::vector<double> ParticleSimulation::ParticleStartSplatTracker::getSplatTimes
     return result;
 }
 
-std::vector<Core::Vector> ParticleSimulation::ParticleStartSplatTracker::getStartLocations() {
+std::vector<Core::Vector> ParticleSimulation::ParticleStartSplatTracker::getStartLocations() const{
     std::vector<Core::Vector> result;
     for (auto const &entry: sortedParticleData_){
         result.emplace_back(entry.startLocation);
@@ -145,7 +145,7 @@ std::vector<Core::Vector> ParticleSimulation::ParticleStartSplatTracker::getStar
     return result;
 }
 
-std::vector<Core::Vector> ParticleSimulation::ParticleStartSplatTracker::getSplatLocations() {
+std::vector<Core::Vector> ParticleSimulation::ParticleStartSplatTracker::getSplatLocations() const{
     std::vector<Core::Vector> result;
     for (auto const &entry: sortedParticleData_){
         result.emplace_back(entry.splatLocation);
