@@ -31,12 +31,11 @@
 #ifndef BTree_velocityIntegrator_hpp
 #define BTree_velocityIntegrator_hpp
 
-#include <stdio.h>
-#include <vector>
-#include <functional>
-
 #include "PSim_abstractTimeIntegrator.hpp"
 #include "Core_vector.hpp"
+#include <cstdio>
+#include <vector>
+#include <functional>
 //forward declare own classes:
 namespace BTree{
     class Particle;

@@ -45,20 +45,20 @@ namespace ParticleSimulation {
     enum Plane {XY,XZ,YZ};
 
     namespace util {
-        std::vector<std::unique_ptr<BTree::Particle>>
-        prepareIonsOnCylinderWalls(int nIons, double charge, double radius, double length);
+        [[nodiscard]] std::vector<std::unique_ptr<BTree::Particle>>
+            prepareIonsOnCylinderWalls(int nIons, double charge, double radius, double length);
 
-        std::vector<std::tuple<double,double,Core::Vector>>
-        probeForces(std::vector<BTree::Particle>& ions, Plane plane, int nU, int nV, double minU, double minV,
+        [[nodiscard]] std::vector<std::tuple<double,double,Core::Vector>>
+            probeForces(std::vector<BTree::Particle>& ions, Plane plane, int nU, int nV, double minU, double minV,
                     double maxU, double maxV, double slicePos);
 
-        std::vector<Core::Vector> getRandomPositionsInBox(int nPositions,Core::Vector corner, Core::Vector boxSize);
+        [[nodiscard]] std::vector<Core::Vector> getRandomPositionsInBox(int nPositions,Core::Vector corner, Core::Vector boxSize);
 
         //std::vector<std::unique_ptr<BTree::Particle>>
         //getRandomIonsInBox(int numIons, double charge, Core::Vector corner, Core::Vector boxSize, double timeOfBirthRange=0.0);
 
-        std::vector<std::unique_ptr<BTree::Particle>>
-        getIonOnLineVector(int numIons, double charge, double x, double y, double z, double timeOfBirthRange=0.0);
+        [[nodiscard]] std::vector<std::unique_ptr<BTree::Particle>>
+            getIonOnLineVector(int numIons, double charge, double x, double y, double z, double timeOfBirthRange=0.0);
     }
 
 }

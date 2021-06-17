@@ -29,13 +29,13 @@
 #ifndef BTree_verletIntegrator_hpp
 #define BTree_verletIntegrator_hpp
 
-#include <stdio.h>
-#include <vector>
-#include <functional>
-
 #include "PSim_abstractTimeIntegrator.hpp"
 #include "Core_vector.hpp"
 #include "BTree_tree.hpp"
+
+#include <cstdio>
+#include <vector>
+#include <functional>
 //forward declare own classes:
 namespace BTree{
     class Particle;
@@ -113,10 +113,10 @@ namespace ParticleSimulation{
                     CollisionModel::AbstractCollisionModel* collisionModel = nullptr
             );
 
-            void addParticle(BTree::Particle* particle);
-            void run(int nTimesteps, double dt);
-            void runSingleStep(double dt);
-            void finalizeSimulation();
+            void addParticle(BTree::Particle* particle) override;
+            void run(int nTimesteps, double dt) override;
+            void runSingleStep(double dt) override;
+            void finalizeSimulation() override;
 
     private:
         CollisionModel::AbstractCollisionModel* collisionModel_ = nullptr; ///< a gas collision model active in the simulation
