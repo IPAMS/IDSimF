@@ -49,20 +49,20 @@ namespace ParticleSimulation{
     public:
         TrajectoryHDF5Writer(const std::string &hdf5Filename, bool compression = true);
 
-        void setParticleAttributes(std::vector<std::string> attributeNames, partAttribTransformFctType attributesTransformFct);
-        void setParticleAttributes(std::vector<std::string> attributeNames, partAttribTransformFctTypeInteger attributesTransformFct);
+        void setParticleAttributes(const std::vector<std::string>& attributeNames, partAttribTransformFctType attributesTransformFct);
+        void setParticleAttributes(const std::vector<std::string>& attributeNames, partAttribTransformFctTypeInteger attributesTransformFct);
 
         void writeTimestep(std::vector<BTree::Particle*>& particles, double time);
 
         template <typename DT>
-        void writeNumericListDataset(std::string dsName, std::vector<DT> values, H5::Group* group = nullptr);
-        void write3DVectorListDataset(std::string dsName, std::vector<Core::Vector> values, H5::Group* group = nullptr);
+        void writeNumericListDataset(std::string dsName, const std::vector<DT> &values, H5::Group* group = nullptr);
+        void write3DVectorListDataset(std::string dsName, const std::vector<Core::Vector> &values, H5::Group* group = nullptr);
 
         template <typename DT, int DIMS>
-        void writeArrayDataSet(std::string dsName, std::vector<std::array<DT, DIMS>> values, H5::Group* group = nullptr);
+        void writeArrayDataSet(std::string dsName, const std::vector<std::array<DT, DIMS>> &values, H5::Group* group = nullptr);
         void writeTrajectoryAttribute(std::string attrName, int value);
-        void writeTrajectoryAttribute(std::string attrName, std::vector<double> values);
-        void writeTrajectoryAttribute(std::string attrName, std::vector<std::string> values);
+        void writeTrajectoryAttribute(std::string attrName, const std::vector<double> &values);
+        void writeTrajectoryAttribute(std::string attrName, const std::vector<std::string> &values);
         void finalizeTrajectory();
         void writeSplatTimes(std::vector<BTree::Particle*> &particles);
         void writeStartSplatData(ParticleStartSplatTracker tracker);
@@ -72,7 +72,7 @@ namespace ParticleSimulation{
 
         void writeTimestepParticleAttributes_(std::vector<BTree::Particle*> &particles);
         void writeTimestepParticleAttributesInteger_(std::vector<BTree::Particle*> &particles);
-        void writeAttribute_(std::unique_ptr<H5::Group>& group, const std::string& attrName, int value);
+        void writeAttribute_(std::unique_ptr<H5::Group>& group, const std::string &attrName, int value);
 
         //int nTimestepsWritten_;
         bool compression_ = true;
@@ -96,6 +96,5 @@ namespace ParticleSimulation{
         partAttribTransformFctTypeInteger particleAttributeTransformFctInteger_;
     };
 }
-
 
 #endif //BTree_trajectoryHDF5Writer_hpp

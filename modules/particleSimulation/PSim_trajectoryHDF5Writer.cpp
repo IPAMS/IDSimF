@@ -24,7 +24,6 @@
 #include <array>
 #include <cmath>
 #include <string>
-#include <iostream>
 
 /**
  * Constructs a new HDF5 trajectory filewriter
@@ -65,7 +64,7 @@ ParticleSimulation::TrajectoryHDF5Writer::TrajectoryHDF5Writer(const std::string
  * @param attributeNames
  * @param attributesTransformFct
  */
-void ParticleSimulation::TrajectoryHDF5Writer::setParticleAttributes(std::vector<std::string> attributeNames,
+void ParticleSimulation::TrajectoryHDF5Writer::setParticleAttributes(const std::vector<std::string>& attributeNames,
                                                                      partAttribTransformFctType attributesTransformFct) {
     hasParticleAttributes_ = true;
     particleAttributeTransformFct_ = std::move(attributesTransformFct);
@@ -78,7 +77,7 @@ void ParticleSimulation::TrajectoryHDF5Writer::setParticleAttributes(std::vector
  * @param attributeNames
  * @param attributesTransformFct
  */
-void ParticleSimulation::TrajectoryHDF5Writer::setParticleAttributes(std::vector<std::string> attributeNames,
+void ParticleSimulation::TrajectoryHDF5Writer::setParticleAttributes(const std::vector<std::string>& attributeNames,
                                                                      partAttribTransformFctTypeInteger attributesTransformFct) {
     hasParticleAttributesInteger_ = true;
     particleAttributeTransformFctInteger_ = std::move(attributesTransformFct);
@@ -118,7 +117,7 @@ void ParticleSimulation::TrajectoryHDF5Writer::writeTimestep(std::vector<BTree::
         //write particle location data:
 
         //define chunk size in parameter direction:
-        hsize_t nParticlesChunk = 200;
+        hsize_t nParticlesChunk = 256;
         if (nParticlesChunk>nParticles) {
             nParticlesChunk = nParticles;
         }
@@ -180,7 +179,7 @@ void ParticleSimulation::TrajectoryHDF5Writer::writeTimestep(std::vector<BTree::
  */
 
 template <typename DT>
-void ParticleSimulation::TrajectoryHDF5Writer::writeNumericListDataset(std::string dsName, std::vector<DT> values, H5::Group* group){
+void ParticleSimulation::TrajectoryHDF5Writer::writeNumericListDataset(std::string dsName, const std::vector<DT> &values, H5::Group* group){
     std::vector<std::array<DT, 1>> valuesPacked;
     for (auto const &val: values){
         std::array<DT,1> ar = {val};
@@ -189,7 +188,7 @@ void ParticleSimulation::TrajectoryHDF5Writer::writeNumericListDataset(std::stri
     writeArrayDataSet<DT, 1>(dsName, valuesPacked, group);
 };
 
-void ParticleSimulation::TrajectoryHDF5Writer::write3DVectorListDataset(std::string dsName, std::vector<Core::Vector> values, H5::Group* group){
+void ParticleSimulation::TrajectoryHDF5Writer::write3DVectorListDataset(std::string dsName, const std::vector<Core::Vector> &values, H5::Group* group){
     std::vector<std::array<double, 3>> valuesPacked;
 
     for (auto const &val: values){
@@ -209,7 +208,7 @@ void ParticleSimulation::TrajectoryHDF5Writer::write3DVectorListDataset(std::str
  * @param group
  */
 template <typename DT, int NCOLUMNS>
-void ParticleSimulation::TrajectoryHDF5Writer::writeArrayDataSet(std::string dsName, std::vector<std::array<DT, NCOLUMNS>> values, H5::Group* group){
+void ParticleSimulation::TrajectoryHDF5Writer::writeArrayDataSet(std::string dsName, const std::vector<std::array<DT, NCOLUMNS>> &values, H5::Group* group){
 
     //prepare dataset structures:
     size_t nValues = values.size();
@@ -272,7 +271,7 @@ void ParticleSimulation::TrajectoryHDF5Writer::writeTrajectoryAttribute(std::str
  * @param value The values to write into the attribute in the trajectory file
  */
 void ParticleSimulation::TrajectoryHDF5Writer::writeTrajectoryAttribute(std::string attrName,
-                                                                        std::vector<double> values){
+                                                                        const std::vector<double> &values){
     hsize_t nVals = values.size();
     hsize_t dims[1] = { nVals };
     H5::DataSpace attr_dataspace = H5::DataSpace (1, dims);
@@ -292,7 +291,7 @@ void ParticleSimulation::TrajectoryHDF5Writer::writeTrajectoryAttribute(std::str
  * @param value The values to write into the attribute in the trajectory file
  */
 void ParticleSimulation::TrajectoryHDF5Writer::writeTrajectoryAttribute(std::string attrName,
-                                                                        std::vector<std::string> values){
+                                                                        const std::vector<std::string> &values){
     hsize_t nVals = values.size();
     hsize_t dims[1] = { nVals };
     H5::DataSpace attr_dataspace = H5::DataSpace (1, dims);
@@ -476,7 +475,7 @@ void ParticleSimulation::TrajectoryHDF5Writer::writeTimestepParticleAttributesIn
  * @param attrName Name of the attribute to write
  * @param value The value to write into the attribute in the trajectory file
  */
-void ParticleSimulation::TrajectoryHDF5Writer::writeAttribute_(std::unique_ptr<H5::Group>& group, const std::string& attrName, int value){
+void ParticleSimulation::TrajectoryHDF5Writer::writeAttribute_(std::unique_ptr<H5::Group>& group, const std::string &attrName, int value){
 
     // Create a dataset attribute.
     hsize_t dims[1] = { 1 };
