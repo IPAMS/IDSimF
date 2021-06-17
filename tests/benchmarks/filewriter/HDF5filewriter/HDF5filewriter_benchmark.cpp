@@ -11,9 +11,10 @@
 int main() {
     std::cout << "Benchmark HDF5 file writer" << std::endl;
 
-    ParticleSimulation::TrajectoryHDF5Writer trajectoryWriter("test_hdf5_writer_trajectory.hd5");
+    ParticleSimulation::TrajectoryHDF5Writer trajectoryWriter("test_hdf5_writer_trajectory.hd5", true);
 
-    int nIons = 1e7;
+    int nIons = 5e6;
+    int nSteps = 5;
 
     AppUtils::Stopwatch stopWatch;
     stopWatch.start();
@@ -30,7 +31,11 @@ int main() {
         particles.push_back(std::move(newIon));
     }
 
-    std::cout << "writing splattimes:: 33 "<<std::endl;
+    for (int step=0; step<nSteps; ++step){
+        trajectoryWriter.writeTimestep(particlePtrs, step*0.1);
+        std::cout << "step: "<<step<<std::endl;
+    }
+
     trajectoryWriter.writeSplatTimes(particlePtrs);
 
 
