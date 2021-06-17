@@ -35,7 +35,6 @@ std::vector<std::unique_ptr<BTree::Particle>> ParticleSimulation::ParticleStartZ
     Core::RndDistPtr rnd_tob = Core::globalRandomGenerator->getUniformDistribution(0,timeOfBirthRange);
 
     std::vector<std::unique_ptr<BTree::Particle>> result;
-    //Core::Particle* result = new Core::Particle[numIons];
     for (int i=0; i<numIons; i++){
         std::unique_ptr<BTree::Particle> newIon = std::make_unique<BTree::Particle>(
                 getRandomParticlePosition(),
