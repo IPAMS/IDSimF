@@ -60,10 +60,10 @@ TEST_CASE("Test self implemented interpolated field", "[ParticleSimulation][Inte
         }
 
         SECTION("The returned upper bounds are correct") {
-            std::array<int, 3> upperBounds = {1, 2, 4};
+            std::array<std::size_t, 3> upperBounds = {1, 2, 4};
             REQUIRE(upperBounds==intField.findLowerBoundIndices(0.5, 5.0, 7.1));
 
-            std::array<int, 3> upperBounds2 = {0, 3, 1};
+            std::array<std::size_t, 3> upperBounds2 = {0, 3, 1};
             REQUIRE(upperBounds2==intField.findLowerBoundIndices(-0.5, 50.0, 2.0));
         }
 
