@@ -28,8 +28,6 @@
 #ifndef BTree_constants_h
 #define BTree_constants_h
 
-#define _USE_MATH_DEFINES
-
 #include <cmath>
 
 namespace Core {

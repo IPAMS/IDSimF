@@ -48,18 +48,18 @@ THE SOFTWARE.
 #define CXXOPTS_VECTOR_DELIMITER ','
 #endif
 
-#define CXXOPTS__VERSION_MAJOR 2
-#define CXXOPTS__VERSION_MINOR 2
-#define CXXOPTS__VERSION_PATCH 0
+#define CXXOPTS_VERSION_MAJOR 2
+#define CXXOPTS_VERSION_MINOR 2
+#define CXXOPTS_VERSION_PATCH 0
 
 namespace cxxopts
 {
   static constexpr struct {
     uint8_t major, minor, patch;
   } version = {
-    CXXOPTS__VERSION_MAJOR,
-    CXXOPTS__VERSION_MINOR,
-    CXXOPTS__VERSION_PATCH
+          CXXOPTS_VERSION_MAJOR,
+          CXXOPTS_VERSION_MINOR,
+          CXXOPTS_VERSION_PATCH
   };
 }
 
