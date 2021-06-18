@@ -10,7 +10,7 @@
 #include "PSim_util.hpp"
 #include "CollisionModel_StatisticalDiffusion.hpp"
 #include "appUtils_stopwatch.hpp"
-#include <cxxopts.hpp>
+#include "CLI11.hpp"
 #include <iostream>
 #include <numeric>
 
@@ -50,23 +50,17 @@ int prepareIons(std::vector<std::unique_ptr<BTree::Particle>> &particles,
 }
 
 int main(int argc, char** argv) {
+    CLI::App app{"Simple benchmark of space charge calculation", "simpleSpaceCharge benchmark"};
 
-    cxxopts::Options options("simpleSpaceCharge benchmark", "Simple benchmark of space charge calculation");
+    //app.add_option("-f,--file", filename, "A help string");
 
-    options.add_options()
-            ("c,collisonModel", "Use collision model", cxxopts::value<bool>()->default_value("false"))
-            ("v,verbose", "be verbose", cxxopts::value<bool>()->default_value("false"))
-            ("h,help", "Print usage");
+    bool useCollisionModel = false;
+    app.add_flag("-c,--collisionModel", useCollisionModel, "Use collision model");
 
-    auto optionsResult = options.parse(argc, argv);
-    if (optionsResult.count("help"))
-    {
-        std::cout << options.help() << std::endl;
-        exit(0);
-    }
+    bool verbose = false;
+    app.add_flag("-v,--verbose", verbose, "be verbose");
+    CLI11_PARSE(app, argc, argv);
 
-    bool useCollisionModel = optionsResult["collisonModel"].as<bool>();
-    bool verbose = optionsResult["verbose"].as<bool>();
 
     int nIonsPerDirection = 23;
     int timeSteps = 200;
