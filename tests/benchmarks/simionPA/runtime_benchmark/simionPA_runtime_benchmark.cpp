@@ -33,11 +33,12 @@ void performBenchmark(int nSamples,
     AppUtils::Stopwatch stopWatch;
     stopWatch.start();
 
+    Core::Vector field;
     for (int i=0; i< nSamples; ++i){
 
         //simPa.isElectrode(xVec[i],y,z);
         //simPa.getInterpolatedPotential(xVec[i],y,z);
-        simPa.getField(xVec[i], y, z);
+        field = simPa.getField(xVec[i], y, z);
     }
 
     stopWatch.stop();
