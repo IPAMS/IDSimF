@@ -1,8 +1,5 @@
-#include "BTree_node.hpp"
-#include "BTree_parallelNodeOriginal.hpp"
 #include "BTree_tree.hpp"
 #include "BTree_parallelTree.hpp"
-#include "BTree_parallelTreeOriginal.hpp"
 #include "BTree_particle.hpp"
 #include "PSim_verletIntegrator.hpp"
 #include "PSim_parallelVerletIntegrator.hpp"
@@ -104,13 +101,10 @@ int main(int argc, char** argv) {
 
     std::vector<std::unique_ptr<BTree::Particle>> particlesSerial;
     std::vector<BTree::Particle*>particlePtrsSerial;
-    std::vector<std::unique_ptr<BTree::Particle>> particlesParallel;
-    std::vector<BTree::Particle*>particlePtrsParallel;
     std::vector<std::unique_ptr<BTree::Particle>> particlesParallelNew;
     std::vector<BTree::Particle*>particlePtrsParallelNew;
 
     int nIonsTotal = prepareIons(particlesSerial, particlePtrsSerial, nIonsPerDirection);
-    prepareIons(particlesParallel, particlePtrsParallel, nIonsPerDirection);
     prepareIons(particlesParallelNew, particlePtrsParallelNew, nIonsPerDirection);
     
     CollisionModel::StatisticalDiffusionModel sdsCollisionModel(100000.0, 298, 28, 3.64e-9);
@@ -119,7 +113,6 @@ int main(int argc, char** argv) {
         collisionModel = &sdsCollisionModel;
         for (int i=0; i<nIonsTotal; ++i){
             sdsCollisionModel.setSTPParameters(*particlePtrsSerial[i]);
-            sdsCollisionModel.setSTPParameters(*particlePtrsParallel[i]);
             sdsCollisionModel.setSTPParameters(*particlePtrsParallelNew[i]);
         }
 
@@ -142,22 +135,17 @@ int main(int argc, char** argv) {
     runIntegrator(verletIntegratorParallel, timeSteps, dt, "parallel");
 
     std::vector<double> diffMags;
-    std::vector<double> diffMagsParallel;
     for (int i=0; i<nIonsTotal; ++i){
-        diffMags.push_back( (particlesSerial[i]->getLocation() - particlesParallel[i]->getLocation()).magnitude() );
-        diffMagsParallel.push_back( (particlesParallel[i]->getLocation() - particlesParallelNew[i]->getLocation()).magnitude() );
+        diffMags.push_back( (particlesSerial[i]->getLocation() - particlesParallelNew[i]->getLocation()).magnitude() );
     }
     double sum = std::accumulate(diffMags.begin(), diffMags.end(), 0.0);
-    double sumParallel = std::accumulate(diffMagsParallel.begin(), diffMagsParallel.end(), 0.0);
 
     if (verbose) {
         for (int i = 0; i<nIonsTotal; ++i) {
-            std::cout << particlesParallel[i]->getLocation() << " | " << particlesParallelNew[i]->getLocation() << " | "
-                      << (particlesParallel[i]->getLocation()-particlesParallelNew[i]->getLocation()).magnitude()
+            std::cout << particlesSerial[i]->getLocation() << " | " << particlesParallelNew[i]->getLocation() << " | "
+                      << (particlesSerial[i]->getLocation()-particlesParallelNew[i]->getLocation()).magnitude()
                       << std::endl;
         }
     }
-
     std::cout << "sum diff: " << sum <<std::endl;
-    std::cout << "sum diff parallel: " << sumParallel <<std::endl;
 }
