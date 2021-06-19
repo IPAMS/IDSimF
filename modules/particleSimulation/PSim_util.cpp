@@ -39,7 +39,7 @@ typedef std::mt19937 MyRNG;  // the Mersenne Twister with a popular choice of pa
  * @param length length of the cylinder (in z direction)
  * @return particles on the cylinder wall
  */
-std::vector<std::unique_ptr<BTree::Particle>> ParticleSimulation::util::prepareIonsOnCylinderWalls(int nIons,double charge, double radius, double length){
+std::vector<std::unique_ptr<BTree::Particle>> ParticleSimulation::util::prepareIonsOnCylinderWalls(unsigned int nIons, double charge, double radius, double length){
     
     MyRNG rng;
     rng.seed(1.0);
@@ -48,7 +48,7 @@ std::vector<std::unique_ptr<BTree::Particle>> ParticleSimulation::util::prepareI
 
     std::vector<std::unique_ptr<BTree::Particle>> result;
 
-    for (int i=0; i<nIons; i++){
+    for (unsigned int i=0; i<nIons; i++){
         double phi = rnd_phi(rng);
         double z = rnd_len(rng);
         double x = radius*sin(phi);
@@ -196,13 +196,13 @@ std::vector<Core::Vector> ParticleSimulation::util::getRandomPositionsInBox(int 
  * @return vector of ions in a straight line
  */
 std::vector<std::unique_ptr<BTree::Particle>>
-ParticleSimulation::util::getIonOnLineVector(int numIons, double charge,
+ParticleSimulation::util::getIonOnLineVector(unsigned int numIons, double charge,
                                              double x, double y, double z,
                                              double timeOfBirthRange) {
     Core::RndDistPtr rnd_tob = Core::globalRandomGenerator->getUniformDistribution(0, timeOfBirthRange);
 
     std::vector<std::unique_ptr<BTree::Particle>> result;
-    for (int i = 0; i < numIons; i++) {
+    for (unsigned int i = 0; i < numIons; i++) {
         std::unique_ptr<BTree::Particle> newIon = std::make_unique<BTree::Particle>(
                 Core::Vector(
                         x,

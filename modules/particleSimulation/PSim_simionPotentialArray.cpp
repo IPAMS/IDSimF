@@ -58,7 +58,10 @@ ParticleSimulation::SimionPotentialArray::SimionPotentialArray(std::string filen
 double ParticleSimulation::SimionPotentialArray::getPotential(index_t ix, index_t iy, index_t iz) const {
 
     if (Core::safetyGuards) {
-        if ( ix>=nx_ || iy>=ny_ || iz>=nz_ ) {
+        if (
+                ix<0 || ix>=nx_ ||
+                iy<0 || iy>=ny_ ||
+                iz<0 || iz>=nz_) {
             std::stringstream ss;
             ss << "Index " << ix << " " << iy << " " << iz << " is not in the potential array";
             throw (ParticleSimulation::PotentialArrayException(ss.str()));
@@ -392,9 +395,9 @@ void ParticleSimulation::SimionPotentialArray::readBinaryPa_(std::ifstream &inSt
         dz_ = 1.0;
     }
 
-    numPoints_ = nx_ * ny_ * nz_;
+    numPoints_ = (unsigned int)(nx_ * ny_ * nz_);
     points_.resize(numPoints_);
-    inStream.read( reinterpret_cast<char*>(points_.data()), (std::streamsize)(sizeof(double)*numPoints_));
+    inStream.read( reinterpret_cast<char*>(points_.data()), sizeof(double)*numPoints_);
 }
 
 
@@ -613,10 +616,10 @@ double ParticleSimulation::SimionPotentialArray::potential_(index_t ix, index_t 
 }
 
 double ParticleSimulation::SimionPotentialArray::rawPotential_(index_t ix, index_t iy, index_t iz) const{
-    return points_[linearIndex_(ix,iy,iz)];
+    return points_[(std::size_t)linearIndex_(ix,iy,iz)];
 }
 
-ParticleSimulation::index_t ParticleSimulation::SimionPotentialArray::linearIndex_(index_t  ix, index_t  iy, index_t  iz) const{
+ParticleSimulation::index_t ParticleSimulation::SimionPotentialArray::linearIndex_(index_t ix, index_t iy, index_t iz) const{
     // This guard has a strong runtime penalty, therefore, the methods reachable from user side
     // has to check that no boundary violation happens...
     /*if (Core::safetyGuards) {
@@ -679,7 +682,7 @@ void ParticleSimulation::SimionPotentialArray::printState() const{
     std::cout << "mx: "<<mirrorx_ << " my: "<<mirrory_<< " mz: "<<mirrorz_ <<std::endl;
     //std::cout << "electrostatic: "<< electrostatic << " ng:"<< ng << std::endl;
 
-    for (index_t i=0; i< 10; ++i){
+    for (std::size_t i=0; i< 10; ++i){
         std::cout << " "<< points_[i];
     }
     std::cout << std::endl;

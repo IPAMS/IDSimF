@@ -148,7 +148,7 @@ TEST_CASE("Test serial verlet integrator", "[ParticleSimulation][VerletIntegrato
             CHECK(verletIntegrator.time() == Approx(timeSteps * dt));
 
             double endTime = timeSteps * dt;
-            for (int i=0; i<nParticles; ++i){
+            for (std::size_t i=0; i<nParticles; ++i){
                 Core::Vector ionPos = particles[i]-> getLocation();
 
                 //calculate approximate position according to a pure linear uniform acceleration

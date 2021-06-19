@@ -139,7 +139,7 @@ TEST_CASE("SIMION PA basic tests","[SimionPotentialArray]"){
 
         std::array<double,6> correctBounds{0.0, 0.149, -0.059, 0.059, -0.059, 0.059};
         std::array<double,6> bounds = simPa.getBounds();
-        for (int i=0; i<6; ++i){
+        for (std::size_t i=0; i<6; ++i){
             REQUIRE( Approx(bounds[i]) == correctBounds[i]);
         }
 

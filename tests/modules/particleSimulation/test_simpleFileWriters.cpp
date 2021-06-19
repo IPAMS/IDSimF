@@ -53,8 +53,8 @@ TEST_CASE( "Average ion position file writer should at least write a file withou
 
     std::vector<BTree::uniquePartPtr> particles;
     std::vector<BTree::Particle*> particlePtrs;
-    int nParticles = 10;
-    for (int i=0; i< nParticles; i++){
+    unsigned int nParticles = 10;
+    for (std::size_t i=0; i< nParticles; i++){
         std::unique_ptr<BTree::Particle> part = std::make_unique<BTree::Particle>(Core::Vector(0,0,i*0.1),1);
         particlePtrs.push_back(part.get());
         particles.push_back(std::move(part));
@@ -63,10 +63,10 @@ TEST_CASE( "Average ion position file writer should at least write a file withou
 
     ParticleSimulation::AverageChargePositionWriter fw("average_position_test.txt");
 
-    int nSteps = 10;
+    unsigned int nSteps = 10;
     double diff =0.1;
-    for (int i=0; i< nSteps; ++i){
-        for (int k=0; k < nParticles; ++k){
+    for (unsigned int i=0; i< nSteps; ++i){
+        for (std::size_t k=0; k < nParticles; ++k){
             Core::Vector newLocation = particlePtrs[k]->getLocation() + Core::Vector(diff,diff,diff);
             tree.updateParticleLocation(k,newLocation);
         }
@@ -78,9 +78,9 @@ TEST_CASE("Test FFT file writer", "[ParticleSimulation][ScalarWriter][file write
 
     std::vector<std::unique_ptr<BTree::Particle>> particles;
     std::vector<BTree::Particle*> particlePtrs;
-    int nParticles_a = 10;
-    int nParticles_b = 10;
-    int nParticles = nParticles_a + nParticles_b;
+    unsigned int nParticles_a = 10;
+    unsigned int nParticles_b = 10;
+    unsigned int nParticles = nParticles_a + nParticles_b;
     for (int i=0; i< nParticles_a; i++){
         std::unique_ptr<BTree::Particle> part = std::make_unique<BTree::Particle>(Core::Vector(0,0,i*0.1),1);
         part->setMassAMU(10);
@@ -108,7 +108,7 @@ TEST_CASE("Test FFT file writer", "[ParticleSimulation][ScalarWriter][file write
             else{
                 diff = 2;
             }
-            for (int k=0; k < nParticles; k++){
+            for (std::size_t k=0; k < nParticles; k++){
                 particles[i]->setVelocity(Core::Vector(0,0,diff));
 
             }
@@ -129,10 +129,10 @@ TEST_CASE("Test FFT file writer", "[ParticleSimulation][ScalarWriter][file write
             else{
                 diff = 2;
             }
-            for (int k=0; k < nParticles_a; k++){
+            for (std::size_t k=0; k < nParticles_a; k++){
                 particles[k]->setVelocity(Core::Vector(0, 0, diff));
             }
-            for (int k=nParticles_a; k < nParticles; k++){
+            for (std::size_t k=nParticles_a; k < nParticles; k++){
                 particles[k]->setVelocity(Core::Vector(0, 0, 2.0*diff));
             }
             fw.writeTimestepMassResolved(0.1*i);

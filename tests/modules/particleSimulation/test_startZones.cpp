@@ -70,13 +70,13 @@ TEST_CASE( "Test cylinder particle start zone",
     // define cylinder start zone in x direction
     double radius = 1.0;
     double length = 4.0;
-    int nSamples = 1000;
+    unsigned int nSamples = 1000;
 
     SECTION("Check if position samples are out of cylindrical start zone in x-direction"){
         ParticleSimulation::CylinderStartZone cylinderStartZone_x(radius, length);
 
         bool outOfCylinder = false;
-        for (int i=0; i<nSamples; ++i){
+        for (unsigned int i=0; i<nSamples; ++i){
             Core::Vector startPos = cylinderStartZone_x.getRandomParticlePosition();
             double r = std::sqrt(startPos.y()*startPos.y() + startPos.z()*startPos.z());
 
@@ -91,7 +91,7 @@ TEST_CASE( "Test cylinder particle start zone",
         ParticleSimulation::CylinderStartZone cylinderStartZone_z(radius, length, {0.0, 0.0, 3.0});
 
         bool outOfCylinder = false;
-        for (int i=0; i<nSamples; ++i){
+        for (unsigned int i=0; i<nSamples; ++i){
             Core::Vector startPos = cylinderStartZone_z.getRandomParticlePosition();
             double r = std::sqrt(startPos.x()*startPos.x() + startPos.y()*startPos.y());
 
@@ -108,7 +108,7 @@ TEST_CASE( "Test cylinder particle start zone",
         ParticleSimulation::CylinderStartZone cylinderStartZone_y(radius, length, {0.0, 2.0, 0.0}, shift);
 
         bool outOfCylinder = false;
-        for (int i=0; i<nSamples; ++i){
+        for (unsigned int i=0; i<nSamples; ++i){
             Core::Vector startPos = cylinderStartZone_y.getRandomParticlePosition();
             startPos = startPos - shift;
 
@@ -137,7 +137,7 @@ TEST_CASE( "Test cylinder particle start zone",
 
         double chargeExpected = 2.0 * Core::ELEMENTARY_CHARGE;
         bool incorrectIonFound = false;
-        for (int i=0; i<nSamples; ++i){
+        for (std::size_t i=0; i<nSamples; ++i){
             Core::Vector pos = ions[i]->getLocation();
             pos = pos - shift;
             double r = std::sqrt(pos.x()*pos.x() + pos.z()*pos.z());

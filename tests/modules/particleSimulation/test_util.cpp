@@ -33,14 +33,14 @@
 TEST_CASE( "Test random particle generation","[ParticleSimulation][utilities][random]") {
 
     SECTION( "Randomly generated ions on a cylinder wall should be on that cylinder wall"){
-        int nions = 100;
+        unsigned int nions = 100;
         double cylinderRadius = 10;
         double cylinderLength = 20;
         std::vector<std::unique_ptr<BTree::Particle>> ions =
                 ParticleSimulation::util::prepareIonsOnCylinderWalls(nions, 1,cylinderRadius,cylinderLength);
 
         bool invalidIonFound = false;
-        for (int i=0; i<nions; ++i){
+        for (std::size_t i=0; i<nions; ++i){
             Core::Vector pos = ions[i]->getLocation();
             double ionRadius = std::sqrt(pos.x()*pos.x() + pos.y()*pos.y());
 

@@ -38,7 +38,7 @@ TEST_CASE( "Test indcution current file writer", "[ParticleSimulation][file writ
 
         std::vector<std::unique_ptr<BTree::Particle>> particles;
         std::vector<BTree::Particle*> particlePtrs;
-        int nParticles = 10;
+        unsigned int nParticles = 10;
         for (int i=0; i< nParticles; i++){
             std::unique_ptr<BTree::Particle> part = std::make_unique<BTree::Particle>(Core::Vector(0.01,0.01,i*0.001),1);
             particlePtrs.push_back(part.get());
@@ -62,7 +62,7 @@ TEST_CASE( "Test indcution current file writer", "[ParticleSimulation][file writ
             else{
                 diff = 0.002;
             }
-            for (int k=0; k < nParticles; k++){
+            for (std::size_t k=0; k < nParticles; k++){
                 particles[k]->setVelocity(Core::Vector(diff,0,0));
 
             }

@@ -70,7 +70,7 @@ TEST_CASE( "Test velocity integrator", "[ParticleSimulation][VelocityIntegrator]
             velocityIntegrator.runSingleStep(dt);
             velocityIntegrator.run(timeSteps,dt);
 
-            for (int i=0; i<nParticles; i++){
+            for (std::size_t i=0; i<nParticles; i++){
                 Core::Vector ionPos = particles[i]-> getLocation();
                 CHECK(Approx(ionPos.x()).epsilon(1e-6) == 510*dt);
             }
@@ -96,7 +96,7 @@ TEST_CASE( "Test velocity integrator", "[ParticleSimulation][VelocityIntegrator]
             velocityIntegrator.runSingleStep(dt);
             velocityIntegrator.run(timeSteps,dt);
 
-            for (int i=0; i<nParticles; i++){
+            for (std::size_t i=0; i<nParticles; i++){
                 Core::Vector ionPos = particles[i]-> getLocation();
                 CHECK(Approx(ionPos.x()).epsilon(1e-6) == 510*dt);
             }

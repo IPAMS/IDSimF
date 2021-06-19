@@ -118,7 +118,7 @@ TEST_CASE( "Test parallel verlet integrator", "[ParticleSimulation][ParallelVerl
             verletIntegrator.run(timeSteps, dt);
 
             double endTime = timeSteps * dt;
-            for (int i=0; i<nParticles; ++i){
+            for (std::size_t i=0; i<nParticles; ++i){
                 Core::Vector ionPos = particles[i]-> getLocation();
 
                 //calculate approximate position according to a pure linear uniform acceleration
@@ -179,7 +179,7 @@ TEST_CASE( "Test parallel verlet integrator", "[ParticleSimulation][ParallelVerl
                 CHECK(verletIntegrator.timeStep() == timeSteps);
 
                 double endTime = timeSteps*dt;
-                for (int i = 0; i<nParticles; ++i) {
+                for (std::size_t i = 0; i<nParticles; ++i) {
                     Core::Vector ionPos = particles[i]->getLocation();
 
                     //calculate approximate position according to a pure linear uniform acceleration

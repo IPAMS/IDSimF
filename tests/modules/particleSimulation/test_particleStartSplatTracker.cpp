@@ -133,12 +133,12 @@ TEST_CASE("TestParticleStartSplatTracker", "[ParticleSimulation][ParticleStartSp
 
     SECTION("Tests with large particle cloud"){
 
-        int nParticles = 100;
+        unsigned int nParticles = 100;
         ParticleSimulation::ParticleStartSplatTracker tracker;
         std::vector<BTree::uniquePartPtr>particles;
         std::vector<BTree::Particle*>particlesPtrs;
 
-        for (int i=0; i<nParticles; ++i){
+        for (unsigned int i=0; i<nParticles; ++i){
             double timeOfBirth = i*0.01;
             BTree::uniquePartPtr particle = std::make_unique<BTree::Particle>(
                     Core::Vector(i*1.0, 1.0, 1.0),
@@ -151,11 +151,11 @@ TEST_CASE("TestParticleStartSplatTracker", "[ParticleSimulation][ParticleStartSp
             tracker.particleStart(particlesPtrs.at(i), timeOfBirth);
         }
 
-        for (int i=nParticles-10; i>=0; --i){ //keep deliberately the last 10 particles non splatted...
+        for (std::size_t i=nParticles-10; i>0; --i){ //keep deliberately the last 10 particles non splatted...
             double splatTime = (2*nParticles)*0.01-(i*0.01);
-            particles.at(i)->setLocation({1.0, i*1.0, 1.0});
-            particles.at(i)->setSplatTime(splatTime);
-            tracker.particleSplat(particlesPtrs.at(i), splatTime);
+            particles.at(i-1)->setLocation({1.0, (i-1)*1.0, 1.0});
+            particles.at(i-1)->setSplatTime(splatTime);
+            tracker.particleSplat(particlesPtrs.at(i-1), splatTime);
         }
 
         tracker.sortStartSplatData();

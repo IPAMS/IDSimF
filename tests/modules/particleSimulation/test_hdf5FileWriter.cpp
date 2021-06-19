@@ -70,7 +70,7 @@ template <hsize_t NDIMS>DataField<NDIMS,double> readDataset(H5::DataSet& ds){
 
     //get dimensions:
     hsize_t dims[NDIMS];
-    int nDims = dataspace.getSimpleExtentDims(dims,NULL);
+    hsize_t nDims = (hsize_t)dataspace.getSimpleExtentDims(dims, nullptr);
     CHECK(NDIMS == nDims);
 
     //prepare return object and prepare to read from HDF5 file:
@@ -113,7 +113,7 @@ std::vector<std::string> readStringAttribute(H5::Group& group, std::string attrN
 
     //get dimensions:
     hsize_t dims[1];
-    int nDims = dataspace.getSimpleExtentDims(dims, NULL);
+    int nDims = dataspace.getSimpleExtentDims(dims, nullptr);
     CHECK(nDims == 1);
     std::vector<std::string> result;
     char **datBuf = new char*[dims[0]];
@@ -131,7 +131,7 @@ std::vector<int> readIntAttribute(H5::Group& group,std::string attrName){
 
     //get dimensions:
     hsize_t dims[1];
-    int nDims = dataspace.getSimpleExtentDims(dims, NULL);
+    int nDims = dataspace.getSimpleExtentDims(dims, nullptr);
     CHECK(nDims == 1);
     std::vector<int> result;
     int datBuf[dims[0]];
@@ -148,7 +148,7 @@ std::vector<double> readDoubleAttribute(H5::Group& group,std::string attrName){
 
     //get dimensions:
     hsize_t dims[1];
-    int nDims = dataspace.getSimpleExtentDims(dims, NULL);
+    int nDims = dataspace.getSimpleExtentDims(dims, nullptr);
     CHECK(nDims == 1);
     std::vector<double> result;
     double datBuf[dims[0]];
@@ -163,8 +163,8 @@ std::vector<double> readDoubleAttribute(H5::Group& group,std::string attrName){
 TEST_CASE( "Test HDF5 trajectory file writer", "[ParticleSimulation][file writers]") {
     std::string filenameBare("test_particles_bare.h5");
     std::string filenameAux("test_particles_aux.h5");
-    int nParticles = 5;
-    int nFrames = 8;
+    unsigned int nParticles = 5;
+    unsigned int nFrames = 8;
 
     SECTION( "Hdf5 trajectory writer can write trajectory files with and without particle attributes"){
 
@@ -212,7 +212,7 @@ TEST_CASE( "Test HDF5 trajectory file writer", "[ParticleSimulation][file writer
 
         //prepare particles to test:
         ParticleSimulation::ParticleStartSplatTracker tracker;
-        for (int i=0; i<nParticles; ++i){
+        for (std::size_t i=0; i<nParticles; ++i){
             double timeOfBirth = i*0.01;
             BTree::uniquePartPtr particle = std::make_unique<BTree::Particle>();
             particle->setLocation({0.0, 1.0, 0.0});
@@ -221,8 +221,8 @@ TEST_CASE( "Test HDF5 trajectory file writer", "[ParticleSimulation][file writer
             tracker.particleStart(particlePtrs.at(i), timeOfBirth);
         }
 
-        for (int k = 1; k < nFrames; k++) {
-            for (int i = 0; i < nParticles; ++i) {
+        for (unsigned int k = 1; k < nFrames; k++) {
+            for (std::size_t i = 0; i < nParticles; ++i) {
                 particles[i]->setLocation(Core::Vector(i * 0.1, 1.0, k * 10.0));
                 particles[i]->setAcceleration(Core::Vector(i * 0.1, k * 1.0, 0));
                 particles[i]->setVelocity(Core::Vector(i * 0.01, i * 0.1, k * 10.0));
@@ -262,12 +262,12 @@ TEST_CASE( "Test HDF5 trajectory file writer", "[ParticleSimulation][file writer
         auto dFieldTimes = readDataset<1>(dsTimes);
         CHECK(dFieldTimes.rank == 1);
         std::vector<double> times = dFieldTimes.data;
-        int nTimesteps = times.size();
+        std::size_t nTimesteps = times.size();
 
         CHECK(nTimesteps == nFrames);
 
         std::array<hsize_t,1> index= {0};
-        for (int ts=1; ts<nTimesteps; ++ts) {
+        for (std::size_t ts=1; ts < nTimesteps; ++ts) {
             index[0] = ts;
             CHECK(Approx(dFieldTimes.get(index)) == ts * 1.0);
             std::string tsPath = "/particle_trajectory/timesteps/" + std::to_string(ts) +"/positions";
@@ -317,12 +317,12 @@ TEST_CASE( "Test HDF5 trajectory file writer", "[ParticleSimulation][file writer
         auto dFieldTimes = readDataset<1>(dsTimes);
         REQUIRE(dFieldTimes.rank == 1);
         std::vector<double> times = dFieldTimes.data;
-        int nTimesteps = times.size();
+        std::size_t nTimesteps = times.size();
 
         REQUIRE(nTimesteps == nFrames);
 
         //read that file and check contents:
-        for (int ts=1; ts<nTimesteps; ++ts) {
+        for (std::size_t ts=1; ts < nTimesteps; ++ts) {
 
             //check float particle attributes:
             std::string pAttribFloatPath = "/particle_trajectory/timesteps/" + std::to_string(ts) +"/particle_attributes_float";

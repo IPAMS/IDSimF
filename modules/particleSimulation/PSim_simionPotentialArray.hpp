@@ -38,7 +38,7 @@
 
 namespace ParticleSimulation{
 
-    using index_t = std::size_t;
+    using index_t = int;
 
     enum PASymmetry{
         CYLINDRICAL,
@@ -128,7 +128,7 @@ namespace ParticleSimulation{
         std::array<index_t ,3> internalBoundsUpper_ = {0, 0, 0};
         std::array<double ,6> bounds_ = {0, 0, 0, 0, 0, 0};
 
-        index_t numPoints_ = 0; ///< Total number of nodes / points
+        unsigned int numPoints_ = 0; ///< Total number of nodes / points
         bool mirrorx_ = false; ///< Flag if mirrored in x direction
         bool mirrory_ = false; ///< Flag if mirrored in y direction
         bool mirrorz_ = false; ///< Flag if mirrored in z direction
