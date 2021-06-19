@@ -82,13 +82,13 @@ namespace Core{
      */
     class UniformTestDistribution: public RandomDistribution{
     public:
-        UniformTestDistribution();
+        UniformTestDistribution() = default;
         UniformTestDistribution(double min, double max);
         double rndValue() override;
     private:
-        int sampleIndex_;
-        double min_;
-        double interval_;
+        std::size_t sampleIndex_ = 0;
+        double min_ = 0.0;
+        double interval_ = 1.0;
     };
 
     /**
@@ -100,7 +100,7 @@ namespace Core{
         NormalTestDistribution();
         double rndValue() override;
     private:
-        int sampleIndex_;
+        std::size_t sampleIndex_;
     };
 
     /**

@@ -9,14 +9,12 @@ set(SOURCE_FILES
         BTree_node.hpp
         BTree_parallelNode.cpp
         BTree_parallelNode.hpp
-        BTree_parallelNodeOriginal.cpp
-        BTree_parallelNodeOriginal.hpp
         BTree_tree.cpp
         BTree_tree.hpp
         BTree_parallelTree.cpp
         BTree_parallelTree.hpp
-        BTree_parallelTreeOriginal.cpp
-        BTree_parallelTreeOriginal.hpp BTree_genericBaseNode.cpp BTree_genericBaseNode.hpp)
+        BTree_genericBaseNode.cpp
+        BTree_genericBaseNode.hpp)
 
 add_library(btree STATIC ${SOURCE_FILES})
 target_include_directories(btree PUBLIC .)

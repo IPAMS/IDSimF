@@ -51,11 +51,11 @@ namespace BTree {
         ParallelNode& operator=(const ParallelNode& that) = delete;
 
         // Member methods:
-        void serializeIntoVector(std::vector<BTree::ParallelNode*> &serializedNodes, int treeLevel,
-                                 std::vector<int> &insertPositions);
+        void serializeIntoVector(std::vector<BTree::ParallelNode*> &serializedNodes, std::size_t treeLevel,
+                                 std::vector<std::size_t> &insertPositions);
 
-        int maximumRecursionDepth() const;
-        void countNodesOnLevel(int level, std::vector<int> &numOfNodesOnLevels) const;
+        std::size_t maximumRecursionDepth() const;
+        void countNodesOnLevel(std::size_t level, std::vector<std::size_t> &numOfNodesOnLevels) const;
 
     private:
 

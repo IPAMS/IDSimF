@@ -30,12 +30,12 @@
  * @return vector of random ions in cylindrical start zone
  */
 std::vector<std::unique_ptr<BTree::Particle>> ParticleSimulation::ParticleStartZone::getRandomParticlesInStartZone(
-        int numIons, double charge, double timeOfBirthRange) {
+        std::size_t numIons, double charge, double timeOfBirthRange) {
 
     Core::RndDistPtr rnd_tob = Core::globalRandomGenerator->getUniformDistribution(0,timeOfBirthRange);
 
     std::vector<std::unique_ptr<BTree::Particle>> result;
-    for (int i=0; i<numIons; i++){
+    for (std::size_t i=0; i<numIons; i++){
         std::unique_ptr<BTree::Particle> newIon = std::make_unique<BTree::Particle>(
                 getRandomParticlePosition(),
                 charge);

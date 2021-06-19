@@ -430,12 +430,12 @@ TEST_CASE( "Test field calculation in serial node", "[Node]") {
         BTree::Particle testIon2 = BTree::Particle(Core::Vector(0.0,0.0,9.0),1.0);
         BTree::Particle testIon3 = BTree::Particle(Core::Vector(0.0,9.0,0.0),1.0);
         BTree::Particle testIon4 = BTree::Particle(Core::Vector(0.0,9.0,0.0),10.0);
-        int nions = 10000;
+        std::size_t nions = 10000;
 
         Core::Vector boxSize = Core::Vector(2.0,2.0,2.0);
         ParticleSimulation::BoxStartZone startZone(boxSize);
         std::vector<std::unique_ptr<BTree::Particle>> ions= startZone.getRandomParticlesInStartZone(nions, 2.0);
-        for (int i=0; i<nions; i++){
+        for (std::size_t i=0; i<nions; i++){
             testNode.insertParticle(ions[i].get());
         }
         testNode.computeChargeDistributionRecursive();

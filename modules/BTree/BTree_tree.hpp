@@ -55,7 +55,7 @@ namespace BTree {
         //simple getter:
         Node* getRoot() const;
         std::list<Particle*>* getParticleList();
-        [[nodiscard]] int getNumberOfParticles() const;
+        [[nodiscard]] std::size_t getNumberOfParticles() const;
 
         //charge calculation methods:
         void computeChargeDistribution();

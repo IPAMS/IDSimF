@@ -52,10 +52,10 @@ namespace CollisionModel{
             int getNDistPoints() const;
             int getNCollisions() const;
             std::vector<double> getMassRatios() const;
-            double getLogMassRatio(size_t icdfIndex) const;
-            double getLogMassRatioDistance(size_t index) const;
+            double getLogMassRatio(std::size_t icdfIndex) const;
+            double getLogMassRatioDistance(std::size_t index) const;
             std::vector<std::vector<double>> getICDFs() const;
-            size_t findUpperDistIndex(const double logMassRatio) const;
+            std::size_t findUpperDistIndex(const double logMassRatio) const;
 
 
         private:

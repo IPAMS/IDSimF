@@ -42,10 +42,10 @@ namespace BTree {
         // Public member methods:
         [[nodiscard]] ParallelNode* getRoot() const;
         std::list<Particle*>* getParticleList() const;
-        [[nodiscard]] int getNumberOfParticles() const;
+        [[nodiscard]] std::size_t getNumberOfParticles() const;
 
         int init();
-        std::vector<int> countNodesOnLevels();
+        std::vector<std::size_t> countNodesOnLevels();
         Core::Vector computeEFieldFromTree(Particle &particle);
 
         void insertParticle(Particle &particle, std::size_t ext_index);
@@ -61,14 +61,14 @@ namespace BTree {
         std::unique_ptr<std::list<Particle*>> iVec_; ///< a linked particle list, stores the particles in a linear order
         std::unique_ptr<std::unordered_map<std::size_t, std::list<Particle *>::const_iterator>> iMap_; ///< a map between the ion indices (keys used by SIMION) and the pointers into the internal particle list
 
-        std::vector<int> nodesOnLevels_;
-        std::vector<int> nodeStartIndicesOnLevels_; ///< Vector of serialized indices of the first nodes on the individual tree levels
-        int numberOfNodesTotal_ = 0;
-        int nodesReserveSize_ = 0; ///< Number of nodes which should be reserved in the serialized field calculation
+        std::vector<std::size_t> nodesOnLevels_;
+        std::vector<std::size_t> nodeStartIndicesOnLevels_; ///< Vector of serialized indices of the first nodes on the individual tree levels
+        std::size_t numberOfNodesTotal_ = 0;
+        std::size_t nodesReserveSize_ = 0; ///< Number of nodes which should be reserved in the serialized field calculation
         std::vector<BTree::ParallelNode*>nodesSerialized_; ///< Serial vector of links to the tree nodes, used for parallelized access to the nodes
-        int nTreeLevels_ = 0; //number of levels in the tree
+        std::size_t nTreeLevels_ = 0; //number of levels in the tree
 
-        [[nodiscard]] int getTreeDepth_() const;
+        [[nodiscard]] std::size_t getTreeDepth_() const;
         void updateLevelStartIndices_();
         void serializeNodes_();
         void updateNodeChargeState_();

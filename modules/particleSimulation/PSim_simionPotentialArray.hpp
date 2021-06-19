@@ -38,7 +38,7 @@
 
 namespace ParticleSimulation{
 
-    using index_t = int;
+    using index_t = std::size_t;
 
     enum PASymmetry{
         CYLINDRICAL,
@@ -96,7 +96,7 @@ namespace ParticleSimulation{
         [[nodiscard]] double interpolatedPotentialCartesian3D_(double xT, double yT, double zT) const;
         [[nodiscard]] double potential_(index_t ix, index_t iy, index_t iz) const;
         [[nodiscard]] double rawPotential_(index_t ix, index_t iy, index_t iz) const;
-        [[nodiscard]] size_t linearIndex_(index_t  ix, index_t  iy, index_t  iz) const;
+        [[nodiscard]] index_t linearIndex_(index_t  ix, index_t  iy, index_t  iz) const;
         [[nodiscard]] bool isInside_(double x, double y, double z) const;
         [[nodiscard]] bool isElectrode_(index_t ix, index_t iy, index_t iz) const;
 
@@ -128,7 +128,7 @@ namespace ParticleSimulation{
         std::array<index_t ,3> internalBoundsUpper_ = {0, 0, 0};
         std::array<double ,6> bounds_ = {0, 0, 0, 0, 0, 0};
 
-        int numPoints_ = 0; ///< Total number of nodes / points
+        index_t numPoints_ = 0; ///< Total number of nodes / points
         bool mirrorx_ = false; ///< Flag if mirrored in x direction
         bool mirrory_ = false; ///< Flag if mirrored in y direction
         bool mirrorz_ = false; ///< Flag if mirrored in z direction

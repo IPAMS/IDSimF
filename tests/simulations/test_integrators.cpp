@@ -26,10 +26,8 @@
  ****************************/
 
 #include "catch.hpp"
-#include "BTree_parallelNodeOriginal.hpp"
 #include "BTree_tree.hpp"
 #include "BTree_parallelTree.hpp"
-#include "BTree_parallelTreeOriginal.hpp"
 #include "BTree_particle.hpp"
 #include "PSim_verletIntegrator.hpp"
 #include "PSim_parallelVerletIntegrator.hpp"

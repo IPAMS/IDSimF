@@ -39,8 +39,8 @@ BTree::ParallelNode::ParallelNode(Core::Vector min, Core::Vector max, BTree::Par
  *
  * @return The maximum number of tree levels of the subtree with this node as root
  */
-int BTree::ParallelNode::maximumRecursionDepth() const {
-        int maxChilds =
+std::size_t BTree::ParallelNode::maximumRecursionDepth() const {
+        std::size_t maxChilds =
                 std::max(
                     std::max(
                         std::max(
@@ -68,7 +68,7 @@ int BTree::ParallelNode::maximumRecursionDepth() const {
  * @param numOfNodesOnLevels a vector, one element per tree level, to count the
  * the nodes number into
  */
-void BTree::ParallelNode::countNodesOnLevel(int level, std::vector<int> &numOfNodesOnLevels) const {
+void BTree::ParallelNode::countNodesOnLevel(std::size_t level, std::vector<std::size_t> &numOfNodesOnLevels) const {
             if(this->isRoot())
                 numOfNodesOnLevels[0]++;
             for(auto octNode : octNodes_)
@@ -95,8 +95,8 @@ void BTree::ParallelNode::countNodesOnLevel(int level, std::vector<int> &numOfNo
  * @param insertPositions A vector with the current insert positions in the serialized vector for the individual
  * tree levels
  */
-void BTree::ParallelNode::serializeIntoVector(std::vector<BTree::ParallelNode*>& serializedNodes, int treeLevel,
-                                              std::vector<int>& insertPositions)
+void BTree::ParallelNode::serializeIntoVector(std::vector<BTree::ParallelNode*>& serializedNodes, std::size_t treeLevel,
+                                              std::vector<std::size_t>& insertPositions)
 {
     // Also updates the normalized edge length of the node, which is used for the
     // decision in the electric field calculation if the node is resolved in its subnodes

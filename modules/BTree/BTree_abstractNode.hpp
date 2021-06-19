@@ -60,7 +60,7 @@ namespace BTree {
         static Core::Vector calculateElectricField(const Core::Vector &r1, const Core::Vector &r2, double charge2);
 
         // Accessors:
-        [[nodiscard]] int getNumberOfParticles() const;
+        [[nodiscard]] std::size_t getNumberOfParticles() const;
         [[nodiscard]] Particle* getParticle() const;
         [[nodiscard]] Core::Vector getCenter() const;
         [[nodiscard]] Core::Vector getMax() const;
@@ -88,7 +88,7 @@ namespace BTree {
         //member fields:
         double charge_ = 0.0; ///< Total charge in the node (and the subnodes)
         Core::Vector centerOfCharge_ = Core::Vector(0,0,0); ///< The center of charge in the node
-        int numP_ = 0; ///< Total number of particles
+        std::size_t numP_ = 0; ///< Total number of particles
 
         Core::Vector min_ = Core::Vector(0,0,0); ///< Minimal corner (xlo,ylo,zlo corner) of the node
         Core::Vector max_ = Core::Vector(0,0,0); ///< Maximal corner (xhi,yhi,zhi corner) of the node

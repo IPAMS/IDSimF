@@ -58,14 +58,14 @@ herr_t collectDatasetNames(hid_t loc_id, const char *name, const H5L_info_t* /*l
 std::vector<std::string> ParticleSimulation::HDF5Reader::namesOfObjectsInGroup(std::string groupName) const{
     H5::Group group = h5f_->openGroup(groupName.c_str());
     std::vector<std::string> objectNames;
-    H5Literate(group.getId(), H5_INDEX_NAME, H5_ITER_INC, NULL, collectObjectNames, &objectNames);
+    H5Literate(group.getId(), H5_INDEX_NAME, H5_ITER_INC, nullptr, collectObjectNames, &objectNames);
     return objectNames;
 }
 
 std::vector<std::string> ParticleSimulation::HDF5Reader::namesOfDatasetsInGroup(std::string groupName) const{
     H5::Group group = h5f_->openGroup(groupName.c_str());
     std::vector<std::string> objectNames;
-    H5Literate(group.getId(), H5_INDEX_NAME, H5_ITER_INC, NULL, collectDatasetNames, &objectNames);
+    H5Literate(group.getId(), H5_INDEX_NAME, H5_ITER_INC, nullptr, collectDatasetNames, &objectNames);
     return objectNames;
 }
 

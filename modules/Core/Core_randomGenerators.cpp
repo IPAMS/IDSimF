@@ -65,15 +65,6 @@ double Core::NormalRandomDistribution::rndValue() {
 }
 
 /**
- * Constructs a test distribution in the interval [0.0, 1.0]
- */
-Core::UniformTestDistribution::UniformTestDistribution():
-    sampleIndex_(0),
-    min_(0),
-    interval_(1.0)
-{}
-
-/**
  * Construct a custom test distribution with a custom interval
  * @param min lower boundary of the interval
  * @param max upper boundary of the interval

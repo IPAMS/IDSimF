@@ -57,7 +57,7 @@ std::list<BTree::Particle*>* BTree::ParallelTree::getParticleList() const{
 /**
  Gets the number of particles in the tree
  */
-int BTree::ParallelTree::getNumberOfParticles() const{
+std::size_t BTree::ParallelTree::getNumberOfParticles() const{
     return(root_->getNumberOfParticles());
 }
 
@@ -74,9 +74,9 @@ int BTree::ParallelTree::init() {
 /**
  * Counts and returns the number of nodes on the individual tree levels and
  */
-std::vector<int> BTree::ParallelTree::countNodesOnLevels()
+std::vector<std::size_t> BTree::ParallelTree::countNodesOnLevels()
 {
-    std::vector<int> numOfNodesOnLevels(nTreeLevels_);
+    std::vector<std::size_t> numOfNodesOnLevels(nTreeLevels_);
     root_->countNodesOnLevel(1, numOfNodesOnLevels);
     return numOfNodesOnLevels;
 }
@@ -223,7 +223,7 @@ int BTree::ParallelTree::updateNodes(int ver) {
         nodeStartIndicesOnLevels_.resize(nTreeLevels_, 0);
         nodesOnLevels_ = countNodesOnLevels();
         numberOfNodesTotal_=0;
-        for(int i=0; i<nTreeLevels_; i++)
+        for(std::size_t i=0; i<nTreeLevels_; ++i)
         {
             numberOfNodesTotal_+=nodesOnLevels_[i];
         }
@@ -257,7 +257,7 @@ void BTree::ParallelTree::printParticles() const{
 /**
  * Get number of tree levels in this tree
  */
-int BTree::ParallelTree::getTreeDepth_() const {
+std::size_t BTree::ParallelTree::getTreeDepth_() const {
     return root_->maximumRecursionDepth();
 }
 
@@ -267,7 +267,7 @@ int BTree::ParallelTree::getTreeDepth_() const {
 void BTree::ParallelTree::updateLevelStartIndices_()
 {
     nodeStartIndicesOnLevels_[0]=0;
-    for(int i=1;i<nTreeLevels_;i++)
+    for(std::size_t i=1; i<nTreeLevels_; ++i)
     {
         nodeStartIndicesOnLevels_.at(i)=nodeStartIndicesOnLevels_.at(i-1)+nodesOnLevels_.at(i-1);
     }
@@ -282,25 +282,24 @@ void BTree::ParallelTree::serializeNodes_()
 
     //copy the start indices vector to a working copy since
     //the serialization method modifies the passed indices vector
-    std::vector<int> currentStartIndices = nodeStartIndicesOnLevels_;
+    std::vector<std::size_t> currentStartIndices = nodeStartIndicesOnLevels_;
     root_->serializeIntoVector(nodesSerialized_, 0, currentStartIndices);
 }
 
 void BTree::ParallelTree::updateNodeChargeState_()
 {
-    for(int i=nTreeLevels_; i>=1; i--)
+    for(std::size_t i=nTreeLevels_; i>=1; i--)
     {
         // get boundaries of the current tree level in the linearized vector to process.
         // the deepest tree level has the end of the linearized vector as upper limit,
         // the other have the begin of the next level as upper limit
-        int levelUpperBound = i==nTreeLevels_ ? numberOfNodesTotal_ : nodeStartIndicesOnLevels_.at(i);
-        int levelLowerBound = nodeStartIndicesOnLevels_.at(i-1);
+        std::size_t levelUpperBound = i==nTreeLevels_ ? numberOfNodesTotal_ : nodeStartIndicesOnLevels_.at(i);
+        std::size_t levelLowerBound = nodeStartIndicesOnLevels_.at(i-1);
 
         #pragma omp parallel for
-        for(int j = levelUpperBound-1; j >= levelLowerBound; --j)
+        for(std::size_t j = levelUpperBound; j > levelLowerBound; j--)
         {
-
-            ParallelNode* currentNode = nodesSerialized_.at(j);
+            ParallelNode* currentNode = nodesSerialized_.at(j-1);
 
             if(currentNode->numP_==1) {
                 // If the current node has only one particle: Update node parameters with parameters from particle
@@ -314,12 +313,12 @@ void BTree::ParallelTree::updateNodeChargeState_()
                 // updated.
                 currentNode->charge_ = 0.0;
                 currentNode->centerOfCharge_ = Core::Vector(0.0,0.0,0.0);
-                for (int m=0; m<8; ++m){
-                    if(currentNode->octNodes_[m] != nullptr){
-                        currentNode->charge_ += currentNode->octNodes_[m]->getCharge();
+                for (auto & octNode : currentNode->octNodes_){
+                    if(octNode != nullptr){
+                        currentNode->charge_ += octNode->getCharge();
                         currentNode->centerOfCharge_ = currentNode->centerOfCharge_+
-                                                        (currentNode->octNodes_[m]->centerOfCharge_ *
-                                                         currentNode->octNodes_[m]->charge_);
+                                                        (octNode->centerOfCharge_ *
+                                                         octNode->charge_);
                     }
                 }
 

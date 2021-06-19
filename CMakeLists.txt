@@ -5,11 +5,11 @@ project(IDSimF)
 enable_testing()
 
 set(CMAKE_CXX_STANDARD 17)
-add_compile_options(-Wdelete-non-virtual-dtor -Wall -Wextra)
+add_compile_options(-Wdelete-non-virtual-dtor -Wall -Wextra -Wsign-conversion -Wzero-as-null-pointer-constant)
 
-if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-    add_compile_options(-Wreserved-id-macro)
-endif()
+#if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+#    add_compile_options(-Wreserved-id-macro)
+#endif()
 
 # set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG}") #-fsanitize=address -fno-omit-frame-pointer -O1")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Ofast")

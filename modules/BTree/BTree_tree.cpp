@@ -56,7 +56,7 @@ std::list<BTree::Particle*>* BTree::Tree::getParticleList(){
  *
  * @returns the number of particles in the tree
  */
-int BTree::Tree::getNumberOfParticles() const{
+std::size_t BTree::Tree::getNumberOfParticles() const{
     return(root_->getNumberOfParticles());
 }
 

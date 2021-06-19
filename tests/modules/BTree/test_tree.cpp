@@ -137,12 +137,12 @@ TEST_CASE( "Test serial tree semantics / particle management","[Tree]") {
     }
 
     SECTION( "Test tree integrity with large number of random particles"){
-        int nions = 10000;
+        std::size_t nions = 10000;
         Core::Vector boxSize(0.002, 0.002, 0.002);
         ParticleSimulation::BoxStartZone startZone(boxSize);
         std::vector<std::unique_ptr<BTree::Particle>> ions= startZone.getRandomParticlesInStartZone(nions, 1);
 
-        for (int i=0; i<nions; i++){
+        for (std::size_t i=0; i<nions; i++){
             testTree.insertParticle((*ions[i]),i+1);
         }
         testTree.computeChargeDistribution();
@@ -210,7 +210,7 @@ TEST_CASE( "Test serial tree charge distribution calculation","[Tree]"){
         BTree::Particle testIon4(Core::Vector(0.0,-0.0008,0.0), 1.0);
         BTree::Particle testIon5(Core::Vector(0.0,0.0008,0.0), 1.0);
 
-        int nions = 10000;
+        std::size_t nions = 10000;
         Core::Vector corner1(-0.00051,-0.0005,-0.0005);
         Core::Vector boxSize1(0.00001,0.001,0.001);
         auto ions1= getRandomIonsInBox(nions,corner1,boxSize1);
@@ -235,7 +235,7 @@ TEST_CASE( "Test serial tree charge distribution calculation","[Tree]"){
         Core::Vector boxSize6(0.001,0.001,0.00001);
         auto ions6= getRandomIonsInBox(nions,corner6,boxSize6);
 
-        for (int i=0; i<nions; i++){
+        for (std::size_t i=0; i<nions; i++){
             testTree.insertParticle(*ions1[i],1);
             testTree.insertParticle(*ions2[i],2);
             testTree.insertParticle(*ions3[i],3);

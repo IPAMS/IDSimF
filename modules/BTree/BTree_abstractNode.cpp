@@ -86,7 +86,7 @@ Core::Vector BTree::AbstractNode::calculateElectricField(const Core::Vector &r1,
  * Gets the number of particles in the node including the suboctant nodes and thus all particles in the
  * spatial extend of the node
  */
-int BTree::AbstractNode::getNumberOfParticles() const{
+std::size_t BTree::AbstractNode::getNumberOfParticles() const{
     return numP_;
 }
 

@@ -134,7 +134,7 @@ ParticleSimulation::InterpolatedField::InterpolatedField(const std::string &hdf5
  * @param iz Data point index in z direction
  * @param fieldIndex The index of the data field to return a data point from
  */
-double ParticleSimulation::InterpolatedField::getScalar(int ix, int iy, int iz, int fieldIndex) const{
+double ParticleSimulation::InterpolatedField::getScalar(size_t ix, size_t iy, size_t iz, size_t fieldIndex) const{
     enforceScalar_(fieldIndex);
     return linearizedFields_[fieldIndex][linearizedIndexScalar_(ix,iy,iz)];
 }
@@ -146,7 +146,7 @@ double ParticleSimulation::InterpolatedField::getScalar(int ix, int iy, int iz, 
  * @param z Position of the probed data point in z direction
  * @param fieldIndex The index of the data field to return an interpolated data point for
  */
-double ParticleSimulation::InterpolatedField::getInterpolatedScalar(double x, double y, double z, int fieldIndex) const{
+double ParticleSimulation::InterpolatedField::getInterpolatedScalar(double x, double y, double z, std::size_t fieldIndex) const{
     enforceScalar_(fieldIndex);
     return interpolate_<double>(x, y, z, fieldIndex);
 }
@@ -158,7 +158,7 @@ double ParticleSimulation::InterpolatedField::getInterpolatedScalar(double x, do
  * @param iz Data point index in z direction
  * @param fieldIndex The index of the data field to return a 3d vector data point from
  */
-Core::Vector ParticleSimulation::InterpolatedField::getVector(int ix, int iy, int iz, int fieldIndex) const{
+Core::Vector ParticleSimulation::InterpolatedField::getVector(std::size_t ix, std::size_t iy, std::size_t iz, std::size_t fieldIndex) const{
     if (!isVector_[fieldIndex]){
         std::stringstream ss;
         ss << "Data field " << fieldIndex <<" is not a vector field";
@@ -180,7 +180,7 @@ Core::Vector ParticleSimulation::InterpolatedField::getVector(int ix, int iy, in
  * @param z Position of the probed data point in z direction
  * @param fieldIndex The index of the data field to return an interpolated 3d vector data point from
  */
-Core::Vector ParticleSimulation::InterpolatedField::getInterpolatedVector(double x, double y, double z, int fieldIndex) const{
+Core::Vector ParticleSimulation::InterpolatedField::getInterpolatedVector(double x, double y, double z, std::size_t fieldIndex) const{
     if (!isVector_[fieldIndex]){
         std::stringstream ss;
         ss << "Data field " << fieldIndex <<" is not a vector field";
@@ -217,13 +217,12 @@ std::array<double,6> ParticleSimulation::InterpolatedField::getBounds() const{
  */
 std::array<std::size_t,3> ParticleSimulation::InterpolatedField::findLowerBoundIndices(double x, double y, double z) const{
     auto lowerX = std::lower_bound(gridPointsX_.begin(), gridPointsX_.end(), x);
-    std::size_t indexLowerX = lowerX-gridPointsX_.begin();
     auto lowerY = std::lower_bound(gridPointsY_.begin(), gridPointsY_.end(), y);
-    std::size_t indexLowerY = lowerY-gridPointsY_.begin();
     auto lowerZ = std::lower_bound(gridPointsZ_.begin(), gridPointsZ_.end(), z);
-    std::size_t indexLowerZ = lowerZ-gridPointsZ_.begin();
-
-    return {indexLowerX,indexLowerY,indexLowerZ};
+    return {
+            (std::size_t)(lowerX-gridPointsX_.begin()),
+            (std::size_t)(lowerY-gridPointsY_.begin()),
+            (std::size_t)(lowerZ-gridPointsZ_.begin())};
 }
 
 void ParticleSimulation::InterpolatedField::updateBounds_() {
@@ -235,7 +234,7 @@ void ParticleSimulation::InterpolatedField::updateBounds_() {
     bounds_[5] = gridPointsZ_.back();
 }
 
-void ParticleSimulation::InterpolatedField::enforceScalar_(int fieldIndex) const {
+void ParticleSimulation::InterpolatedField::enforceScalar_(std::size_t fieldIndex) const {
     if (isVector_[fieldIndex]){
         std::stringstream ss;
         ss << "Data field " << fieldIndex <<" is not a scalar field";
@@ -256,7 +255,7 @@ std::size_t ParticleSimulation::InterpolatedField::linearizedIndexVector_(std::s
 }
 
 template<typename datT>
-datT ParticleSimulation::InterpolatedField::interpolate_(double x, double y, double z, int fieldIndex) const{
+datT ParticleSimulation::InterpolatedField::interpolate_(double x, double y, double z, std::size_t fieldIndex) const{
 
     if (x<= bounds_[0] || x>= bounds_[1] || y<= bounds_[2] || y>= bounds_[3] || z<= bounds_[4] || z>= bounds_[5]){
         std::stringstream ss;
@@ -319,7 +318,7 @@ datT ParticleSimulation::InterpolatedField::interpolate_(double x, double y, dou
 
         std::array<double, 3> result{0.0,0.0,0.0};
 
-        for (int i=0; i<3; ++i){
+        for (std::size_t i=0; i<3; ++i){
             double c_00 = field->operator[](i_000+i)*(1-xd) + field->operator[](i_100+i)*xd;
             double c_01 = field->operator[](i_001+i)*(1-xd) + field->operator[](i_101+i)*xd;
             double c_10 = field->operator[](i_010+i)*(1-xd) + field->operator[](i_110+i)*xd;

@@ -52,10 +52,10 @@ namespace ParticleSimulation{
     public:
         explicit InterpolatedField(const std::string &hdf5Filename);
 
-        [[nodiscard]] double getScalar(int ix, int iy, int iz, int fieldIndex) const;
-        [[nodiscard]] double getInterpolatedScalar(double x,double y, double z, int fieldIndex) const;
-        [[nodiscard]] Core::Vector getVector(int ix, int iy, int iz, int fieldIndex) const;
-        [[nodiscard]] Core::Vector getInterpolatedVector(double x,double y, double z, int fieldIndex) const;
+        [[nodiscard]] double getScalar(std::size_t ix, std::size_t iy, std::size_t iz, std::size_t fieldIndex) const;
+        [[nodiscard]] double getInterpolatedScalar(double x,double y, double z, std::size_t fieldIndex) const;
+        [[nodiscard]] Core::Vector getVector(std::size_t ix, std::size_t iy, std::size_t iz, std::size_t fieldIndex) const;
+        [[nodiscard]] Core::Vector getInterpolatedVector(double x, double y, double z, std::size_t fieldIndex) const;
 
         [[nodiscard]] std::vector<std::vector<double>> getGrid() const;
         [[nodiscard]] std::array<double,6> getBounds() const;
@@ -74,10 +74,10 @@ namespace ParticleSimulation{
         std::vector<std::vector<double>> linearizedFields_;
 
         void updateBounds_();
-        inline void enforceScalar_(int fieldIndex) const;
+        inline void enforceScalar_(std::size_t fieldIndex) const;
         [[nodiscard]] std::size_t linearizedIndexScalar_(std::size_t ix, std::size_t iy, std::size_t iz) const;
         [[nodiscard]] std::size_t linearizedIndexVector_(std::size_t ix, std::size_t iy, std::size_t iz) const;
-        template<typename datT> [[nodiscard]] datT interpolate_(double x, double y, double z, int fieldIndex) const;
+        template<typename datT> [[nodiscard]] datT interpolate_(double x, double y, double z, std::size_t fieldIndex) const;
     };
 }
 

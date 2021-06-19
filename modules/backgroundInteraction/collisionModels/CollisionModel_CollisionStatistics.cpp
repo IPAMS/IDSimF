@@ -72,24 +72,24 @@ void CollisionModel::CollisionStatistics::initCollisionModelFromStatisticsFile_(
 
         for (std::string line; std::getline(instream, line); ) {
             if (std::regex_match(line, patternNumber)){
-                icdfs_.back().push_back(std::strtof(line.c_str(), NULL));
+                icdfs_.back().push_back(std::strtof(line.c_str(), nullptr));
             }
             else if (std::regex_search(line, matches, patternNumericParameter)) {
                 std::string parameterName = matches[1];
                 std::string parameterValue = matches[2];
 
                 if (parameterName == "ICDF_massratio"){
-                    massRatios_.push_back(std::strtof(parameterValue.c_str(), NULL));
+                    massRatios_.push_back(std::strtof(parameterValue.c_str(), nullptr));
                     icdfs_.push_back(std::vector<double>(0));
                 }
                 else if (parameterName == "n_collisions"){
-                    nDistCollisions_ = std::strtol(parameterValue.c_str(),NULL,10);
+                    nDistCollisions_ = std::strtol(parameterValue.c_str(), nullptr, 10);
                 }
                 else if (parameterName == "n_dist_points"){
-                    nDistPoints_ = std::strtol(parameterValue.c_str(),NULL,10);
+                    nDistPoints_ = std::strtol(parameterValue.c_str(),nullptr, 10);
                 }
                 else if (parameterName == "n_statistics"){
-                    nDist_ = std::strtol(parameterValue.c_str(),NULL,10);
+                    nDist_ = std::strtol(parameterValue.c_str(), nullptr, 10);
                 }
             }
         }
@@ -104,13 +104,13 @@ void CollisionModel::CollisionStatistics::initCollisionModelFromStatisticsFile_(
  * @param logMassRatio the logarithmic mass ratio to find the distribution index for
  * @return index of the collision distribution with a logarithmic mass ratio above logMassRatio
  */
-size_t CollisionModel::CollisionStatistics::findUpperDistIndex(const double logMassRatio) const {
+std::size_t CollisionModel::CollisionStatistics::findUpperDistIndex(const double logMassRatio) const {
     auto upper = std::upper_bound(logMassRatios_.begin(), logMassRatios_.end(), logMassRatio);
     if (upper == logMassRatios_.begin()){
         return 0;
     }
     else {
-        return ( (--upper) - logMassRatios_.begin());
+        return ( (std::size_t)((--upper) - logMassRatios_.begin()));
     }
 }
 

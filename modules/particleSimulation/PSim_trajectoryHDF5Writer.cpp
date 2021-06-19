@@ -207,7 +207,7 @@ void ParticleSimulation::TrajectoryHDF5Writer::write3DVectorListDataset(std::str
  * @param values
  * @param group
  */
-template <typename DT, int NCOLUMNS>
+template <typename DT, std::size_t NCOLUMNS>
 void ParticleSimulation::TrajectoryHDF5Writer::writeArrayDataSet(std::string dsName, const std::vector<std::array<DT, NCOLUMNS>> &values, H5::Group* group){
 
     //prepare dataset structures:
@@ -246,7 +246,7 @@ void ParticleSimulation::TrajectoryHDF5Writer::writeArrayDataSet(std::string dsN
     // Define memory space.
     std::vector<DT> datBuf(nValues*NCOLUMNS);
     for (std::size_t i=0; i<nValues; ++i){
-        for(int j=0; j<NCOLUMNS; ++j){
+        for(std::size_t j=0; j<NCOLUMNS; ++j){
             datBuf[i*NCOLUMNS+j] = values[i][j];
         }
     }
@@ -278,7 +278,7 @@ void ParticleSimulation::TrajectoryHDF5Writer::writeTrajectoryAttribute(std::str
     H5::Attribute doubleAttribute = baseGroup_->createAttribute(attrName.c_str(), H5::PredType::IEEE_F32BE, attr_dataspace);
 
     double data[nVals];
-    for (size_t i = 0; i < nVals; ++i)
+    for (std::size_t i = 0; i < nVals; ++i)
     {
         data[i] = values[i];
     }
@@ -306,7 +306,7 @@ void ParticleSimulation::TrajectoryHDF5Writer::writeTrajectoryAttribute(std::str
     //Due to a abi bug between the std lib and hdf, we need to provide raw strings to the hdf5 methods
     //Save array of pointers to the raw c strings and use that array as data buffer
     const char* data[nVals];
-    for (size_t i = 0; i < nVals; ++i)
+    for (std::size_t i = 0; i < nVals; ++i)
     {
         data[i] = values[i].c_str();
     }

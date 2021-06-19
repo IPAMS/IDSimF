@@ -50,7 +50,7 @@ std::vector<DTYPE> ParticleSimulation::HDF5Reader::readAttributeVector(std::stri
 
     //get dimensions:
     hsize_t dims[1];
-    int nDims = dataspace.getSimpleExtentDims(dims, NULL);
+    int nDims = dataspace.getSimpleExtentDims(dims, nullptr);
     if (nDims != 1){
         std::stringstream ss;
         ss << "Attribute " << attributeName <<" is not a one dimensional attribute vector";
@@ -99,7 +99,7 @@ ParticleSimulation::HDF5Reader::readDataset_(H5::DataSet ds) const
 
     //get dimensions:
     hsize_t dims[NDIMS];
-    dataspace.getSimpleExtentDims(dims,NULL);
+    dataspace.getSimpleExtentDims(dims, nullptr);
 
     //prepare return object and prepare to read from HDF5 file:
     DataField<NDIMS,double> dField;

@@ -58,7 +58,7 @@ namespace ParticleSimulation{
         void writeNumericListDataset(std::string dsName, const std::vector<DT> &values, H5::Group* group = nullptr);
         void write3DVectorListDataset(std::string dsName, const std::vector<Core::Vector> &values, H5::Group* group = nullptr);
 
-        template <typename DT, int DIMS>
+        template <typename DT, std::size_t DIMS>
         void writeArrayDataSet(std::string dsName, const std::vector<std::array<DT, DIMS>> &values, H5::Group* group = nullptr);
         void writeTrajectoryAttribute(std::string attrName, int value);
         void writeTrajectoryAttribute(std::string attrName, const std::vector<double> &values);
