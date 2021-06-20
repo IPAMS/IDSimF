@@ -50,8 +50,8 @@ void prepareIons(std::vector<std::unique_ptr<BTree::Particle>> &particles,
 
 TEST_CASE("Compare results of serial and parallel varlet integrators with a line of charged particles", "[Simulation]"){
 
-    int nIons = 200;
-    int timeSteps = 1000;
+    unsigned int nIons = 200;
+    unsigned int timeSteps = 1000;
     double dt = 3.0e-4;
     double spaceChargeFactor = 1.0;
 
@@ -107,13 +107,13 @@ TEST_CASE("Compare results of serial and parallel varlet integrators with a line
     verletIntegratorParallelNew.run(timeSteps, dt);
 
     std::vector<double> diffMags;
-    for (int i=0; i<nIons; ++i){
+    for (unsigned int i=0; i<nIons; ++i){
         diffMags.push_back( (particlesSerial[i]->getLocation() - particlesParallelNew[i]->getLocation()).magnitude() );
     }
     double sum = std::accumulate(diffMags.begin(), diffMags.end(), 0.0);
     double maximumDiff = *std::max_element(diffMags.begin(), diffMags.end());
 
-    for (int i=0; i<nIons; ++i){
+    for (unsigned int i=0; i<nIons; ++i){
         std::cout <<
             particlesSerial[i]->getLocation()<< " | " <<
             particlesParallelNew[i]->getLocation()<< " | " <<
