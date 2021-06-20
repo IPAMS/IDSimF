@@ -89,7 +89,7 @@ int main(int argc, const char * argv[]) {
             throw std::invalid_argument("wrong configuration value: integrator mode");
         }
 
-        int timeSteps = simConf.intParameter("sim_time_steps");
+        unsigned int timeSteps = simConf.unsignedIntParameter("sim_time_steps");
         int trajectoryWriteInterval = simConf.intParameter("trajectory_write_interval");
         int fftWriteInterval = simConf.intParameter("fft_write_interval");
         double dt = simConf.doubleParameter("dt");
@@ -228,7 +228,7 @@ int main(int argc, const char * argv[]) {
         auto trapFieldFunction =
                 [exciteMode, rfMode, excitePulseLength, excitePulsePotential, omega, &swiftWaveForm, &V_0, &V_0_ramp,
                         &potentialArrays, &potentialsFactorsDc, &potentialFactorsRf, &potentialFactorsExcite]
-                        (BTree::Particle* particle, int /*particleIndex*/, auto& /*tree*/, double time, int timestep)
+                        (BTree::Particle* particle, int /*particleIndex*/, auto& /*tree*/, double time, unsigned int timestep)
                         -> Core::Vector {
 
                     Core::Vector pos = particle->getLocation();
@@ -270,7 +270,7 @@ int main(int argc, const char * argv[]) {
                 [spaceChargeFactor, &trapFieldFunction,
                         axialPotential_lowerStart, axialPotential_upperStart, axialPotentialGradient](
                         BTree::Particle* particle, int particleIndex,
-                        auto& tree, double time, int timestep) -> Core::Vector {
+                        auto& tree, double time, unsigned int timestep) -> Core::Vector {
 
                     Core::Vector pos = particle->getLocation();
                     double particleCharge = particle->getCharge();

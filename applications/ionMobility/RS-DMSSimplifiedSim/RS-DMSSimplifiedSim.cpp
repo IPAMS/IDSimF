@@ -61,7 +61,7 @@ int main(int argc, const char * argv[]) {
         std::string confFileName = argv[1];
         AppUtils::SimulationConfiguration simConf(confFileName, logger);
 
-        std::vector<int> nParticles = simConf.intVectorParameter("n_particles");
+        std::vector<unsigned int> nParticles = simConf.unsignedIntVectorParameter("n_particles");
         int nSteps = simConf.intParameter("sim_time_steps");
         int nStepsPerOscillation = simConf.intParameter("sim_time_steps_per_sv_oscillation");
         int concentrationWriteInterval = simConf.intParameter("concentrations_write_interval");
@@ -145,7 +145,7 @@ int main(int argc, const char * argv[]) {
         // init simulation  =====================================================================
 
         // create and add simulation particles:
-        int nParticlesTotal = 0;
+        unsigned int nParticlesTotal = 0;
         std::vector<uniqueReactivePartPtr>particles;
         std::vector<BTree::Particle*>particlesPtrs;
         std::vector<std::vector<double>> trajectoryAdditionalParams;
@@ -157,7 +157,7 @@ int main(int argc, const char * argv[]) {
             RS::Substance *subst = rsSimConf->substance(i);
             std::vector<Core::Vector> initialPositions =
                     ParticleSimulation::util::getRandomPositionsInBox(nParticles[i],initCorner,initBoxSize);
-            for (int k = 0; k < nParticles[i]; k++) {
+            for (unsigned int k = 0; k < nParticles[i]; k++) {
                 uniqueReactivePartPtr particle = std::make_unique<RS::ReactiveParticle>(subst);
 
                 // init position and initial chemical species of the particle:
@@ -166,7 +166,7 @@ int main(int argc, const char * argv[]) {
                 particle->setFloatAttribute(key_ChemicalIndex, substIndex);
 
                 particlesPtrs.push_back(particle.get());
-                rsSim.addParticle(particle.get(), nParticlesTotal);
+                rsSim.addParticle(particle.get(), static_cast<int>(nParticlesTotal));
                 particles.push_back(std::move(particle));
                 trajectoryAdditionalParams.emplace_back(std::vector<double>(1));
                 nParticlesTotal++;
@@ -243,8 +243,8 @@ int main(int argc, const char * argv[]) {
             fieldMagnitude = fieldFct(rsSim.simulationTime());
             reactionConditions.electricField = fieldMagnitude;
 
-            for (int i = 0; i < nParticlesTotal; i++) {
-                bool reacted = rsSim.react(i, reactionConditions, dt_s);
+            for (unsigned int i = 0; i < nParticlesTotal; i++) {
+                bool reacted = rsSim.react(static_cast<int>(i), reactionConditions, dt_s);
 
                 if (reacted){
                     //we had an reaction event: Update the chemical species for the trajectory
@@ -264,7 +264,7 @@ int main(int argc, const char * argv[]) {
             if (cvMode == AUTO_CV && step % nStepsPerOscillation == 0) {
                 //calculate current mean z-position:
                 double buf = 0.0;
-                for (int i = 0; i < nParticlesTotal; i++) {
+                for (unsigned int i = 0; i < nParticlesTotal; i++) {
                     buf += particles[i]->getLocation().z();
                 }
                 double currentMeanZPos = buf / nParticlesTotal;

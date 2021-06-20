@@ -52,7 +52,7 @@ namespace ParticleSimulation {
             probeForces(std::vector<BTree::Particle>& ions, Plane plane, int nU, int nV, double minU, double minV,
                     double maxU, double maxV, double slicePos);
 
-        [[nodiscard]] std::vector<Core::Vector> getRandomPositionsInBox(int nPositions,Core::Vector corner, Core::Vector boxSize);
+        [[nodiscard]] std::vector<Core::Vector> getRandomPositionsInBox(unsigned int nPositions, Core::Vector corner, Core::Vector boxSize);
 
         //std::vector<std::unique_ptr<BTree::Particle>>
         //getRandomIonsInBox(int numIons, double charge, Core::Vector corner, Core::Vector boxSize, double timeOfBirthRange=0.0);

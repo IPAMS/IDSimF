@@ -74,7 +74,7 @@ namespace BTree{
         // Diagnostic methods:
         [[nodiscard]] std::string toString() const override;
         virtual void printTree(int level) const;
-        void writeToStream(std::ostream& filestream,void (*writeFct)(std::ostream& filestream)) const;
+        void writeToStream(std::ostream& filestream,void (*writeFct)(std::ostream& filestream, const NodType* node)) const;
         virtual void testNodeIntegrity(int level);
 
 
@@ -109,7 +109,7 @@ namespace BTree{
         //destroy all sub-nodes:
         for (auto & octNode : octNodes_){
             if(octNode != nullptr){
-                deleteoctNode;
+                delete(octNode);
                 octNode = nullptr;
             }
         }
@@ -457,7 +457,7 @@ namespace BTree{
      */
     template<class NodType>
     void GenericBaseNode<NodType>::writeToStream(std::ostream& filestream,
-                                                 void (*writeFct)(std::ostream& filestream) ) const{
+                                                 void (*writeFct)(std::ostream& filestream, const NodType* node) ) const{
 
         writeFct(filestream, static_cast<const NodType*>(this));
 

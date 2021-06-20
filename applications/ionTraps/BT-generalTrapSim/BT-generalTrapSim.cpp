@@ -93,9 +93,9 @@ int main(int argc, const char * argv[]) {
             throw std::invalid_argument("wrong configuration value: integrator mode");
         }
 
-        int timeSteps = simConf.intParameter("sim_time_steps");
-        int trajectoryWriteInterval = simConf.intParameter("trajectory_write_interval");
-        int fftWriteInterval = simConf.intParameter("fft_write_interval");
+        unsigned int timeSteps = simConf.unsignedIntParameter("sim_time_steps");
+        unsigned int trajectoryWriteInterval = simConf.unsignedIntParameter("trajectory_write_interval");
+        unsigned int fftWriteInterval = simConf.unsignedIntParameter("fft_write_interval");
         double dt = simConf.doubleParameter("dt");
 
         std::string fftWriteMode_str = simConf.stringParameter("fft_write_mode");
@@ -228,7 +228,7 @@ int main(int argc, const char * argv[]) {
                 [exciteMode, rfMode, excitePulseLength, excitePulsePotential,
                         omega, &swiftWaveForm, &V_0, &V_0_ramp,
                         &potentialArrays, &potentialsFactorsDc, &potentialFactorsRf, &potentialFactorsExcite]
-                        (BTree::Particle* particle, int /*particleIndex*/, auto& /*tree*/, double time, int timestep)
+                        (BTree::Particle* particle, int /*particleIndex*/, auto& /*tree*/, double time, unsigned int timestep)
                         -> Core::Vector {
 
                     Core::Vector pos = particle->getLocation();
@@ -267,7 +267,7 @@ int main(int argc, const char * argv[]) {
         auto accelerationFunctionQIT =
                 [spaceChargeFactor, &trapFieldFunction](
                         BTree::Particle* particle, int particleIndex,
-                        auto& tree, double time, int timestep) -> Core::Vector {
+                        auto& tree, double time, unsigned int timestep) -> Core::Vector {
 
                     double particleCharge = particle->getCharge();
 
@@ -293,7 +293,7 @@ int main(int argc, const char * argv[]) {
         auto accelerationFunctionQIT_parallel =
                 [spaceChargeFactor, &trapFieldFunction](
                         BTree::Particle* particle, int particleIndex,
-                        auto& tree, double time, int timestep) -> Core::Vector {
+                        auto& tree, double time, unsigned int timestep) -> Core::Vector {
 
                     double particleCharge = particle->getCharge();
 
@@ -325,7 +325,7 @@ int main(int argc, const char * argv[]) {
         auto otherActionsFunctionQIT = [&simulationDomainBoundaries, &ionsInactive, &potentialArrays, &startSplatTracker](
                 Core::Vector& newPartPos, BTree::Particle* particle,
                 int /*particleIndex*/,
-                auto& /*tree*/, double time, int /*timestep*/) {
+                auto& /*tree*/, double time, unsigned int /*timestep*/) {
             // if the ion is out of the boundary box or ends up in an electrode:
             // Terminate the ion
             // (since all potential arrays of the simulation define the basis functions of a linear combination,
@@ -387,7 +387,7 @@ int main(int argc, const char * argv[]) {
         auto timestepWriteFunction =
                 [trajectoryWriteInterval, fftWriteInterval, fftWriteMode, &V_0, &V_rf_export, &ionsInactive,
                         &hdf5Writer, &startSplatTracker, &ionsInactiveWriter, &fftWriter, &integratorPtr, &logger](
-                        std::vector<BTree::Particle*>& particles, auto& /*tree*/, double time, int timestep,
+                        std::vector<BTree::Particle*>& particles, auto& /*tree*/, double time, unsigned int timestep,
                         bool lastTimestep) {
 
                     // check if simulation should be terminated (if all particles are terminated)

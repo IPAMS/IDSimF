@@ -36,9 +36,9 @@ TEST_CASE( "Test velocity integrator", "[ParticleSimulation][VelocityIntegrator]
     SECTION( "Velocity integrator should be able to integrate particles correctly") {
 
         //Test with verlet integration:
-        double nParticles = 10;
         double dt = 1e-4;
-        int timeSteps = 50;
+        unsigned int nParticles = 10;
+        unsigned int timeSteps = 50;
 
         double ionVelocity = 10.0;
 
@@ -53,7 +53,7 @@ TEST_CASE( "Test velocity integrator", "[ParticleSimulation][VelocityIntegrator]
         std::vector<BTree::Particle*>particlesPtrs;
 
         double yPos = 0;
-        for (int i=0; i<nParticles; i++){
+        for (unsigned int i=0; i<nParticles; ++i){
             BTree::uniquePartPtr particle = std::make_unique<BTree::Particle>(
                     Core::Vector(0.0,yPos,0.0),
                     Core::Vector(0.0,0.0,0.0),
@@ -78,13 +78,13 @@ TEST_CASE( "Test velocity integrator", "[ParticleSimulation][VelocityIntegrator]
 
         SECTION("Simulation run should run through and functions should be called"){
 
-            int nTimeStepsWritten = 0;
+            unsigned int nTimeStepsWritten = 0;
             auto timestepWriteFct = [&nTimeStepsWritten](std::vector<BTree::Particle*>& /*particles*/, double /*time*/,
                     int /*timestep*/,bool /*lastTimestep*/){
                 nTimeStepsWritten++;
             };
 
-            int nParticlesTouched = 0;
+            unsigned int nParticlesTouched = 0;
             auto otherActionsFct = [&nParticlesTouched] (
                     Core::Vector& /*newPartPos*/,BTree::Particle* /*particle*/,
                     int /*particleIndex*/, double /*time*/, int /*timestep*/){

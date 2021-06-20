@@ -88,7 +88,7 @@ void ParticleSimulation::VerletIntegrator::addParticle(BTree::Particle *particle
  * @param nTimesteps number of time steps to run the verlet integration
  * @param dt time step length
  */
-void ParticleSimulation::VerletIntegrator::run(int nTimesteps, double dt) {
+void ParticleSimulation::VerletIntegrator::run(unsigned int nTimesteps, double dt) {
 
     this->runState_ = RUNNING;
     bearParticles_(0.0);
@@ -96,7 +96,7 @@ void ParticleSimulation::VerletIntegrator::run(int nTimesteps, double dt) {
         timestepWriteFunction_(particles_, tree_, time_, timestep_, false);
     }
 
-    for (int step=0; step< nTimesteps; step++){
+    for (unsigned int step=0; step< nTimesteps; ++step){
         runSingleStep(dt);
         if (this->runState_ == IN_TERMINATION){
             break;

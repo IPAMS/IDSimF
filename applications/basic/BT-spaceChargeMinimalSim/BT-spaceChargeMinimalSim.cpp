@@ -54,7 +54,7 @@ int main(int argc, const char * argv[]) {
 
 
         // read basic simulation parameters =============================================================
-        int timeSteps = simConf.intParameter("sim_time_steps");
+        unsigned int timeSteps = simConf.unsignedIntParameter("sim_time_steps");
         int trajectoryWriteInterval = simConf.intParameter("trajectory_write_interval");
         double dt = simConf.doubleParameter("dt");
 

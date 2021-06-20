@@ -191,7 +191,7 @@ TEST_CASE("Test serial verlet integrator", "[ParticleSimulation][VerletIntegrato
         //prepare data structures:
         double nParticles = 2;
         double dt = 1e-4;
-        int timeSteps = 50;
+        unsigned int timeSteps = 50;
 
         auto accelerationFctReactive = [ionAcceleration] (
                 BTree::Particle* particle, int /*particleIndex*/,

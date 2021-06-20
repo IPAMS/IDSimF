@@ -246,12 +246,12 @@ int main(int argc, const char * argv[]) {
 
 
         //read ion configuration =======================================================================
-        int nParticlesTotal = 0;
+        unsigned int nParticlesTotal = 0;
         std::vector<uniqueReactivePartPtr> particles;
         std::vector<BTree::Particle*> particlePtrs;
 
         // read and init random ion box configuration
-        std::vector<int> nIons = simConf.intVectorParameter("n_ions");
+        std::vector<unsigned int> nIons = simConf.unsignedIntVectorParameter("n_ions");
 
         Core::Vector initCorner(-startWidth_m/2.0, -startWidth_m/2.0, -startWidth_m/2.0);
         Core::Vector initBoxSize(startWidth_m, startWidth_m, startWidth_m);
@@ -260,14 +260,14 @@ int main(int argc, const char * argv[]) {
             RS::Substance* subst = discreteSubstances[i];
             std::vector<Core::Vector> initialPositions =
                     ParticleSimulation::util::getRandomPositionsInBox(nIons[i], initCorner, initBoxSize);
-            for (int k = 0; k<nIons[i]; k++) {
+            for (unsigned int k = 0; k<nIons[i]; k++) {
                 uniqueReactivePartPtr particle = std::make_unique<RS::ReactiveParticle>(subst);
 
-                particle->setIndex(nParticlesTotal);
+                particle->setIndex(static_cast<int>(nParticlesTotal));
                 particle->setLocation(initialPositions[k]);
                 particle->setFloatAttribute(key_Collisions_total, 0);
                 particlePtrs.push_back(particle.get());
-                rsSim.addParticle(particle.get(), nParticlesTotal);
+                rsSim.addParticle(particle.get(), static_cast<int>(nParticlesTotal));
                 particles.push_back(std::move(particle));
                 nParticlesTotal++;
             }
@@ -284,7 +284,7 @@ int main(int argc, const char * argv[]) {
         // define functions for the trajectory integration ==================================================
 
         // some variables for synchronization between calls of the acceleration function:
-        int lastTimestep = -1;
+        unsigned int lastTimestep = 0;
         double parameter_a;
         double exciteCos;
 
@@ -293,7 +293,7 @@ int main(int argc, const char * argv[]) {
                         spaceChargeFactor, omega, z_0, U_0, d_square_2,
                         &swiftWaveForm, exciteDivisor, &V_0, &V_0_ramp, &lastTimestep, &parameter_a, &exciteCos](
                         BTree::Particle* particle, int /*particleIndex*/,
-                        BTree::Tree& tree, double time, int timestep) -> Core::Vector {
+                        BTree::Tree& tree, double time, unsigned int timestep) -> Core::Vector {
 
                     Core::Vector pos = particle->getLocation();
                     double particleCharge = particle->getCharge();
@@ -307,7 +307,7 @@ int main(int argc, const char * argv[]) {
                         tsExcitePotential = swiftWaveForm->getValue(timestep)*excitePotential;
                     }
                     else if (exciteMode==CONTINUOUSSINE) {
-                        if (timestep>lastTimestep) {
+                        if ( (timestep+1) > lastTimestep) {
                             exciteCos = cos(omega/exciteDivisor*time)*excitePotential;
                         }
                         tsExcitePotential = exciteCos;
@@ -319,12 +319,11 @@ int main(int argc, const char * argv[]) {
 
                     double a_ex = tsExcitePotential/z_0;
 
-                    Core::Vector rfForce(0, 0, 0);
-                    if (timestep>lastTimestep) {
+                    if ( (timestep+1) > lastTimestep) {
                         parameter_a = (U_0+(V_0*cos(omega*time)))/d_square_2;
                         lastTimestep = timestep;
                     }
-                    rfForce = Core::Vector(
+                    Core::Vector rfForce = Core::Vector(
                             parameter_a*pos.x(),
                             parameter_a*pos.y(),
                             -2*parameter_a*pos.z()+a_ex)*particleCharge;
@@ -346,7 +345,7 @@ int main(int argc, const char * argv[]) {
             startSplatTracker.particleStart(particle, time);
         };
 
-        int ionsInactive = 0;
+        unsigned int ionsInactive = 0;
         auto otherActionsFunctionQIT = [maxIonRadius_m, &ionsInactive, &startSplatTracker]
                 (Core::Vector& newPartPos, BTree::Particle* particle,
                  int /*particleIndex*/, BTree::Tree& /*tree*/, double time, int /*timestep*/) {
@@ -469,9 +468,9 @@ int main(int argc, const char * argv[]) {
             if (step%trajectoryWriteInterval==0) {
                 rsSim.logConcentrations(logger);
             }
-            for (int i = 0; i<nParticlesTotal; i++) {
+            for (unsigned int i = 0; i<nParticlesTotal; i++) {
                 if (particles[i]->isActive()) {
-                    rsSim.react(i, reactionConditions, dt);
+                    rsSim.react(static_cast<int>(i), reactionConditions, dt);
                     int substIndex = substanceIndices.at(particles[i]->getSpecies());
                     particles[i]->setFloatAttribute(key_ChemicalIndex, substIndex);
                 }

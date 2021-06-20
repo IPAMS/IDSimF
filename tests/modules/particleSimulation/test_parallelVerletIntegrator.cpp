@@ -68,7 +68,7 @@ TEST_CASE( "Test parallel verlet integrator", "[ParticleSimulation][ParallelVerl
         REQUIRE_NOTHROW(verletIntegrator.run(1,dt));
 
         //particles should be addable and integrator should be able to run:
-        int nSteps = 100;
+        unsigned int nSteps = 100;
         REQUIRE_NOTHROW(verletIntegrator.addParticle(&testParticle1));
         REQUIRE_NOTHROW(verletIntegrator.run(nSteps,dt));
 

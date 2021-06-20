@@ -140,14 +140,14 @@ std::vector<std::tuple<double,double,Core::Vector>> ParticleSimulation::util::pr
  * @param boxSize size of the box in x,y,z direction
  * @return random sampled positions in the speciefied box
  */
-std::vector<Core::Vector> ParticleSimulation::util::getRandomPositionsInBox(int nPositions, Core::Vector corner,
-                                                                             Core::Vector boxSize) {
+std::vector<Core::Vector> ParticleSimulation::util::getRandomPositionsInBox(unsigned int nPositions, Core::Vector corner,
+                                                                            Core::Vector boxSize) {
     std::vector<Core::Vector> result;
     Core::RndDistPtr rnd_x = Core::globalRandomGenerator->getUniformDistribution(0,boxSize.x());
     Core::RndDistPtr rnd_y = Core::globalRandomGenerator->getUniformDistribution(0,boxSize.y());
     Core::RndDistPtr rnd_z = Core::globalRandomGenerator->getUniformDistribution(0,boxSize.z());
 
-    for (int i=0; i<nPositions; i++) {
+    for (unsigned int i=0; i<nPositions; i++) {
         result.push_back(
             Core::Vector(
                     corner.x() + rnd_x->rndValue(),

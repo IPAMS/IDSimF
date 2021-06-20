@@ -34,17 +34,17 @@
 #include <Eigen/Dense>
 #include "Core_vector.hpp"
 
-void testParallel(int nElements, int nSteps){
+void testParallel(unsigned int nElements, int nSteps){
     std::vector<double> myVector(nElements);
     #pragma omp parallel for
-    for (int i=0; i<nElements; i++){
+    for (unsigned int i=0; i<nElements; i++){
         myVector[i] = 1e-3*i;
     }
 
 
     for (int step=0; step<nSteps; step++) {
     #pragma omp parallel for
-        for (int i = 0; i < nElements; i++) {
+        for (unsigned int i = 0; i < nElements; i++) {
             myVector[i] = sin(myVector[i]);
         }
     }
@@ -52,18 +52,18 @@ void testParallel(int nElements, int nSteps){
 }
 
 template<typename T>
-std::vector<T> testVector(int nElements,int nSteps, std::string message){
+std::vector<T> testVector(unsigned int nElements, int nSteps, std::string message){
     clock_t begin = std::clock();
     std::time_t wallBegin = std::time(nullptr);
 
     std::vector<T> myVector;
-    for (int i = 0; i < nElements; i++) {
+    for (unsigned int i = 0; i < nElements; i++) {
         myVector.push_back(T(1e-3 * i, 2e-3 * i, 3e-3 * i));
     }
 
     for (int step = 0; step < nSteps; step++) {
         //#pragma omp parallel for default(none) shared(myVector) private(step, nElements)
-        for (int i = 1; i < nElements - 1; i++) {
+        for (unsigned int i = 1; i < nElements - 1; i++) {
             myVector[i] = (myVector[i] + myVector[i + 1]) / 2.0;
         }
     }
@@ -81,7 +81,7 @@ std::vector<T> testVector(int nElements,int nSteps, std::string message){
 }
 
 int main(int argc, const char * argv[]) {
-    int nElements = 2000000;
+    unsigned int nElements = 2000000;
     int nSteps = 1000;
 
     if (argc <2){

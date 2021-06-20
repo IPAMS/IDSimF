@@ -19,13 +19,13 @@
 #include <iostream>
 
 template<typename PAType>
-void performBenchmark(int nSamples,
+void performBenchmark(unsigned int nSamples,
         double xStart,
         double xStop, double y, double z,
         std::string filename, std::string message){
 
 
-    std::vector<double> xVec = ParticleSimulation::linspace(xStart,xStop, nSamples);
+    std::vector<double> xVec = ParticleSimulation::linspace(xStart,xStop, static_cast<int>(nSamples));
 
     PAType simPa(filename);
 
@@ -34,7 +34,7 @@ void performBenchmark(int nSamples,
     stopWatch.start();
 
     Core::Vector field;
-    for (int i=0; i< nSamples; ++i){
+    for (unsigned int i=0; i< nSamples; ++i){
 
         //simPa.isElectrode(xVec[i],y,z);
         //simPa.getInterpolatedPotential(xVec[i],y,z);
@@ -51,7 +51,7 @@ int main() {
 
     Core::safetyGuards = true;
 
-    int n = 50000000;
+    unsigned int n = 50000000;
 
     performBenchmark<ParticleSimulation::SimionPotentialArray>
         (n, 0.038, 0.038, 0.001, 0.002, "simion_test_cylindrical_mirrored.pa","cylindrical");

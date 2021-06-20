@@ -56,7 +56,7 @@ int main(int argc, const char * argv[]) {
 
 
         // read basic simulation parameters =============================================================
-        int timeSteps = simConf.intParameter("sim_time_steps");
+        unsigned int timeSteps = simConf.unsignedIntParameter("sim_time_steps");
         int trajectoryWriteInterval = simConf.intParameter("trajectory_write_interval");
         double dt = simConf.doubleParameter("dt");
 
@@ -68,11 +68,11 @@ int main(int argc, const char * argv[]) {
         std::vector<std::unique_ptr<BTree::Particle>> particles;
         std::vector<BTree::Particle*> particlePtrs;
 
-        std::vector<int> nIons = simConf.intVectorParameter("n_ions");
+        std::vector<unsigned int> nIons = simConf.unsignedIntVectorParameter("n_ions");
         std::vector<double> ionMasses = simConf.doubleVectorParameter("ion_masses");
 
         for (std::size_t i = 0; i<nIons.size(); i++) {
-            int nParticles = nIons[i];
+            unsigned int nParticles = nIons[i];
             double mass = ionMasses[i];
             ParticleSimulation::BoxStartZone startZone(Core::Vector(3.0, 3.0, 3.0)/1000.0);
             auto ions = startZone.getRandomParticlesInStartZone(nParticles, 1.0);
@@ -81,7 +81,7 @@ int main(int argc, const char * argv[]) {
                                                                      1000.0,
             Core::Vector(3, 3, 3) / 1000.0);
              */
-            for (int j = 0; j<nParticles; j++) {
+            for (unsigned int j = 0; j<nParticles; j++) {
                 ions[j]->setMassAMU(mass);
                 particlePtrs.push_back(ions[j].get());
                 particles.push_back(std::move(ions[j]));

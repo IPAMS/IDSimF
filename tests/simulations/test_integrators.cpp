@@ -37,9 +37,9 @@
 #include <numeric>
 
 void prepareIons(std::vector<std::unique_ptr<BTree::Particle>> &particles,
-                 std::vector<BTree::Particle*> &particlePtrs, int nIons){
+                 std::vector<BTree::Particle*> &particlePtrs, unsigned int nIons){
 
-    for (int i=0; i<nIons; i++){
+    for (unsigned int i=0; i < nIons; ++i){
         double posy = i*1.0/nIons;
         std::unique_ptr<BTree::Particle> newIon = std::make_unique<BTree::Particle>(Core::Vector(0,posy,0), 1.0);
         newIon -> setMassAMU(100);

@@ -66,9 +66,9 @@ int main(int argc, const char * argv[]) {
         std::string confFileName = argv[1];
         AppUtils::SimulationConfiguration simConf(confFileName, logger);
 
-        std::vector<int> nParticles = simConf.intVectorParameter("n_particles");
-        int nSteps = simConf.intParameter("sim_time_steps");
-        int nStepsPerOscillation = simConf.intParameter("sim_time_steps_per_sv_oscillation");
+        std::vector<unsigned int> nParticles = simConf.unsignedIntVectorParameter("n_particles");
+        unsigned int nSteps = simConf.unsignedIntParameter("sim_time_steps");
+        unsigned int nStepsPerOscillation = simConf.unsignedIntParameter("sim_time_steps_per_sv_oscillation");
         int concentrationWriteInterval = simConf.intParameter("concentrations_write_interval");
         int trajectoryWriteInterval = simConf.intParameter("trajectory_write_interval");
         double spaceChargeFactor = simConf.doubleParameter("space_charge_factor");
@@ -217,7 +217,7 @@ int main(int argc, const char * argv[]) {
         // init simulation  =====================================================================
 
         // create and add simulation particles:
-        int nParticlesTotal = 0;
+        unsigned int nParticlesTotal = 0;
         std::vector<uniqueReactivePartPtr> particles;
         std::vector<BTree::Particle*> particlesPtrs;
         std::vector<std::vector<double>> trajectoryAdditionalParams;
@@ -229,13 +229,13 @@ int main(int argc, const char * argv[]) {
             RS::Substance* subst = rsSimConf->substance(i);
             std::vector<Core::Vector> initialPositions =
                     ParticleSimulation::util::getRandomPositionsInBox(nParticles[i], initCorner, initBoxSize);
-            for (int k = 0; k<nParticles[i]; k++) {
+            for (unsigned int k = 0; k<nParticles[i]; ++k) {
                 uniqueReactivePartPtr particle = std::make_unique<RS::ReactiveParticle>(subst);
 
                 particle->setLocation(initialPositions[k]);
 
                 particlesPtrs.push_back(particle.get());
-                rsSim.addParticle(particle.get(), nParticlesTotal);
+                rsSim.addParticle(particle.get(), static_cast<int>(nParticlesTotal));
                 particles.push_back(std::move(particle));
                 trajectoryAdditionalParams.push_back(std::vector<double>(1));
                 nParticlesTotal++;
@@ -385,12 +385,12 @@ int main(int argc, const char * argv[]) {
         AppUtils::Stopwatch stopWatch;
         stopWatch.start();
 
-        for (int step = 0; step<nSteps; step++) {
-            for (int i = 0; i<nParticlesTotal; i++) {
+        for (unsigned int step = 0; step<nSteps; step++) {
+            for (unsigned int i = 0; i<nParticlesTotal; i++) {
                 reactionConditions.electricField = fieldMagnitude;
                 reactionConditions.temperature = backgroundTemperatureFct(particles[i]->getLocation());
 
-                bool reacted = rsSim.react(i, reactionConditions, dt_s);
+                bool reacted = rsSim.react(static_cast<int>(i), reactionConditions, dt_s);
                 int substIndex = substanceIndices.at(particles[i]->getSpecies());
                 particles[i]->setFloatAttribute(key_ChemicalIndex, substIndex);
 
@@ -407,7 +407,7 @@ int main(int argc, const char * argv[]) {
             if (cvMode==AUTO_CV && step%nStepsPerOscillation==0) {
                 //calculate current mean z-position:
                 double buf = 0.0;
-                for (int i = 0; i<nParticlesTotal; i++) {
+                for (unsigned int i = 0; i<nParticlesTotal; i++) {
                     buf += particles[i]->getLocation().z();
                 }
                 double currentMeanZPos = buf/nParticlesTotal;

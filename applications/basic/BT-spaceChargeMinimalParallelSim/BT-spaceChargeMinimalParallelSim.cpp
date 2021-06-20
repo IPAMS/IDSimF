@@ -69,7 +69,7 @@ int main(int argc, const char * argv[]) {
         std::vector<std::unique_ptr<BTree::Particle>> particles;
         std::vector<BTree::Particle*> particlePtrs;
 
-        std::vector<int> nIons = std::vector<int>();
+        std::vector<unsigned int> nIons = std::vector<unsigned int>();
         std::vector<double> ionMasses = std::vector<double>();
 
         if (simConf.isParameter("ion_cloud_init_file")) {
@@ -83,19 +83,19 @@ int main(int argc, const char * argv[]) {
             }
         }
         else {
-            nIons = simConf.intVectorParameter("n_ions");
+            nIons = simConf.unsignedIntVectorParameter("n_ions");
             ionMasses = simConf.doubleVectorParameter("ion_masses");
-        }
 
-        for (std::size_t i = 0; i<nIons.size(); i++) {
-            int nParticles = nIons[i];
-            double mass = ionMasses[i];
-            ParticleSimulation::BoxStartZone startZone(Core::Vector(3, 3, 3)/1000.0);
-            auto ions = startZone.getRandomParticlesInStartZone(nParticles, 1.0);
-            for (int j = 0; j<nParticles; j++) {
-                ions[j]->setMassAMU(mass);
-                particlePtrs.push_back(ions[j].get());
-                particles.push_back(std::move(ions[j]));
+            for (std::size_t i = 0; i<nIons.size(); i++) {
+                unsigned int nParticles = nIons[i];
+                double mass = ionMasses[i];
+                ParticleSimulation::BoxStartZone startZone(Core::Vector(3, 3, 3)/1000.0);
+                auto ions = startZone.getRandomParticlesInStartZone(nParticles, 1.0);
+                for (unsigned int j = 0; j<nParticles; j++) {
+                    ions[j]->setMassAMU(mass);
+                    particlePtrs.push_back(ions[j].get());
+                    particles.push_back(std::move(ions[j]));
+                }
             }
         }
 

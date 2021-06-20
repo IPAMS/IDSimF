@@ -76,7 +76,7 @@ void ParticleSimulation::ParallelVerletIntegrator::initInternalState_(){
     tree_.init();
 }
 
-void ParticleSimulation::ParallelVerletIntegrator::run(int nTimesteps, double dt) {
+void ParticleSimulation::ParallelVerletIntegrator::run(unsigned int nTimesteps, double dt) {
 
     // run init:
     this->runState_ = RUNNING;
@@ -87,7 +87,7 @@ void ParticleSimulation::ParallelVerletIntegrator::run(int nTimesteps, double dt
     }
 
     // run:
-    for (int step=0; step< nTimesteps; step++){
+    for (unsigned int step=0; step< nTimesteps; step++){
         runSingleStep(dt);
         if (this->runState_ == IN_TERMINATION){
             break;

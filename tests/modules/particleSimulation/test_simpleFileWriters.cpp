@@ -81,13 +81,13 @@ TEST_CASE("Test FFT file writer", "[ParticleSimulation][ScalarWriter][file write
     unsigned int nParticles_a = 10;
     unsigned int nParticles_b = 10;
     unsigned int nParticles = nParticles_a + nParticles_b;
-    for (int i=0; i< nParticles_a; i++){
+    for (unsigned int i=0; i < nParticles_a; i++){
         std::unique_ptr<BTree::Particle> part = std::make_unique<BTree::Particle>(Core::Vector(0,0,i*0.1),1);
         part->setMassAMU(10);
         particlePtrs.push_back(part.get());
         particles.push_back(std::move(part));
     }
-    for (int i=0; i< nParticles_b; i++){
+    for (unsigned int i=0; i< nParticles_b; i++){
         std::unique_ptr<BTree::Particle> part = std::make_unique<BTree::Particle>(Core::Vector(0.1,0,i*0.1),1);
         part->setMassAMU(20);
         particlePtrs.push_back(part.get());
@@ -99,9 +99,9 @@ TEST_CASE("Test FFT file writer", "[ParticleSimulation][ScalarWriter][file write
 
         ParticleSimulation::IdealizedQitFFTWriter fw(particlePtrs, "fft_file_writer_test.txt");
 
-        int nSteps = 10;
+        unsigned int nSteps = 10;
         double diff = 0;
-        for (int i=0; i< nSteps; i++){
+        for (unsigned int i=0; i< nSteps; i++){
             if (i% 2 ==0){
                 diff = -1;
             }

@@ -22,13 +22,13 @@
 //#include <string>
 
 template<typename PAType>
-void performBenchmark(int nSamples,
+void performBenchmark(unsigned int nSamples,
         double xStart,
         double xStop, double y, double z,
         std::string filename, std::string message){
 
 
-    std::vector<double> xVec = ParticleSimulation::linspace(xStart,xStop, nSamples);
+    std::vector<double> xVec = ParticleSimulation::linspace(xStart,xStop, static_cast<int>(nSamples));
 
     PAType simPa(filename);
 
@@ -38,7 +38,7 @@ void performBenchmark(int nSamples,
     AppUtils::Stopwatch stopWatch;
     stopWatch.start();
 
-    for (int i=0; i< nSamples; ++i){
+    for (unsigned int i=0; i< nSamples; ++i){
 
         //simPa.isElectrode(xVec[i],y,z);
         //simPa.getInterpolatedPotential(xVec[i],y,z);

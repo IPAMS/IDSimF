@@ -68,7 +68,7 @@ namespace ParticleSimulation{
                                 int particleIndex,
                                 BTree::Tree& tree,
                                 double time,
-                                int timestep)>
+                                unsigned int timestep)>
                 accelerationFctType;
 
         /**
@@ -78,7 +78,7 @@ namespace ParticleSimulation{
                 <void (std::vector<BTree::Particle*>& particles,
                        BTree::Tree& tree,
                        double time,
-                       int timestep,
+                       unsigned int timestep,
                        bool lastTimestep)>
                 timestepWriteFctType;
 
@@ -92,9 +92,8 @@ namespace ParticleSimulation{
                        int particleIndex,
                        BTree::Tree& tree,
                        double time,
-                       int timestep)>
+                       unsigned int timestep)>
                 otherActionsFctType;
-
 
             VerletIntegrator(
                     std::vector<BTree::Particle*> particles,
@@ -114,7 +113,7 @@ namespace ParticleSimulation{
             );
 
             void addParticle(BTree::Particle* particle) override;
-            void run(int nTimesteps, double dt) override;
+            void run(unsigned int nTimesteps, double dt) override;
             void runSingleStep(double dt) override;
             void finalizeSimulation() override;
 

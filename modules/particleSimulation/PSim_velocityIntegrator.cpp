@@ -67,9 +67,9 @@ void ParticleSimulation::VelocityIntegrator::addParticle_(BTree::Particle *parti
  * @param nTimesteps number of time steps to run the integration
  * @param dt time step length
  */
-void ParticleSimulation::VelocityIntegrator::run(int nTimesteps, double dt) {
+void ParticleSimulation::VelocityIntegrator::run(unsigned int nTimesteps, double dt) {
     this->runState_ = RUNNING;
-    for (int step=0; step< nTimesteps; step++){
+    for (unsigned int step=0; step< nTimesteps; step++){
         runSingleStep(dt);
         if (this->runState_ == IN_TERMINATION){
             break;

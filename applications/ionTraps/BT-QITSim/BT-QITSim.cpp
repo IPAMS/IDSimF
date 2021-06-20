@@ -98,9 +98,9 @@ int main(int argc, const char * argv[]) {
             throw std::invalid_argument("wrong configuration value: integrator mode");
         }
 
-        int timeSteps = simConf.intParameter("sim_time_steps");
-        int trajectoryWriteInterval = simConf.intParameter("trajectory_write_interval");
-        int fftWriteInterval = simConf.intParameter("fft_write_interval");
+        unsigned int timeSteps = simConf.unsignedIntParameter("sim_time_steps");
+        unsigned int trajectoryWriteInterval = simConf.unsignedIntParameter("trajectory_write_interval");
+        unsigned int fftWriteInterval = simConf.unsignedIntParameter("fft_write_interval");
         double dt = simConf.doubleParameter("dt");
         std::vector<int> nIons = std::vector<int>();
         std::vector<double> ionMasses = std::vector<double>();
@@ -249,7 +249,7 @@ int main(int argc, const char * argv[]) {
                         omega, z_0, U_0, d_square_2,
                         &rfSampledWaveForm, &higherFieldOrdersCoefficients, &swiftWaveForm, &V_0, &V_0_ramp](
                         BTree::Particle* particle, int /*particleIndex*/,
-                        auto& /*tree*/, double time, int timestep) -> Core::Vector {
+                        auto& /*tree*/, double time, unsigned int timestep) -> Core::Vector {
 
                     Core::Vector pos = particle->getLocation();
                     double particleCharge = particle->getCharge();
@@ -329,7 +329,7 @@ int main(int argc, const char * argv[]) {
         auto accelerationFunctionQIT =
                 [spaceChargeFactor, &trapFieldFunction](
                         BTree::Particle* particle, int particleIndex,
-                        auto& tree, double time, int timestep) -> Core::Vector {
+                        auto& tree, double time, unsigned int timestep) -> Core::Vector {
 
                     double particleCharge = particle->getCharge();
 
@@ -355,7 +355,7 @@ int main(int argc, const char * argv[]) {
         auto accelerationFunctionQIT_parallel =
                 [spaceChargeFactor, &trapFieldFunction](
                         BTree::Particle* particle, int particleIndex,
-                        auto& tree, double time, int timestep) -> Core::Vector {
+                        auto& tree, double time, unsigned int timestep) -> Core::Vector {
 
                     double particleCharge = particle->getCharge();
 
@@ -387,8 +387,8 @@ int main(int argc, const char * argv[]) {
 
         int ionsInactive = 0;
         auto otherActionsFunctionQIT = [maxIonRadius, &ionsInactive, &startSplatTracker]
-                (Core::Vector& newPartPos, BTree::Particle* particle, int /*particleIndex*/,
-                 auto& /*tree*/, double time, int /*timestep*/) {
+                (Core::Vector& newPartPos, BTree::Particle* particle, unsigned int /*particleIndex*/,
+                 auto& /*tree*/, double time, unsigned int /*timestep*/) {
             if (newPartPos.magnitude()>maxIonRadius) {
                 particle->setActive(false);
                 particle->setSplatTime(time);
@@ -442,7 +442,7 @@ int main(int argc, const char * argv[]) {
                 [trajectoryWriteInterval, fftWriteInterval, fftWriteMode, &V_0, &V_rf_export, &ionsInactive,
                         &hdf5Writer, &ionsInactiveWriter,
                         &fftWriter, &startSplatTracker, &logger](
-                        std::vector<BTree::Particle*>& particles, auto& /*tree*/, double time, int timestep,
+                        std::vector<BTree::Particle*>& particles, auto& /*tree*/, double time, unsigned int timestep,
                         bool lastTimestep) {
 
                     if (timestep%fftWriteInterval==0) {
