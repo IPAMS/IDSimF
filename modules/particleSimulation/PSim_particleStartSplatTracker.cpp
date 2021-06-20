@@ -39,7 +39,7 @@ void ParticleSimulation::ParticleStartSplatTracker::particleStart(BTree::Particl
 
     auto emplaceResult = pMap_.try_emplace(particle, entry);
     if (emplaceResult.second){ //emplace was successful, key was not already existing
-        particle->setIntegerAttribute("global index", (int) entry.globalIndex);
+        particle->setIntegerAttribute("global index", static_cast<int>(entry.globalIndex));
         pInsertIndex_++;
     } else {
         throw (std::invalid_argument("Illegal double insert into start splat tracker: Particle is already existing"));
@@ -64,7 +64,7 @@ void ParticleSimulation::ParticleStartSplatTracker::particleRestart(BTree::Parti
         newEntry.state = RESTARTED;
 
         pMap_.at(particle) = newEntry;
-        particle->setIntegerAttribute("global index", (int) newEntry.globalIndex);
+        particle->setIntegerAttribute("global index", static_cast<int>(newEntry.globalIndex));
         pInsertIndex_++;
     }
     catch (const std::out_of_range& exception) {

@@ -220,9 +220,9 @@ std::array<std::size_t,3> ParticleSimulation::InterpolatedField::findLowerBoundI
     auto lowerY = std::lower_bound(gridPointsY_.begin(), gridPointsY_.end(), y);
     auto lowerZ = std::lower_bound(gridPointsZ_.begin(), gridPointsZ_.end(), z);
     return {
-            (std::size_t)(lowerX-gridPointsX_.begin()),
-            (std::size_t)(lowerY-gridPointsY_.begin()),
-            (std::size_t)(lowerZ-gridPointsZ_.begin())};
+            static_cast<std::size_t>(lowerX-gridPointsX_.begin()),
+            static_cast<std::size_t>(lowerY-gridPointsY_.begin()),
+            static_cast<std::size_t>(lowerZ-gridPointsZ_.begin())};
 }
 
 void ParticleSimulation::InterpolatedField::updateBounds_() {

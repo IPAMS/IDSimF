@@ -83,13 +83,13 @@ void CollisionModel::CollisionStatistics::initCollisionModelFromStatisticsFile_(
                     icdfs_.emplace_back(std::vector<double>(0));
                 }
                 else if (parameterName == "n_collisions"){
-                    nDistCollisions_ = std::atoi(parameterValue.c_str());
+                    nDistCollisions_ = static_cast<int>(std::stol(parameterValue));
                 }
                 else if (parameterName == "n_dist_points"){
-                    nDistPoints_ = std::atoi(parameterValue.c_str());
+                    nDistPoints_ = static_cast<int>(std::stol(parameterValue));
                 }
                 else if (parameterName == "n_statistics"){
-                    nDist_ = std::atoi(parameterValue.c_str());
+                    nDist_ = static_cast<int>(std::stol(parameterValue));
                 }
             }
         }
@@ -110,7 +110,7 @@ std::size_t CollisionModel::CollisionStatistics::findUpperDistIndex(const double
         return 0;
     }
     else {
-        return ( (std::size_t)((--upper) - logMassRatios_.begin()));
+        return ( static_cast<std::size_t>((--upper) - logMassRatios_.begin()));
     }
 }
 

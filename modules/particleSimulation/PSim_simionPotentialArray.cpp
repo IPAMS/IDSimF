@@ -395,7 +395,7 @@ void ParticleSimulation::SimionPotentialArray::readBinaryPa_(std::ifstream &inSt
         dz_ = 1.0;
     }
 
-    numPoints_ = (unsigned int)(nx_ * ny_ * nz_);
+    numPoints_ = static_cast<unsigned int>(nx_ * ny_ * nz_);
     points_.resize(numPoints_);
     inStream.read( reinterpret_cast<char*>(points_.data()), sizeof(double)*numPoints_);
 }
@@ -616,7 +616,7 @@ double ParticleSimulation::SimionPotentialArray::potential_(index_t ix, index_t 
 }
 
 double ParticleSimulation::SimionPotentialArray::rawPotential_(index_t ix, index_t iy, index_t iz) const{
-    return points_[(std::size_t)linearIndex_(ix,iy,iz)];
+    return points_[static_cast<std::size_t>(linearIndex_(ix,iy,iz))];
 }
 
 ParticleSimulation::index_t ParticleSimulation::SimionPotentialArray::linearIndex_(index_t ix, index_t iy, index_t iz) const{

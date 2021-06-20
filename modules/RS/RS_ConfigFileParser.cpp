@@ -260,7 +260,7 @@ std::pair<std::vector<std::string>,std::vector<std::string>> RS::ConfigFileParse
 
     while (std::regex_search (str, m, pattern)) {
         if (m.position(0)>0) {
-            outResults.push_back(str.substr(0, (std::size_t) m.position(0)));
+            outResults.push_back(str.substr(0, static_cast<std::size_t>(m.position(0))));
         }
         outMatches.push_back(m[0].str());
         str = m.suffix().str();
