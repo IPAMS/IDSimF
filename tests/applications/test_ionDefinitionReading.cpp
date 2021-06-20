@@ -82,13 +82,19 @@ TEST_CASE( "Test ion definition reading", "[ApplicationUtils]") {
     std::vector<std::unique_ptr<BTree::Particle>> particles;
     std::vector<BTree::Particle*> particlePtrs;
 
-    SECTION("Ion definition reading: Ion definition reading with invalid file should throw") {
+    SECTION("Ion definition reading: Ion definition reading with invalid ion start geometry should throw") {
         AppUtils::SimulationConfiguration simConf_invalid("ionDefinition_invalid.json");
         REQUIRE_THROWS_AS(
                 AppUtils::readIonDefinition(particles, particlePtrs, simConf_invalid),
                 std::invalid_argument);
     }
 
+    SECTION("Ion definition reading: Ion definition reading with invalid ion number should throw") {
+        AppUtils::SimulationConfiguration simConf_invalid("ionDefinition_invalid_2.json");
+        REQUIRE_THROWS_WITH(
+                AppUtils::readIonDefinition(particles, particlePtrs, simConf_invalid),
+                "LargestInt out of UInt range");
+    }
 
     SECTION("Test ion definitions with ion cloud files") {
 

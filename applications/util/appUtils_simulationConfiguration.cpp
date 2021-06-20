@@ -42,6 +42,20 @@ std::vector<int> AppUtils::SimulationConfiguration::intVectorParameter(const std
     return (result);
 }
 
+std::vector<unsigned int> AppUtils::SimulationConfiguration::unsignedIntVectorParameter(const std::string& jsonName) const {
+    std::vector<unsigned int> result;
+    if (isParameter(jsonName)) {
+        Json::Value jsonNode = confRoot_.get(jsonName,0);
+        for (std::size_t i=0; i<jsonNode.size(); i++){
+            result.push_back(jsonNode.get(i,0).asUInt());
+        }
+    } else {
+        throw std::invalid_argument("missing configuration value: " + jsonName);
+    }
+    return (result);
+}
+
+
 double AppUtils::SimulationConfiguration::doubleParameter(const std::string& jsonName) const {
     if (isParameter(jsonName)) {
         double result = confRoot_.get(jsonName, 0).asDouble();

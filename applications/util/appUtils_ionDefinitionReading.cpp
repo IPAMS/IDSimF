@@ -137,7 +137,7 @@ void AppUtils::readRandomIonDefinition(
         const SimulationConfiguration& simConf) {
 
     // ions are not given in an init file, read and init random ion box configuration
-    std::vector<int> nIons = simConf.intVectorParameter("n_ions");
+    std::vector<unsigned int> nIons = simConf.unsignedIntVectorParameter("n_ions");
     std::vector<double> ionMasses = simConf.doubleVectorParameter("ion_masses");
     std::vector<double> ionCharges = simConf.doubleVectorParameter("ion_charges");
     std::vector<double> ionCollisionDiameters_angstrom = simConf.doubleVectorParameter("ion_collision_gas_diameters_angstrom");

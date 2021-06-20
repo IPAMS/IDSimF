@@ -13,6 +13,7 @@ set(TEST_FILES
         ${TEST_FILE_FOLDER}/ionCloudFile.json
         ${TEST_FILE_FOLDER}/test_ion_cloud_01.csv
         ${TEST_FILE_FOLDER}/ionDefinition_invalid.json
+        ${TEST_FILE_FOLDER}/ionDefinition_invalid_2.json
         )
 file(COPY ${TEST_FILES} DESTINATION .)
 

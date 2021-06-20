@@ -18,6 +18,7 @@ namespace AppUtils{
         bool isParameter(const std::string& keyName) const;
         int intParameter(const std::string& jsonName) const;
         std::vector<int> intVectorParameter(const std::string& jsonName) const;
+        std::vector<unsigned int> unsignedIntVectorParameter(const std::string& jsonName) const;
         double doubleParameter(const std::string& jsonName) const;
         std::vector<double> doubleVectorParameter(const std::string& jsonName, double multiplicator = 1.0) const;
         Core::Vector vector3dParameter(const std::string& jsonName) const;
