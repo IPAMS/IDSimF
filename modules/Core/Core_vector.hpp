@@ -42,7 +42,7 @@ namespace Core {
         // Constructors:
         Vector() = default;
         Vector(double x, double y, double z);
-        explicit Vector(double*);
+        explicit Vector(const double*);
         
         // Accessors:
         [[nodiscard]] double x() const;

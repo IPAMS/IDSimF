@@ -33,16 +33,16 @@
 namespace Core {
     //typedef std::mt19937 MyRNG;  // the Mersenne Twister with a popular choice of parameters
     
-    const double ELEMENTARY_CHARGE = 1.60217e-19; ///< Elementary charge (Coulomb)
-    const double EPSILON_0 = 8.854e-12;           ///< Vacuum permittivity (Farad / m)
-    const double ELECTRIC_CONSTANT = (4.0*M_PI*EPSILON_0); ///< Electrical constant
-    const double AMU_TO_KG = 1.66048e-27;            ///<(kg/amu) conversion factor
+    constexpr double ELEMENTARY_CHARGE = 1.60217e-19; ///< Elementary charge (Coulomb)
+    constexpr double EPSILON_0 = 8.854e-12;           ///< Vacuum permittivity (Farad / m)
+    constexpr double ELECTRIC_CONSTANT = (4.0*M_PI*EPSILON_0); ///< Electrical constant
+    constexpr double AMU_TO_KG = 1.66048e-27;            ///<(kg/amu) conversion factor
     
-    const double K_BOLTZMANN = 1.3806505e-23;       ///< Boltzmann constant (J/K)
-    const double RGas = 8.3145;                     ///< Ideal gas constant (J/(mol*K))
-    const double JOULE_TO_EV  = 6.2415095e+18;        ///< (eV/J) conversion factor
-    const double N_AVOGADRO = 6.02214199e23;        ///< Avogadro's number
-    const double MOL_VOLUME = 22.413996e-3;         //Volume (m^3) of one mol
+    constexpr double K_BOLTZMANN = 1.3806505e-23;       ///< Boltzmann constant (J/K)
+    constexpr double RGas = 8.3145;                     ///< Ideal gas constant (J/(mol*K))
+    constexpr double JOULE_TO_EV  = 6.2415095e+18;        ///< (eV/J) conversion factor
+    constexpr double N_AVOGADRO = 6.02214199e23;        ///< Avogadro's number
+    constexpr double MOL_VOLUME = 22.413996e-3;         //Volume (m^3) of one mol
                                                     // of ideal gas at 0 C, 101.325 kPa
 }
 #endif /* BTree_constants_h */

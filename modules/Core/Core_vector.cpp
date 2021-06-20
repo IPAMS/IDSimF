@@ -40,7 +40,7 @@ Core::Vector::Vector(double x,double y, double z)
  * Constructs vector with components passed as array
  * @param coord three element array with x,y,z components
  */
-Core::Vector::Vector(double* coord){
+Core::Vector::Vector(const double* coord){
     x_= coord[0];
     y_= coord[1];
     z_= coord[2];
