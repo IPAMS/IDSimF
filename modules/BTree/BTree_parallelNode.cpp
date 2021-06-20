@@ -20,9 +20,7 @@
  ****************************/
 
 #include "BTree_parallelNode.hpp"
-#include <math.h>
-#include <sstream>
-#include <iostream>
+#include <cmath>
 
 /**
  * Constructs a tree node
@@ -104,10 +102,10 @@ void BTree::ParallelNode::serializeIntoVector(std::vector<BTree::ParallelNode*>&
 
     serializedNodes.at(insertPositions[treeLevel])=this;
     insertPositions[treeLevel]++;
-    for(int i=0; i<8; ++i)
+    for(auto & octNode : octNodes_)
     {
-        if(octNodes_[i]!=nullptr)
-            octNodes_[i]->serializeIntoVector(serializedNodes, treeLevel+1, insertPositions);
+        if(octNode!=nullptr)
+            octNode->serializeIntoVector(serializedNodes, treeLevel+1, insertPositions);
     }
 }
 

@@ -27,10 +27,10 @@
 #ifndef BTree_parallelTree_hpp
 #define BTree_parallelTree_hpp
 
-#include <stdio.h>
+#include "BTree_parallelNode.hpp"
+#include <cstdio>
 #include <list>
 #include <unordered_map>
-#include "BTree_parallelNode.hpp"
 
 namespace BTree {
 
@@ -41,18 +41,18 @@ namespace BTree {
 
         // Public member methods:
         [[nodiscard]] ParallelNode* getRoot() const;
-        std::list<Particle*>* getParticleList() const;
+        [[nodiscard]] std::list<Particle*>* getParticleList() const;
         [[nodiscard]] std::size_t getNumberOfParticles() const;
 
-        int init();
+        std::size_t init();
         std::vector<std::size_t> countNodesOnLevels();
         Core::Vector computeEFieldFromTree(Particle &particle);
 
         void insertParticle(Particle &particle, std::size_t ext_index);
         void removeParticle(std::size_t ext_index);
-        Particle* getParticle(std::size_t ext_index) const;
+        [[nodiscard]] Particle* getParticle(std::size_t ext_index) const;
         void updateParticleLocation(std::size_t extIndex, Core::Vector newLocation, int* numNodesChanged);
-        int updateNodes(int ver);
+        std::size_t updateNodes(int ver);
         
         void printParticles() const;
 

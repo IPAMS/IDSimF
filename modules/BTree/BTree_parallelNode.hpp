@@ -54,7 +54,7 @@ namespace BTree {
         void serializeIntoVector(std::vector<BTree::ParallelNode*> &serializedNodes, std::size_t treeLevel,
                                  std::vector<std::size_t> &insertPositions);
 
-        std::size_t maximumRecursionDepth() const;
+        [[nodiscard]] std::size_t maximumRecursionDepth() const;
         void countNodesOnLevel(std::size_t level, std::vector<std::size_t> &numOfNodesOnLevels) const;
 
     private:

@@ -62,7 +62,7 @@ namespace BTree{
 
         // Generic node / tree management methods:
         void initAsRoot() override;
-        bool isRoot() const override;
+        [[nodiscard]] bool isRoot() const override;
         NodType* createOctNode(Octant oct);
         NodType** getOctants();
         void removeMyselfFromTree() override;
@@ -74,7 +74,7 @@ namespace BTree{
         // Diagnostic methods:
         [[nodiscard]] std::string toString() const override;
         virtual void printTree(int level) const;
-        void writeToStream(std::ostream& filestream,void (*writeFct)(std::ostream& filestream, const NodType* node)) const;
+        void writeToStream(std::ostream& filestream,void (*writeFct)(std::ostream& filestream)) const;
         virtual void testNodeIntegrity(int level);
 
 
@@ -107,10 +107,10 @@ namespace BTree{
     template<class NodType>
     GenericBaseNode<NodType>::~GenericBaseNode<NodType>(){
         //destroy all sub-nodes:
-        for (int i=0; i<8; i++){
-            if(octNodes_[i] != nullptr){
-                delete(octNodes_[i]);
-                octNodes_[i] = nullptr;
+        for (auto & octNode : octNodes_){
+            if(octNode != nullptr){
+                deleteoctNode;
+                octNode = nullptr;
             }
         }
         nNodes_--;
@@ -375,13 +375,13 @@ namespace BTree{
         else{
             charge_ = 0.0;
             centerOfCharge_ = Core::Vector(0,0,0);
-            for (int i=0; i<8; i++){
-                if(octNodes_[i] != nullptr){
-                    octNodes_[i]->computeChargeDistributionRecursive();
-                    charge_ += octNodes_[i]->getCharge();
+            for (auto & octNode : octNodes_){
+                if(octNode != nullptr){
+                    octNode->computeChargeDistributionRecursive();
+                    charge_ += octNode->getCharge();
                     centerOfCharge_ = centerOfCharge_+
-                            (octNodes_[i]->getCenterOfCharge() *
-                                    octNodes_[i]->getCharge());
+                            (octNode->getCenterOfCharge() *
+                                    octNode->getCharge());
                 }
             }
             if (charge_ != 0.0){
@@ -429,9 +429,9 @@ namespace BTree{
     template<class NodType>
     void GenericBaseNode<NodType>::printTree(int level) const{
 
-        for (int i=0; i<8; i++){
-            if(octNodes_[i] != nullptr){
-                octNodes_[i]->printTree(level+1);
+        for (auto & octNode : octNodes_){
+            if(octNode != nullptr){
+                octNode->printTree(level+1);
             }
         }
 
@@ -457,14 +457,13 @@ namespace BTree{
      */
     template<class NodType>
     void GenericBaseNode<NodType>::writeToStream(std::ostream& filestream,
-                                                 void (*writeFct)(std::ostream& filestream, const NodType* node) ) const{
+                                                 void (*writeFct)(std::ostream& filestream) ) const{
 
         writeFct(filestream, static_cast<const NodType*>(this));
 
-        for (int i=0; i<8; i++){
-            if(octNodes_[i] != nullptr){
-                octNodes_[i]->writeToStream(filestream,writeFct);
-
+        for (auto & octNode : octNodes_){
+            if(octNode != nullptr){
+                octNode->writeToStream(filestream,writeFct);
             }
         }
     }

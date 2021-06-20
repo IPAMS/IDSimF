@@ -28,10 +28,9 @@
  * @param min the lower spatial boundary of the tree domain
  * @param max the upper spatial boundary of the tree domain
  */
-BTree::Tree::Tree(Core::Vector min, Core::Vector max){
-    root_ = std::make_unique<BTree::Node>(min,max,nullptr);
+BTree::Tree::Tree(Core::Vector min, Core::Vector max):
+        root_(std::make_unique<BTree::Node>(min,max,nullptr)){
     root_->initAsRoot();
-
     iVec_ = std::make_unique<std::list<Particle*>>();
     iMap_ = std::make_unique<std::unordered_map<int,std::list<Particle*>::const_iterator>>();
 }
@@ -81,7 +80,7 @@ void BTree::Tree::insertParticle(BTree::Particle &particle, int ext_index){
  */
 void BTree::Tree::removeParticle(int ext_index){
     
-    std::list<Particle*>::const_iterator iter =(*iMap_)[ext_index];
+    auto iter =(*iMap_)[ext_index];
     BTree::Particle* particle = *iter;
     BTree::AbstractNode* pHostNode = particle->getHostNode();
     pHostNode->removeMyselfFromTree();
@@ -100,7 +99,7 @@ void BTree::Tree::removeParticle(int ext_index){
  * @returns the retrieved particle
  */
 BTree::Particle* BTree::Tree::getParticle(int ext_index) const{
-    std::list<Particle*>::const_iterator iter =(*iMap_)[ext_index];
+    auto iter =(*iMap_)[ext_index];
     BTree::Particle* particle = *iter;
     return (particle);
 }

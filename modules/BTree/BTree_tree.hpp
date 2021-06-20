@@ -53,7 +53,7 @@ namespace BTree {
         Tree(Core::Vector min, Core::Vector max);
 
         //simple getter:
-        Node* getRoot() const;
+        [[nodiscard]] Node* getRoot() const;
         std::list<Particle*>* getParticleList();
         [[nodiscard]] std::size_t getNumberOfParticles() const;
 

@@ -52,7 +52,7 @@ namespace BTree {
         virtual ~AbstractNode() = default;
 
         // Copy Constructors:
-        AbstractNode(const AbstractNode& that);
+        AbstractNode(const AbstractNode& that) = default;
         //AbstractNode& operator=(const AbstractNode& that);
 
         // Static methods:

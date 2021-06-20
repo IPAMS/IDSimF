@@ -28,10 +28,9 @@
  \param min the lower spatial boundary of the tree domain
  \param min the upper spatial boundary of the tree domain
  */
-BTree::ParallelTree::ParallelTree(Core::Vector min, Core::Vector max){
-    root_ = std::make_unique<BTree::ParallelNode>(min,max,nullptr);
+BTree::ParallelTree::ParallelTree(Core::Vector min, Core::Vector max):
+        root_(std::make_unique<BTree::ParallelNode>(min,max,nullptr)) {
     root_->initAsRoot();
-    
     iVec_ = std::make_unique<std::list<Particle*>>();
     iMap_ = std::make_unique<std::unordered_map<std::size_t, std::list<Particle*>::const_iterator>>();
 }
@@ -67,7 +66,7 @@ std::size_t BTree::ParallelTree::getNumberOfParticles() const{
  *
  * @return the total number of nodes in this tree
  */
-int BTree::ParallelTree::init() {
+std::size_t BTree::ParallelTree::init() {
     return updateNodes(1);
 }
 
@@ -117,9 +116,9 @@ Core::Vector BTree::ParallelTree::computeEFieldFromTree(BTree::Particle &particl
                 efield=efield+root_->calculateElectricField(loc, currentNode->centerOfCharge_, currentNode->charge_);
             }
             else { // if distiance is too small: Decent a level in the tree and add the child nodes to the process list
-                for(int i=0; i < 8; ++i) {
-                    if(currentNode->octNodes_[i] != nullptr){
-                        nodesToProcess.push_back(currentNode->octNodes_[i]);
+                for(auto & octNode : currentNode->octNodes_) {
+                    if(octNode != nullptr){
+                        nodesToProcess.push_back(octNode);
                     }
                 }
             }
@@ -214,7 +213,7 @@ void BTree::ParallelTree::updateParticleLocation(std::size_t extIndex, Core::Vec
  * data structures has not to be updated)
  * @return the total number of nodes in the tree
  */
-int BTree::ParallelTree::updateNodes(int ver) {
+std::size_t BTree::ParallelTree::updateNodes(int ver) {
     if(ver!=0)
     {
         //if a structural change in the tree structure has happened: We have to update serialized

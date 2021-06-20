@@ -19,10 +19,7 @@
  along with IDSimF.  If not, see <https://www.gnu.org/licenses/>.
  ****************************/
 #include "BTree_abstractNode.hpp"
-
-#include "BTree_abstractNode.hpp"
 #include "BTree_particle.hpp"
-#include <sstream>
 #include <iostream>
 
 /**
@@ -36,20 +33,6 @@ BTree::AbstractNode::AbstractNode(Core::Vector min, Core::Vector max)
         min_(min),
         max_(max),
         center_(min+(max-min)/2)
-{}
-
-/**
- * Copy constructor
- * @param that a node to copy
- */
-BTree::AbstractNode::AbstractNode(const BTree::AbstractNode& that):
-        charge_(that.charge_),
-        centerOfCharge_(that.centerOfCharge_),
-        numP_(that.numP_),
-        min_(that.min_),
-        max_(that.max_),
-        center_(that.center_),
-        particle_(that.particle_)
 {}
 
 // Static methods:

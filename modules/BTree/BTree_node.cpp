@@ -21,7 +21,6 @@
 
 #include "BTree_node.hpp"
 #include "BTree_particle.hpp"
-#include <sstream>
 #include <iostream>
 
 
@@ -64,9 +63,9 @@ Core::Vector BTree::Node::computeElectricFieldFromTree(BTree::Particle &targetP)
         }
         else{
             Core::Vector efield= Core::Vector(0.0,0.0,0.0);
-            for (int i=0; i<8; i++){
-                if(octNodes_[i] != nullptr){
-                    efield = efield +octNodes_[i]->computeElectricFieldFromTree(targetP);
+            for (auto & octNode : octNodes_){
+                if(octNode != nullptr){
+                    efield = efield +octNode->computeElectricFieldFromTree(targetP);
                 }
             }
             return(efield);
