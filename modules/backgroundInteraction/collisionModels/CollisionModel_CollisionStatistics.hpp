@@ -40,22 +40,22 @@ namespace CollisionModel{
     */
     class CollisionStatisticsFileException : public std::runtime_error {
     public:
-        explicit CollisionStatisticsFileException (const std::string msg): std::runtime_error(msg) {}
+        explicit CollisionStatisticsFileException (const std::string &msg): std::runtime_error(msg) {}
     };
 
     class CollisionStatistics {
         public:
 
             CollisionStatistics();
-            explicit CollisionStatistics(std::string statisticsFilename);
-            int getNDist() const;
-            int getNDistPoints() const;
-            int getNCollisions() const;
-            std::vector<double> getMassRatios() const;
-            double getLogMassRatio(std::size_t icdfIndex) const;
-            double getLogMassRatioDistance(std::size_t index) const;
-            std::vector<std::vector<double>> getICDFs() const;
-            std::size_t findUpperDistIndex(const double logMassRatio) const;
+            explicit CollisionStatistics(const std::string &statisticsFilename);
+            [[nodiscard]] int getNDist() const;
+            [[nodiscard]] int getNDistPoints() const;
+            [[nodiscard]] int getNCollisions() const;
+            [[nodiscard]] std::vector<double> getMassRatios() const;
+            [[nodiscard]] double getLogMassRatio(std::size_t icdfIndex) const;
+            [[nodiscard]] double getLogMassRatioDistance(std::size_t index) const;
+            [[nodiscard]] std::vector<std::vector<double>> getICDFs() const;
+            [[nodiscard]] std::size_t findUpperDistIndex(double logMassRatio) const;
 
 
         private:
@@ -67,7 +67,7 @@ namespace CollisionModel{
             std::vector<double> logMassRatioDists_; ///< Logarithmic distances between the mass ratios
             std::vector<std::vector<double>> icdfs_; ///< The ICDF data in the collision statistic
 
-            void initCollisionModelFromStatisticsFile_(std::string statisticsFilename);
+            void initCollisionModelFromStatisticsFile_(const std::string &statisticsFilename);
     };
 }
 

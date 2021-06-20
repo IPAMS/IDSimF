@@ -33,9 +33,9 @@ Core::Vector CollisionModel::sphereRand(double r) {
     // 2. Knop, R.E.: Algorithm 381: random vectors uniform in solid angle. Commun. ACM. 13, 326 (1970).
     // https://doi.org/10.1145/362349.362377
 
-    double xp = 0.0;
-    double yp = 0.0;
-    double S = 0.0;
+    double xp;
+    double yp;
+    double S;
 
     // Find a sample on the unit disc by rejection sampling:
     do

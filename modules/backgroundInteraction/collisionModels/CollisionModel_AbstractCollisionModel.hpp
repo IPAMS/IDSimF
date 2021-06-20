@@ -44,12 +44,12 @@ namespace CollisionModel {
 
             virtual void modifyAcceleration(Core::Vector& acceleration,
                                             BTree::Particle& particle,
-                                            const double dt) = 0;
+                                            double dt) = 0;
             virtual void modifyVelocity(BTree::Particle& particle,
-                                        const double dt) = 0;
+                                        double dt) = 0;
             virtual void modifyPosition(Core::Vector& position,
                                         BTree::Particle& particle,
-                                        const double dt) = 0;
+                                        double dt) = 0;
     };
 }
 

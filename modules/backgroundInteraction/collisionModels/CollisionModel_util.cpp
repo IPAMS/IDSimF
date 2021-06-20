@@ -69,7 +69,7 @@ double CollisionModel::util::estimateMobility(double massIon_amu, double diamete
             1.0e-5 * pow(10,(4.9137 - 1.4491*logdm - 0.2772*pow(logdm,2.0) + 0.0717*pow(logdm,3.0)));
 
     //Compute mobilityGas by scaling mobilityAir (in 10-4 m2 V-1 s-1)
-    double k0 = mobilityAir * getAirToGas(massIon_amu,diameterIon_nm,collisionGasMass_amu,collisionGasDiameter_nm);
+    double k0 = mobilityAir * getAirToGas(massIon_amu, diameterIon_nm, collisionGasMass_amu, collisionGasDiameter_nm);
 
     return k0;
 }

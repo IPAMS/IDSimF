@@ -46,7 +46,7 @@
 #include "CollisionModel_SpatialFieldFunctions.hpp"
 #include "CollisionModel_MathFunctions.hpp"
 #include "RS_AbstractReaction.hpp"
-#include <stdio.h>
+#include <cstdio>
 #include <functional>
 
 namespace CollisionModel{

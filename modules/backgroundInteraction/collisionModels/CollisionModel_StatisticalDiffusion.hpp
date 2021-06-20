@@ -54,7 +54,7 @@ namespace CollisionModel {
                     double staticTemperature,
                     double collisionGasMassAmu,
                     double collisionGasDiameterM,
-                    CollisionStatistics cs = CollisionStatistics());
+                    const CollisionStatistics &cs = CollisionStatistics());
 
             StatisticalDiffusionModel(
                     double staticPressure,
@@ -62,7 +62,7 @@ namespace CollisionModel {
                     Core::Vector staticGasVelocity,
                     double collisionGasMassAmu,
                     double collisionGasDiameterM,
-                    CollisionStatistics cs = CollisionStatistics());
+                    const CollisionStatistics &cs = CollisionStatistics());
 
             StatisticalDiffusionModel(
                     std::function<double(const Core::Vector& location)>pressureFunction,
@@ -70,7 +70,7 @@ namespace CollisionModel {
                     std::function<Core::Vector(const Core::Vector& location)>velocityFunction,
                     double collisionGasMassAmu,
                     double collisionGasDiameterM,
-                    CollisionStatistics cs = CollisionStatistics());
+                    const CollisionStatistics &cs = CollisionStatistics());
 
             void setSTPParameters(BTree::Particle& ion) const;
             void updateModelParameters(BTree::Particle& ion) const override;

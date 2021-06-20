@@ -66,7 +66,7 @@ CollisionModel::HardSphereModel::HardSphereModel(
                 staticTemperature,
                 collisionGasMassAmu,
                 collisionGasDiameterM,
-                afterCollisionFunction,
+                std::move(afterCollisionFunction),
                 maxwellianApproximation) { }
 
 /**

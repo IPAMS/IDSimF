@@ -44,7 +44,7 @@ CollisionModel::CollisionStatistics::CollisionStatistics():
  *
  * @param statisticsFilename the name / path to a collision statistics parameter file
  */
-CollisionModel::CollisionStatistics::CollisionStatistics(std::string statisticsFilename) {
+CollisionModel::CollisionStatistics::CollisionStatistics(const std::string &statisticsFilename) {
     initCollisionModelFromStatisticsFile_(statisticsFilename);
     std::transform(massRatios_.begin(), massRatios_.end(), std::back_inserter(logMassRatios_),
             [](double mr) -> double { return log10(mr); });
@@ -59,7 +59,7 @@ CollisionModel::CollisionStatistics::CollisionStatistics(std::string statisticsF
  *
  * @param statisticsFilename the name / path to a collision statistics parameter file
  */
-void CollisionModel::CollisionStatistics::initCollisionModelFromStatisticsFile_(std::string statisticsFilename) {
+void CollisionModel::CollisionStatistics::initCollisionModelFromStatisticsFile_(const std::string &statisticsFilename) {
     std::ifstream instream;
     instream.open(statisticsFilename);
 
@@ -80,16 +80,16 @@ void CollisionModel::CollisionStatistics::initCollisionModelFromStatisticsFile_(
 
                 if (parameterName == "ICDF_massratio"){
                     massRatios_.push_back(std::strtof(parameterValue.c_str(), nullptr));
-                    icdfs_.push_back(std::vector<double>(0));
+                    icdfs_.emplace_back(std::vector<double>(0));
                 }
                 else if (parameterName == "n_collisions"){
-                    nDistCollisions_ = std::strtol(parameterValue.c_str(), nullptr, 10);
+                    nDistCollisions_ = std::atoi(parameterValue.c_str());
                 }
                 else if (parameterName == "n_dist_points"){
-                    nDistPoints_ = std::strtol(parameterValue.c_str(),nullptr, 10);
+                    nDistPoints_ = std::atoi(parameterValue.c_str());
                 }
                 else if (parameterName == "n_statistics"){
-                    nDist_ = std::strtol(parameterValue.c_str(), nullptr, 10);
+                    nDist_ = std::atoi(parameterValue.c_str());
                 }
             }
         }
