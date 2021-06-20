@@ -63,9 +63,6 @@ int main(int argc, const char * argv[]) {
 
         std::string confFileName = argv[1];
         AppUtils::SimulationConfiguration simConf(confFileName, logger);
-        std::string confBasePath = simConf.confBasePath();
-
-
 
         // read basic simulation parameters =============================================================
         int timeSteps = simConf.intParameter("sim_time_steps");
@@ -102,7 +99,7 @@ int main(int argc, const char * argv[]) {
         double maxRadius = simConf.doubleParameter("max_r_mm")/1000.0;
 
         // read ion configuration ========================
-        std::vector<int> nIons = simConf.intVectorParameter("n_ions");
+        std::vector<unsigned int> nIons = simConf.unsignedIntVectorParameter("n_ions");
         std::vector<double> ionMasses = simConf.doubleVectorParameter("ion_masses");
 
         std::vector<std::unique_ptr<BTree::Particle>> particles;
@@ -121,11 +118,11 @@ int main(int argc, const char * argv[]) {
 
         //init ions:
         for (std::size_t i = 0; i<nIons.size(); i++) {
-            int nParticles = nIons[i];
+            unsigned int nParticles = nIons[i];
             double mass = ionMasses[i];
             auto ions = startZone.getRandomParticlesInStartZone(nParticles, 1.0);
 
-            for (int j = 0; j<nParticles; j++) {
+            for (unsigned int j = 0; j<nParticles; j++) {
                 ions[j]->setMassAMU(mass);
                 particlePtrs.push_back(ions[j].get());
                 particles.push_back(std::move(ions[j]));
@@ -234,6 +231,8 @@ int main(int argc, const char * argv[]) {
         stopWatch.stop();
         logger->info("CPU time: {} s", stopWatch.elapsedSecondsCPU());
         logger->info("Finished in {} seconds (wall clock time)", stopWatch.elapsedSecondsWall());
+
+        return EXIT_SUCCESS;
     }
     catch(const std::invalid_argument& ia){
         std::cout << ia.what() << std::endl;

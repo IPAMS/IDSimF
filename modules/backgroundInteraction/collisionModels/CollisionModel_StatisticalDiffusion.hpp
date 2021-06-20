@@ -31,7 +31,6 @@
 #ifndef Collision_StatisticalDiffusion_hpp
 #define Collision_StatisticalDiffusion_hpp
 
-#include <stdio.h>
 #include "Core_vector.hpp"
 #include "BTree_particle.hpp"
 #include "Core_constants.hpp"
@@ -40,6 +39,7 @@
 #include "CollisionModel_SpatialFieldFunctions.hpp"
 #include "CollisionModel_MathFunctions.hpp"
 #include "CollisionModel_CollisionStatistics.hpp"
+#include <cstdio>
 
 namespace CollisionModel {
     class StatisticalDiffusionModel : public AbstractCollisionModel {
@@ -54,7 +54,7 @@ namespace CollisionModel {
                     double staticTemperature,
                     double collisionGasMassAmu,
                     double collisionGasDiameterM,
-                    const CollisionStatistics &cs = CollisionStatistics());
+                    CollisionStatistics cs = CollisionStatistics());
 
             StatisticalDiffusionModel(
                     double staticPressure,
@@ -62,7 +62,7 @@ namespace CollisionModel {
                     Core::Vector staticGasVelocity,
                     double collisionGasMassAmu,
                     double collisionGasDiameterM,
-                    const CollisionStatistics &cs = CollisionStatistics());
+                    CollisionStatistics cs = CollisionStatistics());
 
             StatisticalDiffusionModel(
                     std::function<double(const Core::Vector& location)>pressureFunction,
@@ -70,7 +70,7 @@ namespace CollisionModel {
                     std::function<Core::Vector(const Core::Vector& location)>velocityFunction,
                     double collisionGasMassAmu,
                     double collisionGasDiameterM,
-                    const CollisionStatistics &cs = CollisionStatistics());
+                    CollisionStatistics cs = CollisionStatistics());
 
             void setSTPParameters(BTree::Particle& ion) const;
             void updateModelParameters(BTree::Particle& ion) const override;
@@ -102,7 +102,7 @@ namespace CollisionModel {
             double collisionGasMass_amu_ = 0.0;    ///< Mass of the collision gas particles in amu
             double collisionGasDiameter_nm_ = 0.0; ///< Effective diamenter of collision gas particles in nanometer
 
-            double randomWalkDistance_(double logParticleMassRatio) const;
+            [[nodiscard]] double randomWalkDistance_(double logParticleMassRatio) const;
 
     };
 }

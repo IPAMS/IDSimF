@@ -37,7 +37,7 @@ CollisionModel::StatisticalDiffusionModel::StatisticalDiffusionModel(
         double staticTemperature,
         double collisionGasMassAmu,
         double collisionGasDiameterM,
-        const CollisionModel::CollisionStatistics& cs):
+        CollisionModel::CollisionStatistics cs):
         StatisticalDiffusionModel(
                 staticPressure,
                 staticTemperature,
@@ -63,14 +63,14 @@ CollisionModel::StatisticalDiffusionModel::StatisticalDiffusionModel(
         Core::Vector staticGasVelocity,
         double collisionGasMassAmu,
         double collisionGasDiameterM,
-        const CollisionStatistics &cs):
+        CollisionStatistics cs):
             StatisticalDiffusionModel(
                 getConstantDoubleFunction(staticPressure),
                 getConstantDoubleFunction(staticTemperature),
                 getConstantVectorFunction(staticGasVelocity),
                 collisionGasMassAmu,
                 collisionGasDiameterM,
-                cs)
+                std::move(cs))
 {}
 
 /**
@@ -90,7 +90,7 @@ CollisionModel::StatisticalDiffusionModel::StatisticalDiffusionModel(
         std::function<Core::Vector(const Core::Vector &location)>velocityFunction,
         double collisionGasMassAmu,
         double collisionGasDiameterM,
-        const CollisionModel::CollisionStatistics &cs):
+        CollisionModel::CollisionStatistics cs):
             pressureFunction_(std::move(pressureFunction)),
             temperatureFunction_(std::move(temperatureFunction)),
             velocityFunction_(std::move(velocityFunction)),

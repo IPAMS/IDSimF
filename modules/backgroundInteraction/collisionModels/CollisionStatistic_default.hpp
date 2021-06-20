@@ -31,9 +31,9 @@
 
 namespace CollisionModel{
 
-    const int N_DIST_DEFAULT_POINTS = 1002; ///< Number of data points per ICDF. (Note: the extra point, 1002, might be unnecesary.)
-    const int N_DIST_DEFAULT_COLLISIONS = 100000; ///< Number of collisions represented in distribution data
-    const int N_DIST_DEFAULT = 5; ///< Number of ICDFs in represented in distribution data
+    constexpr int N_DIST_DEFAULT_POINTS = 1002; ///< Number of data points per ICDF. (Note: the extra point, 1002, might be unnecesary.)
+    constexpr int N_DIST_DEFAULT_COLLISIONS = 100000; ///< Number of collisions represented in distribution data
+    constexpr int N_DIST_DEFAULT = 5; ///< Number of ICDFs in represented in distribution data
     const std::vector<double> MASSRATIO_DEFAULT = {1,10,100,1000,10000};
     const std::vector<double> LOG_MASSRATIO_DEFAULT = {0,1,2,3,4};
     const std::vector<double> LOG_MASSRATIO_DISTANCES_DEFAULT = {1,1,1,1};
