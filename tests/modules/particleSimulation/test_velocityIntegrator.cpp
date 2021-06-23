@@ -42,7 +42,7 @@ TEST_CASE( "Test velocity integrator", "[ParticleSimulation][VelocityIntegrator]
 
         double ionVelocity = 10.0;
 
-        auto velocityFct = [ionVelocity](BTree::Particle* /*particle*/, int /*particleIndex*/, double /*time*/, int /*timestep*/){
+        auto velocityFct = [ionVelocity](BTree::Particle* /*particle*/, int /*particleIndex*/, double /*time*/, unsigned int /*timestep*/){
             Core::Vector result(ionVelocity, 0, ionVelocity*0.1);
             return (result);
         };
