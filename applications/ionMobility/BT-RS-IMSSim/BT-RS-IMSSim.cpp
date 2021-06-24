@@ -164,10 +164,10 @@ int main(int argc, const char *argv[]){
         ParticleSimulation::TrajectoryHDF5Writer hdf5Writer(hdf5Filename);
         hdf5Writer.setParticleAttributes(auxParamNames, additionalParamTFct);
 
-        int ionsInactive = 0;
+        unsigned int ionsInactive = 0;
 
         //fixme: nAllParticles and nTotalParticles are the same parameter
-        int nAllParticles = 0;
+        unsigned int nAllParticles = 0;
         for (const auto ni: nParticles) {
             nAllParticles += ni;
         }

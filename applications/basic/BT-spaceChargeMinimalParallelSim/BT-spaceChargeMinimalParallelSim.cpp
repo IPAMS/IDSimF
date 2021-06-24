@@ -57,8 +57,8 @@ int main(int argc, const char * argv[]) {
         AppUtils::SimulationConfiguration simConf(confFileName, logger);
 
         // read basic simulation parameters =============================================================
-        int timeSteps = simConf.intParameter("sim_time_steps");
-        int trajectoryWriteInterval = simConf.intParameter("trajectory_write_interval");
+        unsigned int timeSteps = simConf.unsignedIntParameter("sim_time_steps");
+        unsigned int trajectoryWriteInterval = simConf.unsignedIntParameter("trajectory_write_interval");
         double dt = simConf.doubleParameter("dt");
 
         //read physical configuration ===================================================================
@@ -141,7 +141,7 @@ int main(int argc, const char * argv[]) {
 
         auto timestepWriteFunction =
                 [trajectoryWriteInterval, &hdf5Writer, &logger](
-                        std::vector<BTree::Particle*>& particles, BTree::ParallelTree& /*tree*/, double time, int timestep,
+                        std::vector<BTree::Particle*>& particles, BTree::ParallelTree& /*tree*/, double time, unsigned int timestep,
                         bool lastTimestep) {
 
                     if (lastTimestep) {

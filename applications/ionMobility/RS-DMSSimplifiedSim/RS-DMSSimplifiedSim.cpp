@@ -139,8 +139,8 @@ int main(int argc, const char * argv[]) {
         jsonWriter->setScales(1000,1);
 
         // read particle configuration ==========================================================
-        int ionsInactive = 0;
-        int nAllParticles = 0;
+        unsigned int ionsInactive = 0;
+        unsigned int nAllParticles = 0;
         for (const auto ni: nParticles){
             nAllParticles += ni;
         }

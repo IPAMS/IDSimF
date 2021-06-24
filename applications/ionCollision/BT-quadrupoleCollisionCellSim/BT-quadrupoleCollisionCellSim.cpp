@@ -74,8 +74,8 @@ int main(int argc, const char * argv[]) {
         AppUtils::SimulationConfiguration simConf(confFileName, logger);
 
         // read basic simulation parameters =============================================================
-        int timeSteps = simConf.intParameter("sim_time_steps");
-        int trajectoryWriteInterval = simConf.intParameter("trajectory_write_interval");
+        unsigned int timeSteps = simConf.unsignedIntParameter("sim_time_steps");
+        unsigned int trajectoryWriteInterval = simConf.unsignedIntParameter("trajectory_write_interval");
         double dt = simConf.doubleParameter("dt");
 
         // read physical and geometrical simulation parameters
@@ -258,7 +258,7 @@ int main(int argc, const char * argv[]) {
                 [trajectoryWriteInterval, ionRecordMode, &ionsInactive, &hdf5Writer, &startSplatTracker,
                  &integratorPtr, &logger](
                         std::vector<BTree::Particle*>& particles, auto& /*tree*/,
-                        double time, int timestep, bool lastTimestep) {
+                        double time, unsigned int timestep, bool lastTimestep) {
 
                     // check if simulation should be terminated (if all particles are terminated)
                     if (ionsInactive >= particles.size() && particles.size() > 0){

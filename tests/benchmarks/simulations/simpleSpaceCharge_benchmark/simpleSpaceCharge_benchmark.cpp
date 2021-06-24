@@ -60,7 +60,7 @@ int main(int argc, char** argv) {
 
 
     unsigned int nIonsPerDirection = 23;
-    int timeSteps = 200;
+    unsigned int timeSteps = 200;
     double dt = 1e-3;
     double spaceChargeFactor = 1.0;
 

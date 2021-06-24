@@ -198,7 +198,7 @@ int main(int argc, const char * argv[]) {
             rfAmplitudeMode = RAMPED_RF;
             double V_rf_start = simConf.doubleParameter("V_rf_start");
             double V_rf_end = simConf.doubleParameter("V_rf_end");
-            V_0_ramp = ParticleSimulation::linspace(V_rf_start, V_rf_end, timeSteps);
+            V_0_ramp = ParticleSimulation::linspace(V_rf_start, V_rf_end, static_cast<int>(timeSteps));
         }
         else {
             rfAmplitudeMode = STATIC_RF;

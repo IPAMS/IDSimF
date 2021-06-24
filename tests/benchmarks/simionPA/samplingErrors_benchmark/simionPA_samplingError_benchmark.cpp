@@ -60,7 +60,7 @@ int main() {
     Core::safetyGuards = true;
 
     //int n = 50000000;
-    int n = 500;
+    unsigned int n = 500;
 
     /*performBenchmark<ParticleSimulation::SimionPotentialArray>
             (n, 0.001, 0.038, 0.001, 0.002, "simion_test_planar_3d.pa","new");

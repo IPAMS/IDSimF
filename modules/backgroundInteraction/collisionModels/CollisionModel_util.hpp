@@ -34,20 +34,22 @@
 #include <functional>
 
 
-namespace CollisionModel::util {
-    const double M_AIR    = 28.94515; ///<Effective mass of air (amu)
-    const double D_AIR    = 0.366;    ///<Effective diameter of air (nm)
+namespace CollisionModel {
+    namespace util {
+        const double M_AIR    = 28.94515; ///<Effective mass of air (amu)
+        const double D_AIR    = 0.366;    ///<Effective diameter of air (nm)
 
 
-    double getAirToGas(double massIon_amu, double diameterIon_nm,
-                       double collisionGasMass_amu, double collisionGasDiameter_nm);
+        double getAirToGas(double massIon_amu, double diameterIon_nm,
+                           double collisionGasMass_amu, double collisionGasDiameter_nm);
 
-    double estimateCollisionDiameterFromMass(double massIon_amu);
+        double estimateCollisionDiameterFromMass(double massIon_amu);
 
-    double estimateMobility(double massIon_amu, double diameterIon_nm,
-                            double collisionGasMass_amu, double collisionGasDiameter_nm);
+        double estimateMobility(double massIon_amu, double diameterIon_nm,
+                                double collisionGasMass_amu, double collisionGasDiameter_nm);
 
-    std::function<void(RS::CollisionConditions,BTree::Particle&)> getCollisionCountFunction(int* countVal);
+        std::function<void(RS::CollisionConditions,BTree::Particle&)> getCollisionCountFunction(int* countVal);
+    }
 }
 
 

@@ -17,12 +17,12 @@ int main() {
     AppUtils::Stopwatch stopWatch;
     stopWatch.start();
 
-    int nSamples = 80000000;
+    unsigned int nSamples = 80000000;
     std::vector<double> xVec(nSamples);
     std::generate(xVec.begin(), xVec.end(), generateFct);
     std::vector<double> result_std(nSamples);
 
-    for (int i=0; i < nSamples; ++i){
+    for (unsigned int i=0; i < nSamples; ++i){
         result_std[i] = std::erf(xVec[i]);
     }
 
