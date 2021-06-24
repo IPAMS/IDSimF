@@ -67,7 +67,7 @@ namespace ParticleSimulation{
         void setTerminationState();
         [[nodiscard]] RunState runState() const;
         [[nodiscard]] double time() const;
-        [[nodiscard]] int timeStep() const;
+        [[nodiscard]] unsigned int timeStep() const;
 
     protected:
         RunState runState_ = STOPPED; ///< the current state the integrator is in

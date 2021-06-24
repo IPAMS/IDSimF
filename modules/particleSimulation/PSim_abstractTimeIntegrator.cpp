@@ -73,7 +73,7 @@ double ParticleSimulation::AbstractTimeIntegrator::time() const{
 /**
  * Gets the current time step
  */
-int ParticleSimulation::AbstractTimeIntegrator::timeStep() const{
+unsigned int ParticleSimulation::AbstractTimeIntegrator::timeStep() const{
     return timestep_;
 }
 

@@ -109,7 +109,7 @@ std::array<std::array<double, 2>, 3> AppUtils::SimulationConfiguration::double3d
             throw std::invalid_argument("3d box definition has not 3 dimensions");
         }
 
-        for (int i=0; i<3; ++i){
+        for (unsigned int i=0; i<3; ++i){
             Json::Value dimNode = jsonNode.get(i,0);
             if (dimNode.size() != 2){
                 throw std::invalid_argument("Number of elements is not 2 in a dimension of a 3d box definition");

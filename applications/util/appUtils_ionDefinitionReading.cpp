@@ -153,7 +153,7 @@ void AppUtils::readRandomIonDefinition(
     for (std::size_t i = 0; i < nIons.size(); i++) {
 
         // get ion group parameters
-        int nParticles = nIons.at(i);
+        unsigned int nParticles = nIons.at(i);
         double mass = ionMasses.at(i);
         double charge = ionCharges.at(i);
         double collisionDiameter_m = ionCollisionDiameters_angstrom[i]*1e-10;

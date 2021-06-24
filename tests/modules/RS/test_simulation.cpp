@@ -111,11 +111,11 @@ TEST_CASE( "Test basic RS simulation semantics", "[RS][Simulation]") {
 
         std::vector<uniqueReactivePartPtr> particles;
 
-        for (int i=0; i < 100; ++i){
+        for (unsigned int i=0; i < 100; ++i){
             auto particle = std::make_unique<RS::ReactiveParticle>(&Cluster_1);
             particle->setChargeElementary(i);
             particles.push_back(std::move(particle));
-            sim.addParticle(particles[i].get(),i);
+            sim.addParticle(particles[i].get(),static_cast<int>(i));
         }
 
         sim.addParticle(p2.get(), 200);

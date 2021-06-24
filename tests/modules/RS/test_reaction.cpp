@@ -132,7 +132,7 @@ TEST_CASE("Test chemical semantics of RS reaction types", "[RS][Reaction]") {
 
         // test if the velocity is reinitialized thermally:
         // Generate 100000 test samples and determine mean velocity and mean velocity magnitude after collision
-        int nSamples = 100000;
+        unsigned int nSamples = 100000;
         std::vector<Core::Vector> velocities(nSamples);
         std::vector<double> magnitudes;
 
