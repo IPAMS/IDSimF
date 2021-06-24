@@ -10,6 +10,7 @@
   "start_width_z_mm":0.00001,
   "sv_Vmm-1":3000,
   "cv_Vmm-1":-50,
+  "sv_mode":"bi_sin",
   "sv_frequency_s-1":3e6,
   "cv_relaxation_parameter":1.5e9,
   "cv_mode":"auto",

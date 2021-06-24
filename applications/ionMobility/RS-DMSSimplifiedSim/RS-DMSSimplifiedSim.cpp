@@ -45,6 +45,7 @@
 const std::string key_ChemicalIndex = "keyChemicalIndex";
 const double standardPressure_Pa = 102300; //101325
 enum CVMode {STATIC_CV, AUTO_CV};
+enum SVMode {BI_SIN, SQUARE, CLIPPED_SIN};
 
 int main(int argc, const char * argv[]) {
 
@@ -93,15 +94,26 @@ int main(int argc, const char * argv[]) {
             throw std::invalid_argument("wrong configuration value: cv_mode");
         }
 
+        SVMode svMode;
+        std::string svModeStr = simConf.stringParameter("sv_mode");
+        if (svModeStr == "bi_sin"){
+            svMode = BI_SIN;
+        }
+        else if (svModeStr == "square"){
+            svMode = SQUARE;
+        }
+        else if (svModeStr == "clipped_sin"){
+            svMode = CLIPPED_SIN;
+        }
+        else{
+            throw std::invalid_argument("wrong configuration value: sv_mode");
+        }
+
         double fieldSV_VPerM = simConf.doubleParameter("sv_Vmm-1") * 1000.0;
         double fieldCV_VPerM = simConf.doubleParameter("cv_Vmm-1") * 1000.0;
         double fieldFrequency = simConf.doubleParameter("sv_frequency_s-1");
         double fieldWavePeriod = 1.0/fieldFrequency;
-        double field_h = 2.0;
-        double field_F = 2.0;
-        double field_W = (1/fieldWavePeriod) * 2 * M_PI;
         double fieldMagnitude = 0; //actual field magnitude
-
         double dt_s = fieldWavePeriod / nStepsPerOscillation;
 
         // ======================================================================================
@@ -183,20 +195,46 @@ int main(int argc, const char * argv[]) {
 
 
         // define trajectory integration parameters / functions =================================
+        std::function<double(double)> fieldFct;
+        if (svMode == BI_SIN){
+            double field_h = 2.0;
+            double field_F = 2.0;
+            double field_W = (1/fieldWavePeriod) * 2 * M_PI;
+            auto  fieldFctBisinusoidal=
+                    [&fieldSV_VPerM, &fieldCV_VPerM, field_F, field_W, field_h]
+                            (double time) -> double{
 
-        auto fieldFct =
-                [&fieldSV_VPerM, &fieldCV_VPerM, field_F, field_W, field_h]
-                (double time) -> double{
+                        //double particleCharge = particle->getCharge();
+                        double voltageSVgp = fieldSV_VPerM * 0.6667; // V/m (1V/m peak to peak is 0.6667V/m ground to peak)
+                        double voltageSVt = fieldCV_VPerM + (field_F * sin(field_W * time)
+                                + sin(field_h * field_W * time - 0.5 * M_PI))
+                                * voltageSVgp / (field_F + 1);
 
-            //double particleCharge = particle->getCharge();
-            double voltageSVgp = fieldSV_VPerM * 0.6667; // V/m (1V/m peak to peak is 0.6667V/m ground to peak)
-            double voltageSVt = fieldCV_VPerM + (field_F * sin(field_W * time)
-                                        + sin(field_h * field_W * time - 0.5 * M_PI))
-                                        * voltageSVgp / (field_F + 1);
+                        return voltageSVt;
+                    };
+            fieldFct = fieldFctBisinusoidal;
+        }
+        else if (svMode == SQUARE){
+            double thirdOfWavePeriod = fieldWavePeriod / 3.0;
+            auto  fieldFctSquare=
+                    [&fieldSV_VPerM, &fieldCV_VPerM, fieldWavePeriod, thirdOfWavePeriod]
+                            (double time) -> double{
 
-            return voltageSVt;
-        };
+                        double timeInPeriod = std::fmod(time, fieldWavePeriod);
 
+                        double voltageSVgp_highField = fieldSV_VPerM * 0.666667; // V/m (1V/m peak to peak is 0.6667V/m ground to peak)
+                        double voltageSVgp_lowField = -voltageSVgp_highField * 0.5; // low field is 1/2 of high field
+                        double voltageSVt;
+                        if (timeInPeriod < thirdOfWavePeriod){
+                            voltageSVt = fieldCV_VPerM + voltageSVgp_highField;
+                        }
+                        else {
+                            voltageSVt = fieldCV_VPerM + voltageSVgp_lowField;
+                        }
+                        return voltageSVt;
+                    };
+            fieldFct = fieldFctSquare;
+        }
 
         ParticleSimulation::partAttribTransformFctType additionalParameterTransformFct =
                 [=](BTree::Particle* particle) -> std::vector<double> {
