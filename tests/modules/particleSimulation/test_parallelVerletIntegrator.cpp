@@ -87,8 +87,8 @@ TEST_CASE( "Test parallel verlet integrator", "[ParticleSimulation][ParallelVerl
 
     SECTION("Tests with particle lists"){
 
-        double nParticles = 10;
-        double timeSteps = 60;
+        unsigned int nParticles = 10;
+        unsigned int timeSteps = 60;
 
         std::vector<BTree::uniquePartPtr>particles;
         std::vector<BTree::Particle*>particlesPtrs;
@@ -99,7 +99,7 @@ TEST_CASE( "Test parallel verlet integrator", "[ParticleSimulation][ParallelVerl
             double yPos = 0;
             double lastTime = timeSteps * dt - 4*dt;
             double timeOfBirth = lastTime;
-            for (int i=0; i<nParticles; ++i){
+            for (unsigned int i=0; i<nParticles; ++i){
                 BTree::uniquePartPtr particle = std::make_unique<BTree::Particle>(
                         Core::Vector(0.0, yPos, 0.0),
                         Core::Vector(0.0,0.0,0.0),
@@ -138,7 +138,7 @@ TEST_CASE( "Test parallel verlet integrator", "[ParticleSimulation][ParallelVerl
             //prepare particles all born at t=0:
             double yPos = 0;
             double timeOfBirth = 0.0;
-            for (int i = 0; i<nParticles; ++i) {
+            for (unsigned int i = 0; i<nParticles; ++i) {
                 BTree::uniquePartPtr particle = std::make_unique<BTree::Particle>(
                         Core::Vector(0.0, yPos, 0.0),
                         Core::Vector(0.0, 0.0, 0.0),
@@ -152,20 +152,20 @@ TEST_CASE( "Test parallel verlet integrator", "[ParticleSimulation][ParallelVerl
 
             SECTION("Integration should run through and functions should be called") {
 
-                int nTimestepsRecorded = 0;
+                unsigned int nTimestepsRecorded = 0;
                 auto timestepWriteFct = [&nTimestepsRecorded](std::vector<BTree::Particle*>& /*particles*/, BTree::ParallelTree& /*tree*/,
                                                               double /*time*/, int /*timestep*/, bool /*lastTimestep*/){
                     nTimestepsRecorded++;
                 };
 
-                int nParticlesTouched = 0;
+                unsigned int nParticlesTouched = 0;
                 auto otherActionsFct = [&nParticlesTouched] (
                         Core::Vector& /*newPartPos*/, BTree::Particle* /*particle*/,
                         int /*particleIndex*/, BTree::ParallelTree& /*tree*/, double /*time*/, int /*timestep*/){
                     nParticlesTouched++;
                 };
 
-                int nParticlesStartMonitored = 0;
+                unsigned int nParticlesStartMonitored = 0;
                 auto particleStartMonitoringFct = [&nParticlesStartMonitored] (BTree::Particle* /*particle*/, double /*time*/){
                     nParticlesStartMonitored++;
                 };
@@ -201,9 +201,9 @@ TEST_CASE( "Test parallel verlet integrator", "[ParticleSimulation][ParallelVerl
             SECTION("Integration should be stoppable") {
 
                 ParticleSimulation::AbstractTimeIntegrator* integratorPtr;
-                int terminationTimeStep = 40;
+                unsigned int terminationTimeStep = 40;
 
-                int nTimestepsRecorded = 0;
+                unsigned int nTimestepsRecorded = 0;
                 auto timestepWriteFct = [&nTimestepsRecorded](std::vector<BTree::Particle*>& /*particles*/, BTree::ParallelTree& /*tree*/,
                                                               double /*time*/, int /*timestep*/, bool /*lastTimestep*/){
                     nTimestepsRecorded++;
@@ -211,7 +211,7 @@ TEST_CASE( "Test parallel verlet integrator", "[ParticleSimulation][ParallelVerl
 
                 auto terminationActionFct = [&integratorPtr, terminationTimeStep] (
                         Core::Vector& /*newPartPos*/, BTree::Particle* /*particle*/,
-                        int /*particleIndex*/, BTree::ParallelTree& /*tree*/, double /*time*/, int timestep){
+                        int /*particleIndex*/, BTree::ParallelTree& /*tree*/, double /*time*/, unsigned int timestep){
                     if (timestep >= terminationTimeStep){
                         integratorPtr->setTerminationState();
                     }

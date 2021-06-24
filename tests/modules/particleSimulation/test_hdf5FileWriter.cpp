@@ -91,7 +91,7 @@ template <hsize_t NDIMS>DataField<NDIMS,double> readDataset(H5::DataSet& ds){
     dataspace.selectHyperslab(H5S_SELECT_SET, dims,offset);
 
     //define memory dataspace and hyperslab:
-    H5::DataSpace memspace(NDIMS, dims);
+    H5::DataSpace memspace(static_cast<int>(NDIMS), dims);
     memspace.selectHyperslab(H5S_SELECT_SET,dims,offset);
 
     //read:
@@ -213,7 +213,7 @@ TEST_CASE( "Test HDF5 trajectory file writer", "[ParticleSimulation][file writer
         //prepare particles to test:
         ParticleSimulation::ParticleStartSplatTracker tracker;
         for (std::size_t i=0; i<nParticles; ++i){
-            double timeOfBirth = i*0.01;
+            double timeOfBirth = static_cast<double>(i)*0.01;
             BTree::uniquePartPtr particle = std::make_unique<BTree::Particle>();
             particle->setLocation({0.0, 1.0, 0.0});
             particlePtrs.emplace_back(particle.get());
@@ -223,9 +223,10 @@ TEST_CASE( "Test HDF5 trajectory file writer", "[ParticleSimulation][file writer
 
         for (unsigned int k = 1; k < nFrames; k++) {
             for (std::size_t i = 0; i < nParticles; ++i) {
-                particles[i]->setLocation(Core::Vector(i * 0.1, 1.0, k * 10.0));
-                particles[i]->setAcceleration(Core::Vector(i * 0.1, k * 1.0, 0));
-                particles[i]->setVelocity(Core::Vector(i * 0.01, i * 0.1, k * 10.0));
+                double i_d = static_cast<double>(i);
+                particles[i]->setLocation(Core::Vector(i_d * 0.1, 1.0, k * 10.0));
+                particles[i]->setAcceleration(Core::Vector(i_d * 0.1, k * 1.0, 0));
+                particles[i]->setVelocity(Core::Vector(i_d * 0.01, i_d * 0.1, k * 10.0));
             }
             writerBare.writeTimestep(particlePtrs, k * 1.0);
             writerAux.writeTimestep(particlePtrs, k * 1.0);

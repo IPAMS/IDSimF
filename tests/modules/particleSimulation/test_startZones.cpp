@@ -29,7 +29,6 @@
 #include "Core_vector.hpp"
 #include "PSim_cylinderStartZone.hpp"
 #include "PSim_boxStartZone.hpp"
-#include <algorithm>
 #include <vector>
 
 

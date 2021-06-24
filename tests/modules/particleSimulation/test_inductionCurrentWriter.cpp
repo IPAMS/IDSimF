@@ -39,7 +39,7 @@ TEST_CASE( "Test indcution current file writer", "[ParticleSimulation][file writ
         std::vector<std::unique_ptr<BTree::Particle>> particles;
         std::vector<BTree::Particle*> particlePtrs;
         unsigned int nParticles = 10;
-        for (int i=0; i< nParticles; i++){
+        for (unsigned int i=0; i < nParticles; i++){
             std::unique_ptr<BTree::Particle> part = std::make_unique<BTree::Particle>(Core::Vector(0.01,0.01,i*0.001),1);
             particlePtrs.push_back(part.get());
             particles.push_back(std::move(part));

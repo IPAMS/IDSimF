@@ -26,7 +26,6 @@
  ****************************/
 
 #include "PSim_sampledWaveform.hpp"
-#include <iostream>
 #include "catch.hpp"
 
 

@@ -28,6 +28,7 @@
 
 #include "PSim_HDF5Reader.hpp"
 #include <vector>
+#include <array>
 #include "catch.hpp"
 
 TEST_CASE("Test HDF5 file reader", "[ParticleSimulation][file reader]") {
@@ -88,7 +89,7 @@ TEST_CASE("Test HDF5 file reader", "[ParticleSimulation][file reader]") {
 
             std::vector<std::string> datasetNames = h5reader_trajectory.namesOfDatasetsInGroup(
                     "particle_trajectory/timesteps");
-            REQUIRE(datasetNames.size()==0);
+            REQUIRE(datasetNames.empty());
 
             std::vector<std::string> datasetNamesInFrame = h5reader_trajectory.namesOfDatasetsInGroup(
                     "particle_trajectory/timesteps/"+objectNames[0]);

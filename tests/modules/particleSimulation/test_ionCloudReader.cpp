@@ -50,22 +50,22 @@ TEST_CASE("Test ion cloud reader", "[ParticleSimulation][IonCloudReader][file re
 
 
 
-        iClRef.push_back(BTree::Particle(
+        iClRef.emplace_back(BTree::Particle(
                 Core::Vector(1.0,1.0,1.0),
                 Core::Vector(1.00,1.00,1.00),
                 1.0, 100.0, 3.64e-10, 0));
 
-        iClRef.push_back(BTree::Particle(
+        iClRef.emplace_back(BTree::Particle(
                 Core::Vector(1.0,2.0,1.0),
                 Core::Vector(10.0,10.0,10.0),
                 -1.0, 200.0, 3.64e-10, 0.0));
 
-        iClRef.push_back(BTree::Particle(
+        iClRef.emplace_back(BTree::Particle(
                 Core::Vector(-10,-20,-10.0),
                 Core::Vector(-10.00,10.0,-10.0),
                 2.0, 300.0, 3.64e-10, 1e-5));
 
-        iClRef.push_back(BTree::Particle(
+        iClRef.emplace_back(BTree::Particle(
                 Core::Vector(1.0,2.0,1.0),
                 Core::Vector(10.0,10.0,10.0),
                 -10.5, 200.0, 3.64e-10, 3e-5));

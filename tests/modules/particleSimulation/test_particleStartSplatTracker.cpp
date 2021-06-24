@@ -152,8 +152,9 @@ TEST_CASE("TestParticleStartSplatTracker", "[ParticleSimulation][ParticleStartSp
         }
 
         for (std::size_t i=nParticles-10; i>0; --i){ //keep deliberately the last 10 particles non splatted...
-            double splatTime = (2*nParticles)*0.01-(i*0.01);
-            particles.at(i-1)->setLocation({1.0, (i-1)*1.0, 1.0});
+            double i_d = static_cast<double>(i);
+            double splatTime = (2*nParticles)*0.01-(i_d*0.01);
+            particles.at(i-1)->setLocation({1.0, (i_d-1)*1.0, 1.0});
             particles.at(i-1)->setSplatTime(splatTime);
             tracker.particleSplat(particlesPtrs.at(i-1), splatTime);
         }
@@ -201,7 +202,7 @@ TEST_CASE("TestParticleStartSplatTracker", "[ParticleSimulation][ParticleStartSp
         };
 
         double nParticles = 10;
-        double timeSteps = 100;
+        unsigned int timeSteps = 100;
 
         std::vector<BTree::uniquePartPtr>particles;
         std::vector<BTree::Particle*>particlesPtrs;

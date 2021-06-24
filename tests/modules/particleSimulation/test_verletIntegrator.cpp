@@ -58,7 +58,7 @@ TEST_CASE("Test serial verlet integrator", "[ParticleSimulation][VerletIntegrato
         CHECK_NOTHROW(verletIntegrator.runSingleStep(dt));
 
         //particles should be addable and integrator should be able to run:
-        int nSteps = 100;
+        unsigned int nSteps = 100;
         BTree::Particle testParticle1(Core::Vector(0.0, 0.0, 0.0),
                 Core::Vector(0.0, 0.0, 0.0),
                 1.0, 100.0);
@@ -90,8 +90,8 @@ TEST_CASE("Test serial verlet integrator", "[ParticleSimulation][VerletIntegrato
     }
 
     SECTION( "Verlet integrator should be able to integrate correctly non reactive particles with TOB distribution") {
-        double nParticles = 10;
-        double timeSteps = 60;
+        unsigned int nParticles = 10;
+        unsigned int timeSteps = 60;
         double dt = 1e-4;
 
         //prepare particles with a distributed time of birth (TOB):
@@ -101,7 +101,7 @@ TEST_CASE("Test serial verlet integrator", "[ParticleSimulation][VerletIntegrato
         double yPos = 0;
         double lastTime = timeSteps * dt - 4*dt;
         double timeOfBirth = lastTime;
-        for (int i=0; i<nParticles; ++i){
+        for (unsigned int i=0; i<nParticles; ++i){
             BTree::uniquePartPtr particle = std::make_unique<BTree::Particle>(
                     Core::Vector(0.0, yPos, 0.0),
                     Core::Vector(0.0,0.0,0.0),
@@ -116,7 +116,7 @@ TEST_CASE("Test serial verlet integrator", "[ParticleSimulation][VerletIntegrato
 
         SECTION("Verlet integrator should run through and should call functions"){
 
-            int nTimeStepsRecorded = 0;
+            unsigned int nTimeStepsRecorded = 0;
             auto timestepWriteFct = [&nTimeStepsRecorded](std::vector<BTree::Particle*>& /*particles*/, BTree::Tree& /*tree*/, double /*time*/, int /*timestep*/,
                                        bool /*lastTimestep*/){
                 nTimeStepsRecorded++;
@@ -129,7 +129,7 @@ TEST_CASE("Test serial verlet integrator", "[ParticleSimulation][VerletIntegrato
                 nParticlesTouched++;
             };
 
-            int nParticlesStartMonitored = 0;
+            unsigned int nParticlesStartMonitored = 0;
             auto particleStartMonitoringFct = [&nParticlesStartMonitored] (BTree::Particle* /*particle*/, double /*time*/){
                 nParticlesStartMonitored++;
             };
@@ -166,11 +166,11 @@ TEST_CASE("Test serial verlet integrator", "[ParticleSimulation][VerletIntegrato
         SECTION("Verlet integrator should be stoppable"){
 
             ParticleSimulation::AbstractTimeIntegrator* integratorPtr;
-            int terminationTimeStep = 50;
+            unsigned int terminationTimeStep = 50;
 
             auto timestepStopFct = [&integratorPtr, terminationTimeStep](
                     std::vector<BTree::Particle*>& /*particles*/, BTree::Tree& /*tree*/,
-                    double /*time*/, int timestep, bool /*lastTimestep*/){
+                    double /*time*/, unsigned int timestep, bool /*lastTimestep*/){
                 if (timestep >= terminationTimeStep){
                     integratorPtr->setTerminationState();
                 }
@@ -226,7 +226,7 @@ TEST_CASE("Test serial verlet integrator", "[ParticleSimulation][VerletIntegrato
             yPos = yPos+0.01;
         }
         for (std::size_t i=0; i<particles.size(); i++){
-            rsSim.addParticle(particles[i].get(),i);
+            rsSim.addParticle(particles[i].get(),static_cast<int>(i));
         }
 
         // run trajectory integration without reactions:
@@ -251,9 +251,9 @@ TEST_CASE("Test serial verlet integrator", "[ParticleSimulation][VerletIntegrato
         reactionConditions.temperature = 298;
         reactionConditions.pressure = 100000.0;
 
-        for (int ts=0; ts<timeSteps; ts++){
+        for (unsigned int ts=0; ts<timeSteps; ts++){
             for (std::size_t i=0; i<particles.size(); i++){
-                rsSim.react(i, reactionConditions, dt);
+                rsSim.react(static_cast<int>(i), reactionConditions, dt);
             }
             rsSim.advanceTimestep(dt);
             verletIntegrator.runSingleStep(dt);
