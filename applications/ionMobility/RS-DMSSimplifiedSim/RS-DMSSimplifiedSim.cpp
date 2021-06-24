@@ -224,16 +224,33 @@ int main(int argc, const char * argv[]) {
 
                         double voltageSVgp_highField = fieldSV_VPerM * 0.666667; // V/m (1V/m peak to peak is 0.6667V/m ground to peak)
                         double voltageSVgp_lowField = -voltageSVgp_highField * 0.5; // low field is 1/2 of high field
-                        double voltageSVt;
                         if (timeInPeriod < thirdOfWavePeriod){
-                            voltageSVt = fieldCV_VPerM + voltageSVgp_highField;
+                            return fieldCV_VPerM + voltageSVgp_highField;
                         }
                         else {
-                            voltageSVt = fieldCV_VPerM + voltageSVgp_lowField;
+                            return fieldCV_VPerM + voltageSVgp_lowField;
                         }
-                        return voltageSVt;
                     };
             fieldFct = fieldFctSquare;
+        }
+        else if (svMode == CLIPPED_SIN){
+            double h = 3.0/2.0* M_PI  - 1.0;
+            double t_sin = M_PI / (2*h + 1);
+            double f_low = -(2.0* t_sin) / (M_PI-2.0*t_sin);
+
+            auto  fieldFctClippedSin=
+                    [&fieldSV_VPerM, &fieldCV_VPerM, f_low, t_sin, fieldWavePeriod]
+                            (double time) -> double{
+
+                        double normalizedTimeInPeriod = std::fmod(time, fieldWavePeriod) / fieldWavePeriod;
+                        if (normalizedTimeInPeriod < t_sin){
+                            return  fieldCV_VPerM + ((M_PI * sin(M_PI* normalizedTimeInPeriod / t_sin) - 2*t_sin) / (M_PI-2*t_sin) * fieldSV_VPerM);
+                        }
+                        else {
+                            return  fieldCV_VPerM + (f_low*fieldSV_VPerM);
+                        }
+                    };
+            fieldFct = fieldFctClippedSin;
         }
 
         ParticleSimulation::partAttribTransformFctType additionalParameterTransformFct =
@@ -241,7 +258,6 @@ int main(int argc, const char * argv[]) {
                     std::vector<double> result = {particle->getFloatAttribute(key_ChemicalIndex)};
                     return result;
                 };
-
 
         auto timestepWriteFct =
                 [&jsonWriter, &voltageWriter, &additionalParameterTransformFct, trajectoryWriteInterval,
