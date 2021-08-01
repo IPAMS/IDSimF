@@ -397,7 +397,7 @@ void ParticleSimulation::SimionPotentialArray::readBinaryPa_(std::ifstream &inSt
 
     numPoints_ = static_cast<unsigned int>(nx_ * ny_ * nz_);
     points_.resize(numPoints_);
-    inStream.read( reinterpret_cast<char*>(points_.data()), sizeof(double)*numPoints_);
+    inStream.read( reinterpret_cast<char*>(points_.data()), static_cast<std::streamsize >(sizeof(double)*numPoints_));
 }
 
 
