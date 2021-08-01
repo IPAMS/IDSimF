@@ -32,6 +32,12 @@ If no ion cloud file is used, the following configuration parameters define the 
 ``ion_time_of_birth_range_s`` : float
     Time range in which ions are generated, in seconds. The specified number of ions are generated uniformly in this time range.
 
+``ion_direction_vector`` : Vector of three floats
+    Initial direction of motion of the ions. This vector is only a direction vector, the initial velocity of the defined ions is set by ``ion_kinetic_energy_eV``.
+
+``ion_kinetic_energy_eV`` : float
+    Start energy of the ions in electronvolts, the initial ion velocity is in the direction of ``ion_direction_vector``.
+
 Ion start configuration
 .......................
 
