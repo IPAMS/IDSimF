@@ -236,12 +236,13 @@ bool ParticleSimulation::SimionPotentialArray::isElectrode(double xPt, double yP
     index_t yNode = static_cast<index_t>(yT);
     index_t zNode = static_cast<index_t>(zT);
 
+
     // as soon as one coordinate is not exactly on a node coordinate,
     // we have to check if the surrounding nodes are part of an electrode,
     // which makes the current point part of an electrode
+    // (xT and xNode for example would be exactly equal if the transformed coordinate is exactly on a node)
 
-    if (xNode != xPt || yNode != yPt || zNode != zPt){
-
+    if (xT > xNode || yT > yNode || zT > zNode){
 
         // as soon one point of the surrounding points is NOT an electrode point:
         // The current point is not in an electrode
@@ -256,9 +257,9 @@ bool ParticleSimulation::SimionPotentialArray::isElectrode(double xPt, double yP
             }
             else{
                 return !(!isElectrode_(xNode,   yNode,   zNode) ||
-                        !isElectrode_(xNode+1, yNode,   zNode) ||
-                        !isElectrode_(xNode,   yNode+1, zNode) ||
-                        !isElectrode_(xNode+1, yNode+1, zNode));
+                         !isElectrode_(xNode+1, yNode,   zNode) ||
+                         !isElectrode_(xNode,   yNode+1, zNode) ||
+                         !isElectrode_(xNode+1, yNode+1, zNode));
             }
         }
         else {
@@ -269,19 +270,19 @@ bool ParticleSimulation::SimionPotentialArray::isElectrode(double xPt, double yP
             }
             else {
                 return !(!isElectrode_(xNode,  yNode,   zNode) ||
-                        !isElectrode_(xNode+1, yNode,   zNode) ||
-                        !isElectrode_(xNode,   yNode+1, zNode) ||
-                        !isElectrode_(xNode+1, yNode+1, zNode) ||
-                        !isElectrode_(xNode,   yNode,   zNode+1) ||
-                        !isElectrode_(xNode+1, yNode,   zNode+1) ||
-                        !isElectrode_(xNode,   yNode+1, zNode+1) ||
-                        !isElectrode_(xNode+1, yNode+1, zNode+1)
+                         !isElectrode_(xNode+1, yNode,   zNode) ||
+                         !isElectrode_(xNode,   yNode+1, zNode) ||
+                         !isElectrode_(xNode+1, yNode+1, zNode) ||
+                         !isElectrode_(xNode,   yNode,   zNode+1) ||
+                         !isElectrode_(xNode+1, yNode,   zNode+1) ||
+                         !isElectrode_(xNode,   yNode+1, zNode+1) ||
+                         !isElectrode_(xNode+1, yNode+1, zNode+1)
                 );
             }
         }
     }
     else {
-        return isElectrode_(xNode,yNode,zNode);
+        return isElectrode_(xNode, yNode, zNode);
     }
 }
 
@@ -591,7 +592,7 @@ double ParticleSimulation::SimionPotentialArray::interpolatedPotentialCartesian3
     // node position in z direction. If we are exactly on a node in z direction, the contribution for
     // all nodes with zNode+1 is zero, since the weighting in z direction would be zWeight which is 0.0
     // in this case.
-    if (zWeight != 0){
+    if (zWeight > 0.0){
         double p001 = potential_(xNode, yNode, zNode+1);
         double p101 = xWeight != 0.0 ? potential_(xNode+1, yNode, zNode+1) : 0.0;
         double p011 = yWeight != 0.0 ? potential_(xNode, yNode+1, zNode+1) : 0.0;

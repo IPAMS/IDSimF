@@ -69,11 +69,12 @@ TEST_CASE("SIMION PA basic tests","[SimionPotentialArray]"){
                 Catch::Matchers::Contains("is not in the planar potential array"));
 
         REQUIRE (simPa.isElectrode(0.02, 0.015, 0.03) == false);
+        REQUIRE (simPa.isElectrode(0.02, 0.015, 0.0301) == false);
         REQUIRE (simPa.isElectrode(0.038, 0.018, 0.038) == true);
         REQUIRE (simPa.isElectrode(0.038, 0.018, 0.0389999) == true);
 
-        // uppper and lower boundaries:
-        REQUIRE (simPa.isElectrode(0.038, 0.018, 0.039) == false);
+        // upper and lower boundaries:
+        REQUIRE (simPa.isElectrode(0.038, 0.018, 0.039) == true);
         REQUIRE (simPa.isElectrode(0.0, 0.0001, 0.0) == true);
 
         REQUIRE_THROWS_MATCHES(simPa.getInterpolatedPotential(1.0,2.0,1.0),
