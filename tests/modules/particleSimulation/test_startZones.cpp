@@ -26,6 +26,7 @@
  ****************************/
 
 #include "catch.hpp"
+#include "test_util.hpp"
 #include "Core_vector.hpp"
 #include "PSim_cylinderStartZone.hpp"
 #include "PSim_boxStartZone.hpp"
@@ -145,7 +146,7 @@ TEST_CASE( "Test cylinder particle start zone",
             double tob = ions[i]->getTimeOfBirth();
 
             if (pos.y() > length || pos.y() < 0.0 || r > radius ||
-                charge != chargeExpected || tob < 0.0 || tob > 5.0
+                !isExactDoubleEqual(charge, chargeExpected) || tob < 0.0 || tob > 5.0
             ){
                 incorrectIonFound = true;
             }

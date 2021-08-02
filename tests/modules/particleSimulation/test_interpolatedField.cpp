@@ -68,16 +68,16 @@ TEST_CASE("Test self implemented interpolated field", "[ParticleSimulation][Inte
         }
 
         SECTION("Uninterpolated data can be accessed and is correct") {
-            REQUIRE(intField.getScalar(1, 1, 1, 0)==6.0);
-            REQUIRE(intField.getScalar(1, 3, 2, 0)==9.0);
-            REQUIRE(intField.getScalar(3, 0, 1, 0)==17.0);
-            REQUIRE(intField.getScalar(3, 0, 4, 0)==25.0);
+            REQUIRE(intField.getScalar(1, 1, 1, 0)== Approx(6.0));
+            REQUIRE(intField.getScalar(1, 3, 2, 0)== Approx(9.0));
+            REQUIRE(intField.getScalar(3, 0, 1, 0)== Approx(17.0));
+            REQUIRE(intField.getScalar(3, 0, 4, 0)== Approx(25.0));
         }
 
         SECTION("Interpolated data can be accessed and is correct") {
-            REQUIRE(intField.getInterpolatedScalar(1.0, 1.0, 1.0, 0)==3.0);
-            REQUIRE(intField.getInterpolatedScalar(11.5, 5.0, 6.2, 0)==22.7);
-            REQUIRE(intField.getInterpolatedScalar(5.0, 5.0, 0.1, 0)==Approx(10.1));
+            REQUIRE(intField.getInterpolatedScalar(1.0, 1.0, 1.0, 0) == Approx(3.0));
+            REQUIRE(intField.getInterpolatedScalar(11.5, 5.0, 6.2, 0) == Approx(22.7));
+            REQUIRE(intField.getInterpolatedScalar(5.0, 5.0, 0.1, 0) == Approx(10.1));
             REQUIRE_THROWS_AS(
                     intField.getInterpolatedScalar(-100.0, -100.0, 0.1, 0)==0.0,
                     std::invalid_argument);

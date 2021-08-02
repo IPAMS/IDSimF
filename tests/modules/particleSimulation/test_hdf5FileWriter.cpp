@@ -25,6 +25,8 @@
 
  ****************************/
 
+#include "catch.hpp"
+#include "test_util.hpp"
 #include "PSim_trajectoryHDF5Writer.hpp"
 #include "PSim_trajectoryExplorerJSONwriter.hpp"
 #include "PSim_particleStartSplatTracker.hpp"
@@ -35,7 +37,7 @@
 #include <vector>
 #include <string>
 #include <algorithm>
-#include "catch.hpp"
+
 
 
 // Define some helping data structures and functions .........
@@ -366,7 +368,8 @@ TEST_CASE( "Test HDF5 trajectory file writer", "[ParticleSimulation][file writer
 
             for (hsize_t pi = 0; pi < nParticles; ++pi) {
                 indices[0] = pi;
-                REQUIRE(dFieldInteger.get(indices) == pi);
+                REQUIRE(isExactDoubleEqual(
+                        dFieldInteger.get(indices), pi));
             }
         }
 

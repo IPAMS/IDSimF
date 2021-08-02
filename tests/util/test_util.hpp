@@ -14,7 +14,6 @@ inline std::string vectorApproxCompare(const Core::Vector &lhs, const Core::Vect
     bool equal = true;
     std::stringstream ss;
 
-
     if (lhs.x() != Approx(rhs.x())){
         equal = false;
         ss << "x coord unequal "<<lhs.x() <<" != "<<rhs.x()<<std::endl;
@@ -37,6 +36,15 @@ inline std::string vectorApproxCompare(const Core::Vector &lhs, const Core::Vect
         return ss.str();
     }
 }
+
+// Vector equality means, exact, floating point equality here, thus deactivate
+// floating point comparison warning
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wfloat-equal"
+inline bool isExactDoubleEqual(double lhs, double rhs){
+    return lhs == rhs;
+}
+#pragma GCC diagnostic pop
 
 //FIXME: get rid of this method: Rewrite tests with start zone directly
 inline std::vector<std::unique_ptr<BTree::Particle>> getRandomIonsInBox(std::size_t numIons, Core::Vector corner, Core::Vector boxSize){

@@ -25,11 +25,13 @@
 
  ****************************/
 
+#include "catch.hpp"
+#include "test_util.hpp"
 #include "PSim_ionCloudReader.hpp"
 #include "Core_vector.hpp"
 #include "BTree_particle.hpp"
 #include <vector>
-#include "catch.hpp"
+
 
 TEST_CASE("Test ion cloud reader", "[ParticleSimulation][IonCloudReader][file readers]") {
 
@@ -75,8 +77,12 @@ TEST_CASE("Test ion cloud reader", "[ParticleSimulation][IonCloudReader][file re
         for (std::size_t i=0; i<iCl.size(); i++){
             REQUIRE( (*iCl[i]).getLocation() == iClRef[i].getLocation() );
             REQUIRE( (*iCl[i]).getVelocity() == iClRef[i].getVelocity() );
-            REQUIRE( (*iCl[i]).getCharge() == iClRef[i].getCharge() );
-            REQUIRE( (*iCl[i]).getMass() == iClRef[i].getMass() );
+            REQUIRE( isExactDoubleEqual(
+                    (*iCl[i]).getCharge(),
+                    iClRef[i].getCharge() ));
+            REQUIRE( isExactDoubleEqual(
+                    (*iCl[i]).getMass(),
+                    iClRef[i].getMass() ));
             REQUIRE( (*iCl[i]).getDiameter() == Approx(iClRef[i].getDiameter()).epsilon(1e-15) );
         }
     }

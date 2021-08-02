@@ -153,7 +153,9 @@ TEST_CASE("SIMION PA basic tests","[SimionPotentialArray]"){
 
         REQUIRE(simPa.getInterpolatedPotential(0.07, 0.02, 0.03) == Approx(72.57148));
         //check for circular mirroring / circular symmetry:
-        REQUIRE(simPa.getInterpolatedPotential(0.07, 0.01, 0.02) == simPa.getInterpolatedPotential(0.07, -0.01, -0.02));
+        REQUIRE(isExactDoubleEqual(
+                simPa.getInterpolatedPotential(0.07, 0.01, 0.02),
+                simPa.getInterpolatedPotential(0.07, -0.01, -0.02)));
 
         REQUIRE_THROWS_MATCHES(simPa.getField(1.0,2.0,0.0),
                 ParticleSimulation::PotentialArrayException,
@@ -163,8 +165,9 @@ TEST_CASE("SIMION PA basic tests","[SimionPotentialArray]"){
                 ParticleSimulation::PotentialArrayException,
                 Catch::Matchers::Contains("is not in the cylindrical potential array"));
 
-        REQUIRE(simPa.getInterpolatedPotential(0.14899, 0.002, 0.002) ==
-            simPa.getInterpolatedPotential(0.14899, 0.002, 0.002));
+        REQUIRE(isExactDoubleEqual(
+                simPa.getInterpolatedPotential(0.14899, 0.002, 0.002),
+                simPa.getInterpolatedPotential(0.14899, 0.002, 0.002)));
 
         REQUIRE(
             vectorApproxCompare(

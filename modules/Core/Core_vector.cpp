@@ -148,9 +148,14 @@ Core::Vector Core::operator/(const Core::Vector &lhs, double rhs){
     return lhs * (1.0 / rhs);
 }
 
+// Vector equality means, exact, floating point equality here, thus deactivate
+// floating point comparison warning
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wfloat-equal"
 bool Core::operator==(Core::Vector const &lhs, Core::Vector const &rhs){
     return (lhs.x_ == rhs.x_ && lhs.y_ == rhs.y_ && lhs.z_ == rhs.z_);
 }
+#pragma GCC diagnostic pop
 
 bool Core::operator!=(const Core::Vector &lhs, const Core::Vector &rhs){
     return !(lhs == rhs);

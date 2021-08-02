@@ -65,9 +65,9 @@ TEST_CASE("TestParticleStartSplatTracker", "[ParticleSimulation][ParticleStartSp
 
             ParticleSimulation::ParticleStartSplatTracker::pMapEntry entry_1 = tracker.get(&particle_1);
 
-            CHECK(entry_1.startTime==1.1);
+            CHECK(isExactDoubleEqual(entry_1.startTime, 1.1));
             CHECK(entry_1.startLocation==Core::Vector(1.5, 2.0, 2.5));
-            CHECK(entry_1.splatTime==2.1);
+            CHECK(isExactDoubleEqual(entry_1.splatTime, 2.1));
             CHECK(entry_1.splatLocation==Core::Vector(2.0, 2.0, 2.0));
             CHECK(entry_1.globalIndex==1);
             CHECK(particle_1.getIntegerAttribute("global index")==1);
@@ -164,8 +164,8 @@ TEST_CASE("TestParticleStartSplatTracker", "[ParticleSimulation][ParticleStartSp
         CHECK(pData[10].globalIndex == 10);
         CHECK(pData[10].startLocation == Core::Vector(10*1.0, 1.0, 1.0));
         CHECK(pData[10].splatLocation == particles[10]->getLocation());
-        CHECK(pData[10].startTime == particles[10]->getTimeOfBirth());
-        CHECK(pData[10].splatTime == particles[10]->getSplatTime());
+        CHECK(isExactDoubleEqual(pData[10].startTime, particles[10]->getTimeOfBirth()));
+        CHECK(isExactDoubleEqual(pData[10].splatTime, particles[10]->getSplatTime()));
         CHECK(pData[10].splatLocation == particles[10]->getLocation());
         CHECK(pData[10].state == ParticleSimulation::ParticleStartSplatTracker::SPLATTED);
 
@@ -176,8 +176,8 @@ TEST_CASE("TestParticleStartSplatTracker", "[ParticleSimulation][ParticleStartSp
         std::vector<Core::Vector> startLocations = tracker.getStartLocations();
         std::vector<Core::Vector> splatLocations = tracker.getSplatLocations();
 
-        CHECK(startTimes[25] == particles[25]->getTimeOfBirth());
-        CHECK(splatTimes[25] == particles[25]->getSplatTime());
+        CHECK(startTimes[25] == Approx(particles[25]->getTimeOfBirth()));
+        CHECK(splatTimes[25] == Approx(particles[25]->getSplatTime()));
         CHECK(startLocations[25] == Core::Vector(25*1.0, 1.0, 1.0));
         CHECK(splatLocations[25] == particles[25]->getLocation());
 
@@ -255,7 +255,7 @@ TEST_CASE("TestParticleStartSplatTracker", "[ParticleSimulation][ParticleStartSp
 
         CHECK(states[0] == 2);
         CHECK(states[9] == 2);
-        CHECK(startTimes[9] == 10*dt*0.5);
+        CHECK(startTimes[9] == Approx(10*dt*0.5));
         CHECK(splatTimes[9] == Approx(0.0095));
         CHECK(vectorApproxCompare(splatLocations[9], Core::Vector(0.00020025, 0.09, 0.000100125)) == vectorsApproxEqual);
         CHECK(vectorApproxCompare(startLocations[9], Core::Vector(0.0, 0.09, 0.0)) == vectorsApproxEqual);

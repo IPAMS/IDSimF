@@ -69,7 +69,7 @@ TEST_CASE("Test utility functions","[ParticleSimulation][utilities]") {
 
         CHECK(result.size() == 100);
         auto lastrow = result.back();
-        CHECK(std::get<0>(lastrow) == 1.8);
-        CHECK(std::get<1>(lastrow) == 9.0);
+        CHECK(std::get<0>(lastrow) == Approx(1.8));
+        CHECK(std::get<1>(lastrow) == Approx(9.0));
     }
 }

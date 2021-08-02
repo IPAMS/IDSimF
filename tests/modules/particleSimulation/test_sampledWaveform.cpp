@@ -36,8 +36,8 @@ TEST_CASE("Test sampled waveform / SWIFT waveform reader", "[ParticleSimulation]
 
         SECTION("State should be good and correct") {
             REQUIRE(sw.good());
-            REQUIRE(sw[15500] == 0.76383);
-            REQUIRE(sw.getValue(16500) == -0.8761);
+            REQUIRE(sw[15500] == Approx(0.76383));
+            REQUIRE(sw.getValue(16500) == Approx(-0.8761));
         }
 
         SECTION("Read from an non existing index should throw an exception"){
@@ -49,13 +49,13 @@ TEST_CASE("Test sampled waveform / SWIFT waveform reader", "[ParticleSimulation]
     SECTION("Synthetically numpy generated SWIFT waveform should be readable and correct") {
         ParticleSimulation::SampledWaveform sw("swift_test_sin.csv");
         REQUIRE(sw.good());
-        REQUIRE(sw[24] == 1.253332335643040918e-01 );
-        REQUIRE(sw.getValue(24) == 1.253332335643040918e-01 );
+        REQUIRE(sw[24] == Approx(1.253332335643040918e-01) );
+        REQUIRE(sw.getValue(24) == Approx(1.253332335643040918e-01) );
 
         REQUIRE(sw.size() == 200);
-        REQUIRE(sw.getValue(4) == sw.getValueLooped(204) );
-        REQUIRE(sw.getValue(4) == sw.getValueLooped(404) );
-        REQUIRE(sw.getValue(0) == sw.getValueLooped(200) );
+        REQUIRE(sw.getValue(4) == Approx(sw.getValueLooped(204)) );
+        REQUIRE(sw.getValue(4) == Approx(sw.getValueLooped(404)) );
+        REQUIRE(sw.getValue(0) == Approx(sw.getValueLooped(200)) );
     }
 
     SECTION( "Non existing input file should lead to good()==false") {
