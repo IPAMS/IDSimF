@@ -30,6 +30,7 @@
 #include "Core_constants.hpp"
 #include "RS_Substance.hpp"
 #include "catch.hpp"
+#include "test_util.hpp"
 
 TEST_CASE( "Basic Particle semantics tests", "[Particle]") {
 
@@ -38,7 +39,7 @@ TEST_CASE( "Basic Particle semantics tests", "[Particle]") {
     SECTION("Basic Particle creation tests") {
         //Test ion location:
         CHECK(testIon.getLocation()==Core::Vector(1.0, 2.0, 3.0));
-        CHECK(testIon.getCharge()==2.0*Core::ELEMENTARY_CHARGE);
+        CHECK(isExactDoubleEqual(testIon.getCharge(), 2.0*Core::ELEMENTARY_CHARGE));
         CHECK(testIon.isActive());
     }
 
@@ -53,9 +54,9 @@ TEST_CASE( "Basic Particle semantics tests", "[Particle]") {
                     100.0,
                     1e-5);
             CHECK(testIon2.getLocation()==Core::Vector(2.0, 3.0, 4.0));
-            CHECK(testIon2.getCharge()==1.0*Core::ELEMENTARY_CHARGE);
-            CHECK(testIon2.getMass()==100.0*Core::AMU_TO_KG);
-            CHECK(testIon2.getTimeOfBirth()==1e-5);
+            CHECK(isExactDoubleEqual(testIon2.getCharge(), 1.0*Core::ELEMENTARY_CHARGE));
+            CHECK(isExactDoubleEqual(testIon2.getMass(), 100.0*Core::AMU_TO_KG));
+            CHECK(isExactDoubleEqual(testIon2.getTimeOfBirth(), 1e-5));
             CHECK(testIon2.isActive());
         }
 
@@ -69,10 +70,10 @@ TEST_CASE( "Basic Particle semantics tests", "[Particle]") {
                     3.2e-10,
                     1e-5);
             CHECK(testIon2.getLocation()==Core::Vector(2.0, 3.0, 4.0));
-            CHECK(testIon2.getCharge()==1.0*Core::ELEMENTARY_CHARGE);
-            CHECK(testIon2.getMass()==100.0*Core::AMU_TO_KG);
-            CHECK(testIon2.getDiameter()==3.2e-10);
-            CHECK(testIon2.getTimeOfBirth()==1e-5);
+            CHECK(isExactDoubleEqual(testIon2.getCharge(), 1.0*Core::ELEMENTARY_CHARGE));
+            CHECK(isExactDoubleEqual(testIon2.getMass(), 100.0*Core::AMU_TO_KG));
+            CHECK(isExactDoubleEqual(testIon2.getDiameter(), 3.2e-10));
+            CHECK(isExactDoubleEqual(testIon2.getTimeOfBirth(), 1e-5));
             CHECK(testIon2.isActive());
         }
 
@@ -84,7 +85,7 @@ TEST_CASE( "Basic Particle semantics tests", "[Particle]") {
         CHECK(!testIon.isActive());
 
         testIon.setChargeElementary(1.0);
-        CHECK(testIon.getCharge()==1.0*Core::ELEMENTARY_CHARGE);
+        CHECK(isExactDoubleEqual(testIon.getCharge(), 1.0*Core::ELEMENTARY_CHARGE));
 
         testIon.setLocation(Core::Vector(2.0, 2.0, 2.0));
         CHECK(testIon.getLocation()==Core::Vector(2.0, 2.0, 2.0));

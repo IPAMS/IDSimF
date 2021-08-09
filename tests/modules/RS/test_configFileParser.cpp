@@ -26,6 +26,7 @@
  ****************************/
 
 #include "catch.hpp"
+#include "test_util.hpp"
 #include "RS_ConfigFileParser.hpp"
 #include "RS_Substance.hpp"
 #include "RS_AbstractReaction.hpp"
@@ -171,14 +172,14 @@ TEST_CASE("Test parsing of chemical systems with RS config file parser", "[RS][C
 
         CHECK(simConf->substance(2)->name() == "Cl_3");
         CHECK(simConf->substance(2)->type() == RS::Substance::substanceType::discrete);
-        CHECK(simConf->substance(2)->mass() == 55);
+        CHECK(isExactDoubleEqual(simConf->substance(2)->mass(), 55));
         CHECK(simConf->substance(2)->charge() == 1.0);
         CHECK(simConf->substance(2)->mobility() == Approx(0.000235).epsilon(1e-6));
         CHECK(simConf->substance(2)->collisionDiameter() == Approx(7.0e-10).epsilon(1e-5));
 
         CHECK(simConf->substance(3)->name() == "Cl_4");
         CHECK(simConf->substance(3)->type() == RS::Substance::substanceType::discrete);
-        CHECK(simConf->substance(3)->mass() == 73);
+        CHECK(isExactDoubleEqual(simConf->substance(3)->mass(), 73));
         CHECK(simConf->substance(3)->charge() == 1.0);
         CHECK(simConf->substance(3)->mobility() == Approx(2.09e-4).epsilon(1e-6));
         CHECK(simConf->substance(3)->collisionDiameter() == Approx(9.0e-10).epsilon(1e-5));
@@ -202,8 +203,8 @@ TEST_CASE("Test parsing of chemical systems with RS config file parser", "[RS][C
 
         REQUIRE(simConf->substance(4)->name() == "Cl_5");
         REQUIRE(simConf->substance(4)->type() == RS::Substance::substanceType::discrete);
-        REQUIRE(simConf->substance(4)->mass() == 91);
-        REQUIRE(simConf->substance(4)->charge() == 1.0);
+        REQUIRE(isExactDoubleEqual(simConf->substance(4)->mass(), 91));
+        REQUIRE(isExactDoubleEqual(simConf->substance(4)->charge(), 1.0));
         REQUIRE(simConf->substance(4)->mobility() == Approx(1.90e-4).epsilon(1e-6));
         REQUIRE(simConf->substance(4)->collisionDiameter() == Approx(10.0e-10).epsilon(1e-5));
 

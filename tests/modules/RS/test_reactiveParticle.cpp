@@ -26,6 +26,7 @@
  ****************************/
 
 #include "catch.hpp"
+#include "test_util.hpp"
 #include "RS_Substance.hpp"
 #include "RS_ReactiveParticle.hpp"
 #include "Core_constants.hpp"
@@ -45,15 +46,15 @@ TEST_CASE("Test basic instantiation and setting of species in reactive particle"
 
     rp.setSpecies(&sub2);
 
-    CHECK(rp.getDiameter() == 100.0);
-    CHECK(rp.getMass() == 10.0*Core::AMU_TO_KG);
-    CHECK(rp.getMobility() == 0.1);
-    CHECK(rp.getCharge() == 20.0*Core::ELEMENTARY_CHARGE);
+    CHECK(isExactDoubleEqual(rp.getDiameter(), 100.0));
+    CHECK(isExactDoubleEqual(rp.getMass(), 10.0*Core::AMU_TO_KG));
+    CHECK(isExactDoubleEqual(rp.getMobility(), 0.1));
+    CHECK(isExactDoubleEqual(rp.getCharge(), 20.0*Core::ELEMENTARY_CHARGE));
 
     RS::ReactiveParticle rp2 = RS::ReactiveParticle(&sub2);
 
-    CHECK(rp2.getDiameter() == 100.0);
-    CHECK(rp2.getMass() == 10.0*Core::AMU_TO_KG);
-    CHECK(rp2.getMobility() == 0.1);
-    CHECK(rp2.getCharge() == 20.0*Core::ELEMENTARY_CHARGE);
+    CHECK(isExactDoubleEqual(rp2.getDiameter(), 100.0));
+    CHECK(isExactDoubleEqual(rp2.getMass(), 10.0*Core::AMU_TO_KG));
+    CHECK(isExactDoubleEqual(rp2.getMobility(), 0.1));
+    CHECK(isExactDoubleEqual(rp2.getCharge(), 20.0*Core::ELEMENTARY_CHARGE));
 }

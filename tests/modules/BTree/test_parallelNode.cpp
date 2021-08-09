@@ -32,6 +32,7 @@
 #include <iostream>
 #include <cmath>
 #include "catch.hpp"
+#include "test_util.hpp"
 
 TEST_CASE( "Test basic parallel node semantics", "[Node]"){
 
@@ -197,12 +198,12 @@ TEST_CASE( "Test particle management in parallel node", "[Node]") {
         BTree::AbstractNode* leafNode6 = testIon6.getHostNode();
         leafNode6->removeMyselfFromTree();
         REQUIRE(testNode.getNumberOfParticles() == 1);
-        REQUIRE(testNode.getCharge() == 6.0*Core::ELEMENTARY_CHARGE);
+        REQUIRE(isExactDoubleEqual(testNode.getCharge(), 6.0*Core::ELEMENTARY_CHARGE));
 
         BTree::AbstractNode* leafNode5 = testIon5.getHostNode();
         leafNode5->removeMyselfFromTree();
         REQUIRE(testNode.getNumberOfParticles() == 0);
-        REQUIRE( testNode.getCharge() == 0.0*Core::ELEMENTARY_CHARGE);
+        REQUIRE(isExactDoubleEqual(testNode.getCharge(), 0.0*Core::ELEMENTARY_CHARGE));
         testNode.insertParticle(&testIon1);
         testNode.insertParticle(&testIon2);
         testNode.insertParticle(&testIon3);
@@ -251,12 +252,12 @@ TEST_CASE( "Test particle management in parallel node", "[Node]") {
         BTree::AbstractNode* leafNode3 = testIon3.getHostNode();
         leafNode3->removeMyselfFromTree();
         REQUIRE( (testNode.getCenterOfCharge() - Core::Vector(1.5,1.0,1.0)).magnitude() < 1e-10 );
-        REQUIRE(testNode.getCharge() == 2.0*Core::ELEMENTARY_CHARGE);
+        REQUIRE(isExactDoubleEqual(testNode.getCharge(), 2.0*Core::ELEMENTARY_CHARGE));
 
         BTree::AbstractNode* leafNode1 = testIon1.getHostNode();
         leafNode1->removeMyselfFromTree();
         REQUIRE( (testNode.getCenterOfCharge() - Core::Vector(2.0,1.0,1.0)).magnitude() < 1e-10 );
-        REQUIRE(testNode.getCharge() == 1.0*Core::ELEMENTARY_CHARGE);
+        REQUIRE(isExactDoubleEqual(testNode.getCharge(), 1.0*Core::ELEMENTARY_CHARGE));
     }
 
     SECTION( "Particles should be mass insertable and removeable from parallel node (memory leak test)"){

@@ -192,12 +192,12 @@ TEST_CASE( "Test particle insertion and remove in serial node", "[Node]") {
         BTree::AbstractNode* leafNode6 = testIon6.getHostNode();
         leafNode6->removeMyselfFromTree();
         REQUIRE(testNode.getNumberOfParticles() == 1);
-        REQUIRE(testNode.getCharge() == 6.0*Core::ELEMENTARY_CHARGE);
+        REQUIRE(isExactDoubleEqual(testNode.getCharge(), 6.0*Core::ELEMENTARY_CHARGE));
 
         BTree::AbstractNode* leafNode5 = testIon5.getHostNode();
         leafNode5->removeMyselfFromTree();
         REQUIRE(testNode.getNumberOfParticles() == 0);
-        REQUIRE(testNode.getCharge() == 0.0*Core::ELEMENTARY_CHARGE);
+        REQUIRE(isExactDoubleEqual(testNode.getCharge(), 0.0*Core::ELEMENTARY_CHARGE));
 
         testNode.insertParticle(&testIon1);
         testNode.insertParticle(&testIon2);
@@ -245,12 +245,12 @@ TEST_CASE( "Test particle insertion and remove in serial node", "[Node]") {
         BTree::AbstractNode* leafNode3 = testIon3.getHostNode();
         leafNode3->removeMyselfFromTree();
         REQUIRE( (testNode2.getCenterOfCharge() - Core::Vector(1.5,1.0,1.0)).magnitude() < 1e-10 );
-        REQUIRE(testNode2.getCharge() == 2.0*Core::ELEMENTARY_CHARGE);
+        REQUIRE(isExactDoubleEqual(testNode2.getCharge(), 2.0*Core::ELEMENTARY_CHARGE));
 
         BTree::AbstractNode* leafNode1 = testIon1.getHostNode();
         leafNode1->removeMyselfFromTree();
         REQUIRE( (testNode2.getCenterOfCharge() - Core::Vector(2.0,1.0,1.0)).magnitude() < 1e-10 );
-        REQUIRE(testNode2.getCharge() == 1.0*Core::ELEMENTARY_CHARGE);
+        REQUIRE(isExactDoubleEqual(testNode2.getCharge(), 1.0*Core::ELEMENTARY_CHARGE));
     }
 
     SECTION("Test particle mass insertion and remove from node (memory leak test)"){
@@ -400,8 +400,8 @@ TEST_CASE( "Test field calculation in serial node", "[Node]") {
         testNode.computeChargeDistributionRecursive();
 
         Core::Vector testField1 = testNode.computeElectricFieldFromTree(testIon1);
-        REQUIRE( testField1.x() == testField1.y());
-        REQUIRE( testField1.x() == testField1.z());
+        REQUIRE( testField1.x() == Approx(testField1.y()));
+        REQUIRE( testField1.x() == Approx(testField1.z()));
     }
 
     SECTION( "Test charge distribution calculation in all spatial directions with few particles") {

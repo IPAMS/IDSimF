@@ -29,8 +29,9 @@
 #include "BTree_parallelTree.hpp"
 #include "PSim_util.hpp"
 #include <iostream>
-#include "test_util.hpp"
 #include "catch.hpp"
+#include "test_util.hpp"
+#include "test_particleStarting.hpp"
 
 TEST_CASE( "Test parallel tree semantics / particle management","[Tree]") {
     BTree::ParallelTree testTree(
@@ -167,7 +168,7 @@ TEST_CASE( "Test parallel tree charge distribution calculation","[Tree]"){
 
         testTree.init();
         REQUIRE(testTree.getNumberOfParticles() == 3);
-        REQUIRE(testTree.getRoot()->getCharge() == 3.0*Core::ELEMENTARY_CHARGE);
+        REQUIRE(isExactDoubleEqual(testTree.getRoot()->getCharge(), 3.0*Core::ELEMENTARY_CHARGE));
 
         REQUIRE(testTree.computeEFieldFromTree(testIon1) == Core::Vector(0.0,0.0,0.0));
         REQUIRE(testTree.computeEFieldFromTree(testIon2) != Core::Vector(0.0,0.0,0.0));

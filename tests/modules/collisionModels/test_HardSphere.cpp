@@ -78,7 +78,7 @@ TEST_CASE( "Test Hard Sphere model after collision function", "[CollisionModels]
     Core::globalRandomGenerator = std::make_unique<Core::TestRandomGenerator>();
 
     //define a simple after collision function, which is called after a collision has taken place:
-    double nTotalCollisions = 0;
+    int nTotalCollisions = 0;
     std::vector<double> collisionEnergies;
     auto afterCollisionFct = [&nTotalCollisions, &collisionEnergies](
             RS::CollisionConditions collisionConditions, BTree::Particle &){

@@ -1,8 +1,8 @@
-#ifndef IONSIMULATION_CPP_TEST_UTIL_HPP
-#define IONSIMULATION_CPP_TEST_UTIL_HPP
+#ifndef IDSIMF_CPP_TEST_UTIL_HPP
+#define IDSIMF_CPP_TEST_UTIL_HPP
 
 #include "Core_vector.hpp"
-#include "PSim_boxStartZone.hpp"
+
 #include <string>
 #include <sstream>
 #include <fstream>
@@ -46,14 +46,6 @@ inline bool isExactDoubleEqual(double lhs, double rhs){
 }
 #pragma GCC diagnostic pop
 
-//FIXME: get rid of this method: Rewrite tests with start zone directly
-inline std::vector<std::unique_ptr<BTree::Particle>> getRandomIonsInBox(std::size_t numIons, Core::Vector corner, Core::Vector boxSize){
-    Core::Vector center = corner + boxSize/2.0;
-    ParticleSimulation::BoxStartZone startZone(boxSize, center);
-
-    return startZone.getRandomParticlesInStartZone(numIons, 1.0);
-}
-
 inline std::string readTextFile(std::string filename){
     std::ifstream inputFilestream(filename);
     std::string result(
@@ -63,4 +55,4 @@ inline std::string readTextFile(std::string filename){
     return result;
 }
 
-#endif //IONSIMULATION_CPP_TEST_UTIL_HPP
+#endif //IDSIMF_CPP_TEST_UTIL_HPP

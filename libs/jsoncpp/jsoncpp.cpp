@@ -3024,7 +3024,10 @@ bool Value::operator==(const Value& other) const {
   case uintValue:
     return value_.uint_ == other.value_.uint_;
   case realValue:
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wfloat-equal"
     return value_.real_ == other.value_.real_;
+#pragma GCC diagnostic pop
   case booleanValue:
     return value_.bool_ == other.value_.bool_;
   case stringValue: {

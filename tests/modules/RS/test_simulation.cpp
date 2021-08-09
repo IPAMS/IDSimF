@@ -26,11 +26,11 @@
  ****************************/
 
 #include "catch.hpp"
+#include "test_util.hpp"
 #include "RS_Simulation.hpp"
 #include "RS_SimulationConfiguration.hpp"
 #include "RS_ConfigFileParser.hpp"
 #include "RS_AbstractReaction.hpp"
-#include "RS_StaticReaction.hpp"
 #include "Core_randomGenerators.hpp"
 #include <memory>
 #include <map>
@@ -102,7 +102,7 @@ TEST_CASE( "Test basic RS simulation semantics", "[RS][Simulation]") {
 
         CHECK(!insertSuccessful);
         CHECK(p1->getSpecies() == sim.getParticle(1).getSpecies());
-        CHECK(p1->getCharge() == sim.getParticle(1).getCharge());
+        CHECK(isExactDoubleEqual(p1->getCharge(), sim.getParticle(1).getCharge()));
         CHECK(sim.discreteConcentrations().at(&Cluster_1) == 1);
         CHECK(sim.discreteConcentrations().count(&Cluster_3) == 0);
     }
@@ -178,17 +178,17 @@ TEST_CASE( "Test RS simulations", "[RS][Simulation]") {
         CHECK(sim.getParticle(1).getSpecies() == subst_A);
 
         //Check if simulation updates particles according to substances:
-        CHECK(sim.getParticle(2).getMobility() == subst_C->mobility());
-        CHECK(sim.getParticle(1).getMobility() == subst_A->mobility());
+        CHECK(isExactDoubleEqual(sim.getParticle(2).getMobility(), subst_C->mobility()));
+        CHECK(isExactDoubleEqual(sim.getParticle(1).getMobility(), subst_A->mobility()));
 
-        CHECK(sim.getParticle(2).getDiameter() == subst_C->collisionDiameter());
-        CHECK(sim.getParticle(1).getDiameter() == subst_A->collisionDiameter());
+        CHECK(isExactDoubleEqual(sim.getParticle(2).getDiameter(), subst_C->collisionDiameter()));
+        CHECK(isExactDoubleEqual(sim.getParticle(1).getDiameter(), subst_A->collisionDiameter()));
 
-        REQUIRE(sim.getParticle(2).getCharge() == subst_C->charge()*Core::ELEMENTARY_CHARGE);
-        REQUIRE(sim.getParticle(1).getCharge() == subst_A->charge()*Core::ELEMENTARY_CHARGE);
+        CHECK(isExactDoubleEqual(sim.getParticle(2).getCharge(), subst_C->charge()*Core::ELEMENTARY_CHARGE));
+        CHECK(isExactDoubleEqual(sim.getParticle(1).getCharge(), subst_A->charge()*Core::ELEMENTARY_CHARGE));
 
-        REQUIRE(sim.getParticle(2).getMass() == subst_C->mass()*Core::AMU_TO_KG);
-        REQUIRE(sim.getParticle(1).getMass() == subst_A->mass()*Core::AMU_TO_KG);
+        CHECK(isExactDoubleEqual(sim.getParticle(2).getMass(), subst_C->mass()*Core::AMU_TO_KG));
+        CHECK(isExactDoubleEqual(sim.getParticle(1).getMass(), subst_A->mass()*Core::AMU_TO_KG));
     }
 
     SECTION( "Simulation with water cluster configuration file should be correct") {
