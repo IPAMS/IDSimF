@@ -30,10 +30,10 @@
 #include "BTree_tree.hpp"
 #include "PSim_boxStartZone.hpp"
 #include "PSim_util.hpp"
-#include <iostream>
+#include "test_particleStarting.hpp"
 #include "catch.hpp"
 #include "test_util.hpp"
-#include "test_particleStarting.hpp"
+#include <iostream>
 
 TEST_CASE( "Test serial tree semantics / particle management","[Tree]") {
     BTree::Tree testTree(

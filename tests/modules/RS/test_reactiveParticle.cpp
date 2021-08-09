@@ -25,11 +25,11 @@
 
  ****************************/
 
-#include "catch.hpp"
-#include "test_util.hpp"
 #include "RS_Substance.hpp"
 #include "RS_ReactiveParticle.hpp"
 #include "Core_constants.hpp"
+#include "catch.hpp"
+#include "test_util.hpp"
 
 TEST_CASE("Test basic instantiation and setting of species in reactive particle", "[RS][Reactive Particle]") {
 

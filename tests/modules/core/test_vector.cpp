@@ -25,8 +25,8 @@
 
  ****************************/
 
-#include "catch.hpp"
 #include "Core_vector.hpp"
+#include "catch.hpp"
 #include <cmath>
 
 TEST_CASE("Test Vector construction","[Core][Vector]"){

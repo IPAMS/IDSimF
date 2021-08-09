@@ -25,11 +25,11 @@
 
  ****************************/
 
-#include "catch.hpp"
-#include "test_util.hpp"
 #include "PSim_ionCloudReader.hpp"
 #include "Core_vector.hpp"
 #include "BTree_particle.hpp"
+#include "catch.hpp"
+#include "test_util.hpp"
 #include <vector>
 
 

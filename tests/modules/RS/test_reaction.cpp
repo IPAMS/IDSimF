@@ -25,7 +25,6 @@
 
  ****************************/
 
-#include "catch.hpp"
 #include "RS_Substance.hpp"
 #include "RS_StaticReaction.hpp"
 #include "RS_StaticThermalizingReaction.hpp"
@@ -34,6 +33,7 @@
 #include "RS_SimpleCollisionStepReaction.hpp"
 #include "Core_constants.hpp"
 #include "Core_randomGenerators.hpp"
+#include "catch.hpp"
 
 #include <array>
 #include <numeric>

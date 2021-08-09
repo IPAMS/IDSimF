@@ -26,10 +26,10 @@
  ****************************/
 
 #include "PSim_math.hpp"
+#include "catch.hpp"
+#include <vector>
 #include <iostream>
 #include <limits>
-#include "vector"
-#include "catch.hpp"
 
 bool compareVectors(std::vector<double> a, std::vector<double> b) {
     if (a.size() != b.size()) return false;

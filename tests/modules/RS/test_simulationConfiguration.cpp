@@ -25,8 +25,8 @@
 
  ****************************/
 
-#include "catch.hpp"
 #include "RS_SimulationConfiguration.hpp"
+#include "catch.hpp"
 
 TEST_CASE("Test RS simulation configuration", "[RS][SimulationConfiguration]") {
 

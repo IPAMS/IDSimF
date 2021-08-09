@@ -28,11 +28,10 @@
 #include "BTree_parallelNode.hpp"
 #include "BTree_particle.hpp"
 #include "Core_constants.hpp"
+#include "catch.hpp"
 #include "test_util.hpp"
 #include <iostream>
 #include <cmath>
-#include "catch.hpp"
-#include "test_util.hpp"
 
 TEST_CASE( "Test basic parallel node semantics", "[Node]"){
 

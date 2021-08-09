@@ -25,13 +25,13 @@
 
  ****************************/
 
-#include "catch.hpp"
-#include "test_util.hpp"
 #include "RS_ConfigFileParser.hpp"
 #include "RS_Substance.hpp"
 #include "RS_AbstractReaction.hpp"
 #include "RS_VantHoffReaction.hpp"
 #include "RS_SimpleCollisionStepReaction.hpp"
+#include "catch.hpp"
+#include "test_util.hpp"
 #include <vector>
 #include <utility>
 

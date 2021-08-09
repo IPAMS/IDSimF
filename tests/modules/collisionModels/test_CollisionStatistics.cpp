@@ -25,8 +25,8 @@
 
  ****************************/
 
-#include "catch.hpp"
 #include "CollisionModel_CollisionStatistics.hpp"
+#include "catch.hpp"
 
 TEST_CASE( "Test basic collision statistics semantics", "[CollisionModels][CollisionStatistics]") {
 

@@ -28,10 +28,10 @@
 #include "Core_vector.hpp"
 #include "BTree_parallelTree.hpp"
 #include "PSim_util.hpp"
-#include <iostream>
+#include "test_particleStarting.hpp"
 #include "catch.hpp"
 #include "test_util.hpp"
-#include "test_particleStarting.hpp"
+#include <iostream>
 
 TEST_CASE( "Test parallel tree semantics / particle management","[Tree]") {
     BTree::ParallelTree testTree(

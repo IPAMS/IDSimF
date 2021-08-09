@@ -27,12 +27,12 @@
 
 #include "PSim_interpolatedField.hpp"
 #include "Core_vector.hpp"
+#include "catch.hpp"
 #include "test_util.hpp"
 #include <iostream>
 #include <vector>
 #include <array>
 
-#include "catch.hpp"
 
 
 TEST_CASE("Test self implemented interpolated field", "[ParticleSimulation][InterpolatedField][file readers]") {

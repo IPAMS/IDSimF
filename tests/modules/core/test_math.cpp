@@ -26,8 +26,8 @@
  ****************************/
 
 
-#include "catch.hpp"
 #include "Core_math.hpp"
+#include "catch.hpp"
 
 #include <cmath>
 

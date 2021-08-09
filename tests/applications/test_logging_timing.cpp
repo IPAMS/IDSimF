@@ -25,9 +25,9 @@
 
  ****************************/
 
-#include "catch.hpp"
 #include "appUtils_logging.hpp"
 #include "appUtils_stopwatch.hpp"
+#include "catch.hpp"
 #include "test_util.hpp"
 #include <string>
 #include <chrono>

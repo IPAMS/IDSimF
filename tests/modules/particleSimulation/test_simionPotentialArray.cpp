@@ -27,8 +27,8 @@
 
 #include "Core_debug.hpp"
 #include "PSim_simionPotentialArray.hpp"
-#include "test_util.hpp"
 #include "catch.hpp"
+#include "test_util.hpp"
 
 const double scale_mm_to_m = 1000;
 

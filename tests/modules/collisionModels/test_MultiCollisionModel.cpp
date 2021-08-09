@@ -25,16 +25,17 @@
 
  ****************************/
 
-#include "catch.hpp"
 #include "CollisionModel_AbstractCollisionModel.hpp"
 #include "CollisionModel_MultiCollisionModel.hpp"
 #include "CollisionModel_HardSphere.hpp"
 #include "CollisionModel_util.hpp"
 #include "BTree_particle.hpp"
 #include "Core_randomGenerators.hpp"
+#include "catch.hpp"
 
 #include <memory>
 #include <vector>
+
 
 TEST_CASE( "Test multi collision model with multiple hard sphere models ","[CollisionModels][MultiModel]") {
     //Set the global random generator to a test random number generator to make the test experiment fully deterministic:

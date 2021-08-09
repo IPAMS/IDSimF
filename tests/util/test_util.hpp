@@ -6,7 +6,6 @@
 #include <string>
 #include <sstream>
 #include <fstream>
-#include "catch.hpp"
 
 const std::string vectorsApproxEqual("Vectors approximately equal");
 

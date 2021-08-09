@@ -25,13 +25,14 @@
 
  ****************************/
 
-#include "catch.hpp"
 #include "CollisionModel_HardSphere.hpp"
 #include "Core_constants.hpp"
 #include "Core_randomGenerators.hpp"
 #include "BTree_particle.hpp"
+#include "catch.hpp"
 
 #include <memory>
+
 
 TEST_CASE( "Basic test Hard Sphere model", "[CollisionModels][HardSphereModel]") {
     //Set the global random generator to a test random number generator to make the test experiment fully deterministic:

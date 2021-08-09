@@ -25,8 +25,8 @@
 
  ****************************/
 
-#include "catch.hpp"
 #include "CollisionModel_MathFunctions.hpp"
+#include "catch.hpp"
 
 
 

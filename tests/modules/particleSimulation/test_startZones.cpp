@@ -25,11 +25,11 @@
 
  ****************************/
 
-#include "catch.hpp"
-#include "test_util.hpp"
 #include "Core_vector.hpp"
 #include "PSim_cylinderStartZone.hpp"
 #include "PSim_boxStartZone.hpp"
+#include "catch.hpp"
+#include "test_util.hpp"
 #include <vector>
 
 

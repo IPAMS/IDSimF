@@ -27,9 +27,9 @@
 
 
 #include "PSim_HDF5Reader.hpp"
+#include "catch.hpp"
 #include <vector>
 #include <array>
-#include "catch.hpp"
 
 TEST_CASE("Test HDF5 file reader", "[ParticleSimulation][file reader]") {
 

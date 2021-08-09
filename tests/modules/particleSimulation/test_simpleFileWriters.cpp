@@ -30,8 +30,8 @@
 #include "PSim_scalar_writer.hpp"
 #include "PSim_averageChargePositionWriter.hpp"
 #include "PSim_idealizedQitFFTWriter.hpp"
-#include <memory>
 #include "catch.hpp"
+#include <memory>
 
 
 TEST_CASE( "Scalar file writer should at least write a file without exception",

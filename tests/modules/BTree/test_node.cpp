@@ -30,10 +30,10 @@
 #include "BTree_particle.hpp"
 #include "PSim_util.hpp"
 #include "PSim_boxStartZone.hpp"
+#include "catch.hpp"
 #include "test_util.hpp"
 #include <iostream>
 #include <cmath>
-#include "catch.hpp"
 
 TEST_CASE( "Test basic serial node semantics", "[Node]"){
     //Test ion location:

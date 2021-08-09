@@ -25,8 +25,8 @@
 
  ****************************/
 
-#include "catch.hpp"
 #include "RS_Substance.hpp"
+#include "catch.hpp"
 
 TEST_CASE("RS Substance: Test basic instantiation", "[RS][Substance]") {
 

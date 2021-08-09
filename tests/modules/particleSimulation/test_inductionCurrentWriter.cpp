@@ -28,8 +28,8 @@
 #include "BTree_particle.hpp"
 #include "PSim_simionPotentialArray.hpp"
 #include "PSim_inductionCurrentWriter.hpp"
-#include <memory>
 #include "catch.hpp"
+#include <memory>
 
 
 TEST_CASE( "Test indcution current file writer", "[ParticleSimulation][file writers]") {

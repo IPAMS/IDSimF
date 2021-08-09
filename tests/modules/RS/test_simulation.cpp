@@ -25,13 +25,13 @@
 
  ****************************/
 
-#include "catch.hpp"
-#include "test_util.hpp"
 #include "RS_Simulation.hpp"
 #include "RS_SimulationConfiguration.hpp"
 #include "RS_ConfigFileParser.hpp"
 #include "RS_AbstractReaction.hpp"
 #include "Core_randomGenerators.hpp"
+#include "catch.hpp"
+#include "test_util.hpp"
 #include <memory>
 #include <map>
 #include <utility>

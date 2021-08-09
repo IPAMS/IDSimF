@@ -25,9 +25,9 @@
 
  ****************************/
 
-#include "catch.hpp"
 #include "RS_util.hpp"
 #include "Core_randomGenerators.hpp"
+#include "catch.hpp"
 #include <numeric>
 #include <vector>
 #include <RS_constants.hpp>

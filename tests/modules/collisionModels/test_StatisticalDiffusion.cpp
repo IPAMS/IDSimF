@@ -24,7 +24,6 @@
  Testing of statistical diffusion simulation (SDS) collsion model
 
  ****************************/
-#include "catch.hpp"
 #include "Core_randomGenerators.hpp"
 #include "BTree_particle.hpp"
 #include "BTree_tree.hpp"
@@ -32,6 +31,7 @@
 #include "CollisionStatistic_default.hpp"
 #include "PSim_constants.hpp"
 #include "PSim_verletIntegrator.hpp"
+#include "catch.hpp"
 
 
 TEST_CASE( "Test SDS collison model", "[CollisionModels][SDS]") {

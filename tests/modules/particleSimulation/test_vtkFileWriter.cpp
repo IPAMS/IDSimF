@@ -29,8 +29,8 @@
 #include "BTree_particle.hpp"
 #include "BTree_tree.hpp"
 
-#include <iostream>
 #include "catch.hpp"
+#include <iostream>
 
 TEST_CASE( "The VTK writer should at least write a file without exception",
         "[ParticleSimulation][VtkFieldReader][file writers]") {

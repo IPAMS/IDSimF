@@ -1,5 +1,5 @@
-#include "catch.hpp"
 #include "CollisionModel_util.hpp"
+#include "catch.hpp"
 
 TEST_CASE( "Test ion parameter estimation functions", "[CollisionModels][Util]") {
 

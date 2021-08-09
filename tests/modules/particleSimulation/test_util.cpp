@@ -28,8 +28,8 @@
 #include "PSim_util.hpp"
 #include "BTree_particle.hpp"
 #include "Core_vector.hpp"
-#include <cmath>
 #include "catch.hpp"
+#include <cmath>
 TEST_CASE( "Test random particle generation","[ParticleSimulation][utilities][random]") {
 
     SECTION( "Randomly generated ions on a cylinder wall should be on that cylinder wall"){

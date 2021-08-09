@@ -26,12 +26,12 @@
  ****************************/
 
 
-#include "catch.hpp"
-#include "test_util.hpp"
 #include "PSim_particleStartSplatTracker.hpp"
 #include "PSim_parallelVerletIntegrator.hpp"
 #include "BTree_particle.hpp"
 #include "Core_vector.hpp"
+#include "catch.hpp"
+#include "test_util.hpp"
 #include <iostream>
 #include <memory>
 

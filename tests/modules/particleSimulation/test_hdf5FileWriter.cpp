@@ -25,14 +25,15 @@
 
  ****************************/
 
-#include "catch.hpp"
-#include "test_util.hpp"
 #include "PSim_trajectoryHDF5Writer.hpp"
 #include "PSim_trajectoryExplorerJSONwriter.hpp"
 #include "PSim_particleStartSplatTracker.hpp"
 #include "Core_vector.hpp"
 #include "BTree_particle.hpp"
 #include "H5Cpp.h"
+#include "catch.hpp"
+#include "test_util.hpp"
+
 #include <array>
 #include <vector>
 #include <string>
