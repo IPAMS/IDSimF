@@ -79,7 +79,7 @@ TEST_CASE("Test self implemented interpolated field", "[ParticleSimulation][Inte
             REQUIRE(intField.getInterpolatedScalar(11.5, 5.0, 6.2, 0) == Approx(22.7));
             REQUIRE(intField.getInterpolatedScalar(5.0, 5.0, 0.1, 0) == Approx(10.1));
             REQUIRE_THROWS_AS(
-                    intField.getInterpolatedScalar(-100.0, -100.0, 0.1, 0)==0.0,
+                    intField.getInterpolatedScalar(-100.0, -100.0, 0.1, 0) == Approx(0.0),
                     std::invalid_argument);
         }
 

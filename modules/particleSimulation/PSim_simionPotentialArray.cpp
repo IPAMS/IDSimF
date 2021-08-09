@@ -20,6 +20,7 @@
  ****************************/
 
 #include "Core_debug.hpp"
+#include "Core_utils.hpp"
 #include "PSim_simionPotentialArray.hpp"
 #include "spdlog/spdlog.h"
 #include <sstream>
@@ -150,7 +151,7 @@ Core::Vector ParticleSimulation::SimionPotentialArray::getField(double xPt, doub
         // the radial field points outwards radially, since we can scale its cartesian components
         // with the normalized cartesian components of the point
 
-        if (rT != 0.0){
+        if (Core::isDoubleUnequal(rT, 0.0)){
             double Ey = Er * yT / rT;
             double Ez = Er * zT / rT;
             field = {Ex, Ey, Ez};
@@ -506,10 +507,13 @@ double ParticleSimulation::SimionPotentialArray::interpolatedPotentialCylindrica
     // if we are exactly on the last node position in a direction
 
     //note that "potential_" makes NO bounds check (getPotential does)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wfloat-equal"
     double p00 = potential_(xNode, rNode, 0);
     double p10 = xWeight != 0.0 ? potential_(xNode+1, rNode, 0) : 0.0;
     double p01 = rWeight != 0.0 ? potential_(xNode, rNode+1, 0) : 0.0;
     double p11 = (xWeight != 0.0 && rWeight != 0.0) ? potential_(xNode+1, rNode+1, 0) : 0.0;
+#pragma GCC diagnostic pop
 
     double pot =
             (1-xWeight) * (1-rWeight) * p00 +
@@ -539,11 +543,13 @@ double ParticleSimulation::SimionPotentialArray::interpolatedPotentialCartesian2
 
     // two dimensional interpolation is technically exactly the same as in cylindrical coordinates,
     // see the comment there
-
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wfloat-equal"
     double p00 = potential_(xNode, yNode, 0);
     double p10 = xWeight != 0.0 ? potential_(xNode+1, yNode, 0) : 0.0;
     double p01 = yWeight != 0.0 ? potential_(xNode, yNode+1, 0) : 0.0;
     double p11 = (xWeight != 0.0 && yWeight != 0.0) ? potential_(xNode+1, yNode+1, 0) : 0.0;
+#pragma GCC diagnostic pop
 
     double pot =
                  (1-xWeight) * (1-yWeight) * p00 +
@@ -578,10 +584,13 @@ double ParticleSimulation::SimionPotentialArray::interpolatedPotentialCartesian3
     // get the values on the 4 nodes with lower z index surrounding the point we want to get the potential for
     // (see comment above)
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wfloat-equal"
     double p000 = potential_(xNode, yNode, zNode);
     double p100 = xWeight != 0.0 ? potential_(xNode+1, yNode, zNode) : 0.0;
     double p010 = yWeight != 0.0 ? potential_(xNode, yNode+1, zNode) : 0.0;
     double p110 = (xWeight != 0.0 && yWeight != 0.0) ? potential_(xNode+1, yNode+1, zNode) : 0.0;
+#pragma GCC diagnostic pop
 
     double pot = (1-xWeight) * (1-yWeight) * (1-zWeight) * p000 +
                  xWeight     * (1-yWeight) * (1-zWeight) * p100 +
@@ -593,10 +602,13 @@ double ParticleSimulation::SimionPotentialArray::interpolatedPotentialCartesian3
     // all nodes with zNode+1 is zero, since the weighting in z direction would be zWeight which is 0.0
     // in this case.
     if (zWeight > 0.0){
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wfloat-equal"
         double p001 = potential_(xNode, yNode, zNode+1);
         double p101 = xWeight != 0.0 ? potential_(xNode+1, yNode, zNode+1) : 0.0;
         double p011 = yWeight != 0.0 ? potential_(xNode, yNode+1, zNode+1) : 0.0;
         double p111 = (xWeight != 0.0 && yWeight != 0.0) ? potential_(xNode+1, yNode+1, zNode+1) : 0.0;
+#pragma GCC diagnostic pop
 
         pot +=  (1-xWeight) * (1-yWeight) * zWeight * p001 +
                 xWeight     * (1-yWeight) * zWeight * p101 +

@@ -168,7 +168,7 @@ TEST_CASE( "Test ion definition reading", "[ApplicationUtils]") {
             REQUIRE(kE_100 == Approx(100.0));
 
             Core::Vector v_100 = p_100->getVelocity();
-            REQUIRE(v_100.z() == 0.0);
+            REQUIRE(isExactDoubleEqual(v_100.z(), 0.0));
             REQUIRE(2.0 * v_100.x() == Approx(v_100.y()));
         }
     }

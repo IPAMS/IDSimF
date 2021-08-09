@@ -31,6 +31,7 @@
 
 
 #include "Core_vector.hpp"
+#include "Core_utils.hpp"
 #include "BTree_abstractNode.hpp"
 #include "BTree_particle.hpp"
 #include <sstream>
@@ -299,7 +300,7 @@ namespace BTree{
                                                    parentNode->octNodes_[i]->charge_);
                 }
             }
-            if (parentNode->charge_ != 0.0){
+            if (Core::isDoubleUnequal(parentNode->charge_, 0.0)){
                 parentNode->centerOfCharge_ = parentNode->centerOfCharge_ / parentNode->charge_;
             }
             else {
@@ -384,7 +385,7 @@ namespace BTree{
                                     octNode->getCharge());
                 }
             }
-            if (charge_ != 0.0){
+            if (Core::isDoubleUnequal(charge_, 0.0)){
                 centerOfCharge_ = centerOfCharge_ / charge_;
             }
             else {

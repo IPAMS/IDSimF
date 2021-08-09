@@ -20,6 +20,7 @@
  ****************************/
 
 #include "BTree_parallelTree.hpp"
+#include "Core_utils.hpp"
 #include <iostream>
 
 /**
@@ -321,7 +322,7 @@ void BTree::ParallelTree::updateNodeChargeState_()
                     }
                 }
 
-                if (currentNode->charge_ != 0.0){
+                if (Core::isDoubleUnequal(currentNode->charge_, 0.0)){
                     currentNode->centerOfCharge_ = currentNode->centerOfCharge_ / currentNode->charge_;
                 }
                 else {

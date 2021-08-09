@@ -122,10 +122,10 @@ TEST_CASE( "Basic Particle semantics tests", "[Particle]") {
             std::string testKey = "a testkey";
 
             testIon.setFloatAttribute(testKey, 100.0);
-            CHECK(testIon.getFloatAttribute(testKey)==100.0);
+            CHECK(isExactDoubleEqual(testIon.getFloatAttribute(testKey), 100.0));
 
             testIon.setFloatAttribute(testKey, 200.0);
-            REQUIRE(testIon.getFloatAttribute(testKey)==200.0);
+            REQUIRE(isExactDoubleEqual(testIon.getFloatAttribute(testKey), 200.0));
         }
 
         SECTION("Test integer attributes"){
