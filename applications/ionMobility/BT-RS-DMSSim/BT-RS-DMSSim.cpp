@@ -26,6 +26,7 @@
 
  ****************************/
 
+#include "Core_utils.hpp"
 #include "RS_Simulation.hpp"
 #include "RS_SimulationConfiguration.hpp"
 #include "RS_ConfigFileParser.hpp"
@@ -267,7 +268,7 @@ int main(int argc, const char * argv[]) {
 
                     Core::Vector fieldForce(0, 0, fieldMagnitude*particleCharge);
 
-                    if (spaceChargeFactor==0.0) {
+                    if (Core::isDoubleEqual(spaceChargeFactor, 0.0)) {
                         return (fieldForce/particle->getMass());
                     }
                     else {

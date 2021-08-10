@@ -113,8 +113,8 @@ TEST_CASE("Test chemical semantics of RS reaction types", "[RS][Reaction]") {
 
     SECTION("Reaction probability of static reaction should be correct") {
         RS::StaticReaction reac = RS::StaticReaction(educts, products, 1.5e10, "a test reaction");
-        CHECK(reac.attemptReaction(reactionConditions, &dummyParticle, 1.0).reactionProbability == 1.5e10);
-        CHECK(reac.attemptReaction(reactionConditions, &dummyParticle, 0.1).reactionProbability == 1.5e9);
+        CHECK(reac.attemptReaction(reactionConditions, &dummyParticle, 1.0).reactionProbability == Approx(1.5e10));
+        CHECK(reac.attemptReaction(reactionConditions, &dummyParticle, 0.1).reactionProbability == Approx(1.5e9));
     }
 
     SECTION("Static thermalizing reaction should calculate correct reaction probabilities and thermalize reacted particle") {
@@ -128,7 +128,7 @@ TEST_CASE("Test chemical semantics of RS reaction types", "[RS][Reaction]") {
 
         // test if linearized reaction probability is correct:
         RS::ReactiveParticle productParticle(&pro_1);
-        CHECK(reac.attemptReaction(reactionConditions, &productParticle, 1.0).reactionProbability == 10.0);
+        CHECK(reac.attemptReaction(reactionConditions, &productParticle, 1.0).reactionProbability == Approx(10.0));
 
         // test if the velocity is reinitialized thermally:
         // Generate 100000 test samples and determine mean velocity and mean velocity magnitude after collision

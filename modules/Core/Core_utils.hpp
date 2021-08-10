@@ -33,6 +33,10 @@ namespace Core {
     inline bool isDoubleUnequal(double lhs, double rhs){
         return lhs != rhs;
     }
+
+    inline bool isDoubleEqual(double lhs, double rhs){
+        return lhs == rhs;
+    }
 }
 #pragma GCC diagnostic pop
 

@@ -20,6 +20,7 @@
  ****************************/
 
 #include "CollisionModel_HardSphere.hpp"
+#include "Core_utils.hpp"
 #include "Core_math.hpp"
 #include "Core_randomGenerators.hpp"
 
@@ -133,7 +134,7 @@ void CollisionModel::HardSphereModel::modifyVelocity(BTree::Particle &ion, doubl
     Core::Vector pLocation = ion.getLocation();
     double localPressure_Pa = pressureFunction_(pLocation);
 
-    if (localPressure_Pa==0.0){
+    if (Core::isDoubleEqual(localPressure_Pa, 0.0)){
         return; //pressure 0 means no collision at all
     }
 

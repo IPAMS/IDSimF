@@ -36,7 +36,7 @@ TEST_CASE("Test basic instantiation and setting of species in reactive particle"
     RS::Substance sub1("Testsubstance",RS::Substance::substanceType::discrete);
     RS::ReactiveParticle rp = RS::ReactiveParticle(&sub1);
 
-    CHECK(rp.getCharge() == 0.0);
+    CHECK(isExactDoubleEqual(rp.getCharge(), 0.0));
 
     RS::Substance sub2("Testsubstance2",RS::Substance::substanceType::discrete);
     sub2.collisionDiameter(100.0);

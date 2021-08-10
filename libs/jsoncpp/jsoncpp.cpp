@@ -3307,12 +3307,15 @@ bool Value::asBool() const {
 bool Value::isConvertibleTo(ValueType other) const {
   switch (other) {
   case nullValue:
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wfloat-equal"
     return (isNumeric() && asDouble() == 0.0) ||
            (type() == booleanValue && value_.bool_ == false) ||
            (type() == stringValue && asString().empty()) ||
            (type() == arrayValue && value_.map_->empty()) ||
            (type() == objectValue && value_.map_->empty()) ||
            type() == nullValue;
+#pragma GCC diagnostic pop
   case intValue:
     return isInt() ||
            (type() == realValue && InRange(value_.real_, minInt, maxInt)) ||
@@ -3755,11 +3758,13 @@ Value::Members Value::getMemberNames() const {
 //}
 //
 //# endif
-
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wfloat-equal"
 static bool IsIntegral(double d) {
   double integral_part;
   return modf(d, &integral_part) == 0.0;
 }
+#pragma GCC diagnostic pop
 
 bool Value::isNull() const { return type() == nullValue; }
 

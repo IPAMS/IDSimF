@@ -27,6 +27,7 @@
  ****************************/
 
 
+#include "Core_utils.hpp"
 #include "BTree_particle.hpp"
 #include "PSim_trajectoryHDF5Writer.hpp"
 #include "PSim_scalar_writer.hpp"
@@ -130,7 +131,7 @@ int main(int argc, const char * argv[]) {
         std::vector<double> detectionPAFactors;
         for (size_t i = 0; i<detectionPAFactorsRaw.size(); ++i) {
             double paKey = detectionPAFactorsRaw[i];
-            if (paKey!=0.0) {
+            if (Core::isDoubleUnequal(paKey,0.0)) {
                 detectionPAs.emplace_back(potentialArrays[i].get());
                 detectionPAFactors.emplace_back(paKey);
             }

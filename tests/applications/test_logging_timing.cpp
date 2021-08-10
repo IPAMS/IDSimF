@@ -47,8 +47,8 @@ TEST_CASE( "Test logging", "[ApplicationUtils]") {
 TEST_CASE( "Test stopwatch timing", "[ApplicationUtils]") {
 
     AppUtils::Stopwatch sw;
-    CHECK(sw.elapsedSecondsCPU() == 0.0);
-    CHECK(sw.elapsedSecondsWall() == 0.0);
+    CHECK(isExactDoubleEqual(sw.elapsedSecondsCPU(), 0.0));
+    CHECK(isExactDoubleEqual(sw.elapsedSecondsWall(), 0.0));
     sw.start();
     std::this_thread::sleep_for(std::chrono::seconds(1));
     sw.stop();

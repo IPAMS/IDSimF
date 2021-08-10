@@ -27,6 +27,7 @@
 
 #include "RS_Substance.hpp"
 #include "catch.hpp"
+#include "test_util.hpp"
 
 TEST_CASE("RS Substance: Test basic instantiation", "[RS][Substance]") {
 
@@ -49,15 +50,15 @@ TEST_CASE("RS Substance: Test basic instantiation", "[RS][Substance]") {
 
     SECTION("RS Substance: Test basic getter and setters") {
         sub.charge(10.0);
-        REQUIRE(sub.charge() == 10.0);
+        REQUIRE(isExactDoubleEqual(sub.charge(), 10.0));
 
         sub.mass(100.0);
-        REQUIRE(sub.mass() == 100.0);
+        REQUIRE(isExactDoubleEqual(sub.mass(), 100.0));
 
         sub.staticConcentration(1.0e10);
-        REQUIRE(sub.staticConcentration() == 1.0e10);
+        REQUIRE(isExactDoubleEqual(sub.staticConcentration(),  1.0e10));
 
         sub.mobility(5.0);
-        REQUIRE(sub.mobility() == 5.0);
+        REQUIRE(isExactDoubleEqual(sub.mobility(), 5.0));
     }
 }

@@ -49,9 +49,9 @@ TEST_CASE("TestParticleStartSplatTracker", "[ParticleSimulation][ParticleStartSp
         SECTION("Test of valid use with one particle") {
             ParticleSimulation::ParticleStartSplatTracker::pMapEntry entry_0 = tracker.get(&particle_0);
 
-            CHECK(entry_0.startTime==1.0);
+            CHECK(isExactDoubleEqual(entry_0.startTime, 1.0));
             CHECK(entry_0.startLocation==Core::Vector(0.5, 1.0, 1.5));
-            CHECK(entry_0.splatTime==2.0);
+            CHECK(isExactDoubleEqual(entry_0.splatTime, 2.0));
             CHECK(entry_0.splatLocation==Core::Vector(1.0, 1.0, 1.0));
             CHECK(entry_0.globalIndex==0);
             CHECK(particle_0.getIntegerAttribute("global index")==0);
@@ -182,7 +182,7 @@ TEST_CASE("TestParticleStartSplatTracker", "[ParticleSimulation][ParticleStartSp
         CHECK(splatLocations[25] == particles[25]->getLocation());
 
         CHECK(pData[nParticles-1].state == ParticleSimulation::ParticleStartSplatTracker::STARTED);
-        CHECK(pData[nParticles-1].splatTime == 0.0); //since the particle is not splatted
+        CHECK(isExactDoubleEqual(pData[nParticles-1].splatTime, 0.0)); //since the particle is not splatted
     }
 
 
