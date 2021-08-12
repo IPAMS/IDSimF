@@ -122,7 +122,7 @@ double CollisionModel::StatisticalDiffusionModel::randomWalkDistance_(double log
 
     // Select actual indices in the discrete ICDFs according to an uniformly distributed random percentile
     double percentile = Core::globalRandomGenerator->uniformRealRndValue() * (cs_.getNDistPoints() - 2);
-    size_t iLower = floor(percentile);
+    size_t iLower = size_t(floor(percentile));
     size_t iUpper= iLower + 1;
 
     // Calculate random walk distance within the two ICDFs

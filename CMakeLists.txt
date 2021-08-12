@@ -6,7 +6,7 @@ enable_testing()
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-add_compile_options(-Wdelete-non-virtual-dtor -Wall -Wextra -Wsign-conversion -Wfloat-equal) #-Wzero-as-null-pointer-constant)
+add_compile_options(-Wdelete-non-virtual-dtor -Wall -Wextra -Wsign-conversion -Wfloat-equal -Wfloat-conversion) #-Wzero-as-null-pointer-constant)
 
 #if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 #    add_compile_options(-Wreserved-id-macro)

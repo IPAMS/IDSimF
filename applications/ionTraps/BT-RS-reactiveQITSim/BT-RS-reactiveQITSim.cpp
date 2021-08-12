@@ -63,8 +63,8 @@ double z_0_default = 7.0  / 1000.0;
 
 std::function<void(double,BTree::Particle&)> createCollisionCountFunction(std::string key){
     return [=](double /*collisionEnergy*/, BTree::Particle& ion)->void{
-        int nCollisions = ion.getFloatAttribute(key);
-        ion.setFloatAttribute(key, nCollisions+1);
+        int nCollisions = ion.getIntegerAttribute(key);
+        ion.setIntegerAttribute(key, nCollisions+1);
     };
 }
 
@@ -73,8 +73,8 @@ createCollisionReactionFunction(RS::Substance *collisionPartnerSubstance, RS::Si
 
     return [collisionPartnerSubstance,key,&rsSim] (RS::CollisionConditions conditions, BTree::Particle& ion){
         rsSim.collisionReact(ion.getIndex(),collisionPartnerSubstance,conditions);
-        int nCollisions = ion.getFloatAttribute(key);
-        ion.setFloatAttribute(key, nCollisions+1);
+        int nCollisions = ion.getIntegerAttribute(key);
+        ion.setIntegerAttribute(key, nCollisions+1);
     };
 }
 

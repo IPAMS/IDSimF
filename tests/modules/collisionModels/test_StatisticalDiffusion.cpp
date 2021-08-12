@@ -100,7 +100,7 @@ TEST_CASE( "Test SDS collison model", "[CollisionModels][SDS]") {
 
         //Test with verlet integration:
         double dt = 1e-4;
-        double timeSteps = 50;
+        unsigned int timeSteps = 50;
 
         double massGas_amu = 28.94515; //SDS default value for air
         double diameterGas = 0.366 * 1.0e-9;
@@ -134,7 +134,7 @@ TEST_CASE( "Test SDS collison model", "[CollisionModels][SDS]") {
                 ParticleSimulation::noFunction, ParticleSimulation::noFunction, ParticleSimulation::noFunction,
                 &sds);
 
-        verletIntegrator.run(timeSteps,dt);
+        verletIntegrator.run(timeSteps, dt);
 
         Core::Vector ionPos = ion.getLocation();
 
