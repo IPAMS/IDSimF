@@ -265,7 +265,7 @@ int main(int argc, const char * argv[]) {
 
                 particle->setIndex(static_cast<int>(nParticlesTotal));
                 particle->setLocation(initialPositions[k]);
-                particle->setFloatAttribute(key_Collisions_total, 0);
+                particle->setIntegerAttribute(key_Collisions_total, 0);
                 particlePtrs.push_back(particle.get());
                 rsSim.addParticle(particle.get(), static_cast<int>(nParticlesTotal));
                 particles.push_back(std::move(particle));
@@ -379,26 +379,25 @@ int main(int argc, const char * argv[]) {
                             particle->getVelocity().x(),
                             particle->getVelocity().y(),
                             particle->getVelocity().z(),
-                            kineticEnergy_eV,
-                            particle->getFloatAttribute(key_Collisions_total),
-                            particle->getFloatAttribute(key_ChemicalIndex)
+                            kineticEnergy_eV
                     };
                     return result;
                 };
 
-        std::vector<std::string> auxParamNames = {"velocity x", "velocity y", "velocity z", "kinetic energy (eV)",
-                                                  "total collisions",
-                                                  "chemical id"};
+        std::vector<std::string> auxParamNames = {"velocity x", "velocity y", "velocity z", "kinetic energy (eV)"};
 
         ParticleSimulation::partAttribTransformFctTypeInteger integerParticleAttributesTransformFct =
                 [](BTree::Particle* particle) -> std::vector<int> {
                     std::vector<int> result = {
-                            particle->getIntegerAttribute("global index")
+                            particle->getIntegerAttribute("global index"),
+                            particle->getIntegerAttribute(key_Collisions_total),
+                            particle->getIntegerAttribute(key_ChemicalIndex)
+
                     };
                     return result;
                 };
 
-        std::vector<std::string> integerParticleAttributesNames = {"global index"};
+        std::vector<std::string> integerParticleAttributesNames = {"global index", "total collisions", "chemical id"};
 
         auto hdf5Writer = std::make_unique<ParticleSimulation::TrajectoryHDF5Writer>(
                 projectName+"_trajectories.hd5");
@@ -472,7 +471,7 @@ int main(int argc, const char * argv[]) {
                 if (particles[i]->isActive()) {
                     rsSim.react(static_cast<int>(i), reactionConditions, dt);
                     int substIndex = substanceIndices.at(particles[i]->getSpecies());
-                    particles[i]->setFloatAttribute(key_ChemicalIndex, substIndex);
+                    particles[i]->setIntegerAttribute(key_ChemicalIndex, substIndex);
                 }
             }
             rsSim.advanceTimestep(dt);
