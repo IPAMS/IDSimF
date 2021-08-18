@@ -20,13 +20,6 @@ Base Classes
     :undoc-members:
 
 
-:cpp:class:`CollisionModel::EmptyCollisionModel` is an empty model, which does nothing. It is used in simulations without background gas interaction if an integrator expects a collision model. 
-
-.. doxygenclass:: CollisionModel::EmptyCollisionModel
-    :members:
-    :undoc-members:
-
-
 :cpp:class:`CollisionModel::MultiCollisionModel` combines multiple collision models, primarily :cpp:class:`CollisionModel::HardSphereModel`, to model background gas mixtures in the hard sphere model. 
 
 .. doxygenclass:: CollisionModel::MultiCollisionModel
