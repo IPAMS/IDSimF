@@ -43,7 +43,7 @@ RS::SimulationConfiguration* RS::Simulation::simulationConfiguration() const {
     return simConf_.get();
 }
 
-bool RS::Simulation::addParticle(RS::ReactiveParticle* particle,int index) {
+bool RS::Simulation::addParticle(RS::ReactiveParticle* particle, index_t index) {
     std::pair<pMap::iterator,bool> insResult = particleMap_.insert(pPair(index,particle));
 
     if (insResult.second) {
@@ -52,12 +52,12 @@ bool RS::Simulation::addParticle(RS::ReactiveParticle* particle,int index) {
     return insResult.second;
 }
 
-void RS::Simulation::removeParticle(int index) {
+void RS::Simulation::removeParticle(index_t index) {
     discreteConcentrations_[particleMap_.at(index)->getSpecies()]--;
     particleMap_.erase(index);
 }
 
-RS::ReactiveParticle& RS::Simulation::getParticle(int index) const{
+RS::ReactiveParticle& RS::Simulation::getParticle(index_t index) const{
     return *particleMap_.at(index);
 }
 
@@ -87,14 +87,14 @@ long RS::Simulation::reactionEvents(RS::AbstractReaction* reaction) const {
 
 void RS::Simulation::performTimestep(RS::ReactionConditions& conditions, double dt) {
 
-    int nParticles = particleMap_.size();
+    std::size_t nParticles = particleMap_.size();
 
     #pragma omp parallel
     {
         reactionMap indMap = indReactDeepCopy_(); // get local copy of independent reaction maps
 
         #pragma omp for
-        for (int i = 0; i<nParticles; i++) {
+        for (std::size_t i = 0; i<nParticles; ++i) {
             react_(i, conditions, dt, indMap);
         }
     }
@@ -146,11 +146,11 @@ void RS::Simulation::doReaction(RS::AbstractReaction* reaction, RS::ReactivePart
  * @param dt the time step length
  * @return true if a reaction had occurred
  */
-bool RS::Simulation::react(int index, RS::ReactionConditions& conditions, double dt) {
+bool RS::Simulation::react(index_t index, RS::ReactionConditions& conditions, double dt) {
     return react_(index, conditions, dt, reacInd_);
 }
 
-bool RS::Simulation::react_(int index, RS::ReactionConditions& conditions, double dt, reactionMap &reacInd) {
+bool RS::Simulation::react_(index_t index, RS::ReactionConditions& conditions, double dt, reactionMap &reacInd) {
     RS::ReactiveParticle* particle = particleMap_[index];
 
     std::vector<AbstractReaction*> &iReactions = reacInd[particle->getSpecies()];
@@ -182,7 +182,7 @@ bool RS::Simulation::react_(int index, RS::ReactionConditions& conditions, doubl
     return false;
 }
 
-bool RS::Simulation::collisionReact(int index, RS::Substance* reactionPartnerSpecies, CollisionConditions& conditions){
+bool RS::Simulation::collisionReact(index_t index, RS::Substance* reactionPartnerSpecies, CollisionConditions& conditions){
     //step 1: get reactions for this particle and this reaction partner
     RS::ReactiveParticle* particle = particleMap_.at(index);
     RS::Substance* particleSpecies = particle->getSpecies();

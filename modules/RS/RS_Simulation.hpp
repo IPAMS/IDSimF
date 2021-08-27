@@ -50,14 +50,16 @@ namespace RS {
     using reactionMap = std::map<Substance* const, std::vector<AbstractReaction*>>;
 
     public:
+        using index_t= std::size_t;
+
         explicit Simulation(const std::string& configFileName);
         explicit Simulation(std::unique_ptr<RS::SimulationConfiguration> simConf);
 
         [[nodiscard]] SimulationConfiguration* simulationConfiguration() const;
 
-        bool addParticle(RS::ReactiveParticle* particle,int index);
-        void removeParticle(int index);
-        [[nodiscard]] ReactiveParticle& getParticle(int index) const;
+        bool addParticle(RS::ReactiveParticle* particle, index_t index);
+        void removeParticle(index_t index);
+        [[nodiscard]] ReactiveParticle& getParticle(index_t index) const;
         [[nodiscard]] std::map<Substance* const,int> discreteConcentrations() const;
         [[nodiscard]] long totalReactionEvents() const;
         [[nodiscard]] long illEvents() const;
@@ -65,8 +67,8 @@ namespace RS {
 
         void performTimestep(ReactionConditions& conditions, double dt);
         void doReaction(RS::AbstractReaction* reaction, RS::ReactiveParticle* particle, RS::Substance* product);
-        bool react(int index, ReactionConditions& conditions, double dt);
-        bool collisionReact(int index, RS::Substance* reactionPartnerSpecies, CollisionConditions& conditions);
+        bool react(index_t index, ReactionConditions& conditions, double dt);
+        bool collisionReact(index_t index, RS::Substance* reactionPartnerSpecies, CollisionConditions& conditions);
         void advanceTimestep(double dt);
 
         [[nodiscard]] int timestep() const;
@@ -79,13 +81,13 @@ namespace RS {
         friend std::ostream& ::operator<<(std::ostream& os, const RS::Simulation& sim);
 
     private:
-        using pMap = std::unordered_map<int, RS::ReactiveParticle*>;
+        using pMap = std::unordered_map<index_t, RS::ReactiveParticle*>;
         using pPair= pMap::value_type;
         pMap particleMap_;
 
         void initFromSimulationConfig_(std::unique_ptr<RS::SimulationConfiguration> simConf);
         reactionMap indReactDeepCopy_();
-        bool react_(int index, ReactionConditions& conditions, double dt, reactionMap &reacInd);
+        bool react_(index_t index, ReactionConditions& conditions, double dt, reactionMap &reacInd);
 
         std::string concentrationString_() const;
         std::string reactionStatisticsString_() const;
