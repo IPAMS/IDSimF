@@ -32,7 +32,7 @@ BTree::Tree::Tree(Core::Vector min, Core::Vector max):
         root_(std::make_unique<BTree::Node>(min,max,nullptr)){
     root_->initAsRoot();
     iVec_ = std::make_unique<std::list<Particle*>>();
-    iMap_ = std::make_unique<std::unordered_map<int,std::list<Particle*>::const_iterator>>();
+    iMap_ = std::make_unique<std::unordered_map<std::size_t,std::list<Particle*>::const_iterator>>();
 }
 
 /**
@@ -65,7 +65,7 @@ std::size_t BTree::Tree::getNumberOfParticles() const{
  * @param particle the particle to insert
  * @param ext_index an external index number for the particle / numerical particle id (most likely from a SIMION simulation)
  */
-void BTree::Tree::insertParticle(BTree::Particle &particle, int ext_index){
+void BTree::Tree::insertParticle(BTree::Particle &particle, size_t ext_index){
     
     root_->insertParticle(&particle);
     iVec_->push_front(&particle);
@@ -78,7 +78,7 @@ void BTree::Tree::insertParticle(BTree::Particle &particle, int ext_index){
  *
  * @param ext_index the external numerical particle index
  */
-void BTree::Tree::removeParticle(int ext_index){
+void BTree::Tree::removeParticle(size_t ext_index){
     
     auto iter =(*iMap_)[ext_index];
     BTree::Particle* particle = *iter;
@@ -98,7 +98,7 @@ void BTree::Tree::removeParticle(int ext_index){
  * @param ext_index the external particle index
  * @returns the retrieved particle
  */
-BTree::Particle* BTree::Tree::getParticle(int ext_index) const{
+BTree::Particle* BTree::Tree::getParticle(size_t ext_index) const{
     auto iter =(*iMap_)[ext_index];
     BTree::Particle* particle = *iter;
     return (particle);
@@ -112,7 +112,7 @@ BTree::Particle* BTree::Tree::getParticle(int ext_index) const{
  * @param ext_index the external index of the particle to update
  * @param newLocation a new location of that particle
  */
-void BTree::Tree::updateParticleLocation(int ext_index, Core::Vector newLocation){
+void BTree::Tree::updateParticleLocation(size_t ext_index, Core::Vector newLocation){
     //test if location has changed
     //if yes: test if particle is still in the node
 

@@ -69,7 +69,7 @@ void ParticleSimulation::SimpleVTKwriter::write(BTree::Tree& tree,bool writeTree
     //tree applies them to itself
 
     BTree::Node* root = tree.getRoot();
-    int nIons = root->getNumberOfParticles();
+    std::size_t nIons = root->getNumberOfParticles();
 
     std::string header = "# vtk DataFile Version 2.0\n"
                          "Core Test\n"

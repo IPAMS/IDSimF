@@ -97,7 +97,7 @@ std::vector<std::tuple<double,double,Core::Vector>> ParticleSimulation::util::pr
     Core::Vector domainMin = Core::Vector(-100,-100,-100);
     Core::Vector domainMax = Core::Vector( 100, 100, 100);
     BTree::Tree tree = BTree::Tree(domainMin,domainMax);
-    int k = 0;
+    std::size_t k = 0;
     for ( auto &ion : ions ) {
         tree.insertParticle(ion,k);
         ++k;

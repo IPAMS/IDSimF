@@ -62,17 +62,17 @@ namespace BTree {
         Core::Vector computeEFieldFromTree(Particle &particle);
 
         //particle modification methods:
-        void insertParticle(Particle &particle, int ext_index);
-        void removeParticle(int ext_index);
-        [[nodiscard]] Particle* getParticle(int ext_index) const;
-        void updateParticleLocation(int ext_index, Core::Vector newLocation);
+        void insertParticle(Particle &particle, size_t ext_index);
+        void removeParticle(size_t ext_index);
+        [[nodiscard]] Particle* getParticle(size_t ext_index) const;
+        void updateParticleLocation(size_t ext_index, Core::Vector newLocation);
         
         void printParticles() const;
 
     private:
         std::unique_ptr<Node> root_; ///< the root node of the tree
         std::unique_ptr<std::list<Particle*>> iVec_; ///< a linked particle list, stores the particles in a linear order
-        std::unique_ptr<std::unordered_map<int, std::list<Particle *>::const_iterator>> iMap_;
+        std::unique_ptr<std::unordered_map<std::size_t, std::list<Particle *>::const_iterator>> iMap_;
         ///< a map between ion indices (keys used by an external simulation) and pointers into the internal particle list
     };
 }

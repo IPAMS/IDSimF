@@ -43,13 +43,13 @@ int main() {
     // init simulation  =====================================================================
 
     // create and add simulation particles:
-    int nParticles = 10000;
+    std::size_t nParticles = 10000;
     std::vector<uniqueReactivePartPtr>particles;
     std::vector<BTree::Particle*>particlesPtrs;
     //std::vector<std::vector<double>> trajectoryAdditionalParams;
 
     RS::Substance *subst = simConf->substance(0);
-    for (int i=0; i<nParticles;i++) {
+    for (std::size_t i=0; i<nParticles; ++i) {
 
         uniqueReactivePartPtr particle = std::make_unique<RS::ReactiveParticle>(subst);
         particle->setLocation({0.01*i, 0.0, 0.0});
@@ -76,7 +76,7 @@ int main() {
 
     for (int step=0; step<nSteps; step++) {
 
-        for (int i = 0; i < nParticles; i++) {
+        for (std::size_t i = 0; i < nParticles; i++) {
             rsSim.react(i, reactionConditions, dt_s);
         }
         rsSim.advanceTimestep(dt_s);

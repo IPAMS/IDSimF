@@ -366,7 +366,7 @@ int main(int argc, const char * argv[]) {
                 [](BTree::Particle* particle) -> std::vector<int> {
                     std::vector<int> result = {
                             particle->getIntegerAttribute("global index"),
-                            particle->getIndex()
+                            static_cast<int>(particle->getIndex())
                     };
                     return result;
                 };

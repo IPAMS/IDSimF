@@ -66,8 +66,8 @@ namespace BTree {
         void setHostNode(AbstractNode* newHostNode);
         [[nodiscard]] AbstractNode* getHostNode()  const;
 
-        void setIndex(int index);
-        [[nodiscard]] int getIndex() const;
+        void setIndex(size_t index);
+        [[nodiscard]] std::size_t getIndex() const;
 
         void setChargeElementary(double chargeElemCharges);
         [[nodiscard]] double getCharge() const;
@@ -100,7 +100,7 @@ namespace BTree {
 
     private:
         //all internal variable are in SI units
-        int index_ = -1; ///< an external index (mostly the index of the particle in the reaction model)
+        std::size_t index_ = 0; ///< an external index (mostly the index of the particle in the reaction model)
         Core::Vector location_= Core::Vector(0.0, 0.0, 0.0); ///< The spatial location of the particle (m)
         Core::Vector velocity_ = Core::Vector(0.0, 0.0, 0.0); ///< The velocity of the particle (m/s)
         Core::Vector acceleration_ = Core::Vector(0.0, 0.0, 0.0); ///< The acceleration of the particle (m/s^2)

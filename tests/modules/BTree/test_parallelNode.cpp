@@ -278,7 +278,7 @@ TEST_CASE( "Test particle management in parallel node", "[Node]") {
         REQUIRE(testNode.getNumberOfParticles() == nIons);
         REQUIRE( (testNode.getCharge() - nIons*Core::ELEMENTARY_CHARGE) < 1e-100);
 
-        int maxRek = testNode.maximumRecursionDepth();
+        std::size_t maxRek = testNode.maximumRecursionDepth();
         REQUIRE(maxRek == 8);
 
         BTree::AbstractNode* hostNode;

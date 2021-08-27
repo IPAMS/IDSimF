@@ -147,14 +147,14 @@ BTree::AbstractNode* BTree::Particle::getHostNode() const{
 /**
  * Sets the external index of the particle
  */
-void BTree::Particle::setIndex(int index){
+void BTree::Particle::setIndex(size_t index){
     index_ = index;
 }
 
 /**
  * Gets the external index of the particle
  */
-int BTree::Particle::getIndex() const{
+std::size_t BTree::Particle::getIndex() const{
     return (index_);
 }
 

@@ -369,7 +369,7 @@ void ParticleSimulation::TrajectoryHDF5Writer::writeStartSplatData(ParticleStart
  * Finalizes the trajectory, usually after the simulation has finished
  */
 void ParticleSimulation::TrajectoryHDF5Writer::finalizeTrajectory(){
-    writeTrajectoryAttribute("number of timesteps",offsetScalarLike_[0]);
+    writeTrajectoryAttribute("number of timesteps", offsetScalarLike_[0]);
 }
 
 /**

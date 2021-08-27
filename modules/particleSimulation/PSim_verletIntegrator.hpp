@@ -65,7 +65,7 @@ namespace ParticleSimulation{
         */
         typedef std::function
                 <Core::Vector (BTree::Particle* particle,
-                                int particleIndex,
+                                std::size_t particleIndex,
                                 BTree::Tree& tree,
                                 double time,
                                 unsigned int timestep)>
@@ -89,7 +89,7 @@ namespace ParticleSimulation{
         typedef std::function
                 <void (Core::Vector& newPartPos,
                        BTree::Particle* particle,
-                       int particleIndex,
+                       std::size_t particleIndex,
                        BTree::Tree& tree,
                        double time,
                        unsigned int timestep)>

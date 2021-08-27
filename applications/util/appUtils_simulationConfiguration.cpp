@@ -45,7 +45,8 @@ std::vector<int> AppUtils::SimulationConfiguration::intVectorParameter(const std
     std::vector<int> result;
     if (isParameter(jsonName)) {
         Json::Value jsonNode = confRoot_.get(jsonName,0);
-        for (std::size_t i=0; i<jsonNode.size(); i++){
+        auto nJsonNodes = static_cast<unsigned int>(jsonNode.size());
+        for (unsigned int i=0; i<nJsonNodes; i++){
             result.push_back(jsonNode.get(i,0).asInt());
         }
     } else {
@@ -58,7 +59,9 @@ std::vector<unsigned int> AppUtils::SimulationConfiguration::unsignedIntVectorPa
     std::vector<unsigned int> result;
     if (isParameter(jsonName)) {
         Json::Value jsonNode = confRoot_.get(jsonName,0);
-        for (std::size_t i=0; i<jsonNode.size(); i++){
+        auto nJsonNodes = static_cast<unsigned int>(jsonNode.size());
+
+        for (unsigned int i=0; i<nJsonNodes; ++i){
             result.push_back(jsonNode.get(i,0).asUInt());
         }
     } else {
@@ -85,7 +88,8 @@ std::vector<double> AppUtils::SimulationConfiguration::doubleVectorParameter(con
     std::vector<double> result;
     if (isParameter(jsonName)) {
         Json::Value jsonNode = confRoot_.get(jsonName,0);
-        for (std::size_t i=0; i<jsonNode.size(); i++){
+        auto nJsonNodes = static_cast<unsigned int>(jsonNode.size());
+        for (unsigned int i=0; i<nJsonNodes; ++i){
             result.push_back(jsonNode.get(i,0).asDouble()*multiplicator);
         }
     } else {
@@ -139,7 +143,8 @@ std::vector<std::string> AppUtils::SimulationConfiguration::stringVectorParamete
     std::vector<std::string> result;
     if (isParameter(jsonName)) {
         Json::Value jsonNode = confRoot_.get(jsonName,0);
-        for (std::size_t i=0; i<jsonNode.size(); i++){
+        auto nJsonNodes = static_cast<unsigned int>(jsonNode.size());
+        for (unsigned int i=0; i<nJsonNodes; ++i){
             result.push_back(jsonNode.get(i,0).asString());
         }
     } else {

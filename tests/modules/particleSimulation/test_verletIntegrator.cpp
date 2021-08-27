@@ -226,7 +226,7 @@ TEST_CASE("Test serial verlet integrator", "[ParticleSimulation][VerletIntegrato
             yPos = yPos+0.01;
         }
         for (std::size_t i=0; i<particles.size(); i++){
-            rsSim.addParticle(particles[i].get(),static_cast<int>(i));
+            rsSim.addParticle(particles[i].get(), i);
         }
 
         // run trajectory integration without reactions:
@@ -253,7 +253,7 @@ TEST_CASE("Test serial verlet integrator", "[ParticleSimulation][VerletIntegrato
 
         for (unsigned int ts=0; ts<timeSteps; ts++){
             for (std::size_t i=0; i<particles.size(); i++){
-                rsSim.react(static_cast<int>(i), reactionConditions, dt);
+                rsSim.react(i, reactionConditions, dt);
             }
             rsSim.advanceTimestep(dt);
             verletIntegrator.runSingleStep(dt);

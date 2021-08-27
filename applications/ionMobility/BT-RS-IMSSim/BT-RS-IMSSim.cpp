@@ -194,7 +194,7 @@ int main(int argc, const char *argv[]){
 
                 particle->setLocation(initialPositions[k]);
                 particlesPtrs.push_back(particle.get());
-                rsSim.addParticle(particle.get(), static_cast<int>(nParticlesTotal));
+                rsSim.addParticle(particle.get(), nParticlesTotal);
                 particles.push_back(std::move(particle));
                 trajectoryAdditionalParams.emplace_back(std::vector<double>(1));
                 nParticlesTotal++;
@@ -395,7 +395,7 @@ int main(int argc, const char *argv[]){
                 rsSim.logConcentrations(logger);
             }
             for (unsigned int i = 0; i<nParticlesTotal; i++) {
-                bool reacted = rsSim.react(static_cast<int>(i), reactionConditions, dt_s);
+                bool reacted = rsSim.react(i, reactionConditions, dt_s);
                 int substIndex = substanceIndices.at(particles[i]->getSpecies());
                 particles[i]->setFloatAttribute(key_ChemicalIndex, substIndex);
 

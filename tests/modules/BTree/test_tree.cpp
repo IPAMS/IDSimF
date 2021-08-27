@@ -144,7 +144,7 @@ TEST_CASE( "Test serial tree semantics / particle management","[Tree]") {
         std::vector<std::unique_ptr<BTree::Particle>> ions= startZone.getRandomParticlesInStartZone(nions, 1);
 
         for (std::size_t i=0; i<nions; i++){
-            testTree.insertParticle((*ions[i]),i+1);
+            testTree.insertParticle((*ions[i]), i+1);
         }
         testTree.computeChargeDistribution();
 

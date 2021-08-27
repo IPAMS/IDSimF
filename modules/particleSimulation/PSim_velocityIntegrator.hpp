@@ -61,7 +61,7 @@ namespace ParticleSimulation{
         */
         typedef std::function
                 <Core::Vector (BTree::Particle* particle,
-                                int particleIndex,
+                                std::size_t particleIndex,
                                 double time,
                                 unsigned int timestep)>
                 velocityFctType;
