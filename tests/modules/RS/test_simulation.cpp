@@ -123,7 +123,7 @@ TEST_CASE( "Test basic RS simulation semantics", "[RS][Simulation]") {
         CHECK(sim.discreteConcentrations().at(&Cluster_1) == 100);
         CHECK(sim.discreteConcentrations().at(&Cluster_2) == 1);
 
-        for (int i=50; i < 60; ++i){
+        for (std::size_t i=50; i < 60; ++i){
             sim.removeParticle(i);
         }
 
@@ -148,10 +148,10 @@ TEST_CASE( "Test RS simulations", "[RS][Simulation]") {
         subst_B->staticConcentration(0.05);
         sim.simulationConfiguration()->updateConfiguration();
 
-        int nParticles = 100;
+        std::size_t nParticles = 100;
         int nSteps = 20;
         std::vector<uniqueReactivePartPtr> particles;
-        for (int i=0; i < nParticles; ++i) {
+        for (std::size_t i=0; i < nParticles; ++i) {
             uniqueReactivePartPtr particle = std::make_unique<RS::ReactiveParticle>(subst_A);
             sim.addParticle(particle.get(), i);
             particles.push_back(std::move(particle));
@@ -164,7 +164,7 @@ TEST_CASE( "Test RS simulations", "[RS][Simulation]") {
 
         for (int step=0; step < nSteps; ++step) {
 
-            for (int i = 0; i < nParticles; ++i) {
+            for (std::size_t i = 0; i < nParticles; ++i) {
                 RS::ReactiveParticle particle = sim.getParticle(i);
                 sim.react(i, reactionConditions, 1.0);
             }
@@ -199,11 +199,11 @@ TEST_CASE( "Test RS simulations", "[RS][Simulation]") {
         RS::Substance* Cl1 = simConf->substanceByName("Cl_1");
         RS::Substance* H2O = simConf->substanceByName("H2O");
         H2O->staticConcentration(0.0);
-        int nParticles = 100000;
+        std::size_t nParticles = 100000;
         int nSteps = 200;
         double dt = 1.0e-4;
         std::vector<uniqueReactivePartPtr> particles;
-        for (int i=0; i < nParticles; ++i) {
+        for (std::size_t i=0; i < nParticles; ++i) {
             uniqueReactivePartPtr particle = std::make_unique<RS::ReactiveParticle>(Cl1);
             sim.addParticle(particle.get(), i);
             particles.push_back(std::move(particle));
@@ -215,8 +215,7 @@ TEST_CASE( "Test RS simulations", "[RS][Simulation]") {
         reactionConditions.pressure = 100000.0;
 
         for (int step=0; step < nSteps; ++step) {
-
-            for (int i = 0; i < nParticles; ++i) {
+            for (std::size_t i = 0; i < nParticles; ++i) {
                 sim.react(i, reactionConditions, dt);
             }
             sim.advanceTimestep(dt);
@@ -245,9 +244,9 @@ TEST_CASE( "Test RS simulations", "[RS][Simulation]") {
         RS::Substance* Cl2 = simConf->substanceByName("Cl_2");
         RS::Substance* N2 = simConf->substanceByName("N2");
 
-        int nParticles = 100;
+        std::size_t nParticles = 100;
         std::vector<uniqueReactivePartPtr> particles;
-        for (int i=0; i < nParticles; ++i) {
+        for (std::size_t i=0; i < nParticles; ++i) {
             uniqueReactivePartPtr particle = std::make_unique<RS::ReactiveParticle>(Cl2);
             sim.addParticle(particle.get(), i);
             particles.push_back(std::move(particle));

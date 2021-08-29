@@ -83,7 +83,7 @@ namespace ParticleSimulation{
         typedef std::function
                 <void (Core::Vector& newPartPos,
                        BTree::Particle* particle,
-                       int particleIndex,
+                       std::size_t particleIndex,
                        double time,
                        unsigned int timestep)>
                 otherActionsFctType;

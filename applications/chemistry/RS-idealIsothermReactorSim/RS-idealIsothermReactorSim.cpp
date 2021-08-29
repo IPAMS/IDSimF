@@ -72,7 +72,7 @@ int main(int argc, const char * argv[]) {
         // init simulation  =====================================================================
 
         // create and add simulation particles:
-        int nParticlesTotal = 0;
+        std::size_t nParticlesTotal = 0;
         std::vector<uniqueReactivePartPtr> particles;
         for (std::size_t i=0; i<nParticles.size(); ++i) {
             RS::Substance *subst = rsSimConf->getAllDiscreteSubstances().at(i);

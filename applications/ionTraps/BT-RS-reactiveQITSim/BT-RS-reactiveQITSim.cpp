@@ -263,11 +263,11 @@ int main(int argc, const char * argv[]) {
             for (unsigned int k = 0; k<nIons[i]; k++) {
                 uniqueReactivePartPtr particle = std::make_unique<RS::ReactiveParticle>(subst);
 
-                particle->setIndex(static_cast<int>(nParticlesTotal));
+                particle->setIndex(nParticlesTotal);
                 particle->setLocation(initialPositions[k]);
                 particle->setIntegerAttribute(key_Collisions_total, 0);
                 particlePtrs.push_back(particle.get());
-                rsSim.addParticle(particle.get(), static_cast<int>(nParticlesTotal));
+                rsSim.addParticle(particle.get(), nParticlesTotal);
                 particles.push_back(std::move(particle));
                 nParticlesTotal++;
             }
@@ -469,7 +469,7 @@ int main(int argc, const char * argv[]) {
             }
             for (unsigned int i = 0; i<nParticlesTotal; i++) {
                 if (particles[i]->isActive()) {
-                    rsSim.react(static_cast<int>(i), reactionConditions, dt);
+                    rsSim.react(i, reactionConditions, dt);
                     int substIndex = substanceIndices.at(particles[i]->getSpecies());
                     particles[i]->setIntegerAttribute(key_ChemicalIndex, substIndex);
                 }
