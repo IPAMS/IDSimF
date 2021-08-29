@@ -58,7 +58,7 @@ TEST_CASE( "Average ion position file writer should at least write a file withou
         std::unique_ptr<BTree::Particle> part = std::make_unique<BTree::Particle>(Core::Vector(0,0,static_cast<double>(i)*0.1),1);
         particlePtrs.push_back(part.get());
         particles.push_back(std::move(part));
-        tree.insertParticle(*(particlePtrs[i]),static_cast<int>(i));
+        tree.insertParticle(*(particlePtrs[i]), i);
     }
 
     ParticleSimulation::AverageChargePositionWriter fw("average_position_test.txt");
@@ -68,7 +68,7 @@ TEST_CASE( "Average ion position file writer should at least write a file withou
     for (unsigned int i=0; i< nSteps; ++i){
         for (std::size_t k=0; k < nParticles; ++k){
             Core::Vector newLocation = particlePtrs[k]->getLocation() + Core::Vector(diff,diff,diff);
-            tree.updateParticleLocation(static_cast<int>(k),newLocation);
+            tree.updateParticleLocation(k, newLocation);
         }
         fw.writeTimestep(tree,0.1*i);
     }
