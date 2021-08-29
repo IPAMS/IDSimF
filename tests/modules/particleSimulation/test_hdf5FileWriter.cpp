@@ -128,7 +128,8 @@ std::vector<std::string> readStringAttribute(H5::Group& group, std::string attrN
     return (result);
 }
 
-std::vector<int> readIntAttribute(H5::Group& group,std::string attrName){
+// Todo: Compact code for integral types with templates
+std::vector<int> readIntAttribute(H5::Group& group, std::string attrName){
     H5::Attribute attr(group.openAttribute(attrName.c_str()));
     H5::DataSpace dataspace = attr.getSpace();
 
@@ -138,14 +139,31 @@ std::vector<int> readIntAttribute(H5::Group& group,std::string attrName){
     CHECK(nDims == 1);
     std::vector<int> result;
     int datBuf[dims[0]];
-    attr.read(H5::PredType::NATIVE_INT,datBuf);
+    attr.read(H5::PredType::NATIVE_INT, datBuf);
     for (hsize_t i=0; i<dims[0]; ++i){
         result.emplace_back(datBuf[i]);
     }
     return result;
 }
 
-std::vector<double> readDoubleAttribute(H5::Group& group,std::string attrName){
+std::vector<int> readHSizetAttribute(H5::Group& group, std::string attrName){
+    H5::Attribute attr(group.openAttribute(attrName.c_str()));
+    H5::DataSpace dataspace = attr.getSpace();
+
+    //get dimensions:
+    hsize_t dims[1];
+    int nDims = dataspace.getSimpleExtentDims(dims, nullptr);
+    CHECK(nDims == 1);
+    std::vector<int> result;
+    int datBuf[dims[0]];
+    attr.read(H5::PredType::NATIVE_UINT64, datBuf);
+    for (hsize_t i=0; i<dims[0]; ++i){
+        result.emplace_back(datBuf[i]);
+    }
+    return result;
+}
+
+std::vector<double> readDoubleAttribute(H5::Group& group, std::string attrName){
     H5::Attribute attr(group.openAttribute(attrName.c_str()));
     H5::DataSpace dataspace = attr.getSpace();
 
@@ -155,7 +173,7 @@ std::vector<double> readDoubleAttribute(H5::Group& group,std::string attrName){
     CHECK(nDims == 1);
     std::vector<double> result;
     double datBuf[dims[0]];
-    attr.read(H5::PredType::NATIVE_DOUBLE,datBuf);
+    attr.read(H5::PredType::NATIVE_DOUBLE, datBuf);
     for (hsize_t i=0; i<dims[0]; ++i){
         result.emplace_back(datBuf[i]);
     }
@@ -258,8 +276,12 @@ TEST_CASE( "Test HDF5 trajectory file writer", "[ParticleSimulation][file writer
 
         //check file version:
         H5::Group group (bareFile.openGroup("particle_trajectory"));
-        auto fileVersionId = readIntAttribute(group,"file version");
-        REQUIRE_NOTHROW(fileVersionId[0] == 2);
+        auto fileVersionId = readIntAttribute(group, "file version");
+        CHECK(fileVersionId[0] == 3);
+
+        //check number of timesteps:
+        auto nuberOfTimesteps = readHSizetAttribute(group, "number of timesteps");
+        CHECK(nuberOfTimesteps[0] == 8);
 
         //check timesteps:
         H5::DataSet dsTimes= bareFile.openDataSet("particle_trajectory/times");

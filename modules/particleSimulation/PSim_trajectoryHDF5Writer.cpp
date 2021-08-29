@@ -369,7 +369,7 @@ void ParticleSimulation::TrajectoryHDF5Writer::writeStartSplatData(ParticleStart
  * Finalizes the trajectory, usually after the simulation has finished
  */
 void ParticleSimulation::TrajectoryHDF5Writer::finalizeTrajectory(){
-    writeTrajectoryAttribute("number of timesteps", offsetScalarLike_[0]);
+    writeAttribute_(baseGroup_, "number of timesteps", offsetScalarLike_[0]);
 }
 
 /**
@@ -475,7 +475,8 @@ void ParticleSimulation::TrajectoryHDF5Writer::writeTimestepParticleAttributesIn
  * @param attrName Name of the attribute to write
  * @param value The value to write into the attribute in the trajectory file
  */
-void ParticleSimulation::TrajectoryHDF5Writer::writeAttribute_(std::unique_ptr<H5::Group>& group, const std::string &attrName, int value){
+void ParticleSimulation::TrajectoryHDF5Writer::writeAttribute_(std::unique_ptr<H5::Group>& group, const std::string &attrName,
+                                                               int value){
 
     // Create a dataset attribute.
     hsize_t dims[1] = { 1 };
@@ -486,4 +487,24 @@ void ParticleSimulation::TrajectoryHDF5Writer::writeAttribute_(std::unique_ptr<H
     // Write the attribute data.
     int attr_data[1] = {value};
     attribute.write( H5::PredType::NATIVE_INT, attr_data);
+}
+
+/**
+ * Writes an unsigned long long (aka hsize_t) attribute to a HDF5 group
+ * @param group The group to write to
+ * @param attrName Name of the attribute to write
+ * @param value The value to write into the attribute in the trajectory file
+ */
+void ParticleSimulation::TrajectoryHDF5Writer::writeAttribute_(std::unique_ptr<H5::Group>& group, const std::string &attrName,
+                                                               hsize_t value){
+
+    // Create a dataset attribute.
+    hsize_t dims[1] = { 1 };
+    H5::DataSpace attr_dataspace = H5::DataSpace (1, dims);
+    H5::Attribute attribute = group->createAttribute( attrName.c_str(), H5::PredType::STD_U64BE,
+            attr_dataspace);
+
+    // Write the attribute data.
+    hsize_t attr_data[1] = {value};
+    attribute.write( H5::PredType::NATIVE_UINT64, attr_data);
 }

@@ -73,6 +73,7 @@ namespace ParticleSimulation{
         void writeTimestepParticleAttributes_(std::vector<BTree::Particle*> &particles);
         void writeTimestepParticleAttributesInteger_(std::vector<BTree::Particle*> &particles);
         void writeAttribute_(std::unique_ptr<H5::Group>& group, const std::string &attrName, int value);
+        void writeAttribute_(std::unique_ptr<H5::Group>& group, const std::string &attrName, hsize_t value);
 
         //int nTimestepsWritten_;
         bool compression_ = true;
