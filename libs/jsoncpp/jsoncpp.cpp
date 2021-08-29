@@ -453,6 +453,7 @@ bool Reader::readValue() {
       currentValue().setOffsetLimit(current_ - begin_);
       break;
     } // Else, fall through...
+    [[fallthrough]];
   default:
     currentValue().setOffsetStart(token.start_ - begin_);
     currentValue().setOffsetLimit(token.end_ - begin_);
@@ -1387,6 +1388,7 @@ bool OurReader::readValue() {
       currentValue().setOffsetLimit(current_ - begin_);
       break;
     } // else, fall through ...
+    [[fallthrough]];
   default:
     currentValue().setOffsetStart(token.start_ - begin_);
     currentValue().setOffsetLimit(token.end_ - begin_);
@@ -1439,6 +1441,7 @@ bool OurReader::readToken(Token& token) {
       ok = readStringSingleQuote();
       break;
     } // else fall through
+    [[fallthrough]];
   case '/':
     token.type_ = tokenComment;
     ok = readComment();
