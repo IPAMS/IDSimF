@@ -58,6 +58,21 @@ TEST_CASE("Test sampled waveform / SWIFT waveform reader", "[ParticleSimulation]
         REQUIRE(sw.getValue(0) == Approx(sw.getValueLooped(200)) );
     }
 
+    SECTION("Waveform with low sample number should be interpolatable") {
+        ParticleSimulation::SampledWaveform sw("low_sample_waveform.csv");
+        REQUIRE(sw.good());
+        REQUIRE(sw.size() == 20);
+
+        REQUIRE(sw.getInterpolatedValue(0.2) == Approx(1.0));
+        REQUIRE(sw.getInterpolatedValue(0.205) == Approx(1.0));
+        REQUIRE(sw.getInterpolatedValue(0.35) == Approx(1.0));
+        REQUIRE(sw.getInterpolatedValue(0.375) == Approx(1.5));
+        REQUIRE(sw.getInterpolatedValue(0.4) == Approx(2.0));
+        REQUIRE(sw.getInterpolatedValue(0.45) == Approx(2.0));
+        REQUIRE(sw.getInterpolatedValue(0.475) == Approx(3.0));
+        REQUIRE(sw.getInterpolatedValue(0.50) == Approx(4.0));
+    }
+
     SECTION( "Non existing input file should lead to good()==false") {
         ParticleSimulation::SampledWaveform sw("not_a_file");
         REQUIRE(! sw.good());

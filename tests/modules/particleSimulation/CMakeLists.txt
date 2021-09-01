@@ -23,6 +23,7 @@ set(TEST_FILE_FOLDER ${CMAKE_SOURCE_DIR}/tests/testfields)
 set(TEST_FILES
         ${TEST_FILE_FOLDER}/swift_test_sin.csv
         ${TEST_FILE_FOLDER}/swift_test_transient.csv
+        ${TEST_FILE_FOLDER}/low_sample_waveform.csv
         ${TEST_FILE_FOLDER}/test_linear_vector_field_01.h5
         ${TEST_FILE_FOLDER}/test_linear_scalar_field_01.h5
         ${TEST_FILE_FOLDER}/test_ion_cloud_01.csv

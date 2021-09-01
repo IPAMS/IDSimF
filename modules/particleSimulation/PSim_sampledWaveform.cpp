@@ -21,6 +21,7 @@
 
 #include "PSim_sampledWaveform.hpp"
 #include <fstream>
+#include <cmath>
 
 /**
  * Constructor: Creates a sampled waveform from a given file
@@ -32,6 +33,8 @@ ParticleSimulation::SampledWaveform::SampledWaveform(std::string filename){
 
     std::ifstream fIn(filename.c_str());
     if (fIn.good()){
+
+        // fill wave table with values from csv:
         std::string line;
         while(std::getline(fIn, line)) {
             if (line[0] != '#') {
@@ -39,6 +42,13 @@ ParticleSimulation::SampledWaveform::SampledWaveform(std::string filename){
             }
         }
         size_ = wfTable_.size();
+
+        // fill phases table:
+        double phaseIncrement = 1.0 / size_;
+        for(std::size_t i=0; i<size_; ++i){
+            phaseTable_.push_back(i*phaseIncrement);
+        }
+
         dataIsGood_ = true;
     }
 }
@@ -87,4 +97,19 @@ double ParticleSimulation::SampledWaveform::getValueLooped(std::size_t index) co
  */
 double ParticleSimulation::SampledWaveform::operator[](std::size_t index) const{
     return this->getValue(index);
+}
+
+double ParticleSimulation::SampledWaveform::getInterpolatedValue(double phase) {
+    // calculate nearest two values
+
+    std::size_t iLower = static_cast<std::size_t>(std::floor(phase * this->size_));
+    std::size_t iHigher = iLower+1;
+
+    double phase0 = phaseTable_[iLower];
+    double phase1 = phaseTable_[iHigher];
+    double val0 = wfTable_[iLower];
+    double val1 = wfTable_[iHigher];
+
+    // calculate interpolated value
+    return val0 + (phase - phase0) * ((val1-val0) / (phase1-phase0));
 }
