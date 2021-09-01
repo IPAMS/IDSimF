@@ -99,6 +99,13 @@ double ParticleSimulation::SampledWaveform::operator[](std::size_t index) const{
     return this->getValue(index);
 }
 
+/**
+ * Gets linearly interpolated waveform values
+ *
+ * @param phase The waveform phase to get an interpolated value for (phase is considered not to be in radians, thus
+ * the phase values have to be between [0 .. 1])
+ * @return The linearly interpolated value for the given phase
+ */
 double ParticleSimulation::SampledWaveform::getInterpolatedValue(double phase) {
     // calculate nearest two values
 
