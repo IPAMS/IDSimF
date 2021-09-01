@@ -102,14 +102,31 @@ double ParticleSimulation::SampledWaveform::operator[](std::size_t index) const{
 double ParticleSimulation::SampledWaveform::getInterpolatedValue(double phase) {
     // calculate nearest two values
 
-    std::size_t iLower = static_cast<std::size_t>(std::floor(phase * this->size_));
+    std::size_t iLower = static_cast<std::size_t>(std::floor(phase * size_));
     std::size_t iHigher = iLower+1;
 
-    double phase0 = phaseTable_[iLower];
-    double phase1 = phaseTable_[iHigher];
-    double val0 = wfTable_[iLower];
-    double val1 = wfTable_[iHigher];
 
-    // calculate interpolated value
-    return val0 + (phase - phase0) * ((val1-val0) / (phase1-phase0));
+    //"normal" interpolation between samples:
+    if (iHigher < size_) {
+        double phase0 = phaseTable_[iLower];
+        double phase1 = phaseTable_[iHigher];
+        double val0 = wfTable_[iLower];
+        double val1 = wfTable_[iHigher];
+
+        // calculate interpolated value
+        return val0 + (phase - phase0) * ((val1-val0) / (phase1-phase0));
+    }
+    //edge case: Interpolation between last and first sample of the waveform
+    else if (iHigher == size_){
+        double phase0 = phaseTable_[iLower];
+        double phase1 = 1.0;
+        double val0 = wfTable_[iLower];
+        double val1 = wfTable_[0];
+
+        // calculate interpolated value
+        return val0 + (phase - phase0) * ((val1-val0) / (phase1-phase0));
+    }
+    else if (iHigher > size_){
+        throw (std::invalid_argument("Illegal phase (out of valid data range)"));
+    }
 }

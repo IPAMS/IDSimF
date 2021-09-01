@@ -35,46 +35,49 @@ TEST_CASE("Test sampled waveform / SWIFT waveform reader", "[ParticleSimulation]
         ParticleSimulation::SampledWaveform sw("swift_test_transient.csv");
 
         SECTION("State should be good and correct") {
-            REQUIRE(sw.good());
-            REQUIRE(sw[15500] == Approx(0.76383));
-            REQUIRE(sw.getValue(16500) == Approx(-0.8761));
+            CHECK(sw.good());
+            CHECK(sw[15500] == Approx(0.76383));
+            CHECK(sw.getValue(16500) == Approx(-0.8761));
         }
 
         SECTION("Read from an non existing index should throw an exception"){
-            REQUIRE(sw.good() == true);
-            REQUIRE_THROWS(sw[100000000]);
+            CHECK(sw.good() == true);
+            CHECK_THROWS(sw[100000000]);
         }
     }
 
     SECTION("Synthetically numpy generated SWIFT waveform should be readable and correct") {
         ParticleSimulation::SampledWaveform sw("swift_test_sin.csv");
-        REQUIRE(sw.good());
-        REQUIRE(sw[24] == Approx(1.253332335643040918e-01) );
-        REQUIRE(sw.getValue(24) == Approx(1.253332335643040918e-01) );
+        CHECK(sw.good());
+        CHECK(sw[24] == Approx(1.253332335643040918e-01) );
+        CHECK(sw.getValue(24) == Approx(1.253332335643040918e-01) );
 
-        REQUIRE(sw.size() == 200);
-        REQUIRE(sw.getValue(4) == Approx(sw.getValueLooped(204)) );
-        REQUIRE(sw.getValue(4) == Approx(sw.getValueLooped(404)) );
-        REQUIRE(sw.getValue(0) == Approx(sw.getValueLooped(200)) );
+        CHECK(sw.size() == 200);
+        CHECK(sw.getValue(4) == Approx(sw.getValueLooped(204)) );
+        CHECK(sw.getValue(4) == Approx(sw.getValueLooped(404)) );
+        CHECK(sw.getValue(0) == Approx(sw.getValueLooped(200)) );
     }
 
     SECTION("Waveform with low sample number should be interpolatable") {
         ParticleSimulation::SampledWaveform sw("low_sample_waveform.csv");
-        REQUIRE(sw.good());
-        REQUIRE(sw.size() == 20);
+        CHECK(sw.good());
+        CHECK(sw.size() == 20);
 
-        REQUIRE(sw.getInterpolatedValue(0.2) == Approx(1.0));
-        REQUIRE(sw.getInterpolatedValue(0.205) == Approx(1.0));
-        REQUIRE(sw.getInterpolatedValue(0.35) == Approx(1.0));
-        REQUIRE(sw.getInterpolatedValue(0.375) == Approx(1.5));
-        REQUIRE(sw.getInterpolatedValue(0.4) == Approx(2.0));
-        REQUIRE(sw.getInterpolatedValue(0.45) == Approx(2.0));
-        REQUIRE(sw.getInterpolatedValue(0.475) == Approx(3.0));
-        REQUIRE(sw.getInterpolatedValue(0.50) == Approx(4.0));
+        CHECK(sw.getInterpolatedValue(0.2) == Approx(1.0));
+        CHECK(sw.getInterpolatedValue(0.205) == Approx(1.0));
+        CHECK(sw.getInterpolatedValue(0.35) == Approx(1.0));
+        CHECK(sw.getInterpolatedValue(0.375) == Approx(1.5));
+        CHECK(sw.getInterpolatedValue(0.4) == Approx(2.0));
+        CHECK(sw.getInterpolatedValue(0.45) == Approx(2.0));
+        CHECK(sw.getInterpolatedValue(0.475) == Approx(3.0));
+        CHECK(sw.getInterpolatedValue(0.50) == Approx(4.0));
+        CHECK(sw.getInterpolatedValue(0.50) == Approx(4.0));
+        CHECK(sw.getInterpolatedValue(0.975) == Approx(0.5));
+        CHECK_THROWS(sw.getInterpolatedValue(1.1));
     }
 
     SECTION( "Non existing input file should lead to good()==false") {
         ParticleSimulation::SampledWaveform sw("not_a_file");
-        REQUIRE(! sw.good());
+        CHECK(! sw.good());
     }
 }
