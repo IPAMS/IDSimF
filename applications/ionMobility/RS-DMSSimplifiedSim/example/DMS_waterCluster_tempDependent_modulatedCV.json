@@ -1,0 +1,20 @@
+{
+  "sim_time_steps":12000,
+  "sim_time_steps_per_sv_oscillation":6000,
+  "concentrations_write_interval":2000,
+  "trajectory_write_interval":2000,
+  "reaction_configuration":"RS_waterCl_tempDependent_fittedMob.conf",
+  "n_particles":[2000,0,0,0,0,0,0,0,0],
+  "start_width_x_mm":0.00001,
+  "start_width_y_mm":0.00001,
+  "start_width_z_mm":0.00001,
+  "sv_Vmm-1":3000,
+  "cv_Vmm-1":1,
+  "sv_mode":"square",
+  "sv_frequency_s-1":3e6,
+  "cv_relaxation_parameter":1.5e9,
+  "cv_mode":"modulated_auto",
+  "cv_waveform": "cv_waveform_triangle.csv",
+  "background_temperature_K":413.15,
+  "background_pressure_Pa":101325
+}

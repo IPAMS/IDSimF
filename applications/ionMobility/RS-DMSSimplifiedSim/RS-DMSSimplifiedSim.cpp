@@ -32,6 +32,7 @@
 #include "RS_ConfigFileParser.hpp"
 #include "RS_ConcentrationFileWriter.hpp"
 #include "PSim_trajectoryExplorerJSONwriter.hpp"
+#include "PSim_sampledWaveform.hpp"
 #include "PSim_scalar_writer.hpp"
 #include "PSim_util.hpp"
 #include "appUtils_simulationConfiguration.hpp"
@@ -44,7 +45,7 @@
 
 const std::string key_ChemicalIndex = "keyChemicalIndex";
 const double standardPressure_Pa = 102300; //101325
-enum CVMode {STATIC_CV, AUTO_CV};
+enum CVMode {STATIC_CV, AUTO_CV, MODULATED_CV, MODULATED_AUTO_CV};
 enum SVMode {BI_SIN, SQUARE, CLIPPED_SIN};
 
 int main(int argc, const char * argv[]) {
@@ -83,6 +84,7 @@ int main(int argc, const char * argv[]) {
         CVMode cvMode;
         double meanZPos = 0.0; //variable used for automatic CV correction
         double cvRelaxationParameter = 0.0;
+
         if (cvModeStr == "static"){
             cvMode = STATIC_CV;
         }
@@ -90,9 +92,16 @@ int main(int argc, const char * argv[]) {
             cvMode = AUTO_CV;
             cvRelaxationParameter = simConf.doubleParameter("cv_relaxation_parameter");
         }
+        else if (cvModeStr == "modulated"){
+            cvMode = MODULATED_CV;
+        }
+        else if (cvModeStr == "modulated_auto"){
+            cvMode = MODULATED_AUTO_CV;
+        }
         else{
             throw std::invalid_argument("wrong configuration value: cv_mode");
         }
+
 
         SVMode svMode;
         std::string svModeStr = simConf.stringParameter("sv_mode");
@@ -131,6 +140,7 @@ int main(int argc, const char * argv[]) {
             substanceIndices.insert(std::pair<RS::Substance*,int>(discreteSubstances[i], i));
             ionMobility.push_back(discreteSubstances[i]->mobility());
         }
+
 
         // prepare file writer  =================================================================
         RS::ConcentrationFileWriter resultFilewriter(projectName+"_conc.csv");
@@ -195,43 +205,44 @@ int main(int argc, const char * argv[]) {
 
 
         // define trajectory integration parameters / functions =================================
-        std::function<double(double)> fieldFct;
+        std::function<double(double fieldAmplitude_VPerM, double time)> SVFieldFct;
+
         if (svMode == BI_SIN){
             double field_h = 2.0;
             double field_F = 2.0;
             double field_W = (1/fieldWavePeriod) * 2 * M_PI;
             auto  fieldFctBisinusoidal=
-                    [&fieldSV_VPerM, &fieldCV_VPerM, field_F, field_W, field_h]
-                            (double time) -> double{
+                    [field_F, field_W, field_h]
+                    (double svAmplitude_VPerM, double time) -> double{
 
                         //double particleCharge = particle->getCharge();
-                        double voltageSVgp = fieldSV_VPerM * 0.6667; // V/m (1V/m peak to peak is 0.6667V/m ground to peak)
-                        double voltageSVt = fieldCV_VPerM + (field_F * sin(field_W * time)
+                        double voltageSVgp = svAmplitude_VPerM * 0.6667; // V/m (1V/m peak to peak is 0.6667V/m ground to peak)
+                        double voltageSVt = (field_F * sin(field_W * time)
                                 + sin(field_h * field_W * time - 0.5 * M_PI))
                                 * voltageSVgp / (field_F + 1);
 
                         return voltageSVt;
                     };
-            fieldFct = fieldFctBisinusoidal;
+            SVFieldFct = fieldFctBisinusoidal;
         }
         else if (svMode == SQUARE){
             double thirdOfWavePeriod = fieldWavePeriod / 3.0;
             auto  fieldFctSquare=
-                    [&fieldSV_VPerM, &fieldCV_VPerM, fieldWavePeriod, thirdOfWavePeriod]
-                            (double time) -> double{
+                    [fieldWavePeriod, thirdOfWavePeriod]
+                    (double svAmplitude_VPerM, double time) -> double{
 
                         double timeInPeriod = std::fmod(time, fieldWavePeriod);
 
-                        double voltageSVgp_highField = fieldSV_VPerM * 0.666667; // V/m (1V/m peak to peak is 0.6667V/m ground to peak)
+                        double voltageSVgp_highField = svAmplitude_VPerM * 0.666667; // V/m (1V/m peak to peak is 0.6667V/m ground to peak)
                         double voltageSVgp_lowField = -voltageSVgp_highField * 0.5; // low field is 1/2 of high field
                         if (timeInPeriod < thirdOfWavePeriod){
-                            return fieldCV_VPerM + voltageSVgp_highField;
+                            return voltageSVgp_highField;
                         }
                         else {
-                            return fieldCV_VPerM + voltageSVgp_lowField;
+                            return voltageSVgp_lowField;
                         }
                     };
-            fieldFct = fieldFctSquare;
+            SVFieldFct = fieldFctSquare;
         }
         else if (svMode == CLIPPED_SIN){
             double h = 3.0/2.0* M_PI  - 1.0;
@@ -239,18 +250,39 @@ int main(int argc, const char * argv[]) {
             double f_low = -(2.0* t_sin) / (M_PI-2.0*t_sin);
 
             auto  fieldFctClippedSin=
-                    [&fieldSV_VPerM, &fieldCV_VPerM, f_low, t_sin, fieldWavePeriod]
-                            (double time) -> double{
+                    [f_low, t_sin, fieldWavePeriod]
+                    (double svAmplitude_VPerM, double time) -> double{
 
                         double normalizedTimeInPeriod = std::fmod(time, fieldWavePeriod) / fieldWavePeriod;
                         if (normalizedTimeInPeriod < t_sin){
-                            return  fieldCV_VPerM + ((M_PI * sin(M_PI* normalizedTimeInPeriod / t_sin) - 2*t_sin) / (M_PI-2*t_sin) * fieldSV_VPerM);
+                            return  ((M_PI * sin(M_PI* normalizedTimeInPeriod / t_sin) - 2*t_sin) / (M_PI-2*t_sin) * svAmplitude_VPerM);
                         }
                         else {
-                            return  fieldCV_VPerM + (f_low*fieldSV_VPerM);
+                            return  (f_low*svAmplitude_VPerM);
                         }
                     };
-            fieldFct = fieldFctClippedSin;
+            SVFieldFct = fieldFctClippedSin;
+        }
+
+        std::function<double(double cvAmplitude_VPerM, double time)> CVFieldFct;
+        if (cvMode == STATIC_CV || cvMode == AUTO_CV){
+            //non modulated CV:
+            auto nonModulatedCV =
+                [] (double cvAmplitude_VPerM, double) -> double{
+                    return cvAmplitude_VPerM;
+                };
+            CVFieldFct = nonModulatedCV;
+        }
+        else {
+            // modulated CV, read CV waveform:
+            std::string cvWaveformFileName = simConf.pathRelativeToConfFile(simConf.stringParameter("cv_waveform"));
+            auto cvWaveForm = ParticleSimulation::SampledWaveform(cvWaveformFileName);
+            auto modulatedCV =
+                [cvWaveForm, fieldWavePeriod] (double cvAmplitude_VPerM, double time) -> double{
+                    double period = std::fmod(time, fieldWavePeriod) / fieldWavePeriod;
+                    return cvWaveForm.getInterpolatedValue(period) * cvAmplitude_VPerM;
+                };
+            CVFieldFct = std::move(modulatedCV);
         }
 
         ParticleSimulation::partAttribTransformFctType additionalParameterTransformFct =
@@ -294,8 +326,15 @@ int main(int argc, const char * argv[]) {
         double reducedPressure = standardPressure_Pa / backgroundPressure_Pa;
         for (int step=0; step<nSteps; step++) {
 
-            fieldMagnitude = fieldFct(rsSim.simulationTime());
+            double cvField = CVFieldFct(fieldCV_VPerM, rsSim.simulationTime());
+            fieldMagnitude = SVFieldFct(fieldSV_VPerM, rsSim.simulationTime() +  cvField);
             reactionConditions.electricField = fieldMagnitude;
+
+            if (step % 500 == 0){
+                logger->info("ts: {}, time: {}, period: {}, cv: {}",
+                        step, rsSim.simulationTime(),
+                        std::fmod(rsSim.simulationTime(), fieldWavePeriod) / fieldWavePeriod, cvField);
+            }
 
             for (unsigned int i = 0; i < nParticlesTotal; i++) {
                 bool reacted = rsSim.react(i, reactionConditions, dt_s);

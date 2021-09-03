@@ -49,7 +49,7 @@ namespace ParticleSimulation{
         [[nodiscard]] double getValue(std::size_t index) const;
         [[nodiscard]] double getValueLooped(std::size_t index) const;
         [[nodiscard]] double operator[](std::size_t index) const;
-        [[nodiscard]] double getInterpolatedValue(double phase);
+        [[nodiscard]] double getInterpolatedValue(double phase) const;
 
     private:
         std::vector<double> wfTable_;

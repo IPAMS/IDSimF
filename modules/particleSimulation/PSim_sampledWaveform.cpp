@@ -106,7 +106,7 @@ double ParticleSimulation::SampledWaveform::operator[](std::size_t index) const{
  * the phase values have to be between [0 .. 1])
  * @return The linearly interpolated value for the given phase
  */
-double ParticleSimulation::SampledWaveform::getInterpolatedValue(double phase) {
+double ParticleSimulation::SampledWaveform::getInterpolatedValue(double phase) const{
     // calculate nearest two values
 
     std::size_t iLower = static_cast<std::size_t>(std::floor(phase * size_));
@@ -136,4 +136,6 @@ double ParticleSimulation::SampledWaveform::getInterpolatedValue(double phase) {
     else if (iHigher > size_){
         throw (std::invalid_argument("Illegal phase (out of valid data range)"));
     }
+
+    return NAN; // should never happen, since all possible cases are handled above
 }
