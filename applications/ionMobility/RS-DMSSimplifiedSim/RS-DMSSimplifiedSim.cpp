@@ -118,8 +118,8 @@ int main(int argc, const char * argv[]) {
             throw std::invalid_argument("wrong configuration value: sv_mode");
         }
 
-        double fieldSV_VPerM = simConf.doubleParameter("sv_Vmm-1") * 1000.0;
-        double fieldCV_VPerM = simConf.doubleParameter("cv_Vmm-1") * 1000.0;
+        double fieldSVSetpoint_VPerM = simConf.doubleParameter("sv_Vmm-1") * 1000.0;
+        double fieldCVSetpoint_VPerM = simConf.doubleParameter("cv_Vmm-1") * 1000.0;
         double fieldFrequency = simConf.doubleParameter("sv_frequency_s-1");
         double fieldWavePeriod = 1.0/fieldFrequency;
         double fieldMagnitude = 0; //actual field magnitude
@@ -156,13 +156,16 @@ int main(int argc, const char * argv[]) {
         }
 
         std::unique_ptr<ParticleSimulation::Scalar_writer> cvFieldWriter;
-        if (cvMode == AUTO_CV){
+        int cvHighResLogPeriod = 0;
+        if (simConf.isParameter("log_cv_field_period")){
+            cvHighResLogPeriod = simConf.intParameter("log_cv_field_period");
+        }
+        if (cvMode == AUTO_CV || cvHighResLogPeriod > 0){
             cvFieldWriter = std::make_unique<ParticleSimulation::Scalar_writer>(projectName+ "_cv.csv");
         }
 
         std::unique_ptr<ParticleSimulation::Scalar_writer> voltageWriter;
         voltageWriter = std::make_unique<ParticleSimulation::Scalar_writer>(projectName+ "_voltages.csv");
-
 
         // init simulation  =====================================================================
 
@@ -274,15 +277,18 @@ int main(int argc, const char * argv[]) {
             CVFieldFct = nonModulatedCV;
         }
         else {
-            // modulated CV, read CV waveform:
+            // modulated CV, read CV waveform and phase shift:
             std::string cvWaveformFileName = simConf.pathRelativeToConfFile(simConf.stringParameter("cv_waveform"));
             auto cvWaveForm = ParticleSimulation::SampledWaveform(cvWaveformFileName);
+
+            double cvPhaseShift = simConf.doubleParameter("cv_phase_shift");
             auto modulatedCV =
-                [cvWaveForm, fieldWavePeriod] (double cvAmplitude_VPerM, double time) -> double{
+                [cvWaveForm, cvPhaseShift, fieldWavePeriod] (double cvAmplitude_VPerM, double time) -> double{
                     double period = std::fmod(time, fieldWavePeriod) / fieldWavePeriod;
-                    return cvWaveForm.getInterpolatedValue(period) * cvAmplitude_VPerM;
+                    double shiftedPeriod = std::fmod(period + cvPhaseShift, 1.0);
+                    return cvWaveForm.getInterpolatedValue(shiftedPeriod) * cvAmplitude_VPerM;
                 };
-            CVFieldFct = std::move(modulatedCV);
+            CVFieldFct = modulatedCV;
         }
 
         ParticleSimulation::partAttribTransformFctType additionalParameterTransformFct =
@@ -326,15 +332,10 @@ int main(int argc, const char * argv[]) {
         double reducedPressure = standardPressure_Pa / backgroundPressure_Pa;
         for (int step=0; step<nSteps; step++) {
 
-            double cvField = CVFieldFct(fieldCV_VPerM, rsSim.simulationTime());
-            fieldMagnitude = SVFieldFct(fieldSV_VPerM, rsSim.simulationTime() +  cvField);
+            double cvFieldNow_VPerM = CVFieldFct(fieldCVSetpoint_VPerM, rsSim.simulationTime());
+            double svFieldNow_VPerM = SVFieldFct(fieldSVSetpoint_VPerM, rsSim.simulationTime());
+            fieldMagnitude = svFieldNow_VPerM + cvFieldNow_VPerM;
             reactionConditions.electricField = fieldMagnitude;
-
-            if (step % 500 == 0){
-                logger->info("ts: {}, time: {}, period: {}, cv: {}",
-                        step, rsSim.simulationTime(),
-                        std::fmod(rsSim.simulationTime(), fieldWavePeriod) / fieldWavePeriod, cvField);
-            }
 
             for (unsigned int i = 0; i < nParticlesTotal; i++) {
                 bool reacted = rsSim.react(i, reactionConditions, dt_s);
@@ -350,6 +351,9 @@ int main(int argc, const char * argv[]) {
                 particleLocation.z( particleLocation.z() + particleShift);
                 particles[i]->setLocation(particleLocation);
             }
+            if (cvHighResLogPeriod > 0){
+                cvFieldWriter->writeTimestep(cvFieldNow_VPerM, rsSim.simulationTime());
+            }
             rsSim.advanceTimestep(dt_s);
             timestepWriteFct(particlesPtrs, rsSim.simulationTime(), step, false);
 
@@ -364,10 +368,10 @@ int main(int argc, const char * argv[]) {
 
                 //update cv value:
                 double diffMeanZPos = meanZPos - currentMeanZPos;
-                fieldCV_VPerM = fieldCV_VPerM + diffMeanZPos * cvRelaxationParameter;
-                cvFieldWriter->writeTimestep(std::vector<double>{fieldCV_VPerM,currentMeanZPos},rsSim.simulationTime());
+                fieldCVSetpoint_VPerM = fieldCVSetpoint_VPerM + diffMeanZPos * cvRelaxationParameter;
+                cvFieldWriter->writeTimestep(std::vector<double>{fieldCVSetpoint_VPerM, currentMeanZPos}, rsSim.simulationTime());
                 meanZPos = currentMeanZPos;
-                logger->info("CV corrected ts:{} time:{:.2e} new CV:{}", step, rsSim.simulationTime(), fieldCV_VPerM);
+                logger->info("CV corrected ts:{} time:{:.2e} new CV:{}", step, rsSim.simulationTime(), fieldCVSetpoint_VPerM);
             }
 
             if (ionsInactive>=nAllParticles || AppUtils::SignalHandler::isTerminationSignaled()){

@@ -15,6 +15,8 @@
   "cv_relaxation_parameter":1.5e9,
   "cv_mode":"modulated_auto",
   "cv_waveform": "cv_waveform_triangle.csv",
-  "background_temperature_K":413.15,
+  "cv_phase_shift": 0.1,
+  "log_cv_field_period": 100,
+  "background_temperature_K": 413.15,
   "background_pressure_Pa":101325
 }
