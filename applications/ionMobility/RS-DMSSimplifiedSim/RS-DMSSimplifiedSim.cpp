@@ -304,7 +304,7 @@ int main(int argc, const char * argv[]) {
 
             if (timestep % concentrationWriteInterval ==0) {
                 resultFilewriter.writeTimestep(rsSim);
-                voltageWriter->writeTimestep(fieldMagnitude,time);
+                voltageWriter->writeTimestep(fieldMagnitude, time);
             }
             if (lastTimestep) {
                 jsonWriter->writeTimestep(
@@ -351,7 +351,7 @@ int main(int argc, const char * argv[]) {
                 particleLocation.z( particleLocation.z() + particleShift);
                 particles[i]->setLocation(particleLocation);
             }
-            if (cvHighResLogPeriod > 0){
+            if (cvHighResLogPeriod > 0 && step % cvHighResLogPeriod == 0){
                 cvFieldWriter->writeTimestep(cvFieldNow_VPerM, rsSim.simulationTime());
             }
             rsSim.advanceTimestep(dt_s);
