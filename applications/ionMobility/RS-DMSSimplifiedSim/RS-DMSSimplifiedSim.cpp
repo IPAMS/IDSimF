@@ -97,6 +97,7 @@ int main(int argc, const char * argv[]) {
         }
         else if (cvModeStr == "modulated_auto"){
             cvMode = MODULATED_AUTO_CV;
+            cvRelaxationParameter = simConf.doubleParameter("cv_relaxation_parameter");
         }
         else{
             throw std::invalid_argument("wrong configuration value: cv_mode");
@@ -358,7 +359,7 @@ int main(int argc, const char * argv[]) {
             timestepWriteFct(particlesPtrs, rsSim.simulationTime(), step, false);
 
             //autocorrect compensation voltage, to minimize z drift (once for every single SV oscillation):
-            if (cvMode == AUTO_CV && step % nStepsPerOscillation == 0) {
+            if ( (cvMode == AUTO_CV || cvMode == MODULATED_AUTO_CV) && step % nStepsPerOscillation == 0) {
                 //calculate current mean z-position:
                 double buf = 0.0;
                 for (unsigned int i = 0; i < nParticlesTotal; i++) {
@@ -371,7 +372,7 @@ int main(int argc, const char * argv[]) {
                 fieldCVSetpoint_VPerM = fieldCVSetpoint_VPerM + diffMeanZPos * cvRelaxationParameter;
                 cvFieldWriter->writeTimestep(std::vector<double>{fieldCVSetpoint_VPerM, currentMeanZPos}, rsSim.simulationTime());
                 meanZPos = currentMeanZPos;
-                logger->info("CV corrected ts:{} time:{:.2e} new CV:{}", step, rsSim.simulationTime(), fieldCVSetpoint_VPerM);
+                logger->info("CV corrected ts:{} time:{:.2e} new CV:{} diffMeanPos:{}", step, rsSim.simulationTime(), fieldCVSetpoint_VPerM, diffMeanZPos);
             }
 
             if (ionsInactive>=nAllParticles || AppUtils::SignalHandler::isTerminationSignaled()){
