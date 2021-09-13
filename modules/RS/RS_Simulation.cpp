@@ -85,20 +85,31 @@ long RS::Simulation::reactionEvents(RS::AbstractReaction* reaction) const {
 }
 
 
-void RS::Simulation::performTimestep(RS::ReactionConditions& conditions, double dt) {
+void RS::Simulation::performTimestep(RS::ReactionConditions& conditions, double dt, const particleReactedFctType& particleReactedFct) {
 
     std::size_t nParticles = particleMap_.size();
 
-    #pragma omp parallel
+    #pragma omp parallel default(none) shared(particleReactedFct) private(nParticles, conditions, dt)
     {
         reactionMap indMap = indReactDeepCopy_(); // get local copy of independent reaction maps
 
-        #pragma omp for
-        for (std::size_t i = 0; i<nParticles; ++i) {
-            react_(i, conditions, dt, indMap);
+        if (particleReactedFct != nullptr) {
+            #pragma omp for
+            for (std::size_t i = 0; i<nParticles; ++i) {
+                react_(i, conditions, dt, indMap);
+            }
+        }
+        else {
+            #pragma omp for
+            for (std::size_t i = 0; i<nParticles; ++i) {
+                bool hasReacted = react_(i, conditions, dt, indMap);
+                if (hasReacted){
+                    RS::ReactiveParticle* particle = particleMap_[i];
+                    particleReactedFct(particle);
+                }
+            }
         }
     }
-
 }
 
 /**

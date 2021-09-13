@@ -51,6 +51,7 @@ namespace RS {
 
     public:
         using index_t= std::size_t;
+        using particleReactedFctType= std::function<void (BTree::Particle* particle)>;
 
         explicit Simulation(const std::string& configFileName);
         explicit Simulation(std::unique_ptr<RS::SimulationConfiguration> simConf);
@@ -65,7 +66,7 @@ namespace RS {
         [[nodiscard]] long illEvents() const;
         [[nodiscard]] long reactionEvents(AbstractReaction* reaction) const;
 
-        void performTimestep(ReactionConditions& conditions, double dt);
+        void performTimestep(ReactionConditions& conditions, double dt, const particleReactedFctType& particleReactedFct = nullptr);
         void doReaction(RS::AbstractReaction* reaction, RS::ReactiveParticle* particle, RS::Substance* product);
         bool react(index_t index, ReactionConditions& conditions, double dt);
         bool collisionReact(index_t index, RS::Substance* reactionPartnerSpecies, CollisionConditions& conditions);
