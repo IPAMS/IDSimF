@@ -51,7 +51,7 @@ namespace RS {
 
     public:
         using index_t= std::size_t;
-        using particleReactedFctType= std::function<void (BTree::Particle* particle)>;
+        using particleReactedFctType= std::function<void (RS::ReactiveParticle* particle)>;
 
         explicit Simulation(const std::string& configFileName);
         explicit Simulation(std::unique_ptr<RS::SimulationConfiguration> simConf);
