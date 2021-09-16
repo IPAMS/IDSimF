@@ -131,6 +131,19 @@ namespace Core{
     };
 
     /**
+     * Independent random generator for testing
+     */
+    class IndependentRandomGenerator{
+    public:
+        IndependentRandomGenerator();
+        double uniformRealRndValue();
+
+    private:
+        std::mt19937 internalRNG_;  ///< global random generator
+        std::uniform_real_distribution<double> internalUniformDist_;
+    };
+
+    /**
      * RandomGenerator for testing: Produces *non* random test values / test distributions
      */
     class TestRandomGenerator: public AbstractRandomGenerator{

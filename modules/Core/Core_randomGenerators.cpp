@@ -133,6 +133,21 @@ std::unique_ptr<Core::RandomDistribution> Core::RandomGenerator::getUniformDistr
     return std::make_unique<Core::UniformRandomDistribution>(min, max);
 }
 
+/**
+ * Construct intependent rng
+ */
+Core::IndependentRandomGenerator::IndependentRandomGenerator():
+internalRNG_(Core::rdSeed()),
+internalUniformDist_()
+{}
+
+/**
+ * Generate uniformly distributed in the interval [0.0, 1.0]
+ * @return uniformly distributed random value in [0.0, 1.0]
+ */
+double Core::IndependentRandomGenerator::uniformRealRndValue() {
+    return internalUniformDist_(internalRNG_);
+}
 
 /**
  * Construct test value random generator
