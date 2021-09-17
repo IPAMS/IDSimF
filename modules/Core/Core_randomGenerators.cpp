@@ -20,12 +20,33 @@
  ****************************/
 
 #include "Core_randomGenerators.hpp"
+#include <omp.h>
 
 std::random_device Core::rdSeed; //seed generator
-std::mt19937 Core::internalRNG(Core::rdSeed()); //internal real random generator
-
+std::mt19937 Core::oldInternalRNG(Core::rdSeed()); //internal real random generator
 std::unique_ptr<Core::AbstractRandomGenerator> Core::globalRandomGenerator =
         std::make_unique<Core::RandomGenerator>();
+
+Core::InternalRNG Core::internalRNG;
+
+/**
+ * Constructs the internal random number gnerator
+ */
+Core::InternalRNG::InternalRNG() {
+    int nMaxThreads_ = omp_get_max_threads();
+    for (int i=0; i<nMaxThreads_; ++i){
+        generators_.emplace_back(std::make_unique<std::mt19937>(Core::rdSeed()));
+    }
+}
+
+std::mt19937* Core::InternalRNG::getThreadRNG() {
+    return generators_[static_cast<std::size_t>(omp_get_thread_num())].get();
+}
+
+std::mt19937* Core::InternalRNG::getRNG(std::size_t index) {
+    return generators_.at(index).get();
+}
+
 
 /**
  * Constructs a uniform random distribution in the interval [0.0, 1.0]
@@ -46,7 +67,7 @@ Core::UniformRandomDistribution::UniformRandomDistribution(double min, double ma
  * @return uniformly distributed random value
  */
 double Core::UniformRandomDistribution::rndValue() {
-    return internalUniformDist_(Core::internalRNG);
+    return internalUniformDist_(Core::oldInternalRNG);
 }
 
 /**
@@ -61,7 +82,7 @@ Core::NormalRandomDistribution::NormalRandomDistribution():
  * @return normal distributed random value
  */
 double Core::NormalRandomDistribution::rndValue() {
-    return internalNormalDist_(Core::internalRNG);
+    return internalNormalDist_(Core::oldInternalRNG);
 }
 
 /**

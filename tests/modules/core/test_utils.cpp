@@ -28,6 +28,7 @@
 #include "Core_constants.hpp"
 #include "Core_randomGenerators.hpp"
 #include "catch.hpp"
+#include <omp.h>
 
 
 struct randomSampleParams{
@@ -109,6 +110,25 @@ template<class GeneratorType> void testUniformCustomDistribution(int nSamples, d
     }
 }
 
+TEST_CASE("Test existance of global internal, multithreaded RNG") {
+
+    int nMaxThreads = omp_get_max_threads();
+
+    SECTION("Generators in rng generator pool should be independent"){
+        if (nMaxThreads > 1){
+            auto rng0 = Core::internalRNG.getRNG(0);
+            auto rng1 = Core::internalRNG.getRNG(1);
+
+            CHECK(&rng0 != &rng1);
+            CHECK( (*rng0)() != (*rng1)());
+        }
+    }
+
+    SECTION("There should be a rng for all threads"){
+        CHECK_NOTHROW(Core::internalRNG.getRNG(static_cast<std::size_t>(nMaxThreads-1)));
+    }
+}
+
 
 TEST_CASE( "Test random distributions", "[Core][random]") {
 
@@ -174,7 +194,7 @@ TEST_CASE( "Test random generators", "[Core][random]") {
             }
         }
 
-        SECTION("Test random generator produces skewed disitribution"){
+        SECTION("Test random generator produces skewed distribution"){
 
             int nSamples = 1000;
             expectedDistParams expectedNorm{0.1615938885, 0.8400041942};

@@ -39,8 +39,22 @@
 
 namespace Core{
 
-    extern std::random_device rdSeed; ///< seed generator
-    extern std::mt19937 internalRNG;  ///< global random generator
+    extern std::random_device rdSeed; ///< global seed generator
+    extern std::mt19937 oldInternalRNG;  ///< global random generator
+
+
+    class InternalRNG{
+    public:
+        InternalRNG();
+        std::mt19937* getThreadRNG();
+        std::mt19937* getRNG(std::size_t index);
+
+    private:
+        std::vector<std::unique_ptr<std::mt19937>> generators_;
+    };
+
+    extern InternalRNG internalRNG; ///< global internal randomness provider
+
 
     /**
      * A random distribution which produces random samples with a specific distribution
