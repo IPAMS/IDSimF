@@ -35,15 +35,15 @@ Core::MersenneBitSource::MersenneBitSource():
         internalRandomSource(Core::rdSeed())
 {}
 
-std::mt19937::result_type Core::MersenneBitSource::max() {
+Core::rndBit_type Core::MersenneBitSource::max() {
     return internalRandomSource.max();
 }
 
-std::mt19937::result_type Core::MersenneBitSource::min() {
+Core::rndBit_type Core::MersenneBitSource::min() {
     return internalRandomSource.min();
 }
 
-std::mt19937::result_type Core::MersenneBitSource::operator()() {
+Core::rndBit_type Core::MersenneBitSource::operator()() {
     return internalRandomSource();
 }
 
@@ -51,15 +51,15 @@ Core::TestBitSource::TestBitSource():
 sampleIndex_(0)
 {}
 
-unsigned int Core::TestBitSource::min() {
+Core::rndBit_type Core::TestBitSource::min() {
     return 0;
 }
 
-unsigned int Core::TestBitSource::max() {
+Core::rndBit_type Core::TestBitSource::max() {
     return 4294967295;
 }
 
-unsigned int Core::TestBitSource::operator()() {
+Core::rndBit_type Core::TestBitSource::operator()() {
     sampleIndex_ = (sampleIndex_+1) % Core::UNIFORM_RANDOM_BITS.size();
     return Core::UNIFORM_RANDOM_BITS[sampleIndex_];
 }
