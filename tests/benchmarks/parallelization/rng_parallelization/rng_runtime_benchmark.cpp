@@ -66,13 +66,15 @@ void runParallel_randomFactory(int nSteps, int nVals, spdlog::logger* logger){
         #pragma omp parallel default(none) firstprivate(nVals, logger) shared(Core::randomGeneratorPool, result)
         {
             //logger->info("rng address: {}", (long)&rng);
+            int stepResult= 0;
             #pragma omp for
             for (int i=0; i<nVals; ++i){
                 double rndVal = Core::randomGeneratorPool.getThreadElement()->normalRealRndValue();
-                if (rndVal < 0.001){
-                    result++;
+                if (rndVal < -3.0){
+                    stepResult++;
                 }
             }
+            result += stepResult;
         }
     }
     logger->info("result {}", result);
@@ -85,14 +87,15 @@ void runParallel_randomFactory_independent(int nSteps, int nVals, spdlog::logger
         #pragma omp parallel default(none) firstprivate(nVals, logger) shared(Core::randomGeneratorPool, result)
         {
             Core::RandomGeneratorPool::RNGPoolElement* rngElement = Core::randomGeneratorPool.getThreadElement();
-            //logger->info("rng address: {}", (long)&rng);
+            int stepResult= 0;
             #pragma omp for
             for (int i=0; i<nVals; ++i){
                 double rndVal = rngElement->normalRealRndValue();
-                if (rndVal < 0.001){
-                    result++;
+                if (rndVal < -3.0){
+                    stepResult++;
                 }
             }
+            result += stepResult;
         }
     }
     logger->info("result {}", result);
@@ -107,13 +110,15 @@ void runParallel_independent(int nSteps, int nVals, spdlog::logger* logger){
             std::mt19937 rngGen(Core::rdSeed());
             std::normal_distribution<double> dist;
             //logger->info("rng address: {}", (long)&rng);
+            int stepResult= 0;
             #pragma omp for
             for (int i=0; i<nVals; ++i){
                 double rndVal = dist(rngGen);
-                if (rndVal < 0.001){
-                    result++;
+                if (rndVal < -3.0){
+                    stepResult++;
                 }
             }
+            result += stepResult;
         }
     }
     logger->info("result {}", result);
