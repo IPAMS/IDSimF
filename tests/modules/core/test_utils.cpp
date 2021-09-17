@@ -82,7 +82,7 @@ template<class GeneratorPoolType> void testGeneratorSample(
         int nSamples, expectedDistParams expectedNorm, expectedDistParams expectedUni, double margin){
 
     GeneratorPoolType rndGenPool;
-    auto rngGen = rndGenPool.getThreadElement();
+    auto rngGen = rndGenPool.getThreadRandomSource();
 
     std::vector<double> normalVals = std::vector<double>();
     std::vector<double> uniformVals = std::vector<double>();
@@ -144,8 +144,8 @@ TEST_CASE("Test productive random generator pool") {
 
     SECTION("Generators in rng generator pool should produce independent randomness"){
         if (nMaxThreads > 1){
-            auto rng0 = rngPool.getElement(0);
-            auto rng1 = rngPool.getElement(1);
+            auto rng0 = rngPool.getRandomSource(0);
+            auto rng1 = rngPool.getRandomSource(1);
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wfloat-equal"
@@ -156,7 +156,7 @@ TEST_CASE("Test productive random generator pool") {
     }
 
     SECTION("There should be a rng for all threads"){
-        CHECK_NOTHROW(Core::globalRandomGeneratorPool->getElement(static_cast<std::size_t>(nMaxThreads-1)));
+        CHECK_NOTHROW(Core::globalRandomGeneratorPool->getRandomSource(static_cast<std::size_t>(nMaxThreads-1)));
     }
 }
 
@@ -166,7 +166,7 @@ TEST_CASE( "Test productive random distributions", "[Core][random]") {
 
     SECTION("Uniform random distribution should have the correct mean and deviation") {
         Core::RandomGeneratorPool rngPool;
-        auto mersenneBitSource = rngPool.getThreadElement()->getRandomBitSource();
+        auto mersenneBitSource = rngPool.getThreadRandomSource()->getRandomBitSource();
 
         int nSamples = 10000;
 
@@ -197,7 +197,7 @@ TEST_CASE( "Test productive random distributions", "[Core][random]") {
 TEST_CASE( "Test testing random distributions", "[Core][random]") {
 
     Core::TestRandomGeneratorPool rngPool;
-    Core::TestRandomGeneratorPool::TestRNGPoolElement* rngPoolElem = rngPool.getThreadElement();
+    Core::TestRandomGeneratorPool::TestRNGPoolElement* rngPoolElem = rngPool.getThreadRandomSource();
 
     std::vector<double> vals;
 

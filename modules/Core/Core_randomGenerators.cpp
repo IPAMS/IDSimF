@@ -141,14 +141,14 @@ Core::RandomGeneratorPool::RandomGeneratorPool() {
 }
 
 Core::RndDistPtr Core::RandomGeneratorPool::getUniformDistribution(double min, double max) {
-    return std::make_unique<Core::UniformRandomDistribution>(min, max, this->getThreadElement()->getRandomBitSource());
+    return std::make_unique<Core::UniformRandomDistribution>(min, max, this->getThreadRandomSource()->getRandomBitSource());
 }
 
-Core::RandomGeneratorPool::RNGPoolElement* Core::RandomGeneratorPool::getThreadElement() {
+Core::RandomGeneratorPool::RNGPoolElement* Core::RandomGeneratorPool::getThreadRandomSource() {
     return elements_[static_cast<std::size_t>(omp_get_thread_num())].get();
 }
 
-Core::RandomGeneratorPool::RNGPoolElement* Core::RandomGeneratorPool::getElement(std::size_t index) {
+Core::RandomGeneratorPool::RNGPoolElement* Core::RandomGeneratorPool::getRandomSource(std::size_t index) {
     return elements_.at(index).get();
 }
 
@@ -168,10 +168,10 @@ Core::RndDistPtr Core::TestRandomGeneratorPool::getUniformDistribution(double mi
     return std::make_unique<Core::UniformTestDistribution>(min, max);
 }
 
-Core::TestRandomGeneratorPool::TestRNGPoolElement* Core::TestRandomGeneratorPool::getThreadElement() {
+Core::TestRandomGeneratorPool::TestRNGPoolElement* Core::TestRandomGeneratorPool::getThreadRandomSource() {
     return &element_;
 }
 
-Core::TestRandomGeneratorPool::TestRNGPoolElement* Core::TestRandomGeneratorPool::getElement(std::size_t) {
+Core::TestRandomGeneratorPool::TestRNGPoolElement* Core::TestRandomGeneratorPool::getRandomSource(std::size_t) {
     return &element_;
 }

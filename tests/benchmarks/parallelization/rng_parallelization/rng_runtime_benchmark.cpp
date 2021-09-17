@@ -42,7 +42,7 @@ void runParallel_randomFactory(int nSteps, int nVals, spdlog::logger* logger){
             int stepResult= 0;
             #pragma omp for
             for (int i=0; i<nVals; ++i){
-                double rndVal = Core::globalRandomGeneratorPool->getThreadElement()->normalRealRndValue();
+                double rndVal = Core::globalRandomGeneratorPool->getThreadRandomSource()->normalRealRndValue();
                 if (rndVal < -3.0){
                     stepResult++;
                 }
@@ -59,7 +59,7 @@ void runParallel_randomFactory_independent(int nSteps, int nVals, spdlog::logger
     for (int step =0; step< nSteps; ++step){
         #pragma omp parallel default(none) firstprivate(nVals, logger) shared(Core::globalRandomGeneratorPool, result)
         {
-            Core::RandomSource* rngElement = Core::globalRandomGeneratorPool->getThreadElement();
+            Core::RandomSource* rngElement = Core::globalRandomGeneratorPool->getThreadRandomSource();
             int stepResult= 0;
             #pragma omp for
             for (int i=0; i<nVals; ++i){

@@ -137,8 +137,8 @@ namespace Core{
     public:
         virtual ~AbstractRandomGeneratorPool() =default;
         virtual RndDistPtr getUniformDistribution(double min, double max) =0;
-        virtual RandomSource* getThreadElement() =0;
-        virtual RandomSource* getElement(std::size_t index) =0;
+        virtual RandomSource* getThreadRandomSource() =0;
+        virtual RandomSource* getRandomSource(std::size_t index) =0;
     };
 
     class RandomGeneratorPool: public AbstractRandomGeneratorPool{
@@ -158,8 +158,8 @@ namespace Core{
 
         RandomGeneratorPool();
         RndDistPtr getUniformDistribution(double min, double max) override;
-        RNGPoolElement* getThreadElement() override;
-        RNGPoolElement* getElement(std::size_t index) override;
+        RNGPoolElement* getThreadRandomSource() override;
+        RNGPoolElement* getRandomSource(std::size_t index) override;
 
     private:
         std::vector<std::unique_ptr<RNGPoolElement>> elements_;
@@ -182,8 +182,8 @@ namespace Core{
 
         TestRandomGeneratorPool() = default;
         RndDistPtr getUniformDistribution(double min, double max) override;
-        TestRNGPoolElement* getThreadElement() override;
-        TestRNGPoolElement* getElement(std::size_t index) override;
+        TestRNGPoolElement* getThreadRandomSource() override;
+        TestRNGPoolElement* getRandomSource(std::size_t index) override;
 
     private:
         TestRNGPoolElement element_;
