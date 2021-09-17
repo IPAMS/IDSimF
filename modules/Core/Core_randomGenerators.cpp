@@ -23,11 +23,29 @@
 #include <omp.h>
 
 std::random_device Core::rdSeed; //seed generator
-std::mt19937 Core::oldInternalRNG(Core::rdSeed()); //internal real random generator
-std::unique_ptr<Core::AbstractRandomGenerator> Core::globalRandomGenerator =
-        std::make_unique<Core::RandomGenerator>();
 
-Core::RandomGeneratorPool Core::randomGeneratorPool;
+std::unique_ptr<Core::AbstractRandomGenerator> Core::globalRandomGenerator =
+        std::make_unique<Core::PooledRandomGenerator>();
+
+std::unique_ptr<Core::AbstractRandomGeneratorPool> Core::globalRandomGeneratorPool =
+        std::make_unique<Core::RandomGeneratorPool>();
+
+
+Core::MersenneBitGenerator::MersenneBitGenerator():
+randomSource(Core::rdSeed())
+{}
+
+std::mt19937::result_type Core::MersenneBitGenerator::max() {
+    return randomSource.max();
+}
+
+std::mt19937::result_type Core::MersenneBitGenerator::min() {
+    return randomSource.min();
+}
+
+std::mt19937::result_type Core::MersenneBitGenerator::operator()() {
+    return randomSource();
+}
 
 Core::RandomGeneratorPool::RNGPoolElement::RNGPoolElement():
 rngGenerator_(Core::rdSeed())
@@ -83,7 +101,7 @@ Core::UniformRandomDistribution::UniformRandomDistribution(double min, double ma
  * @return uniformly distributed random value
  */
 double Core::UniformRandomDistribution::rndValue() {
-    return internalUniformDist_(Core::oldInternalRNG);
+    return 0.0; //internalUniformDist_(Core::globalRandomGeneratorPool->getThreadElement().);
 }
 
 /**
@@ -98,7 +116,7 @@ Core::NormalRandomDistribution::NormalRandomDistribution():
  * @return normal distributed random value
  */
 double Core::NormalRandomDistribution::rndValue() {
-    return internalNormalDist_(Core::oldInternalRNG);
+    return 0.0;// internalNormalDist_(Core::oldInternalRNG);
 }
 
 /**
@@ -139,25 +157,23 @@ double Core::NormalTestDistribution::rndValue() {
 /**
  * Construct production use RandomGenerator
  */
-Core::RandomGenerator::RandomGenerator():
-    uniformDistribution_(),
-    normalDistribution_()
+Core::PooledRandomGenerator::PooledRandomGenerator()
 {}
 
 /**
  * Generate uniformly distributed in the interval [0.0, 1.0]
  * @return uniformly distributed random value in [0.0, 1.0]
  */
-double Core::RandomGenerator::uniformRealRndValue() {
-    return uniformDistribution_.rndValue();
+double Core::PooledRandomGenerator::uniformRealRndValue() {
+    return Core::globalRandomGeneratorPool->getThreadElement()->uniformRealRndValue();
 }
 
 /**
  * Generate normal distributed value
  * @return normal distributed random value
  */
-double Core::RandomGenerator::normalRealRndValue() {
-    return normalDistribution_.rndValue();
+double Core::PooledRandomGenerator::normalRealRndValue() {
+    return Core::globalRandomGeneratorPool->getThreadElement()->normalRealRndValue();
 }
 
 /**
@@ -166,7 +182,7 @@ double Core::RandomGenerator::normalRealRndValue() {
  * @param max upper boundary of the random distribution
  * @return uniform random distribution in the interval [min, max]
  */
-std::unique_ptr<Core::RandomDistribution> Core::RandomGenerator::getUniformDistribution(double min, double max) {
+std::unique_ptr<Core::RandomDistribution> Core::PooledRandomGenerator::getUniformDistribution(double min, double max) {
     return std::make_unique<Core::UniformRandomDistribution>(min, max);
 }
 

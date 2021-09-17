@@ -110,22 +110,37 @@ template<class GeneratorType> void testUniformCustomDistribution(int nSamples, d
     }
 }
 
-TEST_CASE("Test existance of global internal, multithreaded RNG") {
+TEST_CASE("Test productive random generator pool") {
 
     int nMaxThreads = omp_get_max_threads();
+    Core::RandomGeneratorPool rngPool;
 
-    SECTION("Generators in rng generator pool should be independent"){
+    SECTION("Test Mersenne Bit Source"){
+        Core::MersenneBitGenerator mersenneSource;
+        Core::MersenneBitGenerator::result_type result = mersenneSource();
+        CHECK(result != 10);
+
+        std::vector<int> testVector = {1,2,3,4,5,6,7,8};
+        std::shuffle(testVector.begin(), testVector.end(), mersenneSource);
+
+        CHECK(testVector[0] != 1);
+    }
+
+    SECTION("Generators in rng generator pool should produce independent randomness"){
         if (nMaxThreads > 1){
-            auto rng0 = Core::randomGeneratorPool.getElement(0);
-            auto rng1 = Core::randomGeneratorPool.getElement(1);
+            auto rng0 = rngPool.getElement(0);
+            auto rng1 = rngPool.getElement(1);
 
-            CHECK(&rng0 != &rng1);
-            CHECK( (*rng0)() != (*rng1)());
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wfloat-equal"
+            CHECK(rng0->uniformRealRndValue() != rng1->uniformRealRndValue());
+#pragma GCC diagnostic pop
+
         }
     }
 
     SECTION("There should be a rng for all threads"){
-        CHECK_NOTHROW(Core::randomGeneratorPool.getElement(static_cast<std::size_t>(nMaxThreads-1)));
+        CHECK_NOTHROW(Core::globalRandomGeneratorPool->getElement(static_cast<std::size_t>(nMaxThreads-1)));
     }
 }
 
@@ -159,9 +174,9 @@ TEST_CASE( "Test random generators", "[Core][random]") {
         expectedDistParams expectedNorm{0.0, 1.0};
         expectedDistParams expectedUni{0.5, 0.28};
 
-        testGeneratorSample<Core::RandomGenerator>(nSamples, expectedNorm, expectedUni, 0.02);
+        testGeneratorSample<Core::PooledRandomGenerator>(nSamples, expectedNorm, expectedUni, 0.02);
 
-        testUniformCustomDistribution<Core::RandomGenerator>(1000, 2.0, 6.0);
+        testUniformCustomDistribution<Core::PooledRandomGenerator>(1000, 2.0, 6.0);
     }
 
     SECTION("Test deterministic test random generators"){

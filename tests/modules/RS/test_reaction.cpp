@@ -120,7 +120,7 @@ TEST_CASE("Test chemical semantics of RS reaction types", "[RS][Reaction]") {
     SECTION("Static thermalizing reaction should calculate correct reaction probabilities and thermalize reacted particle") {
 
         //This test is a statistical test: use a real random number generator:
-        Core::globalRandomGenerator = std::make_unique<Core::RandomGenerator>();
+        Core::globalRandomGenerator = std::make_unique<Core::PooledRandomGenerator>();
 
         pro_1.mass(200);
         RS::StaticThermalizingReaction reac = RS::StaticThermalizingReaction(educts, products, 10.0, "a test reaction");

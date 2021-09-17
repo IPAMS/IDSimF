@@ -40,17 +40,50 @@
 namespace Core{
 
     extern std::random_device rdSeed; ///< global seed generator
-    extern std::mt19937 oldInternalRNG;  ///< global random generator
 
-
-    class RandomGeneratorPool{
+    template <class result_T>
+    class RandomBitGenerator{
     public:
+        typedef result_T result_type;
+        virtual ~RandomBitGenerator() =default;
+        virtual result_T min() =0;
+        virtual result_T max() =0;
+        virtual result_T operator()() =0;
+    };
 
-        class RNGPoolElement{
+    class MersenneBitGenerator: public RandomBitGenerator<std::mt19937::result_type>{
+    public:
+        MersenneBitGenerator();
+        std::mt19937::result_type min() override;
+        std::mt19937::result_type max() override;
+        std::mt19937::result_type operator()() override;
+
+    private:
+        std::mt19937 randomSource;
+    };
+
+    class AbstractRNGPoolElement{
+    public:
+        virtual ~AbstractRNGPoolElement() =default;
+        virtual double uniformRealRndValue() =0;
+        virtual double normalRealRndValue() =0;
+    };
+
+    class AbstractRandomGeneratorPool{
+    public:
+        virtual ~AbstractRandomGeneratorPool() =default;
+//        virtual RndDistPtr getUniformDistribution(double min, double max) =0;
+        virtual AbstractRNGPoolElement* getThreadElement() =0;
+        virtual AbstractRNGPoolElement* getElement(std::size_t index) =0;
+    };
+
+    class RandomGeneratorPool: public AbstractRandomGeneratorPool{
+    public:
+        class RNGPoolElement: public AbstractRNGPoolElement{
         public:
             RNGPoolElement();
-            double uniformRealRndValue();
-            double normalRealRndValue();
+            double uniformRealRndValue() override;
+            double normalRealRndValue() override;
             std::mt19937* getRNG();
 
         private:
@@ -65,10 +98,9 @@ namespace Core{
 
     private:
         std::vector<std::unique_ptr<RNGPoolElement>> elements_;
-
     };
 
-    extern RandomGeneratorPool randomGeneratorPool; ///< global internal randomness provider
+    extern std::unique_ptr<AbstractRandomGeneratorPool> globalRandomGeneratorPool; ///< global provider
 
 
     /**
@@ -147,16 +179,12 @@ namespace Core{
     /**
      * RandomGenerator for production use.
      */
-    class RandomGenerator: public AbstractRandomGenerator{
+    class PooledRandomGenerator: public AbstractRandomGenerator{
     public:
-        RandomGenerator();
+        PooledRandomGenerator();
         double uniformRealRndValue() override;
         double normalRealRndValue() override;
         std::unique_ptr<RandomDistribution> getUniformDistribution(double min, double max) override;
-
-    private:
-        UniformRandomDistribution uniformDistribution_;
-        NormalRandomDistribution normalDistribution_;
     };
 
     /**
