@@ -59,7 +59,7 @@ void runParallel_randomFactory_independent(int nSteps, int nVals, spdlog::logger
     for (int step =0; step< nSteps; ++step){
         #pragma omp parallel default(none) firstprivate(nVals, logger) shared(Core::globalRandomGeneratorPool, result)
         {
-            Core::AbstractRNGPoolElement* rngElement = Core::globalRandomGeneratorPool->getThreadElement();
+            Core::RandomSource* rngElement = Core::globalRandomGeneratorPool->getThreadElement();
             int stepResult= 0;
             #pragma omp for
             for (int i=0; i<nVals; ++i){

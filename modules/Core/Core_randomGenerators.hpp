@@ -75,9 +75,9 @@ namespace Core{
     };
 
 
-    class AbstractRNGPoolElement{
+    class RandomSource{
     public:
-        virtual ~AbstractRNGPoolElement() =default;
+        virtual ~RandomSource() =default;
         virtual double uniformRealRndValue() =0;
         virtual double normalRealRndValue() =0;
         virtual RandomBitSource<rndBit_type>* getRandomBitSource() =0;
@@ -137,13 +137,13 @@ namespace Core{
     public:
         virtual ~AbstractRandomGeneratorPool() =default;
         virtual RndDistPtr getUniformDistribution(double min, double max) =0;
-        virtual AbstractRNGPoolElement* getThreadElement() =0;
-        virtual AbstractRNGPoolElement* getElement(std::size_t index) =0;
+        virtual RandomSource* getThreadElement() =0;
+        virtual RandomSource* getElement(std::size_t index) =0;
     };
 
     class RandomGeneratorPool: public AbstractRandomGeneratorPool{
     public:
-        class RNGPoolElement: public AbstractRNGPoolElement{
+        class RNGPoolElement: public RandomSource{
         public:
             RNGPoolElement() = default;
             double uniformRealRndValue() override;
@@ -167,9 +167,9 @@ namespace Core{
 
     class TestRandomGeneratorPool: public AbstractRandomGeneratorPool{
     public:
-        class TestPoolElement: public AbstractRNGPoolElement{
+        class TestRNGPoolElement: public RandomSource{
         public:
-            TestPoolElement() = default;
+            TestRNGPoolElement() = default;
             double uniformRealRndValue() override;
             double normalRealRndValue() override;
             TestBitSource* getRandomBitSource() override;
@@ -182,11 +182,11 @@ namespace Core{
 
         TestRandomGeneratorPool() = default;
         RndDistPtr getUniformDistribution(double min, double max) override;
-        TestPoolElement* getThreadElement() override;
-        TestPoolElement* getElement(std::size_t index) override;
+        TestRNGPoolElement* getThreadElement() override;
+        TestRNGPoolElement* getElement(std::size_t index) override;
 
     private:
-        TestPoolElement element_;
+        TestRNGPoolElement element_;
 
     };
 

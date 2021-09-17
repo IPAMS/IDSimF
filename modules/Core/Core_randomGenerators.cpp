@@ -152,15 +152,15 @@ Core::RandomGeneratorPool::RNGPoolElement* Core::RandomGeneratorPool::getElement
     return elements_.at(index).get();
 }
 
-double Core::TestRandomGeneratorPool::TestPoolElement::uniformRealRndValue() {
+double Core::TestRandomGeneratorPool::TestRNGPoolElement::uniformRealRndValue() {
     return uniformDist_.rndValue();
 }
 
-double Core::TestRandomGeneratorPool::TestPoolElement::normalRealRndValue() {
+double Core::TestRandomGeneratorPool::TestRNGPoolElement::normalRealRndValue() {
     return normalDist_.rndValue();
 }
 
-Core::TestBitSource* Core::TestRandomGeneratorPool::TestPoolElement::getRandomBitSource() {
+Core::TestBitSource* Core::TestRandomGeneratorPool::TestRNGPoolElement::getRandomBitSource() {
     return &rngGenerator_;
 }
 
@@ -168,10 +168,10 @@ Core::RndDistPtr Core::TestRandomGeneratorPool::getUniformDistribution(double mi
     return std::make_unique<Core::UniformTestDistribution>(min, max);
 }
 
-Core::TestRandomGeneratorPool::TestPoolElement* Core::TestRandomGeneratorPool::getThreadElement() {
+Core::TestRandomGeneratorPool::TestRNGPoolElement* Core::TestRandomGeneratorPool::getThreadElement() {
     return &element_;
 }
 
-Core::TestRandomGeneratorPool::TestPoolElement* Core::TestRandomGeneratorPool::getElement(std::size_t) {
+Core::TestRandomGeneratorPool::TestRNGPoolElement* Core::TestRandomGeneratorPool::getElement(std::size_t) {
     return &element_;
 }

@@ -197,7 +197,7 @@ TEST_CASE( "Test productive random distributions", "[Core][random]") {
 TEST_CASE( "Test testing random distributions", "[Core][random]") {
 
     Core::TestRandomGeneratorPool rngPool;
-    Core::TestRandomGeneratorPool::TestPoolElement* rngPoolElem = rngPool.getThreadElement();
+    Core::TestRandomGeneratorPool::TestRNGPoolElement* rngPoolElem = rngPool.getThreadElement();
 
     std::vector<double> vals;
 
