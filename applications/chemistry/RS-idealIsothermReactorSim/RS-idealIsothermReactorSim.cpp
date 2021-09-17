@@ -94,10 +94,6 @@ int main(int argc, const char * argv[]) {
 
 
         // simulate   ===========================================================================
-        //Set the global random generator to a test random number generator to test for parallelization
-        Core::globalRandomGenerator = std::make_unique<Core::TestRandomGenerator>();
-
-
         AppUtils::SignalHandler::registerSignalHandler();
         AppUtils::Stopwatch stopWatch;
         stopWatch.start();
