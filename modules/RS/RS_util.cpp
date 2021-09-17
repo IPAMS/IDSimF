@@ -35,9 +35,10 @@ Core::Vector RS::util::maxwellBoltzmannRandomVelocity(double temperature_K, doub
 
     double  vrStdevGas = std::sqrt(
             RS::K_BOLTZMANN * temperature_K / (gasParticleMass_amu * RS::KG_PER_AMU));
+    Core::RandomSource* rngGen = Core::globalRandomGeneratorPool->getThreadRandomSource();
 
-    double vxGas = Core::globalRandomGenerator->normalRealRndValue() * vrStdevGas;
-    double vyGas = Core::globalRandomGenerator->normalRealRndValue() * vrStdevGas;
-    double vzGas = Core::globalRandomGenerator->normalRealRndValue() * vrStdevGas;
+    double vxGas = rngGen->normalRealRndValue() * vrStdevGas;
+    double vyGas = rngGen->normalRealRndValue() * vrStdevGas;
+    double vzGas = rngGen->normalRealRndValue() * vrStdevGas;
     return {vxGas,vyGas,vzGas};
 }

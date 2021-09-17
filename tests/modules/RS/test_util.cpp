@@ -35,7 +35,7 @@
 
 TEST_CASE("Random sampled Maxwell-Boltzmann velocity vectors should be correct", "[RS][utility][random]") {
     //This test is a statistical test: use a real random number generator:
-    Core::globalRandomGenerator = std::make_unique<Core::PooledRandomGenerator>();
+    Core::globalRandomGeneratorPool = std::make_unique<Core::RandomGeneratorPool>();
     unsigned int nSamples = 20000;
 
     double temperature = 298;
