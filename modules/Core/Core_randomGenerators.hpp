@@ -39,6 +39,8 @@
 
 namespace Core{
 
+    using rndBit_type = std::mt19937::result_type;
+
     extern std::random_device rdSeed; ///< global seed generator
 
     template <class result_T>
@@ -51,23 +53,22 @@ namespace Core{
         virtual result_T operator()() =0;
     };
 
-    class MersenneBitSource: public RandomBitSource<std::mt19937::result_type>{
+    class MersenneBitSource: public RandomBitSource<rndBit_type>{
     public:
         MersenneBitSource();
-        std::mt19937::result_type min() override;
-        std::mt19937::result_type max() override;
-        std::mt19937::result_type operator()() override;
+        rndBit_type min() override;
+        rndBit_type max() override;
+        rndBit_type operator()() override;
 
-    private:
-        std::mt19937 randomSource;
+        std::mt19937 internalRandomSource;
     };
 
-    class TestBitSource: public RandomBitSource<unsigned int>{
+    class TestBitSource: public RandomBitSource<rndBit_type>{
     public:
         TestBitSource();
-        unsigned int min() override;
-        unsigned int max() override;
-        unsigned int operator()() override;
+        rndBit_type min() override;
+        rndBit_type max() override;
+        rndBit_type operator()() override;
 
     private:
         std::size_t sampleIndex_;
@@ -78,6 +79,7 @@ namespace Core{
         virtual ~AbstractRNGPoolElement() =default;
         virtual double uniformRealRndValue() =0;
         virtual double normalRealRndValue() =0;
+        virtual RandomBitSource<rndBit_type>* getRandomBitSource() =0;
     };
 
     class AbstractRandomGeneratorPool{
@@ -95,10 +97,10 @@ namespace Core{
             RNGPoolElement();
             double uniformRealRndValue() override;
             double normalRealRndValue() override;
-            std::mt19937* getRNG();
+            MersenneBitSource* getRandomBitSource() override;
 
         private:
-            std::mt19937 rngGenerator_;
+            MersenneBitSource rngGenerator_;
             std::uniform_real_distribution<double> uniformDist_;
             std::normal_distribution<double> normalDist_;
         };
@@ -110,8 +112,6 @@ namespace Core{
     private:
         std::vector<std::unique_ptr<RNGPoolElement>> elements_;
     };
-
-    extern std::unique_ptr<AbstractRandomGeneratorPool> globalRandomGeneratorPool; ///< global provider
 
 
     /**
@@ -215,6 +215,7 @@ namespace Core{
     };
 
     extern std::unique_ptr<AbstractRandomGenerator> globalRandomGenerator; ///<the global random generator used in the project
+    extern std::unique_ptr<AbstractRandomGeneratorPool> globalRandomGeneratorPool; ///< global provider
 }
 
 #endif //BTree_randomGenerators

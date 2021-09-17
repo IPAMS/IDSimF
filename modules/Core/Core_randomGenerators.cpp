@@ -32,19 +32,19 @@ std::unique_ptr<Core::AbstractRandomGeneratorPool> Core::globalRandomGeneratorPo
 
 
 Core::MersenneBitSource::MersenneBitSource():
-randomSource(Core::rdSeed())
+        internalRandomSource(Core::rdSeed())
 {}
 
 std::mt19937::result_type Core::MersenneBitSource::max() {
-    return randomSource.max();
+    return internalRandomSource.max();
 }
 
 std::mt19937::result_type Core::MersenneBitSource::min() {
-    return randomSource.min();
+    return internalRandomSource.min();
 }
 
 std::mt19937::result_type Core::MersenneBitSource::operator()() {
-    return randomSource();
+    return internalRandomSource();
 }
 
 Core::TestBitSource::TestBitSource():
@@ -64,19 +64,18 @@ unsigned int Core::TestBitSource::operator()() {
     return Core::UNIFORM_RANDOM_BITS[sampleIndex_];
 }
 
-Core::RandomGeneratorPool::RNGPoolElement::RNGPoolElement():
-rngGenerator_(Core::rdSeed())
+Core::RandomGeneratorPool::RNGPoolElement::RNGPoolElement()
 {}
 
 double Core::RandomGeneratorPool::RNGPoolElement::uniformRealRndValue() {
-    return uniformDist_(rngGenerator_);
+    return uniformDist_(rngGenerator_.internalRandomSource);
 }
 
 double Core::RandomGeneratorPool::RNGPoolElement::normalRealRndValue() {
-    return normalDist_(rngGenerator_);
+    return normalDist_(rngGenerator_.internalRandomSource);
 }
 
-std::mt19937* Core::RandomGeneratorPool::RNGPoolElement::getRNG() {
+Core::MersenneBitSource* Core::RandomGeneratorPool::RNGPoolElement::getRandomBitSource() {
     return &rngGenerator_;
 }
 

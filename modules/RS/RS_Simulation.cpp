@@ -155,7 +155,7 @@ bool RS::Simulation::react_(index_t index, RS::ReactionConditions& conditions, d
 
     std::vector<AbstractReaction*> &iReactions = reacInd[particle->getSpecies()];
     // shuffle the order of the reaction for every time step to prevent simulation artifacts:
-    std::shuffle(iReactions.begin(), iReactions.end(), Core::oldInternalRNG);
+    std::shuffle(iReactions.begin(), iReactions.end(), *Core::globalRandomGeneratorPool->getThreadElement()->getRandomBitSource());
 
     for (const auto& reaction: iReactions){ //iterate through all independent reactions
 
