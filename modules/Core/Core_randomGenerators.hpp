@@ -42,24 +42,35 @@ namespace Core{
     extern std::random_device rdSeed; ///< global seed generator
 
     template <class result_T>
-    class RandomBitGenerator{
+    class RandomBitSource{
     public:
         typedef result_T result_type;
-        virtual ~RandomBitGenerator() =default;
+        virtual ~RandomBitSource() =default;
         virtual result_T min() =0;
         virtual result_T max() =0;
         virtual result_T operator()() =0;
     };
 
-    class MersenneBitGenerator: public RandomBitGenerator<std::mt19937::result_type>{
+    class MersenneBitSource: public RandomBitSource<std::mt19937::result_type>{
     public:
-        MersenneBitGenerator();
+        MersenneBitSource();
         std::mt19937::result_type min() override;
         std::mt19937::result_type max() override;
         std::mt19937::result_type operator()() override;
 
     private:
         std::mt19937 randomSource;
+    };
+
+    class TestBitSource: public RandomBitSource<unsigned int>{
+    public:
+        TestBitSource();
+        unsigned int min() override;
+        unsigned int max() override;
+        unsigned int operator()() override;
+
+    private:
+        std::size_t sampleIndex_;
     };
 
     class AbstractRNGPoolElement{
@@ -187,18 +198,6 @@ namespace Core{
         std::unique_ptr<RandomDistribution> getUniformDistribution(double min, double max) override;
     };
 
-    /**
-     * Independent random generator for testing
-     */
-    class IndependentRandomGenerator{
-    public:
-        IndependentRandomGenerator();
-        double uniformRealRndValue();
-
-    private:
-        std::mt19937 internalRNG_;  ///< global random generator
-        std::uniform_real_distribution<double> internalUniformDist_;
-    };
 
     /**
      * RandomGenerator for testing: Produces *non* random test values / test distributions

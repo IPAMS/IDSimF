@@ -29,6 +29,7 @@
 #include "Core_randomGenerators.hpp"
 #include "catch.hpp"
 #include <omp.h>
+#include <iostream>
 
 
 struct randomSampleParams{
@@ -110,21 +111,37 @@ template<class GeneratorType> void testUniformCustomDistribution(int nSamples, d
     }
 }
 
+TEST_CASE("Test random bit sources") {
+    SECTION("Test Mersenne Bit Source"){
+        Core::MersenneBitSource mersenneSource;
+        std::vector<int> testVector = {1,2,3,4,5,6,7,8};
+        std::shuffle(testVector.begin(), testVector.end(), mersenneSource);
+
+        CHECK( (testVector[0] != 1 && testVector[1] != 2) );
+    }
+
+    SECTION("Test Test Bit Source"){
+        Core::TestBitSource testSource1;
+        Core::TestBitSource testSource2;
+
+        std::vector<int> testVector1 = {1,2,3,4,5,6,7,8};
+        std::vector<int> testVector2 = {1,2,3,4,5,6,7,8};
+        std::shuffle(testVector1.begin(), testVector1.end(), testSource1);
+        std::shuffle(testVector2.begin(), testVector2.end(), testSource2);
+
+        CHECK( (testVector1[0] != 1 && testVector1[1] != 2) );
+        CHECK(testVector1 == testVector2);
+        CHECK(testSource1() != testSource1());
+    }
+
+}
+
 TEST_CASE("Test productive random generator pool") {
 
     int nMaxThreads = omp_get_max_threads();
     Core::RandomGeneratorPool rngPool;
 
-    SECTION("Test Mersenne Bit Source"){
-        Core::MersenneBitGenerator mersenneSource;
-        Core::MersenneBitGenerator::result_type result = mersenneSource();
-        CHECK(result != 10);
 
-        std::vector<int> testVector = {1,2,3,4,5,6,7,8};
-        std::shuffle(testVector.begin(), testVector.end(), mersenneSource);
-
-        CHECK(testVector[0] != 1);
-    }
 
     SECTION("Generators in rng generator pool should produce independent randomness"){
         if (nMaxThreads > 1){

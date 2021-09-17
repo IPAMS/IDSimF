@@ -31,20 +31,37 @@ std::unique_ptr<Core::AbstractRandomGeneratorPool> Core::globalRandomGeneratorPo
         std::make_unique<Core::RandomGeneratorPool>();
 
 
-Core::MersenneBitGenerator::MersenneBitGenerator():
+Core::MersenneBitSource::MersenneBitSource():
 randomSource(Core::rdSeed())
 {}
 
-std::mt19937::result_type Core::MersenneBitGenerator::max() {
+std::mt19937::result_type Core::MersenneBitSource::max() {
     return randomSource.max();
 }
 
-std::mt19937::result_type Core::MersenneBitGenerator::min() {
+std::mt19937::result_type Core::MersenneBitSource::min() {
     return randomSource.min();
 }
 
-std::mt19937::result_type Core::MersenneBitGenerator::operator()() {
+std::mt19937::result_type Core::MersenneBitSource::operator()() {
     return randomSource();
+}
+
+Core::TestBitSource::TestBitSource():
+sampleIndex_(0)
+{}
+
+unsigned int Core::TestBitSource::min() {
+    return 0;
+}
+
+unsigned int Core::TestBitSource::max() {
+    return 4294967295;
+}
+
+unsigned int Core::TestBitSource::operator()() {
+    sampleIndex_ = (sampleIndex_+1) % Core::UNIFORM_RANDOM_BITS.size();
+    return Core::UNIFORM_RANDOM_BITS[sampleIndex_];
 }
 
 Core::RandomGeneratorPool::RNGPoolElement::RNGPoolElement():
@@ -186,21 +203,6 @@ std::unique_ptr<Core::RandomDistribution> Core::PooledRandomGenerator::getUnifor
     return std::make_unique<Core::UniformRandomDistribution>(min, max);
 }
 
-/**
- * Construct intependent rng
- */
-Core::IndependentRandomGenerator::IndependentRandomGenerator():
-internalRNG_(Core::rdSeed()),
-internalUniformDist_()
-{}
-
-/**
- * Generate uniformly distributed in the interval [0.0, 1.0]
- * @return uniformly distributed random value in [0.0, 1.0]
- */
-double Core::IndependentRandomGenerator::uniformRealRndValue() {
-    return internalUniformDist_(internalRNG_);
-}
 
 /**
  * Construct test value random generator
