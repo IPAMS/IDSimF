@@ -98,6 +98,28 @@ void runParallel_randomFactory_independent(int nSteps, int nVals, spdlog::logger
     logger->info("result {}", result);
 }
 
+void runParallel_independent(int nSteps, int nVals, spdlog::logger* logger){
+    logger->info("running independent");
+    long result = 0;
+    for (int step =0; step< nSteps; ++step){
+        #pragma omp parallel default(none) firstprivate(nVals, logger) shared(Core::randomGeneratorPool, result)
+        {
+            Core::RandomGeneratorPool::RNGPoolElement* rngElement = Core::randomGeneratorPool.getThreadElement();
+            std::mt19937* rngGen = rngElement->getRNG();
+            std::normal_distribution<double> dist;
+            //logger->info("rng address: {}", (long)&rng);
+            #pragma omp for
+            for (int i=0; i<nVals; ++i){
+                double rndVal = dist(*rngGen);
+                if (rndVal < 0.001){
+                    result++;
+                }
+            }
+        }
+    }
+    logger->info("result {}", result);
+}
+
 
 void runTrivial(int nSteps, int nVals, spdlog::logger* logger){
     logger->info("run trivial");
@@ -158,7 +180,10 @@ int main(int argc, const char * argv[]) {
     else if(mode== 3) {
         runParallel_randomFactory_independent(nSteps, nVals, logger.get());
     }
-    else if(mode== 3){
+    else if(mode== 4) {
+        runParallel_independent(nSteps, nVals, logger.get());
+    }
+    else if(mode== 5){
         runTrivial(nSteps, nVals, logger.get());
     }
     stopWatch.stop();
