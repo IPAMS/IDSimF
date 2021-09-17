@@ -78,17 +78,18 @@ void checkDistParams(randomSampleParams rsParam, expectedDistParams expectedPara
     REQUIRE(rsParam.stdDev == Approx(expectedParam.stdDev).margin(margin));
 }
 
-template<class GeneratorType> void testGeneratorSample(
+template<class GeneratorPoolType> void testGeneratorSample(
         int nSamples, expectedDistParams expectedNorm, expectedDistParams expectedUni, double margin){
 
-    GeneratorType rndGen;
+    GeneratorPoolType rndGenPool;
+    auto rngGen = rndGenPool.getThreadElement();
 
     std::vector<double> normalVals = std::vector<double>();
     std::vector<double> uniformVals = std::vector<double>();
 
     for (int i=0; i<nSamples;i++){
-        normalVals.push_back(rndGen.normalRealRndValue());
-        uniformVals.push_back(rndGen.uniformRealRndValue());
+        normalVals.push_back(rngGen->normalRealRndValue());
+        uniformVals.push_back(rngGen->uniformRealRndValue());
     }
 
     randomSampleParams srNorm = calculateParamsFromSample(normalVals);
@@ -99,12 +100,12 @@ template<class GeneratorType> void testGeneratorSample(
     checkDistParams(srUni,expectedUni,margin);
 }
 
-template<class GeneratorType> void testUniformCustomDistribution(int nSamples, double min, double max){
-    GeneratorType rndGen;
-    Core::RndDistPtr uniDist = rndGen.getUniformDistribution(min, max);
+template<class GeneratorPoolType> void testUniformCustomDistribution(int nSamples, double min, double max){
+    GeneratorPoolType rndGenPool;
+    Core::RndDistPtr uniDist = rndGenPool.getUniformDistribution(min, max);
     std::vector<double> uniformVals = std::vector<double>();
 
-    for (int i=0; i<nSamples;i++){
+    for (int i=0; i<nSamples; ++i){
         uniformVals.push_back(uniDist->rndValue());
         REQUIRE(uniformVals.back() > min);
         REQUIRE(uniformVals.back() < max);
@@ -141,8 +142,6 @@ TEST_CASE("Test productive random generator pool") {
     int nMaxThreads = omp_get_max_threads();
     Core::RandomGeneratorPool rngPool;
 
-
-
     SECTION("Generators in rng generator pool should produce independent randomness"){
         if (nMaxThreads > 1){
             auto rng0 = rngPool.getElement(0);
@@ -162,81 +161,76 @@ TEST_CASE("Test productive random generator pool") {
 }
 
 
-TEST_CASE( "Test random distributions", "[Core][random]") {
+TEST_CASE( "Test productive random distributions", "[Core][random]") {
+
 
     SECTION("Uniform random distribution should have the correct mean and deviation") {
+        Core::RandomGeneratorPool rngPool;
+        auto mersenneBitSource = rngPool.getThreadElement()->getRandomBitSource();
 
         int nSamples = 10000;
-        randomSampleParams sr = generateDistributionSample<Core::UniformRandomDistribution>(nSamples);
+
+        Core::UniformRandomDistribution dist(0.0, 1.0, mersenneBitSource);
+
+        std::vector<double> vals;
+        for (int i=0; i<nSamples;i++){
+            vals.push_back(dist.rndValue());
+        }
+        randomSampleParams sr = calculateParamsFromSample(vals);
 
         bool meanInRage = ((sr.mean<0.51) && (sr.mean>0.49));
-        REQUIRE(meanInRage);
+        CHECK(meanInRage);
         bool stdDevInRage = ((sr.stdDev<0.30) && (sr.stdDev>0.26));
-        REQUIRE(stdDevInRage);
+        CHECK(stdDevInRage);
     }
 
-    SECTION("Normal random distribution should have the correct mean and deviation") {
-        int nSamples = 1000;
-        randomSampleParams sr = generateDistributionSample<Core::NormalRandomDistribution>(nSamples);
-
-        REQUIRE(sr.mean<0.1);
-        bool stdDevInRage = ((sr.stdDev<1.05) && (sr.stdDev>0.95));
-        REQUIRE(stdDevInRage);
-    }
-}
-
-TEST_CASE( "Test random generators", "[Core][random]") {
-    SECTION("Production random generator should generate correct uniform random samples") {
+    SECTION("Productive rng should produce correct uniform and normal distributions"){
         int nSamples = 10000;
         expectedDistParams expectedNorm{0.0, 1.0};
         expectedDistParams expectedUni{0.5, 0.28};
 
-        testGeneratorSample<Core::PooledRandomGenerator>(nSamples, expectedNorm, expectedUni, 0.02);
-
-        testUniformCustomDistribution<Core::PooledRandomGenerator>(1000, 2.0, 6.0);
+        testGeneratorSample<Core::RandomGeneratorPool>(nSamples, expectedNorm, expectedUni, 0.02);
+        testUniformCustomDistribution<Core::RandomGeneratorPool>(1000, 2.0, 6.0);
     }
+}
 
-    SECTION("Test deterministic test random generators"){
+TEST_CASE( "Test testing random distributions", "[Core][random]") {
 
-        SECTION("Test individual test generator samples") {
+    Core::TestRandomGeneratorPool rngPool;
+    Core::TestRandomGeneratorPool::TestPoolElement* rngPoolElem = rngPool.getThreadElement();
 
-            Core::TestRandomGenerator testRng;
-            std::vector<double> vals;
+    std::vector<double> vals;
 
-            SECTION("Test random generator should generate predefined deterministic normal random samples") {
+    SECTION("Test random generator should generate predefined deterministic normal random samples") {
 
-                for (int i = 0; i<10; ++i) {
-                    vals.push_back(testRng.normalRealRndValue());
-                }
-
-                REQUIRE(Approx(vals[2])==0.046029231875);
-                REQUIRE(Approx(vals[4])==0.176058757790);
-                REQUIRE(Approx(vals[8])==-0.628735061607);
-            }
-
-            SECTION("Test random generator should generate predefined deterministic uniform random samples") {
-
-                for (int i = 0; i<10; ++i) {
-                    vals.push_back(testRng.uniformRealRndValue());
-                }
-
-                REQUIRE(Approx(vals[1])==0.900613166242);
-                REQUIRE(Approx(vals[3])==0.498839039733);
-                REQUIRE(Approx(vals[7])==0.437690201598);
-            }
+        for (int i = 0; i<10; ++i) {
+            vals.push_back(rngPoolElem->normalRealRndValue());
         }
 
-        SECTION("Test random generator produces skewed distribution"){
-
-            int nSamples = 1000;
-            expectedDistParams expectedNorm{0.1615938885, 0.8400041942};
-            expectedDistParams expectedUni{0.5253988, 0.2888807331};
-
-            testGeneratorSample<Core::TestRandomGenerator>(nSamples, expectedNorm, expectedUni, 1e-7);
-
-            testUniformCustomDistribution<Core::TestRandomGenerator>(1000, 2.0, 6.0);
-        }
-
+        REQUIRE(Approx(vals[2])==0.046029231875);
+        REQUIRE(Approx(vals[4])==0.176058757790);
+        REQUIRE(Approx(vals[8])==-0.628735061607);
     }
 
+    SECTION("Test random generator should generate predefined deterministic uniform random samples") {
+
+        for (int i = 0; i<10; ++i) {
+            vals.push_back(rngPoolElem->uniformRealRndValue());
+        }
+
+        REQUIRE(Approx(vals[1])==0.900613166242);
+        REQUIRE(Approx(vals[3])==0.498839039733);
+        REQUIRE(Approx(vals[7])==0.437690201598);
+    }
+
+    SECTION("Test random generator produces skewed distribution"){
+
+        int nSamples = 1000;
+        expectedDistParams expectedNorm{0.1615938885, 0.8400041942};
+        expectedDistParams expectedUni{0.5253988, 0.2888807331};
+
+        testGeneratorSample<Core::TestRandomGeneratorPool>(nSamples, expectedNorm, expectedUni, 1e-7);
+
+        testUniformCustomDistribution<Core::TestRandomGeneratorPool>(1000, 2.0, 6.0);
+    }
 }

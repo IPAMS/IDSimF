@@ -74,6 +74,7 @@ namespace Core{
         std::size_t sampleIndex_;
     };
 
+
     class AbstractRNGPoolElement{
     public:
         virtual ~AbstractRNGPoolElement() =default;
@@ -82,70 +83,27 @@ namespace Core{
         virtual RandomBitSource<rndBit_type>* getRandomBitSource() =0;
     };
 
-    class AbstractRandomGeneratorPool{
-    public:
-        virtual ~AbstractRandomGeneratorPool() =default;
-//        virtual RndDistPtr getUniformDistribution(double min, double max) =0;
-        virtual AbstractRNGPoolElement* getThreadElement() =0;
-        virtual AbstractRNGPoolElement* getElement(std::size_t index) =0;
-    };
-
-    class RandomGeneratorPool: public AbstractRandomGeneratorPool{
-    public:
-        class RNGPoolElement: public AbstractRNGPoolElement{
-        public:
-            RNGPoolElement();
-            double uniformRealRndValue() override;
-            double normalRealRndValue() override;
-            MersenneBitSource* getRandomBitSource() override;
-
-        private:
-            MersenneBitSource rngGenerator_;
-            std::uniform_real_distribution<double> uniformDist_;
-            std::normal_distribution<double> normalDist_;
-        };
-
-        RandomGeneratorPool();
-        RNGPoolElement* getThreadElement();
-        RNGPoolElement* getElement(std::size_t index);
-
-    private:
-        std::vector<std::unique_ptr<RNGPoolElement>> elements_;
-    };
-
-
     /**
-     * A random distribution which produces random samples with a specific distribution
-     */
+ * A random distribution which produces random samples with a specific distribution
+ */
     class RandomDistribution{
     public:
         virtual double rndValue() =0;
         virtual ~RandomDistribution() = default;
     };
 
-    typedef std::unique_ptr<Core::RandomDistribution> RndDistPtr; ///< pointer type used throughout the project
+    using RndDistPtr= std::unique_ptr<Core::RandomDistribution>; ///< pointer type used throughout the project
 
     /**
      * A uniform distribution, which generates random samples in a specified interval
      */
     class UniformRandomDistribution: public RandomDistribution{
     public:
-        UniformRandomDistribution();
-        UniformRandomDistribution(double min, double max);
+        UniformRandomDistribution(double min, double max, RandomBitSource<rndBit_type>* randomSource);
         double rndValue() override;
     private:
+        RandomBitSource<rndBit_type>* randomSource_;
         std::uniform_real_distribution<double> internalUniformDist_;
-    };
-
-    /**
-     * Random distribution which random samples wich are gaussian normal distributed (with mu=0.0 and sigma=1.0)
-     */
-    class NormalRandomDistribution: public RandomDistribution{
-    public:
-        NormalRandomDistribution();
-        double rndValue() override;
-    private:
-        std::normal_distribution<double> internalNormalDist_;
     };
 
     /**
@@ -175,46 +133,63 @@ namespace Core{
         std::size_t sampleIndex_;
     };
 
-    /**
-     * Random generator interface: A random generator is able to produce uniform and normal distributed random
-     * samples and custom uniform random distributions.
-     */
-    class AbstractRandomGenerator{
+    class AbstractRandomGeneratorPool{
     public:
-        virtual ~AbstractRandomGenerator() =default;
-        virtual double uniformRealRndValue() =0;
-        virtual double normalRealRndValue() =0;
+        virtual ~AbstractRandomGeneratorPool() =default;
         virtual RndDistPtr getUniformDistribution(double min, double max) =0;
+        virtual AbstractRNGPoolElement* getThreadElement() =0;
+        virtual AbstractRNGPoolElement* getElement(std::size_t index) =0;
     };
 
-    /**
-     * RandomGenerator for production use.
-     */
-    class PooledRandomGenerator: public AbstractRandomGenerator{
+    class RandomGeneratorPool: public AbstractRandomGeneratorPool{
     public:
-        PooledRandomGenerator();
-        double uniformRealRndValue() override;
-        double normalRealRndValue() override;
-        std::unique_ptr<RandomDistribution> getUniformDistribution(double min, double max) override;
-    };
+        class RNGPoolElement: public AbstractRNGPoolElement{
+        public:
+            RNGPoolElement() = default;
+            double uniformRealRndValue() override;
+            double normalRealRndValue() override;
+            MersenneBitSource* getRandomBitSource() override;
 
+        private:
+            MersenneBitSource rngGenerator_;
+            std::uniform_real_distribution<double> uniformDist_;
+            std::normal_distribution<double> normalDist_;
+        };
 
-    /**
-     * RandomGenerator for testing: Produces *non* random test values / test distributions
-     */
-    class TestRandomGenerator: public AbstractRandomGenerator{
-    public:
-        TestRandomGenerator();
-        double uniformRealRndValue() override;
-        double normalRealRndValue() override;
-        std::unique_ptr<RandomDistribution> getUniformDistribution(double min, double max) override;
+        RandomGeneratorPool();
+        RndDistPtr getUniformDistribution(double min, double max) override;
+        RNGPoolElement* getThreadElement() override;
+        RNGPoolElement* getElement(std::size_t index) override;
 
     private:
-        UniformTestDistribution uniformDistribution_;
-        NormalTestDistribution normalDistribution_;
+        std::vector<std::unique_ptr<RNGPoolElement>> elements_;
     };
 
-    extern std::unique_ptr<AbstractRandomGenerator> globalRandomGenerator; ///<the global random generator used in the project
+    class TestRandomGeneratorPool: public AbstractRandomGeneratorPool{
+    public:
+        class TestPoolElement: public AbstractRNGPoolElement{
+        public:
+            TestPoolElement() = default;
+            double uniformRealRndValue() override;
+            double normalRealRndValue() override;
+            TestBitSource* getRandomBitSource() override;
+
+        private:
+            TestBitSource rngGenerator_;
+            UniformTestDistribution uniformDist_;
+            NormalTestDistribution normalDist_;
+        };
+
+        TestRandomGeneratorPool() = default;
+        RndDistPtr getUniformDistribution(double min, double max) override;
+        TestPoolElement* getThreadElement() override;
+        TestPoolElement* getElement(std::size_t index) override;
+
+    private:
+        TestPoolElement element_;
+
+    };
+
     extern std::unique_ptr<AbstractRandomGeneratorPool> globalRandomGeneratorPool; ///< global provider
 }
 
