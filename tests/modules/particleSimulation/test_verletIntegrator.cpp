@@ -39,7 +39,7 @@ using sPair= sMap::value_type;
 TEST_CASE("Test serial verlet integrator", "[ParticleSimulation][VerletIntegrator][trajectory integration]") {
 
     //Set the global random generator to a test random number generator to make the test experiment fully deterministic:
-    Core::globalRandomGenerator = std::make_unique<Core::TestRandomGenerator>();
+    Core::globalRandomGeneratorPool = std::make_unique<Core::TestRandomGeneratorPool>();
 
     double ionAcceleration = 10.0; //((1000V / 100mm) * elementary charge) / 100 amu = 9.64e9 m/s^2
 
