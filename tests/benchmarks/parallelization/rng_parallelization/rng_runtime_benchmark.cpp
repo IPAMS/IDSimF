@@ -102,15 +102,14 @@ void runParallel_independent(int nSteps, int nVals, spdlog::logger* logger){
     logger->info("running independent");
     long result = 0;
     for (int step =0; step< nSteps; ++step){
-        #pragma omp parallel default(none) firstprivate(nVals, logger) shared(Core::randomGeneratorPool, result)
+        #pragma omp parallel default(none) firstprivate(nVals, logger) shared(Core::rdSeed, result)
         {
-            Core::RandomGeneratorPool::RNGPoolElement* rngElement = Core::randomGeneratorPool.getThreadElement();
-            std::mt19937* rngGen = rngElement->getRNG();
+            std::mt19937 rngGen(Core::rdSeed());
             std::normal_distribution<double> dist;
             //logger->info("rng address: {}", (long)&rng);
             #pragma omp for
             for (int i=0; i<nVals; ++i){
-                double rndVal = dist(*rngGen);
+                double rndVal = dist(rngGen);
                 if (rndVal < 0.001){
                     result++;
                 }
