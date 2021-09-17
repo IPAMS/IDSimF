@@ -27,24 +27,40 @@ std::mt19937 Core::oldInternalRNG(Core::rdSeed()); //internal real random genera
 std::unique_ptr<Core::AbstractRandomGenerator> Core::globalRandomGenerator =
         std::make_unique<Core::RandomGenerator>();
 
-Core::InternalRNG Core::internalRNG;
+Core::RandomGeneratorPool Core::randomGeneratorPool;
+
+Core::RandomGeneratorPool::RNGPoolElement::RNGPoolElement():
+rngGenerator_(Core::rdSeed())
+{}
+
+double Core::RandomGeneratorPool::RNGPoolElement::uniformRealRndValue() {
+    return uniformDist_(rngGenerator_);
+}
+
+double Core::RandomGeneratorPool::RNGPoolElement::normalRealRndValue() {
+    return normalDist_(rngGenerator_);
+}
+
+std::mt19937* Core::RandomGeneratorPool::RNGPoolElement::getRNG() {
+    return &rngGenerator_;
+}
 
 /**
- * Constructs the internal random number gnerator
+ * Constructs the internal random number generator
  */
-Core::InternalRNG::InternalRNG() {
+Core::RandomGeneratorPool::RandomGeneratorPool() {
     int nMaxThreads_ = omp_get_max_threads();
     for (int i=0; i<nMaxThreads_; ++i){
-        generators_.emplace_back(std::make_unique<std::mt19937>(Core::rdSeed()));
+        elements_.emplace_back(std::make_unique<Core::RandomGeneratorPool::RNGPoolElement>());
     }
 }
 
-std::mt19937* Core::InternalRNG::getThreadRNG() {
-    return generators_[static_cast<std::size_t>(omp_get_thread_num())].get();
+Core::RandomGeneratorPool::RNGPoolElement* Core::RandomGeneratorPool::getThreadElement() {
+    return elements_[static_cast<std::size_t>(omp_get_thread_num())].get();
 }
 
-std::mt19937* Core::InternalRNG::getRNG(std::size_t index) {
-    return generators_.at(index).get();
+Core::RandomGeneratorPool::RNGPoolElement* Core::RandomGeneratorPool::getElement(std::size_t index) {
+    return elements_.at(index).get();
 }
 
 

@@ -116,8 +116,8 @@ TEST_CASE("Test existance of global internal, multithreaded RNG") {
 
     SECTION("Generators in rng generator pool should be independent"){
         if (nMaxThreads > 1){
-            auto rng0 = Core::internalRNG.getRNG(0);
-            auto rng1 = Core::internalRNG.getRNG(1);
+            auto rng0 = Core::randomGeneratorPool.getElement(0);
+            auto rng1 = Core::randomGeneratorPool.getElement(1);
 
             CHECK(&rng0 != &rng1);
             CHECK( (*rng0)() != (*rng1)());
@@ -125,7 +125,7 @@ TEST_CASE("Test existance of global internal, multithreaded RNG") {
     }
 
     SECTION("There should be a rng for all threads"){
-        CHECK_NOTHROW(Core::internalRNG.getRNG(static_cast<std::size_t>(nMaxThreads-1)));
+        CHECK_NOTHROW(Core::randomGeneratorPool.getElement(static_cast<std::size_t>(nMaxThreads-1)));
     }
 }
 

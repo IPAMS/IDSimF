@@ -43,17 +43,32 @@ namespace Core{
     extern std::mt19937 oldInternalRNG;  ///< global random generator
 
 
-    class InternalRNG{
+    class RandomGeneratorPool{
     public:
-        InternalRNG();
-        std::mt19937* getThreadRNG();
-        std::mt19937* getRNG(std::size_t index);
+
+        class RNGPoolElement{
+        public:
+            RNGPoolElement();
+            double uniformRealRndValue();
+            double normalRealRndValue();
+            std::mt19937* getRNG();
+
+        private:
+            std::mt19937 rngGenerator_;
+            std::uniform_real_distribution<double> uniformDist_;
+            std::normal_distribution<double> normalDist_;
+        };
+
+        RandomGeneratorPool();
+        RNGPoolElement* getThreadElement();
+        RNGPoolElement* getElement(std::size_t index);
 
     private:
-        std::vector<std::unique_ptr<std::mt19937>> generators_;
+        std::vector<std::unique_ptr<RNGPoolElement>> elements_;
+
     };
 
-    extern InternalRNG internalRNG; ///< global internal randomness provider
+    extern RandomGeneratorPool randomGeneratorPool; ///< global internal randomness provider
 
 
     /**

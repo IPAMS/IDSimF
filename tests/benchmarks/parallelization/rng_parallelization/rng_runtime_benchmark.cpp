@@ -60,16 +60,36 @@ void runParallel_multipleGenerators(int nSteps, int nVals, spdlog::logger* logge
 }
 
 void runParallel_randomFactory(int nSteps, int nVals, spdlog::logger* logger){
-    logger->info("running runParallel_randomFactory");
+    logger->info("running runParallel_randomFactory with randomPool");
     long result = 0;
     for (int step =0; step< nSteps; ++step){
-        #pragma omp parallel default(none) firstprivate(nVals, logger) shared(Core::internalRNG, result)
+        #pragma omp parallel default(none) firstprivate(nVals, logger) shared(Core::randomGeneratorPool, result)
         {
             //logger->info("rng address: {}", (long)&rng);
             #pragma omp for
             for (int i=0; i<nVals; ++i){
-                double rndVal = (*Core::internalRNG.getThreadRNG())();
-                if (rndVal < 0.0001){
+                double rndVal = Core::randomGeneratorPool.getThreadElement()->normalRealRndValue();
+                if (rndVal < 0.001){
+                    result++;
+                }
+            }
+        }
+    }
+    logger->info("result {}", result);
+}
+
+void runParallel_randomFactory_independent(int nSteps, int nVals, spdlog::logger* logger){
+    logger->info("running runParallel_randomFactory_independent");
+    long result = 0;
+    for (int step =0; step< nSteps; ++step){
+        #pragma omp parallel default(none) firstprivate(nVals, logger) shared(Core::randomGeneratorPool, result)
+        {
+            std::normal_distribution<double> dist;
+            //logger->info("rng address: {}", (long)&rng);
+            #pragma omp for
+            for (int i=0; i<nVals; ++i){
+                double rndVal = dist(*Core::randomGeneratorPool.getThreadElement()->getRNG());
+                if (rndVal < 0.001){
                     result++;
                 }
             }
@@ -134,6 +154,9 @@ int main(int argc, const char * argv[]) {
     }
     else if(mode== 2) {
         runParallel_randomFactory(nSteps, nVals, logger.get());
+    }
+    else if(mode== 3) {
+        runParallel_randomFactory_independent(nSteps, nVals, logger.get());
     }
     else if(mode== 3){
         runTrivial(nSteps, nVals, logger.get());
