@@ -32,7 +32,7 @@
 std::vector<std::unique_ptr<BTree::Particle>> ParticleSimulation::ParticleStartZone::getRandomParticlesInStartZone(
         std::size_t numIons, double charge, double timeOfBirthRange) {
 
-    Core::RndDistPtr rnd_tob = Core::globalRandomGenerator->getUniformDistribution(0,timeOfBirthRange);
+    Core::RndDistPtr rnd_tob = Core::globalRandomGeneratorPool->getUniformDistribution(0,timeOfBirthRange);
 
     std::vector<std::unique_ptr<BTree::Particle>> result;
     for (std::size_t i=0; i<numIons; i++){

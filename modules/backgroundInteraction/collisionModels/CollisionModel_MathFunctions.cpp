@@ -37,11 +37,12 @@ Core::Vector CollisionModel::sphereRand(double r) {
     double yp;
     double S;
 
+    Core::RandomSource* rndSource = Core::globalRandomGeneratorPool->getThreadRandomSource();
     // Find a sample on the unit disc by rejection sampling:
     do
     {
-        xp = 2.0*Core::globalRandomGenerator->uniformRealRndValue() - 1.0;
-        yp = 2.0*Core::globalRandomGenerator->uniformRealRndValue() - 1.0;
+        xp = 2.0*rndSource->uniformRealRndValue() - 1.0;
+        yp = 2.0*rndSource->uniformRealRndValue() - 1.0;
         S = xp*xp + yp*yp;
     }
     while( S > 1.0);

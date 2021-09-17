@@ -47,7 +47,7 @@ baseVector_(baseVector)
         isShifted_ = true;
     }
 
-    rnd_x_ = Core::globalRandomGenerator->getUniformDistribution(0.0, length_);
+    rnd_x_ = Core::globalRandomGeneratorPool->getUniformDistribution(0.0, length_);
 }
 
 /**

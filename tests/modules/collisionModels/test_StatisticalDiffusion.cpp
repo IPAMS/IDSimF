@@ -37,7 +37,7 @@
 TEST_CASE( "Test SDS collison model", "[CollisionModels][SDS]") {
 
     //Set the global random generator to a test random number generator to make the test experiment fully deterministic:
-    Core::globalRandomGenerator = std::make_unique<Core::TestRandomGenerator>();
+    Core::globalRandomGeneratorPool = std::make_unique<Core::TestRandomGeneratorPool>();
 
     SECTION( "SDS random jumps should be correct with default statistics") {
         CollisionModel::StatisticalDiffusionModel sds(100000,298,28,0.366 * 1.0e-9);

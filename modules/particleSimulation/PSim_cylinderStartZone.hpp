@@ -55,8 +55,8 @@ namespace ParticleSimulation{
         Core::Vector baseVector_;
 
         Core::RndDistPtr rnd_x_;
-        Core::RndDistPtr rnd_R_ = Core::globalRandomGenerator->getUniformDistribution(0,1);
-        Core::RndDistPtr rnd_phi_ = Core::globalRandomGenerator->getUniformDistribution(0,2*M_PI);
+        Core::RndDistPtr rnd_R_ = Core::globalRandomGeneratorPool->getUniformDistribution(0,1);
+        Core::RndDistPtr rnd_phi_ = Core::globalRandomGeneratorPool->getUniformDistribution(0,2*M_PI);
     };
 }
 
