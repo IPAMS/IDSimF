@@ -89,17 +89,11 @@ void RS::Simulation::performTimestep(RS::ReactionConditions& conditions, double 
 
     std::size_t nParticles = particleMap_.size();
 
-    #pragma omp parallel default(none) shared(particleReactedFct) private(nParticles, conditions, dt)
+    #pragma omp parallel default(none) shared(particleMap_) firstprivate(particleReactedFct, nParticles, conditions, dt)
     {
         reactionMap indMap = indReactDeepCopy_(); // get local copy of independent reaction maps
 
         if (particleReactedFct != nullptr) {
-            #pragma omp for
-            for (std::size_t i = 0; i<nParticles; ++i) {
-                react_(i, conditions, dt, indMap);
-            }
-        }
-        else {
             #pragma omp for
             for (std::size_t i = 0; i<nParticles; ++i) {
                 bool hasReacted = react_(i, conditions, dt, indMap);
@@ -107,6 +101,12 @@ void RS::Simulation::performTimestep(RS::ReactionConditions& conditions, double 
                     RS::ReactiveParticle* particle = particleMap_[i];
                     particleReactedFct(particle);
                 }
+            }
+        }
+        else {
+            #pragma omp for
+            for (std::size_t i = 0; i<nParticles; ++i) {
+                react_(i, conditions, dt, indMap);
             }
         }
     }
@@ -121,13 +121,17 @@ void RS::Simulation::doReaction(RS::AbstractReaction* reaction, RS::ReactivePart
 {
 
     //we have a reaction event: count the reaction event
+    #pragma omp atomic
     totalReactionEvents_++;
+
+    #pragma omp atomic
     reactionEvents_[reaction]++;
 
     // despite the possible illnes of the reaction event: now REACT! => remove actual particle
     // (independent reaction => therefore only on discrete educt and this must be the current particle)
     //this->removeParticle(index);
     //RS::ReactiveParticle* particle = particleMap_.at(index);
+    #pragma omp atomic
     discreteConcentrations_[particle->getSpecies()]--;
 
 
@@ -137,6 +141,7 @@ void RS::Simulation::doReaction(RS::AbstractReaction* reaction, RS::ReactivePart
     //an independent reaction has only one discrete educt.
     //(Currently the config file parser enforces only one discrete products)
 
+    //#pragma omp atomic
     particle->setSpecies(product);
     /*RS::ReactiveParticle productParticle = RS::ReactiveParticle(
             product,
@@ -144,6 +149,7 @@ void RS::Simulation::doReaction(RS::AbstractReaction* reaction, RS::ReactivePart
             particle.getCharge());*/
 
     //this->addParticle(productParticle,index);
+    #pragma omp atomic
     discreteConcentrations_[product]++;
 }
 
@@ -180,7 +186,7 @@ bool RS::Simulation::react_(index_t index, RS::ReactionConditions& conditions, d
 
             RS::Substance* product = reaction->discreteProducts()->begin()->first;
 
-            #pragma omp critical (do_reaction)
+            //#pragma omp critical (do_reaction)
             {
                 doReaction(reaction, particle, product);
             }

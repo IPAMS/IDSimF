@@ -191,7 +191,9 @@ TEST_CASE( "Test RS simulations", "[RS][Simulation]") {
         CHECK(isExactDoubleEqual(sim.getParticle(1).getMass(), subst_A->mass()*Core::AMU_TO_KG));
     }
 
-    SECTION( "Simulation with water cluster configuration file should be correct") {
+    SECTION( "Simulation with water cluster configuration file and reacted function should be correct") {
+
+        //TODO: Add test with reaction function
 
         RS::Simulation sim = RS::Simulation(parser.parseFile("RS_waterCluster_test.conf"));
         RS::SimulationConfiguration* simConf = sim.simulationConfiguration();
