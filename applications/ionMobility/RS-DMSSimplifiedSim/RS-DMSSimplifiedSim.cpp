@@ -134,7 +134,7 @@ int main(int argc, const char * argv[]) {
         RS::Simulation rsSim = RS::Simulation(parser.parseFile(rsConfFileName));
         RS::SimulationConfiguration* rsSimConf = rsSim.simulationConfiguration();
         //prepare a map for retrieval of the substance index:
-        std::map<RS::Substance*,int> substanceIndices;
+        std::map<RS::Substance*, int> substanceIndices;
         std::vector<RS::Substance*> discreteSubstances = rsSimConf->getAllDiscreteSubstances();
         std::vector<double> ionMobility; // = simConf.doubleVectorParameter("ion_mobility");
         for (std::size_t i=0; i<discreteSubstances.size(); i++){
@@ -323,6 +323,12 @@ int main(int argc, const char * argv[]) {
             }
         };
 
+        auto particlesReactedFct = [substanceIndices](RS::ReactiveParticle* particle){
+            //we had an reaction event: Update the chemical species for the trajectory
+            int substIndex = substanceIndices.at(particle->getSpecies());
+            particle->setFloatAttribute(key_ChemicalIndex, substIndex);
+        };
+
 
         // simulate   ===========================================================================
         AppUtils::SignalHandler::registerSignalHandler();
@@ -337,20 +343,20 @@ int main(int argc, const char * argv[]) {
             double svFieldNow_VPerM = SVFieldFct(fieldSVSetpoint_VPerM, rsSim.simulationTime());
             fieldMagnitude = svFieldNow_VPerM + cvFieldNow_VPerM;
             reactionConditions.electricField = fieldMagnitude;
+            rsSim.performTimestep(reactionConditions, dt_s, particlesReactedFct);
 
-            for (unsigned int i = 0; i < nParticlesTotal; i++) {
-                bool reacted = rsSim.react(i, reactionConditions, dt_s);
+            #pragma omp parallel default(none) shared(particles) firstprivate(nParticlesTotal, reducedPressure, fieldMagnitude, dt_s)
+            {
+                #pragma omp for
+                for (unsigned int i = 0; i<nParticlesTotal; i++) {
+                    // move particle in z axis according to particle mobility:
+                    RS::ReactiveParticle* particle = particles[i].get();
 
-                if (reacted){
-                    //we had an reaction event: Update the chemical species for the trajectory
-                    int substIndex = substanceIndices.at(particles[i]->getSpecies());
-                    particles[i]->setFloatAttribute(key_ChemicalIndex, substIndex);
+                    double particleShift = particle->getMobility()*reducedPressure*fieldMagnitude*dt_s;
+                    Core::Vector particleLocation = particle->getLocation();
+                    particleLocation.z(particleLocation.z()+particleShift);
+                    particle->setLocation(particleLocation);
                 }
-                // move particle in z axis according to particle mobility:
-                double particleShift = particles[i]->getMobility() * reducedPressure * fieldMagnitude * dt_s;
-                Core::Vector particleLocation = particles[i]->getLocation();
-                particleLocation.z( particleLocation.z() + particleShift);
-                particles[i]->setLocation(particleLocation);
             }
             if (cvHighResLogPeriod > 0 && step % cvHighResLogPeriod == 0){
                 cvFieldWriter->writeTimestep(cvFieldNow_VPerM, rsSim.simulationTime());
