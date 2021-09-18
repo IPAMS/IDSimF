@@ -33,9 +33,9 @@ ParticleSimulation::BoxStartZone::BoxStartZone(Core::Vector size, Core::Vector c
     Core::Vector cornerLower = centerPosition - (size*0.5);
     Core::Vector cornerUpper = cornerLower + size;
 
-    rnd_x = Core::globalRandomGenerator->getUniformDistribution(cornerLower.x(), cornerUpper.x());
-    rnd_y = Core::globalRandomGenerator->getUniformDistribution(cornerLower.y(), cornerUpper.y());
-    rnd_z = Core::globalRandomGenerator->getUniformDistribution(cornerLower.z(), cornerUpper.z());
+    rnd_x = Core::globalRandomGeneratorPool->getUniformDistribution(cornerLower.x(), cornerUpper.x());
+    rnd_y = Core::globalRandomGeneratorPool->getUniformDistribution(cornerLower.y(), cornerUpper.y());
+    rnd_z = Core::globalRandomGeneratorPool->getUniformDistribution(cornerLower.z(), cornerUpper.z());
 }
 
 /**

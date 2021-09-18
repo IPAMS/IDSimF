@@ -143,9 +143,9 @@ std::vector<std::tuple<double,double,Core::Vector>> ParticleSimulation::util::pr
 std::vector<Core::Vector> ParticleSimulation::util::getRandomPositionsInBox(unsigned int nPositions, Core::Vector corner,
                                                                             Core::Vector boxSize) {
     std::vector<Core::Vector> result;
-    Core::RndDistPtr rnd_x = Core::globalRandomGenerator->getUniformDistribution(0,boxSize.x());
-    Core::RndDistPtr rnd_y = Core::globalRandomGenerator->getUniformDistribution(0,boxSize.y());
-    Core::RndDistPtr rnd_z = Core::globalRandomGenerator->getUniformDistribution(0,boxSize.z());
+    Core::RndDistPtr rnd_x = Core::globalRandomGeneratorPool->getUniformDistribution(0,boxSize.x());
+    Core::RndDistPtr rnd_y = Core::globalRandomGeneratorPool->getUniformDistribution(0,boxSize.y());
+    Core::RndDistPtr rnd_z = Core::globalRandomGeneratorPool->getUniformDistribution(0,boxSize.z());
 
     for (unsigned int i=0; i<nPositions; i++) {
         result.push_back(
@@ -199,7 +199,7 @@ std::vector<std::unique_ptr<BTree::Particle>>
 ParticleSimulation::util::getIonOnLineVector(unsigned int numIons, double charge,
                                              double x, double y, double z,
                                              double timeOfBirthRange) {
-    Core::RndDistPtr rnd_tob = Core::globalRandomGenerator->getUniformDistribution(0, timeOfBirthRange);
+    Core::RndDistPtr rnd_tob = Core::globalRandomGeneratorPool->getUniformDistribution(0, timeOfBirthRange);
 
     std::vector<std::unique_ptr<BTree::Particle>> result;
     for (unsigned int i = 0; i < numIons; i++) {

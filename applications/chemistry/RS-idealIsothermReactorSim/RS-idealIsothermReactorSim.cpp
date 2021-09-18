@@ -24,6 +24,7 @@
  Simple chemical kinetics in an isotherm ideally mixed reactor
 
  ****************************/
+#include "Core_randomGenerators.hpp"
 #include "RS_Simulation.hpp"
 #include "RS_SimulationConfiguration.hpp"
 #include "RS_ConfigFileParser.hpp"

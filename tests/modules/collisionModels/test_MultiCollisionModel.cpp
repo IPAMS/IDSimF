@@ -39,7 +39,7 @@
 
 TEST_CASE( "Test multi collision model with multiple hard sphere models ","[CollisionModels][MultiModel]") {
     //Set the global random generator to a test random number generator to make the test experiment fully deterministic:
-    Core::globalRandomGenerator = std::make_unique<Core::TestRandomGenerator>();
+    Core::globalRandomGeneratorPool = std::make_unique<Core::TestRandomGeneratorPool>();
 
     double diameterHe = CollisionModel::HardSphereModel::DIAMETER_HE;
     double diameterN2 = CollisionModel::HardSphereModel::DIAMETER_N2;

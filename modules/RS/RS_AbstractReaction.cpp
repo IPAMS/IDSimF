@@ -95,7 +95,7 @@ std::string RS::AbstractReaction::getTypeLabel() const {
  * @return the random decision
  */
 bool RS::AbstractReaction::generateRandomDecision(double probability) const{
-    double rndVal = Core::globalRandomGenerator->uniformRealRndValue();
+    double rndVal = Core::globalRandomGeneratorPool->getThreadRandomSource()->uniformRealRndValue();
     return (rndVal < probability);
 }
 

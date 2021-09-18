@@ -135,7 +135,7 @@ TEST_CASE( "Test basic RS simulation semantics", "[RS][Simulation]") {
 TEST_CASE( "Test RS simulations", "[RS][Simulation]") {
 
     //Set the global random generator to a test random number generator to make the test experiment fully deterministic:
-    Core::globalRandomGenerator = std::make_unique<Core::TestRandomGenerator>();
+    Core::globalRandomGeneratorPool = std::make_unique<Core::TestRandomGeneratorPool>();
     RS::ConfigFileParser parser = RS::ConfigFileParser();
 
 

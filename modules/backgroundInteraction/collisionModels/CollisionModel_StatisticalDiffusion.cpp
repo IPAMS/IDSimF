@@ -121,7 +121,7 @@ double CollisionModel::StatisticalDiffusionModel::randomWalkDistance_(double log
     const std::vector<double> &icdfUpper = icdfs_.at(upperDistIndex+1);
 
     // Select actual indices in the discrete ICDFs according to an uniformly distributed random percentile
-    double percentile = Core::globalRandomGenerator->uniformRealRndValue() * (cs_.getNDistPoints() - 2);
+    double percentile = Core::globalRandomGeneratorPool->getThreadRandomSource()->uniformRealRndValue() * (cs_.getNDistPoints() - 2);
     size_t iLower = size_t(floor(percentile));
     size_t iUpper= iLower + 1;
 

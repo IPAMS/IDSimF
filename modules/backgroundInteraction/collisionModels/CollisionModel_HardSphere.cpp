@@ -126,6 +126,8 @@ void CollisionModel::HardSphereModel::modifyAcceleration(Core::Vector& /*acceler
   */
 void CollisionModel::HardSphereModel::modifyVelocity(BTree::Particle &ion, double dt) {
 
+    Core::RandomSource* rndSource = Core::globalRandomGeneratorPool->getThreadRandomSource();
+
     // Calculate collision cross section between particle and collision gas:
     //   TODO: It seems to be unnecessary to constantly recalculate this
     //   value, cache the calculated values somehow?
@@ -176,7 +178,7 @@ void CollisionModel::HardSphereModel::modifyVelocity(BTree::Particle &ion, doubl
     // Possible mitigation: Throw warning / exception if collision probability becomes too high
 
     // Decide if a collision actually happens:
-    if (Core::globalRandomGenerator->uniformRealRndValue() > collisionProb){
+    if (rndSource->uniformRealRndValue() > collisionProb){
         return; // no collision takes place
     }
 
@@ -193,9 +195,9 @@ void CollisionModel::HardSphereModel::modifyVelocity(BTree::Particle &ion, doubl
     if (maxwellianApproximation_){
         // Fast, approximate option: Calculate the gas particle velocity with a simple
         // Maxwell-Boltzmann distribution
-        vGasParticle.x(Core::globalRandomGenerator->normalRealRndValue() * vrStdevGas);
-        vGasParticle.y(Core::globalRandomGenerator->normalRealRndValue() * vrStdevGas);
-        vGasParticle.z(Core::globalRandomGenerator->normalRealRndValue() * vrStdevGas);
+        vGasParticle.x(rndSource->normalRealRndValue() * vrStdevGas);
+        vGasParticle.y(rndSource->normalRealRndValue() * vrStdevGas);
+        vGasParticle.z(rndSource->normalRealRndValue() * vrStdevGas);
     }
     else {
         // More correct but slower option:
@@ -212,12 +214,12 @@ void CollisionModel::HardSphereModel::modifyVelocity(BTree::Particle &ion, doubl
         // Here three standard deviations of the mean three dimensional background particle velocity is used
         double vGasParticleUpperScale = vRelIonMeanBackRest + vrStdevGas * SQRT3_3;
         do {
-            vGasParticle.x(Core::globalRandomGenerator->normalRealRndValue() * vrStdevGas);
-            vGasParticle.y(Core::globalRandomGenerator->normalRealRndValue() * vrStdevGas);
-            vGasParticle.z(Core::globalRandomGenerator->normalRealRndValue() * vrStdevGas);
+            vGasParticle.x(rndSource->normalRealRndValue() * vrStdevGas);
+            vGasParticle.y(rndSource->normalRealRndValue() * vrStdevGas);
+            vGasParticle.z(rndSource->normalRealRndValue() * vrStdevGas);
             vGasParticleMagnitude = (vGasParticle - vFrameMeanBackRest).magnitude();
         }
-        while (Core::globalRandomGenerator->uniformRealRndValue() >= (vGasParticleMagnitude / vGasParticleUpperScale));
+        while (rndSource->uniformRealRndValue() >= (vGasParticleMagnitude / vGasParticleUpperScale));
     }
 
 
@@ -241,7 +243,7 @@ void CollisionModel::HardSphereModel::modifyVelocity(BTree::Particle &ion, doubl
     // for a hit on a ring with radius d. This can be transformed with the fundamental transformation
     // law of probabilities ("Change of variables formula") to impact_offset = sqrt(Uni) with an
     // uniformly distributed random variable in the interval [0,1].
-    double impactOffset = std::sqrt(Core::globalRandomGenerator->uniformRealRndValue());
+    double impactOffset = std::sqrt(rndSource->uniformRealRndValue());
 
     // Calculate the impact angle on the surface of spherical gas particle where the ion hits, which is
     // the vector from the gas particle center to the collision point on the surface
@@ -249,7 +251,7 @@ void CollisionModel::HardSphereModel::modifyVelocity(BTree::Particle &ion, doubl
 
     // Determine angle of the collision plane round the collision axis. All collision
     // planes are equally probable, since there is no preferential direction.
-    double impactTheta = PI_2*Core::globalRandomGenerator->uniformRealRndValue();
+    double impactTheta = PI_2*rndSource->uniformRealRndValue();
 
     // Compute spherical coordinates in current velocity reference frame.
     Core::Vector vFrameCollidingRest_sp = cartesianToPolar(vFrameCollidingBackRest);

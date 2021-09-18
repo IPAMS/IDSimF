@@ -36,7 +36,7 @@
 
 TEST_CASE( "Basic test Hard Sphere model", "[CollisionModels][HardSphereModel]") {
     //Set the global random generator to a test random number generator to make the test experiment fully deterministic:
-    Core::globalRandomGenerator = std::make_unique<Core::TestRandomGenerator>();
+    Core::globalRandomGeneratorPool = std::make_unique<Core::TestRandomGeneratorPool>();
 
     double diameterHe = CollisionModel::HardSphereModel::DIAMETER_HE;
     BTree::Particle ion = BTree::Particle();
@@ -76,7 +76,7 @@ TEST_CASE( "Basic test Hard Sphere model", "[CollisionModels][HardSphereModel]")
 
 TEST_CASE( "Test Hard Sphere model after collision function", "[CollisionModels][HardSphereModel]") {
     //Set the global random generator to a test random number generator to make the test experiment fully deterministic:
-    Core::globalRandomGenerator = std::make_unique<Core::TestRandomGenerator>();
+    Core::globalRandomGeneratorPool = std::make_unique<Core::TestRandomGeneratorPool>();
 
     //define a simple after collision function, which is called after a collision has taken place:
     int nTotalCollisions = 0;

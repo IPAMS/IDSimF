@@ -20,49 +20,66 @@
  ****************************/
 
 #include "Core_randomGenerators.hpp"
+#include <omp.h>
 
 std::random_device Core::rdSeed; //seed generator
-std::mt19937 Core::internalRNG(Core::rdSeed()); //internal real random generator
 
-std::unique_ptr<Core::AbstractRandomGenerator> Core::globalRandomGenerator =
-        std::make_unique<Core::RandomGenerator>();
+std::unique_ptr<Core::AbstractRandomGeneratorPool> Core::globalRandomGeneratorPool =
+        std::make_unique<Core::RandomGeneratorPool>();
 
-/**
- * Constructs a uniform random distribution in the interval [0.0, 1.0]
- */
-Core::UniformRandomDistribution::UniformRandomDistribution(): internalUniformDist_(0.0, 1.0)
+
+Core::MersenneBitSource::MersenneBitSource():
+internalRandomSource(Core::rdSeed())
 {}
+
+Core::rndBit_type Core::MersenneBitSource::max() {
+    return internalRandomSource.max();
+}
+
+Core::rndBit_type Core::MersenneBitSource::min() {
+    return internalRandomSource.min();
+}
+
+Core::rndBit_type Core::MersenneBitSource::operator()() {
+    return internalRandomSource();
+}
+
+Core::TestBitSource::TestBitSource():
+sampleIndex_(0)
+{}
+
+Core::rndBit_type Core::TestBitSource::min() {
+    return 0;
+}
+
+Core::rndBit_type Core::TestBitSource::max() {
+    return 4294967295;
+}
+
+Core::rndBit_type Core::TestBitSource::operator()() {
+    sampleIndex_ = (sampleIndex_+1) % Core::UNIFORM_RANDOM_BITS.size();
+    return Core::UNIFORM_RANDOM_BITS[sampleIndex_];
+}
+
 
 /**
  * Construct a custom uniform random distribution with a custom interval
  * @param min lower boundary of the interval
  * @param max upper boundary of the interval
  */
-Core::UniformRandomDistribution::UniformRandomDistribution(double min, double max): internalUniformDist_(min, max)
+Core::UniformRandomDistribution::UniformRandomDistribution(double min, double max, Core::RandomBitSource<rndBit_type>* randomSource):
+randomSource_(randomSource),
+internalUniformDist_(min, max)
 {}
 
 /**
  * Generate random value in the uniform distribution
  * @return uniformly distributed random value
  */
-double Core::UniformRandomDistribution::rndValue() {
-    return internalUniformDist_(Core::internalRNG);
+double Core::UniformRandomDistribution::rndValue(){
+    return internalUniformDist_(*randomSource_);
 }
 
-/**
- * Construct normal random distribution
- */
-Core::NormalRandomDistribution::NormalRandomDistribution():
-    internalNormalDist_()
-{}
-
-/**
- * Generate random value
- * @return normal distributed random value
- */
-double Core::NormalRandomDistribution::rndValue() {
-    return internalNormalDist_(Core::internalRNG);
-}
 
 /**
  * Construct a custom test distribution with a custom interval
@@ -70,9 +87,9 @@ double Core::NormalRandomDistribution::rndValue() {
  * @param max upper boundary of the interval
  */
 Core::UniformTestDistribution::UniformTestDistribution(double min, double max):
-    sampleIndex_(0),
-    min_(min),
-    interval_(max-min)
+sampleIndex_(0),
+min_(min),
+interval_(max-min)
 {}
 
 /**
@@ -83,6 +100,7 @@ double Core::UniformTestDistribution::rndValue() {
     sampleIndex_ = (sampleIndex_+1) % Core::UNIFORM_TEST_SAMPLES.size();
     return min_ + Core::UNIFORM_TEST_SAMPLES[sampleIndex_]*interval_;
 }
+
 
 /**
  * Construct normal test distribution
@@ -99,71 +117,61 @@ double Core::NormalTestDistribution::rndValue() {
     return Core::NORMAL_TEST_SAMPLES[sampleIndex_];
 }
 
-/**
- * Construct production use RandomGenerator
- */
-Core::RandomGenerator::RandomGenerator():
-    uniformDistribution_(),
-    normalDistribution_()
-{}
 
-/**
- * Generate uniformly distributed in the interval [0.0, 1.0]
- * @return uniformly distributed random value in [0.0, 1.0]
- */
-double Core::RandomGenerator::uniformRealRndValue() {
-    return uniformDistribution_.rndValue();
+double Core::RandomGeneratorPool::RNGPoolElement::uniformRealRndValue() {
+    return uniformDist_(rngGenerator_.internalRandomSource);
+}
+
+double Core::RandomGeneratorPool::RNGPoolElement::normalRealRndValue() {
+    return normalDist_(rngGenerator_.internalRandomSource);
+}
+
+Core::MersenneBitSource* Core::RandomGeneratorPool::RNGPoolElement::getRandomBitSource() {
+    return &rngGenerator_;
 }
 
 /**
- * Generate normal distributed value
- * @return normal distributed random value
+ * Constructs the internal random number generator
  */
-double Core::RandomGenerator::normalRealRndValue() {
-    return normalDistribution_.rndValue();
+Core::RandomGeneratorPool::RandomGeneratorPool() {
+    int nMaxThreads_ = omp_get_max_threads();
+    for (int i=0; i<nMaxThreads_; ++i){
+        elements_.emplace_back(std::make_unique<Core::RandomGeneratorPool::RNGPoolElement>());
+    }
 }
 
-/**
- * Generate a custom uniform random distribution in the interval [min, max]
- * @param min lower boundary of the random distribution
- * @param max upper boundary of the random distribution
- * @return uniform random distribution in the interval [min, max]
- */
-std::unique_ptr<Core::RandomDistribution> Core::RandomGenerator::getUniformDistribution(double min, double max) {
-    return std::make_unique<Core::UniformRandomDistribution>(min, max);
+Core::RndDistPtr Core::RandomGeneratorPool::getUniformDistribution(double min, double max) {
+    return std::make_unique<Core::UniformRandomDistribution>(min, max, this->getThreadRandomSource()->getRandomBitSource());
 }
 
-
-/**
- * Construct test value random generator
- */
-Core::TestRandomGenerator::TestRandomGenerator():
-    uniformDistribution_(),
-    normalDistribution_()
-{}
-
-/**
- * Generate uniformly distributed *non* random test value in the interval [0.0, 1.0]
- * @return uniformly distributed test value
- */
-double Core::TestRandomGenerator::uniformRealRndValue() {
-    return uniformDistribution_.rndValue();
+Core::RandomGeneratorPool::RNGPoolElement* Core::RandomGeneratorPool::getThreadRandomSource() {
+    return elements_[static_cast<std::size_t>(omp_get_thread_num())].get();
 }
 
-/**
- * Generate normal distributed *non* random test value
- * @return normal distributed test value
- */
-double Core::TestRandomGenerator::normalRealRndValue() {
-    return normalDistribution_.rndValue();
+Core::RandomGeneratorPool::RNGPoolElement* Core::RandomGeneratorPool::getRandomSource(std::size_t index) {
+    return elements_.at(index).get();
 }
 
-/**
- * Generate a custom uniform *non* random test distribution in the interval [min, max]
- * @param min lower boundary of the random distribution
- * @param max upper boundary of the random distribution
- * @return uniform test distribution in the interval [min, max]
- */
-std::unique_ptr<Core::RandomDistribution> Core::TestRandomGenerator::getUniformDistribution(double min, double max) {
+double Core::TestRandomGeneratorPool::TestRNGPoolElement::uniformRealRndValue() {
+    return uniformDist_.rndValue();
+}
+
+double Core::TestRandomGeneratorPool::TestRNGPoolElement::normalRealRndValue() {
+    return normalDist_.rndValue();
+}
+
+Core::TestBitSource* Core::TestRandomGeneratorPool::TestRNGPoolElement::getRandomBitSource() {
+    return &rngGenerator_;
+}
+
+Core::RndDistPtr Core::TestRandomGeneratorPool::getUniformDistribution(double min, double max) {
     return std::make_unique<Core::UniformTestDistribution>(min, max);
+}
+
+Core::TestRandomGeneratorPool::TestRNGPoolElement* Core::TestRandomGeneratorPool::getThreadRandomSource() {
+    return &element_;
+}
+
+Core::TestRandomGeneratorPool::TestRNGPoolElement* Core::TestRandomGeneratorPool::getRandomSource(std::size_t) {
+    return &element_;
 }
