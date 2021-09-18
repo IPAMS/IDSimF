@@ -27,35 +27,58 @@ std::random_device Core::rdSeed; //seed generator
 std::unique_ptr<Core::AbstractRandomGeneratorPool> Core::globalRandomGeneratorPool =
         std::make_unique<Core::RandomGeneratorPool>();
 
-
+/**
+ * Creates a mersenne bit source (initialized by the global seed generator)
+ */
 Core::MersenneBitSource::MersenneBitSource():
 internalRandomSource(Core::rdSeed())
 {}
 
+/**
+ * Maximum value of the value range
+ */
 Core::rndBit_type Core::MersenneBitSource::max() {
     return internalRandomSource.max();
 }
 
+/**
+ * Minimum value of the value range
+ */
 Core::rndBit_type Core::MersenneBitSource::min() {
     return internalRandomSource.min();
 }
 
+/**
+ * Gets a random bit value
+ */
 Core::rndBit_type Core::MersenneBitSource::operator()() {
     return internalRandomSource();
 }
 
+/**
+ * Creates a test (essentially non random) bit source.
+ */
 Core::TestBitSource::TestBitSource():
 sampleIndex_(0)
 {}
 
-Core::rndBit_type Core::TestBitSource::min() {
-    return 0;
-}
-
+/**
+ * Maximum value of the value range
+ */
 Core::rndBit_type Core::TestBitSource::max() {
     return 4294967295;
 }
 
+/**
+ * Minimum value of the value range
+ */
+Core::rndBit_type Core::TestBitSource::min() {
+    return 0;
+}
+
+/**
+ * Generates next value from the predefined, short, list of bit values / bit patterns
+ */
 Core::rndBit_type Core::TestBitSource::operator()() {
     sampleIndex_ = (sampleIndex_+1) % Core::UNIFORM_RANDOM_BITS.size();
     return Core::UNIFORM_RANDOM_BITS[sampleIndex_];
@@ -117,21 +140,32 @@ double Core::NormalTestDistribution::rndValue() {
     return Core::NORMAL_TEST_SAMPLES[sampleIndex_];
 }
 
-
+/**
+ * Get uniformly distributed random value
+ * @return random value, uniformly distrbuted in the interval [0, 1]
+ */
 double Core::RandomGeneratorPool::RNGPoolElement::uniformRealRndValue() {
     return uniformDist_(rngGenerator_.internalRandomSource);
 }
 
+/**
+ * Get normal distributed random value
+ * @return random value, normally distributed
+ */
 double Core::RandomGeneratorPool::RNGPoolElement::normalRealRndValue() {
     return normalDist_(rngGenerator_.internalRandomSource);
 }
 
+/**
+ * Gets the random bit source of this random source
+ * @return A random bit source, based on the mersenne twister
+ */
 Core::MersenneBitSource* Core::RandomGeneratorPool::RNGPoolElement::getRandomBitSource() {
     return &rngGenerator_;
 }
 
 /**
- * Constructs the internal random number generator
+ * Constructs the productive random generator pool
  */
 Core::RandomGeneratorPool::RandomGeneratorPool() {
     int nMaxThreads_ = omp_get_max_threads();
@@ -140,38 +174,85 @@ Core::RandomGeneratorPool::RandomGeneratorPool() {
     }
 }
 
+/**
+ * Get a new uniform random distribution in the interval [min, max]. Note that the underlying random bit source
+ * is the random bit source associated to *the current* thread. The random bit source is NOT changed if the
+ * distribution is called from another thread.
+ *
+ * @param min Lower boundary of the interval of the random values
+ * @param max Upper boundary of the interval of the random values
+ * @return A new uniform random distribution in the interval [min, max]
+ */
 Core::RndDistPtr Core::RandomGeneratorPool::getUniformDistribution(double min, double max) {
     return std::make_unique<Core::UniformRandomDistribution>(min, max, this->getThreadRandomSource()->getRandomBitSource());
 }
 
+/**
+ * Gets the random source associated to the current thread
+ * @return A random source, which is associated to the current thread
+ */
 Core::RandomGeneratorPool::RNGPoolElement* Core::RandomGeneratorPool::getThreadRandomSource() {
     return elements_[static_cast<std::size_t>(omp_get_thread_num())].get();
 }
 
+/**
+ * Gets the random source associated to a thread, specified by an index
+ * @param index The index of the random source
+ * @return A random source, which is associated the specified thread
+ */
 Core::RandomGeneratorPool::RNGPoolElement* Core::RandomGeneratorPool::getRandomSource(std::size_t index) {
     return elements_.at(index).get();
 }
 
+
+/**
+* Get uniformly distributed test value from a short list of predefined, uniformly distributed values
+* @return test value, uniformly distributed in the interval [0, 1]
+*/
 double Core::TestRandomGeneratorPool::TestRNGPoolElement::uniformRealRndValue() {
     return uniformDist_.rndValue();
 }
 
+/**
+ * Get normal distributed test value from a short list of predefined, normally distrbuted values
+ *
+ * @return test value, normally distributed
+ */
 double Core::TestRandomGeneratorPool::TestRNGPoolElement::normalRealRndValue() {
     return normalDist_.rndValue();
 }
 
+/**
+ * Gets the test bit source of this test random source
+ * @return A random bit source, based on the mersenne twister
+ */
 Core::TestBitSource* Core::TestRandomGeneratorPool::TestRNGPoolElement::getRandomBitSource() {
     return &rngGenerator_;
 }
 
+/**
+ * Get a new uniform test distribution in the interval [min, max].
+ *
+ * @param min Lower boundary of the interval of the random values
+ * @param max Upper boundary of the interval of the random values
+ * @return A new uniform test distribution in the interval [min, max]
+ */
 Core::RndDistPtr Core::TestRandomGeneratorPool::getUniformDistribution(double min, double max) {
     return std::make_unique<Core::UniformTestDistribution>(min, max);
 }
 
+/**
+ * Gets a test random source for the current thread
+ * @return Test random source
+ */
 Core::TestRandomGeneratorPool::TestRNGPoolElement* Core::TestRandomGeneratorPool::getThreadRandomSource() {
     return &element_;
 }
 
+/**
+ * Gets a test random source for a specified thread
+ * @return Test random source
+ */
 Core::TestRandomGeneratorPool::TestRNGPoolElement* Core::TestRandomGeneratorPool::getRandomSource(std::size_t) {
     return &element_;
 }

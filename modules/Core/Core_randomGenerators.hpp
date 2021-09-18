@@ -39,10 +39,13 @@
 
 namespace Core{
 
-    using rndBit_type = std::mt19937::result_type;
+    using rndBit_type = std::mt19937::result_type; ///< Result type of random bit generators
 
     extern std::random_device rdSeed; ///< global seed generator
 
+    /**
+     * Generalized source for random bits, which can be used as random bit source for random distributions
+     */
     template <class result_T>
     class RandomBitSource{
     public:
@@ -53,6 +56,9 @@ namespace Core{
         virtual result_T operator()() =0;
     };
 
+    /**
+     * Random bit source based on mersenne twister
+     */
     class MersenneBitSource: public RandomBitSource<rndBit_type>{
     public:
         MersenneBitSource();
@@ -63,6 +69,10 @@ namespace Core{
         std::mt19937 internalRandomSource;
     };
 
+    /**
+     * Random bit source, which generates NO random bits but a short sequence of predefined
+     * bits for testing purposes
+     */
     class TestBitSource: public RandomBitSource<rndBit_type>{
     public:
         TestBitSource();
@@ -74,7 +84,10 @@ namespace Core{
         std::size_t sampleIndex_;
     };
 
-
+    /**
+     * Generalized source for randomness. Allows to produce uniformly and normal distributed random values
+     * and random bits
+     */
     class RandomSource{
     public:
         virtual ~RandomSource() =default;
@@ -84,8 +97,8 @@ namespace Core{
     };
 
     /**
- * A random distribution which produces random samples with a specific distribution
- */
+     * Random distribution which produces random samples with a specific distribution
+     */
     class RandomDistribution{
     public:
         virtual double rndValue() =0;
@@ -95,7 +108,7 @@ namespace Core{
     using RndDistPtr= std::unique_ptr<Core::RandomDistribution>; ///< pointer type used throughout the project
 
     /**
-     * A uniform distribution, which generates random samples in a specified interval
+     * Uniform random distribution, which generates random samples in a specified interval
      */
     class UniformRandomDistribution: public RandomDistribution{
     public:
@@ -133,6 +146,10 @@ namespace Core{
         std::size_t sampleIndex_;
     };
 
+    /**
+     * Generalized pool of random sources, usually one per thread. This allows to provide individual, seperate
+     * random sources for individual threads and can produce random distribution objects.
+     */
     class AbstractRandomGeneratorPool{
     public:
         virtual ~AbstractRandomGeneratorPool() =default;
@@ -141,6 +158,9 @@ namespace Core{
         virtual RandomSource* getRandomSource(std::size_t index) =0;
     };
 
+    /**
+     * Pool of random sources, with random sources based on Mersenne Twister
+     */
     class RandomGeneratorPool: public AbstractRandomGeneratorPool{
     public:
         class RNGPoolElement: public RandomSource{
@@ -165,6 +185,10 @@ namespace Core{
         std::vector<std::unique_ptr<RNGPoolElement>> elements_;
     };
 
+    /**
+     * Pool of "random" sources, with test random sources and test distributions which produce short, predifined
+     * sequences of values / bits.
+     */
     class TestRandomGeneratorPool: public AbstractRandomGeneratorPool{
     public:
         class TestRNGPoolElement: public RandomSource{
@@ -190,7 +214,7 @@ namespace Core{
 
     };
 
-    extern std::unique_ptr<AbstractRandomGeneratorPool> globalRandomGeneratorPool; ///< global provider
+    extern std::unique_ptr<AbstractRandomGeneratorPool> globalRandomGeneratorPool; ///< global random pool / randomness provider
 }
 
 #endif //BTree_randomGenerators
