@@ -9,6 +9,7 @@ Applications in IDSimF are programs which use the IDSimF modules to solve an act
 Running applications 
 ====================
 
+
 Applications are typically called with an configuration file defining the parameters of a simulation run as first argument and a simulation name which is used as base name for the written result files as second argument. 
 
 For example, running the simulation application ``BT-spaceChargeMinimalParallelSim``, which implements a simple ion cloud with space charge interaction, using a simulation configuration ``simConfiguration.json`` with 
@@ -20,6 +21,14 @@ For example, running the simulation application ``BT-spaceChargeMinimalParallelS
 creates a result file ``simulationRun001_trajectories.hd5`` and a simulation log file ``simulationRun001.log``. The trajectory file contains the simulated ion trajectory data in a structured `HDF5 <https://en.wikipedia.org/wiki/Hierarchical_Data_Format>`_ file which can be read and analyzed with `IDSimPy <https://github.com/IPAMS/IDSimPy>`_. The log file contains the status information presented during the simulation to the user, which is also printed to the terminal. 
 
 Which types of result files are produced depends on the simulation type, but all simulation applications generate a simulation log file. 
+
+-------------------------------
+Optional command line arguments
+-------------------------------
+
+* The number of threads in multithreaded applications can be controlled with the ``-n <number of threads>`` option.  
+* A help message with the command line arguments for a simulation application is printed with the ``--help`` switch. 
+
 
 Simulation run configurations
 =============================
