@@ -34,6 +34,30 @@
 #include <memory>
 
 namespace AppUtils{
+
+    /**
+     * "Exception" / Message to indicate that the app should be terminated during commandline
+     * parsing process.
+     */
+    class TerminatedWhileCommandlineParsing : public std::exception
+            {
+            public:
+                TerminatedWhileCommandlineParsing (int returnCode, std::string message):
+                    returnCode_(returnCode),
+                    message_(message)
+                    {}
+                ~TerminatedWhileCommandlineParsing() override = default;
+                const char * what() const throw() override {return message_.c_str();}
+                int returnCode() const {return returnCode_;}
+
+            private:
+                int returnCode_;
+                std::string message_;
+            };
+
+    /**
+     * Parser for the commandline arguments of calls of simulation applications
+     */
     class CommandlineParser {
     public:
         CommandlineParser(int argc, const char * argv[], std::string appName, std::string appDescription,  bool multithreaded=false);
@@ -49,8 +73,6 @@ namespace AppUtils{
         std::string projectName_;
         std::string confFileName_;
         int numberOfThreads_= 1;
-
-        int parse_(CLI::App& app, int argc, const char * argv[]);
     };
 }
 

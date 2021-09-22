@@ -23,6 +23,16 @@
 #include "appUtils_logging.hpp"
 #include <omp.h>
 
+/**
+ * Parses the commandline options / switches and constructs an object with the simulation configuration,
+ * simulation result name and additional options specified by the commandline.
+ *
+ * @param argc Number of commandline arguments
+ * @param argv Commandline argument list
+ * @param appName Name of the simulation application
+ * @param appDescription A brief description of the simualtion application
+ * @param multithreaded If true the commandline arguments are parsed for a multithreaded application.
+ */
 AppUtils::CommandlineParser::CommandlineParser(
         int argc, const char** argv, std::string appName, std::string appDescription,  bool multithreaded) {
     CLI::App app{appDescription, appName};
@@ -34,9 +44,12 @@ AppUtils::CommandlineParser::CommandlineParser(
         app.add_option("--n_threads,-n", numberOfThreads_, "number of parallel threads")->required();
     }
 
-    int retCode = parse_(app, argc, argv);
-    if (retCode != 0){
-        throw std::runtime_error("Wrong commandline");
+    // Try to parse and raise a message to the main app if the parsing fails for some reason:
+    try {
+        (app).parse((argc), (argv));
+    } catch(const CLI::ParseError &e) {
+        int returnCode = (app).exit(e);
+        throw AppUtils::TerminatedWhileCommandlineParsing(returnCode, "app terminated while commandline parsing");
     }
 
     if (multithreaded){
@@ -46,27 +59,38 @@ AppUtils::CommandlineParser::CommandlineParser(
     simulationConfiguration_ = std::make_shared<SimulationConfiguration>(confFileName_, logger_);
 }
 
-int AppUtils::CommandlineParser::parse_(CLI::App& app, int argc, const char * argv[]) {
-    CLI11_PARSE(app, argc, argv);
-    return 0;
-}
-
+/**
+ * Returns the (parsed) simulation configuration specified by the simulation configuration file name in the commandline
+ */
 std::shared_ptr<AppUtils::SimulationConfiguration> AppUtils::CommandlineParser::simulationConfiguration() {
     return simulationConfiguration_;
 }
 
+/**
+ * Returns the logger object for the app, the log file name is constructed from the result base name in the commandline
+ */
 std::shared_ptr<spdlog::logger> AppUtils::CommandlineParser::logger() {
     return logger_;
 }
 
+/**
+ * Returns the name of the configuration file name specified in the commandline
+ */
 std::string AppUtils::CommandlineParser::confFileName() {
     return confFileName_;
 }
 
+/**
+ * Returns the result base name specified in the commandline
+ */
 std::string AppUtils::CommandlineParser::projectName() {
     return projectName_;
 }
 
+/**
+ * Returns the number of parallel threads specified by the commandline. For a single threaded application, the number
+ * of threads is always 1
+ */
 int AppUtils::CommandlineParser::numberOfThreads() {
     return  numberOfThreads_;
 }

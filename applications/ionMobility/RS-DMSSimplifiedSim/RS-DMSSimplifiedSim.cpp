@@ -395,8 +395,8 @@ int main(int argc, const char * argv[]) {
 
         return 0;
     }
-    catch(const std::runtime_error){
-        return EXIT_FAILURE;
+    catch(AppUtils::TerminatedWhileCommandlineParsing& terminatedMessage){
+        return terminatedMessage.returnCode();
     }
     catch(const std::invalid_argument& ia){
         std::cout << ia.what() << std::endl;
