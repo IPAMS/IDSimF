@@ -29,21 +29,28 @@
 #define IDSIMF_APPUTILS_COMMANDLINEPARSER_HPP
 
 #include "appUtils_simulationConfiguration.hpp"
+#include "appUtils_logging.hpp"
+#include "CLI11.hpp"
+#include <memory>
 
 namespace AppUtils{
     class CommandlineParser {
     public:
         CommandlineParser(int argc, const char * argv[], std::string appName, std::string appDescription,  bool multithreaded=false);
-        AppUtils::SimulationConfiguration simulationConfiguration();
+        std::shared_ptr<AppUtils::SimulationConfiguration> simulationConfiguration();
+        std::shared_ptr<spdlog::logger> logger();
         std::string projectName();
         std::string confFileName();
-        unsigned int numberOfThreads();
+        int numberOfThreads();
 
     private:
-        AppUtils::SimulationConfiguration simulationConfiguration_;
+        std::shared_ptr<AppUtils::SimulationConfiguration> simulationConfiguration_;
+        std::shared_ptr<spdlog::logger> logger_;
         std::string projectName_;
         std::string confFileName_;
-        unsigned int numberOfThreads_= 0;
+        int numberOfThreads_= 1;
+
+        int parse_(CLI::App& app, int argc, const char * argv[]);
     };
 }
 

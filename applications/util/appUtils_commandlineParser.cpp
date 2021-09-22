@@ -20,9 +20,53 @@
  ****************************/
 
 #include "appUtils_commandlineParser.hpp"
-#include "CLI11.hpp"
+#include "appUtils_logging.hpp"
+#include <omp.h>
 
 AppUtils::CommandlineParser::CommandlineParser(
         int argc, const char** argv, std::string appName, std::string appDescription,  bool multithreaded) {
-//FIXME
+    CLI::App app{appDescription, appName};
+
+    app.add_option("--conf,-c,run_config",confFileName_, "Configuration file")->required();
+    app.add_option("--result,-r,result",projectName_, "Result name")->required();
+
+    if (multithreaded){
+        app.add_option("--n_threads,-n", numberOfThreads_, "number of parallel threads")->required();
+    }
+
+    int retCode = parse_(app, argc, argv);
+    if (retCode != 0){
+        throw std::runtime_error("Wrong commandline");
+    }
+
+    if (multithreaded){
+        omp_set_num_threads(numberOfThreads_);
+    }
+    logger_ = AppUtils::createLogger(projectName_ + ".log");
+    simulationConfiguration_ = std::make_shared<SimulationConfiguration>(confFileName_, logger_);
+}
+
+int AppUtils::CommandlineParser::parse_(CLI::App& app, int argc, const char * argv[]) {
+    CLI11_PARSE(app, argc, argv);
+    return 0;
+}
+
+std::shared_ptr<AppUtils::SimulationConfiguration> AppUtils::CommandlineParser::simulationConfiguration() {
+    return simulationConfiguration_;
+}
+
+std::shared_ptr<spdlog::logger> AppUtils::CommandlineParser::logger() {
+    return logger_;
+}
+
+std::string AppUtils::CommandlineParser::confFileName() {
+    return confFileName_;
+}
+
+std::string AppUtils::CommandlineParser::projectName() {
+    return projectName_;
+}
+
+int AppUtils::CommandlineParser::numberOfThreads() {
+    return  numberOfThreads_;
 }

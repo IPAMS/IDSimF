@@ -39,6 +39,7 @@
 #include "appUtils_logging.hpp"
 #include "appUtils_stopwatch.hpp"
 #include "appUtils_signalHandler.hpp"
+#include "appUtils_commandlineParser.hpp"
 #include "json.h"
 #include <iostream>
 #include <cmath>
@@ -51,36 +52,32 @@ enum SVMode {BI_SIN, SQUARE, CLIPPED_SIN};
 int main(int argc, const char * argv[]) {
 
     try{
-        // open configuration, parse configuration file =========================================
-        if (argc<=2) {
-            std::cout << "Run abort: No run configuration or project name given." << std::endl;
-            return EXIT_FAILURE;
-        }
-        std::string projectName = argv[2];
-        std::cout << projectName << std::endl;
-        auto logger = AppUtils::createLogger(projectName + ".log");
 
-        std::string confFileName = argv[1];
-        AppUtils::SimulationConfiguration simConf(confFileName, logger);
+        AppUtils::CommandlineParser cmdLineParser(argc, argv, "DMS simlified", "Simplified DMS Simulation", true);
+        std::string projectName = cmdLineParser.projectName();
+        auto logger = cmdLineParser.logger();
 
-        std::vector<unsigned int> nParticles = simConf.unsignedIntVectorParameter("n_particles");
-        int nSteps = simConf.intParameter("sim_time_steps");
-        int nStepsPerOscillation = simConf.intParameter("sim_time_steps_per_sv_oscillation");
-        int concentrationWriteInterval = simConf.intParameter("concentrations_write_interval");
-        int trajectoryWriteInterval = simConf.intParameter("trajectory_write_interval");
+        std::string confFileName = cmdLineParser.confFileName();
+        auto simConf = cmdLineParser.simulationConfiguration();
+
+        std::vector<unsigned int> nParticles = simConf->unsignedIntVectorParameter("n_particles");
+        int nSteps = simConf->intParameter("sim_time_steps");
+        int nStepsPerOscillation = simConf->intParameter("sim_time_steps_per_sv_oscillation");
+        int concentrationWriteInterval = simConf->intParameter("concentrations_write_interval");
+        int trajectoryWriteInterval = simConf->intParameter("trajectory_write_interval");
 
         //geometric parameters:
-        double startWidthX_m = simConf.doubleParameter("start_width_x_mm")/1000.0;
-        double startWidthY_m = simConf.doubleParameter("start_width_y_mm")/1000.0;
-        double startWidthZ_m = simConf.doubleParameter("start_width_z_mm")/1000.0;
+        double startWidthX_m = simConf->doubleParameter("start_width_x_mm")/1000.0;
+        double startWidthY_m = simConf->doubleParameter("start_width_y_mm")/1000.0;
+        double startWidthZ_m = simConf->doubleParameter("start_width_z_mm")/1000.0;
 
 
         //Define background temperature
-        double backgroundTemperature_K = simConf.doubleParameter("background_temperature_K");
-        double backgroundPressure_Pa = simConf.doubleParameter("background_pressure_Pa");
+        double backgroundTemperature_K = simConf->doubleParameter("background_temperature_K");
+        double backgroundPressure_Pa = simConf->doubleParameter("background_pressure_Pa");
 
         //field parameters:
-        std::string cvModeStr = simConf.stringParameter("cv_mode");
+        std::string cvModeStr = simConf->stringParameter("cv_mode");
         CVMode cvMode;
         double meanZPos = 0.0; //variable used for automatic CV correction
         double cvRelaxationParameter = 0.0;
@@ -90,14 +87,14 @@ int main(int argc, const char * argv[]) {
         }
         else if (cvModeStr == "auto"){
             cvMode = AUTO_CV;
-            cvRelaxationParameter = simConf.doubleParameter("cv_relaxation_parameter");
+            cvRelaxationParameter = simConf->doubleParameter("cv_relaxation_parameter");
         }
         else if (cvModeStr == "modulated"){
             cvMode = MODULATED_CV;
         }
         else if (cvModeStr == "modulated_auto"){
             cvMode = MODULATED_AUTO_CV;
-            cvRelaxationParameter = simConf.doubleParameter("cv_relaxation_parameter");
+            cvRelaxationParameter = simConf->doubleParameter("cv_relaxation_parameter");
         }
         else{
             throw std::invalid_argument("wrong configuration value: cv_mode");
@@ -105,7 +102,7 @@ int main(int argc, const char * argv[]) {
 
 
         SVMode svMode;
-        std::string svModeStr = simConf.stringParameter("sv_mode");
+        std::string svModeStr = simConf->stringParameter("sv_mode");
         if (svModeStr == "bi_sin"){
             svMode = BI_SIN;
         }
@@ -119,9 +116,9 @@ int main(int argc, const char * argv[]) {
             throw std::invalid_argument("wrong configuration value: sv_mode");
         }
 
-        double fieldSVSetpoint_VPerM = simConf.doubleParameter("sv_Vmm-1") * 1000.0;
-        double fieldCVSetpoint_VPerM = simConf.doubleParameter("cv_Vmm-1") * 1000.0;
-        double fieldFrequency = simConf.doubleParameter("sv_frequency_s-1");
+        double fieldSVSetpoint_VPerM = simConf->doubleParameter("sv_Vmm-1") * 1000.0;
+        double fieldCVSetpoint_VPerM = simConf->doubleParameter("cv_Vmm-1") * 1000.0;
+        double fieldFrequency = simConf->doubleParameter("sv_frequency_s-1");
         double fieldWavePeriod = 1.0/fieldFrequency;
         double fieldMagnitude = 0; //actual field magnitude
         double dt_s = fieldWavePeriod / nStepsPerOscillation;
@@ -130,13 +127,13 @@ int main(int argc, const char * argv[]) {
 
         //read and prepare chemical configuration ===============================================
         RS::ConfigFileParser parser = RS::ConfigFileParser();
-        std::string rsConfFileName = simConf.pathRelativeToConfFile(simConf.stringParameter("reaction_configuration"));
+        std::string rsConfFileName = simConf->pathRelativeToConfFile(simConf->stringParameter("reaction_configuration"));
         RS::Simulation rsSim = RS::Simulation(parser.parseFile(rsConfFileName));
         RS::SimulationConfiguration* rsSimConf = rsSim.simulationConfiguration();
         //prepare a map for retrieval of the substance index:
         std::map<RS::Substance*, int> substanceIndices;
         std::vector<RS::Substance*> discreteSubstances = rsSimConf->getAllDiscreteSubstances();
-        std::vector<double> ionMobility; // = simConf.doubleVectorParameter("ion_mobility");
+        std::vector<double> ionMobility; // = simConf->doubleVectorParameter("ion_mobility");
         for (std::size_t i=0; i<discreteSubstances.size(); i++){
             substanceIndices.insert(std::pair<RS::Substance*,int>(discreteSubstances[i], i));
             ionMobility.push_back(discreteSubstances[i]->mobility());
@@ -158,8 +155,8 @@ int main(int argc, const char * argv[]) {
 
         std::unique_ptr<ParticleSimulation::Scalar_writer> cvFieldWriter;
         int cvHighResLogPeriod = 0;
-        if (simConf.isParameter("log_cv_field_period")){
-            cvHighResLogPeriod = simConf.intParameter("log_cv_field_period");
+        if (simConf->isParameter("log_cv_field_period")){
+            cvHighResLogPeriod = simConf->intParameter("log_cv_field_period");
         }
         if (cvMode == AUTO_CV || cvHighResLogPeriod > 0){
             cvFieldWriter = std::make_unique<ParticleSimulation::Scalar_writer>(projectName+ "_cv.csv");
@@ -279,10 +276,10 @@ int main(int argc, const char * argv[]) {
         }
         else {
             // modulated CV, read CV waveform and phase shift:
-            std::string cvWaveformFileName = simConf.pathRelativeToConfFile(simConf.stringParameter("cv_waveform"));
+            std::string cvWaveformFileName = simConf->pathRelativeToConfFile(simConf->stringParameter("cv_waveform"));
             auto cvWaveForm = ParticleSimulation::SampledWaveform(cvWaveformFileName);
 
-            double cvPhaseShift = simConf.doubleParameter("cv_phase_shift");
+            double cvPhaseShift = simConf->doubleParameter("cv_phase_shift");
             auto modulatedCV =
                 [cvWaveForm, cvPhaseShift, fieldWavePeriod] (double cvAmplitude_VPerM, double time) -> double{
                     double period = std::fmod(time, fieldWavePeriod) / fieldWavePeriod;
@@ -397,6 +394,9 @@ int main(int argc, const char * argv[]) {
         // ======================================================================================
 
         return 0;
+    }
+    catch(const std::runtime_error){
+        return EXIT_FAILURE;
     }
     catch(const std::invalid_argument& ia){
         std::cout << ia.what() << std::endl;
