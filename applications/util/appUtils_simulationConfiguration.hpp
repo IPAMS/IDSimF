@@ -4,6 +4,7 @@
 #include "json.h"
 #include "spdlog/spdlog.h"
 #include "PSim_interpolatedField.hpp"
+#include "appUtils_logging.hpp"
 #include <filesystem>
 #include <vector>
 #include <fstream>
@@ -11,6 +12,7 @@
 #include <memory>
 
 namespace AppUtils{
+
     class SimulationConfiguration{
     public:
         SimulationConfiguration(const std::string& confFileName);
@@ -41,7 +43,9 @@ namespace AppUtils{
         Json::Value confRoot_;
         std::filesystem::path confFilePath_;
         std::filesystem::path confFileBasePath_;
-        std::shared_ptr<spdlog::logger> logger_ = nullptr;
+        AppUtils::logger_ptr logger_ = nullptr;
     };
+
+    using simConf_ptr = std::shared_ptr<AppUtils::SimulationConfiguration>;
 }
 #endif //IONSIMULATION_CPP_PARAMETERPARSING_HPP

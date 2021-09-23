@@ -61,15 +61,15 @@ namespace AppUtils{
     class CommandlineParser {
     public:
         CommandlineParser(int argc, const char * argv[], std::string appName, std::string appDescription,  bool multithreaded=false);
-        std::shared_ptr<AppUtils::SimulationConfiguration> simulationConfiguration();
-        std::shared_ptr<spdlog::logger> logger();
+        simConf_ptr simulationConfiguration();
+        AppUtils::logger_ptr logger();
         std::string projectName();
         std::string confFileName();
         int numberOfThreads();
 
     private:
-        std::shared_ptr<AppUtils::SimulationConfiguration> simulationConfiguration_;
-        std::shared_ptr<spdlog::logger> logger_;
+        simConf_ptr simulationConfiguration_;
+        AppUtils::logger_ptr logger_;
         std::string projectName_;
         std::string confFileName_;
         int numberOfThreads_= 1;

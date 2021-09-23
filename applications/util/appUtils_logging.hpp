@@ -31,7 +31,10 @@
 #include <memory>
 
 namespace AppUtils{
-    std::shared_ptr<spdlog::logger> createLogger(std::string logfileName);
+
+    using logger_ptr = std::shared_ptr<spdlog::logger>;
+
+    logger_ptr createLogger(std::string logfileName);
 }
 
 #endif //IDSIMF_APPUTILS_LOGGING_HPP
