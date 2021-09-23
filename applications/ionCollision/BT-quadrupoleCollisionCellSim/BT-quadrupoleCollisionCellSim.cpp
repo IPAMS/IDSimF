@@ -39,6 +39,7 @@
 #include "appUtils_logging.hpp"
 #include "appUtils_stopwatch.hpp"
 #include "appUtils_signalHandler.hpp"
+#include "appUtils_commandlineParser.hpp"
 #include <iostream>
 #include <vector>
 
@@ -61,52 +62,47 @@ enum IonDataRecordMode{
 int main(int argc, const char * argv[]) {
 
     try {
-        // read configuration file ======================================================================
-        if (argc<=2) {
-            std::cout << "Run abort: No run configuration or project name given." << std::endl;
-            return EXIT_FAILURE;
-        }
-        std::string projectName = argv[2];
-        std::cout << projectName << std::endl;
-        auto logger = AppUtils::createLogger(projectName + ".log");
-
-        std::string confFileName = argv[1];
-        AppUtils::SimulationConfiguration simConf(confFileName, logger);
-
+        // parse commandline / create conf and logger ===================================================
+        AppUtils::CommandlineParser cmdLineParser(argc, argv, "BT-quadrupoleCollisionCellSim",
+                "Simulation of a quadrupolar collision cell", true);
+        std::string simResultBasename = cmdLineParser.projectName();
+        auto logger = cmdLineParser.logger();
+        auto simConf = cmdLineParser.simulationConfiguration();
+        
         // read basic simulation parameters =============================================================
-        unsigned int timeSteps = simConf.unsignedIntParameter("sim_time_steps");
-        unsigned int trajectoryWriteInterval = simConf.unsignedIntParameter("trajectory_write_interval");
-        double dt = simConf.doubleParameter("dt");
+        unsigned int timeSteps = simConf->unsignedIntParameter("sim_time_steps");
+        unsigned int trajectoryWriteInterval = simConf->unsignedIntParameter("trajectory_write_interval");
+        double dt = simConf->doubleParameter("dt");
 
         // read physical and geometrical simulation parameters
-        double spaceChargeFactor = simConf.doubleParameter("space_charge_factor");
-        double collisionGasMass_amu = simConf.doubleParameter("collision_gas_mass_amu");
-        double collisionGasDiameter_m = simConf.doubleParameter("collision_gas_diameter_angstrom")*1e-10;
-        double backgroundGasTemperature_K = simConf.doubleParameter("background_gas_temperature_K");
-        double backgroundGasPressure_pa = simConf.doubleParameter("background_gas_pressure_Pa");
+        double spaceChargeFactor = simConf->doubleParameter("space_charge_factor");
+        double collisionGasMass_amu = simConf->doubleParameter("collision_gas_mass_amu");
+        double collisionGasDiameter_m = simConf->doubleParameter("collision_gas_diameter_angstrom")*1e-10;
+        double backgroundGasTemperature_K = simConf->doubleParameter("background_gas_temperature_K");
+        double backgroundGasPressure_pa = simConf->doubleParameter("background_gas_pressure_Pa");
 
-        double V_rf = simConf.doubleParameter("V_rf"); //volts, RF voltage
-        double freq_rf = simConf.doubleParameter("frequency_rf"); //Hz, RF Frequency
+        double V_rf = simConf->doubleParameter("V_rf"); //volts, RF voltage
+        double freq_rf = simConf->doubleParameter("frequency_rf"); //Hz, RF Frequency
         double omega_rf = freq_rf*M_PI*2.0;
 
 
         //read potential arrays and potential array configuration =================================================
         // Note that fast adjust PAs are expected here
-        std::vector<std::string> potentialArraysNames = simConf.stringVectorParameter("potential_arrays");
-        double potentialArrayScale = simConf.doubleParameter("potential_array_scale");
+        std::vector<std::string> potentialArraysNames = simConf->stringVectorParameter("potential_arrays");
+        double potentialArrayScale = simConf->doubleParameter("potential_array_scale");
         std::vector<std::unique_ptr<ParticleSimulation::SimionPotentialArray>> potentialArrays =
-                AppUtils::readPotentialArrayFiles(potentialArraysNames, simConf.confBasePath(), potentialArrayScale,
+                AppUtils::readPotentialArrayFiles(potentialArraysNames, simConf->confBasePath(), potentialArrayScale,
                         true);
 
         //scaling factor of 0.1 because SIMION uses a value of 10000 in  Fast Adjust PAs and  mm to m is 1000 = 0.1
-        std::vector<double> potentialsDc = simConf.doubleVectorParameter("dc_potentials");
-        std::vector<double> potentialFactorsRf = simConf.doubleVectorParameter("rf_potential_factors");
+        std::vector<double> potentialsDc = simConf->doubleVectorParameter("dc_potentials");
+        std::vector<double> potentialFactorsRf = simConf->doubleVectorParameter("rf_potential_factors");
 
         // defining simulation domain box (used for ion termination):
         std::array<std::array<double, 2>, 3> simulationDomainBoundaries;
-        if (simConf.isParameter("simulation_domain_boundaries")) {
+        if (simConf->isParameter("simulation_domain_boundaries")) {
             // get manual simulation domain boundaries from config file
-            simulationDomainBoundaries = simConf.double3dBox("simulation_domain_boundaries");
+            simulationDomainBoundaries = simConf->double3dBox("simulation_domain_boundaries");
         }
         else {
             // TODO: use minimal Potential Array bounds as simulation domain
@@ -114,13 +110,13 @@ int main(int argc, const char * argv[]) {
         }
 
         // Read ion termination mode configuration from simulation config
-        std::string ionTerminationMode_str = simConf.stringParameter("termination_mode");
+        std::string ionTerminationMode_str = simConf->stringParameter("termination_mode");
         IonTerminationMode ionTerminationMode;
         if (ionTerminationMode_str=="terminate") {
             ionTerminationMode = TERMINATE;
         }
         else if (ionTerminationMode_str=="restart") {
-            if (AppUtils::isIonCloudDefinitionPresent(simConf)) {
+            if (AppUtils::isIonCloudDefinitionPresent(*simConf)) {
                 throw std::invalid_argument("Ion restart mode is not possible with ion cloud file");
             }
             ionTerminationMode = RESTART;
@@ -131,7 +127,7 @@ int main(int argc, const char * argv[]) {
 
 
         // Read ion data record mode configuration from simulation config
-        std::string ionRecordMode_str = simConf.stringParameter("record_mode");
+        std::string ionRecordMode_str = simConf->stringParameter("record_mode");
         IonDataRecordMode ionRecordMode;
         if (ionRecordMode_str=="full") {
             ionRecordMode = FULL;
@@ -147,7 +143,7 @@ int main(int argc, const char * argv[]) {
         std::vector<std::unique_ptr<BTree::Particle>> particles;
         std::vector<BTree::Particle*> particlePtrs;
 
-        AppUtils::readIonDefinition(particles, particlePtrs, simConf);
+        AppUtils::readIonDefinition(particles, particlePtrs, *simConf);
 
         //init gas collision models:
         CollisionModel::HardSphereModel hsModel = CollisionModel::HardSphereModel(
@@ -232,7 +228,7 @@ int main(int argc, const char * argv[]) {
 
         //prepare file writers ==============================================================================
         auto hdf5Writer = std::make_unique<ParticleSimulation::TrajectoryHDF5Writer>(
-                projectName+"_trajectories.hd5");
+                simResultBasename+"_trajectories.hd5");
 
         if (ionRecordMode==FULL) {
             std::vector<std::string> particleAttributeNames = {"velocity x", "velocity y", "velocity z",
@@ -320,7 +316,7 @@ int main(int argc, const char * argv[]) {
         }
         else { //ion termination mode is RESTART
             std::shared_ptr<ParticleSimulation::ParticleStartZone> particleStartZone =
-                    AppUtils::getStartZoneFromIonDefinition(simConf);
+                    AppUtils::getStartZoneFromIonDefinition(*simConf);
 
             otherActionsFunction = [&isIonTerminated, pz = std::move(particleStartZone), &startSplatTracker](
                     Core::Vector& newPartPos, BTree::Particle* particle,
@@ -356,6 +352,9 @@ int main(int argc, const char * argv[]) {
     {
         std::cout << pe.what() << std::endl;
         return EXIT_FAILURE;
+    }
+    catch(AppUtils::TerminatedWhileCommandlineParsing& terminatedMessage){
+        return terminatedMessage.returnCode();
     }
     catch(const std::invalid_argument& ia){
         std::cout << ia.what() << std::endl;
