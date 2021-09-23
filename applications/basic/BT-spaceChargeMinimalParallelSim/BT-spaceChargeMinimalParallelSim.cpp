@@ -37,6 +37,7 @@
 #include "appUtils_stopwatch.hpp"
 #include "appUtils_logging.hpp"
 #include "appUtils_signalHandler.hpp"
+#include "appUtils_commandlineParser.hpp"
 #include <iostream>
 #include <vector>
 
@@ -44,25 +45,21 @@
 int main(int argc, const char * argv[]) {
     try {
         // read configuration file ======================================================================
-        if (argc<=2) {
-            std::cout << "Run abort: No run configuration or project name given." << std::endl;
-            return EXIT_FAILURE;
-        }
+        AppUtils::CommandlineParser cmdLineParser(argc, argv, "BT-spaceChargeMinimalParallelSim",
+                "Basic parallel space charge simulation (mostly for testing purposes)", true);
+        std::string simResultBasename = cmdLineParser.projectName();
+        auto logger = cmdLineParser.logger();
 
-        std::string projectName = argv[2];
-        std::cout << projectName << std::endl;
-        auto logger = AppUtils::createLogger(projectName+".log");
-
-        std::string confFileName = argv[1];
-        AppUtils::SimulationConfiguration simConf(confFileName, logger);
+        std::string confFileName = cmdLineParser.confFileName();
+        auto simConf = cmdLineParser.simulationConfiguration();
 
         // read basic simulation parameters =============================================================
-        unsigned int timeSteps = simConf.unsignedIntParameter("sim_time_steps");
-        unsigned int trajectoryWriteInterval = simConf.unsignedIntParameter("trajectory_write_interval");
-        double dt = simConf.doubleParameter("dt");
+        unsigned int timeSteps = simConf->unsignedIntParameter("sim_time_steps");
+        unsigned int trajectoryWriteInterval = simConf->unsignedIntParameter("trajectory_write_interval");
+        double dt = simConf->doubleParameter("dt");
 
         //read physical configuration ===================================================================
-        double spaceChargeFactor = simConf.doubleParameter("space_charge_factor");
+        double spaceChargeFactor = simConf->doubleParameter("space_charge_factor");
 
 
         //read ion configuration =======================================================================
@@ -72,9 +69,9 @@ int main(int argc, const char * argv[]) {
         std::vector<unsigned int> nIons = std::vector<unsigned int>();
         std::vector<double> ionMasses = std::vector<double>();
 
-        if (simConf.isParameter("ion_cloud_init_file")) {
-            std::string ionCloudFileName = simConf.pathRelativeToConfFile(
-                    simConf.stringParameter("ion_cloud_init_file"));
+        if (simConf->isParameter("ion_cloud_init_file")) {
+            std::string ionCloudFileName = simConf->pathRelativeToConfFile(
+                    simConf->stringParameter("ion_cloud_init_file"));
             ParticleSimulation::IonCloudReader reader = ParticleSimulation::IonCloudReader();
             particles = reader.readIonCloud(ionCloudFileName);
             //prepare a vector of raw pointers
@@ -83,8 +80,8 @@ int main(int argc, const char * argv[]) {
             }
         }
         else {
-            nIons = simConf.unsignedIntVectorParameter("n_ions");
-            ionMasses = simConf.doubleVectorParameter("ion_masses");
+            nIons = simConf->unsignedIntVectorParameter("n_ions");
+            ionMasses = simConf->doubleVectorParameter("ion_masses");
 
             for (std::size_t i = 0; i<nIons.size(); i++) {
                 unsigned int nParticles = nIons[i];
@@ -114,7 +111,7 @@ int main(int argc, const char * argv[]) {
 
         std::vector<std::string> auxParamNames = {"velocity x", "velocity y", "velocity z"};
 
-        auto hdf5Writer = std::make_unique<ParticleSimulation::TrajectoryHDF5Writer>(projectName+"_trajectories.hd5");
+        auto hdf5Writer = std::make_unique<ParticleSimulation::TrajectoryHDF5Writer>(simResultBasename+"_trajectories.hd5");
         hdf5Writer->setParticleAttributes(auxParamNames, additionalParameterTransformFct);
 
         /*auto jsonWriter = std::make_unique<ParticleSimulation::TrajectoryExplorerJSONwriter>(
@@ -171,6 +168,9 @@ int main(int argc, const char * argv[]) {
         logger->info("elapsed secs (wall time) {}", stopWatch.elapsedSecondsWall());
         logger->info("elapsed secs (cpu time) {}", stopWatch.elapsedSecondsCPU());
         return EXIT_SUCCESS;
+    }
+    catch(AppUtils::TerminatedWhileCommandlineParsing& terminatedMessage){
+        return terminatedMessage.returnCode();
     }
     catch(const ParticleSimulation::IonCloudFileException& ie)
     {
