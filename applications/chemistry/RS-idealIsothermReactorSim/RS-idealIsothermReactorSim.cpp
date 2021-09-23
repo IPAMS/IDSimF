@@ -33,39 +33,31 @@
 #include "appUtils_logging.hpp"
 #include "appUtils_stopwatch.hpp"
 #include "appUtils_signalHandler.hpp"
-#include "json.h"
+#include "appUtils_commandlineParser.hpp"
 #include <iostream>
 #include <cmath>
 
 int main(int argc, const char * argv[]) {
 
     try{
-        // open configuration, parse configuration file =========================================
-        if (argc<=2) {
-            std::cout << "Run abort: No run configuration or project name given." << std::endl;
-            return EXIT_FAILURE;
-        }
+        // parse commandline / create conf and logger ===================================================
+        AppUtils::CommandlineParser cmdLineParser(argc, argv, "BT-idealIsothermReactorSim",
+                "RS Simulation in an ideally mixed, isotherm reactor", true);
+        std::string resultFilename = cmdLineParser.projectName() + "_result.txt";
+        auto logger = cmdLineParser.logger();
+        auto simConf = cmdLineParser.simulationConfiguration();
 
-        std::string projectName = argv[2];
-        std::cout << projectName<<std::endl;
-        std::string resultFilename = projectName + "_result.txt";
-        auto logger = AppUtils::createLogger(projectName + ".log");
-
-
-        std::string confFileName = argv[1];
-        AppUtils::SimulationConfiguration simConf(confFileName, logger);
-
-        std::string rsConfigFileName = simConf.pathRelativeToConfFile(
-                simConf.stringParameter("reaction_configuration"));
+        std::string rsConfigFileName = simConf->pathRelativeToConfFile(
+                simConf->stringParameter("reaction_configuration"));
         RS::ConfigFileParser parser = RS::ConfigFileParser();
         RS::Simulation sim = RS::Simulation(parser.parseFile(rsConfigFileName));
         RS::SimulationConfiguration* rsSimConf = sim.simulationConfiguration();
 
-        std::vector<int> nParticles = simConf.intVectorParameter("n_particles");
-        int nSteps = simConf.intParameter("sim_time_steps");
-        int concentrationWriteInterval = simConf.intParameter("concentrations_write_interval");
-        double dt_s = simConf.doubleParameter("dt_s");
-        double backgroundTemperature_K = simConf.doubleParameter("background_temperature_K");
+        std::vector<int> nParticles = simConf->intVectorParameter("n_particles");
+        int nSteps = simConf->intParameter("sim_time_steps");
+        int concentrationWriteInterval = simConf->intParameter("concentrations_write_interval");
+        double dt_s = simConf->doubleParameter("dt_s");
+        double backgroundTemperature_K = simConf->doubleParameter("background_temperature_K");
 
         RS::ConcentrationFileWriter resultFilewriter(resultFilename);
         // ======================================================================================
@@ -125,6 +117,9 @@ int main(int argc, const char * argv[]) {
         // ======================================================================================
 
         return 0;
+    }
+    catch(AppUtils::TerminatedWhileCommandlineParsing& terminatedMessage){
+        return terminatedMessage.returnCode();
     }
     catch(const std::invalid_argument& ia){
         std::cout << ia.what() << std::endl;
