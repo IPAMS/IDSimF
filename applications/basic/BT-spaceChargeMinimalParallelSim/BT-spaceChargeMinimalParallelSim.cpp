@@ -44,7 +44,7 @@
 
 int main(int argc, const char * argv[]) {
     try {
-        // read configuration file ======================================================================
+        // parse commandline / create conf and logger ===================================================
         AppUtils::CommandlineParser cmdLineParser(argc, argv, "BT-spaceChargeMinimalParallelSim",
                 "Basic parallel space charge simulation (mostly for testing purposes)", true);
         std::string simResultBasename = cmdLineParser.projectName();
