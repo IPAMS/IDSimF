@@ -44,6 +44,7 @@
 #include "appUtils_logging.hpp"
 #include "appUtils_stopwatch.hpp"
 #include "appUtils_signalHandler.hpp"
+#include "appUtils_commandlineParser.hpp"
 #include "json.h"
 #include <iostream>
 #include <cmath>
@@ -64,38 +65,34 @@ int main(int argc, const char *argv[]){
 
     try {
         // open configuration, parse configuration file =========================================
-        if (argc<=2) {
-            std::cout << "Run abort: No run configuration or project name given." << std::endl;
-            return EXIT_FAILURE;
-        }
-        std::string projectName = argv[2];
-        std::cout << projectName << std::endl;
-        auto logger = AppUtils::createLogger(projectName+".log");
+        AppUtils::CommandlineParser cmdLineParser(argc, argv, "BT-RS-DMSSim", "DMS Simulation with trajectories and chemistry", false);
+        std::string projectName = cmdLineParser.projectName();
+        auto logger = cmdLineParser.logger();
 
-        std::string confFileName = argv[1];
-        AppUtils::SimulationConfiguration simConf(confFileName, logger);
+        std::string confFileName = cmdLineParser.confFileName();
+        auto simConf = cmdLineParser.simulationConfiguration();
 
-        std::vector<unsigned int> nParticles = simConf.unsignedIntVectorParameter("n_particles");
-        int nSteps = simConf.intParameter("sim_time_steps");
-        int concentrationWriteInterval = simConf.intParameter("concentrations_write_interval");
-        int trajectoryWriteInterval = simConf.intParameter("trajectory_write_interval");
-        bool writeVelocities = simConf.boolParameter("trajectory_write_velocities");
-        double dt_s = simConf.doubleParameter("dt_s");
-        double eFieldMagnitude = simConf.doubleParameter("electric_field_mag_Vm-1");
-        double spaceChargeFactor = simConf.doubleParameter("space_charge_factor");
+        std::vector<unsigned int> nParticles = simConf->unsignedIntVectorParameter("n_particles");
+        int nSteps = simConf->intParameter("sim_time_steps");
+        int concentrationWriteInterval = simConf->intParameter("concentrations_write_interval");
+        int trajectoryWriteInterval = simConf->intParameter("trajectory_write_interval");
+        bool writeVelocities = simConf->boolParameter("trajectory_write_velocities");
+        double dt_s = simConf->doubleParameter("dt_s");
+        double eFieldMagnitude = simConf->doubleParameter("electric_field_mag_Vm-1");
+        double spaceChargeFactor = simConf->doubleParameter("space_charge_factor");
 
-        double startWidthX_m = simConf.doubleParameter("start_width_x_mm")/1000.0;
-        double startWidthYZ_m = simConf.doubleParameter("start_width_yz_mm")/1000.0;
-        double stopPosX_m = simConf.doubleParameter("stop_position_x_mm")/1000.0;
+        double startWidthX_m = simConf->doubleParameter("start_width_x_mm")/1000.0;
+        double startWidthYZ_m = simConf->doubleParameter("start_width_yz_mm")/1000.0;
+        double stopPosX_m = simConf->doubleParameter("stop_position_x_mm")/1000.0;
 
         //read and check gas parameters:
-        std::string transportModelType = simConf.stringParameter("transport_model_type");
-        double backgroundTemperature_K = simConf.doubleParameter("background_temperature_K");
+        std::string transportModelType = simConf->stringParameter("transport_model_type");
+        double backgroundTemperature_K = simConf->doubleParameter("background_temperature_K");
 
-        std::vector<double> backgroundPartialPressures_Pa = simConf.doubleVectorParameter(
+        std::vector<double> backgroundPartialPressures_Pa = simConf->doubleVectorParameter(
                 "background_partial_pressures_Pa");
-        std::vector<double> collisionGasMasses_Amu = simConf.doubleVectorParameter("collision_gas_masses_amu");
-        std::vector<double> collisionGasDiameters_angstrom = simConf.doubleVectorParameter(
+        std::vector<double> collisionGasMasses_Amu = simConf->doubleVectorParameter("collision_gas_masses_amu");
+        std::vector<double> collisionGasDiameters_angstrom = simConf->doubleVectorParameter(
                 "collision_gas_diameters_angstrom");
 
         std::size_t nBackgroundGases = backgroundPartialPressures_Pa.size();
@@ -118,14 +115,14 @@ int main(int argc, const char *argv[]){
         // ======================================================================================
 
         //read and prepare chemical configuration ===============================================
-        std::string rsConfFileName = simConf.pathRelativeToConfFile(simConf.stringParameter("reaction_configuration"));
+        std::string rsConfFileName = simConf->pathRelativeToConfFile(simConf->stringParameter("reaction_configuration"));
         RS::ConfigFileParser parser = RS::ConfigFileParser();
         RS::Simulation rsSim = RS::Simulation(parser.parseFile(rsConfFileName));
         RS::SimulationConfiguration* rsSimConf = rsSim.simulationConfiguration();
         //prepare a map for retrieval of the substance index:
         std::map<RS::Substance*, int> substanceIndices;
         std::vector<RS::Substance*> discreteSubstances = rsSimConf->getAllDiscreteSubstances();
-        std::vector<double> ionMobility; // = simConf.doubleVectorParameter("ion_mobility",confRoot);
+        std::vector<double> ionMobility; // = simConf->doubleVectorParameter("ion_mobility",confRoot);
         for (std::size_t i = 0; i<discreteSubstances.size(); i++) {
             substanceIndices.insert(std::pair<RS::Substance*, int>(discreteSubstances[i], i));
             ionMobility.push_back(discreteSubstances[i]->mobility());
@@ -306,9 +303,9 @@ int main(int argc, const char *argv[]){
 
             //create sds collision model, if statistics file is given: create with custom statistics
             std::unique_ptr<CollisionModel::StatisticalDiffusionModel> collisionModel;
-            if (simConf.isParameter("sds_collision_statistics")) {
-                std::string sdsCollisionStatisticsFileName = simConf.pathRelativeToConfFile(
-                        simConf.stringParameter("sds_collision_statistics"));
+            if (simConf->isParameter("sds_collision_statistics")) {
+                std::string sdsCollisionStatisticsFileName = simConf->pathRelativeToConfFile(
+                        simConf->stringParameter("sds_collision_statistics"));
 
                 logger->info("SDS with custom collision statistics file: {}", sdsCollisionStatisticsFileName);
                 CollisionModel::CollisionStatistics cs(sdsCollisionStatisticsFileName);
@@ -407,7 +404,7 @@ int main(int argc, const char *argv[]){
             }
             rsSim.advanceTimestep(dt_s);
 
-            //terminate simualation loop if all particles are terminated or termination of the integrator was requested
+            //terminate simulation loop if all particles are terminated or termination of the integrator was requested
             //from somewhere (e.g. signal from outside)
             if (trajectoryIntegrator !=nullptr) {
                 trajectoryIntegrator->runSingleStep(dt_s);
@@ -439,6 +436,9 @@ int main(int argc, const char *argv[]){
         // ======================================================================================
 
         return 0;
+    }
+    catch(AppUtils::TerminatedWhileCommandlineParsing& terminatedMessage){
+        return terminatedMessage.returnCode();
     }
     catch(const std::invalid_argument& ia){
         std::cout << ia.what() << std::endl;
