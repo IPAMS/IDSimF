@@ -53,8 +53,8 @@ int main(int argc, const char * argv[]) {
 
     try {
         // parse commandline / create conf and logger ===================================================
-        AppUtils::CommandlineParser cmdLineParser(argc, argv, "BT-quadrupoleCollisionCellSim",
-                "Simulation of a quadrupolar collision cell", false);
+        AppUtils::CommandlineParser cmdLineParser(argc, argv, "BT-generalQuadSim",
+                "Generalized quadrupolar / multipolar ion guide simulation", false);
         std::string simResultBasename = cmdLineParser.projectName();
         auto logger = cmdLineParser.logger();
         auto simConf = cmdLineParser.simulationConfiguration();
