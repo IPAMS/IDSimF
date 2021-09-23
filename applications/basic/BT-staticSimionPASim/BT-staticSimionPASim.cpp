@@ -37,6 +37,7 @@
 #include "appUtils_logging.hpp"
 #include "appUtils_stopwatch.hpp"
 #include "appUtils_signalHandler.hpp"
+#include "appUtils_commandlineParser.hpp"
 #include <iostream>
 #include <vector>
 
@@ -44,27 +45,24 @@
 int main(int argc, const char * argv[]) {
 
     try {
-        // read configuration file ======================================================================
-        if (argc<=2) {
-            std::cout << "Run abort: No run configuration or project name given." << std::endl;
-            return EXIT_FAILURE;
-        }
-        std::string projectName = argv[2];
-        std::cout << projectName << std::endl;
-        auto logger = AppUtils::createLogger(projectName+".log");
+        // parse commandline / create conf and logger ===================================================
+        AppUtils::CommandlineParser cmdLineParser(argc, argv, "BT-staticSimionPASim",
+                "Simple trajectory simulation (non parallel) with space charge and SIMION electrode geometries", false);
+        std::string simResultBasename = cmdLineParser.projectName();
+        auto logger = cmdLineParser.logger();
 
-        std::string confFileName = argv[1];
-        AppUtils::SimulationConfiguration simConf(confFileName, logger);
+        std::string confFileName = cmdLineParser.confFileName();
+        auto simConf = cmdLineParser.simulationConfiguration();
 
 
         // read basic simulation parameters =============================================================
-        unsigned int timeSteps = simConf.unsignedIntParameter("sim_time_steps");
-        int trajectoryWriteInterval = simConf.intParameter("trajectory_write_interval");
-        double dt = simConf.doubleParameter("dt");
-        std::string simionPAFilename = simConf.pathRelativeToConfFile(simConf.stringParameter("potential_array_file"));
+        unsigned int timeSteps = simConf->unsignedIntParameter("sim_time_steps");
+        int trajectoryWriteInterval = simConf->intParameter("trajectory_write_interval");
+        double dt = simConf->doubleParameter("dt");
+        std::string simionPAFilename = simConf->pathRelativeToConfFile(simConf->stringParameter("potential_array_file"));
 
         //read physical configuration ===================================================================
-        double spaceChargeFactor = simConf.doubleParameter("space_charge_factor");
+        double spaceChargeFactor = simConf->doubleParameter("space_charge_factor");
 
 
         //read simion potential array ===================================================================
@@ -74,7 +72,7 @@ int main(int argc, const char * argv[]) {
         std::vector<std::unique_ptr<BTree::Particle>> particles;
         std::vector<BTree::Particle*> particlePtrs;
 
-        std::string ionCloudFileName = simConf.pathRelativeToConfFile(simConf.stringParameter("ion_cloud_init_file"));
+        std::string ionCloudFileName = simConf->pathRelativeToConfFile(simConf->stringParameter("ion_cloud_init_file"));
         ParticleSimulation::IonCloudReader reader = ParticleSimulation::IonCloudReader();
         particles = reader.readIonCloud(ionCloudFileName);
         //prepare a vector of raw pointers
@@ -84,7 +82,7 @@ int main(int argc, const char * argv[]) {
 
         //prepare file writer ==============================================================================
         auto jsonWriter = std::make_unique<ParticleSimulation::TrajectoryExplorerJSONwriter>(
-                projectName+"_trajectories.json");
+                simResultBasename+"_trajectories.json");
         jsonWriter->setScales(1000, 1e6);
 
 
@@ -176,6 +174,9 @@ int main(int argc, const char * argv[]) {
     {
         std::cout << ie.what() << std::endl;
         return EXIT_FAILURE;
+    }
+    catch(AppUtils::TerminatedWhileCommandlineParsing& terminatedMessage){
+        return terminatedMessage.returnCode();
     }
     catch(const std::invalid_argument& ia){
         std::cout << ia.what() << std::endl;
