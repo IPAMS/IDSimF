@@ -26,7 +26,7 @@ Which types of result files are produced depends on the simulation type, but all
 Optional command line arguments
 -------------------------------
 
-* The number of threads in multithreaded applications can be controlled with the ``-n <number of threads>`` option.  
+* The number of threads in multithreaded applications can be controlled with the ``--n_threads <number of threads>`` (alias to ``-n <number of threads>``) option.  
 * A help message with the command line arguments for a simulation application is printed with the ``--help`` switch. 
 
 
