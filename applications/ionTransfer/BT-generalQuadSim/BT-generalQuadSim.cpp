@@ -40,6 +40,7 @@
 #include "appUtils_logging.hpp"
 #include "appUtils_stopwatch.hpp"
 #include "appUtils_signalHandler.hpp"
+#include "appUtils_commandlineParser.hpp"
 #include <iostream>
 #include <vector>
 
@@ -51,63 +52,57 @@ const double rho_per_pa = 2.504e20; //(particles / m^3) / Pa
 int main(int argc, const char * argv[]) {
 
     try {
-        // read configuration file ======================================================================
-        if (argc<=2) {
-            std::cout << "Run abort: No run configuration or project name given." << std::endl;
-            return EXIT_FAILURE;
-        }
-
-        std::string projectName = argv[2];
-        std::cout << projectName << std::endl;
-        auto logger = AppUtils::createLogger(projectName+".log");
-
-        std::string confFileName = argv[1];
-        AppUtils::SimulationConfiguration simConf(confFileName, logger);
+        // parse commandline / create conf and logger ===================================================
+        AppUtils::CommandlineParser cmdLineParser(argc, argv, "BT-quadrupoleCollisionCellSim",
+                "Simulation of a quadrupolar collision cell", false);
+        std::string simResultBasename = cmdLineParser.projectName();
+        auto logger = cmdLineParser.logger();
+        auto simConf = cmdLineParser.simulationConfiguration();
 
         // read basic simulation parameters =============================================================
-        unsigned int timeSteps = simConf.unsignedIntParameter("sim_time_steps");
-        int trajectoryWriteInterval = simConf.intParameter("trajectory_write_interval");
-        double dt = simConf.doubleParameter("dt");
+        unsigned int timeSteps = simConf->unsignedIntParameter("sim_time_steps");
+        int trajectoryWriteInterval = simConf->intParameter("trajectory_write_interval");
+        double dt = simConf->doubleParameter("dt");
 
         // read interpolated fields ======================
-        std::unique_ptr<ParticleSimulation::InterpolatedField> rhoField = simConf.readInterpolatedField(
+        std::unique_ptr<ParticleSimulation::InterpolatedField> rhoField = simConf->readInterpolatedField(
                 "rho_field_file");
-        std::unique_ptr<ParticleSimulation::InterpolatedField> flowField = simConf.readInterpolatedField(
+        std::unique_ptr<ParticleSimulation::InterpolatedField> flowField = simConf->readInterpolatedField(
                 "flow_field_file");
-        std::unique_ptr<ParticleSimulation::InterpolatedField> electricFieldQuadRF = simConf.readInterpolatedField(
+        std::unique_ptr<ParticleSimulation::InterpolatedField> electricFieldQuadRF = simConf->readInterpolatedField(
                 "electric_field_rf_file");
-        std::unique_ptr<ParticleSimulation::InterpolatedField> electricFieldQuadEntrance = simConf.readInterpolatedField(
+        std::unique_ptr<ParticleSimulation::InterpolatedField> electricFieldQuadEntrance = simConf->readInterpolatedField(
                 "electric_field_entrance_file");
 
         // read physical and geometrical simulation parameters
-        double spaceChargeFactor = simConf.doubleParameter("space_charge_factor");
-        double collisionGasMassAmu = simConf.doubleParameter("collision_gas_mass_amu");
-        double collisionGasDiameterM = simConf.doubleParameter("collision_gas_diameter_angstrom")*1e-10;
-        double backgroundTemperture = simConf.doubleParameter("background_temperature");
+        double spaceChargeFactor = simConf->doubleParameter("space_charge_factor");
+        double collisionGasMassAmu = simConf->doubleParameter("collision_gas_mass_amu");
+        double collisionGasDiameterM = simConf->doubleParameter("collision_gas_diameter_angstrom")*1e-10;
+        double backgroundTemperture = simConf->doubleParameter("background_temperature");
 
-        double V_rf = simConf.doubleParameter("V_rf");//600; //volts, RF voltage
-        double V_entrance = simConf.doubleParameter("V_entrance");
-        double P_factor = simConf.doubleParameter("P_factor");
+        double V_rf = simConf->doubleParameter("V_rf");//600; //volts, RF voltage
+        double V_entrance = simConf->doubleParameter("V_entrance");
+        double P_factor = simConf->doubleParameter("P_factor");
 
-        double entranceAperture = simConf.doubleParameter("entrance_aperture_mm")/1000.0;
+        double entranceAperture = simConf->doubleParameter("entrance_aperture_mm")/1000.0;
 
-        double qStartBoxCenter = simConf.doubleParameter("start_center_mm")/1000.0;
+        double qStartBoxCenter = simConf->doubleParameter("start_center_mm")/1000.0;
         double qStartBoxLength =
-                simConf.doubleParameter("start_length_mm")/1000.0; //the start position on the q length (x) axis
+                simConf->doubleParameter("start_length_mm")/1000.0; //the start position on the q length (x) axis
 
-        double maxQLength = simConf.doubleParameter("max_q_length_mm")/1000.0;
-        double maxRadius = simConf.doubleParameter("max_r_mm")/1000.0;
+        double maxQLength = simConf->doubleParameter("max_q_length_mm")/1000.0;
+        double maxRadius = simConf->doubleParameter("max_r_mm")/1000.0;
 
         // read ion configuration ========================
-        std::vector<unsigned int> nIons = simConf.unsignedIntVectorParameter("n_ions");
-        std::vector<double> ionMasses = simConf.doubleVectorParameter("ion_masses");
+        std::vector<unsigned int> nIons = simConf->unsignedIntVectorParameter("n_ions");
+        std::vector<double> ionMasses = simConf->doubleVectorParameter("ion_masses");
 
         std::vector<std::unique_ptr<BTree::Particle>> particles;
         std::vector<BTree::Particle*> particlePtrs;
 
         //prepare file writers ==============================================================================
         auto jsonWriter = std::make_unique<ParticleSimulation::TrajectoryExplorerJSONwriter>
-                (projectName+"_trajectories.json");
+                (simResultBasename+"_trajectories.json");
         jsonWriter->setScales(1000, 1e6);
 
         // prepare random generators:
@@ -233,6 +228,9 @@ int main(int argc, const char * argv[]) {
         logger->info("Finished in {} seconds (wall clock time)", stopWatch.elapsedSecondsWall());
 
         return EXIT_SUCCESS;
+    }
+    catch(AppUtils::TerminatedWhileCommandlineParsing& terminatedMessage){
+        return terminatedMessage.returnCode();
     }
     catch(const std::invalid_argument& ia){
         std::cout << ia.what() << std::endl;
