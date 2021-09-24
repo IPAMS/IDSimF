@@ -13,7 +13,13 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     add_compile_options(-Wshorten-64-to-32) #-Wzero-as-null-pointer-constant)
 endif()
 
-
+## get number of cores for parallel test runs:
+include(ProcessorCount)
+ProcessorCount(N)
+if(NOT N EQUAL 0)
+    #set(CTEST_BUILD_FLAGS -j${N})
+    set(N_THREADS ${N})
+endif()
 
         #if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 #    add_compile_options(-Wreserved-id-macro)

@@ -43,6 +43,7 @@
 #include "appUtils_logging.hpp"
 #include "appUtils_stopwatch.hpp"
 #include "appUtils_signalHandler.hpp"
+#include "appUtils_commandlineParser.hpp"
 #include <iostream>
 #include <vector>
 
@@ -72,21 +73,16 @@ constexpr double z_0_default = 7.0  / 1000.0;
 int main(int argc, const char * argv[]) {
 
     try {
-        // read configuration file ======================================================================
-        if (argc<=2) {
-            std::cout << "Run abort: No run configuration or project name given." << std::endl;
-            return EXIT_FAILURE;
-        }
-        std::string projectName = argv[2];
-        std::cout << projectName << std::endl;
-        auto logger = AppUtils::createLogger(projectName+".log");
-
-        std::string confFileName = argv[1];
-        AppUtils::SimulationConfiguration simConf(confFileName, logger);
-        std::string confBasePath = simConf.confBasePath();
+        // parse commandline / create conf and logger ===================================================
+        AppUtils::CommandlineParser cmdLineParser(argc, argv, "BT-QITSim",
+                "Idealized Quadrupole Ion Trap (QIT) simulation", true);
+        std::string simResultBasename = cmdLineParser.projectName();
+        AppUtils::logger_ptr logger = cmdLineParser.logger();
+        AppUtils::simConf_ptr simConf = cmdLineParser.simulationConfiguration();
+        std::filesystem::path confBasePath = simConf->confBasePath();
 
         // read basic simulation parameters =============================================================
-        std::string integratorMode_str = simConf.stringParameter("integrator_mode");
+        std::string integratorMode_str = simConf->stringParameter("integrator_mode");
         IntegratorMode integratorMode;
         if (integratorMode_str=="verlet") {
             integratorMode = VERLET;
@@ -98,14 +94,14 @@ int main(int argc, const char * argv[]) {
             throw std::invalid_argument("wrong configuration value: integrator mode");
         }
 
-        unsigned int timeSteps = simConf.unsignedIntParameter("sim_time_steps");
-        unsigned int trajectoryWriteInterval = simConf.unsignedIntParameter("trajectory_write_interval");
-        unsigned int fftWriteInterval = simConf.unsignedIntParameter("fft_write_interval");
-        double dt = simConf.doubleParameter("dt");
+        unsigned int timeSteps = simConf->unsignedIntParameter("sim_time_steps");
+        unsigned int trajectoryWriteInterval = simConf->unsignedIntParameter("trajectory_write_interval");
+        unsigned int fftWriteInterval = simConf->unsignedIntParameter("fft_write_interval");
+        double dt = simConf->doubleParameter("dt");
         std::vector<int> nIons = std::vector<int>();
         std::vector<double> ionMasses = std::vector<double>();
         std::vector<double> ionCollisionDiameters_angstrom = std::vector<double>();
-        std::string fftWriteMode_str = simConf.stringParameter("fft_write_mode");
+        std::string fftWriteMode_str = simConf->stringParameter("fft_write_mode");
         FftWriteMode fftWriteMode = UNRESOLVED;
         if (fftWriteMode_str=="unresolved") {
             fftWriteMode = UNRESOLVED;
@@ -118,7 +114,7 @@ int main(int argc, const char * argv[]) {
         double r_0 = 0.0;
         double z_0 = 0.0;
 
-        std::string geometryMode_str = simConf.stringParameter("geometry_mode");
+        std::string geometryMode_str = simConf->stringParameter("geometry_mode");
         //GeometryMode geometryMode;
         if (geometryMode_str=="default") {
             //geometryMode = DEFAULT;
@@ -127,12 +123,12 @@ int main(int argc, const char * argv[]) {
         }
         else if (geometryMode_str=="variable") {
             //geometryMode = VARIABLE;
-            r_0 = simConf.doubleParameter("r_0");
-            z_0 = simConf.doubleParameter("z_0");
+            r_0 = simConf->doubleParameter("r_0");
+            z_0 = simConf->doubleParameter("z_0");
         }
         else if (geometryMode_str=="scaled") {
             //geometryMode = SCALED;
-            double geomScale = simConf.doubleParameter("geometry_scale");
+            double geomScale = simConf->doubleParameter("geometry_scale");
             r_0 = r_0_default*geomScale;
             z_0 = z_0_default*geomScale;
         }
@@ -146,16 +142,16 @@ int main(int argc, const char * argv[]) {
 
 
         //read physical configuration ===================================================================
-        double maxIonRadius = simConf.doubleParameter("max_ion_radius");
-        double backgroundPressure = simConf.doubleParameter("background_pressure_Pa");
-        double backgroundTemperature = simConf.doubleParameter("background_temperature_K");
-        double spaceChargeFactor = simConf.doubleParameter("space_charge_factor");
-        double collisionGasMassAmu = simConf.doubleParameter("collision_gas_mass_amu");
-        double collisionGasDiameterM = simConf.doubleParameter("collision_gas_diameter_angstrom")*1e-10;
+        double maxIonRadius = simConf->doubleParameter("max_ion_radius");
+        double backgroundPressure = simConf->doubleParameter("background_pressure_Pa");
+        double backgroundTemperature = simConf->doubleParameter("background_temperature_K");
+        double spaceChargeFactor = simConf->doubleParameter("space_charge_factor");
+        double collisionGasMassAmu = simConf->doubleParameter("collision_gas_mass_amu");
+        double collisionGasDiameterM = simConf->doubleParameter("collision_gas_diameter_angstrom")*1e-10;
 
 
         //read rf configuration =========================================================================
-        std::string fieldMode_str = simConf.stringParameter("field_mode");
+        std::string fieldMode_str = simConf->stringParameter("field_mode");
         FieldMode fieldMode;
         std::vector<double> higherFieldOrdersCoefficients;
         if (fieldMode_str=="basic") {
@@ -163,22 +159,22 @@ int main(int argc, const char * argv[]) {
         }
         else if (fieldMode_str=="higher_orders") {
             fieldMode = HIGHER_ORDERS;
-            higherFieldOrdersCoefficients = simConf.doubleVectorParameter("field_higher_orders_coeffs");
+            higherFieldOrdersCoefficients = simConf->doubleVectorParameter("field_higher_orders_coeffs");
         }
         else {
             throw std::invalid_argument("wrong configuration value: field_mode");
         }
 
-        double f_rf = simConf.doubleParameter("f_rf"); //RF frequency 1e6;
+        double f_rf = simConf->doubleParameter("f_rf"); //RF frequency 1e6;
         double omega = f_rf*2.0*M_PI; //RF angular frequencyf_rf* 2.0 * M_PI;
 
         // read sampled RF waveform
         RfWaveMode rfWaveMode;
         std::unique_ptr<ParticleSimulation::SampledWaveform> rfSampledWaveForm;
-        if (simConf.isParameter("rf_waveform_csv_file")) {
+        if (simConf->isParameter("rf_waveform_csv_file")) {
             rfWaveMode = SAMPLED;
-            std::string rfWaveformFileName = simConf.pathRelativeToConfFile(
-                    simConf.stringParameter("rf_waveform_csv_file"));
+            std::string rfWaveformFileName = simConf->pathRelativeToConfFile(
+                    simConf->stringParameter("rf_waveform_csv_file"));
 
             rfSampledWaveForm = std::make_unique<ParticleSimulation::SampledWaveform>(rfWaveformFileName);
             if (!rfSampledWaveForm->good()) {
@@ -194,15 +190,15 @@ int main(int argc, const char * argv[]) {
         RfAmplitudeMode rfAmplitudeMode;
         std::vector<double> V_0_ramp;
         double V_0 = 0.0;
-        if (simConf.isParameter("V_rf_start")) {
+        if (simConf->isParameter("V_rf_start")) {
             rfAmplitudeMode = RAMPED_RF;
-            double V_rf_start = simConf.doubleParameter("V_rf_start");
-            double V_rf_end = simConf.doubleParameter("V_rf_end");
+            double V_rf_start = simConf->doubleParameter("V_rf_start");
+            double V_rf_end = simConf->doubleParameter("V_rf_end");
             V_0_ramp = ParticleSimulation::linspace(V_rf_start, V_rf_end, static_cast<int>(timeSteps));
         }
         else {
             rfAmplitudeMode = STATIC_RF;
-            V_0 = simConf.doubleParameter("V_rf");
+            V_0 = simConf->doubleParameter("V_rf");
         }
         std::vector<double> V_rf_export;
 
@@ -212,9 +208,9 @@ int main(int argc, const char * argv[]) {
         ExciteMode exciteMode;
         std::unique_ptr<ParticleSimulation::SampledWaveform> swiftWaveForm;
         double excitePulseLength = 0.0;
-        if (simConf.isParameter("excite_waveform_csv_file")) {
+        if (simConf->isParameter("excite_waveform_csv_file")) {
             exciteMode = SWIFT;
-            std::string swiftFileName = simConf.stringParameter("excite_waveform_csv_file");
+            std::string swiftFileName = simConf->stringParameter("excite_waveform_csv_file");
             swiftWaveForm = std::make_unique<ParticleSimulation::SampledWaveform>(swiftFileName);
             if (!swiftWaveForm->good()) {
                 logger->error("swift transient file not accessible");
@@ -223,16 +219,16 @@ int main(int argc, const char * argv[]) {
         }
         else {
             exciteMode = RECTPULSE;
-            excitePulseLength = simConf.doubleParameter("excite_pulse_length");
+            excitePulseLength = simConf->doubleParameter("excite_pulse_length");
         }
-        double excitePulsePotential = simConf.doubleParameter("excite_pulse_potential");
+        double excitePulsePotential = simConf->doubleParameter("excite_pulse_potential");
 
 
 
         //read ion configuration =======================================================================
         std::vector<std::unique_ptr<BTree::Particle>> particles;
         std::vector<BTree::Particle*> particlePtrs;
-        AppUtils::readIonDefinition(particles, particlePtrs, simConf);
+        AppUtils::readIonDefinition(particles, particlePtrs, *simConf);
         // init additional ion parameters:
         for (const auto& particle: particles) {
             particle->setFloatAttribute(key_rf_x, 0.0);
@@ -399,11 +395,11 @@ int main(int argc, const char * argv[]) {
 
         //prepare file writers and data writing functions ==============================================================================
         auto avgPositionWriter = std::make_unique<ParticleSimulation::AverageChargePositionWriter>(
-                projectName+"_averagePosition.txt");
+                simResultBasename+"_averagePosition.txt");
         auto fftWriter = std::make_unique<ParticleSimulation::IdealizedQitFFTWriter>(particlePtrs,
-                projectName+"_fft.txt");
+                simResultBasename+"_fft.txt");
 
-        auto ionsInactiveWriter = std::make_unique<ParticleSimulation::Scalar_writer>(projectName+"_ionsInactive.txt");
+        auto ionsInactiveWriter = std::make_unique<ParticleSimulation::Scalar_writer>(simResultBasename+"_ionsInactive.txt");
         ParticleSimulation::partAttribTransformFctType additionalParameterTransformFct =
                 [](BTree::Particle* particle) -> std::vector<double> {
                     std::vector<double> result = {
@@ -434,7 +430,7 @@ int main(int argc, const char * argv[]) {
 
         std::vector<std::string> integerParticleAttributesNames = {"global index"};
 
-        auto hdf5Writer = std::make_unique<ParticleSimulation::TrajectoryHDF5Writer>(projectName+"_trajectories.hd5");
+        auto hdf5Writer = std::make_unique<ParticleSimulation::TrajectoryHDF5Writer>(simResultBasename+"_trajectories.hd5");
         hdf5Writer->setParticleAttributes(auxParamNames, additionalParameterTransformFct);
         hdf5Writer->setParticleAttributes(integerParticleAttributesNames, integerParticleAttributesTransformFct);
 
@@ -509,6 +505,9 @@ int main(int argc, const char * argv[]) {
         logger->info("CPU time: {} s", stopWatch.elapsedSecondsCPU());
         logger->info("Finished in {} seconds (wall clock time)", stopWatch.elapsedSecondsWall());
         return EXIT_SUCCESS;
+    }
+    catch(AppUtils::TerminatedWhileCommandlineParsing& terminatedMessage){
+        return terminatedMessage.returnCode();
     }
     catch(const std::invalid_argument& ia){
         std::cout << ia.what() << std::endl;

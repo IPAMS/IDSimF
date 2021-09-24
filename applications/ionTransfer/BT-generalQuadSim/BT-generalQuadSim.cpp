@@ -36,8 +36,6 @@
 #include "PSim_boxStartZone.hpp"
 #include "PSim_verletIntegrator.hpp"
 #include "CollisionModel_HardSphere.hpp"
-#include "appUtils_simulationConfiguration.hpp"
-#include "appUtils_logging.hpp"
 #include "appUtils_stopwatch.hpp"
 #include "appUtils_signalHandler.hpp"
 #include "appUtils_commandlineParser.hpp"
