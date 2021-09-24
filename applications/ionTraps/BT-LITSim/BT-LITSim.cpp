@@ -46,6 +46,7 @@
 #include "appUtils_logging.hpp"
 #include "appUtils_stopwatch.hpp"
 #include "appUtils_signalHandler.hpp"
+#include "appUtils_commandlineParser.hpp"
 #include <iostream>
 #include <vector>
 #include <ctime>
@@ -66,22 +67,17 @@ const std::string key_trapForce_z = "keyTrapForceZ";
 int main(int argc, const char * argv[]) {
 
     try {
-        // read configuration file ======================================================================
-        if (argc<=2) {
-            std::cout << "Run abort: No run configuration or project name given." << std::endl;
-            return EXIT_FAILURE;
-        }
-        std::string projectName = argv[2];
-        std::cout << projectName << std::endl;
-        auto logger = AppUtils::createLogger(projectName+".log");
-
-        std::string confFileName = argv[1];
-        AppUtils::SimulationConfiguration simConf(confFileName, logger);
-        std::filesystem::path confBasePath = simConf.confBasePath();
+        // parse commandline / create conf and logger ===================================================
+        AppUtils::CommandlineParser cmdLineParser(argc, argv, "BT-LITSim",
+                "Linear ion trap (LIT) simulation", true);
+        std::string simResultBasename = cmdLineParser.projectName();
+        AppUtils::logger_ptr logger = cmdLineParser.logger();
+        AppUtils::simConf_ptr simConf = cmdLineParser.simulationConfiguration();
+        std::filesystem::path confBasePath = simConf->confBasePath();
 
 
         // read basic simulation parameters =============================================================
-        std::string integratorMode_str = simConf.stringParameter("integrator_mode");
+        std::string integratorMode_str = simConf->stringParameter("integrator_mode");
         IntegratorMode integratorMode;
         if (integratorMode_str=="parallel_verlet") {
             integratorMode = PARALLEL_VERLET;
@@ -90,12 +86,12 @@ int main(int argc, const char * argv[]) {
             throw std::invalid_argument("wrong configuration value: integrator mode");
         }
 
-        unsigned int timeSteps = simConf.unsignedIntParameter("sim_time_steps");
-        int trajectoryWriteInterval = simConf.intParameter("trajectory_write_interval");
-        int fftWriteInterval = simConf.intParameter("fft_write_interval");
-        double dt = simConf.doubleParameter("dt");
+        unsigned int timeSteps = simConf->unsignedIntParameter("sim_time_steps");
+        int trajectoryWriteInterval = simConf->intParameter("trajectory_write_interval");
+        int fftWriteInterval = simConf->intParameter("fft_write_interval");
+        double dt = simConf->doubleParameter("dt");
 
-        std::string fftWriteMode_str = simConf.stringParameter("fft_write_mode");
+        std::string fftWriteMode_str = simConf->stringParameter("fft_write_mode");
         FftWriteMode fftWriteMode = UNRESOLVED;
         if (fftWriteMode_str=="unresolved") {
             fftWriteMode = UNRESOLVED;
@@ -105,9 +101,9 @@ int main(int argc, const char * argv[]) {
         }
 
         //read potential array configuration of the trap =================================================
-        double paSpatialScale = simConf.doubleParameter("potential_array_scaling");
+        double paSpatialScale = simConf->doubleParameter("potential_array_scaling");
         std::vector<std::unique_ptr<ParticleSimulation::SimionPotentialArray>> potentialArrays;
-        std::vector<std::string> potentialArraysNames = simConf.stringVectorParameter("potential_arrays");
+        std::vector<std::string> potentialArraysNames = simConf->stringVectorParameter("potential_arrays");
         for (const auto& paName: potentialArraysNames) {
             std::filesystem::path paPath = confBasePath/paName;
             std::unique_ptr<ParticleSimulation::SimionPotentialArray> pa_pt =
@@ -115,17 +111,17 @@ int main(int argc, const char * argv[]) {
             potentialArrays.push_back(std::move(pa_pt));
         }
 
-        double axialPotentialCenter = simConf.doubleParameter("axial_potential_center");
-        double axialPotentialFloowWidth = simConf.doubleParameter("axial_potential_floor_width");
-        double axialPotentialGradient = simConf.doubleParameter("axial_potential_gradient_V/m");
+        double axialPotentialCenter = simConf->doubleParameter("axial_potential_center");
+        double axialPotentialFloowWidth = simConf->doubleParameter("axial_potential_floor_width");
+        double axialPotentialGradient = simConf->doubleParameter("axial_potential_gradient_V/m");
 
         // SIMION fast adjust PAs use 10000 as normalized potential value, thus we have to scale everything with 1/10000
         double potentialScale = 1.0/10000.0;
-        std::vector<double> potentialsFactorsDc = simConf.doubleVectorParameter("dc_potentials", potentialScale);
-        std::vector<double> potentialFactorsRf = simConf.doubleVectorParameter("rf_potential_factors", potentialScale);
-        std::vector<double> potentialFactorsExcite = simConf.doubleVectorParameter("excite_potential_factors",
+        std::vector<double> potentialsFactorsDc = simConf->doubleVectorParameter("dc_potentials", potentialScale);
+        std::vector<double> potentialFactorsRf = simConf->doubleVectorParameter("rf_potential_factors", potentialScale);
+        std::vector<double> potentialFactorsExcite = simConf->doubleVectorParameter("excite_potential_factors",
                 potentialScale);
-        std::vector<double> detectionPAFactorsRaw = simConf.doubleVectorParameter("detection_potential_factors");
+        std::vector<double> detectionPAFactorsRaw = simConf->doubleVectorParameter("detection_potential_factors");
         std::vector<ParticleSimulation::SimionPotentialArray*> detectionPAs;
 
         std::vector<double> detectionPAFactors;
@@ -139,9 +135,9 @@ int main(int argc, const char * argv[]) {
 
         // defining simulation domain box (used for ion termination):
         std::array<std::array<double, 2>, 3> simulationDomainBoundaries;
-        if (simConf.isParameter("simulation_domain_boundaries")) {
+        if (simConf->isParameter("simulation_domain_boundaries")) {
             // get manual simulation domain boundaries from config file
-            simulationDomainBoundaries = simConf.double3dBox("simulation_domain_boundaries");
+            simulationDomainBoundaries = simConf->double3dBox("simulation_domain_boundaries");
         }
         else {
             // use minimum PA extent box as domain boundaries
@@ -163,29 +159,29 @@ int main(int argc, const char * argv[]) {
         }
 
         //read physical configuration ===================================================================
-        double backgroundPressure = simConf.doubleParameter("background_pressure_Pa");
-        double backgroundTemperature = simConf.doubleParameter("background_temperature_K");
-        double spaceChargeFactor = simConf.doubleParameter("space_charge_factor");
-        double collisionGasMassAmu = simConf.doubleParameter("collision_gas_mass_amu");
-        double collisionGasDiameterM = simConf.doubleParameter("collision_gas_diameter_angstrom")*1e-10;
+        double backgroundPressure = simConf->doubleParameter("background_pressure_Pa");
+        double backgroundTemperature = simConf->doubleParameter("background_temperature_K");
+        double spaceChargeFactor = simConf->doubleParameter("space_charge_factor");
+        double collisionGasMassAmu = simConf->doubleParameter("collision_gas_mass_amu");
+        double collisionGasDiameterM = simConf->doubleParameter("collision_gas_diameter_angstrom")*1e-10;
 
 
         //read rf configuration =========================================================================
-        double f_rf = simConf.doubleParameter("f_rf"); //RF frequency 1e6;
+        double f_rf = simConf->doubleParameter("f_rf"); //RF frequency 1e6;
         double omega = f_rf*2.0*M_PI; //RF angular frequencyf_rf* 2.0 * M_PI;
 
         RfAmplitudeMode rfMode;
         std::vector<double> V_0_ramp;
         double V_0 = 0.0;
-        if (simConf.isParameter("V_rf_start")) {
+        if (simConf->isParameter("V_rf_start")) {
             rfMode = RAMPED_RF;
-            double V_rf_start = simConf.doubleParameter("V_rf_start");
-            double V_rf_end = simConf.doubleParameter("V_rf_end");
+            double V_rf_start = simConf->doubleParameter("V_rf_start");
+            double V_rf_end = simConf->doubleParameter("V_rf_end");
             V_0_ramp = ParticleSimulation::linspace(V_rf_start, V_rf_end, static_cast<int>(timeSteps));
         }
         else {
             rfMode = STATIC_RF;
-            V_0 = simConf.doubleParameter("V_rf");
+            V_0 = simConf->doubleParameter("V_rf");
         }
         std::vector<double> V_rf_export;
 
@@ -194,9 +190,9 @@ int main(int argc, const char * argv[]) {
         ExciteMode exciteMode;
         std::unique_ptr<ParticleSimulation::SampledWaveform> swiftWaveForm;
         double excitePulseLength = 0.0;
-        if (simConf.isParameter("excite_waveform_csv_file")) {
+        if (simConf->isParameter("excite_waveform_csv_file")) {
             exciteMode = SWIFT;
-            std::string swiftFileName = simConf.stringParameter("excite_waveform_csv_file");
+            std::string swiftFileName = simConf->stringParameter("excite_waveform_csv_file");
             swiftWaveForm = std::make_unique<ParticleSimulation::SampledWaveform>(swiftFileName);
             if (!swiftWaveForm->good()) {
                 logger->error("swift transient file not accessible");
@@ -205,14 +201,14 @@ int main(int argc, const char * argv[]) {
         }
         else {
             exciteMode = RECTPULSE;
-            excitePulseLength = simConf.doubleParameter("excite_pulse_length");
+            excitePulseLength = simConf->doubleParameter("excite_pulse_length");
         }
-        double excitePulsePotential = simConf.doubleParameter("excite_pulse_potential");
+        double excitePulsePotential = simConf->doubleParameter("excite_pulse_potential");
 
         //read ion configuration =======================================================================
         std::vector<std::unique_ptr<BTree::Particle>> particles;
         std::vector<BTree::Particle*> particlePtrs;
-        AppUtils::readIonDefinition(particles, particlePtrs, simConf);
+        AppUtils::readIonDefinition(particles, particlePtrs, *simConf);
 
         // init additional ion parameters:
         for (const auto& particle: particles) {
@@ -333,11 +329,11 @@ int main(int argc, const char * argv[]) {
 
         //prepare file writers and data writing functions ==============================================================================
         auto avgPositionWriter = std::make_unique<ParticleSimulation::AverageChargePositionWriter>(
-                projectName+"_averagePosition.txt");
+                simResultBasename+"_averagePosition.txt");
 
         auto fftWriter = std::make_unique<ParticleSimulation::InductionCurrentWriter>(
-                particlePtrs, projectName+"_fft.txt", detectionPAs, detectionPAFactors, paSpatialScale);
-        auto ionsInactiveWriter = std::make_unique<ParticleSimulation::Scalar_writer>(projectName+"_ionsInactive.txt");
+                particlePtrs, simResultBasename+"_fft.txt", detectionPAs, detectionPAFactors, paSpatialScale);
+        auto ionsInactiveWriter = std::make_unique<ParticleSimulation::Scalar_writer>(simResultBasename+"_ionsInactive.txt");
 
         ParticleSimulation::partAttribTransformFctType particleAttributesTransformFct =
                 [](BTree::Particle* particle) -> std::vector<double> {
@@ -373,7 +369,7 @@ int main(int argc, const char * argv[]) {
 
         std::vector<std::string> integerParticleAttributesNames = {"global index", "index"};
 
-        auto hdf5Writer = std::make_unique<ParticleSimulation::TrajectoryHDF5Writer>(projectName+"_trajectories.hd5");
+        auto hdf5Writer = std::make_unique<ParticleSimulation::TrajectoryHDF5Writer>(simResultBasename+"_trajectories.hd5");
         hdf5Writer->setParticleAttributes(particleAttributesNames, particleAttributesTransformFct);
         hdf5Writer->setParticleAttributes(integerParticleAttributesNames, integerParticleAttributesTransformFct);
 
@@ -452,6 +448,9 @@ int main(int argc, const char * argv[]) {
     {
         std::cout << pe.what() << std::endl;
         return EXIT_FAILURE;
+    }
+    catch(AppUtils::TerminatedWhileCommandlineParsing& terminatedMessage){
+        return terminatedMessage.returnCode();
     }
     catch(const std::invalid_argument& ia){
         std::cout << ia.what() << std::endl;
