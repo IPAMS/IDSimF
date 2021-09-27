@@ -55,10 +55,10 @@ int main(int argc, const char * argv[]) {
 
         AppUtils::CommandlineParser cmdLineParser(argc, argv, "DMS simplified", "Simplified DMS Simulation", true);
         std::string projectName = cmdLineParser.projectName();
-        auto logger = cmdLineParser.logger();
+        AppUtils::logger_ptr logger = cmdLineParser.logger();
 
         std::string confFileName = cmdLineParser.confFileName();
-        auto simConf = cmdLineParser.simulationConfiguration();
+        AppUtils::simConf_ptr simConf = cmdLineParser.simulationConfiguration();
 
         std::vector<unsigned int> nParticles = simConf->unsignedIntVectorParameter("n_particles");
         int nSteps = simConf->intParameter("sim_time_steps");

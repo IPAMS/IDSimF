@@ -44,8 +44,8 @@ int main(int argc, const char * argv[]) {
         AppUtils::CommandlineParser cmdLineParser(argc, argv, "BT-idealIsothermReactorSim",
                 "RS Simulation in an ideally mixed, isotherm reactor", true);
         std::string resultFilename = cmdLineParser.projectName() + "_result.txt";
-        auto logger = cmdLineParser.logger();
-        auto simConf = cmdLineParser.simulationConfiguration();
+        AppUtils::logger_ptr logger = cmdLineParser.logger();
+        AppUtils::simConf_ptr simConf = cmdLineParser.simulationConfiguration();
 
         std::string rsConfigFileName = simConf->pathRelativeToConfFile(
                 simConf->stringParameter("reaction_configuration"));

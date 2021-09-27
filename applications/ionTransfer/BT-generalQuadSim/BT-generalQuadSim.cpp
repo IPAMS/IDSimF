@@ -54,8 +54,8 @@ int main(int argc, const char * argv[]) {
         AppUtils::CommandlineParser cmdLineParser(argc, argv, "BT-generalQuadSim",
                 "Generalized quadrupolar / multipolar ion guide simulation", false);
         std::string simResultBasename = cmdLineParser.projectName();
-        auto logger = cmdLineParser.logger();
-        auto simConf = cmdLineParser.simulationConfiguration();
+        AppUtils::logger_ptr logger = cmdLineParser.logger();
+        AppUtils::simConf_ptr simConf = cmdLineParser.simulationConfiguration();
 
         // read basic simulation parameters =============================================================
         unsigned int timeSteps = simConf->unsignedIntParameter("sim_time_steps");

@@ -48,10 +48,10 @@ int main(int argc, const char * argv[]) {
         AppUtils::CommandlineParser cmdLineParser(argc, argv, "BT-spaceChargeMinimalParallelSim",
                 "Basic parallel space charge simulation (mostly for testing purposes)", true);
         std::string simResultBasename = cmdLineParser.projectName();
-        auto logger = cmdLineParser.logger();
+        AppUtils::logger_ptr logger = cmdLineParser.logger();
 
         std::string confFileName = cmdLineParser.confFileName();
-        auto simConf = cmdLineParser.simulationConfiguration();
+        AppUtils::simConf_ptr simConf = cmdLineParser.simulationConfiguration();
 
         // read basic simulation parameters =============================================================
         unsigned int timeSteps = simConf->unsignedIntParameter("sim_time_steps");
