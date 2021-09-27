@@ -86,7 +86,7 @@ int main(int argc, const char * argv[]) {
         // parse commandline / create conf and logger ===================================================
         AppUtils::CommandlineParser cmdLineParser(argc, argv, "BT-RS-reactiveQITSim",
                 "Quadrupole Ion Trap (QIT) simulation with chemical reactions", false);
-        std::string simResultBasename = cmdLineParser.projectName();
+        std::string simResultBasename = cmdLineParser.resultName();
         AppUtils::logger_ptr logger = cmdLineParser.logger();
         AppUtils::simConf_ptr simConf = cmdLineParser.simulationConfiguration();
         std::filesystem::path confBasePath = simConf->confBasePath();

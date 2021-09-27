@@ -48,7 +48,7 @@ int main(int argc, const char * argv[]) {
         // parse commandline / create conf and logger ===================================================
         AppUtils::CommandlineParser cmdLineParser(argc, argv, "BT-staticSimionPASim",
                 "Simple trajectory simulation (non parallel) with space charge and SIMION electrode geometries", false);
-        std::string simResultBasename = cmdLineParser.projectName();
+        std::string simResultBasename = cmdLineParser.resultName();
         AppUtils::logger_ptr logger = cmdLineParser.logger();
 
         std::string confFileName = cmdLineParser.confFileName();

@@ -38,7 +38,7 @@ AppUtils::CommandlineParser::CommandlineParser(
     CLI::App app{appDescription, appName};
 
     app.add_option("--conf,-c,run_config",confFileName_, "Configuration file")->required();
-    app.add_option("--result,-r,result",projectName_, "Result name")->required();
+    app.add_option("--result,-r,result",simResultName_, "Result name")->required();
 
     if (multithreaded){
         app.add_option("--n_threads,-n", numberOfThreads_, "number of parallel threads")->required();
@@ -55,7 +55,7 @@ AppUtils::CommandlineParser::CommandlineParser(
     if (multithreaded){
         omp_set_num_threads(numberOfThreads_);
     }
-    logger_ = AppUtils::createLogger(projectName_ + ".log");
+    logger_ = AppUtils::createLogger(simResultName_ + ".log");
     simulationConfiguration_ = std::make_shared<SimulationConfiguration>(confFileName_, logger_);
 }
 
@@ -83,8 +83,8 @@ std::string AppUtils::CommandlineParser::confFileName() {
 /**
  * Returns the result base name specified in the commandline
  */
-std::string AppUtils::CommandlineParser::projectName() {
-    return projectName_;
+std::string AppUtils::CommandlineParser::resultName() {
+    return simResultName_;
 }
 
 /**

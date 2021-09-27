@@ -58,7 +58,7 @@ int main(int argc, const char * argv[]) {
     try {
         // open configuration, parse configuration file =========================================
         AppUtils::CommandlineParser cmdLineParser(argc, argv, "BT-RS-DMSSim", "DMS Simulation with trajectories and chemistry", false);
-        std::string projectName = cmdLineParser.projectName();
+        std::string projectName = cmdLineParser.resultName();
         AppUtils::logger_ptr logger = cmdLineParser.logger();
 
         std::string confFileName = cmdLineParser.confFileName();

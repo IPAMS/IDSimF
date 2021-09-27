@@ -63,14 +63,14 @@ namespace AppUtils{
         CommandlineParser(int argc, const char * argv[], std::string appName, std::string appDescription,  bool multithreaded=false);
         simConf_ptr simulationConfiguration();
         AppUtils::logger_ptr logger();
-        std::string projectName();
+        std::string resultName();
         std::string confFileName();
         int numberOfThreads();
 
     private:
         simConf_ptr simulationConfiguration_;
         AppUtils::logger_ptr logger_;
-        std::string projectName_;
+        std::string simResultName_;
         std::string confFileName_;
         int numberOfThreads_= 1;
     };

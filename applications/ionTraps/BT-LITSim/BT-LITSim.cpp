@@ -70,7 +70,7 @@ int main(int argc, const char * argv[]) {
         // parse commandline / create conf and logger ===================================================
         AppUtils::CommandlineParser cmdLineParser(argc, argv, "BT-LITSim",
                 "Linear ion trap (LIT) simulation", true);
-        std::string simResultBasename = cmdLineParser.projectName();
+        std::string simResultBasename = cmdLineParser.resultName();
         AppUtils::logger_ptr logger = cmdLineParser.logger();
         AppUtils::simConf_ptr simConf = cmdLineParser.simulationConfiguration();
         std::filesystem::path confBasePath = simConf->confBasePath();

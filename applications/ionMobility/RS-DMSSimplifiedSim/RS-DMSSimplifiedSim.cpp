@@ -54,7 +54,7 @@ int main(int argc, const char * argv[]) {
     try{
 
         AppUtils::CommandlineParser cmdLineParser(argc, argv, "DMS simplified", "Simplified DMS Simulation", true);
-        std::string projectName = cmdLineParser.projectName();
+        std::string projectName = cmdLineParser.resultName();
         AppUtils::logger_ptr logger = cmdLineParser.logger();
 
         std::string confFileName = cmdLineParser.confFileName();
