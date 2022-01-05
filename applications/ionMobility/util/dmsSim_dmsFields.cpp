@@ -103,3 +103,25 @@ SVFieldFctType createSVFieldFunction(SVMode svMode, double fieldWavePeriod){
 
     return SVFieldFct;
 }
+
+CVMode parseCVModeConfiguration(AppUtils::simConf_ptr simConf){
+    std::string cvModeStr = simConf->stringParameter("cv_mode");
+    CVMode cvMode;
+    if (cvModeStr == "static"){
+        cvMode = STATIC_CV;
+    }
+    else if (cvModeStr == "auto"){
+        cvMode = AUTO_CV;
+    }
+    else if (cvModeStr == "modulated"){
+        cvMode = MODULATED_CV;
+    }
+    else if (cvModeStr == "modulated_auto"){
+        cvMode = MODULATED_AUTO_CV;
+    }
+    else{
+        throw std::invalid_argument("wrong configuration value: cv_mode");
+    }
+
+    return cvMode;
+}

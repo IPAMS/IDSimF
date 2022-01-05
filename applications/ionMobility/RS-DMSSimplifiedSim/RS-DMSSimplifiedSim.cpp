@@ -75,27 +75,11 @@ int main(int argc, const char * argv[]) {
         double backgroundPressure_Pa = simConf->doubleParameter("background_pressure_Pa");
 
         //field parameters:
-        std::string cvModeStr = simConf->stringParameter("cv_mode");
-        CVMode cvMode;
+        CVMode cvMode = parseCVModeConfiguration(simConf);
         double meanZPos = 0.0; //variable used for automatic CV correction
         double cvRelaxationParameter = 0.0;
-
-        if (cvModeStr == "static"){
-            cvMode = STATIC_CV;
-        }
-        else if (cvModeStr == "auto"){
-            cvMode = AUTO_CV;
+        if (cvMode == AUTO_CV || cvMode == MODULATED_AUTO_CV){
             cvRelaxationParameter = simConf->doubleParameter("cv_relaxation_parameter");
-        }
-        else if (cvModeStr == "modulated"){
-            cvMode = MODULATED_CV;
-        }
-        else if (cvModeStr == "modulated_auto"){
-            cvMode = MODULATED_AUTO_CV;
-            cvRelaxationParameter = simConf->doubleParameter("cv_relaxation_parameter");
-        }
-        else{
-            throw std::invalid_argument("wrong configuration value: cv_mode");
         }
 
         SVMode svMode = parseSVModeConfiguration(simConf);

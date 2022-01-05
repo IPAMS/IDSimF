@@ -40,5 +40,6 @@ using SVFieldFctType = std::function<double(double fieldAmplitude_VPerM, double 
 SVMode parseSVModeConfiguration(AppUtils::simConf_ptr simConf);
 SVFieldFctType createSVFieldFunction(SVMode svMode, double fieldWavePeriod);
 
+CVMode parseCVModeConfiguration(AppUtils::simConf_ptr simConf);
 
 #endif //IDSIMF_DMSSIM_DMSFIELDS_HPP
