@@ -45,14 +45,29 @@ namespace Core{
 
     /**
      * Generalized source for random bits, which can be used as random bit source for random distributions
+     *
+     * Note: Since min and max has to be constexpr, min and max are fixed for all implmementations of this
+     * interface class.
      */
     template <class result_T>
     class RandomBitSource{
     public:
         typedef result_T result_type;
         virtual ~RandomBitSource() =default;
-        virtual result_T min() =0;
-        virtual result_T max() =0;
+
+        /**
+         * Note: Min is fixed to mersenne twister min
+         */
+        constexpr static rndBit_type min(){
+            return std::mt19937::min();
+        };
+
+        /**
+         * Note: Max is fixed to mersenne twister max
+         */
+        constexpr static rndBit_type max(){
+            return std::mt19937::max();
+        };
         virtual result_T operator()() =0;
     };
 
@@ -62,8 +77,6 @@ namespace Core{
     class MersenneBitSource: public RandomBitSource<rndBit_type>{
     public:
         MersenneBitSource();
-        rndBit_type min() override;
-        rndBit_type max() override;
         rndBit_type operator()() override;
 
         std::mt19937 internalRandomSource;
@@ -76,8 +89,6 @@ namespace Core{
     class TestBitSource: public RandomBitSource<rndBit_type>{
     public:
         TestBitSource();
-        rndBit_type min() override;
-        rndBit_type max() override;
         rndBit_type operator()() override;
 
     private:

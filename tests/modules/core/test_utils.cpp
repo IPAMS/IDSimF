@@ -115,7 +115,7 @@ template<class GeneratorPoolType> void testUniformCustomDistribution(int nSample
 TEST_CASE("Test random bit sources") {
     SECTION("Test Mersenne Bit Source"){
         Core::MersenneBitSource mersenneSource;
-        std::vector<int> testVector = {1,2,3,4,5,6,7,8};
+        std::vector<int> testVector = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20};
         std::shuffle(testVector.begin(), testVector.end(), mersenneSource);
 
         CHECK( (testVector[0] != 1 && testVector[1] != 2) );
@@ -162,7 +162,6 @@ TEST_CASE("Test productive random generator pool") {
 
 
 TEST_CASE( "Test productive random distributions", "[Core][random]") {
-
 
     SECTION("Uniform random distribution should have the correct mean and deviation") {
         Core::RandomGeneratorPool rngPool;

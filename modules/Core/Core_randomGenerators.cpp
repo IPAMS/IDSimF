@@ -37,16 +37,16 @@ internalRandomSource(Core::rdSeed())
 /**
  * Maximum value of the value range
  */
-Core::rndBit_type Core::MersenneBitSource::max() {
-    return internalRandomSource.max();
-}
+/*Core::rndBit_type Core::MersenneBitSource::max() {
+    return std::mt19937::max();
+}*/
 
 /**
  * Minimum value of the value range
  */
-Core::rndBit_type Core::MersenneBitSource::min() {
-    return internalRandomSource.min();
-}
+/*Core::rndBit_type Core::MersenneBitSource::min() {
+    return std::mt19937::min();
+}*/
 
 /**
  * Gets a random bit value
@@ -65,16 +65,16 @@ sampleIndex_(0)
 /**
  * Maximum value of the value range
  */
-Core::rndBit_type Core::TestBitSource::max() {
+/*Core::rndBit_type Core::TestBitSource::max() {
     return 4294967295;
-}
+}*/
 
 /**
  * Minimum value of the value range
  */
-Core::rndBit_type Core::TestBitSource::min() {
+/*Core::rndBit_type Core::TestBitSource::min() {
     return 0;
-}
+}*/
 
 /**
  * Generates next value from the predefined, short, list of bit values / bit patterns
@@ -90,7 +90,8 @@ Core::rndBit_type Core::TestBitSource::operator()() {
  * @param min lower boundary of the interval
  * @param max upper boundary of the interval
  */
-Core::UniformRandomDistribution::UniformRandomDistribution(double min, double max, Core::RandomBitSource<rndBit_type>* randomSource):
+Core::UniformRandomDistribution::UniformRandomDistribution(double min, double max,
+                                                           Core::RandomBitSource<rndBit_type>* randomSource):
 randomSource_(randomSource),
 internalUniformDist_(min, max)
 {}

@@ -7,7 +7,6 @@
 #include <cmath>
 
 
-
 int main() {
     std::cout << "Benchmark HDF5 file writer" << std::endl;
 
