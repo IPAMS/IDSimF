@@ -33,7 +33,7 @@
 #include "RS_ConcentrationFileWriter.hpp"
 #include "PSim_util.hpp"
 #include "PSim_constants.hpp"
-#include "PSim_verletIntegrator.hpp"
+#include "PSim_parallelVerletIntegrator.hpp"
 #include "PSim_trajectoryExplorerJSONwriter.hpp"
 #include "PSim_scalar_writer.hpp"
 #include "CollisionModel_StatisticalDiffusion.hpp"
@@ -253,7 +253,7 @@ int main(int argc, const char * argv[]) {
 
         auto accelerationFct =
                 [&fieldSV_VPerM, &fieldCV_VPerM, field_F, field_W, field_h, &fieldMagnitude, spaceChargeFactor]
-                        (BTree::Particle* particle, int /*particleIndex*/, BTree::Tree& tree, double time, int /*timestep*/) {
+                        (BTree::Particle* particle, int /*particleIndex*/, auto& tree, double time, int /*timestep*/) {
 
                     double particleCharge = particle->getCharge();
                     double voltageSVgp = fieldSV_VPerM*0.6667; // V/m (1V/m peak to peak is 0.6667V/m ground to peak)
@@ -284,7 +284,7 @@ int main(int argc, const char * argv[]) {
         auto timestepWriteFct =
                 [&jsonWriter, &voltageWriter, &additionalParameterTransformFct, trajectoryWriteInterval,
                         &rsSim, &resultFilewriter, concentrationWriteInterval, &fieldMagnitude, &logger]
-                        (std::vector<BTree::Particle*>& particles, BTree::Tree& tree, double time, int timestep,
+                        (std::vector<BTree::Particle*>& particles, auto& tree, double time, int timestep,
                          bool lastTimestep) {
 
                     if (timestep%concentrationWriteInterval==0) {
@@ -312,7 +312,7 @@ int main(int argc, const char * argv[]) {
 
         auto otherActionsFct = [electrodeHalfDistance_m, electrodeLength_m, &ionsInactive](
                 Core::Vector& newPartPos, BTree::Particle* particle,
-                int /*particleIndex*/, BTree::Tree& /*tree*/, double time, int /*timestep*/) {
+                int /*particleIndex*/, auto& /*tree*/, double time, int /*timestep*/) {
 
             if (std::fabs(newPartPos.z())>=electrodeHalfDistance_m) {
                 particle->setActive(false);
@@ -371,7 +371,7 @@ int main(int argc, const char * argv[]) {
         }
 
         //init trajectory simulation object:
-        ParticleSimulation::VerletIntegrator verletIntegrator(
+        ParticleSimulation::ParallelVerletIntegrator verletIntegrator(
                 particlesPtrs,
                 accelerationFct, timestepWriteFct, otherActionsFct, ParticleSimulation::noFunction,
                 collisionModelPtr.get());
