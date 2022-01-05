@@ -30,16 +30,19 @@
 #define IDSIMF_DMSSIM_DMSFIELDS_HPP
 
 #include "appUtils_simulationConfiguration.hpp"
+#include "PSim_sampledWaveform.hpp"
 #include <functional>
 
 enum CVMode {STATIC_CV, AUTO_CV, MODULATED_CV, MODULATED_AUTO_CV};
 enum SVMode {BI_SIN, SQUARE, CLIPPED_SIN};
 
 using SVFieldFctType = std::function<double(double fieldAmplitude_VPerM, double time)>;
+using CVFieldFctType = std::function<double(double cvAmplitude_VPerM, double time)>;
 
 SVMode parseSVModeConfiguration(AppUtils::simConf_ptr simConf);
 SVFieldFctType createSVFieldFunction(SVMode svMode, double fieldWavePeriod);
 
 CVMode parseCVModeConfiguration(AppUtils::simConf_ptr simConf);
+CVFieldFctType createCVFieldFunction(CVMode cvMode, double fieldWavePeriod, AppUtils::simConf_ptr simConf);
 
 #endif //IDSIMF_DMSSIM_DMSFIELDS_HPP

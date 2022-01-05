@@ -20,6 +20,7 @@
  ****************************/
 
 #include "dmsSim_dmsFields.hpp"
+
 #include <cmath>
 
 SVMode parseSVModeConfiguration(AppUtils::simConf_ptr simConf){
@@ -124,4 +125,32 @@ CVMode parseCVModeConfiguration(AppUtils::simConf_ptr simConf){
     }
 
     return cvMode;
+}
+
+CVFieldFctType createCVFieldFunction(CVMode cvMode, double fieldWavePeriod, AppUtils::simConf_ptr simConf){
+    CVFieldFctType CVFieldFct;
+    if (cvMode == STATIC_CV || cvMode == AUTO_CV){
+        //non modulated CV:
+        auto nonModulatedCV =
+                [] (double cvAmplitude_VPerM, double) -> double{
+                    return cvAmplitude_VPerM;
+                };
+        CVFieldFct = nonModulatedCV;
+    }
+    else {
+        // modulated CV, read CV waveform and phase shift:
+        std::string cvWaveformFileName = simConf->pathRelativeToConfFile(simConf->stringParameter("cv_waveform"));
+        auto cvWaveForm = ParticleSimulation::SampledWaveform(cvWaveformFileName);
+
+        double cvPhaseShift = simConf->doubleParameter("cv_phase_shift");
+        auto modulatedCV =
+                [cvWaveForm, cvPhaseShift, fieldWavePeriod] (double cvAmplitude_VPerM, double time) -> double{
+                    double period = std::fmod(time, fieldWavePeriod) / fieldWavePeriod;
+                    double shiftedPeriod = std::fmod(period + cvPhaseShift, 1.0);
+                    return cvWaveForm.getInterpolatedValue(shiftedPeriod) * cvAmplitude_VPerM;
+                };
+        CVFieldFct = modulatedCV;
+    }
+
+    return CVFieldFct;
 }

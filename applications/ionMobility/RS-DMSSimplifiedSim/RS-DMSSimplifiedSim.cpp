@@ -32,7 +32,6 @@
 #include "RS_ConfigFileParser.hpp"
 #include "RS_ConcentrationFileWriter.hpp"
 #include "PSim_trajectoryExplorerJSONwriter.hpp"
-#include "PSim_sampledWaveform.hpp"
 #include "PSim_scalar_writer.hpp"
 #include "PSim_util.hpp"
 #include "appUtils_simulationConfiguration.hpp"
@@ -175,31 +174,7 @@ int main(int argc, const char * argv[]) {
 
         // define trajectory integration parameters / functions =================================
         SVFieldFctType SVFieldFct = createSVFieldFunction(svMode, fieldWavePeriod);
-
-
-        std::function<double(double cvAmplitude_VPerM, double time)> CVFieldFct;
-        if (cvMode == STATIC_CV || cvMode == AUTO_CV){
-            //non modulated CV:
-            auto nonModulatedCV =
-                [] (double cvAmplitude_VPerM, double) -> double{
-                    return cvAmplitude_VPerM;
-                };
-            CVFieldFct = nonModulatedCV;
-        }
-        else {
-            // modulated CV, read CV waveform and phase shift:
-            std::string cvWaveformFileName = simConf->pathRelativeToConfFile(simConf->stringParameter("cv_waveform"));
-            auto cvWaveForm = ParticleSimulation::SampledWaveform(cvWaveformFileName);
-
-            double cvPhaseShift = simConf->doubleParameter("cv_phase_shift");
-            auto modulatedCV =
-                [cvWaveForm, cvPhaseShift, fieldWavePeriod] (double cvAmplitude_VPerM, double time) -> double{
-                    double period = std::fmod(time, fieldWavePeriod) / fieldWavePeriod;
-                    double shiftedPeriod = std::fmod(period + cvPhaseShift, 1.0);
-                    return cvWaveForm.getInterpolatedValue(shiftedPeriod) * cvAmplitude_VPerM;
-                };
-            CVFieldFct = modulatedCV;
-        }
+        CVFieldFctType CVFieldFct = createCVFieldFunction(cvMode, fieldWavePeriod, simConf);
 
         ParticleSimulation::partAttribTransformFctType additionalParameterTransformFct =
                 [=](BTree::Particle* particle) -> std::vector<double> {
