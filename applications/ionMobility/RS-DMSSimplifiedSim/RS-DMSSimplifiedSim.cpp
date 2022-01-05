@@ -40,19 +40,17 @@
 #include "appUtils_stopwatch.hpp"
 #include "appUtils_signalHandler.hpp"
 #include "appUtils_commandlineParser.hpp"
+#include "dmsSim_dmsFields.hpp"
 #include "json.h"
 #include <iostream>
 #include <cmath>
 
 const std::string key_ChemicalIndex = "keyChemicalIndex";
 const double standardPressure_Pa = 102300; //101325
-enum CVMode {STATIC_CV, AUTO_CV, MODULATED_CV, MODULATED_AUTO_CV};
-enum SVMode {BI_SIN, SQUARE, CLIPPED_SIN};
 
 int main(int argc, const char * argv[]) {
 
     try{
-
         AppUtils::CommandlineParser cmdLineParser(argc, argv, "DMS simplified", "Simplified DMS Simulation", true);
         std::string projectName = cmdLineParser.resultName();
         AppUtils::logger_ptr logger = cmdLineParser.logger();
@@ -100,21 +98,7 @@ int main(int argc, const char * argv[]) {
             throw std::invalid_argument("wrong configuration value: cv_mode");
         }
 
-
-        SVMode svMode;
-        std::string svModeStr = simConf->stringParameter("sv_mode");
-        if (svModeStr == "bi_sin"){
-            svMode = BI_SIN;
-        }
-        else if (svModeStr == "square"){
-            svMode = SQUARE;
-        }
-        else if (svModeStr == "clipped_sin"){
-            svMode = CLIPPED_SIN;
-        }
-        else{
-            throw std::invalid_argument("wrong configuration value: sv_mode");
-        }
+        SVMode svMode = parseSVModeConfiguration(simConf);
 
         double fieldSVSetpoint_VPerM = simConf->doubleParameter("sv_Vmm-1") * 1000.0;
         double fieldCVSetpoint_VPerM = simConf->doubleParameter("cv_Vmm-1") * 1000.0;
@@ -206,64 +190,8 @@ int main(int argc, const char * argv[]) {
 
 
         // define trajectory integration parameters / functions =================================
-        std::function<double(double fieldAmplitude_VPerM, double time)> SVFieldFct;
+        SVFieldFctType SVFieldFct = createSVFieldFunction(svMode, fieldWavePeriod);
 
-        if (svMode == BI_SIN){
-            double field_h = 2.0;
-            double field_F = 2.0;
-            double field_W = (1/fieldWavePeriod) * 2 * M_PI;
-            auto  fieldFctBisinusoidal=
-                    [field_F, field_W, field_h]
-                    (double svAmplitude_VPerM, double time) -> double{
-
-                        //double particleCharge = particle->getCharge();
-                        double voltageSVgp = svAmplitude_VPerM * 0.6667; // V/m (1V/m peak to peak is 0.6667V/m ground to peak)
-                        double voltageSVt = (field_F * sin(field_W * time)
-                                + sin(field_h * field_W * time - 0.5 * M_PI))
-                                * voltageSVgp / (field_F + 1);
-
-                        return voltageSVt;
-                    };
-            SVFieldFct = fieldFctBisinusoidal;
-        }
-        else if (svMode == SQUARE){
-            double thirdOfWavePeriod = fieldWavePeriod / 3.0;
-            auto  fieldFctSquare=
-                    [fieldWavePeriod, thirdOfWavePeriod]
-                    (double svAmplitude_VPerM, double time) -> double{
-
-                        double timeInPeriod = std::fmod(time, fieldWavePeriod);
-
-                        double voltageSVgp_highField = svAmplitude_VPerM * 0.666667; // V/m (1V/m peak to peak is 0.6667V/m ground to peak)
-                        double voltageSVgp_lowField = -voltageSVgp_highField * 0.5; // low field is 1/2 of high field
-                        if (timeInPeriod < thirdOfWavePeriod){
-                            return voltageSVgp_highField;
-                        }
-                        else {
-                            return voltageSVgp_lowField;
-                        }
-                    };
-            SVFieldFct = fieldFctSquare;
-        }
-        else if (svMode == CLIPPED_SIN){
-            double h = 3.0/2.0* M_PI  - 1.0;
-            double t_sin = M_PI / (2*h + 1);
-            double f_low = -(2.0* t_sin) / (M_PI-2.0*t_sin);
-
-            auto  fieldFctClippedSin=
-                    [f_low, t_sin, fieldWavePeriod]
-                    (double svAmplitude_VPerM, double time) -> double{
-
-                        double normalizedTimeInPeriod = std::fmod(time, fieldWavePeriod) / fieldWavePeriod;
-                        if (normalizedTimeInPeriod < t_sin){
-                            return  ((M_PI * sin(M_PI* normalizedTimeInPeriod / t_sin) - 2*t_sin) / (M_PI-2*t_sin) * svAmplitude_VPerM);
-                        }
-                        else {
-                            return  (f_low*svAmplitude_VPerM);
-                        }
-                    };
-            SVFieldFct = fieldFctClippedSin;
-        }
 
         std::function<double(double cvAmplitude_VPerM, double time)> CVFieldFct;
         if (cvMode == STATIC_CV || cvMode == AUTO_CV){
