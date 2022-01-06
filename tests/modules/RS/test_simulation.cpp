@@ -241,8 +241,55 @@ TEST_CASE( "Test RS simulations", "[RS][Simulation]") {
         CHECK( sim.totalReactionEvents() > 0);
         CHECK( sim.totalReactionEvents()  == totalCountedWithFunction);
         CHECK( particles[0]->getIntegerAttribute("reacted") > 0);
+        CHECK( particles[1]->getIntegerAttribute("reacted") > 0);
     }
 
+    SECTION( "Parallelized simulation with water clusters and individual reaction conditions should be correct") {
+        RS::Simulation sim = RS::Simulation(parser.parseFile("RS_waterCluster_test_temperatureDependent.conf"));
+        RS::SimulationConfiguration* simConf = sim.simulationConfiguration();
+
+        RS::Substance* Cl6 = simConf->substanceByName("Cl_6");
+        RS::Substance* Cl1 = simConf->substanceByName("Cl_1");
+
+        std::size_t nParticles = 10000;
+        int nSteps = 200;
+        double dt = 1.0e-4;
+        std::vector<uniqueReactivePartPtr> particles;
+        for (std::size_t i=0; i < nParticles; ++i) {
+            uniqueReactivePartPtr particle = std::make_unique<RS::ReactiveParticle>(Cl6);
+            particle->setFloatAttribute("temperature", i*0.1);
+            sim.addParticle(particle.get(), i);
+            particles.push_back(std::move(particle));
+        }
+
+        auto reactionConditionsFct = [](RS::ReactiveParticle* particle, double /*time*/)->RS::ReactionConditions{
+            RS::ReactionConditions reactionConditions = RS::ReactionConditions();
+            reactionConditions.temperature = particle->getFloatAttribute("temperature");
+            reactionConditions.electricField = 0.0;
+            reactionConditions.pressure = 100000.0;
+
+            return reactionConditions;
+        };
+
+        for (int step=0; step < nSteps; ++step) {
+            sim.performTimestep(reactionConditionsFct, dt);
+            sim.advanceTimestep(dt);
+        }
+
+        CHECK(sim.timestep() == nSteps);
+        CHECK(sim.simulationTime() == Approx(nSteps* dt));
+
+        auto concs = sim.discreteConcentrations();
+        for (auto& co: concs){
+            std::cout<<" "<< co.first->name() << " " << co.second <<std::endl;
+        }
+
+        //CHECK( ( sim.reactionEvents(reacCl1Forward) > 86000 && sim.reactionEvents(reacCl1Forward) < 87000) );
+        //CHECK( ( sim.reactionEvents(reacCl2Forward) > 58500 && sim.reactionEvents(reacCl2Forward) < 61000) );
+        CHECK( sim.totalReactionEvents() > 0);
+        CHECK( particles[0]->getSpecies() == Cl6);
+        CHECK( particles[nParticles-1]->getSpecies() == Cl1);
+    }
 
     SECTION("Result of collision based reaction events with configuration file should be correct"){
 
