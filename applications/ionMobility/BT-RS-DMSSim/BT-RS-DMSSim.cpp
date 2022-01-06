@@ -169,6 +169,7 @@ int main(int argc, const char * argv[]) {
         std::string rsConfFileName = simConf->pathRelativeToConfFile(simConf->stringParameter("reaction_configuration"));
         RS::Simulation rsSim = RS::Simulation(parser.parseFile(rsConfFileName));
         RS::SimulationConfiguration* rsSimConf = rsSim.simulationConfiguration();
+
         //prepare a map for retrieval of the substance index:
         std::map<RS::Substance*, int> substanceIndices;
         std::vector<RS::Substance*> discreteSubstances = rsSimConf->getAllDiscreteSubstances();
@@ -214,12 +215,14 @@ int main(int argc, const char * argv[]) {
 
         for (std::size_t i = 0; i<nParticles.size(); i++) {
             RS::Substance* subst = rsSimConf->substance(i);
+            int substIndex = substanceIndices.at(subst);
             std::vector<Core::Vector> initialPositions =
                     ParticleSimulation::util::getRandomPositionsInBox(nParticles[i], initCorner, initBoxSize);
             for (unsigned int k = 0; k<nParticles[i]; ++k) {
                 uniqueReactivePartPtr particle = std::make_unique<RS::ReactiveParticle>(subst);
 
                 particle->setLocation(initialPositions[k]);
+                particle->setFloatAttribute(key_ChemicalIndex, substIndex);
 
                 particlesPtrs.push_back(particle.get());
                 rsSim.addParticle(particle.get(), nParticlesTotal);
@@ -229,11 +232,6 @@ int main(int argc, const char * argv[]) {
             }
         }
 
-        RS::ReactionConditions reactionConditions = RS::ReactionConditions();
-        reactionConditions.temperature = 0.0;//backgroundTemperature_K;
-        reactionConditions.pressure = backgroundPressure_Pa;
-        reactionConditions.electricField = 0.0;
-
         resultFilewriter.initFile(rsSimConf);
         // ======================================================================================
 
@@ -242,8 +240,6 @@ int main(int argc, const char * argv[]) {
         SVFieldFctType SVFieldFct = createSVFieldFunction(svMode, fieldWavePeriod);
         CVFieldFctType CVFieldFct = createCVFieldFunction(cvMode, fieldWavePeriod, simConf);
 
-        double cvFieldNow_VPerM = 0.0;
-        double svFieldNow_VPerM = 0.0;
         double totalFieldNow_VPerM = 0.0;
 
         auto accelerationFct =
@@ -358,6 +354,24 @@ int main(int argc, const char * argv[]) {
             collisionModelPtr = nullptr;
         }
 
+        //define reaction simulation functions:
+        auto particlesHasReactedFct = [&collisionModelPtr, &substanceIndices](RS::ReactiveParticle* particle){
+            //we had an reaction event: Count it (access to total counted value has to be synchronized)
+            collisionModelPtr->initializeModelParameters(*particle);
+            int substIndex = substanceIndices.at(particle->getSpecies());
+            particle->setFloatAttribute(key_ChemicalIndex, substIndex);
+        };
+
+        auto reactionConditionsFct = [&totalFieldNow_VPerM, &backgroundTemperatureFct, backgroundPressure_Pa]
+                (RS::ReactiveParticle* particle, double /*time*/)->RS::ReactionConditions{
+            RS::ReactionConditions reactionConditions = RS::ReactionConditions();
+
+            reactionConditions.temperature = backgroundTemperatureFct(particle->getLocation());
+            reactionConditions.electricField = totalFieldNow_VPerM;
+            reactionConditions.pressure = backgroundPressure_Pa;
+            return reactionConditions;
+        };
+
         //init trajectory simulation object:
         ParticleSimulation::ParallelVerletIntegrator verletIntegrator(
                 particlesPtrs,
@@ -372,24 +386,10 @@ int main(int argc, const char * argv[]) {
         stopWatch.start();
 
         for (unsigned int step = 0; step<nSteps; step++) {
-            cvFieldNow_VPerM = CVFieldFct(fieldCVSetpoint_VPerM, rsSim.simulationTime());
-            svFieldNow_VPerM = SVFieldFct(fieldSVSetpoint_VPerM, rsSim.simulationTime());
+            double cvFieldNow_VPerM = CVFieldFct(fieldCVSetpoint_VPerM, rsSim.simulationTime());
+            double svFieldNow_VPerM = SVFieldFct(fieldSVSetpoint_VPerM, rsSim.simulationTime());
             totalFieldNow_VPerM = svFieldNow_VPerM + cvFieldNow_VPerM;
-            reactionConditions.electricField = totalFieldNow_VPerM;
-
-            for (unsigned int i = 0; i<nParticlesTotal; i++) {
-                reactionConditions.temperature = backgroundTemperatureFct(particles[i]->getLocation());
-
-                bool reacted = rsSim.react(i, reactionConditions, dt_s);
-                int substIndex = substanceIndices.at(particles[i]->getSpecies());
-                particles[i]->setFloatAttribute(key_ChemicalIndex, substIndex);
-
-                if (reacted && collisionModelPtr != nullptr) {
-                    //we had an reaction event: update the collision model parameters for the particle which are not
-                    //based on location (mostly STP parameters in SDS)
-                    collisionModelPtr->initializeModelParameters(*particles[i]);
-                }
-            }
+            rsSim.performTimestep(reactionConditionsFct, dt_s, particlesHasReactedFct);
             rsSim.advanceTimestep(dt_s);
             verletIntegrator.runSingleStep(dt_s);
 
@@ -411,7 +411,7 @@ int main(int argc, const char * argv[]) {
                 logger->info("CV corrected ts:{} time:{:.2e} new CV:{} diffMeanPos:{}", step, rsSim.simulationTime(), fieldCVSetpoint_VPerM, diffMeanZPos);
             }
 
-            //terminate simualation loops if all particles are terminated or termination of the integrator was requested
+            //terminate simulation loops if all particles are terminated or termination of the integrator was requested
             //from somewhere (e.g. signal from outside)
             if (ionsInactive>=nAllParticles ||
                     verletIntegrator.runState()==ParticleSimulation::AbstractTimeIntegrator::IN_TERMINATION)
