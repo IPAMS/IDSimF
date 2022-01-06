@@ -188,7 +188,7 @@ TEST_CASE( "Test RS simulations", "[RS][Simulation]") {
         CHECK(isExactDoubleEqual(sim.getParticle(1).getMass(), subst_A->mass()*Core::AMU_TO_KG));
     }
 
-    SECTION( "Parallelized simulation with water cluster configuration file and reacted function should be correct") {
+    SECTION( "Parallelized simulation with water clusters and post reaction function should be correct") {
         RS::Simulation sim = RS::Simulation(parser.parseFile("RS_waterCluster_test.conf"));
         RS::SimulationConfiguration* simConf = sim.simulationConfiguration();
 
@@ -201,6 +201,7 @@ TEST_CASE( "Test RS simulations", "[RS][Simulation]") {
         std::vector<uniqueReactivePartPtr> particles;
         for (std::size_t i=0; i < nParticles; ++i) {
             uniqueReactivePartPtr particle = std::make_unique<RS::ReactiveParticle>(Cl1);
+            particle->setIntegerAttribute("reacted", 0);
             sim.addParticle(particle.get(), i);
             particles.push_back(std::move(particle));
         }
@@ -210,28 +211,43 @@ TEST_CASE( "Test RS simulations", "[RS][Simulation]") {
         reactionConditions.electricField = 0.0;
         reactionConditions.pressure = 100000.0;
 
+        // define a post reaction function:
+        long totalCountedWithFunction = 0;
+        auto particlesReactedFct = [&totalCountedWithFunction](RS::ReactiveParticle* particle){
+            //we had an reaction event: Count it (access to total counted value has to be synchronized)
+            #pragma omp atomic
+            totalCountedWithFunction++;
+
+            //access particles
+            int reactedOld = particle->getIntegerAttribute("reacted");
+            particle->setIntegerAttribute("reacted", reactedOld + 1);
+        };
+
         for (int step=0; step < nSteps; ++step) {
-            sim.performTimestep(reactionConditions, dt);
+            sim.performTimestep(reactionConditions, dt, particlesReactedFct);
             sim.advanceTimestep(dt);
         }
 
-        REQUIRE(sim.timestep() == nSteps);
-        REQUIRE(sim.simulationTime() == Approx(nSteps* dt));
+        CHECK(sim.timestep() == nSteps);
+        CHECK(sim.simulationTime() == Approx(nSteps* dt));
 
         RS::AbstractReaction* reacCl1Forward = simConf->reaction(0);
         RS::AbstractReaction* reacCl2Forward = simConf->reaction(2);
-        REQUIRE(reacCl1Forward->getLabel() == "cl1_forward");
-        REQUIRE(reacCl2Forward->getLabel() == "cl2_forward");
+        CHECK(reacCl1Forward->getLabel() == "cl1_forward");
+        CHECK(reacCl2Forward->getLabel() == "cl2_forward");
 
         CHECK( ( sim.reactionEvents(reacCl1Forward) > 86000 && sim.reactionEvents(reacCl1Forward) < 87000) );
         CHECK( ( sim.reactionEvents(reacCl2Forward) > 58500 && sim.reactionEvents(reacCl2Forward) < 61000) );
+        CHECK( sim.totalReactionEvents() > 0);
+        CHECK( sim.totalReactionEvents()  == totalCountedWithFunction);
+        CHECK( particles[0]->getIntegerAttribute("reacted") > 0);
     }
 
     SECTION("Result of collision based reaction events with configuration file should be correct"){
 
         RS::Simulation sim(parser.parseFile("RS_collisionBasedReactions_test.conf"));
         int ts = sim.timestep();
-        REQUIRE(ts == 0);
+        CHECK(ts == 0);
 
         RS::SimulationConfiguration* simConf = sim.simulationConfiguration();
 
@@ -250,24 +266,24 @@ TEST_CASE( "Test RS simulations", "[RS][Simulation]") {
         RS::CollisionConditions collisionConditions = {.totalCollisionEnergy = 0.0};
 
         bool hasReacted = sim.collisionReact(0,N2,collisionConditions);
-        REQUIRE(hasReacted == false);
-        REQUIRE(sim.getParticle(0).getSpecies() == Cl2);
+        CHECK(hasReacted == false);
+        CHECK(sim.getParticle(0).getSpecies() == Cl2);
 
         collisionConditions.totalCollisionEnergy = 9.9 / Core::JOULE_TO_EV;
         hasReacted = sim.collisionReact(1,N2,collisionConditions);
-        REQUIRE(hasReacted == false);
-        REQUIRE(sim.getParticle(1).getSpecies() == Cl2);
+        CHECK(hasReacted == false);
+        CHECK(sim.getParticle(1).getSpecies() == Cl2);
 
         RS::AbstractReaction* reacCl2Destruction = simConf->reaction(1);
-        REQUIRE(reacCl2Destruction->getLabel() == "cl2_destruction");
-        REQUIRE(sim.reactionEvents(reacCl2Destruction) == 0);
+        CHECK(reacCl2Destruction->getLabel() == "cl2_destruction");
+        CHECK(sim.reactionEvents(reacCl2Destruction) == 0);
 
         collisionConditions.totalCollisionEnergy = 10.1 / Core::JOULE_TO_EV;
         hasReacted = sim.collisionReact(1,N2,collisionConditions);
-        REQUIRE(hasReacted == true);
-        REQUIRE(sim.getParticle(1).getSpecies() == Cl1);
+        CHECK(hasReacted == true);
+        CHECK(sim.getParticle(1).getSpecies() == Cl1);
 
-        REQUIRE(sim.reactionEvents(reacCl2Destruction) == 1);
+        CHECK(sim.reactionEvents(reacCl2Destruction) == 1);
     }
 }
 
