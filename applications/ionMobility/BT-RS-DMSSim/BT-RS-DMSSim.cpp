@@ -43,12 +43,11 @@
 #include "appUtils_stopwatch.hpp"
 #include "appUtils_signalHandler.hpp"
 #include "appUtils_commandlineParser.hpp"
-#include "json.h"
+#include "dmsSim_dmsFields.hpp"
 #include <iostream>
 #include <cmath>
 
 const std::string key_ChemicalIndex = "keyChemicalIndex";
-enum CVMode {STATIC_CV,AUTO_CV};
 enum FlowMode {UNIFORM_FLOW,PARABOLIC_FLOW};
 enum BackgroundTemperatureMode {ISOTHERM,LINEAR_GRADIENT};
 enum CollisionType {SDS,NO_COLLISION};
@@ -57,7 +56,7 @@ int main(int argc, const char * argv[]) {
 
     try {
         // open configuration, parse configuration file =========================================
-        AppUtils::CommandlineParser cmdLineParser(argc, argv, "BT-RS-DMSSim", "DMS Simulation with trajectories and chemistry", false);
+        AppUtils::CommandlineParser cmdLineParser(argc, argv, "BT-RS-DMSSim", "DMS Simulation with trajectories and chemistry", true);
         std::string projectName = cmdLineParser.resultName();
         AppUtils::logger_ptr logger = cmdLineParser.logger();
 
@@ -147,29 +146,19 @@ int main(int argc, const char * argv[]) {
 
 
         //field parameters:
-        std::string cvModeStr = simConf->stringParameter("cv_mode");
-        CVMode cvMode;
+        CVMode cvMode = parseCVModeConfiguration(simConf);
         double meanZPos = 0.0; //variable used for automatic CV correction
         double cvRelaxationParameter = 0.0;
-        if (cvModeStr=="static") {
-            cvMode = STATIC_CV;
-        }
-        else if (cvModeStr=="auto") {
-            cvMode = AUTO_CV;
+        if (cvMode == AUTO_CV || cvMode == MODULATED_AUTO_CV){
             cvRelaxationParameter = simConf->doubleParameter("cv_relaxation_parameter");
         }
-        else {
-            throw std::invalid_argument("wrong configuration value: cv_mode");
-        }
 
-        double fieldSV_VPerM = simConf->doubleParameter("sv_Vmm-1")*1000.0;
-        double fieldCV_VPerM = simConf->doubleParameter("cv_Vmm-1")*1000.0;
+        SVMode svMode = parseSVModeConfiguration(simConf);
+
+        double fieldSVSetpoint_VPerM = simConf->doubleParameter("sv_Vmm-1") * 1000.0;
+        double fieldCVSetpoint_VPerM = simConf->doubleParameter("cv_Vmm-1") * 1000.0;
         double fieldFrequency = simConf->doubleParameter("sv_frequency_s-1");
         double fieldWavePeriod = 1.0/fieldFrequency;
-        double field_h = 2.0;
-        double field_F = 2.0;
-        double field_W = (1/fieldWavePeriod)*2*M_PI;
-        double fieldMagnitude = 0; //actual field magnitude
 
         double dt_s = fieldWavePeriod/nStepsPerOscillation;
         // ======================================================================================
@@ -250,20 +239,19 @@ int main(int argc, const char * argv[]) {
 
 
         // define trajectory integration parameters / functions =================================
+        SVFieldFctType SVFieldFct = createSVFieldFunction(svMode, fieldWavePeriod);
+        CVFieldFctType CVFieldFct = createCVFieldFunction(cvMode, fieldWavePeriod, simConf);
+
+        double cvFieldNow_VPerM = 0.0;
+        double svFieldNow_VPerM = 0.0;
+        double totalFieldNow_VPerM = 0.0;
 
         auto accelerationFct =
-                [&fieldSV_VPerM, &fieldCV_VPerM, field_F, field_W, field_h, &fieldMagnitude, spaceChargeFactor]
-                        (BTree::Particle* particle, int /*particleIndex*/, auto& tree, double time, int /*timestep*/) {
+                [&totalFieldNow_VPerM, spaceChargeFactor]
+                        (BTree::Particle* particle, int /*particleIndex*/, auto& tree, double /*time*/, int /*timestep*/) {
 
                     double particleCharge = particle->getCharge();
-                    double voltageSVgp = fieldSV_VPerM*0.6667; // V/m (1V/m peak to peak is 0.6667V/m ground to peak)
-                    double voltageSVt = fieldCV_VPerM+(field_F*sin(field_W*time)
-                            +sin(field_h*field_W*time-0.5*M_PI))
-                            *voltageSVgp/(field_F+1);
-
-                    fieldMagnitude = voltageSVt; //// / electrodeDistance_m;
-
-                    Core::Vector fieldForce(0, 0, fieldMagnitude*particleCharge);
+                    Core::Vector fieldForce(0, 0, totalFieldNow_VPerM*particleCharge);
 
                     if (Core::isDoubleEqual(spaceChargeFactor, 0.0)) {
                         return (fieldForce/particle->getMass());
@@ -283,13 +271,13 @@ int main(int argc, const char * argv[]) {
 
         auto timestepWriteFct =
                 [&jsonWriter, &voltageWriter, &additionalParameterTransformFct, trajectoryWriteInterval,
-                        &rsSim, &resultFilewriter, concentrationWriteInterval, &fieldMagnitude, &logger]
+                        &rsSim, &resultFilewriter, concentrationWriteInterval, &totalFieldNow_VPerM, &logger]
                         (std::vector<BTree::Particle*>& particles, auto& tree, double time, int timestep,
                          bool lastTimestep) {
 
                     if (timestep%concentrationWriteInterval==0) {
                         resultFilewriter.writeTimestep(rsSim);
-                        voltageWriter->writeTimestep(fieldMagnitude, time);
+                        voltageWriter->writeTimestep(totalFieldNow_VPerM, time);
                     }
                     if (lastTimestep) {
                         jsonWriter->writeTimestep(
@@ -384,8 +372,12 @@ int main(int argc, const char * argv[]) {
         stopWatch.start();
 
         for (unsigned int step = 0; step<nSteps; step++) {
+            cvFieldNow_VPerM = CVFieldFct(fieldCVSetpoint_VPerM, rsSim.simulationTime());
+            svFieldNow_VPerM = SVFieldFct(fieldSVSetpoint_VPerM, rsSim.simulationTime());
+            totalFieldNow_VPerM = svFieldNow_VPerM + cvFieldNow_VPerM;
+            reactionConditions.electricField = totalFieldNow_VPerM;
+
             for (unsigned int i = 0; i<nParticlesTotal; i++) {
-                reactionConditions.electricField = fieldMagnitude;
                 reactionConditions.temperature = backgroundTemperatureFct(particles[i]->getLocation());
 
                 bool reacted = rsSim.react(i, reactionConditions, dt_s);
@@ -412,11 +404,11 @@ int main(int argc, const char * argv[]) {
 
                 //update cv value:
                 double diffMeanZPos = meanZPos-currentMeanZPos;
-                fieldCV_VPerM = fieldCV_VPerM+diffMeanZPos*cvRelaxationParameter;
-                cvFieldWriter->writeTimestep(std::vector<double>{fieldCV_VPerM, currentMeanZPos},
+                fieldCVSetpoint_VPerM = fieldCVSetpoint_VPerM+diffMeanZPos*cvRelaxationParameter;
+                cvFieldWriter->writeTimestep(std::vector<double>{fieldCVSetpoint_VPerM, currentMeanZPos},
                         rsSim.simulationTime());
                 meanZPos = currentMeanZPos;
-                logger->info("CV corrected ts:{} time:{:.2e} new CV:", step, rsSim.simulationTime(), fieldCV_VPerM);
+                logger->info("CV corrected ts:{} time:{:.2e} new CV:{} diffMeanPos:{}", step, rsSim.simulationTime(), fieldCVSetpoint_VPerM, diffMeanZPos);
             }
 
             //terminate simualation loops if all particles are terminated or termination of the integrator was requested
