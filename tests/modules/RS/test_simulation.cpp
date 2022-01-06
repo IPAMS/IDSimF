@@ -188,13 +188,13 @@ TEST_CASE( "Test RS simulations", "[RS][Simulation]") {
         CHECK(isExactDoubleEqual(sim.getParticle(1).getMass(), subst_A->mass()*Core::AMU_TO_KG));
     }
 
-    SECTION( "Parallelized simulation with water clusters and post reaction function should be correct") {
+    SECTION( "Parallelized simulation with water clusters and individual reaction conditions should be correct") {
         RS::Simulation sim = RS::Simulation(parser.parseFile("RS_waterCluster_test.conf"));
         RS::SimulationConfiguration* simConf = sim.simulationConfiguration();
 
         RS::Substance* Cl1 = simConf->substanceByName("Cl_1");
         RS::Substance* H2O = simConf->substanceByName("H2O");
-        H2O->staticConcentration(0.0);
+
         std::size_t nParticles = 100000;
         int nSteps = 200;
         double dt = 1.0e-4;
@@ -242,6 +242,7 @@ TEST_CASE( "Test RS simulations", "[RS][Simulation]") {
         CHECK( sim.totalReactionEvents()  == totalCountedWithFunction);
         CHECK( particles[0]->getIntegerAttribute("reacted") > 0);
     }
+
 
     SECTION("Result of collision based reaction events with configuration file should be correct"){
 
