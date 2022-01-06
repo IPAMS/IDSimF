@@ -52,6 +52,7 @@ namespace RS {
     public:
         using index_t= std::size_t;
         using particleReactedFctType= std::function<void (RS::ReactiveParticle* particle)>;
+        using reactionConditionFctType= std::function<ReactionConditions (RS::ReactiveParticle* particle, double time)>;
 
         explicit Simulation(const std::string& configFileName);
         explicit Simulation(std::unique_ptr<RS::SimulationConfiguration> simConf);
@@ -67,6 +68,8 @@ namespace RS {
         [[nodiscard]] long reactionEvents(AbstractReaction* reaction) const;
 
         void performTimestep(ReactionConditions& conditions, double dt, const particleReactedFctType& particleReactedFct = nullptr);
+        void performTimestep(const reactionConditionFctType& conditionFct, double dt, const particleReactedFctType& particleReactedFct = nullptr);
+
         void doReaction(RS::AbstractReaction* reaction, RS::ReactiveParticle* particle, RS::Substance* product);
         bool react(index_t index, ReactionConditions& conditions, double dt);
         bool collisionReact(index_t index, RS::Substance* reactionPartnerSpecies, CollisionConditions& conditions);

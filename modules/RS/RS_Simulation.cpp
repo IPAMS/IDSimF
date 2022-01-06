@@ -84,7 +84,12 @@ long RS::Simulation::reactionEvents(RS::AbstractReaction* reaction) const {
     return reactionEvents_.at(reaction);
 }
 
-
+/**
+ * Performs a time step with static reaction conditions (same reaction conditions for all particles)
+ * @param conditions The reaction conditions for the time step
+ * @param dt The time step length
+ * @param particleReactedFct An optional function, which is performed for the particles which have reacted
+ */
 void RS::Simulation::performTimestep(RS::ReactionConditions& conditions, double dt, const particleReactedFctType& particleReactedFct) {
 
     std::size_t nParticles = particleMap_.size();
@@ -111,6 +116,45 @@ void RS::Simulation::performTimestep(RS::ReactionConditions& conditions, double 
         }
     }
 }
+
+/**
+ * Performs a time step with variable reaction conditions for the individual particles, defined by a function.
+ * The function takes individual particles and the time at time step begin as parameters.
+ *
+ * @param conditionFct A function which generates individual reaction conditions for the particles
+ * @param dt The time step length
+ * @param particleReactedFct An optional function, which is performed for the particles which have reacted
+ */
+void RS::Simulation::performTimestep(const reactionConditionFctType& conditionFct, double dt, const particleReactedFctType& particleReactedFct) {
+    std::size_t nParticles = particleMap_.size();
+    double time = this->simulationTime();
+
+    #pragma omp parallel default(none) shared(particleMap_) firstprivate(conditionFct, particleReactedFct, nParticles, time, dt)
+    {
+        reactionMap indMap = indReactDeepCopy_(); // get local copy of independent reaction maps
+
+        if (particleReactedFct != nullptr) {
+            #pragma omp for
+            for (std::size_t i = 0; i<nParticles; ++i) {
+                RS::ReactiveParticle* particle = particleMap_[i];
+                ReactionConditions conditions = conditionFct(particle, time);
+                bool hasReacted = react_(i, conditions, dt, indMap);
+                if (hasReacted){
+                    particleReactedFct(particle);
+                }
+            }
+        }
+        else {
+            #pragma omp for
+            for (std::size_t i = 0; i<nParticles; ++i) {
+                RS::ReactiveParticle* particle = particleMap_[i];
+                ReactionConditions conditions = conditionFct(particle, time);
+                react_(i, conditions, dt, indMap);
+            }
+        }
+    }
+}
+
 
 /**
  * Actually perform a reaction: The particle with index "index" is changed into the product species
