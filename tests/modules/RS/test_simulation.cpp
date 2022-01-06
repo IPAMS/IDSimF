@@ -54,8 +54,6 @@ TEST_CASE( "Test basic RS simulation semantics", "[RS][Simulation]") {
     uniqueReactivePartPtr p2 = std::make_unique<RS::ReactiveParticle>(&Cluster_2);
     uniqueReactivePartPtr p3 = std::make_unique<RS::ReactiveParticle>(&Cluster_3);
 
-
-
     SECTION( "Particles should be insertable into and retrievable from a simulation") {
 
         //check if parameters are set by the species at particle generation:
@@ -139,7 +137,7 @@ TEST_CASE( "Test RS simulations", "[RS][Simulation]") {
     RS::ConfigFileParser parser = RS::ConfigFileParser();
 
 
-    SECTION( "Simple simulation should produce correct result") {
+    SECTION( "Simple explicit simulation should produce correct result") {
         RS::Simulation sim = RS::Simulation(parser.getTestConfigSimple());
 
         RS::Substance* subst_A = sim.simulationConfiguration()->getAllSubstances()[0];
@@ -163,7 +161,6 @@ TEST_CASE( "Test RS simulations", "[RS][Simulation]") {
         reactionConditions.pressure = 100000.0;
 
         for (int step=0; step < nSteps; ++step) {
-
             for (std::size_t i = 0; i < nParticles; ++i) {
                 RS::ReactiveParticle particle = sim.getParticle(i);
                 sim.react(i, reactionConditions, 1.0);
@@ -191,10 +188,7 @@ TEST_CASE( "Test RS simulations", "[RS][Simulation]") {
         CHECK(isExactDoubleEqual(sim.getParticle(1).getMass(), subst_A->mass()*Core::AMU_TO_KG));
     }
 
-    SECTION( "Simulation with water cluster configuration file and reacted function should be correct") {
-
-        //TODO: Add test with reaction function
-
+    SECTION( "Parallelized simulation with water cluster configuration file and reacted function should be correct") {
         RS::Simulation sim = RS::Simulation(parser.parseFile("RS_waterCluster_test.conf"));
         RS::SimulationConfiguration* simConf = sim.simulationConfiguration();
 
@@ -217,9 +211,7 @@ TEST_CASE( "Test RS simulations", "[RS][Simulation]") {
         reactionConditions.pressure = 100000.0;
 
         for (int step=0; step < nSteps; ++step) {
-            for (std::size_t i = 0; i < nParticles; ++i) {
-                sim.react(i, reactionConditions, dt);
-            }
+            sim.performTimestep(reactionConditions, dt);
             sim.advanceTimestep(dt);
         }
 
@@ -230,11 +222,12 @@ TEST_CASE( "Test RS simulations", "[RS][Simulation]") {
         RS::AbstractReaction* reacCl2Forward = simConf->reaction(2);
         REQUIRE(reacCl1Forward->getLabel() == "cl1_forward");
         REQUIRE(reacCl2Forward->getLabel() == "cl2_forward");
-        CHECK( ( sim.reactionEvents(reacCl1Forward) > 85000 && sim.reactionEvents(reacCl1Forward) < 86500) );
+
+        CHECK( ( sim.reactionEvents(reacCl1Forward) > 86000 && sim.reactionEvents(reacCl1Forward) < 87000) );
         CHECK( ( sim.reactionEvents(reacCl2Forward) > 58500 && sim.reactionEvents(reacCl2Forward) < 61000) );
     }
 
-    SECTION("Result of collision based simulation with configuration file should be correct"){
+    SECTION("Result of collision based reaction events with configuration file should be correct"){
 
         RS::Simulation sim(parser.parseFile("RS_collisionBasedReactions_test.conf"));
         int ts = sim.timestep();
