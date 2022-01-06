@@ -188,7 +188,7 @@ TEST_CASE( "Test RS simulations", "[RS][Simulation]") {
         CHECK(isExactDoubleEqual(sim.getParticle(1).getMass(), subst_A->mass()*Core::AMU_TO_KG));
     }
 
-    SECTION( "Parallelized simulation with water clusters and individual reaction conditions should be correct") {
+    SECTION( "Parallelized simulation with water clusters, static reaction conditions and post reaction function should be correct") {
         RS::Simulation sim = RS::Simulation(parser.parseFile("RS_waterCluster_test.conf"));
         RS::SimulationConfiguration* simConf = sim.simulationConfiguration();
 
