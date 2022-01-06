@@ -131,8 +131,8 @@ TEST_CASE("Test chemical semantics of RS reaction types", "[RS][Reaction]") {
         CHECK(reac.attemptReaction(reactionConditions, &productParticle, 1.0).reactionProbability == Approx(10.0));
 
         // test if the velocity is reinitialized thermally:
-        // Generate 100000 test samples and determine mean velocity and mean velocity magnitude after collision
-        unsigned int nSamples = 100000;
+        // Generate 200000 test samples and determine mean velocity and mean velocity magnitude after collision
+        unsigned int nSamples = 200000;
         std::vector<Core::Vector> velocities(nSamples);
         std::vector<double> magnitudes;
 
