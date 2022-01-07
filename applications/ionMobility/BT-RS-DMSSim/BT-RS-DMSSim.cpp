@@ -34,7 +34,7 @@
 #include "PSim_util.hpp"
 #include "PSim_constants.hpp"
 #include "PSim_parallelVerletIntegrator.hpp"
-#include "PSim_trajectoryExplorerJSONwriter.hpp"
+#include "PSim_trajectoryHDF5Writer.hpp"
 #include "PSim_scalar_writer.hpp"
 #include "CollisionModel_StatisticalDiffusion.hpp"
 #include "CollisionModel_SpatialFieldFunctions.hpp"
@@ -183,9 +183,17 @@ int main(int argc, const char * argv[]) {
         // prepare file writer  =================================================================
         RS::ConcentrationFileWriter resultFilewriter(projectName+"_conc.csv");
 
-        auto jsonWriter = std::make_unique<ParticleSimulation::TrajectoryExplorerJSONwriter>(
-                projectName+"_trajectories.json");
-        jsonWriter->setScales(1000, 1);
+        std::vector<std::string> auxParamNames = {"chemical id"};
+        auto additionalParamTFct = [](BTree::Particle* particle) -> std::vector<double> {
+            std::vector<double> result = {
+                    particle->getFloatAttribute(key_ChemicalIndex)
+            };
+            return result;
+        };
+
+        std::string hdf5Filename = projectName+"_trajectories.hd5";
+        ParticleSimulation::TrajectoryHDF5Writer trajectoryWriter(hdf5Filename);
+        trajectoryWriter.setParticleAttributes(auxParamNames, additionalParamTFct);
 
         unsigned int ionsInactive = 0;
         unsigned int nAllParticles = 0;
@@ -259,15 +267,10 @@ int main(int argc, const char * argv[]) {
                     }
                 };
 
-        ParticleSimulation::partAttribTransformFctType additionalParameterTransformFct =
-                [=](BTree::Particle* particle) -> std::vector<double> {
-                    std::vector<double> result = {particle->getFloatAttribute(key_ChemicalIndex)};
-                    return result;
-                };
 
         auto timestepWriteFct =
-                [&jsonWriter, &voltageWriter, &additionalParameterTransformFct, trajectoryWriteInterval,
-                        &rsSim, &resultFilewriter, concentrationWriteInterval, &totalFieldNow_VPerM, &logger]
+                [&trajectoryWriter, &voltageWriter, trajectoryWriteInterval, &rsSim, &resultFilewriter, concentrationWriteInterval,
+                 &totalFieldNow_VPerM, &logger]
                         (std::vector<BTree::Particle*>& particles, auto& tree, double time, int timestep,
                          bool lastTimestep) {
 
@@ -276,11 +279,9 @@ int main(int argc, const char * argv[]) {
                         voltageWriter->writeTimestep(totalFieldNow_VPerM, time);
                     }
                     if (lastTimestep) {
-                        jsonWriter->writeTimestep(
-                                particles, additionalParameterTransformFct, time, true);
-
-                        jsonWriter->writeSplatTimes(particles);
-                        jsonWriter->writeIonMasses(particles);
+                        trajectoryWriter.writeTimestep(particles, time);
+                        trajectoryWriter.writeSplatTimes(particles);
+                        trajectoryWriter.finalizeTrajectory();
                         logger->info("finished ts:{} time:{:.2e}", timestep, time);
                     }
 
@@ -289,9 +290,7 @@ int main(int argc, const char * argv[]) {
                         logger->info("ts:{}  time:{:.2e} average cloud position:({:.2e},{:.2e},{:.2e})", timestep, time,
                                 cof.x(), cof.y(), cof.z());
                         rsSim.logConcentrations(logger);
-                        jsonWriter->writeTimestep(
-                                particles, additionalParameterTransformFct, time, false);
-                    }
+                        trajectoryWriter.writeTimestep(particles, time);                    }
                 };
 
         auto otherActionsFct = [electrodeHalfDistance_m, electrodeLength_m, &ionsInactive](
