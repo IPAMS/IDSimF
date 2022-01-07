@@ -184,9 +184,9 @@ int main(int argc, const char * argv[]) {
         RS::ConcentrationFileWriter resultFilewriter(projectName+"_conc.csv");
 
         std::vector<std::string> auxParamNames = {"chemical id"};
-        auto additionalParamTFct = [](BTree::Particle* particle) -> std::vector<double> {
-            std::vector<double> result = {
-                    particle->getFloatAttribute(key_ChemicalIndex)
+        auto additionalParamTFct = [](BTree::Particle* particle) -> std::vector<int> {
+            std::vector<int> result = {
+                    particle->getIntegerAttribute(key_ChemicalIndex)
             };
             return result;
         };
@@ -230,7 +230,7 @@ int main(int argc, const char * argv[]) {
                 uniqueReactivePartPtr particle = std::make_unique<RS::ReactiveParticle>(subst);
 
                 particle->setLocation(initialPositions[k]);
-                particle->setFloatAttribute(key_ChemicalIndex, substIndex);
+                particle->setIntegerAttribute(key_ChemicalIndex, substIndex);
 
                 particlesPtrs.push_back(particle.get());
                 rsSim.addParticle(particle.get(), nParticlesTotal);
@@ -358,7 +358,7 @@ int main(int argc, const char * argv[]) {
             //we had an reaction event: Count it (access to total counted value has to be synchronized)
             collisionModelPtr->initializeModelParameters(*particle);
             int substIndex = substanceIndices.at(particle->getSpecies());
-            particle->setFloatAttribute(key_ChemicalIndex, substIndex);
+            particle->setIntegerAttribute(key_ChemicalIndex, substIndex);
         };
 
         auto reactionConditionsFct = [&totalFieldNow_VPerM, &backgroundTemperatureFct, backgroundPressure_Pa]
