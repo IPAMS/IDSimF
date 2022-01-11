@@ -207,6 +207,7 @@ bool RS::ConfigFileParser::parseReactions(SimulationConfiguration *simConf, cons
                         parsedParams.at(1),
                         parsedParams.at(2),
                         mobility,
+                        parsedParams.at(4),
                         parsedParams.at(3),
                         labelStr);
             }

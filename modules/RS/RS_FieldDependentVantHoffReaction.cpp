@@ -43,6 +43,7 @@ RS::FieldDependentVantHoffReaction::FieldDependentVantHoffReaction(
         double K_s,
         double kBackward,
         double electricMobility,
+        double energyLossRatio,
         double collisionGasMassAmu,
         const std::string label):
 AbstractReaction(educts, products, false, "vanthoff_field", label),
@@ -50,6 +51,7 @@ H_R_(H_R),
 K_s_(K_s),
 kBackward_(kBackward),
 mobility_(electricMobility),
+energyLossRatio_(energyLossRatio),
 collisionGasMass_kg_ (collisionGasMassAmu * RS::KG_PER_AMU)
 {}
 
@@ -58,7 +60,7 @@ RS::ReactionEvent RS::FieldDependentVantHoffReaction::attemptReaction(
         RS::ReactionConditions conditions, ReactiveParticle* /*particle*/, double dt) const{
     double KT = mobility_ * P0_pa_ / conditions.pressure * conditions.temperature / T0_K_;
     double ionTemperature = conditions.temperature +
-                            (collisionGasMass_kg_ * pow(KT * conditions.electricField, 2.0)) /
+                            energyLossRatio_ * (collisionGasMass_kg_ * pow(KT * conditions.electricField, 2.0)) /
                             (3.0 * RS::K_BOLTZMANN);
 
     double k_forward =

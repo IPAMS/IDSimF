@@ -96,6 +96,7 @@ TEST_CASE("Test parsing of chemical systems with RS config file parser", "[RS][C
     RS::ReactionConditions reactionConditions;
     RS::ReactiveParticle dummyParticle(&ed_1);
 
+
     SECTION("Config file with all reaction types should be parsed correctly") {
         N2.staticConcentration(3.58e16);
         std::unique_ptr<RS::SimulationConfiguration> simConf = parser.parseFile("RS_minimal_test.conf");
@@ -131,6 +132,7 @@ TEST_CASE("Test parsing of chemical systems with RS config file parser", "[RS][C
                 3.3806e+09,
                 2e-9,
                 2.35e-4,
+                1.0,
                 28,
                 "a field dependent vant hoff test reaction");
 
@@ -224,6 +226,7 @@ TEST_CASE("Test parsing of chemical systems with RS config file parser", "[RS][C
                 6.8408e+17,
                 2e-9,
                 3.56629e-4,
+                1.0,
                 28,
                 "a field dependent vant hoff test reaction");
 

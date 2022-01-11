@@ -56,6 +56,7 @@ namespace RS {
                 double K_s,
                 double kBackward,
                 double electricMobility,
+                double energyLossRatio,
                 double collisionGasMassAmu,
                 std::string label
         );
@@ -68,6 +69,7 @@ namespace RS {
         double K_s_ = 0.0;         ///< Equilibrium constant for the forward reaction
         double kBackward_ = 0.0;   ///< Rate constant for the backward reaction
         double mobility_ = 0.0;    ///< Electrical mobility of the charged particle
+        double energyLossRatio_ = 1.0; ///< Energy Loss ratio due to inelastic scattering (Zeta)
         double collisionGasMass_kg_= 0.0;  ///< Mass of the collision background gas in kg
 
         double const P0_pa_ = 101325; ///< The default pressure in Pa

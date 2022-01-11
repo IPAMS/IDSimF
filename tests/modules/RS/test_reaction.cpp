@@ -189,6 +189,7 @@ TEST_CASE("Test chemical semantics of RS reaction types", "[RS][Reaction]") {
                 1.0189e+03,
                 2.0e-9,
                 2.085e-4,
+                1.0,
                 28,
                 "a test reaction (water cluster 1)");
         REQUIRE(!reac.isCollisionReaction());
