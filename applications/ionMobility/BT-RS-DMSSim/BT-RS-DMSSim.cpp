@@ -37,6 +37,7 @@
 #include "PSim_trajectoryHDF5Writer.hpp"
 #include "PSim_scalar_writer.hpp"
 #include "CollisionModel_StatisticalDiffusion.hpp"
+#include "CollisionModel_HardSphere.hpp"
 #include "CollisionModel_SpatialFieldFunctions.hpp"
 #include "appUtils_simulationConfiguration.hpp"
 #include "appUtils_logging.hpp"
@@ -50,7 +51,7 @@
 const std::string key_ChemicalIndex = "keyChemicalIndex";
 enum FlowMode {UNIFORM_FLOW,PARABOLIC_FLOW};
 enum BackgroundTemperatureMode {ISOTHERM,LINEAR_GRADIENT};
-enum CollisionType {SDS,NO_COLLISION};
+enum CollisionType {SDS, HS, NO_COLLISION};
 
 int main(int argc, const char * argv[]) {
 
@@ -86,6 +87,9 @@ int main(int argc, const char * argv[]) {
         CollisionType collisionType;
         if (collisionTypeStr=="SDS") {
             collisionType = SDS;
+        }
+        else if (collisionTypeStr=="HS"){
+            collisionType = HS;
         }
         else if (collisionTypeStr=="none") {
             collisionType = NO_COLLISION;
@@ -311,7 +315,7 @@ int main(int argc, const char * argv[]) {
 
         //define / gas interaction /  collision model:
         std::unique_ptr<CollisionModel::AbstractCollisionModel> collisionModelPtr;
-        if (collisionType==SDS) {
+        if (collisionType==SDS || collisionType==HS) {
             // prepare static pressure and temperature functions
             auto staticPressureFct = CollisionModel::getConstantDoubleFunction(backgroundPressure_Pa);
 
@@ -332,22 +336,36 @@ int main(int argc, const char * argv[]) {
                         };
             }
 
-            std::unique_ptr<CollisionModel::StatisticalDiffusionModel> collisionModel =
-                    std::make_unique<CollisionModel::StatisticalDiffusionModel>(
-                            staticPressureFct,
-                            backgroundTemperatureFct,
-                            velocityFct,
-                            collisionGasMass_Amu,
-                            collisionGasDiameter_nm*1e-9);
+            if (collisionType==SDS){
 
-            for (const auto& particle: particlesPtrs) {
-                particle->setDiameter(
-                        CollisionModel::util::estimateCollisionDiameterFromMass(
-                                particle->getMass()/Core::AMU_TO_KG
-                        )*1e-9);
-                collisionModel->setSTPParameters(*particle);
+                std::unique_ptr<CollisionModel::StatisticalDiffusionModel> collisionModel =
+                        std::make_unique<CollisionModel::StatisticalDiffusionModel>(
+                                staticPressureFct,
+                                backgroundTemperatureFct,
+                                velocityFct,
+                                collisionGasMass_Amu,
+                                collisionGasDiameter_nm*1e-9);
+
+                for (const auto& particle: particlesPtrs) {
+                    particle->setDiameter(
+                            CollisionModel::util::estimateCollisionDiameterFromMass(
+                                    particle->getMass()/Core::AMU_TO_KG
+                                    )*1e-9);
+                    collisionModel->setSTPParameters(*particle);
+                }
+                collisionModelPtr = std::move(collisionModel);
             }
-            collisionModelPtr = std::move(collisionModel);
+            else if (collisionType==HS){
+                std::unique_ptr<CollisionModel::HardSphereModel> collisionModel =
+                        std::make_unique<CollisionModel::HardSphereModel>(
+                                staticPressureFct,
+                                velocityFct,
+                                backgroundTemperatureFct,
+                                collisionGasMass_Amu,
+                                collisionGasDiameter_nm*1e-9,
+                                nullptr);
+                collisionModelPtr = std::move(collisionModel);
+            }
         }
         else if (collisionType==NO_COLLISION) {
             collisionModelPtr = nullptr;
