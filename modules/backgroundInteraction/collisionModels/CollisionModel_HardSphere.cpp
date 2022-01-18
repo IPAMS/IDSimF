@@ -64,7 +64,7 @@ CollisionModel::HardSphereModel::HardSphereModel(
         HardSphereModel(
                 getConstantDoubleFunction(staticPressure),
                 getConstantVectorFunction(Core::Vector(0.0, 0.0, 0.0)),
-                staticTemperature,
+                getConstantDoubleFunction(staticTemperature),
                 collisionGasMassAmu,
                 collisionGasDiameterM,
                 std::move(afterCollisionFunction),
@@ -82,13 +82,14 @@ CollisionModel::HardSphereModel::HardSphereModel(
         double collisionGasDiameterM,
         bool maxwellianApproximation)
         :
-        maxwellianApproximation_(maxwellianApproximation),
-        temperature_K_(staticTemperature),
-        collisionGasMass_Amu_(collisionGasMassAmu),
-        collisionGasMass_kg_(collisionGasMassAmu*Core::AMU_TO_KG),
-        collisionGasDiameter_m_(collisionGasDiameterM),
-        pressureFunction_(std::move(pressureFunction)),
-        velocityFunction_(std::move(velocityFunction)) { }
+        HardSphereModel(
+                std::move(pressureFunction),
+                std::move(velocityFunction),
+                getConstantDoubleFunction(staticTemperature),
+                collisionGasMassAmu,
+                collisionGasDiameterM,
+                nullptr,
+                maxwellianApproximation) { }
 
 /**
  * Constructor for location dependent pressure and velocity, given as spatially resolved
@@ -97,19 +98,19 @@ CollisionModel::HardSphereModel::HardSphereModel(
 CollisionModel::HardSphereModel::HardSphereModel(
         std::function<double(Core::Vector& location)> pressureFunction,
         std::function<Core::Vector(Core::Vector& location)> velocityFunction,
-        double staticTemperature,
+        std::function<double(const Core::Vector&)>temperatureFunction,
         double collisionGasMassAmu,
         double collisionGasDiameterM,
         std::function<void(RS::CollisionConditions, BTree::Particle&)> afterCollisionFunction,
         bool maxwellianApproximation)
         :
         maxwellianApproximation_(maxwellianApproximation),
-        temperature_K_(staticTemperature),
         collisionGasMass_Amu_(collisionGasMassAmu),
         collisionGasMass_kg_(collisionGasMassAmu*Core::AMU_TO_KG),
         collisionGasDiameter_m_(collisionGasDiameterM),
         pressureFunction_(std::move(pressureFunction)),
         velocityFunction_(std::move(velocityFunction)),
+        temperatureFunction_(std::move(temperatureFunction)),
         afterCollisionActionFunction_(std::move(afterCollisionFunction)) { }
 
 void CollisionModel::HardSphereModel::updateModelParameters(BTree::Particle& /*ion*/) const {}
@@ -157,10 +158,11 @@ void CollisionModel::HardSphereModel::modifyVelocity(BTree::Particle &ion, doubl
     }
 
     // Calculate the mean gas speed (m/s)
-    double vMeanGas = std::sqrt(8.0*Core::K_BOLTZMANN*temperature_K_/M_PI/(collisionGasMass_Amu_ * Core::AMU_TO_KG));
+    double temperature_K = temperatureFunction_(pLocation);
+    double vMeanGas = std::sqrt(8.0*Core::K_BOLTZMANN*temperature_K/M_PI/(collisionGasMass_Amu_ * Core::AMU_TO_KG));
 
     // Calculate the median gas speed (m/s)
-    double vMedianGas = std::sqrt(2.0*Core::K_BOLTZMANN*temperature_K_/(collisionGasMass_Amu_ * Core::AMU_TO_KG));
+    double vMedianGas = std::sqrt(2.0*Core::K_BOLTZMANN*temperature_K/(collisionGasMass_Amu_ * Core::AMU_TO_KG));
 
     // Compute the mean relative speed (m/s) between ion and gas.
     double s = vRelIonMeanBackRest / vMedianGas;
@@ -168,7 +170,7 @@ void CollisionModel::HardSphereModel::modifyVelocity(BTree::Particle &ion, doubl
             (s + 1.0/(2.0*s)) * 0.5 * PI_SQRT * std::erf(s) + 0.5 * std::exp(-s*s) );
 
     // Compute mean-free-path (m)
-    double effectiveMFP_m = Core::K_BOLTZMANN * temperature_K_ *
+    double effectiveMFP_m = Core::K_BOLTZMANN * temperature_K *
                             (vRelIonMeanBackRest / cMeanRel) / (localPressure_Pa * sigma_m2);
 
     // Compute probability of collision in the current time-step.
@@ -187,7 +189,7 @@ void CollisionModel::HardSphereModel::modifyVelocity(BTree::Particle &ion, doubl
     // Calculate the standard deviation of the one dimensional velocity distribution of the
     // background gas particles. Std. dev. in one dimension is given from Maxwell-Boltzmann
     // as sqrt(kT / particle mass).
-    double  vrStdevGas = std::sqrt( Core::K_BOLTZMANN * temperature_K_ / (collisionGasMass_Amu_ * Core::AMU_TO_KG) );
+    double  vrStdevGas = std::sqrt( Core::K_BOLTZMANN * temperature_K / (collisionGasMass_Amu_ * Core::AMU_TO_KG) );
 
     // Compute the velocity vector of the background gas particle colliding with the ion.
 

@@ -83,7 +83,7 @@ namespace CollisionModel{
         HardSphereModel(
                 std::function<double(Core::Vector& location)>pressureFunction,
                 std::function<Core::Vector(Core::Vector& location)>velocityFunction,
-                double StaticTemperature,
+                std::function<double(const Core::Vector&)>temperatureFunction,
                 double collisionGasMassAmu,
                 double collisionGasDiameterM,
                 std::function<void(RS::CollisionConditions, BTree::Particle&)>afterCollisionFunction,
@@ -113,7 +113,6 @@ namespace CollisionModel{
         const double SQRT3_3 = std::sqrt(3) * 3;
 
         bool maxwellianApproximation_ = false;  ///< flag if a pure maxwellian approximation for the gas particles is used
-        double temperature_K_ = 298;    ///< static background temperature in K
         double collisionGasMass_Amu_ = 0.0;   ///< mass of the neutral colliding gas particles in amu
         double collisionGasMass_kg_ = 0.0;    ///< mass of the neutral colliding gas particles in kg
 
@@ -121,6 +120,7 @@ namespace CollisionModel{
 
         std::function<double(Core::Vector&)> pressureFunction_ = nullptr; ///< a spatial pressure function
         std::function<Core::Vector(Core::Vector&)> velocityFunction_ = nullptr; ///< a spatial velocity function
+        std::function<double(const Core::Vector&)>temperatureFunction_ = nullptr;  ///< Spatial temperature function
         std::function<void(RS::CollisionConditions, BTree::Particle&)> afterCollisionActionFunction_ = nullptr;
         ///< Function with things to do after a collision (e.g. collision based chemical reactions)
     };
