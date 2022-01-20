@@ -193,7 +193,6 @@ TEST_CASE( "Test RS simulations", "[RS][Simulation]") {
         RS::SimulationConfiguration* simConf = sim.simulationConfiguration();
 
         RS::Substance* Cl1 = simConf->substanceByName("Cl_1");
-        RS::Substance* H2O = simConf->substanceByName("H2O");
 
         std::size_t nParticles = 100000;
         int nSteps = 200;
