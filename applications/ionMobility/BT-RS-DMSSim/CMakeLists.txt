@@ -6,11 +6,14 @@ set(SOURCE_FILES
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 target_link_libraries(${PROJECT_NAME} core apputils rs collisionmodels particlesimulation apputils_ionMobility)
 
-add_test(NAME BT-RS-DMSSim_waterCluster_benchmarkRun COMMAND ${PROJECT_NAME}
-        "example/RS_waterCluster_benchmarkRun.json" "run_BT-RS-DMSSim_waterCluster_benchmarkRun" -n ${N_THREADS})
+add_test(NAME BT-RS-DMSSim_waterCluster_HS COMMAND ${PROJECT_NAME}
+        "example/RS_waterCluster_HS.json" "run_BT-RS-DMSSim_waterCluster_HS" -n ${N_THREADS})
 
-add_test(NAME BT-RS-DMSSim_waterCluster_benchmarkRun_noCollison COMMAND ${PROJECT_NAME}
-        "example/RS_waterCluster_benchmarkRun_noCollision.json" "run_BT-RS-DMSSim_waterCluster_benchmarkRun_noCollision" -n ${N_THREADS})
+add_test(NAME BT-RS-DMSSim_waterCluster_SDS COMMAND ${PROJECT_NAME}
+        "example/RS_waterCluster_SDS.json" "run_BT-RS-DMSSim_waterCluster_SDS" -n ${N_THREADS})
+
+add_test(NAME BT-RS-DMSSim_waterCluster_noCollison COMMAND ${PROJECT_NAME}
+        "example/RS_waterCluster_noCollision.json" "run_BT-RS-DMSSim_waterCluster_noCollision" -n ${N_THREADS})
 
 add_test(NAME BT-RS-DMSSim_waterCluster_temperatureGradient COMMAND ${PROJECT_NAME}
         "example/RS_waterCluster_temperatureGradient.json" "run_BT-RS-DMSSim_waterCluster_temperatureGradient" -n ${N_THREADS})
