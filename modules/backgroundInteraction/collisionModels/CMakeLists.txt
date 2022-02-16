@@ -16,7 +16,7 @@ set(SOURCE_FILES
         CollisionModel_MultiCollisionModel.hpp
         CollisionModel_CollisionStatistics.cpp
         CollisionModel_CollisionStatistics.hpp
-        CollisionStatistic_default.hpp)
+        CollisionStatistic_default.hpp CollisionModel_SoftSphere.cpp CollisionModel_SoftSphere.hpp)
 
 add_library(collisionmodels STATIC ${SOURCE_FILES})
 target_include_directories(collisionmodels PUBLIC .)
