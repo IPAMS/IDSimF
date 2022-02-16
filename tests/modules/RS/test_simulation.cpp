@@ -235,9 +235,9 @@ TEST_CASE( "Test RS simulations", "[RS][Simulation]") {
         RS::AbstractReaction* reacCl2Forward = simConf->reaction(2);
         CHECK(reacCl1Forward->getLabel() == "cl1_forward");
         CHECK(reacCl2Forward->getLabel() == "cl2_forward");
-        std::cout << " reaction events:" << sim.reactionEvents(reacCl1Forward) << std::endl;
-        CHECK( ( sim.reactionEvents(reacCl1Forward) > 86000 && sim.reactionEvents(reacCl1Forward) < 87000) );
-        CHECK( ( sim.reactionEvents(reacCl2Forward) > 58500 && sim.reactionEvents(reacCl2Forward) < 61000) );
+
+        CHECK( ( sim.reactionEvents(reacCl1Forward) > 85000 && sim.reactionEvents(reacCl1Forward) < 87500) );
+        CHECK( ( sim.reactionEvents(reacCl2Forward) > 58000 && sim.reactionEvents(reacCl2Forward) < 61000) );
         CHECK( sim.totalReactionEvents() > 0);
         CHECK( sim.totalReactionEvents()  == totalCountedWithFunction);
         CHECK( particles[0]->getIntegerAttribute("reacted") > 0);
