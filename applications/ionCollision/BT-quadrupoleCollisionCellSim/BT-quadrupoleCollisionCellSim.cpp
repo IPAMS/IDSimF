@@ -29,7 +29,7 @@
 #include "Core_randomGenerators.hpp"
 #include "BTree_particle.hpp"
 #include "PSim_util.hpp"
-#include "PSim_trajectoryHDF5Writer.hpp"
+#include "FileIO_trajectoryHDF5Writer.hpp"
 #include "PSim_particleStartSplatTracker.hpp"
 #include "Integration_parallelVerletIntegrator.hpp"
 #include "CollisionModel_HardSphere.hpp"

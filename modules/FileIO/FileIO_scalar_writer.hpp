@@ -19,45 +19,44 @@
  along with IDSimF.  If not, see <https://www.gnu.org/licenses/>.
 
  ------------
- PSim_ionCloudReader.hpp
+ FileIO_scalar_writer.hpp
 
- Reader class for structured simple ion clouds / ion initialization data from csv files
+ Simple file writer for scalar values
 
  ****************************/
 
-#ifndef PSim_ionCloudReader_hpp
-#define PSim_ionCloudReader_hpp
+#ifndef Particle_simulation_scalar_writer
+#define Particle_simulation_scalar_writer
 
-#include <stdexcept>
-#include <string>
+#include <fstream>
 #include <vector>
-#include <memory>
+
 
 //forward declare own classes:
 namespace BTree{
+    class Vector;
     class Particle;
 }
 
-namespace FileIO{
-
+namespace FileIO {
     /**
-     * Individual exception class for problems in ion cloud files
+     * File writer to write scalar values to a result file
      */
-    class IonCloudFileException : public std::runtime_error {
-        public:
-            explicit IonCloudFileException (const std::string msg): std::runtime_error(msg) {}
-    };
+    class Scalar_writer{
+    public:
+        explicit Scalar_writer(std::string transientFilename);
+        ~Scalar_writer();
 
-    /**
-     * File reader for importing structured simple ion clouds / ion initialization data from files
-     */
-    class IonCloudReader {
-        public:
-            [[nodiscard]] std::vector<std::unique_ptr<BTree::Particle>> readIonCloud(std::string filename);
+        void writeTimestep(int intValue, double time);
+        void writeTimestep(std::size_t sizeValue, double time);
+        void writeTimestep(unsigned int unsignedIntValue, double time);
+        void writeTimestep(double doubleValue, double time);
+        void writeTimestep(std::vector<double> doubleValues, double time);
 
-        private:
-            const std::string delimiter_ = ";"; ///<A delimiter for the columns in the ion cloud files
+    private:
+        std::ofstream* transientFile_; ///< File stream to the file to write to
     };
 }
 
-#endif /* BTree_vtkFieldReader_hpp */
+
+#endif //Particle_simulation_scalar_writer

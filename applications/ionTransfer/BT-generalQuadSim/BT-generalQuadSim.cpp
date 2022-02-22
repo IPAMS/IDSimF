@@ -31,7 +31,7 @@
 #include "BTree_tree.hpp"
 #include "PSim_util.hpp"
 #include "PSim_constants.hpp"
-#include "PSim_trajectoryExplorerJSONwriter.hpp"
+#include "FileIO_trajectoryExplorerJSONwriter.hpp"
 #include "PSim_interpolatedField.hpp"
 #include "PSim_boxStartZone.hpp"
 #include "Integration_verletIntegrator.hpp"

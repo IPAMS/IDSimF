@@ -26,7 +26,7 @@
  ****************************/
 
 
-#include "PSim_HDF5Reader.hpp"
+#include "FileIO_HDF5Reader.hpp"
 #include "catch.hpp"
 #include <vector>
 #include <array>

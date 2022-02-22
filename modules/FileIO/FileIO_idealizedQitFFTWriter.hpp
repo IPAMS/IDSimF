@@ -19,10 +19,12 @@
  along with IDSimF.  If not, see <https://www.gnu.org/licenses/>.
 
  ------------
- BTree_inductionCurrentWriter.hpp
+ FileIO_idealizedQitFFTWriter.hpp
 
- Simulation result file writer which writes induced current on arbitrary detection electrodes, defined
- by weight fields given as potential arrays
+ FFT Spectrum writer for idealized QIT Simulations
+
+ Simulation result file writer which writes the approximate electric field on
+ the cap electrodes in an idealized QIT simulation
 
  ****************************/
 
@@ -39,36 +41,25 @@ namespace BTree{
     class Particle;
 }
 
-namespace ParticleSimulation{
-    class SimionPotentialArray;
-}
+namespace FileIO{
     /**
      *  Simulation result file writer which writes the displacement current induced by a simulated ion cloud
-     *  on arbitrary detection electrodes.
-     *  The induction effect on the individual electrodes is defined by individual potential arrays, which contain
-     *  the field which would result with the individual detection electrode on a normalized voltage (1V) and
-     *  all other electrodes in the geometry on ground.
-     *  The effect of the individual electrodes can be scaled by a scaling factor, to allow bipolar or more complex
-     *  detection circuits of the detection electrodes.
+     *  on the cap electrodes in an QIT simulation to a file.
+     *
+     *  The displacement current is approximated as the average displacement of the individual charged particles.
      */
-
-namespace FileIO{
-    class InductionCurrentWriter{
+    class IdealizedQitFFTWriter{
 
     public:
-        InductionCurrentWriter(std::vector<BTree::Particle *> particles, std::string transientFilename,
-                               const std::vector<ParticleSimulation::SimionPotentialArray*> &weightFields,
-                               std::vector<double> weightFactors,
-                               double scale_mm_per_gu);
-        ~InductionCurrentWriter();
+        IdealizedQitFFTWriter(std::vector<BTree::Particle*> particles, std::string transientFilename);
+        ~IdealizedQitFFTWriter();
 
         void writeTimestep(double time);
+        void writeTimestepMassResolved(double time);
 
     private:
-        double scale_mm_per_gu_ = 0.0;
         std::unique_ptr<std::ofstream> transientFile_;
         std::vector<BTree::Particle*> particles_;
-        std::vector<std::pair<ParticleSimulation::SimionPotentialArray*, double>> weightFields_;
     };
 }
 

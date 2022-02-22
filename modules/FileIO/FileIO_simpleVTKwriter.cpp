@@ -19,7 +19,7 @@
  along with IDSimF.  If not, see <https://www.gnu.org/licenses/>.
  ****************************/
 
-#include "PSim_simpleVTKwriter.hpp"
+#include "FileIO_simpleVTKwriter.hpp"
 #include "BTree_particle.hpp"
 #include "BTree_tree.hpp"
 #include "BTree_node.hpp"

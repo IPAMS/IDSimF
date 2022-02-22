@@ -19,14 +19,14 @@
  along with IDSimF.  If not, see <https://www.gnu.org/licenses/>.
 
  ------------
- PSim_HDF5Reader.hpp
+ FileIO_HDF5Reader.hpp
 
  Description
 
  ****************************/
 
-#ifndef IDSIMF_PSIM_HDF5READER_HPP
-#define IDSIMF_PSIM_HDF5READER_HPP
+#ifndef IDSIMF_FILEIO_HDF5READER_HPP
+#define IDSIMF_FILEIO_HDF5READER_HPP
 
 #include <string>
 #include <vector>
@@ -68,6 +68,6 @@ namespace FileIO{
     };
 }
 
-#include "PSim_HDF5Reader.tpp"
+#include "FileIO_HDF5Reader.tpp"
 
-#endif //IDSIMF_PSIM_HDF5READER_HPP
+#endif //IDSIMF_FILEIO_HDF5READER_HPP

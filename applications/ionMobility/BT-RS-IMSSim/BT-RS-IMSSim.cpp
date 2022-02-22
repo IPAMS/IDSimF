@@ -35,7 +35,7 @@
 #include "PSim_constants.hpp"
 #include "Integration_verletIntegrator.hpp"
 #include "Integration_velocityIntegrator.hpp"
-#include "PSim_trajectoryHDF5Writer.hpp"
+#include "FileIO_trajectoryHDF5Writer.hpp"
 #include "CollisionModel_AbstractCollisionModel.hpp"
 #include "CollisionModel_HardSphere.hpp"
 #include "CollisionModel_StatisticalDiffusion.hpp"

@@ -19,7 +19,7 @@
  along with IDSimF.  If not, see <https://www.gnu.org/licenses/>.
  ****************************/
 
-#include "PSim_trajectoryHDF5Writer.hpp"
+#include "FileIO_trajectoryHDF5Writer.hpp"
 #include "PSim_particleStartSplatTracker.hpp"
 #include <array>
 #include <cmath>

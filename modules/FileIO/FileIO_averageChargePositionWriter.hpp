@@ -19,44 +19,37 @@
  along with IDSimF.  If not, see <https://www.gnu.org/licenses/>.
 
  ------------
- PSim_scalar_writer.hpp
+ FileIO_averageChargePositionWriter.hpp
 
- Simple file writer for scalar values
+ File writer for average position of the net charge in a Barnes Hut Tree
 
  ****************************/
 
-#ifndef Particle_simulation_scalar_writer
-#define Particle_simulation_scalar_writer
+#ifndef BTree_average_charge_position_writer_hpp
+#define BTree_average_charge_position_writer_hpp
 
 #include <fstream>
-#include <vector>
-
+#include <string>
 
 //forward declare own classes:
 namespace BTree{
-    class Vector;
-    class Particle;
+    class Tree;
 }
 
 namespace FileIO {
     /**
-     * File writer to write scalar values to a result file
+     * Filewriter to write the average position of the net charge in a Core to a file
      */
-    class Scalar_writer{
+    class AverageChargePositionWriter{
     public:
-        explicit Scalar_writer(std::string transientFilename);
-        ~Scalar_writer();
-
-        void writeTimestep(int intValue, double time);
-        void writeTimestep(std::size_t sizeValue, double time);
-        void writeTimestep(unsigned int unsignedIntValue, double time);
-        void writeTimestep(double doubleValue, double time);
-        void writeTimestep(std::vector<double> doubleValues, double time);
+        explicit AverageChargePositionWriter(std::string transientFilename);
+        ~AverageChargePositionWriter();
+        void writeTimestep(const BTree::Tree& tree, double time);
 
     private:
-        std::ofstream* transientFile_; ///< File stream to the file to write to
+        std::ofstream* transientFile_; ///< file handle of the file to write to
+
     };
 }
 
-
-#endif //Particle_simulation_scalar_writer
+#endif /* BTree_average_charge_position_writer_hpp */

@@ -3,7 +3,7 @@
 #include "BTree_particle.hpp"
 #include "Integration_verletIntegrator.hpp"
 #include "Integration_parallelVerletIntegrator.hpp"
-#include "PSim_trajectoryHDF5Writer.hpp"
+#include "FileIO_trajectoryHDF5Writer.hpp"
 #include "PSim_util.hpp"
 #include "CollisionModel_StatisticalDiffusion.hpp"
 #include "appUtils_stopwatch.hpp"

@@ -19,7 +19,7 @@
  along with IDSimF.  If not, see <https://www.gnu.org/licenses/>.
  ****************************/
 
-#include "PSim_scalar_writer.hpp"
+#include "FileIO_scalar_writer.hpp"
 #include "BTree_tree.hpp"
 #include "BTree_particle.hpp"
 

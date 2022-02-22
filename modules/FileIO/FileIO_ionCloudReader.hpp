@@ -19,37 +19,45 @@
  along with IDSimF.  If not, see <https://www.gnu.org/licenses/>.
 
  ------------
- PSim_averageChargePositionWriter.hpp
+ FileIO_ionCloudReader.hpp
 
- File writer for average position of the net charge in a Barnes Hut Tree
+ Reader class for structured simple ion clouds / ion initialization data from csv files
 
  ****************************/
 
-#ifndef BTree_average_charge_position_writer_hpp
-#define BTree_average_charge_position_writer_hpp
+#ifndef PSim_ionCloudReader_hpp
+#define PSim_ionCloudReader_hpp
 
-#include <fstream>
+#include <stdexcept>
 #include <string>
+#include <vector>
+#include <memory>
 
 //forward declare own classes:
 namespace BTree{
-    class Tree;
+    class Particle;
 }
 
-namespace FileIO {
+namespace FileIO{
+
     /**
-     * Filewriter to write the average position of the net charge in a Core to a file
+     * Individual exception class for problems in ion cloud files
      */
-    class AverageChargePositionWriter{
-    public:
-        explicit AverageChargePositionWriter(std::string transientFilename);
-        ~AverageChargePositionWriter();
-        void writeTimestep(const BTree::Tree& tree, double time);
+    class IonCloudFileException : public std::runtime_error {
+        public:
+            explicit IonCloudFileException (const std::string msg): std::runtime_error(msg) {}
+    };
 
-    private:
-        std::ofstream* transientFile_; ///< file handle of the file to write to
+    /**
+     * File reader for importing structured simple ion clouds / ion initialization data from files
+     */
+    class IonCloudReader {
+        public:
+            [[nodiscard]] std::vector<std::unique_ptr<BTree::Particle>> readIonCloud(std::string filename);
 
+        private:
+            const std::string delimiter_ = ";"; ///<A delimiter for the columns in the ion cloud files
     };
 }
 
-#endif /* BTree_average_charge_position_writer_hpp */
+#endif /* BTree_vtkFieldReader_hpp */

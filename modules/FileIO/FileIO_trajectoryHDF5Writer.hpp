@@ -19,7 +19,7 @@
  along with IDSimF.  If not, see <https://www.gnu.org/licenses/>.
 
  ------------
- PSim_trajectoryExplorerJSONwriter.hpp
+ FileIO_trajectoryExplorerJSONwriter.hpp
 
  Writer class for HDF5 files containing ion trajectories
 
@@ -29,7 +29,7 @@
 #define BTree_trajectoryHDF5Writer_hpp
 
 #include "BTree_particle.hpp"
-#include "PSim_trajectoryWriterDefs.hpp"
+#include "FileIO_trajectoryWriterDefs.hpp"
 #include "H5Cpp.h"
 #include <string>
 #include <vector>

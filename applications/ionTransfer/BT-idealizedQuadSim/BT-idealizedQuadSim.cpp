@@ -29,8 +29,8 @@
 
 #include "BTree_particle.hpp"
 #include "BTree_tree.hpp"
-#include "PSim_simpleVTKwriter.hpp"
-#include "PSim_trajectoryExplorerJSONwriter.hpp"
+#include "FileIO_simpleVTKwriter.hpp"
+#include "FileIO_trajectoryExplorerJSONwriter.hpp"
 #include "PSim_util.hpp"
 #include "Integration_verletIntegrator.hpp"
 #include "CollisionModel_HardSphere.hpp"

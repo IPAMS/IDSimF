@@ -27,9 +27,9 @@
 
 #include "BTree_particle.hpp"
 #include "BTree_tree.hpp"
-#include "PSim_scalar_writer.hpp"
-#include "PSim_averageChargePositionWriter.hpp"
-#include "PSim_idealizedQitFFTWriter.hpp"
+#include "FileIO_scalar_writer.hpp"
+#include "FileIO_averageChargePositionWriter.hpp"
+#include "FileIO_idealizedQitFFTWriter.hpp"
 #include "catch.hpp"
 #include <memory>
 

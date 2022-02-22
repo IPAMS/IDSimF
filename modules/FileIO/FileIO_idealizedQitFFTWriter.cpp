@@ -19,7 +19,7 @@
  along with IDSimF.  If not, see <https://www.gnu.org/licenses/>.
  ****************************/
 
-#include "PSim_idealizedQitFFTWriter.hpp"
+#include "FileIO_idealizedQitFFTWriter.hpp"
 #include "Core_vector.hpp"
 #include "BTree_particle.hpp"
 #include <map>

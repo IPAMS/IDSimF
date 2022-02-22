@@ -25,7 +25,7 @@
 
  ****************************/
 
-#include "PSim_ionCloudReader.hpp"
+#include "FileIO_ionCloudReader.hpp"
 #include "Core_vector.hpp"
 #include "BTree_particle.hpp"
 #include "catch.hpp"

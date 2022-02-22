@@ -15,7 +15,7 @@
 #include "Core_debug.hpp"
 #include "PSim_simionPotentialArray.hpp"
 #include "PSim_math.hpp"
-#include "PSim_scalar_writer.hpp"
+#include "FileIO_scalar_writer.hpp"
 #include "appUtils_stopwatch.hpp"
 
 #include <iostream>

@@ -27,8 +27,8 @@
 
 #include "BTree_particle.hpp"
 #include "BTree_tree.hpp"
-#include "PSim_trajectoryExplorerJSONwriter.hpp"
-#include "PSim_trajectoryHDF5Writer.hpp"
+#include "FileIO_trajectoryExplorerJSONwriter.hpp"
+#include "FileIO_trajectoryHDF5Writer.hpp"
 #include "PSim_util.hpp"
 #include "PSim_boxStartZone.hpp"
 #include "Integration_verletIntegrator.hpp"

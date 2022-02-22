@@ -19,7 +19,7 @@
  along with IDSimF.  If not, see <https://www.gnu.org/licenses/>.
 
  ------------
- PSim_trajectoryExplorerJSONwriter.hpp
+ FileIO_trajectoryExplorerJSONwriter.hpp
 
  Writer class for JSON files containing ion trajectories
 
@@ -28,7 +28,7 @@
 #ifndef BTree_trajectoryExplorerJSONwriter_hpp
 #define BTree_trajectoryExplorerJSONwriter_hpp
 
-#include "PSim_trajectoryWriterDefs.hpp"
+#include "FileIO_trajectoryWriterDefs.hpp"
 #include <ostream>
 #include <vector>
 #include <functional>

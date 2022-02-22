@@ -19,7 +19,7 @@
  along with IDSimF.  If not, see <https://www.gnu.org/licenses/>.
  ****************************/
 
-#include "PSim_HDF5Reader.hpp"
+#include "FileIO_HDF5Reader.hpp"
 
 FileIO::HDF5Reader::HDF5Reader(const std::string &hdf5Filename) {
     h5f_ = std::make_unique<H5::H5File>(hdf5Filename.c_str(), H5F_ACC_RDONLY);

@@ -1,26 +1,26 @@
 project(IDSimF_fileIO)
 
 set(SOURCE_FILES
-        PSim_averageChargePositionWriter.hpp
-        PSim_averageChargePositionWriter.cpp
-        PSim_simpleVTKwriter.hpp
-        PSim_simpleVTKwriter.cpp
-        PSim_trajectoryExplorerJSONwriter.hpp
-        PSim_trajectoryExplorerJSONwriter.cpp
-        PSim_ionCloudReader.cpp
-        PSim_ionCloudReader.hpp
-        PSim_scalar_writer.cpp
-        PSim_scalar_writer.hpp
-        PSim_idealizedQitFFTWriter.cpp
-        PSim_idealizedQitFFTWriter.hpp
-        PSim_inductionCurrentWriter.cpp
-        PSim_inductionCurrentWriter.hpp
-        PSim_HDF5Reader.hpp
-        PSim_HDF5Reader.tpp
-        PSim_HDF5Reader.cpp
-        PSim_trajectoryHDF5Writer.hpp
-        PSim_trajectoryHDF5Writer.cpp
-        PSim_trajectoryWriterDefs.hpp)
+        FileIO_averageChargePositionWriter.hpp
+        FileIO_averageChargePositionWriter.cpp
+        FileIO_simpleVTKwriter.hpp
+        FileIO_simpleVTKwriter.cpp
+        FileIO_trajectoryExplorerJSONwriter.hpp
+        FileIO_trajectoryExplorerJSONwriter.cpp
+        FileIO_ionCloudReader.cpp
+        FileIO_ionCloudReader.hpp
+        FileIO_scalar_writer.cpp
+        FileIO_scalar_writer.hpp
+        FileIO_idealizedQitFFTWriter.cpp
+        FileIO_idealizedQitFFTWriter.hpp
+        FileIO_inductionCurrentWriter.cpp
+        FileIO_inductionCurrentWriter.hpp
+        FileIO_HDF5Reader.hpp
+        FileIO_HDF5Reader.tpp
+        FileIO_HDF5Reader.cpp
+        FileIO_trajectoryHDF5Writer.hpp
+        FileIO_trajectoryHDF5Writer.cpp
+        FileIO_trajectoryWriterDefs.hpp)
 
 add_library(file_io STATIC ${SOURCE_FILES})
 target_include_directories(file_io PUBLIC .)

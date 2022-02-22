@@ -19,7 +19,7 @@
  along with IDSimF.  If not, see <https://www.gnu.org/licenses/>.
  ****************************/
 
-#include "PSim_ionCloudReader.hpp"
+#include "FileIO_ionCloudReader.hpp"
 #include "BTree_particle.hpp"
 #include <fstream>
 

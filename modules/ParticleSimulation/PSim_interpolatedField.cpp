@@ -20,7 +20,7 @@
  ****************************/
 
 #include "PSim_interpolatedField.hpp"
-#include "PSim_HDF5Reader.hpp"
+#include "FileIO_HDF5Reader.hpp"
 #include "Core_vector.hpp"
 #include <algorithm>
 #include <iterator>

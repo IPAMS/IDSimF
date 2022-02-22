@@ -27,7 +27,7 @@
 
 #include "BTree_particle.hpp"
 #include "BTree_tree.hpp"
-#include "PSim_trajectoryExplorerJSONwriter.hpp"
+#include "FileIO_trajectoryExplorerJSONwriter.hpp"
 #include "json.h"
 #include "catch.hpp"
 #include "test_util.hpp"

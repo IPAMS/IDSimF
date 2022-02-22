@@ -19,7 +19,7 @@
  along with IDSimF.  If not, see <https://www.gnu.org/licenses/>.
  ****************************/
 
-#include "PSim_trajectoryExplorerJSONwriter.hpp"
+#include "FileIO_trajectoryExplorerJSONwriter.hpp"
 #include "BTree_tree.hpp"
 #include "BTree_particle.hpp"
 

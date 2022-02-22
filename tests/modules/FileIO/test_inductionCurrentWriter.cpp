@@ -27,7 +27,7 @@
 
 #include "BTree_particle.hpp"
 #include "PSim_simionPotentialArray.hpp"
-#include "PSim_inductionCurrentWriter.hpp"
+#include "FileIO_inductionCurrentWriter.hpp"
 #include "catch.hpp"
 #include <memory>
 
