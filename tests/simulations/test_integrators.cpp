@@ -97,10 +97,10 @@ TEST_CASE("Compare results of serial and parallel varlet integrators with a line
 
 
     // simulate ===============================================================================================
-    ParticleSimulation::VerletIntegrator verletIntegratorSerial(
+    Integration::VerletIntegrator verletIntegratorSerial(
             particlePtrsSerial, accelerationFunctionSerial);
 
-    ParticleSimulation::ParallelVerletIntegrator verletIntegratorParallelNew(
+    Integration::ParallelVerletIntegrator verletIntegratorParallelNew(
             particlePtrsParallelNew, accelerationFunctionParallelNew);
 
     verletIntegratorSerial.run(timeSteps, dt);

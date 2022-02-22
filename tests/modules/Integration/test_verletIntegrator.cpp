@@ -51,7 +51,7 @@ TEST_CASE("Test serial verlet integrator", "[ParticleSimulation][VerletIntegrato
 
     SECTION( "Verlet integrator should be working with deferred particle addition") {
 
-        ParticleSimulation::VerletIntegrator verletIntegrator(accelerationFct);
+        Integration::VerletIntegrator verletIntegrator(accelerationFct);
 
         //should not crash / throw without particles
         double dt = 1e-4;
@@ -134,7 +134,7 @@ TEST_CASE("Test serial verlet integrator", "[ParticleSimulation][VerletIntegrato
                 nParticlesStartMonitored++;
             };
 
-            ParticleSimulation::VerletIntegrator verletIntegrator(
+            Integration::VerletIntegrator verletIntegrator(
                     particlesPtrs,
                     accelerationFct, timestepWriteFct, otherActionsFct, particleStartMonitoringFct);
 
@@ -165,7 +165,7 @@ TEST_CASE("Test serial verlet integrator", "[ParticleSimulation][VerletIntegrato
 
         SECTION("Verlet integrator should be stoppable"){
 
-            ParticleSimulation::AbstractTimeIntegrator* integratorPtr;
+            Integration::AbstractTimeIntegrator* integratorPtr;
             unsigned int terminationTimeStep = 50;
 
             auto timestepStopFct = [&integratorPtr, terminationTimeStep](
@@ -176,7 +176,7 @@ TEST_CASE("Test serial verlet integrator", "[ParticleSimulation][VerletIntegrato
                 }
             };
 
-            ParticleSimulation::VerletIntegrator verletIntegrator(
+            Integration::VerletIntegrator verletIntegrator(
                     particlesPtrs,
                     accelerationFct, timestepStopFct);
             integratorPtr = &verletIntegrator;
@@ -231,7 +231,7 @@ TEST_CASE("Test serial verlet integrator", "[ParticleSimulation][VerletIntegrato
 
         // run trajectory integration without reactions:
 
-        ParticleSimulation::VerletIntegrator verletIntegrator(
+        Integration::VerletIntegrator verletIntegrator(
                 particlesPtrs, accelerationFctReactive);
 
         verletIntegrator.run(timeSteps,dt);

@@ -33,14 +33,14 @@
  * @param otherActionsFunction  a function to perform arbitrary other actions in every time step of the simulation
  * @param collisionModel a collision model, modeling the interaction between charged particles and background gas
  */
-ParticleSimulation::VerletIntegrator::VerletIntegrator(
+Integration::VerletIntegrator::VerletIntegrator(
         std::vector<BTree::Particle *> particles,
-        ParticleSimulation::VerletIntegrator::accelerationFctType accelerationFunction,
-        ParticleSimulation::VerletIntegrator::timestepWriteFctType timestepWriteFunction,
-        ParticleSimulation::VerletIntegrator::otherActionsFctType otherActionsFunction,
-        ParticleSimulation::AbstractTimeIntegrator::particleStartMonitoringFctType ionStartMonitoringFunction,
+        Integration::VerletIntegrator::accelerationFctType accelerationFunction,
+        Integration::VerletIntegrator::timestepWriteFctType timestepWriteFunction,
+        Integration::VerletIntegrator::otherActionsFctType otherActionsFunction,
+        Integration::AbstractTimeIntegrator::particleStartMonitoringFctType ionStartMonitoringFunction,
         CollisionModel::AbstractCollisionModel* collisionModel) :
-    ParticleSimulation::AbstractTimeIntegrator(particles, ionStartMonitoringFunction),
+    Integration::AbstractTimeIntegrator(particles, ionStartMonitoringFunction),
     collisionModel_(collisionModel),
     accelerationFunction_(std::move(accelerationFunction)),
     timestepWriteFunction_(std::move(timestepWriteFunction)),
@@ -55,11 +55,11 @@ ParticleSimulation::VerletIntegrator::VerletIntegrator(
  * @param otherActionsFunction  a function to perform arbitrary other actions in every time step of the simulation
  * @param collisionModel a collision model, modeling the interaction between charged particles and background gas
  */
-ParticleSimulation::VerletIntegrator::VerletIntegrator(
-        ParticleSimulation::VerletIntegrator::accelerationFctType accelerationFunction,
-        ParticleSimulation::VerletIntegrator::timestepWriteFctType timestepWriteFunction,
-        ParticleSimulation::VerletIntegrator::otherActionsFctType otherActionsFunction,
-        ParticleSimulation::AbstractTimeIntegrator::particleStartMonitoringFctType ionStartMonitoringFunction,
+Integration::VerletIntegrator::VerletIntegrator(
+        Integration::VerletIntegrator::accelerationFctType accelerationFunction,
+        Integration::VerletIntegrator::timestepWriteFctType timestepWriteFunction,
+        Integration::VerletIntegrator::otherActionsFctType otherActionsFunction,
+        Integration::AbstractTimeIntegrator::particleStartMonitoringFctType ionStartMonitoringFunction,
         CollisionModel::AbstractCollisionModel* collisionModel) :
     AbstractTimeIntegrator(ionStartMonitoringFunction),
     collisionModel_(collisionModel),
@@ -73,7 +73,7 @@ ParticleSimulation::VerletIntegrator::VerletIntegrator(
  * @param particle the particle to add to the verlet integration
  * @param extIndex an external numerical index / key for the particle to add
  */
-void ParticleSimulation::VerletIntegrator::addParticle(BTree::Particle *particle){
+void Integration::VerletIntegrator::addParticle(BTree::Particle *particle){
     particles_.push_back(particle);
     newPos_.push_back(Core::Vector(0,0,0));
     a_t_.push_back(Core::Vector(0,0,0));
@@ -88,7 +88,7 @@ void ParticleSimulation::VerletIntegrator::addParticle(BTree::Particle *particle
  * @param nTimesteps number of time steps to run the verlet integration
  * @param dt time step length
  */
-void ParticleSimulation::VerletIntegrator::run(unsigned int nTimesteps, double dt) {
+void Integration::VerletIntegrator::run(unsigned int nTimesteps, double dt) {
 
     this->runState_ = RUNNING;
     bearParticles_(0.0);
@@ -110,7 +110,7 @@ void ParticleSimulation::VerletIntegrator::run(unsigned int nTimesteps, double d
  * Run the verlet integrator for a single time step
  * @param dt time step length
  */
-void ParticleSimulation::VerletIntegrator::runSingleStep(double dt) {
+void Integration::VerletIntegrator::runSingleStep(double dt) {
 
     bearParticles_(time_);
 
@@ -162,14 +162,14 @@ void ParticleSimulation::VerletIntegrator::runSingleStep(double dt) {
 /**
  * Finalizes the verlet integration run (should be called after the last time step).
  */
-void ParticleSimulation::VerletIntegrator::finalizeSimulation(){
+void Integration::VerletIntegrator::finalizeSimulation(){
     if (timestepWriteFunction_ !=nullptr) {
         timestepWriteFunction_(particles_, tree_, time_, timestep_, true);
     }
 }
 
-void ParticleSimulation::VerletIntegrator::bearParticles_(double time) {
-    bool particlesCreated = ParticleSimulation::AbstractTimeIntegrator::bearParticles_(time);
+void Integration::VerletIntegrator::bearParticles_(double time) {
+    bool particlesCreated = Integration::AbstractTimeIntegrator::bearParticles_(time);
     if (particlesCreated){
         tree_.computeChargeDistribution();
     }

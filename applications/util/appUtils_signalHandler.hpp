@@ -43,13 +43,13 @@ namespace AppUtils{
     class SignalHandler {
 
     public:
-        static void setReceiver(ParticleSimulation::AbstractTimeIntegrator& receiver);
+        static void setReceiver(Integration::AbstractTimeIntegrator& receiver);
         static void registerSignalHandler();
         static void sendTerminateToReceiver();
         static bool isTerminationSignaled();
 
     private:
-        inline static ParticleSimulation::AbstractTimeIntegrator* receiver_;
+        inline static Integration::AbstractTimeIntegrator* receiver_;
         inline static bool terminationSignaled_ = false;
 
     };

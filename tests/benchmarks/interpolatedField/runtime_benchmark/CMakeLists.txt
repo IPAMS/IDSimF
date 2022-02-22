@@ -12,4 +12,4 @@ set(TEST_FILES
 file(COPY ${TEST_FILES} DESTINATION .)
 
 add_executable(benchmark_interpolated_field_runtime ${SOURCE_FILES})
-target_link_libraries(benchmark_interpolated_field_runtime core particlesimulation)
+target_link_libraries(benchmark_interpolated_field_runtime core file_io particlesimulation)

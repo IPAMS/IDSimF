@@ -377,7 +377,7 @@ int main(int argc, const char * argv[]) {
         hdf5Writer->setParticleAttributes(particleAttributesNames, particleAttributesTransformFct);
         hdf5Writer->setParticleAttributes(integerParticleAttributesNames, integerParticleAttributesTransformFct);
 
-        ParticleSimulation::AbstractTimeIntegrator* integratorPtr;
+        Integration::AbstractTimeIntegrator* integratorPtr;
         auto timestepWriteFunction =
                 [trajectoryWriteInterval, fftWriteInterval, fftWriteMode, &V_0, &V_rf_export, &ionsInactive,
                         &hdf5Writer, &startSplatTracker, &ionsInactiveWriter, &fftWriter, &integratorPtr, &logger](
@@ -429,7 +429,7 @@ int main(int argc, const char * argv[]) {
         stopWatch.start();
 
         if (integratorMode==VERLET) {
-            ParticleSimulation::VerletIntegrator verletIntegrator(
+            Integration::VerletIntegrator verletIntegrator(
                     particlePtrs,
                     accelerationFunctionQIT, timestepWriteFunction, otherActionsFunctionQIT, particleStartMonitoringFct,
                     &hsModel);
@@ -438,7 +438,7 @@ int main(int argc, const char * argv[]) {
             verletIntegrator.run(timeSteps, dt);
         }
         else if (integratorMode==PARALLEL_VERLET) {
-            ParticleSimulation::ParallelVerletIntegrator verletIntegrator(
+            Integration::ParallelVerletIntegrator verletIntegrator(
                     particlePtrs,
                     accelerationFunctionQIT_parallel, timestepWriteFunction, otherActionsFunctionQIT,
                     particleStartMonitoringFct,

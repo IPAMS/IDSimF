@@ -62,7 +62,7 @@ TEST_CASE( "Test parallel verlet integrator", "[ParticleSimulation][ParallelVerl
     SECTION( "Parallel Verlet integrator should be working with deferred particle addition") {
 
         // bare integrator without time step or other actions function
-        ParticleSimulation::ParallelVerletIntegrator verletIntegrator(accelerationFct);
+        Integration::ParallelVerletIntegrator verletIntegrator(accelerationFct);
 
         //should not crash / throw without particles
         REQUIRE_NOTHROW(verletIntegrator.run(1,dt));
@@ -112,7 +112,7 @@ TEST_CASE( "Test parallel verlet integrator", "[ParticleSimulation][ParallelVerl
                 timeOfBirth -= dt*0.5;
             }
 
-            ParticleSimulation::ParallelVerletIntegrator verletIntegrator(
+            Integration::ParallelVerletIntegrator verletIntegrator(
                     particlesPtrs, accelerationFct, nullptr, nullptr, nullptr);
 
             verletIntegrator.run(timeSteps, dt);
@@ -170,7 +170,7 @@ TEST_CASE( "Test parallel verlet integrator", "[ParticleSimulation][ParallelVerl
                     nParticlesStartMonitored++;
                 };
 
-                ParticleSimulation::ParallelVerletIntegrator verletIntegrator(
+                Integration::ParallelVerletIntegrator verletIntegrator(
                         particlesPtrs, accelerationFct, timestepWriteFct, otherActionsFct, particleStartMonitoringFct);
 
                 verletIntegrator.run(timeSteps, dt);
@@ -200,7 +200,7 @@ TEST_CASE( "Test parallel verlet integrator", "[ParticleSimulation][ParallelVerl
 
             SECTION("Integration should be stoppable") {
 
-                ParticleSimulation::AbstractTimeIntegrator* integratorPtr;
+                Integration::AbstractTimeIntegrator* integratorPtr;
                 unsigned int terminationTimeStep = 40;
 
                 unsigned int nTimestepsRecorded = 0;
@@ -217,7 +217,7 @@ TEST_CASE( "Test parallel verlet integrator", "[ParticleSimulation][ParallelVerl
                     }
                 };
 
-                ParticleSimulation::ParallelVerletIntegrator verletIntegrator(
+                Integration::ParallelVerletIntegrator verletIntegrator(
                         particlesPtrs,
                         accelerationFct, timestepWriteFct, terminationActionFct);
 

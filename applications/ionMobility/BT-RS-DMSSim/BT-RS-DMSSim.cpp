@@ -392,7 +392,7 @@ int main(int argc, const char * argv[]) {
         };
 
         //init trajectory simulation object:
-        ParticleSimulation::ParallelVerletIntegrator verletIntegrator(
+        Integration::ParallelVerletIntegrator verletIntegrator(
                 particlesPtrs,
                 accelerationFct, timestepWriteFct, otherActionsFct, ParticleSimulation::noFunction,
                 collisionModelPtr.get());
@@ -433,7 +433,7 @@ int main(int argc, const char * argv[]) {
             //terminate simulation loops if all particles are terminated or termination of the integrator was requested
             //from somewhere (e.g. signal from outside)
             if (ionsInactive>=nAllParticles ||
-                    verletIntegrator.runState()==ParticleSimulation::AbstractTimeIntegrator::IN_TERMINATION)
+                    verletIntegrator.runState()==Integration::AbstractTimeIntegrator::IN_TERMINATION)
             {
                 break;
             }

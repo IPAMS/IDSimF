@@ -128,7 +128,7 @@ TEST_CASE( "Test SDS collison model", "[CollisionModels][SDS]") {
             return(result);
         };
 
-        ParticleSimulation::VerletIntegrator verletIntegrator(
+        Integration::VerletIntegrator verletIntegrator(
                 particles,
                 accelerationFct,
                 ParticleSimulation::noFunction, ParticleSimulation::noFunction, ParticleSimulation::noFunction,

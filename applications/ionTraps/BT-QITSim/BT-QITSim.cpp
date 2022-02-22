@@ -478,7 +478,7 @@ int main(int argc, const char * argv[]) {
         stopWatch.start();
 
         if (integratorMode==VERLET) {
-            ParticleSimulation::VerletIntegrator verletIntegrator(
+            Integration::VerletIntegrator verletIntegrator(
                     particlePtrs,
                     accelerationFunctionQIT, timestepWriteFunction,
                     otherActionsFunctionQIT, particleStartMonitoringFct,
@@ -487,7 +487,7 @@ int main(int argc, const char * argv[]) {
             verletIntegrator.run(timeSteps, dt);
         }
         else if (integratorMode==PARALLEL_VERLET) {
-            ParticleSimulation::ParallelVerletIntegrator verletIntegrator(
+            Integration::ParallelVerletIntegrator verletIntegrator(
                     particlePtrs,
                     accelerationFunctionQIT_parallel, timestepWriteFunction,
                     otherActionsFunctionQIT, particleStartMonitoringFct,

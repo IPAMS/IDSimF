@@ -45,7 +45,7 @@ namespace CollisionModel{
     class AbstractCollisionModel;
 }
 
-namespace ParticleSimulation{
+namespace Integration{
 
     //std::function<Core::Vector(Core::Particle* particle, int particleIndex, Core::Tree& tree, double time, int timestep)> accelerationFctType;
 

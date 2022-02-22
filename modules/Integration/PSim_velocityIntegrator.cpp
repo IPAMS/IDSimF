@@ -34,11 +34,11 @@
  *  (can be nullptr to flag non usage)
 
  */
-ParticleSimulation::VelocityIntegrator::VelocityIntegrator(
+Integration::VelocityIntegrator::VelocityIntegrator(
         std::vector<BTree::Particle *> particles,
-        ParticleSimulation::VelocityIntegrator::velocityFctType velocityFunction,
-        ParticleSimulation::VelocityIntegrator::timestepWriteFctType timestepWriteFunction,
-        ParticleSimulation::VelocityIntegrator::otherActionsFctType otherActionsFunction):
+        Integration::VelocityIntegrator::velocityFctType velocityFunction,
+        Integration::VelocityIntegrator::timestepWriteFctType timestepWriteFunction,
+        Integration::VelocityIntegrator::otherActionsFctType otherActionsFunction):
 velocityFunction_(std::move(velocityFunction)),
 timestepWriteFunction_(std::move(timestepWriteFunction)),
 otherActionsFunction_(std::move(otherActionsFunction))
@@ -53,11 +53,11 @@ otherActionsFunction_(std::move(otherActionsFunction))
  * Adds a particle to the velocity integrator
  * @param particle the particle to add
  */
-void ParticleSimulation::VelocityIntegrator::addParticle(BTree::Particle *particle){
+void Integration::VelocityIntegrator::addParticle(BTree::Particle *particle){
     addParticle_(particle);
 }
 
-void ParticleSimulation::VelocityIntegrator::addParticle_(BTree::Particle *particle){
+void Integration::VelocityIntegrator::addParticle_(BTree::Particle *particle){
     particles_.push_back(particle);
     ++nParticles_;
 }
@@ -67,7 +67,7 @@ void ParticleSimulation::VelocityIntegrator::addParticle_(BTree::Particle *parti
  * @param nTimesteps number of time steps to run the integration
  * @param dt time step length
  */
-void ParticleSimulation::VelocityIntegrator::run(unsigned int nTimesteps, double dt) {
+void Integration::VelocityIntegrator::run(unsigned int nTimesteps, double dt) {
     this->runState_ = RUNNING;
     for (unsigned int step=0; step< nTimesteps; step++){
         runSingleStep(dt);
@@ -83,7 +83,7 @@ void ParticleSimulation::VelocityIntegrator::run(unsigned int nTimesteps, double
  * Run the integrator for a single time step
  * @param dt time step length
  */
-void ParticleSimulation::VelocityIntegrator::runSingleStep(double dt) {
+void Integration::VelocityIntegrator::runSingleStep(double dt) {
     for (std::size_t i=0; i<nParticles_; i++){
         if (particles_[i]->isActive()){
             Core::Vector velocity = velocityFunction_(particles_[i], i, time_, timestep_);
@@ -107,7 +107,7 @@ void ParticleSimulation::VelocityIntegrator::runSingleStep(double dt) {
 /**
  * Finalizes the verlet integration run (should be called after the last time step).
  */
-void ParticleSimulation::VelocityIntegrator::finalizeSimulation(){
+void Integration::VelocityIntegrator::finalizeSimulation(){
     if (timestepWriteFunction_ != nullptr) {
         timestepWriteFunction_(particles_, time_, timestep_, true);
     }

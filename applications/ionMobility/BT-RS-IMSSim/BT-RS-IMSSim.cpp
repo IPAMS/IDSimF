@@ -353,9 +353,9 @@ int main(int argc, const char *argv[]){
         }
 
         //init trajectory simulation object:
-        std::unique_ptr<ParticleSimulation::AbstractTimeIntegrator> trajectoryIntegrator = nullptr;
+        std::unique_ptr<Integration::AbstractTimeIntegrator> trajectoryIntegrator = nullptr;
         if (integratorType==VERLET) {
-            trajectoryIntegrator = std::make_unique<ParticleSimulation::VerletIntegrator>(
+            trajectoryIntegrator = std::make_unique<Integration::VerletIntegrator>(
                     particlesPtrs,
                     accelerationFctVerlet, timestepWriteFctVerlet, otherActionsFunctionIMSVerlet,
                     ParticleSimulation::noFunction,
@@ -371,7 +371,7 @@ int main(int argc, const char *argv[]){
                 return velocity;
             };
 
-            trajectoryIntegrator = std::make_unique<ParticleSimulation::VelocityIntegrator>(
+            trajectoryIntegrator = std::make_unique<Integration::VelocityIntegrator>(
                     particlesPtrs,
                     velocityFctSimple, timestepWriteFctSimple, otherActionsFunctionIMSSimple
             );

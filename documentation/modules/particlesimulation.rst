@@ -13,9 +13,9 @@ Time Integrators
 A central aspect of IDSimF is time integration of the particle motion, which is done by time integrators. 
 
 
-:cpp:class:`ParticleSimulation::AbstractTimeIntegrator` is the abstract super class of all time integrators, which provides a basic common interface for time integration: 
+:cpp:class:`Integration::AbstractTimeIntegrator` is the abstract super class of all time integrators, which provides a basic common interface for time integration:
 
-.. doxygenclass:: ParticleSimulation::AbstractTimeIntegrator
+.. doxygenclass:: Integration::AbstractTimeIntegrator
     :members:
     :undoc-members:
 
@@ -24,9 +24,9 @@ A central aspect of IDSimF is time integration of the particle motion, which is 
 Velocity Integrator
 -------------------
 
-:cpp:class:`ParticleSimulation::VelocityIntegrator` is a simple integrator which uses the current velocity in a time step to move the particle. Thus, it ignores particle inertia. Furthermore, space charge and background gas interactions are ignored by this integrator. 
+:cpp:class:`Integration::VelocityIntegrator` is a simple integrator which uses the current velocity in a time step to move the particle. Thus, it ignores particle inertia. Furthermore, space charge and background gas interactions are ignored by this integrator.
 
-.. doxygenclass:: ParticleSimulation::VelocityIntegrator
+.. doxygenclass:: Integration::VelocityIntegrator
     :members:
     :undoc-members:
 
@@ -35,14 +35,14 @@ Velocity Integrator
 Verlet Integrators
 ------------------
 
-:cpp:class:`ParticleSimulation::VerletIntegrator` and :cpp:class:`ParticleSimulation::ParallelVerletIntegrator` are a serial (non parallelized) and parallelized version of a time integrator implementing the Verlet integration scheme. Space charge and background gas interactions are considered with verlet integrators. 
+:cpp:class:`Integration::VerletIntegrator` and :cpp:class:`Integration::ParallelVerletIntegrator` are a serial (non parallelized) and parallelized version of a time integrator implementing the Verlet integration scheme. Space charge and background gas interactions are considered with verlet integrators.
 
-.. doxygenclass:: ParticleSimulation::VerletIntegrator
+.. doxygenclass:: Integration::VerletIntegrator
     :members:
     :undoc-members:
 
 
-.. doxygenclass:: ParticleSimulation::ParallelVerletIntegrator
+.. doxygenclass:: Integration::ParallelVerletIntegrator
     :members:
     :undoc-members:
 

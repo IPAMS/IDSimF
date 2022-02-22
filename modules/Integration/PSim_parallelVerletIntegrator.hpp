@@ -41,7 +41,7 @@
 #include "CollisionModel_AbstractCollisionModel.hpp"
 #include <vector>
 
-namespace ParticleSimulation{
+namespace Integration{
 
     //std::function<Core::Vector(Core::Particle* particle, int particleIndex, Core::Tree& tree, double time, int timestep)> accelerationFctType;
 

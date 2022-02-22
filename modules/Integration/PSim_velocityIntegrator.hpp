@@ -41,7 +41,7 @@ namespace BTree{
     class Particle;
 }
 
-namespace ParticleSimulation{
+namespace Integration{
 
     /**
      * Ion trajectory integration with a very simple integrator which moves particles in every timestep according to

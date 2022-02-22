@@ -23,12 +23,12 @@
 #include <utility>
 #include <algorithm>
 
-ParticleSimulation::ParallelVerletIntegrator::ParallelVerletIntegrator(
+Integration::ParallelVerletIntegrator::ParallelVerletIntegrator(
         const std::vector<BTree::Particle *>& particles,
-        ParticleSimulation::ParallelVerletIntegrator::accelerationFctType accelerationFunction,
-        ParticleSimulation::ParallelVerletIntegrator::timestepWriteFctType timestepWriteFunction,
-        ParticleSimulation::ParallelVerletIntegrator::otherActionsFctType otherActionsFunction,
-        ParticleSimulation::AbstractTimeIntegrator::particleStartMonitoringFctType ionStartMonitoringFunction,
+        Integration::ParallelVerletIntegrator::accelerationFctType accelerationFunction,
+        Integration::ParallelVerletIntegrator::timestepWriteFctType timestepWriteFunction,
+        Integration::ParallelVerletIntegrator::otherActionsFctType otherActionsFunction,
+        Integration::AbstractTimeIntegrator::particleStartMonitoringFctType ionStartMonitoringFunction,
         CollisionModel::AbstractCollisionModel* collisionModel) :
     AbstractTimeIntegrator(particles, ionStartMonitoringFunction),
     collisionModel_(collisionModel),
@@ -37,11 +37,11 @@ ParticleSimulation::ParallelVerletIntegrator::ParallelVerletIntegrator(
     otherActionsFunction_(std::move(otherActionsFunction))
 {}
 
-ParticleSimulation::ParallelVerletIntegrator::ParallelVerletIntegrator(
-        ParticleSimulation::ParallelVerletIntegrator::accelerationFctType accelerationFunction,
-        ParticleSimulation::ParallelVerletIntegrator::timestepWriteFctType timestepWriteFunction,
-        ParticleSimulation::ParallelVerletIntegrator::otherActionsFctType otherActionsFunction,
-        ParticleSimulation::AbstractTimeIntegrator::particleStartMonitoringFctType ionStartMonitoringFunction,
+Integration::ParallelVerletIntegrator::ParallelVerletIntegrator(
+        Integration::ParallelVerletIntegrator::accelerationFctType accelerationFunction,
+        Integration::ParallelVerletIntegrator::timestepWriteFctType timestepWriteFunction,
+        Integration::ParallelVerletIntegrator::otherActionsFctType otherActionsFunction,
+        Integration::AbstractTimeIntegrator::particleStartMonitoringFctType ionStartMonitoringFunction,
         CollisionModel::AbstractCollisionModel* collisionModel) :
     AbstractTimeIntegrator(ionStartMonitoringFunction),
     collisionModel_(collisionModel),
@@ -57,7 +57,7 @@ ParticleSimulation::ParallelVerletIntegrator::ParallelVerletIntegrator(
  * Adds a particle to the verlet integrator (required if particles are generated in the course of the simulation
  * @param particle the particle to add to the verlet integration
  */
-void ParticleSimulation::ParallelVerletIntegrator::addParticle(BTree::Particle *particle){
+void Integration::ParallelVerletIntegrator::addParticle(BTree::Particle *particle){
     particles_.push_back(particle);
     newPos_.emplace_back(Core::Vector(0,0,0));
     a_t_.emplace_back(Core::Vector(0,0,0));
@@ -67,16 +67,16 @@ void ParticleSimulation::ParallelVerletIntegrator::addParticle(BTree::Particle *
     ++nParticles_;
 }
 
-void ParticleSimulation::ParallelVerletIntegrator::bearParticles_(double time) {
-    ParticleSimulation::AbstractTimeIntegrator::bearParticles_(time);
+void Integration::ParallelVerletIntegrator::bearParticles_(double time) {
+    Integration::AbstractTimeIntegrator::bearParticles_(time);
     initInternalState_();
 }
 
-void ParticleSimulation::ParallelVerletIntegrator::initInternalState_(){
+void Integration::ParallelVerletIntegrator::initInternalState_(){
     tree_.init();
 }
 
-void ParticleSimulation::ParallelVerletIntegrator::run(unsigned int nTimesteps, double dt) {
+void Integration::ParallelVerletIntegrator::run(unsigned int nTimesteps, double dt) {
 
     // run init:
     this->runState_ = RUNNING;
@@ -97,7 +97,7 @@ void ParticleSimulation::ParallelVerletIntegrator::run(unsigned int nTimesteps, 
     this->runState_ = STOPPED;
 }
 
-void ParticleSimulation::ParallelVerletIntegrator::runSingleStep(double dt){
+void Integration::ParallelVerletIntegrator::runSingleStep(double dt){
 
     //std::cout << "runSingleStep "<<dt<<" "<<time_<<std::endl;
     //first: Generate new particles if necessary
@@ -175,7 +175,7 @@ void ParticleSimulation::ParallelVerletIntegrator::runSingleStep(double dt){
 /**
  * Finalizes the verlet integration run (should be called after the last time step).
  */
-void ParticleSimulation::ParallelVerletIntegrator::finalizeSimulation(){
+void Integration::ParallelVerletIntegrator::finalizeSimulation(){
     if (timestepWriteFunction_ != nullptr){
         timestepWriteFunction_(particles_,tree_,time_,timestep_,true);
     }

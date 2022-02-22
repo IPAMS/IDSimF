@@ -448,7 +448,7 @@ int main(int argc, const char * argv[]) {
         CollisionModel::MultiCollisionModel combinedCollisionModel(std::move(collisionModels));
 
         // simulate ===============================================================================================
-        ParticleSimulation::VerletIntegrator verletIntegrator(
+        Integration::VerletIntegrator verletIntegrator(
                 particlePtrs,
                 accelerationFunctionQIT, timestepWriteFunction, otherActionsFunctionQIT, particleStartMonitoringFct,
                 &combinedCollisionModel);
@@ -475,7 +475,7 @@ int main(int argc, const char * argv[]) {
             verletIntegrator.runSingleStep(dt);
 
             if (ionsInactive>=nParticlesTotal ||
-                    verletIntegrator.runState()==ParticleSimulation::AbstractTimeIntegrator::IN_TERMINATION)
+                    verletIntegrator.runState()==Integration::AbstractTimeIntegrator::IN_TERMINATION)
             {
                 break;
             }

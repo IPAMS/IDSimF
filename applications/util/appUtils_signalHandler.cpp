@@ -38,7 +38,7 @@ void exitSignalHandler_(int /*_ignored*/) {
 /**
  * Sets a new receiver time integrator which should be terminated by SIGTERM
  */
-void AppUtils::SignalHandler::setReceiver(ParticleSimulation::AbstractTimeIntegrator& receiver) {
+void AppUtils::SignalHandler::setReceiver(Integration::AbstractTimeIntegrator& receiver) {
     receiver_ = &receiver;
     registerSignalHandler();
 }

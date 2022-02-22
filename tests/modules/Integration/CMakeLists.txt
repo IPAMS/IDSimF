@@ -1,0 +1,17 @@
+project(test_Integration)
+
+set(SOURCE_FILES
+        test_main.cpp
+        test_verletIntegrator.cpp
+        test_parallelVerletIntegrator.cpp
+        test_velocityIntegrator.cpp)
+
+add_executable(test_Integration ${SOURCE_FILES})
+
+target_include_directories(test_Integration PUBLIC
+        ${CMAKE_SOURCE_DIR}/libs/catch
+        ${CMAKE_SOURCE_DIR}/tests/util)
+
+target_link_libraries(test_Integration core integration file_io btree particlesimulation collisionmodels ${HDF5_CXX_LIBRARIES} ${HDF5_LIBRARIES})
+
+add_test(NAME test_Integration COMMAND test_Integration)

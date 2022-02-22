@@ -214,7 +214,7 @@ int main(int argc, const char * argv[]) {
         // simulate ===============================================================================================
         AppUtils::Stopwatch stopWatch;
         stopWatch.start();
-        ParticleSimulation::VerletIntegrator verletIntegrator(
+        Integration::VerletIntegrator verletIntegrator(
                 particlePtrs,
                 accelerationFunction, timestepWriteFunction, otherActionsFunction, ParticleSimulation::noFunction,
                 &hsModel);

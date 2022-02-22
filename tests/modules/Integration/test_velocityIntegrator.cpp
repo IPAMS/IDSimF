@@ -65,7 +65,7 @@ TEST_CASE( "Test velocity integrator", "[ParticleSimulation][VelocityIntegrator]
         }
 
         SECTION("Simulation run should run through with bare integrator"){
-            ParticleSimulation::VelocityIntegrator velocityIntegrator(particlesPtrs, velocityFct);
+            Integration::VelocityIntegrator velocityIntegrator(particlesPtrs, velocityFct);
 
             velocityIntegrator.runSingleStep(dt);
             velocityIntegrator.run(timeSteps,dt);
@@ -91,7 +91,7 @@ TEST_CASE( "Test velocity integrator", "[ParticleSimulation][VelocityIntegrator]
                 nParticlesTouched++;
             };
 
-            ParticleSimulation::VelocityIntegrator velocityIntegrator(particlesPtrs, velocityFct, timestepWriteFct, otherActionsFct);
+            Integration::VelocityIntegrator velocityIntegrator(particlesPtrs, velocityFct, timestepWriteFct, otherActionsFct);
 
             velocityIntegrator.runSingleStep(dt);
             velocityIntegrator.run(timeSteps,dt);
@@ -107,7 +107,7 @@ TEST_CASE( "Test velocity integrator", "[ParticleSimulation][VelocityIntegrator]
 
         SECTION("Simulation run should be stoppable"){
 
-            ParticleSimulation::AbstractTimeIntegrator* integratorPtr;
+            Integration::AbstractTimeIntegrator* integratorPtr;
             int terminationTimeStep = 40;
 
             auto terminationActionFct = [&integratorPtr, terminationTimeStep] (
@@ -118,7 +118,7 @@ TEST_CASE( "Test velocity integrator", "[ParticleSimulation][VelocityIntegrator]
                 }
             };
 
-            ParticleSimulation::VelocityIntegrator velocityIntegrator(particlesPtrs, velocityFct, nullptr, terminationActionFct);
+            Integration::VelocityIntegrator velocityIntegrator(particlesPtrs, velocityFct, nullptr, terminationActionFct);
             integratorPtr = &velocityIntegrator;
 
             velocityIntegrator.run(timeSteps, dt);

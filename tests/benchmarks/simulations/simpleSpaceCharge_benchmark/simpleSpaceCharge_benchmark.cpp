@@ -11,7 +11,7 @@
 #include <iostream>
 #include <numeric>
 
-void runIntegrator(ParticleSimulation::AbstractTimeIntegrator &integrator, unsigned int timeSteps, double dt, std::string message){
+void runIntegrator(Integration::AbstractTimeIntegrator &integrator, unsigned int timeSteps, double dt, std::string message){
     std::cout << "Benchmark " <<message << std::endl;
     AppUtils::Stopwatch stopWatch;
     stopWatch.start();
@@ -123,11 +123,11 @@ int main(int argc, char** argv) {
 
 
     // simulate ===============================================================================================
-    ParticleSimulation::VerletIntegrator verletIntegratorSerial(
+    Integration::VerletIntegrator verletIntegratorSerial(
             particlePtrsSerial,
             accelerationFunctionSerial, nullptr, nullptr, nullptr, collisionModel);
 
-    ParticleSimulation::ParallelVerletIntegrator verletIntegratorParallel(
+    Integration::ParallelVerletIntegrator verletIntegratorParallel(
             particlePtrsParallelNew,
             accelerationFunctionParallelNew, nullptr, nullptr, nullptr, collisionModel);
 

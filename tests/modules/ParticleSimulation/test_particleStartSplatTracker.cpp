@@ -240,7 +240,7 @@ TEST_CASE("TestParticleStartSplatTracker", "[ParticleSimulation][ParticleStartSp
             }
         };
 
-        ParticleSimulation::ParallelVerletIntegrator verletIntegrator(
+        Integration::ParallelVerletIntegrator verletIntegrator(
                 particlesPtrs, accelerationFct, nullptr, otherActionsFct, particleStartMonitoringFct);
 
         verletIntegrator.run(timeSteps, dt);

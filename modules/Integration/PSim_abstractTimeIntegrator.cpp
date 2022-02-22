@@ -22,11 +22,11 @@
 #include "PSim_abstractTimeIntegrator.hpp"
 
 
-ParticleSimulation::AbstractTimeIntegrator::AbstractTimeIntegrator(particleStartMonitoringFctType ionStartMonitorFct) :
+Integration::AbstractTimeIntegrator::AbstractTimeIntegrator(particleStartMonitoringFctType ionStartMonitorFct) :
         particleStartMonitorFct_(std::move(ionStartMonitorFct))
 {}
 
-ParticleSimulation::AbstractTimeIntegrator::AbstractTimeIntegrator(const std::vector<BTree::Particle*>& particles,
+Integration::AbstractTimeIntegrator::AbstractTimeIntegrator(const std::vector<BTree::Particle*>& particles,
                                                                    particleStartMonitoringFctType ionStartMonitorFct):
         particleStartMonitorFct_(std::move(ionStartMonitorFct))
 {
@@ -51,14 +51,14 @@ ParticleSimulation::AbstractTimeIntegrator::AbstractTimeIntegrator(const std::ve
 /**
  * Indicates that the time integration should be terminated at the next possible time
  */
-void ParticleSimulation::AbstractTimeIntegrator::setTerminationState() {
-    runState_ = ParticleSimulation::AbstractTimeIntegrator::IN_TERMINATION;
+void Integration::AbstractTimeIntegrator::setTerminationState() {
+    runState_ = Integration::AbstractTimeIntegrator::IN_TERMINATION;
 }
 
 /**
  * Returns the run state of the integrator
  */
-ParticleSimulation::AbstractTimeIntegrator::RunState ParticleSimulation::AbstractTimeIntegrator::runState() const{
+Integration::AbstractTimeIntegrator::RunState Integration::AbstractTimeIntegrator::runState() const{
     return runState_;
 }
 
@@ -66,14 +66,14 @@ ParticleSimulation::AbstractTimeIntegrator::RunState ParticleSimulation::Abstrac
 /**
  * Gets the simulated time
  */
-double ParticleSimulation::AbstractTimeIntegrator::time() const{
+double Integration::AbstractTimeIntegrator::time() const{
     return time_;
 }
 
 /**
  * Gets the current time step
  */
-unsigned int ParticleSimulation::AbstractTimeIntegrator::timeStep() const{
+unsigned int Integration::AbstractTimeIntegrator::timeStep() const{
     return timestep_;
 }
 
@@ -84,7 +84,7 @@ unsigned int ParticleSimulation::AbstractTimeIntegrator::timeStep() const{
  * @param time the time until particles are born
  * @return true if particles were born
  */
-bool ParticleSimulation::AbstractTimeIntegrator::bearParticles_(double time){
+bool Integration::AbstractTimeIntegrator::bearParticles_(double time){
 
     if (particlesBornIdx_ < particleTOBs_.size()) {
         std::size_t oldParticlesBornIdx = particlesBornIdx_;

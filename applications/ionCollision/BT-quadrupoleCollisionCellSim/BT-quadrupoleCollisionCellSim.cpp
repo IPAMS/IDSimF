@@ -249,7 +249,7 @@ int main(int argc, const char * argv[]) {
         };
 
         std::size_t ionsInactive = 0;
-        ParticleSimulation::AbstractTimeIntegrator *integratorPtr;
+        Integration::AbstractTimeIntegrator *integratorPtr;
         auto timestepWriteFunction =
                 [trajectoryWriteInterval, ionRecordMode, &ionsInactive, &hdf5Writer, &startSplatTracker,
                  &integratorPtr, &logger](
@@ -299,7 +299,7 @@ int main(int argc, const char * argv[]) {
                     potentialArrays.at(0)->isElectrode(newPartPos.x(), newPartPos.y(), newPartPos.z()));
         };
 
-        ParticleSimulation::ParallelVerletIntegrator::otherActionsFctType otherActionsFunction;
+        Integration::ParallelVerletIntegrator::otherActionsFctType otherActionsFunction;
 
         if (ionTerminationMode==TERMINATE) {
             otherActionsFunction = [&isIonTerminated, &ionsInactive, &startSplatTracker](
@@ -335,7 +335,7 @@ int main(int argc, const char * argv[]) {
         AppUtils::Stopwatch stopWatch;
         stopWatch.start();
 
-        ParticleSimulation::ParallelVerletIntegrator verletIntegrator(
+        Integration::ParallelVerletIntegrator verletIntegrator(
                 particlePtrs,
                 accelerationFunction, timestepWriteFunction, otherActionsFunction, particleStartMonitoringFct,
                 &hsModel);

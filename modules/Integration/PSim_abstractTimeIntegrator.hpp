@@ -34,7 +34,7 @@
 #include <vector>
 #include <functional>
 
-namespace ParticleSimulation{
+namespace Integration{
 
     /**
      * Abstract base class for trajectory time integrators
