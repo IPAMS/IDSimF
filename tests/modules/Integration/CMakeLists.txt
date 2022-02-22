@@ -6,6 +6,12 @@ set(SOURCE_FILES
         test_parallelVerletIntegrator.cpp
         test_velocityIntegrator.cpp)
 
+set(TEST_FILE_FOLDER ${CMAKE_SOURCE_DIR}/tests/testfields)
+set(TEST_FILES
+        ${TEST_FILE_FOLDER}/RS_verlet_test.conf
+        )
+file(COPY ${TEST_FILES} DESTINATION .)
+
 add_executable(test_Integration ${SOURCE_FILES})
 
 target_include_directories(test_Integration PUBLIC
