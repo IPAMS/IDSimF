@@ -21,11 +21,11 @@
 
 #include "PSim_HDF5Reader.hpp"
 
-ParticleSimulation::HDF5Reader::HDF5Reader(const std::string &hdf5Filename) {
+FileIO::HDF5Reader::HDF5Reader(const std::string &hdf5Filename) {
     h5f_ = std::make_unique<H5::H5File>(hdf5Filename.c_str(), H5F_ACC_RDONLY);
 }
 
-hsize_t ParticleSimulation::HDF5Reader::numberOfObjectsInGroup(std::string groupName) const{
+hsize_t FileIO::HDF5Reader::numberOfObjectsInGroup(std::string groupName) const{
     H5::Group group (h5f_->openGroup(groupName.c_str()));
     return group.getNumObjs();
 }
@@ -55,21 +55,21 @@ herr_t collectDatasetNames(hid_t loc_id, const char *name, const H5L_info_t* /*l
     return 0;
 }
 
-std::vector<std::string> ParticleSimulation::HDF5Reader::namesOfObjectsInGroup(std::string groupName) const{
+std::vector<std::string> FileIO::HDF5Reader::namesOfObjectsInGroup(std::string groupName) const{
     H5::Group group = h5f_->openGroup(groupName.c_str());
     std::vector<std::string> objectNames;
     H5Literate(group.getId(), H5_INDEX_NAME, H5_ITER_INC, nullptr, collectObjectNames, &objectNames);
     return objectNames;
 }
 
-std::vector<std::string> ParticleSimulation::HDF5Reader::namesOfDatasetsInGroup(std::string groupName) const{
+std::vector<std::string> FileIO::HDF5Reader::namesOfDatasetsInGroup(std::string groupName) const{
     H5::Group group = h5f_->openGroup(groupName.c_str());
     std::vector<std::string> objectNames;
     H5Literate(group.getId(), H5_INDEX_NAME, H5_ITER_INC, nullptr, collectDatasetNames, &objectNames);
     return objectNames;
 }
 
-int ParticleSimulation::HDF5Reader::datasetNDims(std::string datasetName) const{
+int FileIO::HDF5Reader::datasetNDims(std::string datasetName) const{
     H5::DataSet ds = h5f_->openDataSet(datasetName.c_str());
     return ds.getSpace().getSimpleExtentNdims();
 }

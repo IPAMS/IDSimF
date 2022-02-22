@@ -28,7 +28,7 @@
  * Constructor
  * @param transientFilename a filename to write to
  */
-ParticleSimulation::AverageChargePositionWriter::AverageChargePositionWriter(std::string transientFilename){
+FileIO::AverageChargePositionWriter::AverageChargePositionWriter(std::string transientFilename){
     transientFile_ = new std::ofstream();
     transientFile_->open(transientFilename);
 }
@@ -36,7 +36,7 @@ ParticleSimulation::AverageChargePositionWriter::AverageChargePositionWriter(std
 /**
  * Destructor
  */
-ParticleSimulation::AverageChargePositionWriter::~AverageChargePositionWriter(){
+FileIO::AverageChargePositionWriter::~AverageChargePositionWriter(){
     if(transientFile_ != nullptr){
         transientFile_->flush();
         delete (transientFile_);
@@ -48,6 +48,6 @@ ParticleSimulation::AverageChargePositionWriter::~AverageChargePositionWriter(){
  * @param tree a valid Core which contains the charged particles
  * @param time the time of the current time step
  */
-void ParticleSimulation::AverageChargePositionWriter::writeTimestep(const BTree::Tree &tree, double time){
+void FileIO::AverageChargePositionWriter::writeTimestep(const BTree::Tree &tree, double time){
     *transientFile_<<time<<" "<<tree.getRoot()->getCenterOfCharge()<<std::endl;
 }

@@ -188,7 +188,7 @@ int main(int argc, const char * argv[]) {
                     return ((eField+spaceChargeField)*particleCharge/particle->getMass());
                 };
 
-        ParticleSimulation::partAttribTransformFctType particleAttributeTransformFct_simple =
+        FileIO::partAttribTransformFctType particleAttributeTransformFct_simple =
                 [](BTree::Particle* particle) -> std::vector<double> {
                     std::vector<double> result = {
                             particle->getVelocity().x(),
@@ -199,7 +199,7 @@ int main(int argc, const char * argv[]) {
                     return result;
                 };
 
-        ParticleSimulation::partAttribTransformFctType particleAttributeTransformFct_full =
+        FileIO::partAttribTransformFctType particleAttributeTransformFct_full =
                 [](BTree::Particle* particle) -> std::vector<double> {
                     std::vector<double> result = {
                             particle->getVelocity().x(),
@@ -216,7 +216,7 @@ int main(int argc, const char * argv[]) {
                     return result;
                 };
 
-        ParticleSimulation::partAttribTransformFctTypeInteger integerParticleAttributesTransformFct =
+        FileIO::partAttribTransformFctTypeInteger integerParticleAttributesTransformFct =
                 [](BTree::Particle* particle) -> std::vector<int> {
                     std::vector<int> result = {
                             particle->getIntegerAttribute("global index")
@@ -227,7 +227,7 @@ int main(int argc, const char * argv[]) {
         std::vector<std::string> integerParticleAttributesNames = {"global index"};
 
         //prepare file writers ==============================================================================
-        auto hdf5Writer = std::make_unique<ParticleSimulation::TrajectoryHDF5Writer>(
+        auto hdf5Writer = std::make_unique<FileIO::TrajectoryHDF5Writer>(
                 simResultBasename+"_trajectories.hd5");
 
         if (ionRecordMode==FULL) {

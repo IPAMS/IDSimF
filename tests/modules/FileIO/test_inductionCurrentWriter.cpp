@@ -50,7 +50,7 @@ TEST_CASE( "Test indcution current file writer", "[ParticleSimulation][file writ
         std::vector<ParticleSimulation::SimionPotentialArray*> detectionPAs= {&simPa1, &simPa2};
         std::vector<double> detectionScalingFactors = {1.0,-1.0};
 
-        ParticleSimulation::InductionCurrentWriter inductionWriter(particlePtrs, "induction_current_file_writer_test.txt",
+        FileIO::InductionCurrentWriter inductionWriter(particlePtrs, "induction_current_file_writer_test.txt",
                 detectionPAs,detectionScalingFactors, 1.0);
 
         int nSteps = 15;

@@ -39,7 +39,7 @@ namespace BTree {
 }
 
 
-namespace ParticleSimulation {
+namespace FileIO {
 
     //function to transform additional parameters
     typedef std::function

@@ -10,7 +10,7 @@
 int main() {
     std::cout << "Benchmark HDF5 file writer" << std::endl;
 
-    ParticleSimulation::TrajectoryHDF5Writer trajectoryWriter("test_hdf5_writer_trajectory.hd5", true);
+    FileIO::TrajectoryHDF5Writer trajectoryWriter("test_hdf5_writer_trajectory.hd5", true);
 
     int nIons = 5e6;
     int nSteps = 5;

@@ -91,7 +91,7 @@ int main(int argc, const char * argv[]) {
         //prepare file writer ==============================================================================
 
         // function to add some additional exported parameters to the exported trajectory file:
-        ParticleSimulation::partAttribTransformFctType additionalParameterTransformFct =
+        FileIO::partAttribTransformFctType additionalParameterTransformFct =
                 [](BTree::Particle* particle) -> std::vector<double> {
                     std::vector<double> result = {
                             particle->getVelocity().x(),
@@ -103,11 +103,11 @@ int main(int argc, const char * argv[]) {
 
         std::vector<std::string> auxParamNames = {"velocity x", "velocity y", "velocity z"};
 
-        auto hdf5Writer = std::make_unique<ParticleSimulation::TrajectoryHDF5Writer>(
+        auto hdf5Writer = std::make_unique<FileIO::TrajectoryHDF5Writer>(
                 simResultBasename+"_trajectories.hd5");
         hdf5Writer->setParticleAttributes(auxParamNames, additionalParameterTransformFct);
 
-        /*auto jsonWriter = std::make_unique<ParticleSimulation::TrajectoryExplorerJSONwriter>(
+        /*auto jsonWriter = std::make_unique<FileIO::TrajectoryExplorerJSONwriter>(
                 projectName + "_trajectories.json");*/
         //jsonWriter->setScales(1000,1e6);
 

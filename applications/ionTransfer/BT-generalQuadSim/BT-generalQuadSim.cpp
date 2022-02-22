@@ -99,7 +99,7 @@ int main(int argc, const char * argv[]) {
         std::vector<BTree::Particle*> particlePtrs;
 
         //prepare file writers ==============================================================================
-        auto jsonWriter = std::make_unique<ParticleSimulation::TrajectoryExplorerJSONwriter>
+        auto jsonWriter = std::make_unique<FileIO::TrajectoryExplorerJSONwriter>
                 (simResultBasename+"_trajectories.json");
         jsonWriter->setScales(1000, 1e6);
 
@@ -168,7 +168,7 @@ int main(int argc, const char * argv[]) {
             }
         };
 
-        ParticleSimulation::partAttribTransformFctType additionalParameterTransformFct =
+        FileIO::partAttribTransformFctType additionalParameterTransformFct =
                 [&backgroundGasPressureFunction](BTree::Particle* particle) -> std::vector<double> {
                     double pressure_pa = backgroundGasPressureFunction(particle->getLocation());
                     std::vector<double> result = {

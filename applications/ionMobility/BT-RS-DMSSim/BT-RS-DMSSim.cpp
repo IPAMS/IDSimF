@@ -196,7 +196,7 @@ int main(int argc, const char * argv[]) {
         };
 
         std::string hdf5Filename = projectName+"_trajectories.hd5";
-        ParticleSimulation::TrajectoryHDF5Writer trajectoryWriter(hdf5Filename);
+        FileIO::TrajectoryHDF5Writer trajectoryWriter(hdf5Filename);
         trajectoryWriter.setParticleAttributes(auxParamNames, additionalParamTFct);
 
         unsigned int ionsInactive = 0;
@@ -205,13 +205,13 @@ int main(int argc, const char * argv[]) {
             nAllParticles += ni;
         }
 
-        std::unique_ptr<ParticleSimulation::Scalar_writer> cvFieldWriter;
+        std::unique_ptr<FileIO::Scalar_writer> cvFieldWriter;
         if (cvMode==AUTO_CV) {
-            cvFieldWriter = std::make_unique<ParticleSimulation::Scalar_writer>(projectName+"_cv.csv");
+            cvFieldWriter = std::make_unique<FileIO::Scalar_writer>(projectName+"_cv.csv");
         }
 
-        std::unique_ptr<ParticleSimulation::Scalar_writer> voltageWriter;
-        voltageWriter = std::make_unique<ParticleSimulation::Scalar_writer>(projectName+"_voltages.csv");
+        std::unique_ptr<FileIO::Scalar_writer> voltageWriter;
+        voltageWriter = std::make_unique<FileIO::Scalar_writer>(projectName+"_voltages.csv");
 
 
         // init simulation  =====================================================================

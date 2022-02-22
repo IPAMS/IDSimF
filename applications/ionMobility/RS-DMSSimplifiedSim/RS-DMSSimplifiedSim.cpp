@@ -110,7 +110,7 @@ int main(int argc, const char * argv[]) {
         // prepare file writer  =================================================================
         RS::ConcentrationFileWriter resultFilewriter(projectName+"_conc.csv");
 
-        auto jsonWriter = std::make_unique<ParticleSimulation::TrajectoryExplorerJSONwriter>(projectName+ "_trajectories.json");
+        auto jsonWriter = std::make_unique<FileIO::TrajectoryExplorerJSONwriter>(projectName+ "_trajectories.json");
         jsonWriter->setScales(1000,1);
 
         // read particle configuration ==========================================================
@@ -120,17 +120,17 @@ int main(int argc, const char * argv[]) {
             nAllParticles += ni;
         }
 
-        std::unique_ptr<ParticleSimulation::Scalar_writer> cvFieldWriter;
+        std::unique_ptr<FileIO::Scalar_writer> cvFieldWriter;
         int cvHighResLogPeriod = 0;
         if (simConf->isParameter("log_cv_field_period")){
             cvHighResLogPeriod = simConf->intParameter("log_cv_field_period");
         }
         if (cvMode == AUTO_CV || cvHighResLogPeriod > 0){
-            cvFieldWriter = std::make_unique<ParticleSimulation::Scalar_writer>(projectName+ "_cv.csv");
+            cvFieldWriter = std::make_unique<FileIO::Scalar_writer>(projectName+ "_cv.csv");
         }
 
-        std::unique_ptr<ParticleSimulation::Scalar_writer> voltageWriter;
-        voltageWriter = std::make_unique<ParticleSimulation::Scalar_writer>(projectName+ "_voltages.csv");
+        std::unique_ptr<FileIO::Scalar_writer> voltageWriter;
+        voltageWriter = std::make_unique<FileIO::Scalar_writer>(projectName+ "_voltages.csv");
 
         // init simulation  =====================================================================
 
@@ -176,7 +176,7 @@ int main(int argc, const char * argv[]) {
         SVFieldFctType SVFieldFct = createSVFieldFunction(svMode, fieldWavePeriod);
         CVFieldFctType CVFieldFct = createCVFieldFunction(cvMode, fieldWavePeriod, simConf);
 
-        ParticleSimulation::partAttribTransformFctType additionalParameterTransformFct =
+        FileIO::partAttribTransformFctType additionalParameterTransformFct =
                 [=](BTree::Particle* particle) -> std::vector<double> {
                     std::vector<double> result = {particle->getFloatAttribute(key_ChemicalIndex)};
                     return result;

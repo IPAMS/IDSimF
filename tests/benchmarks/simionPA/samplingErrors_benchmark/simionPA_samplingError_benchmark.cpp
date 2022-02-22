@@ -32,7 +32,7 @@ void performBenchmark(unsigned int nSamples,
 
     PAType simPa(filename);
 
-    ParticleSimulation::Scalar_writer scalarWriter("test.csv");
+    FileIO::Scalar_writer scalarWriter("test.csv");
 
     std::cout << "Benchmark SIMION potential array " <<message << std::endl;
     AppUtils::Stopwatch stopWatch;

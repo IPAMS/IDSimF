@@ -41,7 +41,7 @@ namespace BTree{
     class Particle;
 }
 
-namespace ParticleSimulation{
+namespace FileIO{
     /**
      *  Simulation result file writer which writes the displacement current induced by a simulated ion cloud
      *  on the cap electrodes in an QIT simulation to a file.

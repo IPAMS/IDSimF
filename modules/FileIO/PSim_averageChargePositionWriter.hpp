@@ -36,7 +36,7 @@ namespace BTree{
     class Tree;
 }
 
-namespace ParticleSimulation {
+namespace FileIO {
     /**
      * Filewriter to write the average position of the net charge in a Core to a file
      */

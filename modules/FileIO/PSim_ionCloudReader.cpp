@@ -29,7 +29,7 @@
  * @return Vector with unique pointers to the read and newly created particles
  * @throws IonCloudFileException if the ion cloud file is incorrect
  */
-std::vector<std::unique_ptr<BTree::Particle>> ParticleSimulation::IonCloudReader::readIonCloud(std::string filename) {
+std::vector<std::unique_ptr<BTree::Particle>> FileIO::IonCloudReader::readIonCloud(std::string filename) {
 
     //open stream:
     std::ifstream in;
@@ -73,13 +73,13 @@ std::vector<std::unique_ptr<BTree::Particle>> ParticleSimulation::IonCloudReader
                                 pVal[9]  //time of birth
                             ));
                 } else {
-                    throw (ParticleSimulation::IonCloudFileException("wrong number of columns in line: " + fullLine));
+                    throw (FileIO::IonCloudFileException("wrong number of columns in line: " + fullLine));
                 }
             }
         }
         return(ionCloud);
     }
     else{
-        throw(ParticleSimulation::IonCloudFileException("file not found"));
+        throw(FileIO::IonCloudFileException("file not found"));
     }
 }

@@ -27,7 +27,7 @@
 #include <exception>
 
 template <hsize_t dims> using dataField =
-    ParticleSimulation::HDF5Reader::DataField<dims, double>;
+    FileIO::HDF5Reader::DataField<dims, double>;
 
 /**
  * Constructor from a HDF5 file with a grid data set.  The grid data can have varying grid point distances in the
@@ -35,7 +35,7 @@ template <hsize_t dims> using dataField =
  * @param hdf5Filename The filename of the HDF5 file to read
  */
 ParticleSimulation::InterpolatedField::InterpolatedField(const std::string &hdf5Filename) {
-    ParticleSimulation::HDF5Reader h5Reader(hdf5Filename);
+    FileIO::HDF5Reader h5Reader(hdf5Filename);
 
     dataField<1> gridPointsXDf =  h5Reader.readDataset<1>("/grid_points/x");
     gridPointsX_ = gridPointsXDf.data;

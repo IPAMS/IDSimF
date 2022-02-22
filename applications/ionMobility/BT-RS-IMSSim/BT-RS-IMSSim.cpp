@@ -132,7 +132,7 @@ int main(int argc, const char *argv[]){
         RS::ConcentrationFileWriter resultFilewriter(projectName+"_conc.csv");
 
         //prepare auxiliary parameters transform functions
-        ParticleSimulation::partAttribTransformFctType additionalParamTFct;
+        FileIO::partAttribTransformFctType additionalParamTFct;
         std::vector<std::string> auxParamNames;
 
         if (writeVelocities) {
@@ -159,7 +159,7 @@ int main(int argc, const char *argv[]){
 
         //init hdf5 filewriter
         std::string hdf5Filename = projectName+"_trajectories.hd5";
-        ParticleSimulation::TrajectoryHDF5Writer hdf5Writer(hdf5Filename);
+        FileIO::TrajectoryHDF5Writer hdf5Writer(hdf5Filename);
         hdf5Writer.setParticleAttributes(auxParamNames, additionalParamTFct);
 
         unsigned int ionsInactive = 0;

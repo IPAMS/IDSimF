@@ -44,7 +44,7 @@
 
 int timeSteps = 0;
 int trajectoryWriteInterval = 0;
-std::unique_ptr<ParticleSimulation::TrajectoryExplorerJSONwriter> jsonWriter;
+std::unique_ptr<FileIO::TrajectoryExplorerJSONwriter> jsonWriter;
 
 // some constants:
 
@@ -84,8 +84,8 @@ int main(int argc, const char * argv[]) {
     std::vector<int> nIons = std::vector<int>();
     std::vector<double> ionMasses = std::vector<double>();
 
-    jsonWriter = std::unique_ptr<ParticleSimulation::TrajectoryExplorerJSONwriter>(
-            new ParticleSimulation::TrajectoryExplorerJSONwriter(projectName+ "_trajectories.json")
+    jsonWriter = std::unique_ptr<FileIO::TrajectoryExplorerJSONwriter>(
+            new FileIO::TrajectoryExplorerJSONwriter(projectName+ "_trajectories.json")
     );
     jsonWriter->setScales(1000,1e6);
 

@@ -58,7 +58,7 @@ void AppUtils::readIonDefinitionFromIonCloudFile(
     std::string ionCloudFileName = simConf.pathRelativeToConfBasePath(
             simConf.stringParameter("ion_cloud_init_file"));
 
-    ParticleSimulation::IonCloudReader reader = ParticleSimulation::IonCloudReader();
+    FileIO::IonCloudReader reader = FileIO::IonCloudReader();
     particles = reader.readIonCloud(ionCloudFileName);
     //prepare a vector of raw pointers
     for (const auto& part : particles){

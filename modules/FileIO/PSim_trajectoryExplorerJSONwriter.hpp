@@ -40,7 +40,7 @@ namespace BTree{
     class Particle;
 }
 
-namespace ParticleSimulation {
+namespace FileIO {
 
     /**
      * File writer class for JSON files containing ion trajectories.

@@ -34,7 +34,7 @@
 #include <iostream>
 #include "H5Cpp.h"
 
-namespace ParticleSimulation{
+namespace FileIO{
     class HDF5Reader {
 
     public:

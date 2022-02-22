@@ -36,7 +36,7 @@
 
 TEST_CASE( "Scalar file writer should at least write a file without exception",
         "[ParticleSimulation][ScalarWriter][file writers]") {
-    ParticleSimulation::Scalar_writer fw("scalar_file_writer_test.txt");
+    FileIO::Scalar_writer fw("scalar_file_writer_test.txt");
 
     fw.writeTimestep(10,0.1);
     fw.writeTimestep(20,0.2);
@@ -61,7 +61,7 @@ TEST_CASE( "Average ion position file writer should at least write a file withou
         tree.insertParticle(*(particlePtrs[i]), i);
     }
 
-    ParticleSimulation::AverageChargePositionWriter fw("average_position_test.txt");
+    FileIO::AverageChargePositionWriter fw("average_position_test.txt");
 
     unsigned int nSteps = 10;
     double diff =0.1;
@@ -97,7 +97,7 @@ TEST_CASE("Test FFT file writer", "[ParticleSimulation][ScalarWriter][file write
 
     SECTION("Simple FFT file writer should at least write a file without exception when using non mass resolved mode"){
 
-        ParticleSimulation::IdealizedQitFFTWriter fw(particlePtrs, "fft_file_writer_test.txt");
+        FileIO::IdealizedQitFFTWriter fw(particlePtrs, "fft_file_writer_test.txt");
 
         unsigned int nSteps = 10;
         double diff = 0;
@@ -118,7 +118,7 @@ TEST_CASE("Test FFT file writer", "[ParticleSimulation][ScalarWriter][file write
 
     SECTION("Simple Fft file writer should at least write a file without exception when using mass resolved mode"){
 
-        ParticleSimulation::IdealizedQitFFTWriter fw(particlePtrs, "fft_file_writer_test_mass_resolved.txt");
+        FileIO::IdealizedQitFFTWriter fw(particlePtrs, "fft_file_writer_test_mass_resolved.txt");
 
         int nSteps = 10;
         double diff = 0;

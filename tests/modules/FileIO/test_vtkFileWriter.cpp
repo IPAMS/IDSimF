@@ -54,7 +54,7 @@ TEST_CASE( "The VTK writer should at least write a file without exception",
     testTree->insertParticle(testIon5,5);
     //root->printNode(0);
 
-    ParticleSimulation::SimpleVTKwriter* testWriter = new ParticleSimulation::SimpleVTKwriter("test");
+    FileIO::SimpleVTKwriter* testWriter = new FileIO::SimpleVTKwriter("test");
     testWriter->write(*testTree,true);
     delete(testTree);
 

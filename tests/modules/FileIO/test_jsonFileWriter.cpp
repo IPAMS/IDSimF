@@ -66,7 +66,7 @@ TEST_CASE("Test JSON trajectory file writer", "[ParticleSimulation][JSONTrajecto
         // testWriter is instantiated explicitly via "new" and explicitly deleted to check if file is correctly
         // closed in the destructor of the file writer
         std::string filename("trajectoryExplorerTest.json");
-        auto testWriter = new ParticleSimulation::TrajectoryExplorerJSONwriter(filename);
+        auto testWriter = new FileIO::TrajectoryExplorerJSONwriter(filename);
         testWriter->writeTimestep(particles, 0.0,false);
         testWriter->writeTimestep(particles, 0.1,false);
         testWriter->writeTimestep(particles, 0.2,true);
@@ -103,7 +103,7 @@ TEST_CASE("Test JSON trajectory file writer", "[ParticleSimulation][JSONTrajecto
         testIon3.setFloatAttribute(key_testKey, 30.3);
 
 
-        ParticleSimulation::partAttribTransformFctType additionalParameterTransformFct =
+        FileIO::partAttribTransformFctType additionalParameterTransformFct =
                 [=](BTree::Particle* particle) -> std::vector<double> {
                     std::vector<double> result = {particle->getFloatAttribute(key_testKey)};
                     return result;
@@ -111,8 +111,8 @@ TEST_CASE("Test JSON trajectory file writer", "[ParticleSimulation][JSONTrajecto
 
         // testWriter is instantiated explicitly via "new" and explicitly deleted to check if file is correctly
         // closed in the destructor of the file writer
-        ParticleSimulation::TrajectoryExplorerJSONwriter* testWriter =
-                new ParticleSimulation::TrajectoryExplorerJSONwriter("trajectoryExplorerTest_additionalParam.json");
+        FileIO::TrajectoryExplorerJSONwriter* testWriter =
+                new FileIO::TrajectoryExplorerJSONwriter("trajectoryExplorerTest_additionalParam.json");
         std::vector<int> externalKeys = {1,2,3};
 
         int nSteps = 5;

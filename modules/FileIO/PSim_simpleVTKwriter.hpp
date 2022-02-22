@@ -36,7 +36,7 @@ namespace BTree{
     class Node;
 }
 
-namespace ParticleSimulation {
+namespace FileIO {
     /**
      * File writer to write particle cloud and Core data to legacy VTK files
      */

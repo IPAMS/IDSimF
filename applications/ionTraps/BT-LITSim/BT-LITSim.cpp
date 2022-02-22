@@ -328,14 +328,14 @@ int main(int argc, const char * argv[]) {
         };
 
         //prepare file writers and data writing functions ==============================================================================
-        auto avgPositionWriter = std::make_unique<ParticleSimulation::AverageChargePositionWriter>(
+        auto avgPositionWriter = std::make_unique<FileIO::AverageChargePositionWriter>(
                 simResultBasename+"_averagePosition.txt");
 
-        auto fftWriter = std::make_unique<ParticleSimulation::InductionCurrentWriter>(
+        auto fftWriter = std::make_unique<FileIO::InductionCurrentWriter>(
                 particlePtrs, simResultBasename+"_fft.txt", detectionPAs, detectionPAFactors, paSpatialScale);
-        auto ionsInactiveWriter = std::make_unique<ParticleSimulation::Scalar_writer>(simResultBasename+"_ionsInactive.txt");
+        auto ionsInactiveWriter = std::make_unique<FileIO::Scalar_writer>(simResultBasename+"_ionsInactive.txt");
 
-        ParticleSimulation::partAttribTransformFctType particleAttributesTransformFct =
+        FileIO::partAttribTransformFctType particleAttributesTransformFct =
                 [](BTree::Particle* particle) -> std::vector<double> {
                     std::vector<double> result = {
                             particle->getVelocity().x(),
@@ -358,7 +358,7 @@ int main(int argc, const char * argv[]) {
                                                             "spacecharge x", "spacecharge y", "spacecharge z",
                                                             "mass", "charge"};
 
-        ParticleSimulation::partAttribTransformFctTypeInteger integerParticleAttributesTransformFct =
+        FileIO::partAttribTransformFctTypeInteger integerParticleAttributesTransformFct =
                 [](BTree::Particle* particle) -> std::vector<int> {
                     std::vector<int> result = {
                             particle->getIntegerAttribute("global index"),
@@ -369,7 +369,7 @@ int main(int argc, const char * argv[]) {
 
         std::vector<std::string> integerParticleAttributesNames = {"global index", "index"};
 
-        auto hdf5Writer = std::make_unique<ParticleSimulation::TrajectoryHDF5Writer>(simResultBasename+"_trajectories.hd5");
+        auto hdf5Writer = std::make_unique<FileIO::TrajectoryHDF5Writer>(simResultBasename+"_trajectories.hd5");
         hdf5Writer->setParticleAttributes(particleAttributesNames, particleAttributesTransformFct);
         hdf5Writer->setParticleAttributes(integerParticleAttributesNames, integerParticleAttributesTransformFct);
 

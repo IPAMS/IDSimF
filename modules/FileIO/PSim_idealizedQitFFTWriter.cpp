@@ -29,7 +29,7 @@
  * @param particles vector with links to the partilces in a particle cloud to write to a file
  * @param transientFilename the filename of the file to write to
  */
-ParticleSimulation::IdealizedQitFFTWriter::IdealizedQitFFTWriter(std::vector<BTree::Particle*> particles,
+FileIO::IdealizedQitFFTWriter::IdealizedQitFFTWriter(std::vector<BTree::Particle*> particles,
                                                                  std::string transientFilename)
 {
     particles_ = particles;
@@ -40,7 +40,7 @@ ParticleSimulation::IdealizedQitFFTWriter::IdealizedQitFFTWriter(std::vector<BTr
 /**
  * Destructor
  */
-ParticleSimulation::IdealizedQitFFTWriter::~IdealizedQitFFTWriter(){
+FileIO::IdealizedQitFFTWriter::~IdealizedQitFFTWriter(){
     transientFile_->flush();
 }
 
@@ -51,7 +51,7 @@ ParticleSimulation::IdealizedQitFFTWriter::~IdealizedQitFFTWriter(){
  * the result file.
  * @param time the time of the current time step
  */
-void ParticleSimulation::IdealizedQitFFTWriter::writeTimestep(double time){
+void FileIO::IdealizedQitFFTWriter::writeTimestep(double time){
     double avgVelocityZ = 0;
 
     for (const auto& part: particles_) {
@@ -67,7 +67,7 @@ void ParticleSimulation::IdealizedQitFFTWriter::writeTimestep(double time){
  * The result is written to the result file.
  * @param time the time of the current time step
  */
-void ParticleSimulation::IdealizedQitFFTWriter::writeTimestepMassResolved(double time){
+void FileIO::IdealizedQitFFTWriter::writeTimestepMassResolved(double time){
     std::map<double,double> avgVelocityZ;
     std::map<double,int> nParticles;
 

@@ -40,8 +40,8 @@ namespace BTree{
 }
 
 namespace ParticleSimulation{
-
     class SimionPotentialArray;
+}
     /**
      *  Simulation result file writer which writes the displacement current induced by a simulated ion cloud
      *  on arbitrary detection electrodes.
@@ -51,11 +51,14 @@ namespace ParticleSimulation{
      *  The effect of the individual electrodes can be scaled by a scaling factor, to allow bipolar or more complex
      *  detection circuits of the detection electrodes.
      */
+
+namespace FileIO{
     class InductionCurrentWriter{
 
     public:
         InductionCurrentWriter(std::vector<BTree::Particle *> particles, std::string transientFilename,
-                               const std::vector<SimionPotentialArray*> &weightFields, std::vector<double> weightFactors,
+                               const std::vector<ParticleSimulation::SimionPotentialArray*> &weightFields,
+                               std::vector<double> weightFactors,
                                double scale_mm_per_gu);
         ~InductionCurrentWriter();
 
@@ -65,7 +68,7 @@ namespace ParticleSimulation{
         double scale_mm_per_gu_ = 0.0;
         std::unique_ptr<std::ofstream> transientFile_;
         std::vector<BTree::Particle*> particles_;
-        std::vector<std::pair<SimionPotentialArray*, double>> weightFields_;
+        std::vector<std::pair<ParticleSimulation::SimionPotentialArray*, double>> weightFields_;
     };
 }
 

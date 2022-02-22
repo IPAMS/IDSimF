@@ -42,8 +42,10 @@ namespace BTree{
 }
 
 namespace ParticleSimulation{
-
     class ParticleStartSplatTracker;
+}
+
+namespace FileIO {
 
     class TrajectoryHDF5Writer{
     public:
@@ -65,7 +67,7 @@ namespace ParticleSimulation{
         void writeTrajectoryAttribute(std::string attrName, const std::vector<std::string> &values);
         void finalizeTrajectory();
         void writeSplatTimes(std::vector<BTree::Particle*> &particles);
-        void writeStartSplatData(ParticleStartSplatTracker tracker);
+        void writeStartSplatData(ParticleSimulation::ParticleStartSplatTracker tracker);
 
     private:
         constexpr int static FILE_TYPE_VERSION = 3;   ///<File type version identifier of the files written

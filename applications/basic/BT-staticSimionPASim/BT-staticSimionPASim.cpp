@@ -73,7 +73,7 @@ int main(int argc, const char * argv[]) {
         std::vector<BTree::Particle*> particlePtrs;
 
         std::string ionCloudFileName = simConf->pathRelativeToConfFile(simConf->stringParameter("ion_cloud_init_file"));
-        ParticleSimulation::IonCloudReader reader = ParticleSimulation::IonCloudReader();
+        FileIO::IonCloudReader reader = FileIO::IonCloudReader();
         particles = reader.readIonCloud(ionCloudFileName);
         //prepare a vector of raw pointers
         for (const auto& part : particles) {
@@ -81,7 +81,7 @@ int main(int argc, const char * argv[]) {
         }
 
         //prepare file writer ==============================================================================
-        auto jsonWriter = std::make_unique<ParticleSimulation::TrajectoryExplorerJSONwriter>(
+        auto jsonWriter = std::make_unique<FileIO::TrajectoryExplorerJSONwriter>(
                 simResultBasename+"_trajectories.json");
         jsonWriter->setScales(1000, 1e6);
 
@@ -112,7 +112,7 @@ int main(int argc, const char * argv[]) {
                 };
 
         // function to add some additional exported parameters to the exported trajectory file:
-        ParticleSimulation::partAttribTransformFctType additionalParameterTransformFct =
+        FileIO::partAttribTransformFctType additionalParameterTransformFct =
                 [](BTree::Particle* particle) -> std::vector<double> {
                     std::vector<double> result = {
                             particle->getVelocity().x(),
@@ -170,7 +170,7 @@ int main(int argc, const char * argv[]) {
         std::cout << pe.what() << std::endl;
         return EXIT_FAILURE;
     }
-    catch(const ParticleSimulation::IonCloudFileException& ie)
+    catch(const FileIO::IonCloudFileException& ie)
     {
         std::cout << ie.what() << std::endl;
         return EXIT_FAILURE;

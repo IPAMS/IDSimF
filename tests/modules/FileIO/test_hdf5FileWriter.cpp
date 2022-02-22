@@ -191,10 +191,10 @@ TEST_CASE( "Test HDF5 trajectory file writer", "[ParticleSimulation][file writer
 
         // prepare and write data to a hdf5 file:
         //prepare a bare writer:
-        ParticleSimulation::TrajectoryHDF5Writer writerBare(filenameBare, false);
+        FileIO::TrajectoryHDF5Writer writerBare(filenameBare, false);
 
         //prepare a hdf5 writer including parameter attributes
-        ParticleSimulation::partAttribTransformFctType pAttribTransformFct =
+        FileIO::partAttribTransformFctType pAttribTransformFct =
                 [](BTree::Particle *particle) -> std::vector<double>{
                     std::vector<double> result = {
                             particle->getVelocity().x(),
@@ -210,7 +210,7 @@ TEST_CASE( "Test HDF5 trajectory file writer", "[ParticleSimulation][file writer
                                                  "acceleration x", "acceleration y", "acceleration z"};
 
         //prepare a hdf5 writer including parameter attributes
-        ParticleSimulation::partAttribTransformFctTypeInteger pAttribTransformFctInt =
+        FileIO::partAttribTransformFctTypeInteger pAttribTransformFctInt =
                 [](BTree::Particle *particle) -> std::vector<int>{
                     std::vector<int> result = {
                             particle->getIntegerAttribute("global index")
@@ -219,7 +219,7 @@ TEST_CASE( "Test HDF5 trajectory file writer", "[ParticleSimulation][file writer
                 };
         std::vector<std::string> pAttribNamesInt = {"global index"};
 
-        ParticleSimulation::TrajectoryHDF5Writer writerAux(filenameAux);
+        FileIO::TrajectoryHDF5Writer writerAux(filenameAux);
         writerAux.setParticleAttributes(pAttribNames, pAttribTransformFct);
         writerAux.setParticleAttributes(pAttribNamesInt, pAttribTransformFctInt);
 

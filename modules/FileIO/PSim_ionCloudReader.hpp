@@ -38,7 +38,7 @@ namespace BTree{
     class Particle;
 }
 
-namespace ParticleSimulation{
+namespace FileIO{
 
     /**
      * Individual exception class for problems in ion cloud files

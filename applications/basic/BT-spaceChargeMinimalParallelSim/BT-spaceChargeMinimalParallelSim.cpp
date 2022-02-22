@@ -72,7 +72,7 @@ int main(int argc, const char * argv[]) {
         if (simConf->isParameter("ion_cloud_init_file")) {
             std::string ionCloudFileName = simConf->pathRelativeToConfFile(
                     simConf->stringParameter("ion_cloud_init_file"));
-            ParticleSimulation::IonCloudReader reader = ParticleSimulation::IonCloudReader();
+            FileIO::IonCloudReader reader = FileIO::IonCloudReader();
             particles = reader.readIonCloud(ionCloudFileName);
             //prepare a vector of raw pointers
             for (const auto& part : particles) {
@@ -99,7 +99,7 @@ int main(int argc, const char * argv[]) {
         //prepare file writer ==============================================================================
 
         // function to add some additional exported parameters to the exported trajectory file:
-        ParticleSimulation::partAttribTransformFctType additionalParameterTransformFct =
+        FileIO::partAttribTransformFctType additionalParameterTransformFct =
                 [](BTree::Particle* particle) -> std::vector<double> {
                     std::vector<double> result = {
                             particle->getVelocity().x(),
@@ -111,10 +111,10 @@ int main(int argc, const char * argv[]) {
 
         std::vector<std::string> auxParamNames = {"velocity x", "velocity y", "velocity z"};
 
-        auto hdf5Writer = std::make_unique<ParticleSimulation::TrajectoryHDF5Writer>(simResultBasename+"_trajectories.hd5");
+        auto hdf5Writer = std::make_unique<FileIO::TrajectoryHDF5Writer>(simResultBasename+"_trajectories.hd5");
         hdf5Writer->setParticleAttributes(auxParamNames, additionalParameterTransformFct);
 
-        /*auto jsonWriter = std::make_unique<ParticleSimulation::TrajectoryExplorerJSONwriter>(
+        /*auto jsonWriter = std::make_unique<FileIO::TrajectoryExplorerJSONwriter>(
                 projectName + "_trajectories.json");*/
         //jsonWriter->setScales(1000,1e6);
 
@@ -172,7 +172,7 @@ int main(int argc, const char * argv[]) {
     catch(AppUtils::TerminatedWhileCommandlineParsing& terminatedMessage){
         return terminatedMessage.returnCode();
     }
-    catch(const ParticleSimulation::IonCloudFileException& ie)
+    catch(const FileIO::IonCloudFileException& ie)
     {
         std::cout << ie.what() << std::endl;
         return EXIT_FAILURE;

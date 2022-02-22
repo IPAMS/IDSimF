@@ -27,7 +27,7 @@
  * Constructor: Creates the JSON file writer and inits the JSON file to write to
  * @param jsonFilename a filename of the file to write to
  */
-ParticleSimulation::TrajectoryExplorerJSONwriter::TrajectoryExplorerJSONwriter(std::string jsonFilename){
+FileIO::TrajectoryExplorerJSONwriter::TrajectoryExplorerJSONwriter(std::string jsonFilename){
     jsonFile_ = std::make_unique<std::ofstream>();
     jsonFile_->open(jsonFilename);
     initFile_();
@@ -36,7 +36,7 @@ ParticleSimulation::TrajectoryExplorerJSONwriter::TrajectoryExplorerJSONwriter(s
 /**
  * Destructor: Closes the JSON file and destroys the file writer
  */
-ParticleSimulation::TrajectoryExplorerJSONwriter::~TrajectoryExplorerJSONwriter(){
+FileIO::TrajectoryExplorerJSONwriter::~TrajectoryExplorerJSONwriter(){
     closeFile_();
 }
 
@@ -46,7 +46,7 @@ ParticleSimulation::TrajectoryExplorerJSONwriter::~TrajectoryExplorerJSONwriter(
  * @param scale spatial scaling factor
  * @param timeScale temporal scaling factor
  */
-void ParticleSimulation::TrajectoryExplorerJSONwriter::setScales(double scale, double timeScale){
+void FileIO::TrajectoryExplorerJSONwriter::setScales(double scale, double timeScale){
     this->scale_ = scale;
     this->timeScale_ = timeScale;
 }
@@ -54,15 +54,15 @@ void ParticleSimulation::TrajectoryExplorerJSONwriter::setScales(double scale, d
 /**
  * Writes the current timestep to the JSON file without additional parameters.
  *
- * \see ParticleSimulation::TrajectoryExplorerJSONwriter::writeTimestep(Core::Tree&,std::vector<int>,
- *      const ParticleSimulation::partAttribTransformFctType&,
+ * \see FileIO::TrajectoryExplorerJSONwriter::writeTimestep(Core::Tree&,std::vector<int>,
+ *      const FileIO::partAttribTransformFctType&,
  *      const std::vector<additionalParamPair>,
  *      double,
  *      bool)
  *
  * for details
  */
-void ParticleSimulation::TrajectoryExplorerJSONwriter::writeTimestep(std::vector<BTree::Particle*>& particles,
+void FileIO::TrajectoryExplorerJSONwriter::writeTimestep(std::vector<BTree::Particle*>& particles,
                                                                      double time, bool lastTime){
     writeTimestep(particles, emptyParameterTransformFct, emptyTimestepAdditionalParameters, time,
                   lastTime);
@@ -71,15 +71,15 @@ void ParticleSimulation::TrajectoryExplorerJSONwriter::writeTimestep(std::vector
 /**
  * Writes the current timestep to the JSON file with additional parameters for the particles.
  *
- * \see ParticleSimulation::TrajectoryExplorerJSONwriter::writeTimestep(Core::Tree&,std::vector<int>,
- *      const ParticleSimulation::partAttribTransformFctType&,
+ * \see FileIO::TrajectoryExplorerJSONwriter::writeTimestep(Core::Tree&,std::vector<int>,
+ *      const FileIO::partAttribTransformFctType&,
  *      const std::vector<additionalParamPair>,
  *      double,
  *      bool)
  *
  * for details
  */
-void ParticleSimulation::TrajectoryExplorerJSONwriter::writeTimestep(
+void FileIO::TrajectoryExplorerJSONwriter::writeTimestep(
         std::vector<BTree::Particle*>& particles,
         const partAttribTransformFctType &particleParameterTransformFct,
         double time,
@@ -108,9 +108,9 @@ void ParticleSimulation::TrajectoryExplorerJSONwriter::writeTimestep(
  * @param time the time of the current time step
  * @param lastTime must be true if this is the last time step to be written to the JSON file
  */
-void ParticleSimulation::TrajectoryExplorerJSONwriter::writeTimestep(
+void FileIO::TrajectoryExplorerJSONwriter::writeTimestep(
         std::vector<BTree::Particle*>& particles,
-        const ParticleSimulation::partAttribTransformFctType &particleParameterTransformFct,
+        const FileIO::partAttribTransformFctType &particleParameterTransformFct,
         const std::vector<additionalParamPair> timestepAdditionalParameters,
         double time,
         bool lastTime){
@@ -157,7 +157,7 @@ void ParticleSimulation::TrajectoryExplorerJSONwriter::writeTimestep(
  * @param tree a tree containing particles which splat times are written to the JSON file
  * @param externalParticleKeys external keys of the particles which splat times are written to the JSON file
  */
-void ParticleSimulation::TrajectoryExplorerJSONwriter::writeSplatTimes(std::vector<BTree::Particle*>& particles){
+void FileIO::TrajectoryExplorerJSONwriter::writeSplatTimes(std::vector<BTree::Particle*>& particles){
 
     *jsonFile_ << ",\n\"splatTimes\":[\n";
 
@@ -177,7 +177,7 @@ void ParticleSimulation::TrajectoryExplorerJSONwriter::writeSplatTimes(std::vect
  * @param tree a tree containing particles which masses are written to the JSON file
  * @param externalParticleKeys external keys of the particles which masses are written to the JSON file
  */
-void ParticleSimulation::TrajectoryExplorerJSONwriter::writeIonMasses(std::vector<BTree::Particle*>& particles){
+void FileIO::TrajectoryExplorerJSONwriter::writeIonMasses(std::vector<BTree::Particle*>& particles){
 
     *jsonFile_ << ",\n\"ionMasses\":[\n";
 
@@ -196,7 +196,7 @@ void ParticleSimulation::TrajectoryExplorerJSONwriter::writeIonMasses(std::vecto
 /**
  * Initializes the JSON file
  */
-void ParticleSimulation::TrajectoryExplorerJSONwriter::initFile_(){
+void FileIO::TrajectoryExplorerJSONwriter::initFile_(){
     std::string header = "{\n"
                          "\"steps\":[";
     *jsonFile_ << header;
@@ -205,7 +205,7 @@ void ParticleSimulation::TrajectoryExplorerJSONwriter::initFile_(){
 /**
  * Closes the JSON file
  */
-void ParticleSimulation::TrajectoryExplorerJSONwriter::closeFile_(){
+void FileIO::TrajectoryExplorerJSONwriter::closeFile_(){
     std::string footer = "}";
     *jsonFile_ << footer;
     jsonFile_->flush();
@@ -216,7 +216,7 @@ void ParticleSimulation::TrajectoryExplorerJSONwriter::closeFile_(){
  *
  * @param particle a particle which position should be written to the JSON file
  */
-void ParticleSimulation::TrajectoryExplorerJSONwriter::writeIonPosition_(BTree::Particle* particle){
+void FileIO::TrajectoryExplorerJSONwriter::writeIonPosition_(BTree::Particle* particle){
 
     const Core::Vector* ionPos = &particle->getLocation();
     *jsonFile_ << "[" << ionPos->x() * scale_ << "," << ionPos->y() * scale_ << "," << ionPos->z() * scale_ << "]";
@@ -230,7 +230,7 @@ void ParticleSimulation::TrajectoryExplorerJSONwriter::writeIonPosition_(BTree::
  * @param lastParticle has to be true for the last splat time written to the JSON file
  * (to close the vector of splat times in the JSON file)
  */
-void ParticleSimulation::TrajectoryExplorerJSONwriter::writeIonSplatTime_(BTree::Particle *particle, bool lastParticle){
+void FileIO::TrajectoryExplorerJSONwriter::writeIonSplatTime_(BTree::Particle *particle, bool lastParticle){
 
     *jsonFile_ << particle->getSplatTime() * this->timeScale_;
     if (lastParticle) {

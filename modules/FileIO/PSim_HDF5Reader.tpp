@@ -3,7 +3,7 @@
 #include <iostream>
 
 template <hsize_t NDIMS, typename DTYPE>
-DTYPE ParticleSimulation::HDF5Reader::DataField<NDIMS, DTYPE>::get(std::array<hsize_t, NDIMS> indices){
+DTYPE FileIO::HDF5Reader::DataField<NDIMS, DTYPE>::get(std::array<hsize_t, NDIMS> indices){
     hsize_t linIndex;
     if (NDIMS == 4) {
         linIndex = indices[0] * dims[3] * dims[2] * dims[1] + indices[1] * dims[3] * dims[2] + indices[2] * dims[3] + indices[3];
@@ -21,8 +21,8 @@ DTYPE ParticleSimulation::HDF5Reader::DataField<NDIMS, DTYPE>::get(std::array<hs
 }
 
 template <hsize_t NDIMS>
-ParticleSimulation::HDF5Reader::DataField<NDIMS, double>
-    ParticleSimulation::HDF5Reader::readDataset(std::string datasetName) const
+FileIO::HDF5Reader::DataField<NDIMS, double>
+    FileIO::HDF5Reader::readDataset(std::string datasetName) const
 {
     //get the dataspace
     H5::DataSet ds = h5f_->openDataSet(datasetName.c_str());
@@ -30,7 +30,7 @@ ParticleSimulation::HDF5Reader::DataField<NDIMS, double>
 }
 
 //template <hsize_t NDIMS>
-//ParticleSimulation::HDF5Reader::DataField<NDIMS, double>
+//FileIO::HDF5Reader::DataField<NDIMS, double>
 
 
 /**
@@ -42,7 +42,7 @@ ParticleSimulation::HDF5Reader::DataField<NDIMS, double>
  * @return A std::vector with the data from the attribute vector
  */
 template<typename DTYPE>
-std::vector<DTYPE> ParticleSimulation::HDF5Reader::readAttributeVector(std::string groupName, std::string attributeName) const{
+std::vector<DTYPE> FileIO::HDF5Reader::readAttributeVector(std::string groupName, std::string attributeName) const{
 
     H5::Group group (h5f_->openGroup(groupName.c_str()));
     H5::Attribute attr(group.openAttribute(attributeName.c_str()));
@@ -91,8 +91,8 @@ std::vector<DTYPE> ParticleSimulation::HDF5Reader::readAttributeVector(std::stri
 }
 
 template <hsize_t NDIMS>
-ParticleSimulation::HDF5Reader::DataField<NDIMS, double>
-ParticleSimulation::HDF5Reader::readDataset_(H5::DataSet ds) const
+FileIO::HDF5Reader::DataField<NDIMS, double>
+FileIO::HDF5Reader::readDataset_(H5::DataSet ds) const
 {
     //get the dataspace
     H5::DataSpace dataspace = ds.getSpace();

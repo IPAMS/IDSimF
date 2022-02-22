@@ -38,7 +38,7 @@ namespace BTree{
     class Particle;
 }
 
-namespace ParticleSimulation {
+namespace FileIO {
     /**
      * File writer to write scalar values to a result file
      */

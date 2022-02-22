@@ -27,7 +27,7 @@
  * Constructor: Creates a file writer for a given result file
  * @param transientFilename the name of the file to write to
  */
-ParticleSimulation::Scalar_writer::Scalar_writer(std::string transientFilename){
+FileIO::Scalar_writer::Scalar_writer(std::string transientFilename){
     transientFile_ = new std::ofstream();
     transientFile_->open(transientFilename);
 }
@@ -35,7 +35,7 @@ ParticleSimulation::Scalar_writer::Scalar_writer(std::string transientFilename){
 /**
  * Destructor
  */
-ParticleSimulation::Scalar_writer::~Scalar_writer(){
+FileIO::Scalar_writer::~Scalar_writer(){
     if (transientFile_ != nullptr){
         transientFile_->flush();
         delete (transientFile_);
@@ -47,7 +47,7 @@ ParticleSimulation::Scalar_writer::~Scalar_writer(){
  * @param intValue the scalar value to write
  * @param time the time of the current time step
  */
-void ParticleSimulation::Scalar_writer::writeTimestep(int intValue, double time){
+void FileIO::Scalar_writer::writeTimestep(int intValue, double time){
     *transientFile_<<time<<" "<<intValue<<std::endl;
 }
 
@@ -56,7 +56,7 @@ void ParticleSimulation::Scalar_writer::writeTimestep(int intValue, double time)
  * @param sizeValue the scalar value to write
  * @param time the time of the current time step
  */
-void ParticleSimulation::Scalar_writer::writeTimestep(std::size_t sizeValue, double time){
+void FileIO::Scalar_writer::writeTimestep(std::size_t sizeValue, double time){
     *transientFile_<<time<<" "<<sizeValue<<std::endl;
 }
 
@@ -65,7 +65,7 @@ void ParticleSimulation::Scalar_writer::writeTimestep(std::size_t sizeValue, dou
  * @param unsignedIntValue the scalar value to write
  * @param time the time of the current time step
  */
-void ParticleSimulation::Scalar_writer::writeTimestep(unsigned int unsignedIntValue, double time){
+void FileIO::Scalar_writer::writeTimestep(unsigned int unsignedIntValue, double time){
     *transientFile_<<time<<" "<<unsignedIntValue<<std::endl;
 }
 
@@ -74,7 +74,7 @@ void ParticleSimulation::Scalar_writer::writeTimestep(unsigned int unsignedIntVa
  * @param doubleValue the scalar value to write
  * @param time the time of the current time step
  */
-void ParticleSimulation::Scalar_writer::writeTimestep(double doubleValue, double time){
+void FileIO::Scalar_writer::writeTimestep(double doubleValue, double time){
     *transientFile_<<time<<" "<<doubleValue<<std::endl;
 }
 
@@ -83,7 +83,7 @@ void ParticleSimulation::Scalar_writer::writeTimestep(double doubleValue, double
  * @param doubleValues vector of values to write
  * @param time the time of the current time step
  */
-void ParticleSimulation::Scalar_writer::writeTimestep(std::vector<double> doubleValues, double time){
+void FileIO::Scalar_writer::writeTimestep(std::vector<double> doubleValues, double time){
     *transientFile_<<time<<" ";
     for(const auto &val: doubleValues){
         *transientFile_<<val<<" ";

@@ -356,19 +356,19 @@ int main(int argc, const char * argv[]) {
         };
 
         //prepare file writers and data writing functions ==============================================================================
-        auto avgPositionWriter = std::make_unique<ParticleSimulation::AverageChargePositionWriter>(
+        auto avgPositionWriter = std::make_unique<FileIO::AverageChargePositionWriter>(
                 simResultBasename+"_averagePosition.txt");
-        std::unique_ptr<ParticleSimulation::IdealizedQitFFTWriter> fftWriter = nullptr;
+        std::unique_ptr<FileIO::IdealizedQitFFTWriter> fftWriter = nullptr;
         if (fftWriteMode!=OFF) {
-            fftWriter = std::make_unique<ParticleSimulation::IdealizedQitFFTWriter>(particlePtrs,
+            fftWriter = std::make_unique<FileIO::IdealizedQitFFTWriter>(particlePtrs,
                     simResultBasename+"_fft.txt");
         }
-        auto ionsInactiveWriter = std::make_unique<ParticleSimulation::Scalar_writer>(simResultBasename+"_ionsInactive.txt");
+        auto ionsInactiveWriter = std::make_unique<FileIO::Scalar_writer>(simResultBasename+"_ionsInactive.txt");
 
         RS::ConcentrationFileWriter concentrationFilewriter(simResultBasename+"_concentrations.txt");
         concentrationFilewriter.initFile(rsSimConf);
 
-        ParticleSimulation::partAttribTransformFctType additionalParameterTransformFct =
+        FileIO::partAttribTransformFctType additionalParameterTransformFct =
                 [](BTree::Particle* particle) -> std::vector<double> {
                     double ionVelocity = particle->getVelocity().magnitude();
                     double kineticEnergy_eV = 0.5*particle->getMass()*ionVelocity*ionVelocity*Core::JOULE_TO_EV;
@@ -383,7 +383,7 @@ int main(int argc, const char * argv[]) {
 
         std::vector<std::string> auxParamNames = {"velocity x", "velocity y", "velocity z", "kinetic energy (eV)"};
 
-        ParticleSimulation::partAttribTransformFctTypeInteger integerParticleAttributesTransformFct =
+        FileIO::partAttribTransformFctTypeInteger integerParticleAttributesTransformFct =
                 [](BTree::Particle* particle) -> std::vector<int> {
                     std::vector<int> result = {
                             particle->getIntegerAttribute("global index"),
@@ -396,7 +396,7 @@ int main(int argc, const char * argv[]) {
 
         std::vector<std::string> integerParticleAttributesNames = {"global index", "total collisions", "chemical id"};
 
-        auto hdf5Writer = std::make_unique<ParticleSimulation::TrajectoryHDF5Writer>(
+        auto hdf5Writer = std::make_unique<FileIO::TrajectoryHDF5Writer>(
                 simResultBasename+"_trajectories.hd5");
         hdf5Writer->setParticleAttributes(auxParamNames, additionalParameterTransformFct);
         hdf5Writer->setParticleAttributes(integerParticleAttributesNames, integerParticleAttributesTransformFct);

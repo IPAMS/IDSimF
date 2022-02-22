@@ -36,17 +36,17 @@
 TEST_CASE("Test ion cloud reader", "[ParticleSimulation][IonCloudReader][file readers]") {
 
     SECTION( "Ion cloud reader: existing file should open without exception") {
-        ParticleSimulation::IonCloudReader reader = ParticleSimulation::IonCloudReader();
+        FileIO::IonCloudReader reader = FileIO::IonCloudReader();
         REQUIRE_NOTHROW(reader.readIonCloud("test_ion_cloud_01.csv"));
     }
 
     SECTION( "Ion cloud reader: non existing file should throw an exception") {
-        ParticleSimulation::IonCloudReader reader = ParticleSimulation::IonCloudReader();
+        FileIO::IonCloudReader reader = FileIO::IonCloudReader();
         REQUIRE_THROWS(reader.readIonCloud("i_do_not_exist.csv"));
     }
 
     SECTION( "Ion cloud reader: ions defined in file are parsed correctly") {
-        ParticleSimulation::IonCloudReader reader = ParticleSimulation::IonCloudReader();
+        FileIO::IonCloudReader reader = FileIO::IonCloudReader();
         std::vector<std::unique_ptr<BTree::Particle>> iCl = reader.readIonCloud("test_ion_cloud_01.csv");
         std::vector<BTree::Particle> iClRef = std::vector<BTree::Particle>();
 

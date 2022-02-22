@@ -35,7 +35,7 @@
  * @param weightFactors scaling factors for the individual weight fields
  * @param scale_mm_per_gu scaling factor between mm and grid units of the given weight potential arrays
  */
-ParticleSimulation::InductionCurrentWriter::InductionCurrentWriter(
+FileIO::InductionCurrentWriter::InductionCurrentWriter(
         std::vector<BTree::Particle*> particles,
         std::string transientFilename,
         const std::vector<ParticleSimulation::SimionPotentialArray*>& weightFields,
@@ -61,7 +61,7 @@ ParticleSimulation::InductionCurrentWriter::InductionCurrentWriter(
 /**
  * Destructor
  */
-ParticleSimulation::InductionCurrentWriter::~InductionCurrentWriter(){
+FileIO::InductionCurrentWriter::~InductionCurrentWriter(){
     transientFile_->flush();
 }
 
@@ -70,7 +70,7 @@ ParticleSimulation::InductionCurrentWriter::~InductionCurrentWriter(){
  * Writes a time step to the file
  * @param time the time of the current time step
  */
-void ParticleSimulation::InductionCurrentWriter::writeTimestep(double time){
+void FileIO::InductionCurrentWriter::writeTimestep(double time){
     double inducedCurrent = 0;
 
     // iterate through all particles:

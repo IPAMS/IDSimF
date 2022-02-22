@@ -96,7 +96,7 @@ int main(int argc, char** argv) {
                 return (spaceChargeForce / particle->getMass());
             };
 
-    auto hdf5Writer = std::make_unique<ParticleSimulation::TrajectoryHDF5Writer>(
+    auto hdf5Writer = std::make_unique<FileIO::TrajectoryHDF5Writer>(
             "test_trajectories.hd5");
 
     std::vector<std::unique_ptr<BTree::Particle>> particlesSerial;
