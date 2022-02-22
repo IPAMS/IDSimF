@@ -44,6 +44,7 @@ include_directories(${HDF5_INCLUDE_DIRS})
 #optional libraries / optional features-------------
 option (USE_CPP_FSLIB "Use stdc++fs" OFF)
 option (USE_EIGEN "Use Eigen based tests / experimental implementations" OFF)
+
 #-------------------------------
 
 # third party libraries ------------------------------------
@@ -63,7 +64,7 @@ add_subdirectory (tests/modules/BTree)
 add_subdirectory (tests/modules/RS)
 add_subdirectory (tests/modules/CollisionModels)
 add_subdirectory (tests/modules/ParticleSimulation)
-#add_subdirectory (tests/modules/Integration)
+add_subdirectory (tests/modules/Integration)
 add_subdirectory (tests/modules/FileIO)
 add_subdirectory (tests/simulations)
 add_subdirectory (tests/applications)
