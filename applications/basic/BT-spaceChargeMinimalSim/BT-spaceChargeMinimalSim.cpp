@@ -29,7 +29,7 @@
 #include "BTree_tree.hpp"
 #include "PSim_trajectoryExplorerJSONwriter.hpp"
 #include "PSim_trajectoryHDF5Writer.hpp"
-#include "PSim_verletIntegrator.hpp"
+#include "Integration_verletIntegrator.hpp"
 #include "PSim_ionCloudReader.hpp"
 #include "appUtils_simulationConfiguration.hpp"
 #include "appUtils_logging.hpp"

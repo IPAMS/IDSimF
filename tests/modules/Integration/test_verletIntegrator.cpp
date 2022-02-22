@@ -25,7 +25,7 @@
 
  ****************************/
 
-#include "PSim_verletIntegrator.hpp"
+#include "Integration_verletIntegrator.hpp"
 #include "Core_vector.hpp"
 #include "BTree_particle.hpp"
 #include "Core_randomGenerators.hpp"

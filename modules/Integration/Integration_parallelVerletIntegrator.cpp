@@ -19,7 +19,7 @@
  along with IDSimF.  If not, see <https://www.gnu.org/licenses/>.
  ****************************/
 
-#include "PSim_parallelVerletIntegrator.hpp"
+#include "Integration_parallelVerletIntegrator.hpp"
 #include <utility>
 #include <algorithm>
 

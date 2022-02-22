@@ -34,7 +34,7 @@
 #include "PSim_trajectoryExplorerJSONwriter.hpp"
 #include "PSim_interpolatedField.hpp"
 #include "PSim_boxStartZone.hpp"
-#include "PSim_verletIntegrator.hpp"
+#include "Integration_verletIntegrator.hpp"
 #include "CollisionModel_HardSphere.hpp"
 #include "appUtils_stopwatch.hpp"
 #include "appUtils_signalHandler.hpp"

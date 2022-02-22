@@ -33,7 +33,7 @@
 #include "RS_ConcentrationFileWriter.hpp"
 #include "PSim_util.hpp"
 #include "PSim_constants.hpp"
-#include "PSim_parallelVerletIntegrator.hpp"
+#include "Integration_parallelVerletIntegrator.hpp"
 #include "PSim_trajectoryHDF5Writer.hpp"
 #include "PSim_scalar_writer.hpp"
 #include "CollisionModel_StatisticalDiffusion.hpp"

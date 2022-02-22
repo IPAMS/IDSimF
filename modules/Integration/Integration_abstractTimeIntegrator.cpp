@@ -19,7 +19,7 @@
  along with IDSimF.  If not, see <https://www.gnu.org/licenses/>.
  ****************************/
 
-#include "PSim_abstractTimeIntegrator.hpp"
+#include "Integration_abstractTimeIntegrator.hpp"
 
 
 Integration::AbstractTimeIntegrator::AbstractTimeIntegrator(particleStartMonitoringFctType ionStartMonitorFct) :

@@ -31,7 +31,7 @@
 #ifndef BTree_velocityIntegrator_hpp
 #define BTree_velocityIntegrator_hpp
 
-#include "PSim_abstractTimeIntegrator.hpp"
+#include "Integration_abstractTimeIntegrator.hpp"
 #include "Core_vector.hpp"
 #include <cstdio>
 #include <vector>

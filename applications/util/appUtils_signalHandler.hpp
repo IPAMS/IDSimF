@@ -27,7 +27,7 @@
 #ifndef IDSIMF_APPUTILS_SIGNALHANDLER_HPP
 #define IDSIMF_APPUTILS_SIGNALHANDLER_HPP
 
-#include "PSim_abstractTimeIntegrator.hpp"
+#include "Integration_abstractTimeIntegrator.hpp"
 #include <stdexcept>
 
 namespace AppUtils{

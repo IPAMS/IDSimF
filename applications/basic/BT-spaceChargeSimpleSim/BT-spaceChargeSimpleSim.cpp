@@ -31,7 +31,7 @@
 #include "PSim_trajectoryHDF5Writer.hpp"
 #include "PSim_util.hpp"
 #include "PSim_boxStartZone.hpp"
-#include "PSim_verletIntegrator.hpp"
+#include "Integration_verletIntegrator.hpp"
 #include "appUtils_simulationConfiguration.hpp"
 #include "appUtils_logging.hpp"
 #include "appUtils_stopwatch.hpp"

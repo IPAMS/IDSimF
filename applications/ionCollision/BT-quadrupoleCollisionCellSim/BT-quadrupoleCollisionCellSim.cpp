@@ -31,7 +31,7 @@
 #include "PSim_util.hpp"
 #include "PSim_trajectoryHDF5Writer.hpp"
 #include "PSim_particleStartSplatTracker.hpp"
-#include "PSim_parallelVerletIntegrator.hpp"
+#include "Integration_parallelVerletIntegrator.hpp"
 #include "CollisionModel_HardSphere.hpp"
 #include "appUtils_simulationConfiguration.hpp"
 #include "appUtils_inputFileUtilities.hpp"

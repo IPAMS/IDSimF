@@ -30,7 +30,7 @@
 #include "CollisionModel_StatisticalDiffusion.hpp"
 #include "CollisionStatistic_default.hpp"
 #include "PSim_constants.hpp"
-#include "PSim_verletIntegrator.hpp"
+#include "Integration_verletIntegrator.hpp"
 #include "catch.hpp"
 
 

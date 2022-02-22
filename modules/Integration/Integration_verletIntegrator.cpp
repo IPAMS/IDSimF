@@ -19,7 +19,7 @@
  along with IDSimF.  If not, see <https://www.gnu.org/licenses/>.
  ****************************/
 
-#include "PSim_verletIntegrator.hpp"
+#include "Integration_verletIntegrator.hpp"
 #include "BTree_particle.hpp"
 #include "CollisionModel_AbstractCollisionModel.hpp"
 #include <utility>

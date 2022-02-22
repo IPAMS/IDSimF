@@ -32,7 +32,7 @@
 #include "PSim_simpleVTKwriter.hpp"
 #include "PSim_trajectoryExplorerJSONwriter.hpp"
 #include "PSim_util.hpp"
-#include "PSim_verletIntegrator.hpp"
+#include "Integration_verletIntegrator.hpp"
 #include "CollisionModel_HardSphere.hpp"
 #include "parameterParsing_macro.hpp"
 #include "appUtils_stopwatch.hpp"

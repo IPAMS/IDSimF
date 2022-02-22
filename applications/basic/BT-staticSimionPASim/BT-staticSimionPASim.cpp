@@ -30,7 +30,7 @@
 #include "BTree_tree.hpp"
 #include "PSim_trajectoryExplorerJSONwriter.hpp"
 #include "PSim_util.hpp"
-#include "PSim_verletIntegrator.hpp"
+#include "Integration_verletIntegrator.hpp"
 #include "PSim_ionCloudReader.hpp"
 #include "PSim_simionPotentialArray.hpp"
 #include "appUtils_simulationConfiguration.hpp"

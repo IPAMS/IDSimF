@@ -28,8 +28,8 @@
 #include "BTree_tree.hpp"
 #include "BTree_parallelTree.hpp"
 #include "BTree_particle.hpp"
-#include "PSim_verletIntegrator.hpp"
-#include "PSim_parallelVerletIntegrator.hpp"
+#include "Integration_verletIntegrator.hpp"
+#include "Integration_parallelVerletIntegrator.hpp"
 #include "PSim_util.hpp"
 #include "catch.hpp"
 #include <iostream>

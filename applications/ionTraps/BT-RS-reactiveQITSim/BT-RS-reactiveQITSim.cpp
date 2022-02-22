@@ -34,7 +34,7 @@
 #include "PSim_util.hpp"
 #include "PSim_math.hpp"
 #include "PSim_trajectoryHDF5Writer.hpp"
-#include "PSim_verletIntegrator.hpp"
+#include "Integration_verletIntegrator.hpp"
 #include "PSim_sampledWaveform.hpp"
 #include "PSim_particleStartSplatTracker.hpp"
 #include "PSim_scalar_writer.hpp"

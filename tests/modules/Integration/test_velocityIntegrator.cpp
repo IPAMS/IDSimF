@@ -25,7 +25,7 @@
 
  ****************************/
 
-#include "PSim_velocityIntegrator.hpp"
+#include "Integration_velocityIntegrator.hpp"
 #include "Core_vector.hpp"
 #include "BTree_particle.hpp"
 #include "catch.hpp"

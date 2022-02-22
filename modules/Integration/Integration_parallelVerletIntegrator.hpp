@@ -34,7 +34,7 @@
 #include "BTree_particle.hpp"
 #include "Core_vector.hpp"
 #include "BTree_parallelTree.hpp"
-#include "PSim_abstractTimeIntegrator.hpp"
+#include "Integration_abstractTimeIntegrator.hpp"
 #include "PSim_simpleVTKwriter.hpp"
 #include "PSim_trajectoryExplorerJSONwriter.hpp"
 #include "PSim_averageChargePositionWriter.hpp"

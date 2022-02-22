@@ -27,7 +27,7 @@
 
 
 #include "PSim_particleStartSplatTracker.hpp"
-#include "PSim_parallelVerletIntegrator.hpp"
+#include "Integration_parallelVerletIntegrator.hpp"
 #include "BTree_particle.hpp"
 #include "Core_vector.hpp"
 #include "catch.hpp"

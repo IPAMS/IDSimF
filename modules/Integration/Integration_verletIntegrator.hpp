@@ -29,7 +29,7 @@
 #ifndef BTree_verletIntegrator_hpp
 #define BTree_verletIntegrator_hpp
 
-#include "PSim_abstractTimeIntegrator.hpp"
+#include "Integration_abstractTimeIntegrator.hpp"
 #include "Core_vector.hpp"
 #include "BTree_tree.hpp"
 
