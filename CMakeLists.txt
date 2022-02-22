@@ -44,7 +44,18 @@ include_directories(${HDF5_INCLUDE_DIRS})
 #optional libraries / optional features-------------
 option (USE_CPP_FSLIB "Use stdc++fs" OFF)
 option (USE_EIGEN "Use Eigen based tests / experimental implementations" OFF)
+if(NOT DEFINED FMM_3D_PATH)
+    set(USE_FMM_3D false)
+else()
+    set(USE_FMM_3D true)
+endif()
 
+if(USE_FMM_3D)
+    message(STATUS "FMM 3d is TRUE, path is:")
+    message(STATUS ${FMM_3D_PATH})
+else()
+    message(STATUS "FMM 3d is FALSE")
+endif()
 #-------------------------------
 
 # third party libraries ------------------------------------
