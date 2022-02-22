@@ -22,8 +22,6 @@ set(TEST_FILES
         ${TEST_FILE_FOLDER}/simion_test_planar_2d_nonUniformlyScaled.pa
         ${TEST_FILE_FOLDER}/simion_test_planar_3d.pa
         ${TEST_FILE_FOLDER}/simion_test_planar_3d_mirrored.pa
-        ${TEST_FILE_FOLDER}/capacitor_test_pa/cylinder_capacitor.pa1
-        ${TEST_FILE_FOLDER}/capacitor_test_pa/cylinder_capacitor.pa2
         )
 file(COPY ${TEST_FILES} DESTINATION .)
 
