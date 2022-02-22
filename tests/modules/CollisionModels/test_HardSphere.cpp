@@ -39,7 +39,7 @@ TEST_CASE( "Basic test Hard Sphere model", "[CollisionModels][HardSphereModel]")
     Core::globalRandomGeneratorPool = std::make_unique<Core::TestRandomGeneratorPool>();
 
     double diameterHe = CollisionModel::HardSphereModel::DIAMETER_HE;
-    BTree::Particle ion = BTree::Particle();
+    BTree::Particle ion;
     ion.setDiameter(CollisionModel::HardSphereModel::DIAMETER_HE);
     ion.setVelocity(Core::Vector(100,0,0));
     ion.setMassAMU(28.0);
