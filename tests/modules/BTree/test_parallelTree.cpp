@@ -40,9 +40,9 @@ TEST_CASE( "Test parallel tree semantics / particle management","[Tree]") {
 
     SECTION ("Test particle insert and delete"){
         //Test particle add increases the number of particles:
-        BTree::Particle testIon1(Core::Vector(-0.001,0.0,0.0),1.0);
-        BTree::Particle testIon2(Core::Vector(0.0,0.0,0.0),3.0);
-        BTree::Particle testIon3(Core::Vector(0.001,0.0,0.0),8.0);
+        Core::Particle testIon1(Core::Vector(-0.001,0.0,0.0),1.0);
+        Core::Particle testIon2(Core::Vector(0.0,0.0,0.0),3.0);
+        Core::Particle testIon3(Core::Vector(0.001,0.0,0.0),8.0);
         testTree.insertParticle(testIon1,1);
         testTree.insertParticle(testIon2,2);
         testTree.insertParticle(testIon3,3);
@@ -68,8 +68,8 @@ TEST_CASE( "Test parallel tree semantics / particle management","[Tree]") {
     }
 
     SECTION( "Test particle insertion edge cases"){
-        BTree::Particle testIon1(Core::Vector(1.0,1.0,1.0),1.0);
-        BTree::Particle testIon2(Core::Vector(1.0,1.0,1.0),1.0);
+        Core::Particle testIon1(Core::Vector(1.0,1.0,1.0),1.0);
+        Core::Particle testIon2(Core::Vector(1.0,1.0,1.0),1.0);
 
         testTree.insertParticle(testIon1,1);
         REQUIRE_THROWS(testTree.insertParticle(testIon2,2));
@@ -82,11 +82,11 @@ TEST_CASE( "Test parallel tree semantics / particle management","[Tree]") {
 
     SECTION( "Test external index particle access"){
         //Test particle add increases the number of particles:
-        BTree::Particle testIon1(Core::Vector(1.0,1.0,1.0), 1.0);
-        BTree::Particle testIon2(Core::Vector(1.1,1.0,1.0), 1.0);
-        BTree::Particle testIon3(Core::Vector(1.2,1.0,1.0), 1.0);
-        BTree::Particle testIon4(Core::Vector(1.3,1.0,1.0), 1.0);
-        BTree::Particle testIon5(Core::Vector(1.4,1.0,1.0), 1.0);
+        Core::Particle testIon1(Core::Vector(1.0,1.0,1.0), 1.0);
+        Core::Particle testIon2(Core::Vector(1.1,1.0,1.0), 1.0);
+        Core::Particle testIon3(Core::Vector(1.2,1.0,1.0), 1.0);
+        Core::Particle testIon4(Core::Vector(1.3,1.0,1.0), 1.0);
+        Core::Particle testIon5(Core::Vector(1.4,1.0,1.0), 1.0);
 
         testTree.insertParticle(testIon1,10);
         testTree.insertParticle(testIon2,20);
@@ -114,9 +114,9 @@ TEST_CASE( "Test parallel tree semantics / particle management","[Tree]") {
                 Core::Vector(0,0,0),
                 Core::Vector(10,10,10));
 
-        BTree::Particle testIon1(Core::Vector(1.0,1.0,1.0), 1.0);
+        Core::Particle testIon1(Core::Vector(1.0,1.0,1.0), 1.0);
         testTree_2.insertParticle(testIon1,10);
-        BTree::Particle testIon2(Core::Vector(2.0,1.0,1.0), 1.0);
+        Core::Particle testIon2(Core::Vector(2.0,1.0,1.0), 1.0);
         testTree_2.insertParticle(testIon2,20);
 
 
@@ -141,7 +141,7 @@ TEST_CASE( "Test parallel tree semantics / particle management","[Tree]") {
         std::size_t nions = 10000;
         Core::Vector boxSize(0.002, 0.002, 0.002);
         ParticleSimulation::BoxStartZone startZone(boxSize);
-        std::vector<std::unique_ptr<BTree::Particle>> ions= startZone.getRandomParticlesInStartZone(nions, 1);
+        std::vector<std::unique_ptr<Core::Particle>> ions= startZone.getRandomParticlesInStartZone(nions, 1);
 
         for (std::size_t i=0; i<nions; i++){
             testTree.insertParticle((*ions[i]),i+1);
@@ -159,9 +159,9 @@ TEST_CASE( "Test parallel tree charge distribution calculation","[Tree]"){
 
     SECTION("Test basic particle insertion, deletion and charge distribution calculation"){
         //Test particle add increases the number of particles:
-        BTree::Particle testIon1(Core::Vector(1.0,1.0,1.0), 1.0);
-        BTree::Particle testIon2(Core::Vector(1.5,1.0,1.0), 1.0);
-        BTree::Particle testIon3(Core::Vector(0.5,1.0,1.0), 1.0);
+        Core::Particle testIon1(Core::Vector(1.0,1.0,1.0), 1.0);
+        Core::Particle testIon2(Core::Vector(1.5,1.0,1.0), 1.0);
+        Core::Particle testIon3(Core::Vector(0.5,1.0,1.0), 1.0);
         testTree.insertParticle(testIon1,1);
         testTree.insertParticle(testIon2,2);
         testTree.insertParticle(testIon3,3);
@@ -173,15 +173,15 @@ TEST_CASE( "Test parallel tree charge distribution calculation","[Tree]"){
         REQUIRE(testTree.computeEFieldFromTree(testIon1) == Core::Vector(0.0,0.0,0.0));
         REQUIRE(testTree.computeEFieldFromTree(testIon2) != Core::Vector(0.0,0.0,0.0));
 
-        std::list<BTree::Particle*>* particleList= testTree.getParticleList();
+        std::list<Core::Particle*>* particleList= testTree.getParticleList();
         REQUIRE(particleList->size() == 3);
         REQUIRE(particleList->front() == &testIon3);
     }
 
     SECTION("Test particle insertion and carge calculation with another particle configuration"){
-        BTree::Particle testIon1(Core::Vector(-0.001,0.0,0.0), 1.0);
-        BTree::Particle testIon2(Core::Vector(0.0,0.0,0.0), 1.0);
-        BTree::Particle testIon3(Core::Vector(0.001,0.0,0.0), 1.0);
+        Core::Particle testIon1(Core::Vector(-0.001,0.0,0.0), 1.0);
+        Core::Particle testIon2(Core::Vector(0.0,0.0,0.0), 1.0);
+        Core::Particle testIon3(Core::Vector(0.001,0.0,0.0), 1.0);
         testTree.insertParticle(testIon1,1);
         testTree.insertParticle(testIon2,2);
         testTree.insertParticle(testIon3,3);
@@ -199,11 +199,11 @@ TEST_CASE( "Test parallel tree charge distribution calculation","[Tree]"){
     SECTION( "Test force calculation with a large number of particles in a cube"){
 
         //Test particle add increases the number of particles:
-        BTree::Particle testIon1(Core::Vector(0.0,0.0,0.0), 1.0);
-        BTree::Particle testIon2(Core::Vector(-0.0008,0.0,0.0), 1.0);
-        BTree::Particle testIon3(Core::Vector(0.0008,0.0,0.0), 1.0);
-        BTree::Particle testIon4(Core::Vector(0.0,-0.0008,0.0), 1.0);
-        BTree::Particle testIon5(Core::Vector(0.0,0.0008,0.0), 1.0);
+        Core::Particle testIon1(Core::Vector(0.0,0.0,0.0), 1.0);
+        Core::Particle testIon2(Core::Vector(-0.0008,0.0,0.0), 1.0);
+        Core::Particle testIon3(Core::Vector(0.0008,0.0,0.0), 1.0);
+        Core::Particle testIon4(Core::Vector(0.0,-0.0008,0.0), 1.0);
+        Core::Particle testIon5(Core::Vector(0.0,0.0008,0.0), 1.0);
 
         unsigned int nions = 10000;
         Core::Vector corner1(-0.00051,-0.0005,-0.0005);

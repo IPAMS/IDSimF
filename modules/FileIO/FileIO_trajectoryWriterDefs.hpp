@@ -33,9 +33,12 @@
 #include <string>
 
 //forward declare own classes:
+namespace Core {
+    class Particle;
+}
+
 namespace BTree {
     class Tree;
-    class Particle;
 }
 
 
@@ -43,11 +46,11 @@ namespace FileIO {
 
     //function to transform additional parameters
     typedef std::function
-            <std::vector<double>(BTree::Particle* particle)>
+            <std::vector<double>(Core::Particle* particle)>
             partAttribTransformFctType;
 
     typedef std::function
-            <std::vector<int>(BTree::Particle* particle)>
+            <std::vector<int>(Core::Particle* particle)>
             partAttribTransformFctTypeInteger;
 
     //a name value pair representing an additional parameter to be exported:
@@ -55,7 +58,7 @@ namespace FileIO {
 
     //a empty additional transform function which returns nothing but an empty vector
     static const partAttribTransformFctType emptyParameterTransformFct =
-            [](BTree::Particle *) -> std::vector<double>{ return std::vector<double>(); };
+            [](Core::Particle *) -> std::vector<double>{ return std::vector<double>(); };
     static const std::vector <additionalParamPair> emptyTimestepAdditionalParameters;
 }
 

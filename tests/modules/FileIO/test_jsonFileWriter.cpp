@@ -25,7 +25,7 @@
 
  ****************************/
 
-#include "BTree_particle.hpp"
+#include "Core_particle.hpp"
 #include "BTree_tree.hpp"
 #include "FileIO_trajectoryExplorerJSONwriter.hpp"
 #include "json.h"
@@ -47,14 +47,14 @@ Json::Value importParticleTrajectoryFile(std::string filename){
 TEST_CASE("Test JSON trajectory file writer", "[ParticleSimulation][JSONTrajectoryWriter][file writers]") {
 
     SECTION("Json trajectory file writer should write a correct file without additional parameters") {
-        std::vector<BTree::Particle*> particles;
+        std::vector<Core::Particle*> particles;
 
         //create and add particles:
-        BTree::Particle testIon1(Core::Vector(1.2,1.2,1.2),2.0);
-        BTree::Particle testIon2(Core::Vector(1.6,1.2,1.2),2.0);
-        BTree::Particle testIon3(Core::Vector(1.65,1.2,1.2),2.0);
-        BTree::Particle testIon4(Core::Vector(1.66,1.2,1.2),2.0);
-        BTree::Particle testIon5(Core::Vector(1.665,1.2,1.2),2.0);
+        Core::Particle testIon1(Core::Vector(1.2,1.2,1.2),2.0);
+        Core::Particle testIon2(Core::Vector(1.6,1.2,1.2),2.0);
+        Core::Particle testIon3(Core::Vector(1.65,1.2,1.2),2.0);
+        Core::Particle testIon4(Core::Vector(1.66,1.2,1.2),2.0);
+        Core::Particle testIon5(Core::Vector(1.665,1.2,1.2),2.0);
 
 
         particles.push_back(&testIon1);
@@ -87,11 +87,11 @@ TEST_CASE("Test JSON trajectory file writer", "[ParticleSimulation][JSONTrajecto
         std::string key_testKey = "keyTestKey";
 
         //Test file writer:
-        std::vector<BTree::Particle*> particles;
+        std::vector<Core::Particle*> particles;
 
-        BTree::Particle testIon1(Core::Vector(1.2,1.2,1.2),2.0);
-        BTree::Particle testIon2(Core::Vector(1.6,1.2,1.2),2.0);
-        BTree::Particle testIon3(Core::Vector(1.65,1.2,1.2),2.0);
+        Core::Particle testIon1(Core::Vector(1.2,1.2,1.2),2.0);
+        Core::Particle testIon2(Core::Vector(1.6,1.2,1.2),2.0);
+        Core::Particle testIon3(Core::Vector(1.65,1.2,1.2),2.0);
 
         particles.push_back(&testIon1);
         particles.push_back(&testIon2);
@@ -104,7 +104,7 @@ TEST_CASE("Test JSON trajectory file writer", "[ParticleSimulation][JSONTrajecto
 
 
         FileIO::partAttribTransformFctType additionalParameterTransformFct =
-                [=](BTree::Particle* particle) -> std::vector<double> {
+                [=](Core::Particle* particle) -> std::vector<double> {
                     std::vector<double> result = {particle->getFloatAttribute(key_testKey)};
                     return result;
                 };

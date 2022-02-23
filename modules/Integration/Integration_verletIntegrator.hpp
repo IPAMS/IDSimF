@@ -64,7 +64,7 @@ namespace Integration{
         * type definition for acceleration calculation functions
         */
         typedef std::function
-                <Core::Vector (BTree::Particle* particle,
+                <Core::Vector (Core::Particle* particle,
                                 std::size_t particleIndex,
                                 BTree::Tree& tree,
                                 double time,
@@ -75,7 +75,7 @@ namespace Integration{
          * type definition for functions exporting data in every timestep
          */
         typedef std::function
-                <void (std::vector<BTree::Particle*>& particles,
+                <void (std::vector<Core::Particle*>& particles,
                        BTree::Tree& tree,
                        double time,
                        unsigned int timestep,
@@ -88,7 +88,7 @@ namespace Integration{
          */
         typedef std::function
                 <void (Core::Vector& newPartPos,
-                       BTree::Particle* particle,
+                       Core::Particle* particle,
                        std::size_t particleIndex,
                        BTree::Tree& tree,
                        double time,
@@ -96,7 +96,7 @@ namespace Integration{
                 otherActionsFctType;
 
             VerletIntegrator(
-                    std::vector<BTree::Particle*> particles,
+                    std::vector<Core::Particle*> particles,
                     accelerationFctType accelerationFunction,
                     timestepWriteFctType timestepWriteFunction = nullptr,
                     otherActionsFctType otherActionsFunction = nullptr,
@@ -112,7 +112,7 @@ namespace Integration{
                     CollisionModel::AbstractCollisionModel* collisionModel = nullptr
             );
 
-            void addParticle(BTree::Particle* particle) override;
+            void addParticle(Core::Particle* particle) override;
             void run(unsigned int nTimesteps, double dt) override;
             void runSingleStep(double dt) override;
             void finalizeSimulation() override;

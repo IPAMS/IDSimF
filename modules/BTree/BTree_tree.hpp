@@ -54,25 +54,25 @@ namespace BTree {
 
         //simple getter:
         [[nodiscard]] Node* getRoot() const;
-        std::list<Particle*>* getParticleList();
+        std::list<Core::Particle*>* getParticleList();
         [[nodiscard]] std::size_t getNumberOfParticles() const;
 
         //charge calculation methods:
         void computeChargeDistribution();
-        Core::Vector computeEFieldFromTree(Particle &particle);
+        Core::Vector computeEFieldFromTree(Core::Particle &particle);
 
         //particle modification methods:
-        void insertParticle(Particle &particle, size_t ext_index);
+        void insertParticle(Core::Particle &particle, size_t ext_index);
         void removeParticle(size_t ext_index);
-        [[nodiscard]] Particle* getParticle(size_t ext_index) const;
+        [[nodiscard]] Core::Particle* getParticle(size_t ext_index) const;
         void updateParticleLocation(size_t ext_index, Core::Vector newLocation);
         
         void printParticles() const;
 
     private:
         std::unique_ptr<Node> root_; ///< the root node of the tree
-        std::unique_ptr<std::list<Particle*>> iVec_; ///< a linked particle list, stores the particles in a linear order
-        std::unique_ptr<std::unordered_map<std::size_t, std::list<Particle *>::const_iterator>> iMap_;
+        std::unique_ptr<std::list<Core::Particle*>> iVec_; ///< a linked particle list, stores the particles in a linear order
+        std::unique_ptr<std::unordered_map<std::size_t, std::list<Core::Particle *>::const_iterator>> iMap_;
         ///< a map between ion indices (keys used by an external simulation) and pointers into the internal particle list
     };
 }

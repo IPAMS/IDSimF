@@ -1,5 +1,5 @@
 #include "FileIO_trajectoryHDF5Writer.hpp"
-#include "BTree_particle.hpp"
+#include "Core_particle.hpp"
 #include "appUtils_stopwatch.hpp"
 #include <iostream>
 #include <memory>
@@ -18,11 +18,11 @@ int main() {
     AppUtils::Stopwatch stopWatch;
     stopWatch.start();
 
-    std::vector<std::unique_ptr<BTree::Particle>> particles;
-    std::vector<BTree::Particle*> particlePtrs;
+    std::vector<std::unique_ptr<Core::Particle>> particles;
+    std::vector<Core::Particle*> particlePtrs;
 
     for (int i=0; i<nIons; ++i){
-        std::unique_ptr<BTree::Particle> newIon = std::make_unique<BTree::Particle>(
+        std::unique_ptr<Core::Particle> newIon = std::make_unique<Core::Particle>(
                 Core::Vector(i*0.01, 0.0, 0.0), 1.0);
 
         newIon -> setSplatTime(i*0.1);

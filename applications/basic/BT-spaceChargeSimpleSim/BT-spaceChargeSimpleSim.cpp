@@ -25,7 +25,7 @@
 
  ****************************/
 
-#include "BTree_particle.hpp"
+#include "Core_particle.hpp"
 #include "BTree_tree.hpp"
 #include "FileIO_trajectoryExplorerJSONwriter.hpp"
 #include "FileIO_trajectoryHDF5Writer.hpp"
@@ -63,8 +63,8 @@ int main(int argc, const char * argv[]) {
 
 
         //read ion configuration =======================================================================
-        std::vector<std::unique_ptr<BTree::Particle>> particles;
-        std::vector<BTree::Particle*> particlePtrs;
+        std::vector<std::unique_ptr<Core::Particle>> particles;
+        std::vector<Core::Particle*> particlePtrs;
 
         std::vector<unsigned int> nIons = simConf->unsignedIntVectorParameter("n_ions");
         std::vector<double> ionMasses = simConf->doubleVectorParameter("ion_masses");
@@ -92,7 +92,7 @@ int main(int argc, const char * argv[]) {
 
         // function to add some additional exported parameters to the exported trajectory file:
         FileIO::partAttribTransformFctType additionalParameterTransformFct =
-                [](BTree::Particle* particle) -> std::vector<double> {
+                [](Core::Particle* particle) -> std::vector<double> {
                     std::vector<double> result = {
                             particle->getVelocity().x(),
                             particle->getVelocity().y(),
@@ -116,7 +116,7 @@ int main(int argc, const char * argv[]) {
 
         auto accelerationFunction =
                 [spaceChargeFactor](
-                        BTree::Particle* particle, int /*particleIndex*/,
+                        Core::Particle* particle, int /*particleIndex*/,
                         BTree::Tree& tree, double /*time*/, int /*timestep*/) -> Core::Vector {
 
                     double particleCharge = particle->getCharge();
@@ -131,7 +131,7 @@ int main(int argc, const char * argv[]) {
 
         auto timestepWriteFunction =
                 [trajectoryWriteInterval, &hdf5Writer, &logger](
-                        std::vector<BTree::Particle*>& particles, BTree::Tree& /*tree*/, double time,
+                        std::vector<Core::Particle*>& particles, BTree::Tree& /*tree*/, double time,
                         int timestep, bool lastTimestep) {
 
                     if (lastTimestep) {

@@ -40,16 +40,16 @@ namespace CollisionModel{
     public:
         explicit MultiCollisionModel(std::vector<std::unique_ptr<AbstractCollisionModel>> models);
 
-        void updateModelParameters(BTree::Particle& ion) const override;
-        void initializeModelParameters(BTree::Particle& ion) const override;
+        void updateModelParameters(Core::Particle& ion) const override;
+        void initializeModelParameters(Core::Particle& ion) const override;
 
         void modifyAcceleration(Core::Vector& acceleration,
-                                BTree::Particle& ion,
+                                Core::Particle& ion,
                                 double dt) override;
-        void modifyVelocity(BTree::Particle& ion,
+        void modifyVelocity(Core::Particle& ion,
                             double dt) override;
         void modifyPosition(Core::Vector& position,
-                            BTree::Particle& ion,
+                            Core::Particle& ion,
                             double dt) override;
 
 

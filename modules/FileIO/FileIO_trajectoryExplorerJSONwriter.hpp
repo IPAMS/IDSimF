@@ -56,21 +56,21 @@ namespace FileIO {
 
         void setScales(double scale, double timeScale);
 
-        void writeTimestep(std::vector<BTree::Particle*>& particles, double time, bool lastTime);
+        void writeTimestep(std::vector<Core::Particle*>& particles, double time, bool lastTime);
 
         void writeTimestep(
-                std::vector<BTree::Particle*>& particles,
+                std::vector<Core::Particle*>& particles,
                 const partAttribTransformFctType& particleParameterTransformFct,
                 double time, bool lastTime);
 
         void writeTimestep(
-                std::vector<BTree::Particle*>& particles,
+                std::vector<Core::Particle*>& particles,
                 const partAttribTransformFctType& particleParameterTransformFct,
                 std::vector<additionalParamPair> timestepAdditionalParameters,
                 double time, bool lastTime);
 
-        void writeSplatTimes(std::vector<BTree::Particle*>& particles);
-        void writeIonMasses(std::vector<BTree::Particle*>& particles);
+        void writeSplatTimes(std::vector<Core::Particle*>& particles);
+        void writeIonMasses(std::vector<Core::Particle*>& particles);
 
     private:
         std::unique_ptr<std::ofstream> jsonFile_; ///< file stream to write to
@@ -80,8 +80,8 @@ namespace FileIO {
         void initFile_();
         void closeFile_();
 
-        void writeIonPosition_(BTree::Particle* particle);
-        void writeIonSplatTime_(BTree::Particle* particle, bool lastParticle);
+        void writeIonPosition_(Core::Particle* particle);
+        void writeIonSplatTime_(Core::Particle* particle, bool lastParticle);
     };
 }
 

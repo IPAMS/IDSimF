@@ -25,7 +25,7 @@
 
  ****************************/
 
-#include "BTree_particle.hpp"
+#include "Core_particle.hpp"
 #include "BTree_tree.hpp"
 #include "FileIO_scalar_writer.hpp"
 #include "FileIO_averageChargePositionWriter.hpp"
@@ -51,11 +51,11 @@ TEST_CASE( "Average ion position file writer should at least write a file withou
     Core::Vector max = Core::Vector(20.0,20.0,20.0);
     BTree::Tree tree(min,max);
 
-    std::vector<BTree::uniquePartPtr> particles;
-    std::vector<BTree::Particle*> particlePtrs;
+    std::vector<Core::uniquePartPtr> particles;
+    std::vector<Core::Particle*> particlePtrs;
     unsigned int nParticles = 10;
     for (std::size_t i=0; i< nParticles; i++){
-        std::unique_ptr<BTree::Particle> part = std::make_unique<BTree::Particle>(Core::Vector(0,0,static_cast<double>(i)*0.1),1);
+        std::unique_ptr<Core::Particle> part = std::make_unique<Core::Particle>(Core::Vector(0,0,static_cast<double>(i)*0.1),1);
         particlePtrs.push_back(part.get());
         particles.push_back(std::move(part));
         tree.insertParticle(*(particlePtrs[i]), i);
@@ -76,19 +76,19 @@ TEST_CASE( "Average ion position file writer should at least write a file withou
 
 TEST_CASE("Test FFT file writer", "[ParticleSimulation][ScalarWriter][file writers]") {
 
-    std::vector<std::unique_ptr<BTree::Particle>> particles;
-    std::vector<BTree::Particle*> particlePtrs;
+    std::vector<std::unique_ptr<Core::Particle>> particles;
+    std::vector<Core::Particle*> particlePtrs;
     unsigned int nParticles_a = 10;
     unsigned int nParticles_b = 10;
     unsigned int nParticles = nParticles_a + nParticles_b;
     for (unsigned int i=0; i < nParticles_a; i++){
-        std::unique_ptr<BTree::Particle> part = std::make_unique<BTree::Particle>(Core::Vector(0,0,i*0.1),1);
+        std::unique_ptr<Core::Particle> part = std::make_unique<Core::Particle>(Core::Vector(0,0,i*0.1),1);
         part->setMassAMU(10);
         particlePtrs.push_back(part.get());
         particles.push_back(std::move(part));
     }
     for (unsigned int i=0; i< nParticles_b; i++){
-        std::unique_ptr<BTree::Particle> part = std::make_unique<BTree::Particle>(Core::Vector(0.1,0,i*0.1),1);
+        std::unique_ptr<Core::Particle> part = std::make_unique<Core::Particle>(Core::Vector(0.1,0,i*0.1),1);
         part->setMassAMU(20);
         particlePtrs.push_back(part.get());
         particles.push_back(std::move(part));

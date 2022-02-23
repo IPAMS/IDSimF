@@ -27,7 +27,7 @@
  ****************************/
 
 
-#include "BTree_particle.hpp"
+#include "Core_particle.hpp"
 #include "BTree_tree.hpp"
 #include "FileIO_simpleVTKwriter.hpp"
 #include "FileIO_trajectoryExplorerJSONwriter.hpp"
@@ -158,12 +158,12 @@ int main(int argc, const char * argv[]) {
 
 
 
-    std::vector<BTree::Particle*>particles= std::vector<BTree::Particle*>();
+    std::vector<Core::Particle*>particles= std::vector<Core::Particle*>();
 
     for (int i=0; i<nIons.size(); i++){
         int nParticles = nIons[i];
         double mass = ionMasses[i];
-        BTree::Particle* ions= ParticleSimulation::util::getRandomIonsInBox(
+        Core::Particle* ions= ParticleSimulation::util::getRandomIonsInBox(
                 nParticles,1.0,
                 Core::Vector(-entranceAperture/2.0,-entranceAperture/2.0,0),
                 Core::Vector(entranceAperture,entranceAperture,startZLength)
@@ -178,7 +178,7 @@ int main(int argc, const char * argv[]) {
     hsModel.setPressureFunction(backgroundGasPressureFunction);
     hsModel.setVelocityFunction(backgroundGasVelocityFunction);
 
-    std::function<void(Core::Vector& newPartPos,BTree::Particle* particle, int particleIndex, BTree::Tree& tree, double time,int timestep)> otherActionsFct;
+    std::function<void(Core::Vector& newPartPos,Core::Particle* particle, int particleIndex, BTree::Tree& tree, double time,int timestep)> otherActionsFct;
 
     if (simType==2){
         otherActionsFct = otherActionsFunctionQuad_2dSim;
@@ -244,7 +244,7 @@ void timestepWriteFunction(BTree::Tree& tree, std::vector<int> ionKeys, double t
     }
 }
 
-Core::Vector accelerationFunctionQuad(BTree::Particle* particle, int particleIndex, BTree::Tree& tree, double time,int timestep){
+Core::Vector accelerationFunctionQuad(Core::Particle* particle, int particleIndex, BTree::Tree& tree, double time,int timestep){
     //z is the long quad axis
     Core::Vector pos = particle->getLocation();
     double particleCharge =particle->getCharge();
@@ -293,7 +293,7 @@ double backgroundGasPressureFunction(Core::Vector& location){
 std::uniform_real_distribution<double> rnd_xy(0.0,0.0);
 std::uniform_real_distribution<double> rnd_z(0,1.0);
 
-void otherActionsFunctionQuad_3dSim(Core::Vector& newPartPos,BTree::Particle* particle, int particleIndex, BTree::Tree& tree, double time,int timestep){
+void otherActionsFunctionQuad_3dSim(Core::Vector& newPartPos,Core::Particle* particle, int particleIndex, BTree::Tree& tree, double time,int timestep){
     double r_pos = std::sqrt( newPartPos.x()*newPartPos.x() + newPartPos.y()*newPartPos.y() );
     
 /*    if (newPartPos.z() > maxZLength){
@@ -311,7 +311,7 @@ void otherActionsFunctionQuad_3dSim(Core::Vector& newPartPos,BTree::Particle* pa
     }
 }
 
-void otherActionsFunctionQuad_2dSim(Core::Vector& newPartPos,BTree::Particle* particle, int particleIndex, BTree::Tree& tree, double time,int timestep){
+void otherActionsFunctionQuad_2dSim(Core::Vector& newPartPos,Core::Particle* particle, int particleIndex, BTree::Tree& tree, double time,int timestep){
     newPartPos.z(startZLength);
 }
 

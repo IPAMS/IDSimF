@@ -131,7 +131,7 @@ TEST_CASE( "Test cylinder particle start zone",
         Core::Vector shift(2.0, 1.0, 0.0);
         ParticleSimulation::CylinderStartZone cylinderStartZone(radius, length, {0.0, 2.0, 0.0}, shift);
 
-        std::vector<std::unique_ptr<BTree::Particle>> ions =
+        std::vector<std::unique_ptr<Core::Particle>> ions =
                 cylinderStartZone.getRandomParticlesInStartZone(nSamples, 2.0, 5.0);
 
 

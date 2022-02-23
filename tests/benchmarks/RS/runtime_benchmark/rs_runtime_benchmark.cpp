@@ -45,7 +45,7 @@ int main() {
     // create and add simulation particles:
     std::size_t nParticles = 10000;
     std::vector<uniqueReactivePartPtr>particles;
-    std::vector<BTree::Particle*>particlesPtrs;
+    std::vector<Core::Particle*>particlesPtrs;
     //std::vector<std::vector<double>> trajectoryAdditionalParams;
 
     RS::Substance *subst = simConf->substance(0);

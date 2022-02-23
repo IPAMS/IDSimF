@@ -26,7 +26,7 @@
  ****************************/
 
 #include "FileIO_simpleVTKwriter.hpp"
-#include "BTree_particle.hpp"
+#include "Core_particle.hpp"
 #include "BTree_tree.hpp"
 
 #include "catch.hpp"
@@ -41,11 +41,11 @@ TEST_CASE( "The VTK writer should at least write a file without exception",
     BTree::Tree* testTree = new BTree::Tree(min,max);
     
     
-    BTree::Particle testIon1 = BTree::Particle(Core::Vector(1.2,1.2,1.2),2.0);
-    BTree::Particle testIon2 = BTree::Particle(Core::Vector(1.6,1.2,1.2),2.0);
-    BTree::Particle testIon3 = BTree::Particle(Core::Vector(1.65,1.2,1.2),2.0);
-    BTree::Particle testIon4 = BTree::Particle(Core::Vector(1.66,1.2,1.2),2.0);
-    BTree::Particle testIon5 = BTree::Particle(Core::Vector(1.665,1.2,1.2),2.0);
+    Core::Particle testIon1 = Core::Particle(Core::Vector(1.2,1.2,1.2),2.0);
+    Core::Particle testIon2 = Core::Particle(Core::Vector(1.6,1.2,1.2),2.0);
+    Core::Particle testIon3 = Core::Particle(Core::Vector(1.65,1.2,1.2),2.0);
+    Core::Particle testIon4 = Core::Particle(Core::Vector(1.66,1.2,1.2),2.0);
+    Core::Particle testIon5 = Core::Particle(Core::Vector(1.665,1.2,1.2),2.0);
 
     testTree->insertParticle(testIon1,1);
     testTree->insertParticle(testIon2,2);

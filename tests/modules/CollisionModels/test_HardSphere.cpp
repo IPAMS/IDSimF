@@ -28,7 +28,7 @@
 #include "CollisionModel_HardSphere.hpp"
 #include "Core_constants.hpp"
 #include "Core_randomGenerators.hpp"
-#include "BTree_particle.hpp"
+#include "Core_particle.hpp"
 #include "catch.hpp"
 
 #include <memory>
@@ -39,7 +39,7 @@ TEST_CASE( "Basic test Hard Sphere model", "[CollisionModels][HardSphereModel]")
     Core::globalRandomGeneratorPool = std::make_unique<Core::TestRandomGeneratorPool>();
 
     double diameterHe = CollisionModel::HardSphereModel::DIAMETER_HE;
-    BTree::Particle ion;
+    Core::Particle ion;
     ion.setDiameter(CollisionModel::HardSphereModel::DIAMETER_HE);
     ion.setVelocity(Core::Vector(100,0,0));
     ion.setMassAMU(28.0);
@@ -82,13 +82,13 @@ TEST_CASE( "Test Hard Sphere model after collision function", "[CollisionModels]
     int nTotalCollisions = 0;
     std::vector<double> collisionEnergies;
     auto afterCollisionFct = [&nTotalCollisions, &collisionEnergies](
-            RS::CollisionConditions collisionConditions, BTree::Particle &){
+            RS::CollisionConditions collisionConditions, Core::Particle &){
         nTotalCollisions++;
         collisionEnergies.push_back(collisionConditions.totalCollisionEnergy * Core::JOULE_TO_EV);
     };
     double diameterHe = CollisionModel::HardSphereModel::DIAMETER_HE;
     CollisionModel::HardSphereModel hs = CollisionModel::HardSphereModel(1.0,298,4.0,diameterHe,afterCollisionFct);
-    BTree::Particle ion = BTree::Particle();
+    Core::Particle ion = Core::Particle();
     ion.setDiameter(CollisionModel::HardSphereModel::DIAMETER_HE);
     ion.setVelocity(Core::Vector(100,0,0));
     ion.setMassAMU(28.0);

@@ -27,7 +27,7 @@
 #include "Core_constants.hpp"
 #include "BTree_node.hpp"
 #include "BTree_tree.hpp"
-#include "BTree_particle.hpp"
+#include "Core_particle.hpp"
 #include "PSim_util.hpp"
 #include "PSim_boxStartZone.hpp"
 #include "catch.hpp"
@@ -124,11 +124,11 @@ TEST_CASE( "Test particle insertion and remove in serial node", "[Node]") {
         REQUIRE( testNode.getParticle() == nullptr);
 
         //Test particle add increases the number of particles:
-        BTree::Particle testIon1 = BTree::Particle(Core::Vector(1.2,1.2,1.2),2.0);
-        BTree::Particle testIon2 = BTree::Particle(Core::Vector(1.6,1.2,1.2),2.0);
-        BTree::Particle testIon3 = BTree::Particle(Core::Vector(1.65,1.2,1.2),2.0);
-        BTree::Particle testIon4 = BTree::Particle(Core::Vector(1.66,1.2,1.2),2.0);
-        BTree::Particle testIon5 = BTree::Particle(Core::Vector(1.665,1.2,1.2),2.0);
+        Core::Particle testIon1 = Core::Particle(Core::Vector(1.2,1.2,1.2),2.0);
+        Core::Particle testIon2 = Core::Particle(Core::Vector(1.6,1.2,1.2),2.0);
+        Core::Particle testIon3 = Core::Particle(Core::Vector(1.65,1.2,1.2),2.0);
+        Core::Particle testIon4 = Core::Particle(Core::Vector(1.66,1.2,1.2),2.0);
+        Core::Particle testIon5 = Core::Particle(Core::Vector(1.665,1.2,1.2),2.0);
 
         testNode.insertParticle(&testIon1);
         REQUIRE( testNode.getNumberOfParticles() == 1);
@@ -161,8 +161,8 @@ TEST_CASE( "Test particle insertion and remove in serial node", "[Node]") {
 
         //test particle insertion with same particle position:
         //(currently the section is silently ignored)
-        BTree::Particle testIon1 = BTree::Particle(Core::Vector(1.0,1.0,1.0),2.0);
-        BTree::Particle testIon2 = BTree::Particle(Core::Vector(1.0,1.0,1.0),2.0);
+        Core::Particle testIon1 = Core::Particle(Core::Vector(1.0,1.0,1.0),2.0);
+        Core::Particle testIon2 = Core::Particle(Core::Vector(1.0,1.0,1.0),2.0);
 
         testNode.insertParticle(&testIon1);
         REQUIRE_THROWS(testNode.insertParticle(&testIon2));
@@ -179,12 +179,12 @@ TEST_CASE( "Test particle insertion and remove in serial node", "[Node]") {
         REQUIRE( testNode.getParticle() == nullptr);
 
         //Test particle add increases the number of particles:
-        BTree::Particle testIon1 = BTree::Particle(Core::Vector(1.2,1.2,1.2),2.0);
-        BTree::Particle testIon2 = BTree::Particle(Core::Vector(1.6,1.2,1.2),2.0);
-        BTree::Particle testIon3 = BTree::Particle(Core::Vector(1.65,1.2,1.2),2.0);
-        BTree::Particle testIon4 = BTree::Particle(Core::Vector(1.66,1.2,1.2),2.0);
-        BTree::Particle testIon5 = BTree::Particle(Core::Vector(1.5,1.2,1.2),6.0);
-        BTree::Particle testIon6 = BTree::Particle(Core::Vector(1.6,1.2,1.2),2.0);
+        Core::Particle testIon1 = Core::Particle(Core::Vector(1.2,1.2,1.2),2.0);
+        Core::Particle testIon2 = Core::Particle(Core::Vector(1.6,1.2,1.2),2.0);
+        Core::Particle testIon3 = Core::Particle(Core::Vector(1.65,1.2,1.2),2.0);
+        Core::Particle testIon4 = Core::Particle(Core::Vector(1.66,1.2,1.2),2.0);
+        Core::Particle testIon5 = Core::Particle(Core::Vector(1.5,1.2,1.2),6.0);
+        Core::Particle testIon6 = Core::Particle(Core::Vector(1.6,1.2,1.2),2.0);
         testNode.insertParticle(&testIon5);
         testNode.insertParticle(&testIon6);
 
@@ -233,9 +233,9 @@ TEST_CASE( "Test particle insertion and remove in serial node", "[Node]") {
         REQUIRE( testNode2.getParticle() == nullptr);
 
         //Test particle add increases the number of particles:
-        BTree::Particle testIon1(Core::Vector(1.0,1.0,1.0), 1.0);
-        BTree::Particle testIon2(Core::Vector(2.0,1.0,1.0), 1.0);
-        BTree::Particle testIon3(Core::Vector(3.0,1.0,1.0), 1.0);
+        Core::Particle testIon1(Core::Vector(1.0,1.0,1.0), 1.0);
+        Core::Particle testIon2(Core::Vector(2.0,1.0,1.0), 1.0);
+        Core::Particle testIon3(Core::Vector(3.0,1.0,1.0), 1.0);
         testNode2.insertParticle(&testIon1);
         testNode2.insertParticle(&testIon2);
         testNode2.insertParticle(&testIon3);
@@ -257,11 +257,11 @@ TEST_CASE( "Test particle insertion and remove in serial node", "[Node]") {
 
         int nNodesOriginal= testNode.getNumberOfNodes();
         const int nIons = 100;
-        BTree::Particle testIons[nIons];
+        Core::Particle testIons[nIons];
         double xPos;
         for (int i=0; i<nIons;i++){
             xPos = 1.99 / nIons *i;
-            testIons[i] = BTree::Particle(Core::Vector(xPos,1.2,1.2),2.0);
+            testIons[i] = Core::Particle(Core::Vector(xPos,1.2,1.2),2.0);
             testNode.insertParticle(&testIons[i]);
         }
         REQUIRE(testNode.getNumberOfParticles() == nIons);
@@ -288,10 +288,10 @@ TEST_CASE( "Test particle insertion and remove in serial node", "[Node]") {
                 nullptr
         );
 
-        BTree::Particle testIon1(Core::Vector(9.2,0,0), 2.0);
-        BTree::Particle testIon2(Core::Vector(9.201,0,0), 2.0);
-        BTree::Particle testIon3(Core::Vector(9.3,0,0), 2.0);
-        BTree::Particle testIon4(Core::Vector(9.301,0,0), 2.0);
+        Core::Particle testIon1(Core::Vector(9.2,0,0), 2.0);
+        Core::Particle testIon2(Core::Vector(9.201,0,0), 2.0);
+        Core::Particle testIon3(Core::Vector(9.3,0,0), 2.0);
+        Core::Particle testIon4(Core::Vector(9.301,0,0), 2.0);
         testNode2.insertParticle(&testIon1);
         testNode2.insertParticle(&testIon2);
         testNode2.insertParticle(&testIon3);
@@ -343,10 +343,10 @@ TEST_CASE( "Test field calculation in serial node", "[Node]") {
     SECTION( "Test physical correctness of charge calculation") {
 
         //Test particle add increases the number of particles:
-        BTree::Particle testIon1(Core::Vector(0.0,0.0,0.0),1.0);
-        BTree::Particle testIon2(Core::Vector(1.0,0.0,0.0),1.0);
-        BTree::Particle testIon3(Core::Vector(0.0,2.0,0.0),1.0);
-        BTree::Particle testIon4(Core::Vector(0.0,0.0,-1.0),100.0);
+        Core::Particle testIon1(Core::Vector(0.0,0.0,0.0),1.0);
+        Core::Particle testIon2(Core::Vector(1.0,0.0,0.0),1.0);
+        Core::Particle testIon3(Core::Vector(0.0,2.0,0.0),1.0);
+        Core::Particle testIon4(Core::Vector(0.0,0.0,-1.0),100.0);
         testTree.insertParticle(testIon2,2);
         testTree.insertParticle(testIon3,3);
         testTree.insertParticle(testIon4,4);
@@ -361,15 +361,15 @@ TEST_CASE( "Test field calculation in serial node", "[Node]") {
     SECTION( "Test charge distribution calculation symmetrical") {
 
         //Test particle add increases the number of particles:
-        BTree::Particle testIon1 = BTree::Particle(Core::Vector(0.0,0.0,0.0),1.0);
-        BTree::Particle testIon2 = BTree::Particle(Core::Vector(-1.0,-1.0,-1.0),1.0);
-        BTree::Particle testIon3 = BTree::Particle(Core::Vector( 1.0,-1.0,-1.0),1.0);
-        BTree::Particle testIon4 = BTree::Particle(Core::Vector(-1.0, 1.0,-1.0),1.0);
-        BTree::Particle testIon5 = BTree::Particle(Core::Vector( 1.0, 1.0,-1.0),1.0);
-        BTree::Particle testIon6 = BTree::Particle(Core::Vector(-1.0,-1.0, 1.0),1.0);
-        BTree::Particle testIon7 = BTree::Particle(Core::Vector( 1.0,-1.0, 1.0),1.0);
-        BTree::Particle testIon8 = BTree::Particle(Core::Vector(-1.0, 1.0, 1.0),1.0);
-        BTree::Particle testIon9 = BTree::Particle(Core::Vector( 1.0, 1.0, 1.0),1.0);
+        Core::Particle testIon1 = Core::Particle(Core::Vector(0.0,0.0,0.0),1.0);
+        Core::Particle testIon2 = Core::Particle(Core::Vector(-1.0,-1.0,-1.0),1.0);
+        Core::Particle testIon3 = Core::Particle(Core::Vector( 1.0,-1.0,-1.0),1.0);
+        Core::Particle testIon4 = Core::Particle(Core::Vector(-1.0, 1.0,-1.0),1.0);
+        Core::Particle testIon5 = Core::Particle(Core::Vector( 1.0, 1.0,-1.0),1.0);
+        Core::Particle testIon6 = Core::Particle(Core::Vector(-1.0,-1.0, 1.0),1.0);
+        Core::Particle testIon7 = Core::Particle(Core::Vector( 1.0,-1.0, 1.0),1.0);
+        Core::Particle testIon8 = Core::Particle(Core::Vector(-1.0, 1.0, 1.0),1.0);
+        Core::Particle testIon9 = Core::Particle(Core::Vector( 1.0, 1.0, 1.0),1.0);
 
         testTree.insertParticle(testIon2,2);
         testTree.insertParticle(testIon3,3);
@@ -392,8 +392,8 @@ TEST_CASE( "Test field calculation in serial node", "[Node]") {
     SECTION( "Test charge distribution calculation non symmetrical") {
 
         //Test particle add increases the number of particles:
-        BTree::Particle testIon1 = BTree::Particle(Core::Vector(0.0,0.0,0.0),1.0);
-        BTree::Particle testIon2 = BTree::Particle(Core::Vector( 1.0, 1.0, 1.0),1.0);
+        Core::Particle testIon1 = Core::Particle(Core::Vector(0.0,0.0,0.0),1.0);
+        Core::Particle testIon2 = Core::Particle(Core::Vector( 1.0, 1.0, 1.0),1.0);
 
         testNode.insertParticle(&testIon1);
         testNode.insertParticle(&testIon2);
@@ -407,10 +407,10 @@ TEST_CASE( "Test field calculation in serial node", "[Node]") {
     SECTION( "Test charge distribution calculation in all spatial directions with few particles") {
 
         //Test particle add increases the number of particles:
-        BTree::Particle testIon1 = BTree::Particle(Core::Vector(1.0,1.0,1.0),1.0);
-        BTree::Particle testIon2 = BTree::Particle(Core::Vector(0.5,1.0,1.0),1.0);
-        BTree::Particle testIon3 = BTree::Particle(Core::Vector(1.0,0.5,1.0),1.0);
-        BTree::Particle testIon4 = BTree::Particle(Core::Vector(1.0,1.0,0.5),1.0);
+        Core::Particle testIon1 = Core::Particle(Core::Vector(1.0,1.0,1.0),1.0);
+        Core::Particle testIon2 = Core::Particle(Core::Vector(0.5,1.0,1.0),1.0);
+        Core::Particle testIon3 = Core::Particle(Core::Vector(1.0,0.5,1.0),1.0);
+        Core::Particle testIon4 = Core::Particle(Core::Vector(1.0,1.0,0.5),1.0);
         testNode.insertParticle(&testIon1);
         testNode.insertParticle(&testIon2);
         testNode.insertParticle(&testIon3);
@@ -426,15 +426,15 @@ TEST_CASE( "Test field calculation in serial node", "[Node]") {
 
     SECTION("Test charge distribution calculation in all spatial directions with many particles") {
 
-        BTree::Particle testIon1 = BTree::Particle(Core::Vector(9.0,0.0,0.0),1.0);
-        BTree::Particle testIon2 = BTree::Particle(Core::Vector(0.0,0.0,9.0),1.0);
-        BTree::Particle testIon3 = BTree::Particle(Core::Vector(0.0,9.0,0.0),1.0);
-        BTree::Particle testIon4 = BTree::Particle(Core::Vector(0.0,9.0,0.0),10.0);
+        Core::Particle testIon1 = Core::Particle(Core::Vector(9.0,0.0,0.0),1.0);
+        Core::Particle testIon2 = Core::Particle(Core::Vector(0.0,0.0,9.0),1.0);
+        Core::Particle testIon3 = Core::Particle(Core::Vector(0.0,9.0,0.0),1.0);
+        Core::Particle testIon4 = Core::Particle(Core::Vector(0.0,9.0,0.0),10.0);
         std::size_t nions = 10000;
 
         Core::Vector boxSize = Core::Vector(2.0,2.0,2.0);
         ParticleSimulation::BoxStartZone startZone(boxSize);
-        std::vector<std::unique_ptr<BTree::Particle>> ions= startZone.getRandomParticlesInStartZone(nions, 2.0);
+        std::vector<std::unique_ptr<Core::Particle>> ions= startZone.getRandomParticlesInStartZone(nions, 2.0);
         for (std::size_t i=0; i<nions; i++){
             testNode.insertParticle(ions[i].get());
         }

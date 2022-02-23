@@ -29,7 +29,7 @@
 #include "CollisionModel_MultiCollisionModel.hpp"
 #include "CollisionModel_HardSphere.hpp"
 #include "CollisionModel_util.hpp"
-#include "BTree_particle.hpp"
+#include "Core_particle.hpp"
 #include "Core_randomGenerators.hpp"
 #include "catch.hpp"
 
@@ -51,7 +51,7 @@ TEST_CASE( "Test multi collision model with multiple hard sphere models ","[Coll
     auto hs1 = std::make_unique<CollisionModel::HardSphereModel>(1.0,298,4.0,diameterHe,countFct1);
     auto hs2 = std::make_unique<CollisionModel::HardSphereModel>(0.05,298,28.0,diameterN2,countFct2);
 
-    BTree::Particle ion = BTree::Particle();
+    Core::Particle ion = Core::Particle();
     ion.setDiameter(diameterN2);
     ion.setVelocity(Core::Vector(400,0,0));
     ion.setMassAMU(28.0);

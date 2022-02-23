@@ -24,7 +24,7 @@
 #include <algorithm>
 
 Integration::ParallelVerletIntegrator::ParallelVerletIntegrator(
-        const std::vector<BTree::Particle *>& particles,
+        const std::vector<Core::Particle *>& particles,
         Integration::ParallelVerletIntegrator::accelerationFctType accelerationFunction,
         Integration::ParallelVerletIntegrator::timestepWriteFctType timestepWriteFunction,
         Integration::ParallelVerletIntegrator::otherActionsFctType otherActionsFunction,
@@ -57,7 +57,7 @@ Integration::ParallelVerletIntegrator::ParallelVerletIntegrator(
  * Adds a particle to the verlet integrator (required if particles are generated in the course of the simulation
  * @param particle the particle to add to the verlet integration
  */
-void Integration::ParallelVerletIntegrator::addParticle(BTree::Particle *particle){
+void Integration::ParallelVerletIntegrator::addParticle(Core::Particle *particle){
     particles_.push_back(particle);
     newPos_.emplace_back(Core::Vector(0,0,0));
     a_t_.emplace_back(Core::Vector(0,0,0));

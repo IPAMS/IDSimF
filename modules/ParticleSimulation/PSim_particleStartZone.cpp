@@ -29,14 +29,14 @@
  * @param timeOfBirthRange ions are generated with times of birth uniformly distributed in this range
  * @return vector of random ions in cylindrical start zone
  */
-std::vector<std::unique_ptr<BTree::Particle>> ParticleSimulation::ParticleStartZone::getRandomParticlesInStartZone(
+std::vector<std::unique_ptr<Core::Particle>> ParticleSimulation::ParticleStartZone::getRandomParticlesInStartZone(
         std::size_t numIons, double charge, double timeOfBirthRange) {
 
     Core::RndDistPtr rnd_tob = Core::globalRandomGeneratorPool->getUniformDistribution(0,timeOfBirthRange);
 
-    std::vector<std::unique_ptr<BTree::Particle>> result;
+    std::vector<std::unique_ptr<Core::Particle>> result;
     for (std::size_t i=0; i<numIons; i++){
-        std::unique_ptr<BTree::Particle> newIon = std::make_unique<BTree::Particle>(
+        std::unique_ptr<Core::Particle> newIon = std::make_unique<Core::Particle>(
                 getRandomParticlePosition(),
                 charge);
 

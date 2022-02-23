@@ -27,7 +27,7 @@
 
 #include "Integration_velocityIntegrator.hpp"
 #include "Core_vector.hpp"
-#include "BTree_particle.hpp"
+#include "Core_particle.hpp"
 #include "catch.hpp"
 #include <iostream>
 
@@ -42,19 +42,19 @@ TEST_CASE( "Test velocity integrator", "[ParticleSimulation][VelocityIntegrator]
 
         double ionVelocity = 10.0;
 
-        auto velocityFct = [ionVelocity](BTree::Particle* /*particle*/, int /*particleIndex*/, double /*time*/, unsigned int /*timestep*/){
+        auto velocityFct = [ionVelocity](Core::Particle* /*particle*/, int /*particleIndex*/, double /*time*/, unsigned int /*timestep*/){
             Core::Vector result(ionVelocity, 0, ionVelocity*0.1);
             return (result);
         };
 
 
 
-        std::vector<BTree::uniquePartPtr>particles;
-        std::vector<BTree::Particle*>particlesPtrs;
+        std::vector<Core::uniquePartPtr>particles;
+        std::vector<Core::Particle*>particlesPtrs;
 
         double yPos = 0;
         for (unsigned int i=0; i<nParticles; ++i){
-            BTree::uniquePartPtr particle = std::make_unique<BTree::Particle>(
+            Core::uniquePartPtr particle = std::make_unique<Core::Particle>(
                     Core::Vector(0.0,yPos,0.0),
                     Core::Vector(0.0,0.0,0.0),
                     1.0,
@@ -79,14 +79,14 @@ TEST_CASE( "Test velocity integrator", "[ParticleSimulation][VelocityIntegrator]
         SECTION("Simulation run should run through and functions should be called"){
 
             unsigned int nTimeStepsWritten = 0;
-            auto timestepWriteFct = [&nTimeStepsWritten](std::vector<BTree::Particle*>& /*particles*/, double /*time*/,
+            auto timestepWriteFct = [&nTimeStepsWritten](std::vector<Core::Particle*>& /*particles*/, double /*time*/,
                     int /*timestep*/,bool /*lastTimestep*/){
                 nTimeStepsWritten++;
             };
 
             unsigned int nParticlesTouched = 0;
             auto otherActionsFct = [&nParticlesTouched] (
-                    Core::Vector& /*newPartPos*/,BTree::Particle* /*particle*/,
+                    Core::Vector& /*newPartPos*/,Core::Particle* /*particle*/,
                     int /*particleIndex*/, double /*time*/, int /*timestep*/){
                 nParticlesTouched++;
             };
@@ -111,7 +111,7 @@ TEST_CASE( "Test velocity integrator", "[ParticleSimulation][VelocityIntegrator]
             int terminationTimeStep = 40;
 
             auto terminationActionFct = [&integratorPtr, terminationTimeStep] (
-                    Core::Vector& /*newPartPos*/, BTree::Particle* /*particle*/,
+                    Core::Vector& /*newPartPos*/, Core::Particle* /*particle*/,
                     int /*particleIndex*/, double /*time*/, int timestep){
                 if (timestep >= terminationTimeStep){
                     integratorPtr->setTerminationState();

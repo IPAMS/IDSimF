@@ -26,7 +26,7 @@
 
  ****************************/
 
-#include "BTree_particle.hpp"
+#include "Core_particle.hpp"
 #include "FileIO_trajectoryHDF5Writer.hpp"
 #include "PSim_util.hpp"
 #include "Integration_verletIntegrator.hpp"
@@ -226,8 +226,8 @@ int main(int argc, const char * argv[]) {
 
 
         //read ion configuration =======================================================================
-        std::vector<std::unique_ptr<BTree::Particle>> particles;
-        std::vector<BTree::Particle*> particlePtrs;
+        std::vector<std::unique_ptr<Core::Particle>> particles;
+        std::vector<Core::Particle*> particlePtrs;
         AppUtils::readIonDefinition(particles, particlePtrs, *simConf);
         // init additional ion parameters:
         for (const auto& particle: particles) {
@@ -244,7 +244,7 @@ int main(int argc, const char * argv[]) {
                 [exciteMode, rfWaveMode, rfAmplitudeMode, fieldMode, excitePulseLength, excitePulsePotential,
                         omega, z_0, U_0, d_square_2,
                         &rfSampledWaveForm, &higherFieldOrdersCoefficients, &swiftWaveForm, &V_0, &V_0_ramp](
-                        BTree::Particle* particle, int /*particleIndex*/,
+                        Core::Particle* particle, int /*particleIndex*/,
                         auto& /*tree*/, double time, unsigned int timestep) -> Core::Vector {
 
                     Core::Vector pos = particle->getLocation();
@@ -324,7 +324,7 @@ int main(int argc, const char * argv[]) {
 
         auto accelerationFunctionQIT =
                 [spaceChargeFactor, &trapFieldFunction](
-                        BTree::Particle* particle, int particleIndex,
+                        Core::Particle* particle, int particleIndex,
                         auto& tree, double time, unsigned int timestep) -> Core::Vector {
 
                     double particleCharge = particle->getCharge();
@@ -350,7 +350,7 @@ int main(int argc, const char * argv[]) {
 
         auto accelerationFunctionQIT_parallel =
                 [spaceChargeFactor, &trapFieldFunction](
-                        BTree::Particle* particle, int particleIndex,
+                        Core::Particle* particle, int particleIndex,
                         auto& tree, double time, unsigned int timestep) -> Core::Vector {
 
                     double particleCharge = particle->getCharge();
@@ -377,13 +377,13 @@ int main(int argc, const char * argv[]) {
 
         // Prepare ion start / stop tracker and ion start monitoring / ion termination functions
         ParticleSimulation::ParticleStartSplatTracker startSplatTracker;
-        auto particleStartMonitoringFct = [&startSplatTracker](BTree::Particle* particle, double time) {
+        auto particleStartMonitoringFct = [&startSplatTracker](Core::Particle* particle, double time) {
             startSplatTracker.particleStart(particle, time);
         };
 
         int ionsInactive = 0;
         auto otherActionsFunctionQIT = [maxIonRadius, &ionsInactive, &startSplatTracker]
-                (Core::Vector& newPartPos, BTree::Particle* particle, unsigned int /*particleIndex*/,
+                (Core::Vector& newPartPos, Core::Particle* particle, unsigned int /*particleIndex*/,
                  auto& /*tree*/, double time, unsigned int /*timestep*/) {
             if (newPartPos.magnitude()>maxIonRadius) {
                 particle->setActive(false);
@@ -401,7 +401,7 @@ int main(int argc, const char * argv[]) {
 
         auto ionsInactiveWriter = std::make_unique<FileIO::Scalar_writer>(simResultBasename+"_ionsInactive.txt");
         FileIO::partAttribTransformFctType additionalParameterTransformFct =
-                [](BTree::Particle* particle) -> std::vector<double> {
+                [](Core::Particle* particle) -> std::vector<double> {
                     std::vector<double> result = {
                             particle->getVelocity().x(),
                             particle->getVelocity().y(),
@@ -421,7 +421,7 @@ int main(int argc, const char * argv[]) {
                                                   "spacecharge x", "spacecharge y", "spacecharge z"};
 
         FileIO::partAttribTransformFctTypeInteger integerParticleAttributesTransformFct =
-                [](BTree::Particle* particle) -> std::vector<int> {
+                [](Core::Particle* particle) -> std::vector<int> {
                     std::vector<int> result = {
                             particle->getIntegerAttribute("global index")
                     };
@@ -438,7 +438,7 @@ int main(int argc, const char * argv[]) {
                 [trajectoryWriteInterval, fftWriteInterval, fftWriteMode, &V_0, &V_rf_export, &ionsInactive,
                         &hdf5Writer, &ionsInactiveWriter,
                         &fftWriter, &startSplatTracker, &logger](
-                        std::vector<BTree::Particle*>& particles, auto& /*tree*/, double time, unsigned int timestep,
+                        std::vector<Core::Particle*>& particles, auto& /*tree*/, double time, unsigned int timestep,
                         bool lastTimestep) {
 
                     if (timestep%fftWriteInterval==0) {

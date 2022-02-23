@@ -25,16 +25,15 @@
 
  ****************************/
 
-#include "BTree_particle.hpp"
-#include "BTree_node.hpp"
+#include "Core_particle.hpp"
+//#include "BTree_node.hpp"
 #include "Core_constants.hpp"
-#include "RS_Substance.hpp"
 #include "catch.hpp"
 #include "test_util.hpp"
 
 TEST_CASE( "Basic Particle semantics tests", "[Particle]") {
 
-    BTree::Particle testIon = BTree::Particle(Core::Vector(1.0, 2.0, 3.0), 2.0);
+    Core::Particle testIon = Core::Particle(Core::Vector(1.0, 2.0, 3.0), 2.0);
 
     SECTION("Basic Particle creation tests") {
         //Test ion location:
@@ -47,7 +46,7 @@ TEST_CASE( "Basic Particle semantics tests", "[Particle]") {
 
         SECTION("Test constructor with time of birth"){
             //Test ion location:
-            BTree::Particle testIon2 = BTree::Particle(
+            Core::Particle testIon2 = Core::Particle(
                     Core::Vector(2.0, 3.0, 4.0),
                     Core::Vector(1.0, 1.0, 1.0),
                     1.0,
@@ -62,7 +61,7 @@ TEST_CASE( "Basic Particle semantics tests", "[Particle]") {
 
         SECTION("Test constructor with time of birth and collision diameter"){
             //Test ion location:
-            BTree::Particle testIon2 = BTree::Particle(
+            Core::Particle testIon2 = Core::Particle(
                     Core::Vector(2.0, 3.0, 4.0),
                     Core::Vector(1.0, 1.0, 1.0),
                     1.0,
@@ -92,14 +91,14 @@ TEST_CASE( "Basic Particle semantics tests", "[Particle]") {
 
         CHECK(testIon.getHostNode()==nullptr);
 
-        BTree::Node testNode = BTree::Node(
+        /*BTree::Node testNode = BTree::Node(
                 Core::Vector(1.0, 1.0, 1.0),
                 Core::Vector(2.0, 2.0, 2.0),
                 nullptr
         );
 
         testIon.setHostNode(&testNode);
-        CHECK(testIon.getHostNode()==&testNode);
+        CHECK(testIon.getHostNode()==&testNode);*/
     }
 
     SECTION("Particle saves copies of spatial vectors") {

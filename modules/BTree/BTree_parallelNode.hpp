@@ -33,7 +33,7 @@
 
 #include "Core_vector.hpp"
 #include "BTree_genericBaseNode.hpp"
-#include "BTree_particle.hpp"
+#include "Core_particle.hpp"
 #include <ostream>
 #include <vector>
 

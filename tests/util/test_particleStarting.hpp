@@ -31,7 +31,7 @@
 
 
 //FIXME: get rid of this method: Rewrite tests with start zone directly
-inline std::vector<std::unique_ptr<BTree::Particle>> getRandomIonsInBox(std::size_t numIons, Core::Vector corner, Core::Vector boxSize){
+inline std::vector<std::unique_ptr<Core::Particle>> getRandomIonsInBox(std::size_t numIons, Core::Vector corner, Core::Vector boxSize){
     Core::Vector center = corner + boxSize/2.0;
     ParticleSimulation::BoxStartZone startZone(boxSize, center);
 

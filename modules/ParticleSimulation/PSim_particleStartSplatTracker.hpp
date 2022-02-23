@@ -34,7 +34,7 @@
 
 
 //forward declare own classes:
-namespace BTree{
+namespace Core{
     class Particle;
 }
 
@@ -71,11 +71,11 @@ namespace ParticleSimulation{
 
         ParticleStartSplatTracker();
 
-        void particleStart(BTree::Particle* particle, double time);
-        void particleRestart(BTree::Particle* particle, Core::Vector oldPosition, Core::Vector newPosition, double time);
-        void particleSplat(BTree::Particle* particle, double time);
+        void particleStart(Core::Particle* particle, double time);
+        void particleRestart(Core::Particle* particle, Core::Vector oldPosition, Core::Vector newPosition, double time);
+        void particleSplat(Core::Particle* particle, double time);
 
-        [[nodiscard]] pMapEntry get(BTree::Particle* particle) const;
+        [[nodiscard]] pMapEntry get(Core::Particle* particle) const;
         void sortStartSplatData();
 
         std::vector<pMapEntry> getStartSplatData() const;
@@ -88,7 +88,7 @@ namespace ParticleSimulation{
 
     private:
 
-        std::unordered_map<BTree::Particle*, pMapEntry> pMap_;
+        std::unordered_map<Core::Particle*, pMapEntry> pMap_;
         std::vector<pMapEntry> restartedParticlesData_;
         std::vector<pMapEntry> sortedParticleData_;
         std::size_t pInsertIndex_ = 0;

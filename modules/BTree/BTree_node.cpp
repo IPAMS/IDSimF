@@ -20,7 +20,7 @@
  ****************************/
 
 #include "BTree_node.hpp"
-#include "BTree_particle.hpp"
+#include "Core_particle.hpp"
 #include <iostream>
 
 
@@ -41,7 +41,7 @@ BTree::Node::Node(Core::Vector min, Core::Vector max, BTree::Node* parent):
  * @param targetP a particle to calculate the total electric field for
  * @return the electric force on the particle resulting from the particles in the tree with this node as root
  */
-Core::Vector BTree::Node::computeElectricFieldFromTree(BTree::Particle &targetP){
+Core::Vector BTree::Node::computeElectricFieldFromTree(Core::Particle &targetP){
     if (numP_ == 1){
         Core::Vector efield= calculateElectricField(
                 targetP.getLocation(),
@@ -170,7 +170,7 @@ bool BTree::Node::isNodeInSubtree(const BTree::Node *nodeToFind, bool debug) con
  * @param debug prints informatio about the found particle if true
  * @return true if the particle is found in the subtree
  */
-bool BTree::Node::isParticleInSubtree(const BTree::Particle *particle, bool debug) const{
+bool BTree::Node::isParticleInSubtree(const Core::Particle *particle, bool debug) const{
 
     bool result = false;
     if (this->particle_ == particle){

@@ -19,7 +19,7 @@
  along with IDSimF.  If not, see <https://www.gnu.org/licenses/>.
  ****************************/
 #include "BTree_abstractNode.hpp"
-#include "BTree_particle.hpp"
+#include "Core_particle.hpp"
 #include <iostream>
 
 /**
@@ -76,7 +76,7 @@ std::size_t BTree::AbstractNode::getNumberOfParticles() const{
 /**
  * Gets a pointer to the particle in the node
  */
-BTree::Particle* BTree::AbstractNode::getParticle() const{
+Core::Particle* BTree::AbstractNode::getParticle() const{
     return particle_;
 }
 

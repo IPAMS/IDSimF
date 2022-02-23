@@ -34,9 +34,12 @@
 #include <memory>
 
 //forward declare own classes:
+namespace Core{
+    class Particle;
+}
+
 namespace BTree{
     class Vector;
-    class Particle;
 }
 
 namespace ParticleSimulation{
@@ -56,7 +59,7 @@ namespace FileIO{
     class InductionCurrentWriter{
 
     public:
-        InductionCurrentWriter(std::vector<BTree::Particle *> particles, std::string transientFilename,
+        InductionCurrentWriter(std::vector<Core::Particle *> particles, std::string transientFilename,
                                const std::vector<ParticleSimulation::SimionPotentialArray*> &weightFields,
                                std::vector<double> weightFactors,
                                double scale_mm_per_gu);
@@ -67,7 +70,7 @@ namespace FileIO{
     private:
         double scale_mm_per_gu_ = 0.0;
         std::unique_ptr<std::ofstream> transientFile_;
-        std::vector<BTree::Particle*> particles_;
+        std::vector<Core::Particle*> particles_;
         std::vector<std::pair<ParticleSimulation::SimionPotentialArray*, double>> weightFields_;
     };
 }

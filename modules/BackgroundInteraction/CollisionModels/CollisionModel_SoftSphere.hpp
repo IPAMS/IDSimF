@@ -48,17 +48,17 @@ namespace CollisionModel{
 
     public:
 
-        void initializeModelParameters(BTree::Particle& ion) const;
+        void initializeModelParameters(Core::Particle& ion) const;
 
-        void updateModelParameters(BTree::Particle& ion) const;
+        void updateModelParameters(Core::Particle& ion) const;
 
         void modifyAcceleration(Core::Vector& acceleration,
-                                        BTree::Particle& particle,
+                                        Core::Particle& particle,
                                         double dt);
-        void modifyVelocity(BTree::Particle& particle,
+        void modifyVelocity(Core::Particle& particle,
                                     double dt);
         void modifyPosition(Core::Vector& position,
-                                    BTree::Particle& particle,
+                                    Core::Particle& particle,
                                     double dt);
     };
 

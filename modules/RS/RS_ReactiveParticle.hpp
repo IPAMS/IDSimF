@@ -29,7 +29,7 @@
 #ifndef RS_ReactiveParticle_hpp
 #define RS_ReactiveParticle_hpp
 
-#include "BTree_particle.hpp"
+#include "Core_particle.hpp"
 #include "RS_Substance.hpp"
 
 namespace RS{class ReactiveParticle;}
@@ -39,7 +39,7 @@ namespace RS {
     /**
      * A reactive particle: A particle (most probably ionic) which is able to react in a chemical reaction
      */
-    class ReactiveParticle : public BTree::Particle {
+    class ReactiveParticle : public Core::Particle {
 
     public:
         explicit ReactiveParticle(Substance* species);

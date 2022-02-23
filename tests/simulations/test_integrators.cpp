@@ -27,7 +27,7 @@
 
 #include "BTree_tree.hpp"
 #include "BTree_parallelTree.hpp"
-#include "BTree_particle.hpp"
+#include "Core_particle.hpp"
 #include "Integration_verletIntegrator.hpp"
 #include "Integration_parallelVerletIntegrator.hpp"
 #include "PSim_util.hpp"
@@ -36,12 +36,12 @@
 #include <cmath>
 #include <numeric>
 
-void prepareIons(std::vector<std::unique_ptr<BTree::Particle>> &particles,
-                 std::vector<BTree::Particle*> &particlePtrs, unsigned int nIons){
+void prepareIons(std::vector<std::unique_ptr<Core::Particle>> &particles,
+                 std::vector<Core::Particle*> &particlePtrs, unsigned int nIons){
 
     for (unsigned int i=0; i < nIons; ++i){
         double posy = i*1.0/nIons;
-        std::unique_ptr<BTree::Particle> newIon = std::make_unique<BTree::Particle>(Core::Vector(0,posy,0), 1.0);
+        std::unique_ptr<Core::Particle> newIon = std::make_unique<Core::Particle>(Core::Vector(0,posy,0), 1.0);
         newIon -> setMassAMU(100);
         particlePtrs.push_back(newIon.get());
         particles.push_back(std::move(newIon));
@@ -58,7 +58,7 @@ TEST_CASE("Compare results of serial and parallel varlet integrators with a line
     // define functions for the trajectory integration ==================================================
     auto accelerationFunctionSerial =
             [spaceChargeFactor](
-                    BTree::Particle *particle, int /*particleIndex*/,
+                    Core::Particle *particle, int /*particleIndex*/,
                     BTree::Tree &tree, double /*time*/, int /*timestep*/) -> Core::Vector{
 
                 double particleCharge = particle->getCharge();
@@ -73,7 +73,7 @@ TEST_CASE("Compare results of serial and parallel varlet integrators with a line
 
     auto accelerationFunctionParallelNew =
             [spaceChargeFactor](
-                    BTree::Particle *particle, int /*particleIndex*/,
+                    Core::Particle *particle, int /*particleIndex*/,
                     BTree::ParallelTree &tree, double /*time*/, int /*timestep*/) -> Core::Vector{
 
                 double particleCharge = particle->getCharge();
@@ -87,10 +87,10 @@ TEST_CASE("Compare results of serial and parallel varlet integrators with a line
             };
 
 
-    std::vector<std::unique_ptr<BTree::Particle>> particlesSerial;
-    std::vector<BTree::Particle*>particlePtrsSerial;
-    std::vector<std::unique_ptr<BTree::Particle>> particlesParallelNew;
-    std::vector<BTree::Particle*>particlePtrsParallelNew;
+    std::vector<std::unique_ptr<Core::Particle>> particlesSerial;
+    std::vector<Core::Particle*>particlePtrsSerial;
+    std::vector<std::unique_ptr<Core::Particle>> particlesParallelNew;
+    std::vector<Core::Particle*>particlePtrsParallelNew;
 
     prepareIons(particlesSerial, particlePtrsSerial, nIons);
     prepareIons(particlesParallelNew, particlePtrsParallelNew, nIons);

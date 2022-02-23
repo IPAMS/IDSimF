@@ -2,7 +2,7 @@ project(test_BTree)
 
 set(SOURCE_FILES
         test_main.cpp
-        test_particle.cpp
+        ../Core/test_particle.cpp
         test_node.cpp
         test_parallelNode.cpp
         test_parallelTree.cpp

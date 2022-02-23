@@ -28,7 +28,7 @@
 #ifndef BTree_trajectoryHDF5Writer_hpp
 #define BTree_trajectoryHDF5Writer_hpp
 
-#include "BTree_particle.hpp"
+#include "Core_particle.hpp"
 #include "FileIO_trajectoryWriterDefs.hpp"
 #include "H5Cpp.h"
 #include <string>
@@ -54,7 +54,7 @@ namespace FileIO {
         void setParticleAttributes(const std::vector<std::string>& attributeNames, partAttribTransformFctType attributesTransformFct);
         void setParticleAttributes(const std::vector<std::string>& attributeNames, partAttribTransformFctTypeInteger attributesTransformFct);
 
-        void writeTimestep(std::vector<BTree::Particle*>& particles, double time);
+        void writeTimestep(std::vector<Core::Particle*>& particles, double time);
 
         template <typename DT>
         void writeNumericListDataset(std::string dsName, const std::vector<DT> &values, H5::Group* group = nullptr);
@@ -66,14 +66,14 @@ namespace FileIO {
         void writeTrajectoryAttribute(std::string attrName, const std::vector<double> &values);
         void writeTrajectoryAttribute(std::string attrName, const std::vector<std::string> &values);
         void finalizeTrajectory();
-        void writeSplatTimes(std::vector<BTree::Particle*> &particles);
+        void writeSplatTimes(std::vector<Core::Particle*> &particles);
         void writeStartSplatData(ParticleSimulation::ParticleStartSplatTracker tracker);
 
     private:
         constexpr int static FILE_TYPE_VERSION = 3;   ///<File type version identifier of the files written
 
-        void writeTimestepParticleAttributes_(std::vector<BTree::Particle*> &particles);
-        void writeTimestepParticleAttributesInteger_(std::vector<BTree::Particle*> &particles);
+        void writeTimestepParticleAttributes_(std::vector<Core::Particle*> &particles);
+        void writeTimestepParticleAttributesInteger_(std::vector<Core::Particle*> &particles);
         void writeAttribute_(std::unique_ptr<H5::Group>& group, const std::string &attrName, int value);
         void writeAttribute_(std::unique_ptr<H5::Group>& group, const std::string &attrName, hsize_t value);
 

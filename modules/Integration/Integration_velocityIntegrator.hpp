@@ -60,7 +60,7 @@ namespace Integration{
         * type definition for velocity calculation functions
         */
         typedef std::function
-                <Core::Vector (BTree::Particle* particle,
+                <Core::Vector (Core::Particle* particle,
                                 std::size_t particleIndex,
                                 double time,
                                 unsigned int timestep)>
@@ -70,7 +70,7 @@ namespace Integration{
          * type definition for functions exporting data in every timestep
          */
         typedef std::function
-                <void (std::vector<BTree::Particle*>& particles,
+                <void (std::vector<Core::Particle*>& particles,
                        double time,
                        unsigned int timestep,
                        bool lastTimestep)>
@@ -82,26 +82,26 @@ namespace Integration{
          */
         typedef std::function
                 <void (Core::Vector& newPartPos,
-                       BTree::Particle* particle,
+                       Core::Particle* particle,
                        std::size_t particleIndex,
                        double time,
                        unsigned int timestep)>
                 otherActionsFctType;
 
         VelocityIntegrator(
-                std::vector<BTree::Particle*> particles,
+                std::vector<Core::Particle*> particles,
                 velocityFctType velocityFunction,
                 timestepWriteFctType timestepWriteFunction = nullptr,
                 otherActionsFctType otherActionsFunction = nullptr
         );
 
-        void addParticle(BTree::Particle* particle) override;
+        void addParticle(Core::Particle* particle) override;
         void run(unsigned int nTimesteps, double dt) override;
         void runSingleStep(double dt) override;
         void finalizeSimulation() override;
 
     private:
-        void addParticle_(BTree::Particle* particle);
+        void addParticle_(Core::Particle* particle);
 
         velocityFctType velocityFunction_ = nullptr; ///< function to calculate particle acceleration
         timestepWriteFctType timestepWriteFunction_ = nullptr; ///< function to define what is exported in every time step

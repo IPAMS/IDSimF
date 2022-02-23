@@ -26,7 +26,7 @@
 
  ****************************/
 
-#include "BTree_particle.hpp"
+#include "Core_particle.hpp"
 #include "BTree_tree.hpp"
 #include "FileIO_trajectoryExplorerJSONwriter.hpp"
 #include "PSim_util.hpp"
@@ -69,8 +69,8 @@ int main(int argc, const char * argv[]) {
         ParticleSimulation::SimionPotentialArray eField(simionPAFilename);
 
         //read ion configuration ========================================================================
-        std::vector<std::unique_ptr<BTree::Particle>> particles;
-        std::vector<BTree::Particle*> particlePtrs;
+        std::vector<std::unique_ptr<Core::Particle>> particles;
+        std::vector<Core::Particle*> particlePtrs;
 
         std::string ionCloudFileName = simConf->pathRelativeToConfFile(simConf->stringParameter("ion_cloud_init_file"));
         FileIO::IonCloudReader reader = FileIO::IonCloudReader();
@@ -90,7 +90,7 @@ int main(int argc, const char * argv[]) {
 
         auto accelerationFunction =
                 [spaceChargeFactor, &eField](
-                        BTree::Particle* particle, int /*particleIndex*/,
+                        Core::Particle* particle, int /*particleIndex*/,
                         BTree::Tree& tree, double /*time*/, int /*timestep*/) -> Core::Vector {
 
                     Core::Vector pos = particle->getLocation();
@@ -113,7 +113,7 @@ int main(int argc, const char * argv[]) {
 
         // function to add some additional exported parameters to the exported trajectory file:
         FileIO::partAttribTransformFctType additionalParameterTransformFct =
-                [](BTree::Particle* particle) -> std::vector<double> {
+                [](Core::Particle* particle) -> std::vector<double> {
                     std::vector<double> result = {
                             particle->getVelocity().x(),
                             particle->getVelocity().y(),
@@ -124,7 +124,7 @@ int main(int argc, const char * argv[]) {
 
         auto timestepWriteFunction =
                 [trajectoryWriteInterval, &jsonWriter, &additionalParameterTransformFct, &logger](
-                        std::vector<BTree::Particle*>& particles, BTree::Tree& /*tree*/, double time, int timestep,
+                        std::vector<Core::Particle*>& particles, BTree::Tree& /*tree*/, double time, int timestep,
                         bool lastTimestep) {
 
                     if (lastTimestep) {

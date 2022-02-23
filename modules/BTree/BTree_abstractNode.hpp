@@ -29,6 +29,7 @@
 
 
 #include "Core_vector.hpp"
+#include "Core_particle.hpp"
 #include <ostream>
 
 namespace BTree {
@@ -61,7 +62,7 @@ namespace BTree {
 
         // Accessors:
         [[nodiscard]] std::size_t getNumberOfParticles() const;
-        [[nodiscard]] Particle* getParticle() const;
+        [[nodiscard]] Core::Particle* getParticle() const;
         [[nodiscard]] Core::Vector getCenter() const;
         [[nodiscard]] Core::Vector getMax() const;
         [[nodiscard]] Core::Vector getMin() const;
@@ -75,7 +76,7 @@ namespace BTree {
         virtual void updateParents() = 0;
         virtual void updateSelf() = 0;
         virtual void removeMyselfFromTree() = 0;
-        virtual void insertParticle(Particle* particle) = 0;
+        virtual void insertParticle(Core::Particle* particle) = 0;
         virtual void computeChargeDistributionRecursive() = 0;
 
         //export methods:
@@ -93,7 +94,7 @@ namespace BTree {
         Core::Vector min_ = Core::Vector(0,0,0); ///< Minimal corner (xlo,ylo,zlo corner) of the node
         Core::Vector max_ = Core::Vector(0,0,0); ///< Maximal corner (xhi,yhi,zhi corner) of the node
         Core::Vector center_ = Core::Vector(0,0,0); ///< Geometric center of the node
-        Particle* particle_ = nullptr; ///< A particle potentially located in the node
+        Core::Particle* particle_ = nullptr; ///< A particle potentially located in the node
     };
 }
 

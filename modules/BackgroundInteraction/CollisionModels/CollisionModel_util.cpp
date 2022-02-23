@@ -75,6 +75,6 @@ double CollisionModel::util::estimateMobility(double massIon_amu, double diamete
 }
 
 
-std::function<void(RS::CollisionConditions,BTree::Particle&)> CollisionModel::util::getCollisionCountFunction(int* countVal){
-    return [=](RS::CollisionConditions, BTree::Particle& /*ion*/)->void{ (*countVal)++; };
+std::function<void(RS::CollisionConditions,Core::Particle&)> CollisionModel::util::getCollisionCountFunction(int* countVal){
+    return [=](RS::CollisionConditions, Core::Particle& /*ion*/)->void{ (*countVal)++; };
 }

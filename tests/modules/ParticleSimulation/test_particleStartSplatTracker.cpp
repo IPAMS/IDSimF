@@ -28,7 +28,7 @@
 
 #include "PSim_particleStartSplatTracker.hpp"
 #include "Integration_parallelVerletIntegrator.hpp"
-#include "BTree_particle.hpp"
+#include "Core_particle.hpp"
 #include "Core_vector.hpp"
 #include "catch.hpp"
 #include "test_util.hpp"
@@ -41,7 +41,7 @@ TEST_CASE("TestParticleStartSplatTracker", "[ParticleSimulation][ParticleStartSp
     SECTION("Basic StartSplatTracker tests") {
         ParticleSimulation::ParticleStartSplatTracker tracker;
 
-        BTree::Particle particle_0({0.5, 1.0, 1.5}, 1.0);
+        Core::Particle particle_0({0.5, 1.0, 1.5}, 1.0);
         tracker.particleStart(&particle_0, 1.0);
         particle_0.setLocation({1.0, 1.0, 1.0});
         tracker.particleSplat(&particle_0, 2.0);
@@ -58,7 +58,7 @@ TEST_CASE("TestParticleStartSplatTracker", "[ParticleSimulation][ParticleStartSp
         }
 
         SECTION("Test of valid usage with two particles") {
-            BTree::Particle particle_1({1.5, 2.0, 2.5}, 1.0);
+            Core::Particle particle_1({1.5, 2.0, 2.5}, 1.0);
             tracker.particleStart(&particle_1, 1.1);
             particle_1.setLocation({2.0, 2.0, 2.0});
             tracker.particleSplat(&particle_1, 2.1);
@@ -74,12 +74,12 @@ TEST_CASE("TestParticleStartSplatTracker", "[ParticleSimulation][ParticleStartSp
         }
 
         SECTION("Particles should be restartable"){
-            BTree::Particle particle_1({1.5, 2.0, 2.5}, 1.0);
+            Core::Particle particle_1({1.5, 2.0, 2.5}, 1.0);
             tracker.particleStart(&particle_1, 1.1);
             particle_1.setLocation({2.0, 2.0, 2.0});
             tracker.particleSplat(&particle_1, 2.1);
 
-            BTree::Particle particle_2({-1.5, -2.0, -2.5}, 1.0);
+            Core::Particle particle_2({-1.5, -2.0, -2.5}, 1.0);
             tracker.particleStart(&particle_2, 1.1);
 
             CHECK(particle_2.getIntegerAttribute("global index")==2);
@@ -124,7 +124,7 @@ TEST_CASE("TestParticleStartSplatTracker", "[ParticleSimulation][ParticleStartSp
         }
 
         SECTION("Splat of not started particle should throw") {
-            BTree::Particle particle_3({3.0, 3.0, 3-0}, 1.0);
+            Core::Particle particle_3({3.0, 3.0, 3-0}, 1.0);
             REQUIRE_THROWS_AS(
                     tracker.particleSplat(&particle_3, 1.1),
                     std::invalid_argument);
@@ -135,12 +135,12 @@ TEST_CASE("TestParticleStartSplatTracker", "[ParticleSimulation][ParticleStartSp
 
         unsigned int nParticles = 100;
         ParticleSimulation::ParticleStartSplatTracker tracker;
-        std::vector<BTree::uniquePartPtr>particles;
-        std::vector<BTree::Particle*>particlesPtrs;
+        std::vector<Core::uniquePartPtr>particles;
+        std::vector<Core::Particle*>particlesPtrs;
 
         for (unsigned int i=0; i<nParticles; ++i){
             double timeOfBirth = i*0.01;
-            BTree::uniquePartPtr particle = std::make_unique<BTree::Particle>(
+            Core::uniquePartPtr particle = std::make_unique<Core::Particle>(
                     Core::Vector(i*1.0, 1.0, 1.0),
                     Core::Vector(0.0, 0.0, 0.0),
                     1.0,
@@ -195,7 +195,7 @@ TEST_CASE("TestParticleStartSplatTracker", "[ParticleSimulation][ParticleStartSp
         double dt = 1e-4;
 
 
-        auto accelerationFct = [ionAcceleration](BTree::Particle* /*particle*/, int /*particleIndex*/, BTree::ParallelTree& /*tree*/,
+        auto accelerationFct = [ionAcceleration](Core::Particle* /*particle*/, int /*particleIndex*/, BTree::ParallelTree& /*tree*/,
                                                  double /*time*/, int /*timestep*/){
             Core::Vector result(ionAcceleration, 0, ionAcceleration * 0.5);
             return (result);
@@ -204,13 +204,13 @@ TEST_CASE("TestParticleStartSplatTracker", "[ParticleSimulation][ParticleStartSp
         double nParticles = 10;
         unsigned int timeSteps = 100;
 
-        std::vector<BTree::uniquePartPtr>particles;
-        std::vector<BTree::Particle*>particlesPtrs;
+        std::vector<Core::uniquePartPtr>particles;
+        std::vector<Core::Particle*>particlesPtrs;
 
         double timeOfBirth = 0.0;
         double yPos = 0.0;
         for (int i=0; i<nParticles; ++i){
-            BTree::uniquePartPtr particle = std::make_unique<BTree::Particle>(
+            Core::uniquePartPtr particle = std::make_unique<Core::Particle>(
                     Core::Vector(0.0, yPos, 0.0),
                     Core::Vector(0.0,0.0,0.0),
                     1.0,
@@ -224,14 +224,14 @@ TEST_CASE("TestParticleStartSplatTracker", "[ParticleSimulation][ParticleStartSp
 
 
         int nParticlesStartMonitored = 0;
-        auto particleStartMonitoringFct = [&nParticlesStartMonitored, &tracker] (BTree::Particle* particle, double time){
+        auto particleStartMonitoringFct = [&nParticlesStartMonitored, &tracker] (Core::Particle* particle, double time){
             nParticlesStartMonitored++;
             tracker.particleStart(particle, time);
         };
 
         double zMax = 1e-4;
         auto otherActionsFct = [zMax, &tracker] (
-                Core::Vector& /*newPartPos*/, BTree::Particle* particle,
+                Core::Vector& /*newPartPos*/, Core::Particle* particle,
                 int /*particleIndex*/, BTree::ParallelTree& /*tree*/, double time, int /*timestep*/){
             if (particle->getLocation().z() > zMax){
                 particle->setActive(false);

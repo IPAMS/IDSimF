@@ -93,7 +93,7 @@ void FileIO::TrajectoryHDF5Writer::setParticleAttributes(const std::vector<std::
  * @param particles The particle ensemble in the simulation to write to the trajectory file
  * @param time The current simulated time
  */
-void FileIO::TrajectoryHDF5Writer::writeTimestep(std::vector<BTree::Particle*> &particles,
+void FileIO::TrajectoryHDF5Writer::writeTimestep(std::vector<Core::Particle*> &particles,
                                                              double time){
 
     // Write time of this time step to the times vector:
@@ -317,7 +317,7 @@ void FileIO::TrajectoryHDF5Writer::writeTrajectoryAttribute(std::string attrName
  * Writes the splat (termination) times of the simulated particle ensemble to the HDF5 trajectory file
  * @param particles The simulated particle ensemble
  */
-void FileIO::TrajectoryHDF5Writer::writeSplatTimes(std::vector<BTree::Particle *> &particles){
+void FileIO::TrajectoryHDF5Writer::writeSplatTimes(std::vector<Core::Particle *> &particles){
     //prepare timestep dataset structures:
     hsize_t nParticles = particles.size();
 
@@ -376,7 +376,7 @@ void FileIO::TrajectoryHDF5Writer::finalizeTrajectory(){
  * Writes the additional particle attributes of a time step
  * @param particles The simulated particle ensemble to write the auxiliary data for
  */
-void FileIO::TrajectoryHDF5Writer::writeTimestepParticleAttributes_(std::vector<BTree::Particle*> &particles){
+void FileIO::TrajectoryHDF5Writer::writeTimestepParticleAttributes_(std::vector<Core::Particle*> &particles){
 
     hsize_t nParticles = particles.size();
 
@@ -424,7 +424,7 @@ void FileIO::TrajectoryHDF5Writer::writeTimestepParticleAttributes_(std::vector<
  * FIXME
  * @param particles The simulated particle ensemble to write the auxiliary data for
  */
-void FileIO::TrajectoryHDF5Writer::writeTimestepParticleAttributesInteger_(std::vector<BTree::Particle*> &particles){
+void FileIO::TrajectoryHDF5Writer::writeTimestepParticleAttributesInteger_(std::vector<Core::Particle*> &particles){
 
     hsize_t nParticles = particles.size();
 

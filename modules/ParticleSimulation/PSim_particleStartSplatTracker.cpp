@@ -20,7 +20,7 @@
  ****************************/
 
 #include "PSim_particleStartSplatTracker.hpp"
-#include "BTree_particle.hpp"
+#include "Core_particle.hpp"
 #include <algorithm>
 
 ParticleSimulation::ParticleStartSplatTracker::ParticleStartSplatTracker():
@@ -28,7 +28,7 @@ ParticleSimulation::ParticleStartSplatTracker::ParticleStartSplatTracker():
     pInsertIndex_(0)
 {}
 
-void ParticleSimulation::ParticleStartSplatTracker::particleStart(BTree::Particle* particle, double time) {
+void ParticleSimulation::ParticleStartSplatTracker::particleStart(Core::Particle* particle, double time) {
 
     // Existing particle entries are silently overwritten:
     pMapEntry entry;
@@ -47,7 +47,7 @@ void ParticleSimulation::ParticleStartSplatTracker::particleStart(BTree::Particl
 
 }
 
-void ParticleSimulation::ParticleStartSplatTracker::particleRestart(BTree::Particle* particle,
+void ParticleSimulation::ParticleStartSplatTracker::particleRestart(Core::Particle* particle,
                                                                     Core::Vector oldPosition, Core::Vector newPosition,
                                                                     double time) {
     try{
@@ -73,7 +73,7 @@ void ParticleSimulation::ParticleStartSplatTracker::particleRestart(BTree::Parti
 }
 
 
-void ParticleSimulation::ParticleStartSplatTracker::particleSplat(BTree::Particle* particle, double time) {
+void ParticleSimulation::ParticleStartSplatTracker::particleSplat(Core::Particle* particle, double time) {
     try{
         pMapEntry& entry = pMap_.at(particle);
         entry.splatLocation = particle->getLocation();
@@ -86,7 +86,7 @@ void ParticleSimulation::ParticleStartSplatTracker::particleSplat(BTree::Particl
 }
 
 ParticleSimulation::ParticleStartSplatTracker::pMapEntry
-        ParticleSimulation::ParticleStartSplatTracker::get(BTree::Particle* particle) const{
+        ParticleSimulation::ParticleStartSplatTracker::get(Core::Particle* particle) const{
     return pMap_.at(particle);
 }
 

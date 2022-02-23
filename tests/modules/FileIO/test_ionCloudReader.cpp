@@ -27,7 +27,7 @@
 
 #include "FileIO_ionCloudReader.hpp"
 #include "Core_vector.hpp"
-#include "BTree_particle.hpp"
+#include "Core_particle.hpp"
 #include "catch.hpp"
 #include "test_util.hpp"
 #include <vector>
@@ -47,27 +47,27 @@ TEST_CASE("Test ion cloud reader", "[ParticleSimulation][IonCloudReader][file re
 
     SECTION( "Ion cloud reader: ions defined in file are parsed correctly") {
         FileIO::IonCloudReader reader = FileIO::IonCloudReader();
-        std::vector<std::unique_ptr<BTree::Particle>> iCl = reader.readIonCloud("test_ion_cloud_01.csv");
-        std::vector<BTree::Particle> iClRef = std::vector<BTree::Particle>();
+        std::vector<std::unique_ptr<Core::Particle>> iCl = reader.readIonCloud("test_ion_cloud_01.csv");
+        std::vector<Core::Particle> iClRef = std::vector<Core::Particle>();
 
 
 
-        iClRef.emplace_back(BTree::Particle(
+        iClRef.emplace_back(Core::Particle(
                 Core::Vector(1.0,1.0,1.0),
                 Core::Vector(1.00,1.00,1.00),
                 1.0, 100.0, 3.64e-10, 0));
 
-        iClRef.emplace_back(BTree::Particle(
+        iClRef.emplace_back(Core::Particle(
                 Core::Vector(1.0,2.0,1.0),
                 Core::Vector(10.0,10.0,10.0),
                 -1.0, 200.0, 3.64e-10, 0.0));
 
-        iClRef.emplace_back(BTree::Particle(
+        iClRef.emplace_back(Core::Particle(
                 Core::Vector(-10,-20,-10.0),
                 Core::Vector(-10.00,10.0,-10.0),
                 2.0, 300.0, 3.64e-10, 1e-5));
 
-        iClRef.emplace_back(BTree::Particle(
+        iClRef.emplace_back(Core::Particle(
                 Core::Vector(1.0,2.0,1.0),
                 Core::Vector(10.0,10.0,10.0),
                 -10.5, 200.0, 3.64e-10, 3e-5));

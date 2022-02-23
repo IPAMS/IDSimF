@@ -21,7 +21,7 @@
 
 #include "FileIO_idealizedQitFFTWriter.hpp"
 #include "Core_vector.hpp"
-#include "BTree_particle.hpp"
+#include "Core_particle.hpp"
 #include <map>
 
 /**
@@ -29,7 +29,7 @@
  * @param particles vector with links to the partilces in a particle cloud to write to a file
  * @param transientFilename the filename of the file to write to
  */
-FileIO::IdealizedQitFFTWriter::IdealizedQitFFTWriter(std::vector<BTree::Particle*> particles,
+FileIO::IdealizedQitFFTWriter::IdealizedQitFFTWriter(std::vector<Core::Particle*> particles,
                                                                  std::string transientFilename)
 {
     particles_ = particles;

@@ -21,23 +21,23 @@
 
 #include "CollisionModel_SoftSphere.hpp"
 
-void CollisionModel::SoftSphereModel::initializeModelParameters(BTree::Particle &ion) const {
+void CollisionModel::SoftSphereModel::initializeModelParameters(Core::Particle &ion) const {
 
 }
 
-void CollisionModel::SoftSphereModel::updateModelParameters(BTree::Particle &ion) const {
+void CollisionModel::SoftSphereModel::updateModelParameters(Core::Particle &ion) const {
 
 }
 
-void CollisionModel::SoftSphereModel::modifyAcceleration(Core::Vector &acceleration, BTree::Particle &particle,
+void CollisionModel::SoftSphereModel::modifyAcceleration(Core::Vector &acceleration, Core::Particle &particle,
                                                          double dt) {
 
 }
 
-void CollisionModel::SoftSphereModel::modifyVelocity(BTree::Particle &particle, double dt) {
+void CollisionModel::SoftSphereModel::modifyVelocity(Core::Particle &particle, double dt) {
 
 }
 
-void CollisionModel::SoftSphereModel::modifyPosition(Core::Vector &position, BTree::Particle &particle, double dt) {
+void CollisionModel::SoftSphereModel::modifyPosition(Core::Vector &position, Core::Particle &particle, double dt) {
 
 }

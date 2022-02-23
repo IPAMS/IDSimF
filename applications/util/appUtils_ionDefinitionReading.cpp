@@ -50,8 +50,8 @@ bool AppUtils::isIonCloudDefinitionPresent(const SimulationConfiguration& simCon
  * @param confBasePath path to the base path of the simulation configuration file with the configuration in confRoot
  */
 void AppUtils::readIonDefinitionFromIonCloudFile(
-        std::vector<std::unique_ptr<BTree::Particle>>& particles,
-        std::vector<BTree::Particle*>& particlePtrs,
+        std::vector<std::unique_ptr<Core::Particle>>& particles,
+        std::vector<Core::Particle*>& particlePtrs,
         const AppUtils::SimulationConfiguration& simConf) {
 
 
@@ -108,7 +108,7 @@ std::unique_ptr<ParticleSimulation::ParticleStartZone> AppUtils::getStartZoneFro
  * @param confRoot a simulation configuration
  */
 void AppUtils::setIonsKineticEnergy(
-        std::vector<std::unique_ptr<BTree::Particle>>& particles,
+        std::vector<std::unique_ptr<Core::Particle>>& particles,
         const SimulationConfiguration& simConf) {
 
     if (simConf.isParameter("ion_kinetic_energy_eV")){
@@ -132,8 +132,8 @@ void AppUtils::setIonsKineticEnergy(
  * @param confRoot a simulation configuration
  */
 void AppUtils::readRandomIonDefinition(
-        std::vector<std::unique_ptr<BTree::Particle>>& particles,
-        std::vector<BTree::Particle*>& particlePtrs,
+        std::vector<std::unique_ptr<Core::Particle>>& particles,
+        std::vector<Core::Particle*>& particlePtrs,
         const SimulationConfiguration& simConf) {
 
     // ions are not given in an init file, read and init random ion box configuration
@@ -159,18 +159,18 @@ void AppUtils::readRandomIonDefinition(
         double collisionDiameter_m = ionCollisionDiameters_angstrom[i]*1e-10;
 
         // get actual ions for the group
-        std::vector<std::unique_ptr<BTree::Particle>> ions = particleStartZone->getRandomParticlesInStartZone(
+        std::vector<std::unique_ptr<Core::Particle>> ions = particleStartZone->getRandomParticlesInStartZone(
                 nParticles, charge, ions_tob_range);
 
         // set particle parameters
-        for (std::unique_ptr<BTree::Particle>& ion: ions) {
+        for (std::unique_ptr<Core::Particle>& ion: ions) {
             ion->setMassAMU(mass);
             ion->setDiameter(collisionDiameter_m);
         }
         setIonsKineticEnergy(ions, simConf);
 
         // and push particles to vectors containing all particles
-        for (std::unique_ptr<BTree::Particle>& ion: ions){
+        for (std::unique_ptr<Core::Particle>& ion: ions){
             particlePtrs.push_back(ion.get());
             particles.push_back(std::move(ion));
         }
@@ -185,8 +185,8 @@ void AppUtils::readRandomIonDefinition(
  * @param confRoot a simulation configuration
  * @param confBasePath path to the base path of the simulation configuration file with the configuration in confRoot
  */
-void AppUtils::readIonDefinition(std::vector<std::unique_ptr<BTree::Particle>>& particles,
-                                 std::vector<BTree::Particle*>& particlePtrs,
+void AppUtils::readIonDefinition(std::vector<std::unique_ptr<Core::Particle>>& particles,
+                                 std::vector<Core::Particle*>& particlePtrs,
                                  const SimulationConfiguration& simConf) {
 
     if (AppUtils::isIonCloudDefinitionPresent(simConf)) {

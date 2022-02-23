@@ -30,7 +30,7 @@
 
 #include "Core_vector.hpp"
 #include "Core_randomGenerators.hpp"
-#include "BTree_particle.hpp"
+#include "Core_particle.hpp"
 #include <memory>
 #include <vector>
 
@@ -46,7 +46,7 @@ namespace ParticleSimulation{
         virtual ~ParticleStartZone() = default;
         virtual Core::Vector getRandomParticlePosition() = 0;
 
-        std::vector<std::unique_ptr<BTree::Particle>> getRandomParticlesInStartZone(
+        std::vector<std::unique_ptr<Core::Particle>> getRandomParticlesInStartZone(
                 std::size_t numIons, double charge, double timeOfBirthRange=0.0);
     };
 }

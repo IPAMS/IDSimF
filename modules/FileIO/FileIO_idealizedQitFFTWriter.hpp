@@ -36,9 +36,12 @@
 #include <memory>
 
 //forward declare own classes:
+namespace Core{
+    class Particle;
+}
+
 namespace BTree{
     class Vector;
-    class Particle;
 }
 
 namespace FileIO{
@@ -51,7 +54,7 @@ namespace FileIO{
     class IdealizedQitFFTWriter{
 
     public:
-        IdealizedQitFFTWriter(std::vector<BTree::Particle*> particles, std::string transientFilename);
+        IdealizedQitFFTWriter(std::vector<Core::Particle*> particles, std::string transientFilename);
         ~IdealizedQitFFTWriter();
 
         void writeTimestep(double time);
@@ -59,7 +62,7 @@ namespace FileIO{
 
     private:
         std::unique_ptr<std::ofstream> transientFile_;
-        std::vector<BTree::Particle*> particles_;
+        std::vector<Core::Particle*> particles_;
     };
 }
 

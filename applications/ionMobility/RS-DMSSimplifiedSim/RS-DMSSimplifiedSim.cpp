@@ -137,7 +137,7 @@ int main(int argc, const char * argv[]) {
         // create and add simulation particles:
         unsigned int nParticlesTotal = 0;
         std::vector<uniqueReactivePartPtr>particles;
-        std::vector<BTree::Particle*>particlesPtrs;
+        std::vector<Core::Particle*>particlesPtrs;
         std::vector<std::vector<double>> trajectoryAdditionalParams;
 
         Core::Vector initCorner(0,-startWidthY_m/2.0,-startWidthZ_m/2.0);
@@ -177,7 +177,7 @@ int main(int argc, const char * argv[]) {
         CVFieldFctType CVFieldFct = createCVFieldFunction(cvMode, fieldWavePeriod, simConf);
 
         FileIO::partAttribTransformFctType additionalParameterTransformFct =
-                [=](BTree::Particle* particle) -> std::vector<double> {
+                [=](Core::Particle* particle) -> std::vector<double> {
                     std::vector<double> result = {particle->getFloatAttribute(key_ChemicalIndex)};
                     return result;
                 };
@@ -185,7 +185,7 @@ int main(int argc, const char * argv[]) {
         auto timestepWriteFct =
                 [&jsonWriter, &voltageWriter, &additionalParameterTransformFct, trajectoryWriteInterval,
                         &rsSim, &resultFilewriter, concentrationWriteInterval, &fieldMagnitude, &logger]
-                        (std::vector<BTree::Particle *> &particles, double time, int timestep, bool lastTimestep){
+                        (std::vector<Core::Particle *> &particles, double time, int timestep, bool lastTimestep){
 
             if (timestep % concentrationWriteInterval ==0) {
                 resultFilewriter.writeTimestep(rsSim);

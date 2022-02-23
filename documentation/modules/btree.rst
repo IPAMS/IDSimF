@@ -9,9 +9,9 @@ The BTree module provides Barnes-Hut tree implementations which are used to effi
 Particle Class
 ==============
 
-IDSimF implements particle based simulation methods. :cpp:class:`BTree::Particle` is the current base class for all simulated particles in IDSimF. It bundles the basic characteristics of simulated charged particles in IDSimF. 
+IDSimF implements particle based simulation methods. :cpp:class:`Core::Particle` is the current base class for all simulated particles in IDSimF. It bundles the basic characteristics of simulated charged particles in IDSimF.
 
-.. doxygenclass:: BTree::Particle
+.. doxygenclass:: Core::Particle
     :members:
     :undoc-members:
 

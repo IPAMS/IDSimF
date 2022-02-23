@@ -32,7 +32,7 @@
 #define Collision_StatisticalDiffusion_hpp
 
 #include "Core_vector.hpp"
-#include "BTree_particle.hpp"
+#include "Core_particle.hpp"
 #include "Core_constants.hpp"
 #include "CollisionModel_util.hpp"
 #include "CollisionModel_AbstractCollisionModel.hpp"
@@ -72,16 +72,16 @@ namespace CollisionModel {
                     double collisionGasDiameterM,
                     CollisionStatistics cs = CollisionStatistics());
 
-            void setSTPParameters(BTree::Particle& ion) const;
-            void updateModelParameters(BTree::Particle& ion) const override;
-            void initializeModelParameters(BTree::Particle& ion) const override;
+            void setSTPParameters(Core::Particle& ion) const;
+            void updateModelParameters(Core::Particle& ion) const override;
+            void initializeModelParameters(Core::Particle& ion) const override;
             void modifyAcceleration(Core::Vector& acceleration,
-                    BTree::Particle& ion,
+                    Core::Particle& ion,
                     double dt) override;
-            void modifyVelocity(BTree::Particle& ion,
+            void modifyVelocity(Core::Particle& ion,
                     double dt) override;
             void modifyPosition(Core::Vector& position,
-                    BTree::Particle& ion,
+                    Core::Particle& ion,
                     double dt) override;
 
         private:

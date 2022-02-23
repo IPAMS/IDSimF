@@ -25,7 +25,7 @@
 
  ****************************/
 
-#include "BTree_particle.hpp"
+#include "Core_particle.hpp"
 #include "PSim_simionPotentialArray.hpp"
 #include "FileIO_inductionCurrentWriter.hpp"
 #include "catch.hpp"
@@ -36,11 +36,11 @@ TEST_CASE( "Test indcution current file writer", "[ParticleSimulation][file writ
 
     SECTION("Induction current writer should be able to write file"){
 
-        std::vector<std::unique_ptr<BTree::Particle>> particles;
-        std::vector<BTree::Particle*> particlePtrs;
+        std::vector<std::unique_ptr<Core::Particle>> particles;
+        std::vector<Core::Particle*> particlePtrs;
         unsigned int nParticles = 10;
         for (unsigned int i=0; i < nParticles; i++){
-            std::unique_ptr<BTree::Particle> part = std::make_unique<BTree::Particle>(Core::Vector(0.01,0.01,i*0.001),1);
+            std::unique_ptr<Core::Particle> part = std::make_unique<Core::Particle>(Core::Vector(0.01,0.01,i*0.001),1);
             particlePtrs.push_back(part.get());
             particles.push_back(std::move(part));
         }

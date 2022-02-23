@@ -188,7 +188,7 @@ int main(int argc, const char * argv[]) {
         RS::ConcentrationFileWriter resultFilewriter(projectName+"_conc.csv");
 
         std::vector<std::string> auxParamNames = {"chemical id"};
-        auto additionalParamTFct = [](BTree::Particle* particle) -> std::vector<int> {
+        auto additionalParamTFct = [](Core::Particle* particle) -> std::vector<int> {
             std::vector<int> result = {
                     particle->getIntegerAttribute(key_ChemicalIndex)
             };
@@ -219,7 +219,7 @@ int main(int argc, const char * argv[]) {
         // create and add simulation particles:
         unsigned int nParticlesTotal = 0;
         std::vector<uniqueReactivePartPtr> particles;
-        std::vector<BTree::Particle*> particlesPtrs;
+        std::vector<Core::Particle*> particlesPtrs;
         std::vector<std::vector<double>> trajectoryAdditionalParams;
 
         Core::Vector initCorner(0, -startWidthY_m/2.0, -startWidthZ_m/2.0);
@@ -256,7 +256,7 @@ int main(int argc, const char * argv[]) {
 
         auto accelerationFct =
                 [&totalFieldNow_VPerM, spaceChargeFactor]
-                        (BTree::Particle* particle, int /*particleIndex*/, auto& tree, double /*time*/, int /*timestep*/) {
+                        (Core::Particle* particle, int /*particleIndex*/, auto& tree, double /*time*/, int /*timestep*/) {
 
                     double particleCharge = particle->getCharge();
                     Core::Vector fieldForce(0, 0, totalFieldNow_VPerM*particleCharge);
@@ -275,7 +275,7 @@ int main(int argc, const char * argv[]) {
         auto timestepWriteFct =
                 [&trajectoryWriter, &voltageWriter, trajectoryWriteInterval, &rsSim, &resultFilewriter, concentrationWriteInterval,
                  &totalFieldNow_VPerM, &logger]
-                        (std::vector<BTree::Particle*>& particles, auto& tree, double time, int timestep,
+                        (std::vector<Core::Particle*>& particles, auto& tree, double time, int timestep,
                          bool lastTimestep) {
 
                     if (timestep%concentrationWriteInterval==0) {
@@ -298,7 +298,7 @@ int main(int argc, const char * argv[]) {
                 };
 
         auto otherActionsFct = [electrodeHalfDistance_m, electrodeLength_m, &ionsInactive](
-                Core::Vector& newPartPos, BTree::Particle* particle,
+                Core::Vector& newPartPos, Core::Particle* particle,
                 int /*particleIndex*/, auto& /*tree*/, double time, int /*timestep*/) {
 
             if (std::fabs(newPartPos.z())>=electrodeHalfDistance_m) {

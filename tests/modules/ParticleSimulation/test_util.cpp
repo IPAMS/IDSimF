@@ -26,7 +26,7 @@
  ****************************/
 
 #include "PSim_util.hpp"
-#include "BTree_particle.hpp"
+#include "Core_particle.hpp"
 #include "Core_vector.hpp"
 #include "catch.hpp"
 #include <cmath>
@@ -36,7 +36,7 @@ TEST_CASE( "Test random particle generation","[ParticleSimulation][utilities][ra
         unsigned int nions = 100;
         double cylinderRadius = 10;
         double cylinderLength = 20;
-        std::vector<std::unique_ptr<BTree::Particle>> ions =
+        std::vector<std::unique_ptr<Core::Particle>> ions =
                 ParticleSimulation::util::prepareIonsOnCylinderWalls(nions, 1,cylinderRadius,cylinderLength);
 
         bool invalidIonFound = false;
@@ -58,10 +58,10 @@ TEST_CASE( "Test random particle generation","[ParticleSimulation][utilities][ra
 
 TEST_CASE("Test utility functions","[ParticleSimulation][utilities]") {
     SECTION("Probing electric force should at least produce the right spatial positions and result length"){
-        std::vector<BTree::Particle> particles;
+        std::vector<Core::Particle> particles;
         int nIons = 10;
         for (int i=0; i<nIons; ++i){
-            particles.push_back(BTree::Particle(Core::Vector(1.0,1.0,i*0.1),1.0));
+            particles.push_back(Core::Particle(Core::Vector(1.0,1.0,i*0.1),1.0));
         }
 
         std::vector<std::tuple<double,double,Core::Vector>> result =

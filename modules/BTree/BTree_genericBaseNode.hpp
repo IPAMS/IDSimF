@@ -33,7 +33,7 @@
 #include "Core_vector.hpp"
 #include "Core_utils.hpp"
 #include "BTree_abstractNode.hpp"
-#include "BTree_particle.hpp"
+#include "Core_particle.hpp"
 #include <sstream>
 #include <iostream>
 
@@ -69,7 +69,7 @@ namespace BTree{
         void removeMyselfFromTree() override;
         void updateSelf() override;
         void updateParents() override;
-        void insertParticle(Particle* particle) override;
+        void insertParticle(Core::Particle* particle) override;
         void computeChargeDistributionRecursive() override;
 
         // Diagnostic methods:
@@ -318,7 +318,7 @@ namespace BTree{
      * @param particle the particle to insert into the node.
      */
     template<class NodType>
-    void GenericBaseNode<NodType>::insertParticle(Particle* particle){
+    void GenericBaseNode<NodType>::insertParticle(Core::Particle* particle){
 
         if (numP_ >1){
             Octant oct = this->getOctant(particle->getLocation());
@@ -328,7 +328,7 @@ namespace BTree{
             octNodes_[oct]->insertParticle(particle);
         }
         else if(numP_ == 1){
-            Particle* p2 = particle_;
+            Core::Particle* p2 = particle_;
             if(p2->getLocation() != particle->getLocation()){
                 //There is already a particle in the node
                 //relocate and subdivide

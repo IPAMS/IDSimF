@@ -19,7 +19,7 @@
  along with IDSimF.  If not, see <https://www.gnu.org/licenses/>.
  ****************************/
 
-#include "BTree_particle.hpp"
+#include "Core_particle.hpp"
 #include <iostream>
 
 /**
@@ -27,7 +27,7 @@
  * @param location the location of the created particle
  * @param chargeElemCharges the charge of the particle (in units of elementary charges)
  */
-BTree::Particle::Particle(const Core::Vector &location, double chargeElemCharges):
+Core::Particle::Particle(const Core::Vector &location, double chargeElemCharges):
     location_(location),
     charge_(chargeElemCharges * Core::ELEMENTARY_CHARGE)
 {}
@@ -40,7 +40,7 @@ BTree::Particle::Particle(const Core::Vector &location, double chargeElemCharges
  * @param chargeElemCharges the charge of the particle (in units of elementary charges)
  * @param massAMU the mass of the charged particle (in atomic mass units)
  */
-BTree::Particle::Particle(const Core::Vector &location, const Core::Vector &velocity,
+Core::Particle::Particle(const Core::Vector &location, const Core::Vector &velocity,
                           double chargeElemCharges, double massAMU):
     location_(location),
     velocity_(velocity),
@@ -56,7 +56,7 @@ BTree::Particle::Particle(const Core::Vector &location, const Core::Vector &velo
  * @param massAMU the mass of the charged particle (in atomic mass units)
  * @param timeOfBirth the time when this particle was created
  */
-BTree::Particle::Particle(const Core::Vector &location, const Core::Vector &velocity, double chargeElemCharges,
+Core::Particle::Particle(const Core::Vector &location, const Core::Vector &velocity, double chargeElemCharges,
                           double massAMU, double timeOfBirth):
     location_(location),
     velocity_(velocity),
@@ -74,7 +74,7 @@ BTree::Particle::Particle(const Core::Vector &location, const Core::Vector &velo
 * @param collisionDiameterM the effective collision diameter of the particle (in m)
 * @param timeOfBirth the time when this particle was created
 */
-BTree::Particle::Particle(const Core::Vector &location, const Core::Vector &velocity,
+Core::Particle::Particle(const Core::Vector &location, const Core::Vector &velocity,
                           double chargeElemCharges, double massAMU,
                           double collisionDiameterM, double timeOfBirth):
     location_(location),
@@ -90,42 +90,42 @@ BTree::Particle::Particle(const Core::Vector &location, const Core::Vector &velo
 /**
  * Sets a new location
  */
-void BTree::Particle::setLocation(Core::Vector location){
+void Core::Particle::setLocation(Core::Vector location){
         this->location_ = location;
 }
 
 /**
  * Gets the location
  */
-Core::Vector& BTree::Particle::getLocation(){
+Core::Vector& Core::Particle::getLocation(){
     return(location_);
 }
 
 /**
  * Sets a velocity
  */
-void BTree::Particle::setVelocity(Core::Vector velocity){
+void Core::Particle::setVelocity(Core::Vector velocity){
     this->velocity_ = velocity;
 }
 
 /**
  * Gets the velocity
  */
-Core::Vector& BTree::Particle::getVelocity(){
+Core::Vector& Core::Particle::getVelocity(){
     return(velocity_);
 }
 
 /**
  * Sets the acceleration
  */
-void BTree::Particle::setAcceleration(Core::Vector acceleration) {
+void Core::Particle::setAcceleration(Core::Vector acceleration) {
     this->acceleration_ = acceleration;
 }
 
 /**
  * Gets the acceleration
  */
-Core::Vector& BTree::Particle::getAcceleration(){
+Core::Vector& Core::Particle::getAcceleration(){
     return(acceleration_);
 }
 
@@ -133,28 +133,28 @@ Core::Vector& BTree::Particle::getAcceleration(){
  * Sets a new host node for this particle
  * @param newHostNode link to a Core node which is the new host node
  */
-void BTree::Particle::setHostNode(BTree::AbstractNode* newHostNode){
+void Core::Particle::setHostNode(BTree::AbstractNode* newHostNode){
     this->hostNode_ = newHostNode;
 }
 
 /**
  * Gets the host node of this particle
  */
-BTree::AbstractNode* BTree::Particle::getHostNode() const{
+BTree::AbstractNode* Core::Particle::getHostNode() const{
     return (hostNode_);
 }
 
 /**
  * Sets the external index of the particle
  */
-void BTree::Particle::setIndex(size_t index){
+void Core::Particle::setIndex(size_t index){
     index_ = index;
 }
 
 /**
  * Gets the external index of the particle
  */
-std::size_t BTree::Particle::getIndex() const{
+std::size_t Core::Particle::getIndex() const{
     return (index_);
 }
 
@@ -163,7 +163,7 @@ std::size_t BTree::Particle::getIndex() const{
  * Sets the charge in units of elementary charges
  * @param chargeElemCharges the new charge in units of elementary charges
  */
-void BTree::Particle::setChargeElementary(double chargeElemCharges){
+void Core::Particle::setChargeElementary(double chargeElemCharges){
     this->charge_ = chargeElemCharges*Core::ELEMENTARY_CHARGE;
 }
 
@@ -171,14 +171,14 @@ void BTree::Particle::setChargeElementary(double chargeElemCharges){
  * Gets the charge of the particle
  * @return charge of the particle (in Coulomb)
  */
-double BTree::Particle::getCharge() const{
+double Core::Particle::getCharge() const{
     return(charge_);
 }
 
 /**
  * Sets active state of the particle
  */
-void BTree::Particle::setActive(bool active){
+void Core::Particle::setActive(bool active){
     this->active_ = active;
 }
 
@@ -186,14 +186,14 @@ void BTree::Particle::setActive(bool active){
  * Gets the active state of the particle
  * @return true if the particle is active
  */
-bool BTree::Particle::isActive() const{
+bool Core::Particle::isActive() const{
     return(active_);
 }
 
 /**
  * Sets the invalid state of the particle
  */
-void BTree::Particle::setInvalid(bool invalid){
+void Core::Particle::setInvalid(bool invalid){
     this->invalid_ = invalid;
 }
 
@@ -201,7 +201,7 @@ void BTree::Particle::setInvalid(bool invalid){
  * Gets the invalid state of the particle
  * @return true if the particle is invalid
  */
-bool BTree::Particle::isInvalid() const{
+bool Core::Particle::isInvalid() const{
     return(invalid_);
 }
 
@@ -210,7 +210,7 @@ bool BTree::Particle::isInvalid() const{
  * @param key a textual key which identifies the attribute
  * @return the value of the attribute with the given key
  */
-double BTree::Particle::getFloatAttribute(const std::string& key) const{
+double Core::Particle::getFloatAttribute(const std::string& key) const{
     return attributesFloat_.at(key);
 }
 
@@ -219,7 +219,7 @@ double BTree::Particle::getFloatAttribute(const std::string& key) const{
  * @param key a textual key which identifies the attribute
  * @param value the new value of the attribute
  */
-void BTree::Particle::setFloatAttribute(const std::string& key, double value) {
+void Core::Particle::setFloatAttribute(const std::string& key, double value) {
     attributesFloat_[key] = value;
 }
 
@@ -228,7 +228,7 @@ void BTree::Particle::setFloatAttribute(const std::string& key, double value) {
  * @param key a textual key which identifies the attribute
  * @return the value of the attribute with the given key
  */
-int BTree::Particle::getIntegerAttribute(const std::string& key) const{
+int Core::Particle::getIntegerAttribute(const std::string& key) const{
     return attributesInteger_.at(key);
 }
 
@@ -237,56 +237,56 @@ int BTree::Particle::getIntegerAttribute(const std::string& key) const{
  * @param key a textual key which identifies the attribute
  * @param value the new value of the attribute
  */
-void BTree::Particle::setIntegerAttribute(const std::string& key, int value) {
+void Core::Particle::setIntegerAttribute(const std::string& key, int value) {
     attributesInteger_[key] = value;
 }
 
 /**
  * Accesses the array of auxiliary parameters for collision models
  */
-std::array<double,3>& BTree::Particle::getAuxCollisionParams() {
+std::array<double,3>& Core::Particle::getAuxCollisionParams() {
     return auxCollisionParams_;
 }
 
 /**
  * Sets the mobility
  */
-void BTree::Particle::setMobility(double mobility){
+void Core::Particle::setMobility(double mobility){
     this->mobility_ = mobility;
 }
 
 /**
  * Gets the mobility
  */
-double BTree::Particle::getMobility() const{
+double Core::Particle::getMobility() const{
     return(mobility_);
 }
 
 /**
  * Sets the mean free path at standard temperature and standard pressure
  */
-void BTree::Particle::setMeanFreePathSTP(double meanFreePathSTP) {
+void Core::Particle::setMeanFreePathSTP(double meanFreePathSTP) {
     this->STP_meanFreePath_ = meanFreePathSTP;
 }
 
 /**
  * Gets the mean free path at standard temperature and standard pressure
  */
-double BTree::Particle::getMeanFreePathSTP() const{
+double Core::Particle::getMeanFreePathSTP() const{
     return(STP_meanFreePath_);
 }
 
 /**
  * Sets the mean thermal velocity at standard tempeature and standard pressure
  */
-void BTree::Particle::setMeanThermalVelocitySTP(double meanVelocitySTP) {
+void Core::Particle::setMeanThermalVelocitySTP(double meanVelocitySTP) {
     this->STP_meanThermalVelocity_ = meanVelocitySTP;
 }
 
 /**
  * Gets the mean velocity at standard temperature and standard pressure
  */
-double BTree::Particle::getMeanThermalVelocitySTP() const{
+double Core::Particle::getMeanThermalVelocitySTP() const{
     return(STP_meanThermalVelocity_);
 }
 
@@ -294,7 +294,7 @@ double BTree::Particle::getMeanThermalVelocitySTP() const{
  * Sets the mass
  * @param massAMU mass in atomic mass units
  */
-void BTree::Particle::setMassAMU(double massAMU){
+void Core::Particle::setMassAMU(double massAMU){
     this->mass_ = massAMU*Core::AMU_TO_KG;
 }
 
@@ -302,48 +302,48 @@ void BTree::Particle::setMassAMU(double massAMU){
  * Gets the mass (in kg)
  * @return the mass in kg
  */
-double BTree::Particle::getMass() const{
+double Core::Particle::getMass() const{
     return(mass_);
 }
 
 /**
  * Sets the particle diameter
  */
-void BTree::Particle::setDiameter(double diameter) {
+void Core::Particle::setDiameter(double diameter) {
     this->diameter_ = diameter;
 }
 
 /**
  * Gets the particle diameter
  */
-double BTree::Particle::getDiameter() const{
+double Core::Particle::getDiameter() const{
     return(diameter_);
 }
 
 /**
  * Sets the time of particle creation / "birth"
  */
-void BTree::Particle::setTimeOfBirth(double timeOfBirth){
+void Core::Particle::setTimeOfBirth(double timeOfBirth){
     this->timeOfBirth_ = timeOfBirth;
 }
 
 /**
  * Gets the time of particle creation / "birth"
  */
-double BTree::Particle::getTimeOfBirth() const{
+double Core::Particle::getTimeOfBirth() const{
     return(timeOfBirth_);
 }
 
 /**
  * Sets the "splat" / termination time
  */
-void BTree::Particle::setSplatTime(double splatTime){
+void Core::Particle::setSplatTime(double splatTime){
     this->splatTime_ = splatTime;
 }
 
 /**
  * Gets the "splat" / termination time
  */
-double BTree::Particle::getSplatTime() const{
+double Core::Particle::getSplatTime() const{
     return (splatTime_);
 }

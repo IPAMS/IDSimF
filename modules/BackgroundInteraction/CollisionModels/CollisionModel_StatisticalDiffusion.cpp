@@ -148,7 +148,7 @@ double CollisionModel::StatisticalDiffusionModel::randomWalkDistance_(double log
  *
  * @param ion The ion to calculate the parameters for
  */
-void CollisionModel::StatisticalDiffusionModel::setSTPParameters(BTree::Particle &ion) const{
+void CollisionModel::StatisticalDiffusionModel::setSTPParameters(Core::Particle &ion) const{
 
     // FIXME: Cache the STP parameters instead of always recalculate them
     // (all parameters used here for the STP calculation are set / calculatable from the chemical species)
@@ -189,7 +189,7 @@ void CollisionModel::StatisticalDiffusionModel::setSTPParameters(BTree::Particle
 /**
  * Updates internal model parameters for an ion which are dependent on ion position / timestep
  */
-void CollisionModel::StatisticalDiffusionModel::updateModelParameters(BTree::Particle &ion) const {
+void CollisionModel::StatisticalDiffusionModel::updateModelParameters(Core::Particle &ion) const {
 
     Core::Vector particle_location = ion.getLocation();
 
@@ -209,7 +209,7 @@ void CollisionModel::StatisticalDiffusionModel::updateModelParameters(BTree::Par
 /**
  * Inits model parameters which are not dependent on ion position / timestep for an ion
  */
-void CollisionModel::StatisticalDiffusionModel::initializeModelParameters(BTree::Particle &ion) const {
+void CollisionModel::StatisticalDiffusionModel::initializeModelParameters(Core::Particle &ion) const {
     this->setSTPParameters(ion);
 }
 
@@ -221,7 +221,7 @@ void CollisionModel::StatisticalDiffusionModel::initializeModelParameters(BTree:
  * @param ion An ion the acceleration is calculated for
  * @param dt The length of the current time step
  */
-void CollisionModel::StatisticalDiffusionModel::modifyAcceleration(Core::Vector& acceleration, BTree::Particle& ion,
+void CollisionModel::StatisticalDiffusionModel::modifyAcceleration(Core::Vector& acceleration, Core::Particle& ion,
                                                                    double dt) {
 
     Core::Vector gasVelocity = velocityFunction_(ion.getLocation());
@@ -242,7 +242,7 @@ void CollisionModel::StatisticalDiffusionModel::modifyAcceleration(Core::Vector&
 /**
  * The ion velocity is not modified by the SDS model
  */
-void CollisionModel::StatisticalDiffusionModel::modifyVelocity(BTree::Particle& /*ion*/, double /*dt*/) {}
+void CollisionModel::StatisticalDiffusionModel::modifyVelocity(Core::Particle& /*ion*/, double /*dt*/) {}
 
 /**
  * Modifies the position of a particle according to the background gas interaction modeled with the SDS approach
@@ -253,7 +253,7 @@ void CollisionModel::StatisticalDiffusionModel::modifyVelocity(BTree::Particle& 
  * @param dt The length of the current time step
   */
 void CollisionModel::StatisticalDiffusionModel::modifyPosition(
-        Core::Vector& position, BTree::Particle &ion, double dt) {
+        Core::Vector& position, Core::Particle &ion, double dt) {
 
     Core::Vector oldPosition = position;
     double ionMass_amu = ion.getMass() / Core::AMU_TO_KG;

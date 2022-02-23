@@ -26,7 +26,7 @@
  ****************************/
 
 #include "BTree_parallelNode.hpp"
-#include "BTree_particle.hpp"
+#include "Core_particle.hpp"
 #include "Core_constants.hpp"
 #include "catch.hpp"
 #include "test_util.hpp"
@@ -122,11 +122,11 @@ TEST_CASE( "Test particle management in parallel node", "[Node]") {
         REQUIRE( testNode.getParticle() == nullptr);
 
         //Test particle add increases the number of particles:
-        BTree::Particle testIon1 = BTree::Particle(Core::Vector(1.2,1.2,1.2),2.0);
-        BTree::Particle testIon2 = BTree::Particle(Core::Vector(1.6,1.2,1.2),2.0);
-        BTree::Particle testIon3 = BTree::Particle(Core::Vector(1.65,1.2,1.2),2.0);
-        BTree::Particle testIon4 = BTree::Particle(Core::Vector(1.66,1.2,1.2),2.0);
-        BTree::Particle testIon5 = BTree::Particle(Core::Vector(1.665,1.2,1.2),2.0);
+        Core::Particle testIon1 = Core::Particle(Core::Vector(1.2,1.2,1.2),2.0);
+        Core::Particle testIon2 = Core::Particle(Core::Vector(1.6,1.2,1.2),2.0);
+        Core::Particle testIon3 = Core::Particle(Core::Vector(1.65,1.2,1.2),2.0);
+        Core::Particle testIon4 = Core::Particle(Core::Vector(1.66,1.2,1.2),2.0);
+        Core::Particle testIon5 = Core::Particle(Core::Vector(1.665,1.2,1.2),2.0);
 
         testNode.insertParticle(&testIon1);
         REQUIRE( testNode.getNumberOfParticles() == 1);
@@ -164,8 +164,8 @@ TEST_CASE( "Test particle management in parallel node", "[Node]") {
                 nullptr
         );
 
-        BTree::Particle testIon1 = BTree::Particle(Core::Vector(1.0,1.0,1.0),2.0);
-        BTree::Particle testIon2 = BTree::Particle(Core::Vector(1.0,1.0,1.0),2.0);
+        Core::Particle testIon1 = Core::Particle(Core::Vector(1.0,1.0,1.0),2.0);
+        Core::Particle testIon2 = Core::Particle(Core::Vector(1.0,1.0,1.0),2.0);
 
         testNode.insertParticle(&testIon1);
         REQUIRE_THROWS(testNode.insertParticle(&testIon2));
@@ -185,12 +185,12 @@ TEST_CASE( "Test particle management in parallel node", "[Node]") {
         REQUIRE( testNode.getParticle() == nullptr);
 
         //Test particle add increases the number of particles:
-        BTree::Particle testIon1 = BTree::Particle(Core::Vector(1.2,1.2,1.2),2.0);
-        BTree::Particle testIon2 = BTree::Particle(Core::Vector(1.6,1.2,1.2),2.0);
-        BTree::Particle testIon3 = BTree::Particle(Core::Vector(1.65,1.2,1.2),2.0);
-        BTree::Particle testIon4 = BTree::Particle(Core::Vector(1.66,1.2,1.2),2.0);
-        BTree::Particle testIon5 = BTree::Particle(Core::Vector(1.5,1.2,1.2),6.0);
-        BTree::Particle testIon6 = BTree::Particle(Core::Vector(1.6,1.2,1.2),2.0);
+        Core::Particle testIon1 = Core::Particle(Core::Vector(1.2,1.2,1.2),2.0);
+        Core::Particle testIon2 = Core::Particle(Core::Vector(1.6,1.2,1.2),2.0);
+        Core::Particle testIon3 = Core::Particle(Core::Vector(1.65,1.2,1.2),2.0);
+        Core::Particle testIon4 = Core::Particle(Core::Vector(1.66,1.2,1.2),2.0);
+        Core::Particle testIon5 = Core::Particle(Core::Vector(1.5,1.2,1.2),6.0);
+        Core::Particle testIon6 = Core::Particle(Core::Vector(1.6,1.2,1.2),2.0);
         testNode.insertParticle(&testIon5);
         testNode.insertParticle(&testIon6);
 
@@ -237,9 +237,9 @@ TEST_CASE( "Test particle management in parallel node", "[Node]") {
         REQUIRE( testNode.getParticle() == nullptr);
 
         //Test particle add increases the number of particles:
-        BTree::Particle testIon1 = BTree::Particle(Core::Vector(1.0,1.0,1.0),1.0);
-        BTree::Particle testIon2 = BTree::Particle(Core::Vector(2.0,1.0,1.0),1.0);
-        BTree::Particle testIon3 = BTree::Particle(Core::Vector(3.0,1.0,1.0),1.0);
+        Core::Particle testIon1 = Core::Particle(Core::Vector(1.0,1.0,1.0),1.0);
+        Core::Particle testIon2 = Core::Particle(Core::Vector(2.0,1.0,1.0),1.0);
+        Core::Particle testIon3 = Core::Particle(Core::Vector(3.0,1.0,1.0),1.0);
         testNode.insertParticle(&testIon1);
         testNode.insertParticle(&testIon2);
         testNode.insertParticle(&testIon3);
@@ -268,11 +268,11 @@ TEST_CASE( "Test particle management in parallel node", "[Node]") {
 
         int nNodesOriginal= testNode.getNumberOfNodes();
         const int nIons = 100;
-        BTree::Particle testIons[nIons];
+        Core::Particle testIons[nIons];
         double xPos;
         for (int i=0; i<nIons;i++){
             xPos = 1.99 / nIons *i;
-            testIons[i] = BTree::Particle(Core::Vector(xPos,1.2,1.2),2.0);
+            testIons[i] = Core::Particle(Core::Vector(xPos,1.2,1.2),2.0);
             testNode.insertParticle(&testIons[i]);
         }
         REQUIRE(testNode.getNumberOfParticles() == nIons);

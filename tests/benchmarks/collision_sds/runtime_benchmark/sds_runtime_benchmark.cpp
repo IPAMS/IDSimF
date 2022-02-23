@@ -13,7 +13,7 @@
  ****************************/
 
 #include "CollisionModel_StatisticalDiffusion.hpp"
-#include "BTree_particle.hpp"
+#include "Core_particle.hpp"
 #include "appUtils_stopwatch.hpp"
 
 #include <iostream>
@@ -25,7 +25,7 @@ void performBenchmark(int nSamples, double dt){
     stopWatch.start();
 
     CollisionModel::StatisticalDiffusionModel sds(100000,298,28,0.366 * 1.0e-9);
-    BTree::Particle ion;
+    Core::Particle ion;
     ion.setMassAMU(100);
     ion.setVelocity({100,0.0,0.0});
     sds.setSTPParameters(ion);

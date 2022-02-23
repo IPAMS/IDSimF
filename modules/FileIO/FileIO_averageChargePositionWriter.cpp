@@ -21,7 +21,7 @@
 
 #include "FileIO_averageChargePositionWriter.hpp"
 #include "BTree_tree.hpp"
-#include "BTree_particle.hpp"
+#include "Core_particle.hpp"
 #include <vector>
 
 /**

@@ -21,7 +21,7 @@
 
 #include "FileIO_scalar_writer.hpp"
 #include "BTree_tree.hpp"
-#include "BTree_particle.hpp"
+#include "Core_particle.hpp"
 
 /**
  * Constructor: Creates a file writer for a given result file

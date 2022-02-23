@@ -25,8 +25,8 @@
 
  ****************************/
 
-#ifndef BTree_ion_hpp
-#define BTree_ion_hpp
+#ifndef IDSIMF_CORE_PARTICLE_HPP
+#define IDSIMF_CORE_PARTICLE_HPP
 
 #include "Core_constants.hpp"
 #include "Core_vector.hpp"
@@ -34,11 +34,11 @@
 #include <array>
 #include <memory>
 
-
-
 namespace BTree {
-
     class AbstractNode;
+}
+
+namespace Core {
 
     /**
      * Defines a simulated particle, which can be managed by a geometrical Core
@@ -63,8 +63,8 @@ namespace BTree {
         void setAcceleration(Core::Vector velocity);
         [[nodiscard]] Core::Vector& getAcceleration();
 
-        void setHostNode(AbstractNode* newHostNode);
-        [[nodiscard]] AbstractNode* getHostNode()  const;
+        void setHostNode(BTree::AbstractNode* newHostNode);
+        [[nodiscard]] BTree::AbstractNode* getHostNode()  const;
 
         void setIndex(size_t index);
         [[nodiscard]] std::size_t getIndex() const;
@@ -115,15 +115,15 @@ namespace BTree {
         bool invalid_ = false;     ///< Flag if the particle has an invalid state in the simulation
         double timeOfBirth_ = 0.0; ///< Time when the particle was created
         double splatTime_= 0.0;    ///< Time when the particle was terminated ("splatted")
-        AbstractNode* hostNode_ = nullptr; ///< A link to a tree node to which the particle is belonging currently
+        BTree::AbstractNode* hostNode_ = nullptr; ///< A link to a tree node to which the particle is belonging currently
 
         std::unordered_map<std::string, double> attributesFloat_; ///< an arbitrary set of additional floating point attributes, accessible by a name
         std::unordered_map<std::string, int> attributesInteger_; ///< an arbitrary set of additional integer attributes, accessible by a name
         std::array<double, 3> auxCollisionParams_ {0.0,0.0,0.0}; ///< quickly accessible parameters for collision models
     };
 
-    typedef std::unique_ptr<BTree::Particle> uniquePartPtr;
+    typedef std::unique_ptr<Core::Particle> uniquePartPtr;
 }
 
 
-#endif /* BTree_ion_hpp */
+#endif /* IDSIMF_CORE_PARTICLE_HPP */

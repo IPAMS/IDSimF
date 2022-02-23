@@ -27,7 +27,7 @@
 
 #include "Integration_verletIntegrator.hpp"
 #include "Core_vector.hpp"
-#include "BTree_particle.hpp"
+#include "Core_particle.hpp"
 #include "Core_randomGenerators.hpp"
 #include "RS_Substance.hpp"
 #include "RS_Simulation.hpp"
@@ -43,7 +43,7 @@ TEST_CASE("Test serial verlet integrator", "[ParticleSimulation][VerletIntegrato
 
     double ionAcceleration = 10.0; //((1000V / 100mm) * elementary charge) / 100 amu = 9.64e9 m/s^2
 
-    auto accelerationFct = [ionAcceleration](BTree::Particle* /*particle*/, int /*particleIndex*/, BTree::Tree& /*tree*/,
+    auto accelerationFct = [ionAcceleration](Core::Particle* /*particle*/, int /*particleIndex*/, BTree::Tree& /*tree*/,
                                              double /*time*/, int /*timestep*/){
         Core::Vector result(ionAcceleration, 0, ionAcceleration * 0.5);
         return (result);
@@ -59,7 +59,7 @@ TEST_CASE("Test serial verlet integrator", "[ParticleSimulation][VerletIntegrato
 
         //particles should be addable and integrator should be able to run:
         unsigned int nSteps = 100;
-        BTree::Particle testParticle1(Core::Vector(0.0, 0.0, 0.0),
+        Core::Particle testParticle1(Core::Vector(0.0, 0.0, 0.0),
                 Core::Vector(0.0, 0.0, 0.0),
                 1.0, 100.0);
 
@@ -74,7 +74,7 @@ TEST_CASE("Test serial verlet integrator", "[ParticleSimulation][VerletIntegrato
 
         std::cout<<"p 1: "<<testParticle1.getLocation()<<std::endl;
 
-        BTree::Particle testParticle2(Core::Vector(0.0, 0.01, 0.0),
+        Core::Particle testParticle2(Core::Vector(0.0, 0.01, 0.0),
                 Core::Vector(0.0, 0.0, 0.0),
                 1.0, 100.0);
 
@@ -95,14 +95,14 @@ TEST_CASE("Test serial verlet integrator", "[ParticleSimulation][VerletIntegrato
         double dt = 1e-4;
 
         //prepare particles with a distributed time of birth (TOB):
-        std::vector<BTree::uniquePartPtr>particles;
-        std::vector<BTree::Particle*>particlesPtrs;
+        std::vector<Core::uniquePartPtr>particles;
+        std::vector<Core::Particle*>particlesPtrs;
 
         double yPos = 0;
         double lastTime = timeSteps * dt - 4*dt;
         double timeOfBirth = lastTime;
         for (unsigned int i=0; i<nParticles; ++i){
-            BTree::uniquePartPtr particle = std::make_unique<BTree::Particle>(
+            Core::uniquePartPtr particle = std::make_unique<Core::Particle>(
                     Core::Vector(0.0, yPos, 0.0),
                     Core::Vector(0.0,0.0,0.0),
                     1.0,
@@ -117,20 +117,20 @@ TEST_CASE("Test serial verlet integrator", "[ParticleSimulation][VerletIntegrato
         SECTION("Verlet integrator should run through and should call functions"){
 
             unsigned int nTimeStepsRecorded = 0;
-            auto timestepWriteFct = [&nTimeStepsRecorded](std::vector<BTree::Particle*>& /*particles*/, BTree::Tree& /*tree*/, double /*time*/, int /*timestep*/,
+            auto timestepWriteFct = [&nTimeStepsRecorded](std::vector<Core::Particle*>& /*particles*/, BTree::Tree& /*tree*/, double /*time*/, int /*timestep*/,
                                        bool /*lastTimestep*/){
                 nTimeStepsRecorded++;
             };
 
             int nParticlesTouched = 0;
             auto otherActionsFct = [&nParticlesTouched] (
-                    Core::Vector& /*newPartPos*/,BTree::Particle* /*particle*/,
+                    Core::Vector& /*newPartPos*/,Core::Particle* /*particle*/,
                     int /*particleIndex*/, BTree::Tree& /*tree*/, double /*time*/, int /*timestep*/){
                 nParticlesTouched++;
             };
 
             unsigned int nParticlesStartMonitored = 0;
-            auto particleStartMonitoringFct = [&nParticlesStartMonitored] (BTree::Particle* /*particle*/, double /*time*/){
+            auto particleStartMonitoringFct = [&nParticlesStartMonitored] (Core::Particle* /*particle*/, double /*time*/){
                 nParticlesStartMonitored++;
             };
 
@@ -169,7 +169,7 @@ TEST_CASE("Test serial verlet integrator", "[ParticleSimulation][VerletIntegrato
             unsigned int terminationTimeStep = 50;
 
             auto timestepStopFct = [&integratorPtr, terminationTimeStep](
-                    std::vector<BTree::Particle*>& /*particles*/, BTree::Tree& /*tree*/,
+                    std::vector<Core::Particle*>& /*particles*/, BTree::Tree& /*tree*/,
                     double /*time*/, unsigned int timestep, bool /*lastTimestep*/){
                 if (timestep >= terminationTimeStep){
                     integratorPtr->setTerminationState();
@@ -194,7 +194,7 @@ TEST_CASE("Test serial verlet integrator", "[ParticleSimulation][VerletIntegrato
         unsigned int timeSteps = 50;
 
         auto accelerationFctReactive = [ionAcceleration] (
-                BTree::Particle* particle, int /*particleIndex*/,
+                Core::Particle* particle, int /*particleIndex*/,
                 BTree::Tree& /*tree*/, double /*time*/, int /*timestep*/){
             Core::Vector result(ionAcceleration * particle->getCharge() / particle->getMass(), 0,0);
             return(result);
@@ -208,7 +208,7 @@ TEST_CASE("Test serial verlet integrator", "[ParticleSimulation][VerletIntegrato
         RS::Substance* ed_2 = simConf->substance(1);
 
         std::vector<uniqueReactivePartPtr>particles;
-        std::vector<BTree::Particle*>particlesPtrs; // pointers on the raw particles for trajectory integrator
+        std::vector<Core::Particle*>particlesPtrs; // pointers on the raw particles for trajectory integrator
         double yPos = 0;
         for (int i=0; i<nParticles; i++){
             uniqueReactivePartPtr particle = std::make_unique<RS::ReactiveParticle>(

@@ -28,7 +28,7 @@
 #ifndef IONSIMULATION_CPP_COLLISIONMODEL_UTIL_HPP
 #define IONSIMULATION_CPP_COLLISIONMODEL_UTIL_HPP
 
-#include "BTree_particle.hpp"
+#include "Core_particle.hpp"
 #include "RS_AbstractReaction.hpp"
 #include <cmath>
 #include <functional>
@@ -48,7 +48,7 @@ namespace CollisionModel {
         double estimateMobility(double massIon_amu, double diameterIon_nm,
                                 double collisionGasMass_amu, double collisionGasDiameter_nm);
 
-        std::function<void(RS::CollisionConditions,BTree::Particle&)> getCollisionCountFunction(int* countVal);
+        std::function<void(RS::CollisionConditions,Core::Particle&)> getCollisionCountFunction(int* countVal);
     }
 }
 

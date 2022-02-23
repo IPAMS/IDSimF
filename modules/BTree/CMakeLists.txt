@@ -1,8 +1,6 @@
 project(IDSimF_bTree)
 
 set(SOURCE_FILES
-        BTree_particle.cpp
-        BTree_particle.hpp
         BTree_abstractNode.cpp
         BTree_abstractNode.hpp
         BTree_node.cpp

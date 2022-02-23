@@ -29,7 +29,7 @@
 #include "FileIO_trajectoryExplorerJSONwriter.hpp"
 #include "PSim_particleStartSplatTracker.hpp"
 #include "Core_vector.hpp"
-#include "BTree_particle.hpp"
+#include "Core_particle.hpp"
 #include "H5Cpp.h"
 #include "catch.hpp"
 #include "test_util.hpp"
@@ -195,7 +195,7 @@ TEST_CASE( "Test HDF5 trajectory file writer", "[ParticleSimulation][file writer
 
         //prepare a hdf5 writer including parameter attributes
         FileIO::partAttribTransformFctType pAttribTransformFct =
-                [](BTree::Particle *particle) -> std::vector<double>{
+                [](Core::Particle *particle) -> std::vector<double>{
                     std::vector<double> result = {
                             particle->getVelocity().x(),
                             particle->getVelocity().y(),
@@ -211,7 +211,7 @@ TEST_CASE( "Test HDF5 trajectory file writer", "[ParticleSimulation][file writer
 
         //prepare a hdf5 writer including parameter attributes
         FileIO::partAttribTransformFctTypeInteger pAttribTransformFctInt =
-                [](BTree::Particle *particle) -> std::vector<int>{
+                [](Core::Particle *particle) -> std::vector<int>{
                     std::vector<int> result = {
                             particle->getIntegerAttribute("global index")
                     };
@@ -224,8 +224,8 @@ TEST_CASE( "Test HDF5 trajectory file writer", "[ParticleSimulation][file writer
         writerAux.setParticleAttributes(pAttribNamesInt, pAttribTransformFctInt);
 
         // prepare data structures:
-        std::vector<BTree::uniquePartPtr>particles;
-        std::vector<BTree::Particle *> particlePtrs;
+        std::vector<Core::uniquePartPtr>particles;
+        std::vector<Core::Particle *> particlePtrs;
 
         // write an empty frame:
         writerBare.writeTimestep(particlePtrs, 0.0);
@@ -235,7 +235,7 @@ TEST_CASE( "Test HDF5 trajectory file writer", "[ParticleSimulation][file writer
         ParticleSimulation::ParticleStartSplatTracker tracker;
         for (std::size_t i=0; i<nParticles; ++i){
             double timeOfBirth = static_cast<double>(i)*0.01;
-            BTree::uniquePartPtr particle = std::make_unique<BTree::Particle>();
+            Core::uniquePartPtr particle = std::make_unique<Core::Particle>();
             particle->setLocation({0.0, 1.0, 0.0});
             particlePtrs.emplace_back(particle.get());
             particles.emplace_back(std::move(particle));

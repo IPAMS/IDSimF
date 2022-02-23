@@ -35,7 +35,7 @@ CollisionModel::MultiCollisionModel::MultiCollisionModel(
 /**
  * Calls updateModelParameters for all combined sub models
  */
-void CollisionModel::MultiCollisionModel::updateModelParameters(BTree::Particle &ion) const{
+void CollisionModel::MultiCollisionModel::updateModelParameters(Core::Particle &ion) const{
     for(const auto &model: models_){
         model->updateModelParameters(ion);
     }
@@ -44,7 +44,7 @@ void CollisionModel::MultiCollisionModel::updateModelParameters(BTree::Particle 
 /**
  * Calls initializeModelParameters for all combined sub models
  */
-void CollisionModel::MultiCollisionModel::initializeModelParameters(BTree::Particle &ion) const{
+void CollisionModel::MultiCollisionModel::initializeModelParameters(Core::Particle &ion) const{
     for(const auto &model: models_){
         model->initializeModelParameters(ion);
     }
@@ -53,7 +53,7 @@ void CollisionModel::MultiCollisionModel::initializeModelParameters(BTree::Parti
 /**
  * Calls modifyVelocity for all combined sub models
  */
-void CollisionModel::MultiCollisionModel::modifyVelocity(BTree::Particle &ion, double dt){
+void CollisionModel::MultiCollisionModel::modifyVelocity(Core::Particle &ion, double dt){
     for(const auto &model: models_){
         model->modifyVelocity(ion,dt);
     }
@@ -62,7 +62,7 @@ void CollisionModel::MultiCollisionModel::modifyVelocity(BTree::Particle &ion, d
 /**
  * Calls modifyPosition for all combined sub models
  */
-void CollisionModel::MultiCollisionModel::modifyPosition(Core::Vector &position, BTree::Particle &ion, double dt){
+void CollisionModel::MultiCollisionModel::modifyPosition(Core::Vector &position, Core::Particle &ion, double dt){
     for(const auto &model: models_){
         model->modifyPosition(position,ion,dt);
     }
@@ -72,7 +72,7 @@ void CollisionModel::MultiCollisionModel::modifyPosition(Core::Vector &position,
 /**
  * Calls modifyAcceleration for all combined sub models
  */
-void CollisionModel::MultiCollisionModel::modifyAcceleration(Core::Vector &acceleration, BTree::Particle &ion,
+void CollisionModel::MultiCollisionModel::modifyAcceleration(Core::Vector &acceleration, Core::Particle &ion,
                                                              double dt){
     for(const auto &model: models_){
         model->modifyAcceleration(acceleration,ion,dt);

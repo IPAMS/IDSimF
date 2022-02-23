@@ -15,7 +15,7 @@
  ****************************/
 
 #include "CollisionModel_HardSphere.hpp"
-#include "BTree_particle.hpp"
+#include "Core_particle.hpp"
 #include "appUtils_stopwatch.hpp"
 
 #include <ctime>
@@ -25,7 +25,7 @@ int main() {
 
     double diameterN2 = CollisionModel::HardSphereModel::DIAMETER_N2;
     CollisionModel::HardSphereModel hs = CollisionModel::HardSphereModel(10.0,298,28.0, diameterN2);
-    BTree::Particle ion = BTree::Particle();
+    Core::Particle ion = Core::Particle();
 
     ion.setDiameter(diameterN2);
     ion.setVelocity(Core::Vector(0,0,0));

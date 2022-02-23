@@ -13,7 +13,7 @@
  ****************************/
 
 #include "CollisionModel_HardSphere.hpp"
-#include "BTree_particle.hpp"
+#include "Core_particle.hpp"
 #include "appUtils_stopwatch.hpp"
 
 #include <ctime>
@@ -23,7 +23,7 @@ void performBenchmark(int nSamples, bool maxwellApproximation){
     double diameterHe = CollisionModel::HardSphereModel::DIAMETER_HE;
     CollisionModel::HardSphereModel hs = CollisionModel::HardSphereModel(
             1.0,298,4.0,diameterHe,maxwellApproximation);
-    BTree::Particle ion = BTree::Particle();
+    Core::Particle ion = Core::Particle();
     ion.setDiameter(CollisionModel::HardSphereModel::DIAMETER_HE);
     ion.setVelocity(Core::Vector(100,0,0));
     ion.setMassAMU(28.0);

@@ -27,7 +27,7 @@
  ****************************/
 
 #include "Core_randomGenerators.hpp"
-#include "BTree_particle.hpp"
+#include "Core_particle.hpp"
 #include "BTree_tree.hpp"
 #include "PSim_util.hpp"
 #include "PSim_constants.hpp"
@@ -95,8 +95,8 @@ int main(int argc, const char * argv[]) {
         std::vector<unsigned int> nIons = simConf->unsignedIntVectorParameter("n_ions");
         std::vector<double> ionMasses = simConf->doubleVectorParameter("ion_masses");
 
-        std::vector<std::unique_ptr<BTree::Particle>> particles;
-        std::vector<BTree::Particle*> particlePtrs;
+        std::vector<std::unique_ptr<Core::Particle>> particles;
+        std::vector<Core::Particle*> particlePtrs;
 
         //prepare file writers ==============================================================================
         auto jsonWriter = std::make_unique<FileIO::TrajectoryExplorerJSONwriter>
@@ -146,7 +146,7 @@ int main(int argc, const char * argv[]) {
 
         // define functions for the trajectory integration ==================================================
         auto accelerationFunction = [V_rf, V_entrance, spaceChargeFactor, &electricFieldQuadRF, &electricFieldQuadEntrance](
-                BTree::Particle* particle, int /*particleIndex*/, BTree::Tree& tree, double time, int /*timestep*/) {
+                Core::Particle* particle, int /*particleIndex*/, BTree::Tree& tree, double time, int /*timestep*/) {
             //x is the long quad axis
             Core::Vector pos = particle->getLocation();
             double particleCharge = particle->getCharge();
@@ -169,7 +169,7 @@ int main(int argc, const char * argv[]) {
         };
 
         FileIO::partAttribTransformFctType additionalParameterTransformFct =
-                [&backgroundGasPressureFunction](BTree::Particle* particle) -> std::vector<double> {
+                [&backgroundGasPressureFunction](Core::Particle* particle) -> std::vector<double> {
                     double pressure_pa = backgroundGasPressureFunction(particle->getLocation());
                     std::vector<double> result = {
                             particle->getVelocity().x(),
@@ -181,7 +181,7 @@ int main(int argc, const char * argv[]) {
                 };
 
         auto timestepWriteFunction = [trajectoryWriteInterval, &additionalParameterTransformFct, &jsonWriter, &logger](
-                std::vector<BTree::Particle*>& particles, BTree::Tree& /*tree*/, double time, int timestep,
+                std::vector<Core::Particle*>& particles, BTree::Tree& /*tree*/, double time, int timestep,
                 bool lastTimestep) {
             if (timestep%trajectoryWriteInterval==0) {
                 logger->info("ts:{} time:{:.2e}", timestep, time);
@@ -196,7 +196,7 @@ int main(int argc, const char * argv[]) {
         };
 
         auto otherActionsFunction = [maxQLength, maxRadius, &startZone](Core::Vector& newPartPos,
-                                                                        BTree::Particle* particle, int /*particleIndex*/,
+                                                                        Core::Particle* particle, int /*particleIndex*/,
                                                                         BTree::Tree& /*tree*/, double /*time*/, int /*timestep*/) {
 
             double r_pos = std::sqrt(newPartPos.y()*newPartPos.y()+newPartPos.z()*newPartPos.z());

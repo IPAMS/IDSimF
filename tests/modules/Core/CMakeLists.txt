@@ -3,6 +3,7 @@ project(test_core)
 set(SOURCE_FILES
         test_main.cpp
         test_vector.cpp
+        test_particle.cpp
         test_utils.cpp
         test_math.cpp)
 

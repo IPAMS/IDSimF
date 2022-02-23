@@ -25,7 +25,7 @@
 
  ****************************/
 #include "Core_randomGenerators.hpp"
-#include "BTree_particle.hpp"
+#include "Core_particle.hpp"
 #include "BTree_tree.hpp"
 #include "CollisionModel_StatisticalDiffusion.hpp"
 #include "CollisionStatistic_default.hpp"
@@ -41,7 +41,7 @@ TEST_CASE( "Test SDS collison model", "[CollisionModels][SDS]") {
 
     SECTION( "SDS random jumps should be correct with default statistics") {
         CollisionModel::StatisticalDiffusionModel sds(100000,298,28,0.366 * 1.0e-9);
-        BTree::Particle ion;
+        Core::Particle ion;
         ion.setMassAMU(100);
         sds.setSTPParameters(ion);
         sds.updateModelParameters(ion);
@@ -59,7 +59,7 @@ TEST_CASE( "Test SDS collison model", "[CollisionModels][SDS]") {
     SECTION( "SDS random jumps with modified statistics should be correct") {
         CollisionModel::CollisionStatistics cs("cs_icdf_2020_03_15_001_parameterTest.dat");
         CollisionModel::StatisticalDiffusionModel sds(100000,298,2,0.366 * 1.0e-9, cs);
-        BTree::Particle ion;
+        Core::Particle ion;
         ion.setMassAMU(12);
         sds.setSTPParameters(ion);
         sds.updateModelParameters(ion);
@@ -81,7 +81,7 @@ TEST_CASE( "Test SDS collison model", "[CollisionModels][SDS]") {
         double diameterGas = 0.366 * 1.0e-9;
 
         CollisionModel::StatisticalDiffusionModel sds(100000,298.15,massGas_amu,diameterGas);
-        BTree::Particle ion;
+        Core::Particle ion;
         //n=6, m=91, d=0.541621(est), Ko=1.89928(est), MFPo=3.2037e-005, Vo=0.252097 [*]
         //double massIon_amu = 91;
         //double diameterIon = 0.541621 * 1.0e-9;
@@ -105,7 +105,7 @@ TEST_CASE( "Test SDS collison model", "[CollisionModels][SDS]") {
         double massGas_amu = 28.94515; //SDS default value for air
         double diameterGas = 0.366 * 1.0e-9;
 
-        BTree::Particle ion;
+        Core::Particle ion;
 
         double massIon_amu = massGas_amu;
         double diameterIon = diameterGas;
@@ -114,7 +114,7 @@ TEST_CASE( "Test SDS collison model", "[CollisionModels][SDS]") {
         ion.setMassAMU(massIon_amu);
         ion.setMobility(3.5e-4);
 
-        std::vector<BTree::Particle*>particles= std::vector<BTree::Particle*>();
+        std::vector<Core::Particle*>particles= std::vector<Core::Particle*>();
         particles.push_back(&ion);
         CollisionModel::StatisticalDiffusionModel sds(100000,298.15,massGas_amu,diameterGas);
         sds.setSTPParameters(ion);
@@ -122,7 +122,7 @@ TEST_CASE( "Test SDS collison model", "[CollisionModels][SDS]") {
 
         double ionAcceleration = 9.6485335276142e9; //((1000V / 100mm) * elementary charge) / 100 amu = 9.64e9 m/s^2
 
-        auto accelerationFct = [ionAcceleration] (BTree::Particle* /*particle*/, int /*particleIndex*/,
+        auto accelerationFct = [ionAcceleration] (Core::Particle* /*particle*/, int /*particleIndex*/,
                 BTree::Tree& /*tree*/, double /*time*/, int /*timestep*/){
             Core::Vector result(ionAcceleration,0,0);
             return(result);

@@ -28,7 +28,7 @@
 #ifndef IONSIMULATION_CPP_COLLISIONMODEL_ABSTRACTCOLLISIONMODEL_HPP
 #define IONSIMULATION_CPP_COLLISIONMODEL_ABSTRACTCOLLISIONMODEL_HPP
 
-#include "BTree_particle.hpp"
+#include "Core_particle.hpp"
 #include "Core_constants.hpp"
 
 namespace CollisionModel {
@@ -39,16 +39,16 @@ namespace CollisionModel {
 
             virtual ~AbstractCollisionModel() = default;
 
-            virtual void initializeModelParameters(BTree::Particle& ion) const = 0;
-            virtual void updateModelParameters(BTree::Particle& ion) const = 0;
+            virtual void initializeModelParameters(Core::Particle& ion) const = 0;
+            virtual void updateModelParameters(Core::Particle& ion) const = 0;
 
             virtual void modifyAcceleration(Core::Vector& acceleration,
-                                            BTree::Particle& particle,
+                                            Core::Particle& particle,
                                             double dt) = 0;
-            virtual void modifyVelocity(BTree::Particle& particle,
+            virtual void modifyVelocity(Core::Particle& particle,
                                         double dt) = 0;
             virtual void modifyPosition(Core::Vector& position,
-                                        BTree::Particle& particle,
+                                        Core::Particle& particle,
                                         double dt) = 0;
     };
 }

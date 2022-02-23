@@ -21,7 +21,7 @@
 
 #include "FileIO_inductionCurrentWriter.hpp"
 #include "Core_vector.hpp"
-#include "BTree_particle.hpp"
+#include "Core_particle.hpp"
 #include "PSim_simionPotentialArray.hpp"
 
 /**
@@ -36,7 +36,7 @@
  * @param scale_mm_per_gu scaling factor between mm and grid units of the given weight potential arrays
  */
 FileIO::InductionCurrentWriter::InductionCurrentWriter(
-        std::vector<BTree::Particle*> particles,
+        std::vector<Core::Particle*> particles,
         std::string transientFilename,
         const std::vector<ParticleSimulation::SimionPotentialArray*>& weightFields,
         std::vector<double> weightFactors,

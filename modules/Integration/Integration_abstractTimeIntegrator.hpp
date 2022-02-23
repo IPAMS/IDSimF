@@ -28,7 +28,7 @@
 #ifndef BTree_abstractTimeIntegrator_hpp
 #define BTree_abstractTimeIntegrator_hpp
 
-#include "BTree_particle.hpp"
+#include "Core_particle.hpp"
 #include "Core_vector.hpp"
 #include <cstdio>
 #include <vector>
@@ -43,23 +43,23 @@ namespace Integration{
 
     public:
         enum RunState {RUNNING, STOPPED, IN_TERMINATION};
-        typedef std::pair<double, BTree::Particle*> pTobPair_t;
+        typedef std::pair<double, Core::Particle*> pTobPair_t;
 
         /**
           * Type definition for a function to watch ion start events
           */
         typedef std::function
-                <void (BTree::Particle* particle,
+                <void (Core::Particle* particle,
                        double time)>
                 particleStartMonitoringFctType;
 
         explicit AbstractTimeIntegrator(particleStartMonitoringFctType ionStartMonitorFct = nullptr);
-        explicit AbstractTimeIntegrator(const std::vector<BTree::Particle*>& particles,
+        explicit AbstractTimeIntegrator(const std::vector<Core::Particle*>& particles,
                                particleStartMonitoringFctType ionStartMonitorFct = nullptr);
 
         virtual ~AbstractTimeIntegrator() = default;
 
-        virtual void addParticle(BTree::Particle* particle) = 0;
+        virtual void addParticle(Core::Particle* particle) = 0;
         virtual void run(unsigned int nTimesteps, double dt) = 0;
         virtual void runSingleStep(double dt) = 0;
         virtual void finalizeSimulation() = 0;
@@ -73,7 +73,7 @@ namespace Integration{
         RunState runState_ = STOPPED; ///< the current state the integrator is in
         double time_ = 0.0; ///< the current time in the simulation
         unsigned int timestep_ = 0; ///< the current time step
-        std::vector<BTree::Particle*> particles_; ///< links to the simulated particles
+        std::vector<Core::Particle*> particles_; ///< links to the simulated particles
         std::size_t nParticles_ = 0; ///< number of particles
         std::vector<pTobPair_t> particleTOBs_; ///< Time of births of the individual particles
         std::size_t particlesBornIdx_ = 0; ///< index in particleTOBs_ indicating the particles already born

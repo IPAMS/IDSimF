@@ -20,7 +20,7 @@
  ****************************/
 
 #include "Integration_velocityIntegrator.hpp"
-#include "BTree_particle.hpp"
+#include "Core_particle.hpp"
 #include "CollisionModel_AbstractCollisionModel.hpp"
 #include <utility>
 
@@ -35,7 +35,7 @@
 
  */
 Integration::VelocityIntegrator::VelocityIntegrator(
-        std::vector<BTree::Particle *> particles,
+        std::vector<Core::Particle *> particles,
         Integration::VelocityIntegrator::velocityFctType velocityFunction,
         Integration::VelocityIntegrator::timestepWriteFctType timestepWriteFunction,
         Integration::VelocityIntegrator::otherActionsFctType otherActionsFunction):
@@ -53,11 +53,11 @@ otherActionsFunction_(std::move(otherActionsFunction))
  * Adds a particle to the velocity integrator
  * @param particle the particle to add
  */
-void Integration::VelocityIntegrator::addParticle(BTree::Particle *particle){
+void Integration::VelocityIntegrator::addParticle(Core::Particle *particle){
     addParticle_(particle);
 }
 
-void Integration::VelocityIntegrator::addParticle_(BTree::Particle *particle){
+void Integration::VelocityIntegrator::addParticle_(Core::Particle *particle){
     particles_.push_back(particle);
     ++nParticles_;
 }

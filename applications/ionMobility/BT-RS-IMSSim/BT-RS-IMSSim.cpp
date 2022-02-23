@@ -136,7 +136,7 @@ int main(int argc, const char *argv[]){
         std::vector<std::string> auxParamNames;
 
         if (writeVelocities) {
-            additionalParamTFct = [](BTree::Particle* particle) -> std::vector<double> {
+            additionalParamTFct = [](Core::Particle* particle) -> std::vector<double> {
                 std::vector<double> result = {
                         particle->getFloatAttribute(key_ChemicalIndex),
                         particle->getVelocity().x(),
@@ -148,7 +148,7 @@ int main(int argc, const char *argv[]){
             auxParamNames = {"chemical id", "velocity x", "velocity y", "velocity z"};
         }
         else {
-            additionalParamTFct = [](BTree::Particle* particle) -> std::vector<double> {
+            additionalParamTFct = [](Core::Particle* particle) -> std::vector<double> {
                 std::vector<double> result = {
                         particle->getFloatAttribute(key_ChemicalIndex)
                 };
@@ -175,7 +175,7 @@ int main(int argc, const char *argv[]){
         // create and add simulation particles:
         unsigned int nParticlesTotal = 0;
         std::vector<uniqueReactivePartPtr> particles;
-        std::vector<BTree::Particle*> particlesPtrs;
+        std::vector<Core::Particle*> particlesPtrs;
         std::vector<std::vector<double>> trajectoryAdditionalParams;
 
         Core::Vector initCorner(0, 0, 0);
@@ -236,7 +236,7 @@ int main(int argc, const char *argv[]){
 
         auto accelerationFctVerlet =
                 [eFieldMagnitude, spaceChargeFactor]
-                        (BTree::Particle* particle, int /*particleIndex*/, BTree::Tree& tree, double /*time*/, int /*timestep*/) {
+                        (Core::Particle* particle, int /*particleIndex*/, BTree::Tree& tree, double /*time*/, int /*timestep*/) {
                     double particleCharge = particle->getCharge();
 
                     Core::Vector fieldForce(eFieldMagnitude*particleCharge, 0, 0);
@@ -253,7 +253,7 @@ int main(int argc, const char *argv[]){
 
         auto timestepWriteFctSimple =
                 [&hdf5Writer, trajectoryWriteInterval, &ionsInactive, &logger]
-                        (std::vector<BTree::Particle*>& particles, double time, int timestep, bool lastTimestep) {
+                        (std::vector<Core::Particle*>& particles, double time, int timestep, bool lastTimestep) {
                     if (lastTimestep) {
                         hdf5Writer.writeTimestep(particles, time);
                         hdf5Writer.writeSplatTimes(particles);
@@ -268,14 +268,14 @@ int main(int argc, const char *argv[]){
 
         auto timestepWriteFctVerlet =
                 [&timestepWriteFctSimple]
-                        (std::vector<BTree::Particle*>& particles, BTree::Tree& /*tree*/, double time, int timestep,
+                        (std::vector<Core::Particle*>& particles, BTree::Tree& /*tree*/, double time, int timestep,
                          bool lastTimestep) {
                     timestepWriteFctSimple(particles, time, timestep, lastTimestep);
                 };
 
         auto otherActionsFunctionIMSSimple =
                 [stopPosX_m, &ionsInactive]
-                        (Core::Vector& newPartPos, BTree::Particle* particle, int /*particleIndex*/, double time,
+                        (Core::Vector& newPartPos, Core::Particle* particle, int /*particleIndex*/, double time,
                          int /*timestep*/) {
                     if (newPartPos.x()>=stopPosX_m) {
                         particle->setActive(false);
@@ -286,7 +286,7 @@ int main(int argc, const char *argv[]){
 
         auto otherActionsFunctionIMSVerlet =
                 [&otherActionsFunctionIMSSimple]
-                        (Core::Vector& newPartPos, BTree::Particle* particle, int particleIndex,
+                        (Core::Vector& newPartPos, Core::Particle* particle, int particleIndex,
                          BTree::Tree& /*tree*/, double time, int timestep) {
                     otherActionsFunctionIMSSimple(newPartPos, particle, particleIndex, time, timestep);
                 };
@@ -363,7 +363,7 @@ int main(int argc, const char *argv[]){
         }
         else if (integratorType==SIMPLE) {
 
-            auto velocityFctSimple = [eFieldMagnitude, backgroundPTRatio](BTree::Particle* particle, int /*particleIndex*/,
+            auto velocityFctSimple = [eFieldMagnitude, backgroundPTRatio](Core::Particle* particle, int /*particleIndex*/,
                                                                           double /*time*/, int /*timestep*/) {
                 double particleMobility = particle->getMobility();
 

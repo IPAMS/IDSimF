@@ -20,7 +20,7 @@
  ****************************/
 
 #include "FileIO_ionCloudReader.hpp"
-#include "BTree_particle.hpp"
+#include "Core_particle.hpp"
 #include <fstream>
 
 /**
@@ -29,7 +29,7 @@
  * @return Vector with unique pointers to the read and newly created particles
  * @throws IonCloudFileException if the ion cloud file is incorrect
  */
-std::vector<std::unique_ptr<BTree::Particle>> FileIO::IonCloudReader::readIonCloud(std::string filename) {
+std::vector<std::unique_ptr<Core::Particle>> FileIO::IonCloudReader::readIonCloud(std::string filename) {
 
     //open stream:
     std::ifstream in;
@@ -44,7 +44,7 @@ std::vector<std::unique_ptr<BTree::Particle>> FileIO::IonCloudReader::readIonClo
         size_t pos = 0;
         std::string token;
 
-        std::vector<std::unique_ptr<BTree::Particle>> ionCloud;
+        std::vector<std::unique_ptr<Core::Particle>> ionCloud;
         while(std::getline(in, line)) {
             //std::cout << line <<std::endl;
             if (line[0] != '#') {
@@ -64,7 +64,7 @@ std::vector<std::unique_ptr<BTree::Particle>> FileIO::IonCloudReader::readIonClo
                 }
 
                 if (pVal.size() == 10) {
-                    ionCloud.push_back(std::make_unique<BTree::Particle>(
+                    ionCloud.push_back(std::make_unique<Core::Particle>(
                                 Core::Vector(pVal[0], pVal[1], pVal[2]), //location
                                 Core::Vector(pVal[3], pVal[4], pVal[5]), //velocity
                                 pVal[6], //charge (in elementary charges)

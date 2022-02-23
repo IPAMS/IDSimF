@@ -1,6 +1,6 @@
 #include "BTree_tree.hpp"
 #include "BTree_parallelTree.hpp"
-#include "BTree_particle.hpp"
+#include "Core_particle.hpp"
 #include "Integration_verletIntegrator.hpp"
 #include "Integration_parallelVerletIntegrator.hpp"
 #include "FileIO_trajectoryHDF5Writer.hpp"
@@ -25,8 +25,8 @@ void runIntegrator(Integration::AbstractTimeIntegrator &integrator, unsigned int
 }
 
 
-unsigned int prepareIons(std::vector<std::unique_ptr<BTree::Particle>> &particles,
-                 std::vector<BTree::Particle*> &particlePtrs, unsigned int nPerDirection){
+unsigned int prepareIons(std::vector<std::unique_ptr<Core::Particle>> &particles,
+                 std::vector<Core::Particle*> &particlePtrs, unsigned int nPerDirection){
 
     unsigned int nTotal = 0;
     for (unsigned int i=0; i<nPerDirection; i++){
@@ -35,7 +35,7 @@ unsigned int prepareIons(std::vector<std::unique_ptr<BTree::Particle>> &particle
             double pY = j*1.0/nPerDirection;
             for (unsigned int k=0; k<nPerDirection; k++){
                 double pZ = k*1.0/nPerDirection;
-                std::unique_ptr<BTree::Particle> newIon = std::make_unique<BTree::Particle>(Core::Vector(pX,pY,pZ), 1.0);
+                std::unique_ptr<Core::Particle> newIon = std::make_unique<Core::Particle>(Core::Vector(pX,pY,pZ), 1.0);
                 newIon -> setMassAMU(100);
                 particlePtrs.push_back(newIon.get());
                 particles.push_back(std::move(newIon));
@@ -67,7 +67,7 @@ int main(int argc, char** argv) {
     // define functions for the trajectory integration ==================================================
     auto accelerationFunctionSerial =
             [spaceChargeFactor](
-                    BTree::Particle *particle, int /*particleIndex*/,
+                    Core::Particle *particle, int /*particleIndex*/,
                     BTree::Tree &tree, double /*time*/, int /*timestep*/) -> Core::Vector{
 
                 double particleCharge = particle->getCharge();
@@ -83,7 +83,7 @@ int main(int argc, char** argv) {
 
     auto accelerationFunctionParallelNew =
             [spaceChargeFactor](
-                    BTree::Particle *particle, int /*particleIndex*/,
+                    Core::Particle *particle, int /*particleIndex*/,
                     BTree::ParallelTree &tree, double /*time*/, int /*timestep*/) -> Core::Vector{
 
                 double particleCharge = particle->getCharge();
@@ -99,10 +99,10 @@ int main(int argc, char** argv) {
     auto hdf5Writer = std::make_unique<FileIO::TrajectoryHDF5Writer>(
             "test_trajectories.hd5");
 
-    std::vector<std::unique_ptr<BTree::Particle>> particlesSerial;
-    std::vector<BTree::Particle*>particlePtrsSerial;
-    std::vector<std::unique_ptr<BTree::Particle>> particlesParallelNew;
-    std::vector<BTree::Particle*>particlePtrsParallelNew;
+    std::vector<std::unique_ptr<Core::Particle>> particlesSerial;
+    std::vector<Core::Particle*>particlePtrsSerial;
+    std::vector<std::unique_ptr<Core::Particle>> particlesParallelNew;
+    std::vector<Core::Particle*>particlePtrsParallelNew;
 
     unsigned int nIonsTotal = prepareIons(particlesSerial, particlePtrsSerial, nIonsPerDirection);
     prepareIons(particlesParallelNew, particlePtrsParallelNew, nIonsPerDirection);

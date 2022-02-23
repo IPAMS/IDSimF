@@ -40,7 +40,7 @@
 #ifndef Collision_HardSphere_hpp
 #define Collision_HardSphere_hpp
 
-#include "BTree_particle.hpp"
+#include "Core_particle.hpp"
 #include "Core_constants.hpp"
 #include "CollisionModel_AbstractCollisionModel.hpp"
 #include "CollisionModel_SpatialFieldFunctions.hpp"
@@ -77,7 +77,7 @@ namespace CollisionModel{
                 double staticTemperature,
                 double collisionGasMassAmu,
                 double collisionGasDiameterM,
-                std::function<void(RS::CollisionConditions, BTree::Particle&)>afterCollisionFunction,
+                std::function<void(RS::CollisionConditions, Core::Particle&)>afterCollisionFunction,
                 bool maxwellianApproximation = false);
 
         HardSphereModel(
@@ -86,25 +86,25 @@ namespace CollisionModel{
                 std::function<double(const Core::Vector&)>temperatureFunction,
                 double collisionGasMassAmu,
                 double collisionGasDiameterM,
-                std::function<void(RS::CollisionConditions, BTree::Particle&)>afterCollisionFunction,
+                std::function<void(RS::CollisionConditions, Core::Particle&)>afterCollisionFunction,
                 bool maxwellianApproximation = false);
 
 
-        void updateModelParameters(BTree::Particle& ion) const override;
-        void initializeModelParameters(BTree::Particle& ion) const override;
+        void updateModelParameters(Core::Particle& ion) const override;
+        void initializeModelParameters(Core::Particle& ion) const override;
 
         void modifyAcceleration(
                 Core::Vector& acceleration,
-                BTree::Particle& ion,
+                Core::Particle& ion,
                 double dt) override;
 
         void modifyVelocity(
-                BTree::Particle& ion,
+                Core::Particle& ion,
                 double dt) override;
 
         void modifyPosition(
                 Core::Vector& position,
-                BTree::Particle& ion,
+                Core::Particle& ion,
                 double dt) override;
 
     private:
@@ -121,7 +121,7 @@ namespace CollisionModel{
         std::function<double(Core::Vector&)> pressureFunction_ = nullptr; ///< a spatial pressure function
         std::function<Core::Vector(Core::Vector&)> velocityFunction_ = nullptr; ///< a spatial velocity function
         std::function<double(const Core::Vector&)>temperatureFunction_ = nullptr;  ///< Spatial temperature function
-        std::function<void(RS::CollisionConditions, BTree::Particle&)> afterCollisionActionFunction_ = nullptr;
+        std::function<void(RS::CollisionConditions, Core::Particle&)> afterCollisionActionFunction_ = nullptr;
         ///< Function with things to do after a collision (e.g. collision based chemical reactions)
     };
 }

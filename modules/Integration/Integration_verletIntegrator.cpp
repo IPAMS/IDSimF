@@ -20,7 +20,7 @@
  ****************************/
 
 #include "Integration_verletIntegrator.hpp"
-#include "BTree_particle.hpp"
+#include "Core_particle.hpp"
 #include "CollisionModel_AbstractCollisionModel.hpp"
 #include <utility>
 #include <iostream>
@@ -34,7 +34,7 @@
  * @param collisionModel a collision model, modeling the interaction between charged particles and background gas
  */
 Integration::VerletIntegrator::VerletIntegrator(
-        std::vector<BTree::Particle *> particles,
+        std::vector<Core::Particle *> particles,
         Integration::VerletIntegrator::accelerationFctType accelerationFunction,
         Integration::VerletIntegrator::timestepWriteFctType timestepWriteFunction,
         Integration::VerletIntegrator::otherActionsFctType otherActionsFunction,
@@ -73,7 +73,7 @@ Integration::VerletIntegrator::VerletIntegrator(
  * @param particle the particle to add to the verlet integration
  * @param extIndex an external numerical index / key for the particle to add
  */
-void Integration::VerletIntegrator::addParticle(BTree::Particle *particle){
+void Integration::VerletIntegrator::addParticle(Core::Particle *particle){
     particles_.push_back(particle);
     newPos_.push_back(Core::Vector(0,0,0));
     a_t_.push_back(Core::Vector(0,0,0));

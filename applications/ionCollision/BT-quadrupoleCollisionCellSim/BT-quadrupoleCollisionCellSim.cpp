@@ -27,7 +27,7 @@
  ****************************/
 
 #include "Core_randomGenerators.hpp"
-#include "BTree_particle.hpp"
+#include "Core_particle.hpp"
 #include "PSim_util.hpp"
 #include "FileIO_trajectoryHDF5Writer.hpp"
 #include "PSim_particleStartSplatTracker.hpp"
@@ -140,8 +140,8 @@ int main(int argc, const char * argv[]) {
         }
 
         //Read ion configuration and initialize ions:
-        std::vector<std::unique_ptr<BTree::Particle>> particles;
-        std::vector<BTree::Particle*> particlePtrs;
+        std::vector<std::unique_ptr<Core::Particle>> particles;
+        std::vector<Core::Particle*> particlePtrs;
 
         AppUtils::readIonDefinition(particles, particlePtrs, *simConf);
 
@@ -153,7 +153,7 @@ int main(int argc, const char * argv[]) {
         // define functions for the trajectory integration ==================================================
         auto accelerationFunction =
                 [spaceChargeFactor, omega_rf, V_rf, ionRecordMode, &potentialArrays, &potentialsDc, &potentialFactorsRf](
-                        BTree::Particle* particle, int /*particleIndex*/, BTree::ParallelTree& tree, double time,
+                        Core::Particle* particle, int /*particleIndex*/, BTree::ParallelTree& tree, double time,
                         int /*timestep*/) -> Core::Vector {
 
                     Core::Vector pos = particle->getLocation();
@@ -189,7 +189,7 @@ int main(int argc, const char * argv[]) {
                 };
 
         FileIO::partAttribTransformFctType particleAttributeTransformFct_simple =
-                [](BTree::Particle* particle) -> std::vector<double> {
+                [](Core::Particle* particle) -> std::vector<double> {
                     std::vector<double> result = {
                             particle->getVelocity().x(),
                             particle->getVelocity().y(),
@@ -200,7 +200,7 @@ int main(int argc, const char * argv[]) {
                 };
 
         FileIO::partAttribTransformFctType particleAttributeTransformFct_full =
-                [](BTree::Particle* particle) -> std::vector<double> {
+                [](Core::Particle* particle) -> std::vector<double> {
                     std::vector<double> result = {
                             particle->getVelocity().x(),
                             particle->getVelocity().y(),
@@ -217,7 +217,7 @@ int main(int argc, const char * argv[]) {
                 };
 
         FileIO::partAttribTransformFctTypeInteger integerParticleAttributesTransformFct =
-                [](BTree::Particle* particle) -> std::vector<int> {
+                [](Core::Particle* particle) -> std::vector<int> {
                     std::vector<int> result = {
                             particle->getIntegerAttribute("global index")
                     };
@@ -244,7 +244,7 @@ int main(int argc, const char * argv[]) {
 
         // Prepare ion start / stop tracker and ion start monitoring / ion termination functions
         ParticleSimulation::ParticleStartSplatTracker startSplatTracker;
-        auto particleStartMonitoringFct = [&startSplatTracker](BTree::Particle* particle, double time) {
+        auto particleStartMonitoringFct = [&startSplatTracker](Core::Particle* particle, double time) {
             startSplatTracker.particleStart(particle, time);
         };
 
@@ -253,7 +253,7 @@ int main(int argc, const char * argv[]) {
         auto timestepWriteFunction =
                 [trajectoryWriteInterval, ionRecordMode, &ionsInactive, &hdf5Writer, &startSplatTracker,
                  &integratorPtr, &logger](
-                        std::vector<BTree::Particle*>& particles, auto& /*tree*/,
+                        std::vector<Core::Particle*>& particles, auto& /*tree*/,
                         double time, unsigned int timestep, bool lastTimestep) {
 
                     // check if simulation should be terminated (if all particles are terminated)
@@ -264,7 +264,7 @@ int main(int argc, const char * argv[]) {
                     if (timestep==0 && ionRecordMode==FULL) {
                         //if initial time step (integrator was not run) and full record mode:
                         //(if attributes are not initalized, attribute transform function will crash)
-                        for (BTree::Particle* particle: particles) {
+                        for (Core::Particle* particle: particles) {
                             particle->setFloatAttribute("field x", 0.0);
                             particle->setFloatAttribute("field y", 0.0);
                             particle->setFloatAttribute("field z", 0.0);
@@ -303,7 +303,7 @@ int main(int argc, const char * argv[]) {
 
         if (ionTerminationMode==TERMINATE) {
             otherActionsFunction = [&isIonTerminated, &ionsInactive, &startSplatTracker](
-                    Core::Vector& newPartPos, BTree::Particle* particle,
+                    Core::Vector& newPartPos, Core::Particle* particle,
                     int /*particleIndex*/, auto& /*tree*/, double time, int /*timestep*/) {
                 // if the ion is out of the boundary box or ion has hit an electrode: Terminate
                 if (isIonTerminated(newPartPos)) {
@@ -319,7 +319,7 @@ int main(int argc, const char * argv[]) {
                     AppUtils::getStartZoneFromIonDefinition(*simConf);
 
             otherActionsFunction = [&isIonTerminated, pz = std::move(particleStartZone), &startSplatTracker](
-                    Core::Vector& newPartPos, BTree::Particle* particle,
+                    Core::Vector& newPartPos, Core::Particle* particle,
                     int /*particleIndex*/,
                     auto& /*tree*/, double time, int /*timestep*/) {
                 // if the ion is out of the boundary box or ion has hit an electrode: Restart in ion start zone

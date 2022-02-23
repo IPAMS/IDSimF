@@ -26,7 +26,7 @@ Integration::AbstractTimeIntegrator::AbstractTimeIntegrator(particleStartMonitor
         particleStartMonitorFct_(std::move(ionStartMonitorFct))
 {}
 
-Integration::AbstractTimeIntegrator::AbstractTimeIntegrator(const std::vector<BTree::Particle*>& particles,
+Integration::AbstractTimeIntegrator::AbstractTimeIntegrator(const std::vector<Core::Particle*>& particles,
                                                                    particleStartMonitoringFctType ionStartMonitorFct):
         particleStartMonitorFct_(std::move(ionStartMonitorFct))
 {
@@ -90,7 +90,7 @@ bool Integration::AbstractTimeIntegrator::bearParticles_(double time){
         std::size_t oldParticlesBornIdx = particlesBornIdx_;
 
         while (particlesBornIdx_ < particleTOBs_.size() && particleTOBs_[particlesBornIdx_].first <= time) {
-            BTree::Particle *part = particleTOBs_[particlesBornIdx_].second;
+            Core::Particle *part = particleTOBs_[particlesBornIdx_].second;
             part->setTimeOfBirth(time); //set particle TOB to the actual TOB in the simulation
             addParticle(part);
             if (particleStartMonitorFct_ != nullptr){

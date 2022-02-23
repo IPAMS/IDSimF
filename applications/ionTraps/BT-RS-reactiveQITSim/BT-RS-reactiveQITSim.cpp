@@ -62,17 +62,17 @@ const std::string key_Collisions_total = "keyBackgroundGasCollisionsTotal";
 double r_0_default = 10.0 / 1000.0;
 double z_0_default = 7.0  / 1000.0;
 
-std::function<void(double,BTree::Particle&)> createCollisionCountFunction(std::string key){
-    return [=](double /*collisionEnergy*/, BTree::Particle& ion)->void{
+std::function<void(double,Core::Particle&)> createCollisionCountFunction(std::string key){
+    return [=](double /*collisionEnergy*/, Core::Particle& ion)->void{
         int nCollisions = ion.getIntegerAttribute(key);
         ion.setIntegerAttribute(key, nCollisions+1);
     };
 }
 
-std::function<void(RS::CollisionConditions, BTree::Particle &)>
+std::function<void(RS::CollisionConditions, Core::Particle &)>
 createCollisionReactionFunction(RS::Substance *collisionPartnerSubstance, RS::Simulation &rsSim, std::string key){
 
-    return [collisionPartnerSubstance,key,&rsSim] (RS::CollisionConditions conditions, BTree::Particle& ion){
+    return [collisionPartnerSubstance,key,&rsSim] (RS::CollisionConditions conditions, Core::Particle& ion){
         rsSim.collisionReact(ion.getIndex(),collisionPartnerSubstance,conditions);
         int nCollisions = ion.getIntegerAttribute(key);
         ion.setIntegerAttribute(key, nCollisions+1);
@@ -245,7 +245,7 @@ int main(int argc, const char * argv[]) {
         //read ion configuration =======================================================================
         unsigned int nParticlesTotal = 0;
         std::vector<uniqueReactivePartPtr> particles;
-        std::vector<BTree::Particle*> particlePtrs;
+        std::vector<Core::Particle*> particlePtrs;
 
         // read and init random ion box configuration
         std::vector<unsigned int> nIons = simConf->unsignedIntVectorParameter("n_ions");
@@ -289,7 +289,7 @@ int main(int argc, const char * argv[]) {
                 [exciteMode, rfMode, excitePulseLength, excitePotential,
                         spaceChargeFactor, omega, z_0, U_0, d_square_2,
                         &swiftWaveForm, exciteDivisor, &V_0, &V_0_ramp, &lastTimestep, &parameter_a, &exciteCos](
-                        BTree::Particle* particle, int /*particleIndex*/,
+                        Core::Particle* particle, int /*particleIndex*/,
                         BTree::Tree& tree, double time, unsigned int timestep) -> Core::Vector {
 
                     Core::Vector pos = particle->getLocation();
@@ -338,13 +338,13 @@ int main(int argc, const char * argv[]) {
 
         // Prepare ion start / stop tracker and ion start monitoring / ion termination functions
         ParticleSimulation::ParticleStartSplatTracker startSplatTracker;
-        auto particleStartMonitoringFct = [&startSplatTracker](BTree::Particle* particle, double time) {
+        auto particleStartMonitoringFct = [&startSplatTracker](Core::Particle* particle, double time) {
             startSplatTracker.particleStart(particle, time);
         };
 
         unsigned int ionsInactive = 0;
         auto otherActionsFunctionQIT = [maxIonRadius_m, &ionsInactive, &startSplatTracker]
-                (Core::Vector& newPartPos, BTree::Particle* particle,
+                (Core::Vector& newPartPos, Core::Particle* particle,
                  int /*particleIndex*/, BTree::Tree& /*tree*/, double time, int /*timestep*/) {
             if (newPartPos.magnitude()>maxIonRadius_m) {
 
@@ -369,7 +369,7 @@ int main(int argc, const char * argv[]) {
         concentrationFilewriter.initFile(rsSimConf);
 
         FileIO::partAttribTransformFctType additionalParameterTransformFct =
-                [](BTree::Particle* particle) -> std::vector<double> {
+                [](Core::Particle* particle) -> std::vector<double> {
                     double ionVelocity = particle->getVelocity().magnitude();
                     double kineticEnergy_eV = 0.5*particle->getMass()*ionVelocity*ionVelocity*Core::JOULE_TO_EV;
                     std::vector<double> result = {
@@ -384,7 +384,7 @@ int main(int argc, const char * argv[]) {
         std::vector<std::string> auxParamNames = {"velocity x", "velocity y", "velocity z", "kinetic energy (eV)"};
 
         FileIO::partAttribTransformFctTypeInteger integerParticleAttributesTransformFct =
-                [](BTree::Particle* particle) -> std::vector<int> {
+                [](Core::Particle* particle) -> std::vector<int> {
                     std::vector<int> result = {
                             particle->getIntegerAttribute("global index"),
                             particle->getIntegerAttribute(key_Collisions_total),
@@ -404,7 +404,7 @@ int main(int argc, const char * argv[]) {
         auto timestepWriteFunction =
                 [trajectoryWriteInterval, fftWriteInterval, fftWriteMode, &V_0, &V_rf_export, &ionsInactive,
                         &hdf5Writer, &avgPositionWriter, &ionsInactiveWriter, &fftWriter, &startSplatTracker, &logger](
-                        std::vector<BTree::Particle*>& particles, BTree::Tree& tree, double time, int timestep,
+                        std::vector<Core::Particle*>& particles, BTree::Tree& tree, double time, int timestep,
                         bool lastTimestep) {
 
                     if (timestep%fftWriteInterval==0) {

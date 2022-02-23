@@ -58,7 +58,7 @@ CollisionModel::HardSphereModel::HardSphereModel(
         double staticTemperature,
         double collisionGasMassAmu,
         double collisionGasDiameterM,
-        std::function<void(RS::CollisionConditions, BTree::Particle&)> afterCollisionFunction,
+        std::function<void(RS::CollisionConditions, Core::Particle&)> afterCollisionFunction,
         bool maxwellianApproximation)
         :
         HardSphereModel(
@@ -101,7 +101,7 @@ CollisionModel::HardSphereModel::HardSphereModel(
         std::function<double(const Core::Vector&)>temperatureFunction,
         double collisionGasMassAmu,
         double collisionGasDiameterM,
-        std::function<void(RS::CollisionConditions, BTree::Particle&)> afterCollisionFunction,
+        std::function<void(RS::CollisionConditions, Core::Particle&)> afterCollisionFunction,
         bool maxwellianApproximation)
         :
         maxwellianApproximation_(maxwellianApproximation),
@@ -113,11 +113,11 @@ CollisionModel::HardSphereModel::HardSphereModel(
         temperatureFunction_(std::move(temperatureFunction)),
         afterCollisionActionFunction_(std::move(afterCollisionFunction)) { }
 
-void CollisionModel::HardSphereModel::updateModelParameters(BTree::Particle& /*ion*/) const {}
+void CollisionModel::HardSphereModel::updateModelParameters(Core::Particle& /*ion*/) const {}
 
-void CollisionModel::HardSphereModel::initializeModelParameters(BTree::Particle& /*ion*/) const {}
+void CollisionModel::HardSphereModel::initializeModelParameters(Core::Particle& /*ion*/) const {}
 
-void CollisionModel::HardSphereModel::modifyAcceleration(Core::Vector& /*acceleration*/, BTree::Particle& /*ion*/,
+void CollisionModel::HardSphereModel::modifyAcceleration(Core::Vector& /*acceleration*/, Core::Particle& /*ion*/,
                                                          double /*dt*/) {}
 
  /**
@@ -125,7 +125,7 @@ void CollisionModel::HardSphereModel::modifyAcceleration(Core::Vector& /*acceler
   * (only one or none collision can happen, not multiple. Thus, the probability of multiple colllision events
   * happening in "dt" has to be low)
   */
-void CollisionModel::HardSphereModel::modifyVelocity(BTree::Particle &ion, double dt) {
+void CollisionModel::HardSphereModel::modifyVelocity(Core::Particle &ion, double dt) {
 
     Core::RandomSource* rndSource = Core::globalRandomGeneratorPool->getThreadRandomSource();
 
@@ -315,4 +315,4 @@ void CollisionModel::HardSphereModel::modifyVelocity(BTree::Particle &ion, doubl
     }
 }
 
-void CollisionModel::HardSphereModel::modifyPosition(Core::Vector& /*position*/, BTree::Particle& /*ion*/, double /*dt*/) {}
+void CollisionModel::HardSphereModel::modifyPosition(Core::Vector& /*position*/, Core::Particle& /*ion*/, double /*dt*/) {}

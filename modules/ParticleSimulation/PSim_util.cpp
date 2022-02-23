@@ -21,7 +21,7 @@
 
 #include "PSim_util.hpp"
 #include "BTree_tree.hpp"
-#include "BTree_particle.hpp"
+#include "Core_particle.hpp"
 #include "Core_vector.hpp"
 #include "Core_randomGenerators.hpp"
 #include <random>
@@ -39,21 +39,21 @@ typedef std::mt19937 MyRNG;  // the Mersenne Twister with a popular choice of pa
  * @param length length of the cylinder (in z direction)
  * @return particles on the cylinder wall
  */
-std::vector<std::unique_ptr<BTree::Particle>> ParticleSimulation::util::prepareIonsOnCylinderWalls(unsigned int nIons, double charge, double radius, double length){
+std::vector<std::unique_ptr<Core::Particle>> ParticleSimulation::util::prepareIonsOnCylinderWalls(unsigned int nIons, double charge, double radius, double length){
     
     MyRNG rng;
     rng.seed(1.0);
     std::uniform_real_distribution<double> rnd_len(-length/2.0,length/2.0);
     std::uniform_real_distribution<double> rnd_phi(0.0,2.0*M_PI);
 
-    std::vector<std::unique_ptr<BTree::Particle>> result;
+    std::vector<std::unique_ptr<Core::Particle>> result;
 
     for (unsigned int i=0; i<nIons; i++){
         double phi = rnd_phi(rng);
         double z = rnd_len(rng);
         double x = radius*sin(phi);
         double y = radius*cos(phi);
-        std::unique_ptr<BTree::Particle> newIon = std::make_unique<BTree::Particle>(Core::Vector(x,y,z),charge);
+        std::unique_ptr<Core::Particle> newIon = std::make_unique<Core::Particle>(Core::Vector(x,y,z),charge);
         newIon->setActive(false);
         result.push_back(std::move(newIon));
     }
@@ -77,7 +77,7 @@ std::vector<std::unique_ptr<BTree::Particle>> ParticleSimulation::util::prepareI
  * @return a vector with the U and V coordinates and the local electrical forces
  */
 std::vector<std::tuple<double,double,Core::Vector>> ParticleSimulation::util::probeForces(
-        std::vector<BTree::Particle>& ions,
+        std::vector<Core::Particle>& ions,
         ParticleSimulation::Plane plane,
         int nU,
         int nV,
@@ -105,7 +105,7 @@ std::vector<std::tuple<double,double,Core::Vector>> ParticleSimulation::util::pr
     tree.computeChargeDistribution();
     
     Core::Vector force(0,0,0);
-    BTree::Particle testParticle;
+    Core::Particle testParticle;
     Core::Vector particlePosition(0,0,0);
     for (int i=0; i<nU; ++i){
         uPos = minU + (i*dU);
@@ -122,7 +122,7 @@ std::vector<std::tuple<double,double,Core::Vector>> ParticleSimulation::util::pr
                 particlePosition = Core::Vector(slicePos,uPos,vPos);
             }
             
-            testParticle = BTree::Particle(particlePosition, 1);
+            testParticle = Core::Particle(particlePosition, 1);
             force= tree.computeEFieldFromTree(testParticle);
             result.emplace_back(std::tuple<double,double,Core::Vector>{uPos,vPos,force});
             //resultFile<<uPos<<" "<<vPos<<" "<<force<<std::endl;
@@ -168,15 +168,15 @@ std::vector<Core::Vector> ParticleSimulation::util::getRandomPositionsInBox(unsi
  * @param timeOfBirthRange ions are generated with times of birth uniformly distributed in this range
  * @return randomly vector of ions in a box
  */
-/*std::vector<std::unique_ptr<BTree::Particle>> ParticleSimulation::util::getRandomIonsInBox(int numIons, double charge,
+/*std::vector<std::unique_ptr<Core::Particle>> ParticleSimulation::util::getRandomIonsInBox(int numIons, double charge,
                                                                                            Core::Vector corner, Core::Vector boxSize,
                                                                                            double timeOfBirthRange){
     std::vector<Core::Vector> positions = getRandomPositionsInBox(numIons,corner,boxSize);
-    std::vector<std::unique_ptr<BTree::Particle>> result;
+    std::vector<std::unique_ptr<Core::Particle>> result;
     Core::RndDistPtr rnd_tob = Core::globalRandomGenerator->getUniformDistribution(0,timeOfBirthRange);
     //Core::Particle* result = new Core::Particle[numIons];
     for (int i=0; i<numIons; i++){
-        std::unique_ptr<BTree::Particle> newIon = std::make_unique<BTree::Particle>(positions[i],charge);
+        std::unique_ptr<Core::Particle> newIon = std::make_unique<Core::Particle>(positions[i],charge);
         newIon -> setTimeOfBirth(rnd_tob->rndValue());
         result.push_back(std::move(newIon));
     }
@@ -195,15 +195,15 @@ std::vector<Core::Vector> ParticleSimulation::util::getRandomPositionsInBox(unsi
  * @param timeOfBirthRange ions are generated with times of birth uniformly distributed in this range
  * @return vector of ions in a straight line
  */
-std::vector<std::unique_ptr<BTree::Particle>>
+std::vector<std::unique_ptr<Core::Particle>>
 ParticleSimulation::util::getIonOnLineVector(unsigned int numIons, double charge,
                                              double x, double y, double z,
                                              double timeOfBirthRange) {
     Core::RndDistPtr rnd_tob = Core::globalRandomGeneratorPool->getUniformDistribution(0, timeOfBirthRange);
 
-    std::vector<std::unique_ptr<BTree::Particle>> result;
+    std::vector<std::unique_ptr<Core::Particle>> result;
     for (unsigned int i = 0; i < numIons; i++) {
-        std::unique_ptr<BTree::Particle> newIon = std::make_unique<BTree::Particle>(
+        std::unique_ptr<Core::Particle> newIon = std::make_unique<Core::Particle>(
                 Core::Vector(
                         x,
                         y,

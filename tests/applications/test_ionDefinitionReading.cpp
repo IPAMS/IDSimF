@@ -30,7 +30,7 @@
 #include "catch.hpp"
 #include "test_util.hpp"
 
-bool testParticleBox(std::vector<std::unique_ptr<BTree::Particle>>& particles){
+bool testParticleBox(std::vector<std::unique_ptr<Core::Particle>>& particles){
 
     bool particleOutOfBoxFound = false;
 
@@ -48,7 +48,7 @@ bool testParticleBox(std::vector<std::unique_ptr<BTree::Particle>>& particles){
 }
 
 bool testParticleCylinder(
-        std::vector<std::unique_ptr<BTree::Particle>>& particles,
+        std::vector<std::unique_ptr<Core::Particle>>& particles,
         double expectedLength = 0.006,
         double expectedRadius = 0.004
         ){
@@ -79,8 +79,8 @@ TEST_CASE( "Test ion definition reading", "[ApplicationUtils]") {
 
     //std::string configurationPath = "./";
 
-    std::vector<std::unique_ptr<BTree::Particle>> particles;
-    std::vector<BTree::Particle*> particlePtrs;
+    std::vector<std::unique_ptr<Core::Particle>> particles;
+    std::vector<Core::Particle*> particlePtrs;
 
     SECTION("Ion definition reading: Ion definition reading with invalid ion start geometry should throw") {
         AppUtils::SimulationConfiguration simConf_invalid("ionDefinition_invalid.json");

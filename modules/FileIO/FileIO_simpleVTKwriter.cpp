@@ -20,7 +20,7 @@
  ****************************/
 
 #include "FileIO_simpleVTKwriter.hpp"
-#include "BTree_particle.hpp"
+#include "Core_particle.hpp"
 #include "BTree_tree.hpp"
 #include "BTree_node.hpp"
 //#include <iostream>
@@ -104,7 +104,7 @@ void FileIO::SimpleVTKwriter::write(BTree::Tree& tree,bool writeTree){
  */
 void FileIO::SimpleVTKwriter::writeIonPosition(std::ostream& filestream, const BTree::Node* rootnode){
     if (rootnode->getNumberOfParticles() == 1){
-        BTree::Particle* ion = rootnode->getParticle();
+        Core::Particle* ion = rootnode->getParticle();
         filestream<<ion->getLocation()<<"\n";
     }
 }
@@ -116,7 +116,7 @@ void FileIO::SimpleVTKwriter::writeIonPosition(std::ostream& filestream, const B
  */
 void FileIO::SimpleVTKwriter::writeIonActive(std::ostream& filestream, const BTree::Node* rootnode){
     if (rootnode->getNumberOfParticles() == 1){
-        BTree::Particle* ion = rootnode->getParticle();
+        Core::Particle* ion = rootnode->getParticle();
         if (ion->isActive() == true){
             filestream<<"1\n";
         }
