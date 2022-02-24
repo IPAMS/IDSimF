@@ -22,7 +22,7 @@
 #include "BTree_treeParticle.hpp"
 
 BTree::TreeParticle::TreeParticle(Core::Particle* baseParticle):
-    particle_(baseParticle)
+        wrappedParticle(baseParticle)
 {}
 
 

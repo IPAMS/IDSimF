@@ -45,8 +45,8 @@ Core::Vector BTree::Node::computeElectricFieldFromTree(Core::Particle &targetP){
     if (numP_ == 1){
         Core::Vector efield= calculateElectricField(
                 targetP.getLocation(),
-                particle_->get()->getLocation(),
-                particle_->get()->getCharge());
+                particle_->wrappedParticle->getLocation(),
+                particle_->wrappedParticle->getCharge());
         return(efield);
     }
     else{
@@ -112,7 +112,7 @@ void BTree::Node::testSpatialTreeIntegrity(){
 void BTree::Node::testNodeParticleIntegrity(){
     
     if (this->particle_ != nullptr){
-        Core::Vector pLoc = this->particle_->get()->getLocation();
+        Core::Vector pLoc = this->particle_->wrappedParticle->getLocation();
         if (
             pLoc.x() < this->min_.x() ||
             pLoc.y() < this->min_.y() ||

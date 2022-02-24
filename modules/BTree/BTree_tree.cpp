@@ -133,7 +133,7 @@ void BTree::Tree::updateParticleLocation(size_t ext_index, Core::Vector newLocat
     BTree::TreeParticle* particle = this->getParticle(ext_index);
     BTree::AbstractNode* pNode = particle->getHostNode();
     
-    if (particle->get()->getLocation() == newLocation){
+    if (particle->wrappedParticle->getLocation() == newLocation){
         return;
     }
     else if ( !(
@@ -148,13 +148,13 @@ void BTree::Tree::updateParticleLocation(size_t ext_index, Core::Vector newLocat
                  newLocation.z() >= pNode->getMax().z()
                 )  )
     {
-        particle->get()->setLocation(newLocation);
+        particle->wrappedParticle->setLocation(newLocation);
         pNode->updateSelf();
         pNode->updateParents();
     }
     else {
         // we have to reinsert
-        Core::Particle* wrappedParticle = particle->get();
+        Core::Particle* wrappedParticle = particle->wrappedParticle;
         this->removeParticle(ext_index); //this destroys the reference to particle (the TreeParticle)
         wrappedParticle->setLocation(newLocation);
         BTree::TreeParticle* newTreeParticle = this->insertParticle_(*wrappedParticle, ext_index);
@@ -189,7 +189,7 @@ void BTree::Tree::printParticles() const{
     int i =0;
     for (auto&& particle : *iVec_ ) {
 
-        std::cout<<"particle "<<i <<" " << particle->get()->getLocation() <<" "<<particle->getHostNode()->getMin() << " "<< particle->getHostNode()->getMax()<<std::endl;
+        std::cout<<"particle "<<i <<" " << particle->wrappedParticle->getLocation() <<" "<<particle->getHostNode()->getMin() << " "<< particle->getHostNode()->getMax()<<std::endl;
         i++;
     }
 

@@ -224,7 +224,7 @@ namespace BTree{
 
         //remove this node from the octant nodes of the parent node:
         if (parentNode != nullptr){
-            Octant oct = parentNode->getOctant(this->particle_->get()->getLocation());
+            Octant oct = parentNode->getOctant(this->particle_->wrappedParticle->getLocation());
 
             //delete(parentNode->octNodes_[oct]);
             parentNode->octNodes_[oct] = nullptr;
@@ -278,8 +278,8 @@ namespace BTree{
      */
     template<class NodType>
     void GenericBaseNode<NodType>::updateSelf(){
-        centerOfCharge_ = particle_->get()->getLocation();
-        charge_ = particle_->get()->getCharge();
+        centerOfCharge_ = particle_->wrappedParticle->getLocation();
+        charge_ = particle_->wrappedParticle->getCharge();
     }
 
 
@@ -321,7 +321,7 @@ namespace BTree{
     void GenericBaseNode<NodType>::insertParticle(BTree::TreeParticle* particle){
 
         if (numP_ >1){
-            Octant oct = this->getOctant(particle->get()->getLocation());
+            Octant oct = this->getOctant(particle->wrappedParticle->getLocation());
             if (this->octNodes_[oct] == nullptr){
                 this->octNodes_[oct] = this->createOctNode(oct);
             }
@@ -329,10 +329,10 @@ namespace BTree{
         }
         else if(numP_ == 1){
             BTree::TreeParticle* p2 = particle_;
-            if(p2->get()->getLocation() != particle->get()->getLocation()){
+            if(p2->wrappedParticle->getLocation() != particle->wrappedParticle->getLocation()){
                 //There is already a particle in the node
                 //relocate and subdivide
-                Octant oct = this->getOctant(p2->get()->getLocation());
+                Octant oct = this->getOctant(p2->wrappedParticle->getLocation());
                 if (octNodes_[oct] == nullptr){
                     octNodes_[oct] = this->createOctNode(oct);
                 }
@@ -341,7 +341,7 @@ namespace BTree{
 
                 particle_= nullptr;
 
-                oct = this->getOctant(particle->get()->getLocation());
+                oct = this->getOctant(particle->wrappedParticle->getLocation());
                 if (octNodes_[oct] == nullptr){
                     octNodes_[oct] = this->createOctNode(oct);
                 }
@@ -350,7 +350,7 @@ namespace BTree{
             else {
                 //if two particles with exactly the same position are existing: Throw exception
                 std::stringstream ss;
-                ss << "Tried to insert particle with exactly the same position: "<<particle->get()->getLocation()<<std::endl;
+                ss << "Tried to insert particle with exactly the same position: "<<particle->wrappedParticle->getLocation()<<std::endl;
                 throw (std::logic_error(ss.str()));
             }
 
@@ -416,7 +416,7 @@ namespace BTree{
         ss<<std::endl;
 
         if (this->particle_ != nullptr){
-            ss<<"particle location:"<<this->particle_->get()->getLocation()<<std::endl;
+            ss<<"particle location:"<<this->particle_->wrappedParticle->getLocation()<<std::endl;
         }
 
         return(ss.str());
@@ -442,7 +442,7 @@ namespace BTree{
         std::cout<<" min "<<this->min_<<" max "<<this->max_<<" part "<<this->numP_<<" charge "<<this->charge_;
 
         if (this->particle_ != nullptr){
-            std::cout<<" pl:"<<this->particle_<<" loc:"<<this->particle_->get()->getLocation();
+            std::cout<<" pl:"<<this->particle_<<" loc:"<<this->particle_->wrappedParticle->getLocation();
         }
         std::cout<<std::endl;
     }
@@ -489,7 +489,7 @@ namespace BTree{
         }
 
         if (this->particle_ != nullptr){
-            Core::Vector pLoc = this->particle_->get()->getLocation();
+            Core::Vector pLoc = this->particle_->wrappedParticle->getLocation();
             if (
                     pLoc.x() < this->min_.x() ||
                             pLoc.y() < this->min_.y() ||

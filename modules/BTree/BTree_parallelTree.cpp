@@ -105,8 +105,8 @@ Core::Vector BTree::ParallelTree::computeEFieldFromTree(Core::Particle &particle
         BTree::ParallelNode* currentNode = nodesToProcess.at(cur);
 
         if(currentNode->numP_ == 1){ // if node has only one particle: calculate force directly
-            efield=efield+root_->calculateElectricField(loc, currentNode->particle_->get()->getLocation(),
-                    currentNode->particle_->get()->getCharge());
+            efield=efield+root_->calculateElectricField(loc, currentNode->particle_->wrappedParticle->getLocation(),
+                    currentNode->particle_->wrappedParticle->getCharge());
         }
         else { // if more particles: process the node
             // get squared distance to the charge center:
@@ -197,13 +197,13 @@ void BTree::ParallelTree::updateParticleLocation(std::size_t extIndex, Core::Vec
              newLocation.z() >= pNode->getMax().z() ) )
     {
         (*numNodesChanged)++;
-        Core::Particle* wrappedParticle = particle->get();
+        Core::Particle* wrappedParticle = particle->wrappedParticle;
         removeParticle(extIndex);
         wrappedParticle->setLocation(newLocation);
         insertParticle(*wrappedParticle, extIndex);
     }
     else{
-        particle->get()->setLocation(newLocation);
+        particle->wrappedParticle->setLocation(newLocation);
     }
 }
 
@@ -244,7 +244,7 @@ void BTree::ParallelTree::printParticles() const{
     int i =0;
     for (auto&& particle : *iVec_) {
         
-        std::cout<<"particle "<<i <<" " << particle->get()->getLocation() <<" "<<particle->getHostNode()->getMin() << " "<< particle->getHostNode()->getMax()<<std::endl;
+        std::cout<<"particle "<<i <<" " << particle->wrappedParticle->getLocation() <<" "<<particle->getHostNode()->getMin() << " "<< particle->getHostNode()->getMax()<<std::endl;
         i++;
     }
     
@@ -305,8 +305,8 @@ void BTree::ParallelTree::updateNodeChargeState_()
 
             if(currentNode->numP_==1) {
                 // If the current node has only one particle: Update node parameters with parameters from particle
-                currentNode->centerOfCharge_ = currentNode->particle_->get()->getLocation();
-                currentNode->charge_ = currentNode->particle_->get()->getCharge();
+                currentNode->centerOfCharge_ = currentNode->particle_->wrappedParticle->getLocation();
+                currentNode->charge_ = currentNode->particle_->wrappedParticle->getCharge();
             }
             else {
                 // If the current node represents multiple particles, and has therefore sub nodes,
