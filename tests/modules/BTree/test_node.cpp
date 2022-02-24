@@ -280,13 +280,13 @@ TEST_CASE( "Test particle insertion and remove in serial node", "[Node]") {
         int nNodesOriginal= testNode.getNumberOfNodes();
         const int nIons = 100;
         Core::Particle testIons[nIons];
-        std::vector<BTree::TreeParticle> treeParticles;
+        std::vector<std::unique_ptr<BTree::TreeParticle>> treeParticles;
         double xPos;
         for (int i=0; i<nIons;i++){
             xPos = 1.99 / nIons *i;
             testIons[i] = Core::Particle(Core::Vector(xPos,1.2,1.2),2.0);
-            treeParticles.push_back(&testIons[i]);
-            testNode.insertParticle(&treeParticles.back());
+            treeParticles.push_back(std::make_unique<BTree::TreeParticle>(&testIons[i]));
+            testNode.insertParticle(treeParticles.back().get());
         }
         CHECK(testNode.getNumberOfParticles() == nIons);
         CHECK( (testNode.getCharge() - nIons*Core::ELEMENTARY_CHARGE) < 1e-100);
@@ -294,7 +294,7 @@ TEST_CASE( "Test particle insertion and remove in serial node", "[Node]") {
 
         BTree::AbstractNode* hostNode;
         for (size_t i=0; i<nIons;i++){
-            hostNode = treeParticles[i].getHostNode();
+            hostNode = treeParticles[i]->getHostNode();
             hostNode->removeMyselfFromTree();
             if (hostNode != &testNode){
                 delete (hostNode);
@@ -474,11 +474,11 @@ TEST_CASE( "Test field calculation in serial node", "[Node]") {
         Core::Vector boxSize = Core::Vector(2.0,2.0,2.0);
         ParticleSimulation::BoxStartZone startZone(boxSize);
         std::vector<std::unique_ptr<Core::Particle>> ions= startZone.getRandomParticlesInStartZone(nions, 2.0);
-        std::vector<BTree::TreeParticle> treeParticles;
+        std::vector<std::unique_ptr<BTree::TreeParticle>> treeParticles;
 
         for (std::size_t i=0; i<nions; i++){
-            treeParticles.push_back(BTree::TreeParticle(ions[i].get()));
-            testNode.insertParticle(&treeParticles.back());
+            treeParticles.push_back(std::make_unique<BTree::TreeParticle>(ions[i].get()));
+            testNode.insertParticle(treeParticles.back().get());
         }
         testNode.computeChargeDistributionRecursive();
 

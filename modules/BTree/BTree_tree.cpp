@@ -66,12 +66,24 @@ std::size_t BTree::Tree::getNumberOfParticles() const{
  * @param ext_index an external index number for the particle / numerical particle id (most likely from a SIMION simulation)
  */
 void BTree::Tree::insertParticle(Core::Particle &particle, size_t ext_index){
+    insertParticle_(particle, ext_index);
+}
+
+/**
+ * Insert an unwrapped particle into the tree
+ *
+ * @param particle the particle to insert
+ * @param ext_index an external index number for the particle / numerical particle id (most likely from a SIMION simulation)
+ */
+BTree::TreeParticle* BTree::Tree::insertParticle_(Core::Particle &particle, size_t ext_index){
 
     //create new wrapped particle for tree:
     auto treeParticle = std::make_unique<BTree::TreeParticle>(&particle);
+    BTree::TreeParticle* treeParticlePtr = treeParticle.get();
     root_->insertParticle(treeParticle.get());
     iVec_->push_front(std::move(treeParticle));
     iMap_->insert({ext_index, iVec_->cbegin()});
+    return treeParticlePtr;
 }
 
 /**
@@ -143,13 +155,11 @@ void BTree::Tree::updateParticleLocation(size_t ext_index, Core::Vector newLocat
     else {
         // we have to reinsert
         Core::Particle* wrappedParticle = particle->get();
-        BTree::AbstractNode* originalHostNode = particle->getHostNode();
-
         this->removeParticle(ext_index); //this destroys the reference to particle (the TreeParticle)
         wrappedParticle->setLocation(newLocation);
-        this->insertParticle(*wrappedParticle, ext_index);
-        originalHostNode->updateSelf();
-        originalHostNode->updateParents();
+        BTree::TreeParticle* newTreeParticle = this->insertParticle_(*wrappedParticle, ext_index);
+        newTreeParticle->getHostNode()->updateSelf();
+        newTreeParticle->getHostNode()->updateParents();
     }
 }
 

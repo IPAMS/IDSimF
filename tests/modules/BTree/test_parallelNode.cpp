@@ -291,13 +291,13 @@ TEST_CASE( "Test particle management in parallel node", "[Node]") {
         int nNodesOriginal= testNode.getNumberOfNodes();
         const int nIons = 100;
         Core::Particle baseIons[nIons];
-        std::vector<BTree::TreeParticle> treeParticles;
+        std::vector<std::unique_ptr<BTree::TreeParticle>> treeParticles;
         double xPos;
         for (size_t i=0; i<nIons; i++){
             xPos = 1.99 / nIons *i;
             baseIons[i] = Core::Particle(Core::Vector(xPos,1.2,1.2),2.0);
-            treeParticles.push_back(BTree::TreeParticle(&baseIons[i]));
-            testNode.insertParticle(&treeParticles[i]);
+            treeParticles.push_back(std::make_unique<BTree::TreeParticle>(&baseIons[i]));
+            testNode.insertParticle(treeParticles[i].get());
         }
         CHECK(testNode.getNumberOfParticles() == nIons);
         CHECK( (testNode.getCharge() - nIons*Core::ELEMENTARY_CHARGE) < 1e-100);
@@ -307,7 +307,7 @@ TEST_CASE( "Test particle management in parallel node", "[Node]") {
 
         BTree::AbstractNode* hostNode;
         for (size_t i=0; i<nIons;i++){
-            hostNode = treeParticles[i].getHostNode();
+            hostNode = treeParticles[i]->getHostNode();
             hostNode->removeMyselfFromTree();
             if (hostNode != &testNode){
                 delete (hostNode);

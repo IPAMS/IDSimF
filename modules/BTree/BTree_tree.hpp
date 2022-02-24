@@ -70,6 +70,8 @@ namespace BTree {
         void printParticles() const;
 
     private:
+        BTree::TreeParticle* insertParticle_(Core::Particle &particle, size_t ext_index);
+
         std::unique_ptr<Node> root_; ///< the root node of the tree
         std::unique_ptr<treeParticlePtrList> iVec_; ///< a linked particle list, stores the particles in a linear order
         std::unique_ptr<std::unordered_map<std::size_t, treeParticlePtrList::const_iterator>> iMap_;

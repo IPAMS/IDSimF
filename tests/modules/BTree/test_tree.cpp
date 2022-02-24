@@ -121,7 +121,7 @@ TEST_CASE( "Test serial tree semantics / particle management","[Tree]") {
         CHECK( testTree.getNumberOfParticles() == 3);
     }
 
-    SECTION ( "Test particle update"){
+    SECTION("Test particle update"){
         BTree::Tree testTree_2 = BTree::Tree(
                 Core::Vector(0,0,0),
                 Core::Vector(10,10,10));
@@ -132,7 +132,7 @@ TEST_CASE( "Test serial tree semantics / particle management","[Tree]") {
         testTree_2.insertParticle(testIon2,20);
         testTree_2.computeChargeDistribution();
 
-        testTree_2.updateParticleLocation(10,Core::Vector(2.01,1.0,1.0));
+        testTree_2.updateParticleLocation(10, Core::Vector(2.01,1.0,1.0));
         CHECK( testIon1.getLocation() == Core::Vector(2.01,1.0,1.0));
         CHECK( testTree_2.getNumberOfParticles() == 2);
         CHECK( testTree_2.getRoot()->getCenterOfCharge() == Core::Vector(2.005,1.0,1.0));
