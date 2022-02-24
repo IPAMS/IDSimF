@@ -26,10 +26,7 @@ BTree::TreeParticle::TreeParticle(Core::Particle* baseParticle):
 {}
 
 
-/** Gets the wrapped particle*/
-Core::Particle* BTree::TreeParticle::get() const {
-    return particle_;
-}
+
 
 /**
  * Sets a new host node for this particle
