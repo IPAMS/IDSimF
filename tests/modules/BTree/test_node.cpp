@@ -45,17 +45,17 @@ TEST_CASE( "Test basic serial node semantics", "[Node]"){
 
     SECTION("Test node initialization"){
         BTree::Node** octs = testNode.getOctants();
-        REQUIRE(octs[7] == nullptr);
+        CHECK(octs[7] == nullptr);
 
         //Test bare node is root:
-        REQUIRE(testNode.isRoot() == true);
+        CHECK(testNode.isRoot() == true);
 
         //Test center is calculated correctly:
-        REQUIRE(testNode.getCenter() == Core::Vector(1.5,1.5,1.5));
+        CHECK(testNode.getCenter() == Core::Vector(1.5,1.5,1.5));
 
         //Test corners of the block are returned correctly:
-        REQUIRE(testNode.getMin() == Core::Vector(1.0,1.0,1.0));
-        REQUIRE(testNode.getMax() == Core::Vector(2.0,2.0,2.0));
+        CHECK(testNode.getMin() == Core::Vector(1.0,1.0,1.0));
+        CHECK(testNode.getMax() == Core::Vector(2.0,2.0,2.0));
     }
 
     SECTION("Test node octant / sub nodes semantics") {
@@ -65,14 +65,14 @@ TEST_CASE( "Test basic serial node semantics", "[Node]"){
                     Core::Vector(2.0, 2.0, 2.0),
                     nullptr);
 
-            REQUIRE(testNode2.getOctant(Core::Vector(1.0, 1.0, 1.0))==BTree::Node::NET);
-            REQUIRE(testNode2.getOctant(Core::Vector(-1.0, 1.0, 1.0))==BTree::Node::NWT);
-            REQUIRE(testNode2.getOctant(Core::Vector(1.0, -1.0, 1.0))==BTree::Node::SET);
-            REQUIRE(testNode2.getOctant(Core::Vector(-1.0, -1.0, 1.0))==BTree::Node::SWT);
-            REQUIRE(testNode2.getOctant(Core::Vector(1.0, 1.0, -1.0))==BTree::Node::NEB);
-            REQUIRE(testNode2.getOctant(Core::Vector(-1.0, 1.0, -1.0))==BTree::Node::NWB);
-            REQUIRE(testNode2.getOctant(Core::Vector(1.0, -1.0, -1.0))==BTree::Node::SEB);
-            REQUIRE(testNode2.getOctant(Core::Vector(-1.0, -1.0, -1.0))==BTree::Node::SWB);
+            CHECK(testNode2.getOctant(Core::Vector(1.0, 1.0, 1.0))==BTree::Node::NET);
+            CHECK(testNode2.getOctant(Core::Vector(-1.0, 1.0, 1.0))==BTree::Node::NWT);
+            CHECK(testNode2.getOctant(Core::Vector(1.0, -1.0, 1.0))==BTree::Node::SET);
+            CHECK(testNode2.getOctant(Core::Vector(-1.0, -1.0, 1.0))==BTree::Node::SWT);
+            CHECK(testNode2.getOctant(Core::Vector(1.0, 1.0, -1.0))==BTree::Node::NEB);
+            CHECK(testNode2.getOctant(Core::Vector(-1.0, 1.0, -1.0))==BTree::Node::NWB);
+            CHECK(testNode2.getOctant(Core::Vector(1.0, -1.0, -1.0))==BTree::Node::SEB);
+            CHECK(testNode2.getOctant(Core::Vector(-1.0, -1.0, -1.0))==BTree::Node::SWB);
         }
 
         SECTION("Test node sub node / octant generation") {
@@ -84,28 +84,28 @@ TEST_CASE( "Test basic serial node semantics", "[Node]"){
 
             //Explicitly test the generation of ALL subnodes:
             BTree::Node* subNode = testNode2.createOctNode(BTree::Node::SWB);
-            REQUIRE(subNode->getCenter()==Core::Vector(1.25, 1.25, 1.25));
+            CHECK(subNode->getCenter()==Core::Vector(1.25, 1.25, 1.25));
 
             subNode = testNode.createOctNode(BTree::Node::SWT);
-            REQUIRE(subNode->getCenter()==Core::Vector(1.25, 1.25, 1.75));
+            CHECK(subNode->getCenter()==Core::Vector(1.25, 1.25, 1.75));
 
             subNode = testNode.createOctNode(BTree::Node::SEB);
-            REQUIRE(subNode->getCenter()==Core::Vector(1.75, 1.25, 1.25));
+            CHECK(subNode->getCenter()==Core::Vector(1.75, 1.25, 1.25));
 
             subNode = testNode.createOctNode(BTree::Node::SET);
-            REQUIRE(subNode->getCenter()==Core::Vector(1.75, 1.25, 1.75));
+            CHECK(subNode->getCenter()==Core::Vector(1.75, 1.25, 1.75));
 
             subNode = testNode.createOctNode(BTree::Node::NWB);
-            REQUIRE(subNode->getCenter()==Core::Vector(1.25, 1.75, 1.25));
+            CHECK(subNode->getCenter()==Core::Vector(1.25, 1.75, 1.25));
 
             subNode = testNode.createOctNode(BTree::Node::NWT);
-            REQUIRE(subNode->getCenter()==Core::Vector(1.25, 1.75, 1.75));
+            CHECK(subNode->getCenter()==Core::Vector(1.25, 1.75, 1.75));
 
             subNode = testNode.createOctNode(BTree::Node::NET);
-            REQUIRE(subNode->getCenter()==Core::Vector(1.75, 1.75, 1.75));
+            CHECK(subNode->getCenter()==Core::Vector(1.75, 1.75, 1.75));
 
             subNode = testNode.createOctNode(BTree::Node::NEB);
-            REQUIRE(subNode->getCenter()==Core::Vector(1.75, 1.75, 1.25));
+            CHECK(subNode->getCenter()==Core::Vector(1.75, 1.75, 1.25));
         }
     }
 }
@@ -120,84 +120,101 @@ TEST_CASE( "Test particle insertion and remove in serial node", "[Node]") {
     
     SECTION("Test basic particle insertion") {
         //Test bare node has no particles:
-        REQUIRE( testNode.getNumberOfParticles() == 0);
-        REQUIRE( testNode.getParticle() == nullptr);
+        CHECK( testNode.getNumberOfParticles() == 0);
+        CHECK( testNode.getParticle() == nullptr);
 
         //Test particle add increases the number of particles:
-        Core::Particle testIon1 = Core::Particle(Core::Vector(1.2,1.2,1.2),2.0);
-        Core::Particle testIon2 = Core::Particle(Core::Vector(1.6,1.2,1.2),2.0);
-        Core::Particle testIon3 = Core::Particle(Core::Vector(1.65,1.2,1.2),2.0);
-        Core::Particle testIon4 = Core::Particle(Core::Vector(1.66,1.2,1.2),2.0);
-        Core::Particle testIon5 = Core::Particle(Core::Vector(1.665,1.2,1.2),2.0);
+        Core::Particle baseIon1 = Core::Particle(Core::Vector(1.2,1.2,1.2),2.0);
+        Core::Particle baseIon2 = Core::Particle(Core::Vector(1.6,1.2,1.2),2.0);
+        Core::Particle baseIon3 = Core::Particle(Core::Vector(1.65,1.2,1.2),2.0);
+        Core::Particle baseIon4 = Core::Particle(Core::Vector(1.66,1.2,1.2),2.0);
+        Core::Particle baseIon5 = Core::Particle(Core::Vector(1.665,1.2,1.2),2.0);
+
+        BTree::TreeParticle testIon1(&baseIon1);
+        BTree::TreeParticle testIon2(&baseIon2);
+        BTree::TreeParticle testIon3(&baseIon3);
+        BTree::TreeParticle testIon4(&baseIon4);
+        BTree::TreeParticle testIon5(&baseIon5);
 
         testNode.insertParticle(&testIon1);
-        REQUIRE( testNode.getNumberOfParticles() == 1);
+        CHECK( testNode.getNumberOfParticles() == 1);
 
         //Test particle is added as a reference:
-        REQUIRE( testNode.getParticle() == &testIon1);
+        CHECK( testNode.getParticle() == &testIon1);
 
 
         testNode.insertParticle(&testIon2);
-        REQUIRE( testNode.getNumberOfParticles() == 2);
+        CHECK( testNode.getNumberOfParticles() == 2);
 
         testNode.insertParticle(&testIon3);
         testNode.insertParticle(&testIon4);
         testNode.insertParticle(&testIon5);
-        REQUIRE( testNode.getNumberOfParticles() == 5);
+        CHECK( testNode.getNumberOfParticles() == 5);
 
         //Test if particles host node is set correctly and the host node has correct characteristics:
         BTree::AbstractNode* hostNode5 = testIon5.getHostNode();
-        Core::Vector pos = testIon5.getLocation();
+        Core::Vector pos = testIon5.get()->getLocation();
         Core::Vector min = hostNode5->getMin();
         Core::Vector max = hostNode5->getMax();
 
-        REQUIRE(hostNode5->getNumberOfParticles() == 1);
-        REQUIRE((min.x() < pos.x() && pos.x() < max.x()));
-        REQUIRE((min.y() < pos.y() && pos.y() < max.y()));
-        REQUIRE((min.z() < pos.z() && pos.z() < max.z()));
+        CHECK(hostNode5->getNumberOfParticles() == 1);
+        CHECK((min.x() < pos.x() && pos.x() < max.x()));
+        CHECK((min.y() < pos.y() && pos.y() < max.y()));
+        CHECK((min.z() < pos.z() && pos.z() < max.z()));
     }
 
     SECTION("Test particle insertion with special edge cases"){
 
         //test particle insertion with same particle position:
         //(currently the section is silently ignored)
-        Core::Particle testIon1 = Core::Particle(Core::Vector(1.0,1.0,1.0),2.0);
-        Core::Particle testIon2 = Core::Particle(Core::Vector(1.0,1.0,1.0),2.0);
+        Core::Particle baseIon1 = Core::Particle(Core::Vector(1.0,1.0,1.0),2.0);
+        Core::Particle baseIon2 = Core::Particle(Core::Vector(1.0,1.0,1.0),2.0);
+
+        BTree::TreeParticle testIon1(&baseIon1);
+        BTree::TreeParticle testIon2(&baseIon2);
 
         testNode.insertParticle(&testIon1);
-        REQUIRE_THROWS(testNode.insertParticle(&testIon2));
+        CHECK_THROWS(testNode.insertParticle(&testIon2));
 
         testNode.computeChargeDistributionRecursive();
         testNode.printTree(0);
-        REQUIRE(testNode.getNumberOfParticles() == 1);
+        CHECK(testNode.getNumberOfParticles() == 1);
     }
 
     SECTION( "Test particle remove from Node"){
 
         //Test bare node has no particles:
-        REQUIRE( testNode.getNumberOfParticles() == 0);
-        REQUIRE( testNode.getParticle() == nullptr);
+        CHECK( testNode.getNumberOfParticles() == 0);
+        CHECK( testNode.getParticle() == nullptr);
 
         //Test particle add increases the number of particles:
-        Core::Particle testIon1 = Core::Particle(Core::Vector(1.2,1.2,1.2),2.0);
-        Core::Particle testIon2 = Core::Particle(Core::Vector(1.6,1.2,1.2),2.0);
-        Core::Particle testIon3 = Core::Particle(Core::Vector(1.65,1.2,1.2),2.0);
-        Core::Particle testIon4 = Core::Particle(Core::Vector(1.66,1.2,1.2),2.0);
-        Core::Particle testIon5 = Core::Particle(Core::Vector(1.5,1.2,1.2),6.0);
-        Core::Particle testIon6 = Core::Particle(Core::Vector(1.6,1.2,1.2),2.0);
+        Core::Particle baseIon1 = Core::Particle(Core::Vector(1.2,1.2,1.2),2.0);
+        Core::Particle baseIon2 = Core::Particle(Core::Vector(1.6,1.2,1.2),2.0);
+        Core::Particle baseIon3 = Core::Particle(Core::Vector(1.65,1.2,1.2),2.0);
+        Core::Particle baseIon4 = Core::Particle(Core::Vector(1.66,1.2,1.2),2.0);
+        Core::Particle baseIon5 = Core::Particle(Core::Vector(1.5,1.2,1.2),6.0);
+        Core::Particle baseIon6 = Core::Particle(Core::Vector(1.6,1.2,1.2),2.0);
+
+        BTree::TreeParticle testIon1(&baseIon1);
+        BTree::TreeParticle testIon2(&baseIon2);
+        BTree::TreeParticle testIon3(&baseIon3);
+        BTree::TreeParticle testIon4(&baseIon4);
+        BTree::TreeParticle testIon5(&baseIon5);
+        BTree::TreeParticle testIon6(&baseIon6);
+
         testNode.insertParticle(&testIon5);
         testNode.insertParticle(&testIon6);
 
         testNode.computeChargeDistributionRecursive();
         BTree::AbstractNode* leafNode6 = testIon6.getHostNode();
         leafNode6->removeMyselfFromTree();
-        REQUIRE(testNode.getNumberOfParticles() == 1);
-        REQUIRE(isExactDoubleEqual(testNode.getCharge(), 6.0*Core::ELEMENTARY_CHARGE));
+        CHECK(testNode.getNumberOfParticles() == 1);
+        CHECK(isExactDoubleEqual(testNode.getCharge(), 6.0*Core::ELEMENTARY_CHARGE));
 
         BTree::AbstractNode* leafNode5 = testIon5.getHostNode();
         leafNode5->removeMyselfFromTree();
-        REQUIRE(testNode.getNumberOfParticles() == 0);
-        REQUIRE(isExactDoubleEqual(testNode.getCharge(), 0.0*Core::ELEMENTARY_CHARGE));
+        CHECK(testNode.getNumberOfParticles() == 0);
+        CHECK(isExactDoubleEqual(testNode.getCharge(), 0.0*Core::ELEMENTARY_CHARGE));
 
         testNode.insertParticle(&testIon1);
         testNode.insertParticle(&testIon2);
@@ -206,18 +223,18 @@ TEST_CASE( "Test particle insertion and remove in serial node", "[Node]") {
         testNode.insertParticle(&testIon5);
 
         testNode.computeChargeDistributionRecursive();
-        REQUIRE(testNode.getNumberOfParticles() == 5);
-        REQUIRE( (testNode.getCharge() - 16.0*Core::ELEMENTARY_CHARGE) < 1e-100);
+        CHECK(testNode.getNumberOfParticles() == 5);
+        CHECK( (testNode.getCharge() - 16.0*Core::ELEMENTARY_CHARGE) < 1e-100);
 
         BTree::AbstractNode* leafNode1 = testIon1.getHostNode();
         leafNode1->removeMyselfFromTree();
-        REQUIRE(testNode.getNumberOfParticles() == 4);
-        REQUIRE( (testNode.getCharge() - 14.0*Core::ELEMENTARY_CHARGE) < 1e-100);
+        CHECK(testNode.getNumberOfParticles() == 4);
+        CHECK( (testNode.getCharge() - 14.0*Core::ELEMENTARY_CHARGE) < 1e-100);
 
         BTree::AbstractNode* leafNode2 = testIon2.getHostNode();
         leafNode2->removeMyselfFromTree();
-        REQUIRE(testNode.getNumberOfParticles() == 3);
-        REQUIRE( (testNode.getCharge() - 12.0*Core::ELEMENTARY_CHARGE) < 1e-100);
+        CHECK(testNode.getNumberOfParticles() == 3);
+        CHECK( (testNode.getCharge() - 12.0*Core::ELEMENTARY_CHARGE) < 1e-100);
     }
 
     SECTION("Test particle remove from Node with center of charge update"){
@@ -229,28 +246,33 @@ TEST_CASE( "Test particle insertion and remove in serial node", "[Node]") {
 
 
         //Test bare node has no particles:
-        REQUIRE( testNode2.getNumberOfParticles() == 0);
-        REQUIRE( testNode2.getParticle() == nullptr);
+        CHECK( testNode2.getNumberOfParticles() == 0);
+        CHECK( testNode2.getParticle() == nullptr);
 
         //Test particle add increases the number of particles:
-        Core::Particle testIon1(Core::Vector(1.0,1.0,1.0), 1.0);
-        Core::Particle testIon2(Core::Vector(2.0,1.0,1.0), 1.0);
-        Core::Particle testIon3(Core::Vector(3.0,1.0,1.0), 1.0);
+        Core::Particle baseIon1(Core::Vector(1.0,1.0,1.0), 1.0);
+        Core::Particle baseIon2(Core::Vector(2.0,1.0,1.0), 1.0);
+        Core::Particle baseIon3(Core::Vector(3.0,1.0,1.0), 1.0);
+
+        BTree::TreeParticle testIon1(&baseIon1);
+        BTree::TreeParticle testIon2(&baseIon2);
+        BTree::TreeParticle testIon3(&baseIon3);
+
         testNode2.insertParticle(&testIon1);
         testNode2.insertParticle(&testIon2);
         testNode2.insertParticle(&testIon3);
         testNode2.computeChargeDistributionRecursive();
 
-        REQUIRE(testNode2.getCenterOfCharge() == Core::Vector(2.0,1.0,1.0));
+        CHECK(testNode2.getCenterOfCharge() == Core::Vector(2.0,1.0,1.0));
         BTree::AbstractNode* leafNode3 = testIon3.getHostNode();
         leafNode3->removeMyselfFromTree();
-        REQUIRE( (testNode2.getCenterOfCharge() - Core::Vector(1.5,1.0,1.0)).magnitude() < 1e-10 );
-        REQUIRE(isExactDoubleEqual(testNode2.getCharge(), 2.0*Core::ELEMENTARY_CHARGE));
+        CHECK( (testNode2.getCenterOfCharge() - Core::Vector(1.5,1.0,1.0)).magnitude() < 1e-10 );
+        CHECK(isExactDoubleEqual(testNode2.getCharge(), 2.0*Core::ELEMENTARY_CHARGE));
 
         BTree::AbstractNode* leafNode1 = testIon1.getHostNode();
         leafNode1->removeMyselfFromTree();
-        REQUIRE( (testNode2.getCenterOfCharge() - Core::Vector(2.0,1.0,1.0)).magnitude() < 1e-10 );
-        REQUIRE(isExactDoubleEqual(testNode2.getCharge(), 1.0*Core::ELEMENTARY_CHARGE));
+        CHECK( (testNode2.getCenterOfCharge() - Core::Vector(2.0,1.0,1.0)).magnitude() < 1e-10 );
+        CHECK(isExactDoubleEqual(testNode2.getCharge(), 1.0*Core::ELEMENTARY_CHARGE));
     }
 
     SECTION("Test particle mass insertion and remove from node (memory leak test)"){
@@ -258,27 +280,29 @@ TEST_CASE( "Test particle insertion and remove in serial node", "[Node]") {
         int nNodesOriginal= testNode.getNumberOfNodes();
         const int nIons = 100;
         Core::Particle testIons[nIons];
+        std::vector<BTree::TreeParticle> treeParticles;
         double xPos;
         for (int i=0; i<nIons;i++){
             xPos = 1.99 / nIons *i;
             testIons[i] = Core::Particle(Core::Vector(xPos,1.2,1.2),2.0);
-            testNode.insertParticle(&testIons[i]);
+            treeParticles.push_back(&testIons[i]);
+            testNode.insertParticle(&treeParticles.back());
         }
-        REQUIRE(testNode.getNumberOfParticles() == nIons);
-        REQUIRE( (testNode.getCharge() - nIons*Core::ELEMENTARY_CHARGE) < 1e-100);
+        CHECK(testNode.getNumberOfParticles() == nIons);
+        CHECK( (testNode.getCharge() - nIons*Core::ELEMENTARY_CHARGE) < 1e-100);
 
 
         BTree::AbstractNode* hostNode;
-        for (int i=0; i<nIons;i++){
-            hostNode = testIons[i].getHostNode();
+        for (size_t i=0; i<nIons;i++){
+            hostNode = treeParticles[i].getHostNode();
             hostNode->removeMyselfFromTree();
             if (hostNode != &testNode){
                 delete (hostNode);
             }
         }
-        REQUIRE(testNode.getNumberOfParticles() == 0);
-        REQUIRE( (testNode.getCharge() - 0.0) < 1e-100);
-        REQUIRE( testNode.getNumberOfNodes() == nNodesOriginal);
+        CHECK(testNode.getNumberOfParticles() == 0);
+        CHECK( (testNode.getCharge() - 0.0) < 1e-100);
+        CHECK( testNode.getNumberOfNodes() == nNodesOriginal);
     }
 
     SECTION( "Test particle remove transformation validity"){
@@ -288,10 +312,16 @@ TEST_CASE( "Test particle insertion and remove in serial node", "[Node]") {
                 nullptr
         );
 
-        Core::Particle testIon1(Core::Vector(9.2,0,0), 2.0);
-        Core::Particle testIon2(Core::Vector(9.201,0,0), 2.0);
-        Core::Particle testIon3(Core::Vector(9.3,0,0), 2.0);
-        Core::Particle testIon4(Core::Vector(9.301,0,0), 2.0);
+        Core::Particle baseIon1(Core::Vector(9.2,0,0), 2.0);
+        Core::Particle baseIon2(Core::Vector(9.201,0,0), 2.0);
+        Core::Particle baseIon3(Core::Vector(9.3,0,0), 2.0);
+        Core::Particle baseIon4(Core::Vector(9.301,0,0), 2.0);
+
+        BTree::TreeParticle testIon1(&baseIon1);
+        BTree::TreeParticle testIon2(&baseIon2);
+        BTree::TreeParticle testIon3(&baseIon3);
+        BTree::TreeParticle testIon4(&baseIon4);
+
         testNode2.insertParticle(&testIon1);
         testNode2.insertParticle(&testIon2);
         testNode2.insertParticle(&testIon3);
@@ -331,13 +361,13 @@ TEST_CASE( "Test field calculation in serial node", "[Node]") {
         Core::Vector c = BTree::Node::calculateElectricField(a, b, 1.0);
         Core::Vector d = Core::Vector(-(1.0/(4*M_PI*8.854e-12)),0.0,0.0);
 
-        REQUIRE(
+        CHECK(
                 vectorApproxCompare(
                         BTree::Node::calculateElectricField(a, b, 1.0),
                         BTree::Node::calculateElectricField(b, a, 1.0)*(-1))
                         ==  vectorsApproxEqual);
 
-        REQUIRE(vectorApproxCompare(c,d) == vectorsApproxEqual);
+        CHECK(vectorApproxCompare(c,d) == vectorsApproxEqual);
     }
 
     SECTION( "Test physical correctness of charge calculation") {
@@ -353,9 +383,9 @@ TEST_CASE( "Test field calculation in serial node", "[Node]") {
 
         testTree.computeChargeDistribution();
         Core::Vector testField1 = testTree.computeEFieldFromTree(testIon1);
-        REQUIRE( Approx(testField1.x()).epsilon(1e-4) == -1.4399645e-9);
-        REQUIRE( Approx(testField1.y()).epsilon(1e-4) == -1.4399645e-9/4.0);
-        REQUIRE( Approx(testField1.z()).epsilon(1e-4) == 1.4399645e-7);
+        CHECK( Approx(testField1.x()).epsilon(1e-4) == -1.4399645e-9);
+        CHECK( Approx(testField1.y()).epsilon(1e-4) == -1.4399645e-9/4.0);
+        CHECK( Approx(testField1.z()).epsilon(1e-4) == 1.4399645e-7);
     }
 
     SECTION( "Test charge distribution calculation symmetrical") {
@@ -382,35 +412,44 @@ TEST_CASE( "Test field calculation in serial node", "[Node]") {
 
         testTree.computeChargeDistribution();
 
-        REQUIRE(testTree.getRoot()->getNumberOfParticles() == 8);
-        REQUIRE(testTree.getRoot()->getCharge() - 8.0*Core::ELEMENTARY_CHARGE < 1e-30);
+        CHECK(testTree.getRoot()->getNumberOfParticles() == 8);
+        CHECK(testTree.getRoot()->getCharge() - 8.0*Core::ELEMENTARY_CHARGE < 1e-30);
 
         Core::Vector testField1 = testTree.computeEFieldFromTree(testIon1);
-        REQUIRE( ((testField1.x() < 2e-25) && (testField1.y() < 2e-25) && (testField1.z() < 2e-25)) );
+        CHECK( ((testField1.x() < 2e-25) && (testField1.y() < 2e-25) && (testField1.z() < 2e-25)) );
     }
 
     SECTION( "Test charge distribution calculation non symmetrical") {
 
         //Test particle add increases the number of particles:
-        Core::Particle testIon1 = Core::Particle(Core::Vector(0.0,0.0,0.0),1.0);
-        Core::Particle testIon2 = Core::Particle(Core::Vector( 1.0, 1.0, 1.0),1.0);
+        Core::Particle baseIon1 = Core::Particle(Core::Vector(0.0,0.0,0.0),1.0);
+        Core::Particle baseIon2 = Core::Particle(Core::Vector( 1.0, 1.0, 1.0),1.0);
+
+        BTree::TreeParticle testIon1(&baseIon1);
+        BTree::TreeParticle testIon2(&baseIon2);
 
         testNode.insertParticle(&testIon1);
         testNode.insertParticle(&testIon2);
         testNode.computeChargeDistributionRecursive();
 
-        Core::Vector testField1 = testNode.computeElectricFieldFromTree(testIon1);
-        REQUIRE( testField1.x() == Approx(testField1.y()));
-        REQUIRE( testField1.x() == Approx(testField1.z()));
+        Core::Vector testField1 = testNode.computeElectricFieldFromTree(baseIon1);
+        CHECK( testField1.x() == Approx(testField1.y()));
+        CHECK( testField1.x() == Approx(testField1.z()));
     }
 
     SECTION( "Test charge distribution calculation in all spatial directions with few particles") {
 
         //Test particle add increases the number of particles:
-        Core::Particle testIon1 = Core::Particle(Core::Vector(1.0,1.0,1.0),1.0);
-        Core::Particle testIon2 = Core::Particle(Core::Vector(0.5,1.0,1.0),1.0);
-        Core::Particle testIon3 = Core::Particle(Core::Vector(1.0,0.5,1.0),1.0);
-        Core::Particle testIon4 = Core::Particle(Core::Vector(1.0,1.0,0.5),1.0);
+        Core::Particle baseIon1 = Core::Particle(Core::Vector(1.0,1.0,1.0),1.0);
+        Core::Particle baseIon2 = Core::Particle(Core::Vector(0.5,1.0,1.0),1.0);
+        Core::Particle baseIon3 = Core::Particle(Core::Vector(1.0,0.5,1.0),1.0);
+        Core::Particle baseIon4 = Core::Particle(Core::Vector(1.0,1.0,0.5),1.0);
+
+        BTree::TreeParticle testIon1(&baseIon1);
+        BTree::TreeParticle testIon2(&baseIon2);
+        BTree::TreeParticle testIon3(&baseIon3);
+        BTree::TreeParticle testIon4(&baseIon4);
+
         testNode.insertParticle(&testIon1);
         testNode.insertParticle(&testIon2);
         testNode.insertParticle(&testIon3);
@@ -418,10 +457,10 @@ TEST_CASE( "Test field calculation in serial node", "[Node]") {
 
         testNode.computeChargeDistributionRecursive();
 
-        Core::Vector testField1 = testNode.computeElectricFieldFromTree(testIon1);
+        Core::Vector testField1 = testNode.computeElectricFieldFromTree(baseIon1);
 
-        REQUIRE( testField1.x() == Approx(testField1.y()).epsilon(0.001));
-        REQUIRE( testField1.x() == Approx(testField1.z()).epsilon(0.001));
+        CHECK( testField1.x() == Approx(testField1.y()).epsilon(0.001));
+        CHECK( testField1.x() == Approx(testField1.z()).epsilon(0.001));
     }
 
     SECTION("Test charge distribution calculation in all spatial directions with many particles") {
@@ -435,8 +474,11 @@ TEST_CASE( "Test field calculation in serial node", "[Node]") {
         Core::Vector boxSize = Core::Vector(2.0,2.0,2.0);
         ParticleSimulation::BoxStartZone startZone(boxSize);
         std::vector<std::unique_ptr<Core::Particle>> ions= startZone.getRandomParticlesInStartZone(nions, 2.0);
+        std::vector<BTree::TreeParticle> treeParticles;
+
         for (std::size_t i=0; i<nions; i++){
-            testNode.insertParticle(ions[i].get());
+            treeParticles.push_back(BTree::TreeParticle(ions[i].get()));
+            testNode.insertParticle(&treeParticles.back());
         }
         testNode.computeChargeDistributionRecursive();
 
@@ -445,8 +487,8 @@ TEST_CASE( "Test field calculation in serial node", "[Node]") {
         Core::Vector testField3 = testNode.computeElectricFieldFromTree(testIon3);
         Core::Vector testField4 = testNode.computeElectricFieldFromTree(testIon4);
 
-        REQUIRE( (testField1.x() - testField2.z()) < 1e-8);
-        REQUIRE( (testField1.x() - testField3.y()) < 1e-8);
-        REQUIRE( (testField3 - testField4).magnitude() < 1e-8);
+        CHECK( (testField1.x() - testField2.z()) < 1e-8);
+        CHECK( (testField1.x() - testField3.y()) < 1e-8);
+        CHECK( (testField3 - testField4).magnitude() < 1e-8);
     }
 }

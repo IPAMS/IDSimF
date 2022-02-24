@@ -130,21 +130,6 @@ Core::Vector& Core::Particle::getAcceleration(){
 }
 
 /**
- * Sets a new host node for this particle
- * @param newHostNode link to a Core node which is the new host node
- */
-void Core::Particle::setHostNode(BTree::AbstractNode* newHostNode){
-    this->hostNode_ = newHostNode;
-}
-
-/**
- * Gets the host node of this particle
- */
-BTree::AbstractNode* Core::Particle::getHostNode() const{
-    return (hostNode_);
-}
-
-/**
  * Sets the external index of the particle
  */
 void Core::Particle::setIndex(size_t index){

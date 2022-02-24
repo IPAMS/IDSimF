@@ -104,8 +104,8 @@ void FileIO::SimpleVTKwriter::write(BTree::Tree& tree,bool writeTree){
  */
 void FileIO::SimpleVTKwriter::writeIonPosition(std::ostream& filestream, const BTree::Node* rootnode){
     if (rootnode->getNumberOfParticles() == 1){
-        Core::Particle* ion = rootnode->getParticle();
-        filestream<<ion->getLocation()<<"\n";
+        BTree::TreeParticle* ion = rootnode->getParticle();
+        filestream<<ion->get()->getLocation()<<"\n";
     }
 }
 
@@ -116,8 +116,8 @@ void FileIO::SimpleVTKwriter::writeIonPosition(std::ostream& filestream, const B
  */
 void FileIO::SimpleVTKwriter::writeIonActive(std::ostream& filestream, const BTree::Node* rootnode){
     if (rootnode->getNumberOfParticles() == 1){
-        Core::Particle* ion = rootnode->getParticle();
-        if (ion->isActive() == true){
+        BTree::TreeParticle* ion = rootnode->getParticle();
+        if (ion->get()->isActive() == true){
             filestream<<"1\n";
         }
         else{

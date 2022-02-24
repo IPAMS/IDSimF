@@ -33,6 +33,7 @@
 #include <unordered_map>
 
 namespace BTree {
+    using treeParticlePtrList = std::list<std::unique_ptr<BTree::TreeParticle>>;
 
     class ParallelTree {
     public:
@@ -41,7 +42,7 @@ namespace BTree {
 
         // Public member methods:
         [[nodiscard]] ParallelNode* getRoot() const;
-        [[nodiscard]] std::list<Core::Particle*>* getParticleList() const;
+        [[nodiscard]] treeParticlePtrList* getParticleList() const;
         [[nodiscard]] std::size_t getNumberOfParticles() const;
 
         std::size_t init();
@@ -50,7 +51,7 @@ namespace BTree {
 
         void insertParticle(Core::Particle &particle, std::size_t ext_index);
         void removeParticle(std::size_t ext_index);
-        [[nodiscard]] Core::Particle* getParticle(std::size_t ext_index) const;
+        [[nodiscard]] BTree::TreeParticle* getParticle(std::size_t ext_index) const;
         void updateParticleLocation(std::size_t extIndex, Core::Vector newLocation, int* numNodesChanged);
         std::size_t updateNodes(int ver);
         
@@ -58,8 +59,8 @@ namespace BTree {
 
     private:
         std::unique_ptr<ParallelNode> root_;
-        std::unique_ptr<std::list<Core::Particle*>> iVec_; ///< a linked particle list, stores the particles in a linear order
-        std::unique_ptr<std::unordered_map<std::size_t, std::list<Core::Particle *>::const_iterator>> iMap_; ///< a map between the ion indices (keys used by SIMION) and the pointers into the internal particle list
+        std::unique_ptr<treeParticlePtrList> iVec_; ///< a linked particle list, stores the particles in a linear order
+        std::unique_ptr<std::unordered_map<std::size_t, treeParticlePtrList::const_iterator>> iMap_; ///< a map between the ion indices (keys used by SIMION) and the pointers into the internal particle list
 
         std::vector<std::size_t> nodesOnLevels_;
         std::vector<std::size_t> nodeStartIndicesOnLevels_; ///< Vector of serialized indices of the first nodes on the individual tree levels

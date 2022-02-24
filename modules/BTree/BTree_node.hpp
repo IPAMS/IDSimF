@@ -50,7 +50,7 @@ namespace BTree {
         void testSpatialTreeIntegrity();
         void testNodeParticleIntegrity();
         bool isNodeInSubtree(const Node *nodeToFind, bool debug) const;
-        bool isParticleInSubtree(const Core::Particle *particle, bool debug) const;
+        bool isParticleInSubtree(const TreeParticle *particle, bool debug) const;
     };
 }
 

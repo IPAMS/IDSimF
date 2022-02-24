@@ -89,8 +89,6 @@ TEST_CASE( "Basic Particle semantics tests", "[Particle]") {
         testIon.setLocation(Core::Vector(2.0, 2.0, 2.0));
         CHECK(testIon.getLocation()==Core::Vector(2.0, 2.0, 2.0));
 
-        CHECK(testIon.getHostNode()==nullptr);
-
         /*BTree::Node testNode = BTree::Node(
                 Core::Vector(1.0, 1.0, 1.0),
                 Core::Vector(2.0, 2.0, 2.0),

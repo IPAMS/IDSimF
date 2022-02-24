@@ -34,10 +34,6 @@
 #include <array>
 #include <memory>
 
-namespace BTree {
-    class AbstractNode;
-}
-
 namespace Core {
 
     /**
@@ -62,9 +58,6 @@ namespace Core {
         [[nodiscard]] Core::Vector& getVelocity();
         void setAcceleration(Core::Vector velocity);
         [[nodiscard]] Core::Vector& getAcceleration();
-
-        void setHostNode(BTree::AbstractNode* newHostNode);
-        [[nodiscard]] BTree::AbstractNode* getHostNode()  const;
 
         void setIndex(size_t index);
         [[nodiscard]] std::size_t getIndex() const;
@@ -115,7 +108,6 @@ namespace Core {
         bool invalid_ = false;     ///< Flag if the particle has an invalid state in the simulation
         double timeOfBirth_ = 0.0; ///< Time when the particle was created
         double splatTime_= 0.0;    ///< Time when the particle was terminated ("splatted")
-        BTree::AbstractNode* hostNode_ = nullptr; ///< A link to a tree node to which the particle is belonging currently
 
         std::unordered_map<std::string, double> attributesFloat_; ///< an arbitrary set of additional floating point attributes, accessible by a name
         std::unordered_map<std::string, int> attributesInteger_; ///< an arbitrary set of additional integer attributes, accessible by a name

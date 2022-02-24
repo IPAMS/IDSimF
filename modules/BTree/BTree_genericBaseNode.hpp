@@ -33,7 +33,7 @@
 #include "Core_vector.hpp"
 #include "Core_utils.hpp"
 #include "BTree_abstractNode.hpp"
-#include "Core_particle.hpp"
+#include "BTree_treeParticle.hpp"
 #include <sstream>
 #include <iostream>
 
@@ -69,7 +69,7 @@ namespace BTree{
         void removeMyselfFromTree() override;
         void updateSelf() override;
         void updateParents() override;
-        void insertParticle(Core::Particle* particle) override;
+        void insertParticle(BTree::TreeParticle* particle) override;
         void computeChargeDistributionRecursive() override;
 
         // Diagnostic methods:
@@ -224,7 +224,7 @@ namespace BTree{
 
         //remove this node from the octant nodes of the parent node:
         if (parentNode != nullptr){
-            Octant oct = parentNode->getOctant(this->particle_->getLocation());
+            Octant oct = parentNode->getOctant(this->particle_->get()->getLocation());
 
             //delete(parentNode->octNodes_[oct]);
             parentNode->octNodes_[oct] = nullptr;
@@ -278,8 +278,8 @@ namespace BTree{
      */
     template<class NodType>
     void GenericBaseNode<NodType>::updateSelf(){
-        centerOfCharge_ = particle_->getLocation();
-        charge_ = particle_->getCharge();
+        centerOfCharge_ = particle_->get()->getLocation();
+        charge_ = particle_->get()->getCharge();
     }
 
 
@@ -318,21 +318,21 @@ namespace BTree{
      * @param particle the particle to insert into the node.
      */
     template<class NodType>
-    void GenericBaseNode<NodType>::insertParticle(Core::Particle* particle){
+    void GenericBaseNode<NodType>::insertParticle(BTree::TreeParticle* particle){
 
         if (numP_ >1){
-            Octant oct = this->getOctant(particle->getLocation());
+            Octant oct = this->getOctant(particle->get()->getLocation());
             if (this->octNodes_[oct] == nullptr){
                 this->octNodes_[oct] = this->createOctNode(oct);
             }
             octNodes_[oct]->insertParticle(particle);
         }
         else if(numP_ == 1){
-            Core::Particle* p2 = particle_;
-            if(p2->getLocation() != particle->getLocation()){
+            BTree::TreeParticle* p2 = particle_;
+            if(p2->get()->getLocation() != particle->get()->getLocation()){
                 //There is already a particle in the node
                 //relocate and subdivide
-                Octant oct = this->getOctant(p2->getLocation());
+                Octant oct = this->getOctant(p2->get()->getLocation());
                 if (octNodes_[oct] == nullptr){
                     octNodes_[oct] = this->createOctNode(oct);
                 }
@@ -341,7 +341,7 @@ namespace BTree{
 
                 particle_= nullptr;
 
-                oct = this->getOctant(particle->getLocation());
+                oct = this->getOctant(particle->get()->getLocation());
                 if (octNodes_[oct] == nullptr){
                     octNodes_[oct] = this->createOctNode(oct);
                 }
@@ -350,7 +350,7 @@ namespace BTree{
             else {
                 //if two particles with exactly the same position are existing: Throw exception
                 std::stringstream ss;
-                ss << "Tried to insert particle with exactly the same position: "<<particle->getLocation()<<std::endl;
+                ss << "Tried to insert particle with exactly the same position: "<<particle->get()->getLocation()<<std::endl;
                 throw (std::logic_error(ss.str()));
             }
 
@@ -416,7 +416,7 @@ namespace BTree{
         ss<<std::endl;
 
         if (this->particle_ != nullptr){
-            ss<<"particle location:"<<this->particle_->getLocation()<<std::endl;
+            ss<<"particle location:"<<this->particle_->get()->getLocation()<<std::endl;
         }
 
         return(ss.str());
@@ -442,7 +442,7 @@ namespace BTree{
         std::cout<<" min "<<this->min_<<" max "<<this->max_<<" part "<<this->numP_<<" charge "<<this->charge_;
 
         if (this->particle_ != nullptr){
-            std::cout<<" pl:"<<this->particle_<<" loc:"<<this->particle_->getLocation();
+            std::cout<<" pl:"<<this->particle_<<" loc:"<<this->particle_->get()->getLocation();
         }
         std::cout<<std::endl;
     }
@@ -489,7 +489,7 @@ namespace BTree{
         }
 
         if (this->particle_ != nullptr){
-            Core::Vector pLoc = this->particle_->getLocation();
+            Core::Vector pLoc = this->particle_->get()->getLocation();
             if (
                     pLoc.x() < this->min_.x() ||
                             pLoc.y() < this->min_.y() ||

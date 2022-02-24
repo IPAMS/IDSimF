@@ -7,6 +7,8 @@ set(SOURCE_FILES
         BTree_node.hpp
         BTree_parallelNode.cpp
         BTree_parallelNode.hpp
+        BTree_treeParticle.cpp
+        BTree_treeParticle.hpp
         BTree_tree.cpp
         BTree_tree.hpp
         BTree_parallelTree.cpp

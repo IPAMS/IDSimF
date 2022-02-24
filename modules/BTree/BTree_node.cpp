@@ -45,8 +45,8 @@ Core::Vector BTree::Node::computeElectricFieldFromTree(Core::Particle &targetP){
     if (numP_ == 1){
         Core::Vector efield= calculateElectricField(
                 targetP.getLocation(),
-                particle_->getLocation(),
-                particle_->getCharge());
+                particle_->get()->getLocation(),
+                particle_->get()->getCharge());
         return(efield);
     }
     else{
@@ -112,7 +112,7 @@ void BTree::Node::testSpatialTreeIntegrity(){
 void BTree::Node::testNodeParticleIntegrity(){
     
     if (this->particle_ != nullptr){
-        Core::Vector pLoc = this->particle_->getLocation();
+        Core::Vector pLoc = this->particle_->get()->getLocation();
         if (
             pLoc.x() < this->min_.x() ||
             pLoc.y() < this->min_.y() ||
@@ -167,10 +167,10 @@ bool BTree::Node::isNodeInSubtree(const BTree::Node *nodeToFind, bool debug) con
  * Checks if a particle is in a subtree with this node as root
  *
  * @param particle pointer to a particle to find in the subtree
- * @param debug prints informatio about the found particle if true
+ * @param debug prints information about the found particle if true
  * @return true if the particle is found in the subtree
  */
-bool BTree::Node::isParticleInSubtree(const Core::Particle *particle, bool debug) const{
+bool BTree::Node::isParticleInSubtree(const BTree::TreeParticle *particle, bool debug) const{
 
     bool result = false;
     if (this->particle_ == particle){

@@ -31,8 +31,8 @@
 BTree::Tree::Tree(Core::Vector min, Core::Vector max):
         root_(std::make_unique<BTree::Node>(min,max,nullptr)){
     root_->initAsRoot();
-    iVec_ = std::make_unique<std::list<Core::Particle*>>();
-    iMap_ = std::make_unique<std::unordered_map<std::size_t,std::list<Core::Particle*>::const_iterator>>();
+    iVec_ = std::make_unique<treeParticlePtrList>();
+    iMap_ = std::make_unique<std::unordered_map<std::size_t, treeParticlePtrList::const_iterator>>();
 }
 
 /**
@@ -46,7 +46,7 @@ BTree::Node* BTree::Tree::getRoot() const {
  * Gets a linear particle list of the particles in the tree
  * @return a linearized linked list of the particles in the tree
  */
-std::list<Core::Particle*>* BTree::Tree::getParticleList(){
+BTree::treeParticlePtrList* BTree::Tree::getParticleList(){
     return(iVec_.get());
 }
 
@@ -60,15 +60,17 @@ std::size_t BTree::Tree::getNumberOfParticles() const{
 }
 
 /**
- * Insert particle into the tree
+ * Insert an unwrapped particle into the tree
  *
  * @param particle the particle to insert
  * @param ext_index an external index number for the particle / numerical particle id (most likely from a SIMION simulation)
  */
 void BTree::Tree::insertParticle(Core::Particle &particle, size_t ext_index){
-    
-    root_->insertParticle(&particle);
-    iVec_->push_front(&particle);
+
+    //create new wrapped particle for tree:
+    auto treeParticle = std::make_unique<BTree::TreeParticle>(&particle);
+    root_->insertParticle(treeParticle.get());
+    iVec_->push_front(std::move(treeParticle));
     iMap_->insert({ext_index, iVec_->cbegin()});
 }
 
@@ -81,7 +83,7 @@ void BTree::Tree::insertParticle(Core::Particle &particle, size_t ext_index){
 void BTree::Tree::removeParticle(size_t ext_index){
     
     auto iter =(*iMap_)[ext_index];
-    Core::Particle* particle = *iter;
+    BTree::TreeParticle* particle = iter->get();
     BTree::AbstractNode* pHostNode = particle->getHostNode();
     pHostNode->removeMyselfFromTree();
     if (!pHostNode->isRoot()){
@@ -98,9 +100,9 @@ void BTree::Tree::removeParticle(size_t ext_index){
  * @param ext_index the external particle index
  * @returns the retrieved particle
  */
-Core::Particle* BTree::Tree::getParticle(size_t ext_index) const{
+BTree::TreeParticle* BTree::Tree::getParticle(size_t ext_index) const{
     auto iter =(*iMap_)[ext_index];
-    Core::Particle* particle = *iter;
+    BTree::TreeParticle* particle = iter->get();
     return (particle);
 }
 
@@ -116,10 +118,10 @@ void BTree::Tree::updateParticleLocation(size_t ext_index, Core::Vector newLocat
     //test if location has changed
     //if yes: test if particle is still in the node
 
-    Core::Particle* particle = this->getParticle(ext_index);
+    BTree::TreeParticle* particle = this->getParticle(ext_index);
     BTree::AbstractNode* pNode = particle->getHostNode();
     
-    if (particle->getLocation() == newLocation){
+    if (particle->get()->getLocation() == newLocation){
         return;
     }
     else if ( !(
@@ -134,16 +136,20 @@ void BTree::Tree::updateParticleLocation(size_t ext_index, Core::Vector newLocat
                  newLocation.z() >= pNode->getMax().z()
                 )  )
     {
-        particle->setLocation(newLocation);
+        particle->get()->setLocation(newLocation);
         pNode->updateSelf();
         pNode->updateParents();
     }
     else {
-        this->removeParticle(ext_index);
-        particle->setLocation(newLocation);
-        this->insertParticle(*particle, ext_index);
-        particle->getHostNode()->updateSelf();
-        particle->getHostNode()->updateParents();
+        // we have to reinsert
+        Core::Particle* wrappedParticle = particle->get();
+        BTree::AbstractNode* originalHostNode = particle->getHostNode();
+
+        this->removeParticle(ext_index); //this destroys the reference to particle (the TreeParticle)
+        wrappedParticle->setLocation(newLocation);
+        this->insertParticle(*wrappedParticle, ext_index);
+        originalHostNode->updateSelf();
+        originalHostNode->updateParents();
     }
 }
 
@@ -171,14 +177,14 @@ Core::Vector BTree::Tree::computeEFieldFromTree(Core::Particle &particle){
  */
 void BTree::Tree::printParticles() const{
     int i =0;
-    for (Core::Particle* particle : *iVec_) {
+    for (auto&& particle : *iVec_ ) {
 
-        std::cout<<"particle "<<i <<" " << particle->getLocation() <<" "<<particle->getHostNode()->getMin() << " "<< particle->getHostNode()->getMax()<<std::endl;
+        std::cout<<"particle "<<i <<" " << particle->get()->getLocation() <<" "<<particle->getHostNode()->getMin() << " "<< particle->getHostNode()->getMax()<<std::endl;
         i++;
     }
 
     std::cout <<" keys:";
-    for(std::pair<const int, std::list<Core::Particle*>::const_iterator> kv : *iMap_) {
+    for(std::pair<const int, treeParticlePtrList::const_iterator> kv : *iMap_) {
         std::cout<< kv.first <<" | ";
     }
     std::cout <<std::endl;

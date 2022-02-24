@@ -76,7 +76,7 @@ std::size_t BTree::AbstractNode::getNumberOfParticles() const{
 /**
  * Gets a pointer to the particle in the node
  */
-Core::Particle* BTree::AbstractNode::getParticle() const{
+BTree::TreeParticle* BTree::AbstractNode::getParticle() const{
     return particle_;
 }
 

@@ -32,8 +32,8 @@
 BTree::ParallelTree::ParallelTree(Core::Vector min, Core::Vector max):
         root_(std::make_unique<BTree::ParallelNode>(min,max,nullptr)) {
     root_->initAsRoot();
-    iVec_ = std::make_unique<std::list<Core::Particle*>>();
-    iMap_ = std::make_unique<std::unordered_map<std::size_t, std::list<Core::Particle*>::const_iterator>>();
+    iVec_ = std::make_unique<treeParticlePtrList>();
+    iMap_ = std::make_unique<std::unordered_map<std::size_t, treeParticlePtrList::const_iterator>>();
 }
 
 /* copy operator missing
@@ -50,7 +50,7 @@ BTree::ParallelNode* BTree::ParallelTree::getRoot() const{
 /**
  Get a linear particle linked list of the particles in the tree
  */
-std::list<Core::Particle*>* BTree::ParallelTree::getParticleList() const{
+BTree::treeParticlePtrList* BTree::ParallelTree::getParticleList() const{
     return(iVec_.get());
 }
 
@@ -105,8 +105,8 @@ Core::Vector BTree::ParallelTree::computeEFieldFromTree(Core::Particle &particle
         BTree::ParallelNode* currentNode = nodesToProcess.at(cur);
 
         if(currentNode->numP_ == 1){ // if node has only one particle: calculate force directly
-            efield=efield+root_->calculateElectricField(loc, currentNode->particle_->getLocation(),
-                    currentNode->particle_->getCharge());
+            efield=efield+root_->calculateElectricField(loc, currentNode->particle_->get()->getLocation(),
+                    currentNode->particle_->get()->getCharge());
         }
         else { // if more particles: process the node
             // get squared distance to the charge center:
@@ -138,9 +138,10 @@ Core::Vector BTree::ParallelTree::computeEFieldFromTree(Core::Particle &particle
  \param ext_index an external index number for the particle / numerical particle id (most likely from simion)
  */
 void BTree::ParallelTree::insertParticle(Core::Particle &particle, std::size_t ext_index){
-    
-    root_->insertParticle(&particle);
-    iVec_->push_front(&particle);
+
+    auto treeParticle = std::make_unique<BTree::TreeParticle>(&particle);
+    root_->insertParticle(treeParticle.get());
+    iVec_->push_front(std::move(treeParticle));
     iMap_->insert({ext_index, iVec_->cbegin()});
 }
 
@@ -153,7 +154,7 @@ void BTree::ParallelTree::insertParticle(Core::Particle &particle, std::size_t e
 void BTree::ParallelTree::removeParticle(std::size_t ext_index){
     
     auto iter =(*iMap_)[ext_index];
-    Core::Particle* particle = *iter;//[int_index];
+    BTree::TreeParticle* particle = iter->get();//[int_index];
     BTree::AbstractNode* pHostNode = particle->getHostNode();
     pHostNode->removeMyselfFromTree();
     if (!pHostNode->isRoot()){
@@ -170,9 +171,9 @@ void BTree::ParallelTree::removeParticle(std::size_t ext_index){
  \param ext_index the external particle index
  \returns the retrieved particle 
  */
-Core::Particle* BTree::ParallelTree::getParticle(std::size_t ext_index) const{
+BTree::TreeParticle* BTree::ParallelTree::getParticle(std::size_t ext_index) const{
     auto iter =(*iMap_)[ext_index];
-    Core::Particle* particle = *iter;
+    BTree::TreeParticle* particle = iter->get();
     return (particle);
 }
 
@@ -184,7 +185,7 @@ Core::Particle* BTree::ParallelTree::getParticle(std::size_t ext_index) const{
  */
 void BTree::ParallelTree::updateParticleLocation(std::size_t extIndex, Core::Vector newLocation, int* numNodesChanged){
 
-    Core::Particle* particle = getParticle(extIndex);
+    BTree::TreeParticle* particle = getParticle(extIndex);
     BTree::AbstractNode* pNode = particle->getHostNode();
 
     if ( (   newLocation.x() <= pNode->getMin().x() ||
@@ -196,12 +197,13 @@ void BTree::ParallelTree::updateParticleLocation(std::size_t extIndex, Core::Vec
              newLocation.z() >= pNode->getMax().z() ) )
     {
         (*numNodesChanged)++;
+        Core::Particle* wrappedParticle = particle->get();
         removeParticle(extIndex);
-        particle->setLocation(newLocation);
-        insertParticle(*particle, extIndex);
+        wrappedParticle->setLocation(newLocation);
+        insertParticle(*wrappedParticle, extIndex);
     }
     else{
-        particle->setLocation(newLocation);
+        particle->get()->setLocation(newLocation);
     }
 }
 
@@ -240,14 +242,14 @@ std::size_t BTree::ParallelTree::updateNodes(int ver) {
 
 void BTree::ParallelTree::printParticles() const{
     int i =0;
-    for (Core::Particle* particle : *iVec_) {
+    for (auto&& particle : *iVec_) {
         
-        std::cout<<"particle "<<i <<" " << particle->getLocation() <<" "<<particle->getHostNode()->getMin() << " "<< particle->getHostNode()->getMax()<<std::endl;
+        std::cout<<"particle "<<i <<" " << particle->get()->getLocation() <<" "<<particle->getHostNode()->getMin() << " "<< particle->getHostNode()->getMax()<<std::endl;
         i++;
     }
     
     std::cout <<" keys:";
-    for(std::pair<const int, std::list<Core::Particle*>::const_iterator> kv : *iMap_) {
+    for(std::pair<const int, BTree::treeParticlePtrList::const_iterator> kv : *iMap_) {
         std::cout<< kv.first <<" | ";
     }
     std::cout <<std::endl;
@@ -303,8 +305,8 @@ void BTree::ParallelTree::updateNodeChargeState_()
 
             if(currentNode->numP_==1) {
                 // If the current node has only one particle: Update node parameters with parameters from particle
-                currentNode->centerOfCharge_ = currentNode->particle_->getLocation();
-                currentNode->charge_ = currentNode->particle_->getCharge();
+                currentNode->centerOfCharge_ = currentNode->particle_->get()->getLocation();
+                currentNode->charge_ = currentNode->particle_->get()->getCharge();
             }
             else {
                 // If the current node represents multiple particles, and has therefore sub nodes,

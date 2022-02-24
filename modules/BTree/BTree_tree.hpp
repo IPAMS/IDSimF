@@ -45,7 +45,7 @@ namespace Core{
 }
 
 namespace BTree {
-    class Particle;
+    using treeParticlePtrList = std::list<std::unique_ptr<BTree::TreeParticle>>;
 
     class Tree {
 
@@ -54,7 +54,7 @@ namespace BTree {
 
         //simple getter:
         [[nodiscard]] Node* getRoot() const;
-        std::list<Core::Particle*>* getParticleList();
+        treeParticlePtrList* getParticleList();
         [[nodiscard]] std::size_t getNumberOfParticles() const;
 
         //charge calculation methods:
@@ -64,15 +64,15 @@ namespace BTree {
         //particle modification methods:
         void insertParticle(Core::Particle &particle, size_t ext_index);
         void removeParticle(size_t ext_index);
-        [[nodiscard]] Core::Particle* getParticle(size_t ext_index) const;
+        [[nodiscard]] BTree::TreeParticle* getParticle(size_t ext_index) const;
         void updateParticleLocation(size_t ext_index, Core::Vector newLocation);
         
         void printParticles() const;
 
     private:
         std::unique_ptr<Node> root_; ///< the root node of the tree
-        std::unique_ptr<std::list<Core::Particle*>> iVec_; ///< a linked particle list, stores the particles in a linear order
-        std::unique_ptr<std::unordered_map<std::size_t, std::list<Core::Particle *>::const_iterator>> iMap_;
+        std::unique_ptr<treeParticlePtrList> iVec_; ///< a linked particle list, stores the particles in a linear order
+        std::unique_ptr<std::unordered_map<std::size_t, treeParticlePtrList::const_iterator>> iMap_;
         ///< a map between ion indices (keys used by an external simulation) and pointers into the internal particle list
     };
 }

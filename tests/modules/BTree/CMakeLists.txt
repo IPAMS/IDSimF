@@ -7,7 +7,7 @@ set(SOURCE_FILES
         test_parallelNode.cpp
         test_parallelTree.cpp
         test_tree.cpp
-)
+        test_treeParticle.cpp)
 
 add_executable(test_BTree ${SOURCE_FILES})
 target_include_directories(test_BTree PUBLIC

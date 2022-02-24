@@ -45,33 +45,38 @@ TEST_CASE( "Test serial tree semantics / particle management","[Tree]") {
         Core::Particle testIon1(Core::Vector(-0.001,0.0,0.0),1.0);
         Core::Particle testIon2(Core::Vector(0.0,0.0,0.0),3.0);
         Core::Particle testIon3(Core::Vector(0.001,0.0,0.0),8.0);
+
         testTree.insertParticle(testIon1,1);
         testTree.insertParticle(testIon2,2);
         testTree.insertParticle(testIon3,3);
         testTree.computeChargeDistribution();
 
+        BTree::TreeParticle* checkParticlePtr1 = testTree.getParticle(1);
+        BTree::TreeParticle* checkParticlePtr2 = testTree.getParticle(2);
+        BTree::TreeParticle* checkParticlePtr3 = testTree.getParticle(3);
+
         BTree::Node* root = testTree.getRoot();
-        REQUIRE(testTree.getParticleList()->size() == 3);
-        REQUIRE(root->getNumberOfParticles() == 3);
+        CHECK(testTree.getParticleList()->size() == 3);
+        CHECK(root->getNumberOfParticles() == 3);
 
         //test particle removement by particle reference:
         testTree.removeParticle(1);
-        REQUIRE(testTree.getParticleList()->size() == 2);
-        REQUIRE(root->getNumberOfParticles() == 2);
-        REQUIRE( (root->getCharge() - 11*Core::ELEMENTARY_CHARGE) < 1e-100);
+        CHECK(testTree.getParticleList()->size() == 2);
+        CHECK(root->getNumberOfParticles() == 2);
+        CHECK( (root->getCharge() - 11*Core::ELEMENTARY_CHARGE) < 1e-100);
 
         testTree.removeParticle(2);
-        REQUIRE( root->getCenterOfCharge() == Core::Vector(0.001,0.0,0.0));
-        REQUIRE( (root->getCharge() - 8*Core::ELEMENTARY_CHARGE) < 1e-100);
-        REQUIRE( ! root->isParticleInSubtree(&testIon1,false));
-        REQUIRE( ! root->isParticleInSubtree(&testIon2,false));
-        REQUIRE( root->isParticleInSubtree(&testIon3,false));
+        CHECK( root->getCenterOfCharge() == Core::Vector(0.001,0.0,0.0));
+        CHECK( (root->getCharge() - 8*Core::ELEMENTARY_CHARGE) < 1e-100);
+        CHECK( ! root->isParticleInSubtree(checkParticlePtr1,false));
+        CHECK( ! root->isParticleInSubtree(checkParticlePtr2,false));
+        CHECK( root->isParticleInSubtree(checkParticlePtr3,false));
 
         testTree.removeParticle(3);
 
-        REQUIRE( root->getCenterOfCharge() == Core::Vector(0.0,0.0,0.0));
-        REQUIRE( root->getCharge() < 1e-100);
-        REQUIRE( ! root->isParticleInSubtree(&testIon3,false));
+        CHECK( root->getCenterOfCharge() == Core::Vector(0.0,0.0,0.0));
+        CHECK( root->getCharge() < 1e-100);
+        CHECK( ! root->isParticleInSubtree(checkParticlePtr3,false));
     }
 
     SECTION( "Test particle insertion edge cases"){
@@ -79,12 +84,12 @@ TEST_CASE( "Test serial tree semantics / particle management","[Tree]") {
         Core::Particle testIon2(Core::Vector(1.0,1.0,1.0),1.0);
 
         testTree.insertParticle(testIon1,1);
-        REQUIRE_THROWS(testTree.insertParticle(testIon2,2));
+        CHECK_THROWS(testTree.insertParticle(testIon2,2));
 
-        REQUIRE( testTree.getNumberOfParticles() == 1);
-        REQUIRE(testTree.getRoot()->getNumberOfParticles() == 1);
+        CHECK( testTree.getNumberOfParticles() == 1);
+        CHECK(testTree.getRoot()->getNumberOfParticles() == 1);
 
-        REQUIRE(testTree.getParticle(1) == &testIon1);
+        CHECK(testTree.getParticle(1)->get() == &testIon1);
     }
 
     SECTION( "Test external index particle access"){
@@ -100,20 +105,20 @@ TEST_CASE( "Test serial tree semantics / particle management","[Tree]") {
         testTree.insertParticle(testIon3,30);
         testTree.insertParticle(testIon4,40);
 
-        REQUIRE( (testTree.getParticle(30) == &testIon3));
-        REQUIRE( (testTree.getParticle(40) == &testIon4));
+        CHECK( (testTree.getParticle(30)->get() == &testIon3));
+        CHECK( (testTree.getParticle(40)->get() == &testIon4));
 
         testTree.insertParticle(testIon5,15);
 
-        REQUIRE( (testTree.getParticle(15) == &testIon5));
+        CHECK( (testTree.getParticle(15)->get() == &testIon5));
 
         testTree.removeParticle(20);
         testTree.removeParticle(30);
 
-        REQUIRE( (testTree.getParticle(15) == &testIon5));
-        REQUIRE( (testTree.getParticle(10) == &testIon1));
+        CHECK( (testTree.getParticle(15)->get() == &testIon5));
+        CHECK( (testTree.getParticle(10)->get() == &testIon1));
 
-        REQUIRE( testTree.getNumberOfParticles() == 3);
+        CHECK( testTree.getNumberOfParticles() == 3);
     }
 
     SECTION ( "Test particle update"){
@@ -128,13 +133,13 @@ TEST_CASE( "Test serial tree semantics / particle management","[Tree]") {
         testTree_2.computeChargeDistribution();
 
         testTree_2.updateParticleLocation(10,Core::Vector(2.01,1.0,1.0));
-        REQUIRE( testIon1.getLocation() == Core::Vector(2.01,1.0,1.0));
-        REQUIRE( testTree_2.getNumberOfParticles() == 2);
-        REQUIRE( testTree_2.getRoot()->getCenterOfCharge() == Core::Vector(2.005,1.0,1.0));
+        CHECK( testIon1.getLocation() == Core::Vector(2.01,1.0,1.0));
+        CHECK( testTree_2.getNumberOfParticles() == 2);
+        CHECK( testTree_2.getRoot()->getCenterOfCharge() == Core::Vector(2.005,1.0,1.0));
 
         testTree_2.updateParticleLocation(10,Core::Vector(2.01001,1.0,1.0));
-        REQUIRE( testIon1.getLocation() == Core::Vector(2.01001,1.0,1.0));
-        REQUIRE( testTree_2.getRoot()->getCenterOfCharge() == Core::Vector(2.005005,1.0,1.0));
+        CHECK( testIon1.getLocation() == Core::Vector(2.01001,1.0,1.0));
+        CHECK( testTree_2.getRoot()->getCenterOfCharge() == Core::Vector(2.005005,1.0,1.0));
     }
 
     SECTION( "Test tree integrity with large number of random particles"){
@@ -149,11 +154,9 @@ TEST_CASE( "Test serial tree semantics / particle management","[Tree]") {
         testTree.computeChargeDistribution();
 
         //The integrity of the resulting large random tree should be valid:
-        REQUIRE_NOTHROW(testTree.getRoot()->testSpatialTreeIntegrity());
-        REQUIRE_NOTHROW(testTree.getRoot()->testNodeIntegrity(0));
-        REQUIRE_NOTHROW(testTree.getRoot()->testNodeParticleIntegrity());
-
-        REQUIRE(testTree.getRoot()->isParticleInSubtree(ions[1].get(), false));
+        CHECK_NOTHROW(testTree.getRoot()->testSpatialTreeIntegrity());
+        CHECK_NOTHROW(testTree.getRoot()->testNodeIntegrity(0));
+        CHECK_NOTHROW(testTree.getRoot()->testNodeParticleIntegrity());
     }
 }
 
@@ -173,15 +176,15 @@ TEST_CASE( "Test serial tree charge distribution calculation","[Tree]"){
 
         testTree.computeChargeDistribution();
 
-        REQUIRE(testTree.getNumberOfParticles() == 3);
-        REQUIRE(isExactDoubleEqual(testTree.getRoot()->getCharge(), 3.0*Core::ELEMENTARY_CHARGE));
+        CHECK(testTree.getNumberOfParticles() == 3);
+        CHECK(isExactDoubleEqual(testTree.getRoot()->getCharge(), 3.0*Core::ELEMENTARY_CHARGE));
 
-        REQUIRE(testTree.computeEFieldFromTree(testIon1) == Core::Vector(0.0,0.0,0.0));
-        REQUIRE(testTree.computeEFieldFromTree(testIon2) != Core::Vector(0.0,0.0,0.0));
+        CHECK(testTree.computeEFieldFromTree(testIon1) == Core::Vector(0.0,0.0,0.0));
+        CHECK(testTree.computeEFieldFromTree(testIon2) != Core::Vector(0.0,0.0,0.0));
 
-        std::list<Core::Particle*>* particleList= testTree.getParticleList();
-        REQUIRE(particleList->size() == 3);
-        REQUIRE(particleList->front() == &testIon3);
+        BTree::treeParticlePtrList * particleList= testTree.getParticleList();
+        CHECK(particleList->size() == 3);
+        CHECK(particleList->front()->get() == &testIon3);
     }
 
     SECTION("Test particle insertion and carge calculation with another particle configuration"){
@@ -193,13 +196,13 @@ TEST_CASE( "Test serial tree charge distribution calculation","[Tree]"){
         testTree.insertParticle(testIon3,3);
 
         testTree.computeChargeDistribution();
-        REQUIRE(testTree.computeEFieldFromTree(testIon1) != Core::Vector(0.0,0.0,0.0));
-        REQUIRE(
+        CHECK(testTree.computeEFieldFromTree(testIon1) != Core::Vector(0.0,0.0,0.0));
+        CHECK(
                 vectorApproxCompare(
                         testTree.computeEFieldFromTree(testIon2),
                         Core::Vector(0.0,0.0,0.0))
                         ==  vectorsApproxEqual);
-        REQUIRE(testTree.computeEFieldFromTree(testIon3) != Core::Vector(0.0,0.0,0.0));
+        CHECK(testTree.computeEFieldFromTree(testIon3) != Core::Vector(0.0,0.0,0.0));
     }
 
     SECTION( "Test force calculation with a large number of particles in a cube"){
@@ -246,20 +249,20 @@ TEST_CASE( "Test serial tree charge distribution calculation","[Tree]"){
         }
 
         testTree.computeChargeDistribution();
-        REQUIRE(testTree.getNumberOfParticles() == 6 * nions);
+        CHECK(testTree.getNumberOfParticles() == 6 * nions);
         Core::Vector centralForce = testTree.computeEFieldFromTree(testIon1);
         Core::Vector leftForce = testTree.computeEFieldFromTree(testIon2);
         Core::Vector topForce = testTree.computeEFieldFromTree(testIon4);
-        REQUIRE(std::abs(centralForce.x()) < 1.0 );
-        REQUIRE(std::abs(centralForce.y()) < 1.0 );
-        REQUIRE(std::abs(centralForce.z()) < 1.0 );
+        CHECK(std::abs(centralForce.x()) < 1.0 );
+        CHECK(std::abs(centralForce.y()) < 1.0 );
+        CHECK(std::abs(centralForce.z()) < 1.0 );
 
-        REQUIRE(std::abs(leftForce.x())-107 < 1.5 );
-        REQUIRE(std::abs(leftForce.y()) < 1 );
-        REQUIRE(std::abs(leftForce.z()) < 1 );
+        CHECK(std::abs(leftForce.x())-107 < 1.5 );
+        CHECK(std::abs(leftForce.y()) < 1 );
+        CHECK(std::abs(leftForce.z()) < 1 );
 
-        REQUIRE(std::abs(topForce.y())-107 < 1.5 );
-        REQUIRE(std::abs(topForce.x()) < 1 );
-        REQUIRE(std::abs(topForce.z()) < 1 );
+        CHECK(std::abs(topForce.y())-107 < 1.5 );
+        CHECK(std::abs(topForce.x()) < 1 );
+        CHECK(std::abs(topForce.z()) < 1 );
     }
 }
