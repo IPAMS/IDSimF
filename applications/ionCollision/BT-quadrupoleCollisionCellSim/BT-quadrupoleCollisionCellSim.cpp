@@ -153,7 +153,7 @@ int main(int argc, const char * argv[]) {
         // define functions for the trajectory integration ==================================================
         auto accelerationFunction =
                 [spaceChargeFactor, omega_rf, V_rf, ionRecordMode, &potentialArrays, &potentialsDc, &potentialFactorsRf](
-                        Core::Particle* particle, int /*particleIndex*/, BTree::ParallelTree& tree, double time,
+                        Core::Particle* particle, int /*particleIndex*/, SpaceCharge::FieldCalculator& scFieldCalculator, double time,
                         int /*timestep*/) -> Core::Vector {
 
                     Core::Vector pos = particle->getLocation();
@@ -173,7 +173,7 @@ int main(int argc, const char * argv[]) {
                     }
                     Core::Vector spaceChargeField(0, 0, 0);
                     if (spaceChargeFactor>0) {
-                        spaceChargeField = tree.computeEFieldFromTree(*particle)*spaceChargeFactor;
+                        spaceChargeField = scFieldCalculator.computeEFieldFromSpaceCharge(*particle)*spaceChargeFactor;
                     }
 
                     if (ionRecordMode==FULL) {
@@ -253,7 +253,7 @@ int main(int argc, const char * argv[]) {
         auto timestepWriteFunction =
                 [trajectoryWriteInterval, ionRecordMode, &ionsInactive, &hdf5Writer, &startSplatTracker,
                  &integratorPtr, &logger](
-                        std::vector<Core::Particle*>& particles, auto& /*tree*/,
+                        std::vector<Core::Particle*>& particles,
                         double time, unsigned int timestep, bool lastTimestep) {
 
                     // check if simulation should be terminated (if all particles are terminated)
@@ -299,12 +299,12 @@ int main(int argc, const char * argv[]) {
                     potentialArrays.at(0)->isElectrode(newPartPos.x(), newPartPos.y(), newPartPos.z()));
         };
 
-        Integration::ParallelVerletIntegrator::otherActionsFctType otherActionsFunction;
+        Integration::otherActionsFctType otherActionsFunction;
 
         if (ionTerminationMode==TERMINATE) {
             otherActionsFunction = [&isIonTerminated, &ionsInactive, &startSplatTracker](
                     Core::Vector& newPartPos, Core::Particle* particle,
-                    int /*particleIndex*/, auto& /*tree*/, double time, int /*timestep*/) {
+                    int /*particleIndex*/,  double time, int /*timestep*/) {
                 // if the ion is out of the boundary box or ion has hit an electrode: Terminate
                 if (isIonTerminated(newPartPos)) {
                     startSplatTracker.particleSplat(particle, time);
@@ -321,7 +321,7 @@ int main(int argc, const char * argv[]) {
             otherActionsFunction = [&isIonTerminated, pz = std::move(particleStartZone), &startSplatTracker](
                     Core::Vector& newPartPos, Core::Particle* particle,
                     int /*particleIndex*/,
-                    auto& /*tree*/, double time, int /*timestep*/) {
+                     double time, int /*timestep*/) {
                 // if the ion is out of the boundary box or ion has hit an electrode: Restart in ion start zone
                 if (isIonTerminated(newPartPos)) {
                     newPartPos = pz->getRandomParticlePosition();

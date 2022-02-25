@@ -65,36 +65,21 @@ int main(int argc, char** argv) {
     double spaceChargeFactor = 1.0;
 
     // define functions for the trajectory integration ==================================================
-    auto accelerationFunctionSerial =
+    auto accelerationFunction =
             [spaceChargeFactor](
                     Core::Particle *particle, int /*particleIndex*/,
-                    BTree::Tree &tree, double /*time*/, int /*timestep*/) -> Core::Vector{
+                    SpaceCharge::FieldCalculator& scFieldCalculator, double /*time*/, int /*timestep*/) -> Core::Vector{
 
                 double particleCharge = particle->getCharge();
 
                 Core::Vector spaceChargeForce(0,0,0);
                 if (spaceChargeFactor > 0) {
                     spaceChargeForce =
-                            tree.computeEFieldFromTree(*particle) * (particleCharge * spaceChargeFactor);
+                            scFieldCalculator.computeEFieldFromSpaceCharge(*particle) * (particleCharge * spaceChargeFactor);
                 }
                 return (spaceChargeForce / particle->getMass());
             };
 
-
-    auto accelerationFunctionParallelNew =
-            [spaceChargeFactor](
-                    Core::Particle *particle, int /*particleIndex*/,
-                    BTree::ParallelTree &tree, double /*time*/, int /*timestep*/) -> Core::Vector{
-
-                double particleCharge = particle->getCharge();
-
-                Core::Vector spaceChargeForce(0,0,0);
-                if (spaceChargeFactor > 0) {
-                    spaceChargeForce =
-                            tree.computeEFieldFromTree(*particle) * (particleCharge * spaceChargeFactor);
-                }
-                return (spaceChargeForce / particle->getMass());
-            };
 
     auto hdf5Writer = std::make_unique<FileIO::TrajectoryHDF5Writer>(
             "test_trajectories.hd5");
@@ -125,11 +110,11 @@ int main(int argc, char** argv) {
     // simulate ===============================================================================================
     Integration::VerletIntegrator verletIntegratorSerial(
             particlePtrsSerial,
-            accelerationFunctionSerial, nullptr, nullptr, nullptr, collisionModel);
+            accelerationFunction, nullptr, nullptr, nullptr, collisionModel);
 
     Integration::ParallelVerletIntegrator verletIntegratorParallel(
             particlePtrsParallelNew,
-            accelerationFunctionParallelNew, nullptr, nullptr, nullptr, collisionModel);
+            accelerationFunction, nullptr, nullptr, nullptr, collisionModel);
 
     runIntegrator(verletIntegratorSerial, timeSteps, dt, "serial");
     runIntegrator(verletIntegratorParallel, timeSteps, dt, "parallel");

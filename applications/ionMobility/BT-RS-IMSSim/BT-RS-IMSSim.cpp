@@ -236,7 +236,7 @@ int main(int argc, const char *argv[]){
 
         auto accelerationFctVerlet =
                 [eFieldMagnitude, spaceChargeFactor]
-                        (Core::Particle* particle, int /*particleIndex*/, BTree::Tree& tree, double /*time*/, int /*timestep*/) {
+                        (Core::Particle* particle, int /*particleIndex*/, SpaceCharge::FieldCalculator& scFieldCalculator, double /*time*/, int /*timestep*/) {
                     double particleCharge = particle->getCharge();
 
                     Core::Vector fieldForce(eFieldMagnitude*particleCharge, 0, 0);
@@ -246,7 +246,7 @@ int main(int argc, const char *argv[]){
                     }
                     else {
                         Core::Vector spaceChargeForce =
-                                tree.computeEFieldFromTree(*particle)*(particleCharge*spaceChargeFactor);
+                                scFieldCalculator.computeEFieldFromSpaceCharge(*particle)*(particleCharge*spaceChargeFactor);
                         return ((fieldForce+spaceChargeForce)/particle->getMass());
                     }
                 };
@@ -268,7 +268,7 @@ int main(int argc, const char *argv[]){
 
         auto timestepWriteFctVerlet =
                 [&timestepWriteFctSimple]
-                        (std::vector<Core::Particle*>& particles, BTree::Tree& /*tree*/, double time, int timestep,
+                        (std::vector<Core::Particle*>& particles,  double time, int timestep,
                          bool lastTimestep) {
                     timestepWriteFctSimple(particles, time, timestep, lastTimestep);
                 };
@@ -287,7 +287,7 @@ int main(int argc, const char *argv[]){
         auto otherActionsFunctionIMSVerlet =
                 [&otherActionsFunctionIMSSimple]
                         (Core::Vector& newPartPos, Core::Particle* particle, int particleIndex,
-                         BTree::Tree& /*tree*/, double time, int timestep) {
+                          double time, int timestep) {
                     otherActionsFunctionIMSSimple(newPartPos, particle, particleIndex, time, timestep);
                 };
 

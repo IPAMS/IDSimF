@@ -245,7 +245,7 @@ int main(int argc, const char * argv[]) {
                         omega, z_0, U_0, d_square_2,
                         &rfSampledWaveForm, &higherFieldOrdersCoefficients, &swiftWaveForm, &V_0, &V_0_ramp](
                         Core::Particle* particle, int /*particleIndex*/,
-                        auto& /*tree*/, double time, unsigned int timestep) -> Core::Vector {
+                        double time, unsigned int timestep) -> Core::Vector {
 
                     Core::Vector pos = particle->getLocation();
                     double particleCharge = particle->getCharge();
@@ -325,44 +325,17 @@ int main(int argc, const char * argv[]) {
         auto accelerationFunctionQIT =
                 [spaceChargeFactor, &trapFieldFunction](
                         Core::Particle* particle, int particleIndex,
-                        auto& tree, double time, unsigned int timestep) -> Core::Vector {
+                        SpaceCharge::FieldCalculator& scFieldCalculator, double time, unsigned int timestep) -> Core::Vector {
 
                     double particleCharge = particle->getCharge();
 
-                    Core::Vector rfForce = trapFieldFunction(particle, particleIndex, tree, time, timestep);
+                    Core::Vector rfForce = trapFieldFunction(particle, particleIndex, time, timestep);
 
                     Core::Vector spaceChargeForce(0, 0, 0);
                     if (spaceChargeFactor>0) {
                         spaceChargeForce =
-                                tree.computeEFieldFromTree(*particle)*(particleCharge*spaceChargeFactor);
+                                scFieldCalculator.computeEFieldFromSpaceCharge(*particle)*(particleCharge*spaceChargeFactor);
                     }
-
-                    //update the additional parameters for writing them later to the trajectory:
-                    particle->setFloatAttribute(key_rf_x, rfForce.x());
-                    particle->setFloatAttribute(key_rf_y, rfForce.y());
-                    particle->setFloatAttribute(key_rf_z, rfForce.z());
-                    particle->setFloatAttribute(key_spaceCharge_x, spaceChargeForce.x());
-                    particle->setFloatAttribute(key_spaceCharge_y, spaceChargeForce.y());
-                    particle->setFloatAttribute(key_spaceCharge_z, spaceChargeForce.z());
-
-                    return ((rfForce+spaceChargeForce)/particle->getMass());
-                };
-
-        auto accelerationFunctionQIT_parallel =
-                [spaceChargeFactor, &trapFieldFunction](
-                        Core::Particle* particle, int particleIndex,
-                        auto& tree, double time, unsigned int timestep) -> Core::Vector {
-
-                    double particleCharge = particle->getCharge();
-
-                    Core::Vector rfForce = trapFieldFunction(particle, particleIndex, tree, time, timestep);
-
-                    Core::Vector spaceChargeForce(0, 0, 0);
-                    if (spaceChargeFactor>0) {
-                        spaceChargeForce =
-                                tree.computeEFieldFromTree(*particle)*(particleCharge*spaceChargeFactor);
-                    }
-
 
                     //update the additional parameters for writing them later to the trajectory:
                     particle->setFloatAttribute(key_rf_x, rfForce.x());
@@ -384,7 +357,7 @@ int main(int argc, const char * argv[]) {
         int ionsInactive = 0;
         auto otherActionsFunctionQIT = [maxIonRadius, &ionsInactive, &startSplatTracker]
                 (Core::Vector& newPartPos, Core::Particle* particle, unsigned int /*particleIndex*/,
-                 auto& /*tree*/, double time, unsigned int /*timestep*/) {
+                 double time, unsigned int /*timestep*/) {
             if (newPartPos.magnitude()>maxIonRadius) {
                 particle->setActive(false);
                 particle->setSplatTime(time);
@@ -438,7 +411,7 @@ int main(int argc, const char * argv[]) {
                 [trajectoryWriteInterval, fftWriteInterval, fftWriteMode, &V_0, &V_rf_export, &ionsInactive,
                         &hdf5Writer, &ionsInactiveWriter,
                         &fftWriter, &startSplatTracker, &logger](
-                        std::vector<Core::Particle*>& particles, auto& /*tree*/, double time, unsigned int timestep,
+                        std::vector<Core::Particle*>& particles, double time, unsigned int timestep,
                         bool lastTimestep) {
 
                     if (timestep%fftWriteInterval==0) {
@@ -489,7 +462,7 @@ int main(int argc, const char * argv[]) {
         else if (integratorMode==PARALLEL_VERLET) {
             Integration::ParallelVerletIntegrator verletIntegrator(
                     particlePtrs,
-                    accelerationFunctionQIT_parallel, timestepWriteFunction,
+                    accelerationFunctionQIT, timestepWriteFunction,
                     otherActionsFunctionQIT, particleStartMonitoringFct,
                     &hsModel);
             AppUtils::SignalHandler::setReceiver(verletIntegrator);

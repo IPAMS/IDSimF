@@ -56,36 +56,20 @@ TEST_CASE("Compare results of serial and parallel varlet integrators with a line
     double spaceChargeFactor = 1.0;
 
     // define functions for the trajectory integration ==================================================
-    auto accelerationFunctionSerial =
+    auto accelerationFunction =
             [spaceChargeFactor](
                     Core::Particle *particle, int /*particleIndex*/,
-                    BTree::Tree &tree, double /*time*/, int /*timestep*/) -> Core::Vector{
+                    SpaceCharge::FieldCalculator &fieldCalculator, double /*time*/, int /*timestep*/) -> Core::Vector{
 
                 double particleCharge = particle->getCharge();
 
                 Core::Vector spaceChargeForce(0,0,0);
                 if (spaceChargeFactor > 0) {
                     spaceChargeForce =
-                            tree.computeEFieldFromTree(*particle) * (particleCharge * spaceChargeFactor);
+                            fieldCalculator.computeEFieldFromSpaceCharge(*particle) * (particleCharge * spaceChargeFactor);
                 }
                 return (spaceChargeForce / particle->getMass());
             };
-
-    auto accelerationFunctionParallelNew =
-            [spaceChargeFactor](
-                    Core::Particle *particle, int /*particleIndex*/,
-                    BTree::ParallelTree &tree, double /*time*/, int /*timestep*/) -> Core::Vector{
-
-                double particleCharge = particle->getCharge();
-
-                Core::Vector spaceChargeForce(0,0,0);
-                if (spaceChargeFactor > 0) {
-                    spaceChargeForce =
-                            tree.computeEFieldFromTree(*particle) * (particleCharge * spaceChargeFactor);
-                }
-                return (spaceChargeForce / particle->getMass());
-            };
-
 
     std::vector<std::unique_ptr<Core::Particle>> particlesSerial;
     std::vector<Core::Particle*>particlePtrsSerial;
@@ -98,10 +82,10 @@ TEST_CASE("Compare results of serial and parallel varlet integrators with a line
 
     // simulate ===============================================================================================
     Integration::VerletIntegrator verletIntegratorSerial(
-            particlePtrsSerial, accelerationFunctionSerial);
+            particlePtrsSerial, accelerationFunction);
 
     Integration::ParallelVerletIntegrator verletIntegratorParallelNew(
-            particlePtrsParallelNew, accelerationFunctionParallelNew);
+            particlePtrsParallelNew, accelerationFunction);
 
     verletIntegratorSerial.run(timeSteps, dt);
     verletIntegratorParallelNew.run(timeSteps, dt);

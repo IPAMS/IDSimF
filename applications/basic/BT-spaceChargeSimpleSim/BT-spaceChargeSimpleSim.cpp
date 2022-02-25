@@ -117,21 +117,21 @@ int main(int argc, const char * argv[]) {
         auto accelerationFunction =
                 [spaceChargeFactor](
                         Core::Particle* particle, int /*particleIndex*/,
-                        BTree::Tree& tree, double /*time*/, int /*timestep*/) -> Core::Vector {
+                        SpaceCharge::FieldCalculator& scFieldCalculator, double /*time*/, int /*timestep*/) -> Core::Vector {
 
                     double particleCharge = particle->getCharge();
 
                     Core::Vector spaceChargeForce(0, 0, 0);
                     if (spaceChargeFactor>0) {
                         spaceChargeForce =
-                                tree.computeEFieldFromTree(*particle)*(particleCharge*spaceChargeFactor);
+                                scFieldCalculator.computeEFieldFromSpaceCharge(*particle)*(particleCharge*spaceChargeFactor);
                     }
                     return (spaceChargeForce/particle->getMass());
                 };
 
         auto timestepWriteFunction =
                 [trajectoryWriteInterval, &hdf5Writer, &logger](
-                        std::vector<Core::Particle*>& particles, BTree::Tree& /*tree*/, double time,
+                        std::vector<Core::Particle*>& particles,  double time,
                         int timestep, bool lastTimestep) {
 
                     if (lastTimestep) {

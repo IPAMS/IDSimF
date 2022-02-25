@@ -256,7 +256,7 @@ int main(int argc, const char * argv[]) {
 
         auto accelerationFct =
                 [&totalFieldNow_VPerM, spaceChargeFactor]
-                        (Core::Particle* particle, int /*particleIndex*/, auto& tree, double /*time*/, int /*timestep*/) {
+                        (Core::Particle* particle, int /*particleIndex*/, SpaceCharge::FieldCalculator& scFieldCalculator, double /*time*/, int /*timestep*/) {
 
                     double particleCharge = particle->getCharge();
                     Core::Vector fieldForce(0, 0, totalFieldNow_VPerM*particleCharge);
@@ -266,7 +266,7 @@ int main(int argc, const char * argv[]) {
                     }
                     else {
                         Core::Vector spaceChargeForce =
-                                tree.computeEFieldFromTree(*particle)*(particleCharge*spaceChargeFactor);
+                                scFieldCalculator.computeEFieldFromSpaceCharge(*particle)*(particleCharge*spaceChargeFactor);
                         return ((fieldForce+spaceChargeForce)/particle->getMass());
                     }
                 };
@@ -274,8 +274,8 @@ int main(int argc, const char * argv[]) {
 
         auto timestepWriteFct =
                 [&trajectoryWriter, &voltageWriter, trajectoryWriteInterval, &rsSim, &resultFilewriter, concentrationWriteInterval,
-                 &totalFieldNow_VPerM, &logger]
-                        (std::vector<Core::Particle*>& particles, auto& tree, double time, int timestep,
+                 &totalFieldNow_VPerM, &logger, &meanZPos]
+                        (std::vector<Core::Particle*>& particles, double time, int timestep,
                          bool lastTimestep) {
 
                     if (timestep%concentrationWriteInterval==0) {
@@ -288,18 +288,16 @@ int main(int argc, const char * argv[]) {
                         trajectoryWriter.finalizeTrajectory();
                         logger->info("finished ts:{} time:{:.2e}", timestep, time);
                     }
-
                     else if (timestep%trajectoryWriteInterval==0) {
-                        Core::Vector cof = tree.getRoot()->getCenterOfCharge();
-                        logger->info("ts:{}  time:{:.2e} average cloud position:({:.2e},{:.2e},{:.2e})", timestep, time,
-                                cof.x(), cof.y(), cof.z());
+                        logger->info("ts:{}  time:{:.2e} average cloud z position:({:.2e})",
+                                timestep, time, meanZPos);
                         rsSim.logConcentrations(logger);
                         trajectoryWriter.writeTimestep(particles, time);                    }
                 };
 
         auto otherActionsFct = [electrodeHalfDistance_m, electrodeLength_m, &ionsInactive](
                 Core::Vector& newPartPos, Core::Particle* particle,
-                int /*particleIndex*/, auto& /*tree*/, double time, int /*timestep*/) {
+                int /*particleIndex*/,  double time, int /*timestep*/) {
 
             if (std::fabs(newPartPos.z())>=electrodeHalfDistance_m) {
                 particle->setActive(false);
@@ -337,7 +335,6 @@ int main(int argc, const char * argv[]) {
             }
 
             if (collisionType==SDS){
-
                 std::unique_ptr<CollisionModel::StatisticalDiffusionModel> collisionModel =
                         std::make_unique<CollisionModel::StatisticalDiffusionModel>(
                                 staticPressureFct,

@@ -91,7 +91,7 @@ int main(int argc, const char * argv[]) {
         auto accelerationFunction =
                 [spaceChargeFactor, &eField](
                         Core::Particle* particle, int /*particleIndex*/,
-                        BTree::Tree& tree, double /*time*/, int /*timestep*/) -> Core::Vector {
+                        SpaceCharge::FieldCalculator& scFieldCalculator, double /*time*/, int /*timestep*/) -> Core::Vector {
 
                     Core::Vector pos = particle->getLocation();
                     double particleCharge = particle->getCharge();
@@ -100,7 +100,7 @@ int main(int argc, const char * argv[]) {
                         Core::Vector spaceChargeForce(0, 0, 0);
                         if (spaceChargeFactor>0) {
                             spaceChargeForce =
-                                    tree.computeEFieldFromTree(*particle)*spaceChargeFactor;
+                                    scFieldCalculator.computeEFieldFromSpaceCharge(*particle)*spaceChargeFactor;
                         }
                         return ((E+spaceChargeForce)*particleCharge/particle->getMass());
 
@@ -124,7 +124,7 @@ int main(int argc, const char * argv[]) {
 
         auto timestepWriteFunction =
                 [trajectoryWriteInterval, &jsonWriter, &additionalParameterTransformFct, &logger](
-                        std::vector<Core::Particle*>& particles, BTree::Tree& /*tree*/, double time, int timestep,
+                        std::vector<Core::Particle*>& particles, double time, int timestep,
                         bool lastTimestep) {
 
                     if (lastTimestep) {

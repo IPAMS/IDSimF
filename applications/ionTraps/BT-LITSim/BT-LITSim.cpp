@@ -225,7 +225,7 @@ int main(int argc, const char * argv[]) {
         auto trapFieldFunction =
                 [exciteMode, rfMode, excitePulseLength, excitePulsePotential, omega, &swiftWaveForm, &V_0, &V_0_ramp,
                         &potentialArrays, &potentialsFactorsDc, &potentialFactorsRf, &potentialFactorsExcite]
-                        (Core::Particle* particle, int /*particleIndex*/, auto& /*tree*/, double time, unsigned int timestep)
+                        (Core::Particle* particle, int /*particleIndex*/,  double time, unsigned int timestep)
                         -> Core::Vector {
 
                     Core::Vector pos = particle->getLocation();
@@ -263,16 +263,16 @@ int main(int argc, const char * argv[]) {
 
         double axialPotential_upperStart = axialPotentialCenter+axialPotentialFloowWidth;
         double axialPotential_lowerStart = axialPotentialCenter-axialPotentialFloowWidth;
-        auto accelerationFunctionLIT_parallel =
+        auto accelerationFunctionLIT =
                 [spaceChargeFactor, &trapFieldFunction,
                         axialPotential_lowerStart, axialPotential_upperStart, axialPotentialGradient](
                         Core::Particle* particle, int particleIndex,
-                        auto& tree, double time, unsigned int timestep) -> Core::Vector {
+                        SpaceCharge::FieldCalculator& scFieldCalculator, double time, unsigned int timestep) -> Core::Vector {
 
                     Core::Vector pos = particle->getLocation();
                     double particleCharge = particle->getCharge();
 
-                    Core::Vector rfForce = trapFieldFunction(particle, particleIndex, tree, time, timestep);
+                    Core::Vector rfForce = trapFieldFunction(particle, particleIndex, time, timestep);
                     double z_force = 0;
                     if (pos.z()>axialPotential_upperStart) {
                         z_force = (axialPotential_upperStart-pos.z())*axialPotentialGradient*particleCharge;
@@ -286,7 +286,7 @@ int main(int argc, const char * argv[]) {
                     Core::Vector spaceChargeForce(0, 0, 0);
                     if (spaceChargeFactor>0) {
                         spaceChargeForce =
-                                tree.computeEFieldFromTree(*particle)*(particleCharge*spaceChargeFactor);
+                                scFieldCalculator.computeEFieldFromSpaceCharge(*particle)*(particleCharge*spaceChargeFactor);
                     }
 
                     //update the additional parameters for writing them later to the trajectory:
@@ -308,7 +308,7 @@ int main(int argc, const char * argv[]) {
 
         auto otherActionsFunctionQIT = [&simulationDomainBoundaries, &ionsInactive, &potentialArrays, &startSplatTracker](
                 Core::Vector& newPartPos, Core::Particle* particle,
-                int /*particleIndex*/, auto& /*tree*/, double time, int /*timestep*/) {
+                int /*particleIndex*/,  double time, int /*timestep*/) {
             // if the ion is out of the boundary box or ends up in an electrode:
             // Terminate the ion
             // (since all potential arrays of the simulation define the basis functions of a linear combination,
@@ -377,7 +377,7 @@ int main(int argc, const char * argv[]) {
         auto timestepWriteFunction =
                 [trajectoryWriteInterval, fftWriteInterval, fftWriteMode, &V_0, &V_rf_export, &ionsInactive,
                         &hdf5Writer, &startSplatTracker, &ionsInactiveWriter, &fftWriter, &integratorPtr, &logger](
-                        std::vector<Core::Particle*>& particles, auto& /*tree*/, double time, int timestep,
+                        std::vector<Core::Particle*>& particles,  double time, int timestep,
                         bool lastTimestep) {
 
                     // check if simulation should be terminated (if all particles are terminated)
@@ -425,7 +425,7 @@ int main(int argc, const char * argv[]) {
         if (integratorMode==PARALLEL_VERLET) {
             Integration::ParallelVerletIntegrator verletIntegrator(
                     particlePtrs,
-                    accelerationFunctionLIT_parallel, timestepWriteFunction, otherActionsFunctionQIT,
+                    accelerationFunctionLIT, timestepWriteFunction, otherActionsFunctionQIT,
                     particleStartMonitoringFct,
                     &hsModel);
 

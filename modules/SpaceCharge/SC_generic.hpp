@@ -38,8 +38,8 @@ namespace SpaceCharge{
     class FieldCalculator {
 
     public:
+        virtual ~FieldCalculator() = default;
         virtual Core::Vector computeEFieldFromSpaceCharge(Core::Particle &particle) = 0;
-
     };
 }
 

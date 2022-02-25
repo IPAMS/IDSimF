@@ -146,7 +146,8 @@ int main(int argc, const char * argv[]) {
 
         // define functions for the trajectory integration ==================================================
         auto accelerationFunction = [V_rf, V_entrance, spaceChargeFactor, &electricFieldQuadRF, &electricFieldQuadEntrance](
-                Core::Particle* particle, int /*particleIndex*/, BTree::Tree& tree, double time, int /*timestep*/) {
+                Core::Particle* particle, int /*particleIndex*/, SpaceCharge::FieldCalculator& scFieldCalculator,
+                double time, int /*timestep*/) {
             //x is the long quad axis
             Core::Vector pos = particle->getLocation();
             double particleCharge = particle->getCharge();
@@ -158,7 +159,7 @@ int main(int argc, const char * argv[]) {
                                 (electricFieldQuadEntrance->getInterpolatedVector(pos.x(), pos.y(), pos.z(), 0)
                                         *V_entrance);
 
-                Core::Vector spaceChargeForce = tree.computeEFieldFromTree(*particle)*spaceChargeFactor;
+                Core::Vector spaceChargeForce = scFieldCalculator.computeEFieldFromSpaceCharge(*particle)*spaceChargeFactor;
                 Core::Vector result = (E+spaceChargeForce)*particleCharge/particle->getMass();
                 return (result);
             }
@@ -181,7 +182,7 @@ int main(int argc, const char * argv[]) {
                 };
 
         auto timestepWriteFunction = [trajectoryWriteInterval, &additionalParameterTransformFct, &jsonWriter, &logger](
-                std::vector<Core::Particle*>& particles, BTree::Tree& /*tree*/, double time, int timestep,
+                std::vector<Core::Particle*>& particles, double time, int timestep,
                 bool lastTimestep) {
             if (timestep%trajectoryWriteInterval==0) {
                 logger->info("ts:{} time:{:.2e}", timestep, time);
@@ -197,7 +198,7 @@ int main(int argc, const char * argv[]) {
 
         auto otherActionsFunction = [maxQLength, maxRadius, &startZone](Core::Vector& newPartPos,
                                                                         Core::Particle* particle, int /*particleIndex*/,
-                                                                        BTree::Tree& /*tree*/, double /*time*/, int /*timestep*/) {
+                                                                         double /*time*/, int /*timestep*/) {
 
             double r_pos = std::sqrt(newPartPos.y()*newPartPos.y()+newPartPos.z()*newPartPos.z());
 

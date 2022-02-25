@@ -290,7 +290,7 @@ int main(int argc, const char * argv[]) {
                         spaceChargeFactor, omega, z_0, U_0, d_square_2,
                         &swiftWaveForm, exciteDivisor, &V_0, &V_0_ramp, &lastTimestep, &parameter_a, &exciteCos](
                         Core::Particle* particle, int /*particleIndex*/,
-                        BTree::Tree& tree, double time, unsigned int timestep) -> Core::Vector {
+                        SpaceCharge::FieldCalculator& scFieldCalculator, double time, unsigned int timestep) -> Core::Vector {
 
                     Core::Vector pos = particle->getLocation();
                     double particleCharge = particle->getCharge();
@@ -328,7 +328,7 @@ int main(int argc, const char * argv[]) {
                     Core::Vector spaceChargeForce(0, 0, 0);
                     if (spaceChargeFactor>0) {
                         spaceChargeForce =
-                                tree.computeEFieldFromTree(*particle)*(particleCharge*spaceChargeFactor);
+                                scFieldCalculator.computeEFieldFromSpaceCharge(*particle)*(particleCharge*spaceChargeFactor);
                     }
 
                     //update the additional parameters for writing them later to the trajectory:
@@ -345,7 +345,7 @@ int main(int argc, const char * argv[]) {
         unsigned int ionsInactive = 0;
         auto otherActionsFunctionQIT = [maxIonRadius_m, &ionsInactive, &startSplatTracker]
                 (Core::Vector& newPartPos, Core::Particle* particle,
-                 int /*particleIndex*/, BTree::Tree& /*tree*/, double time, int /*timestep*/) {
+                 int /*particleIndex*/,  double time, int /*timestep*/) {
             if (newPartPos.magnitude()>maxIonRadius_m) {
 
                 particle->setActive(false);
@@ -356,8 +356,6 @@ int main(int argc, const char * argv[]) {
         };
 
         //prepare file writers and data writing functions ==============================================================================
-        auto avgPositionWriter = std::make_unique<FileIO::AverageChargePositionWriter>(
-                simResultBasename+"_averagePosition.txt");
         std::unique_ptr<FileIO::IdealizedQitFFTWriter> fftWriter = nullptr;
         if (fftWriteMode!=OFF) {
             fftWriter = std::make_unique<FileIO::IdealizedQitFFTWriter>(particlePtrs,
@@ -403,12 +401,11 @@ int main(int argc, const char * argv[]) {
 
         auto timestepWriteFunction =
                 [trajectoryWriteInterval, fftWriteInterval, fftWriteMode, &V_0, &V_rf_export, &ionsInactive,
-                        &hdf5Writer, &avgPositionWriter, &ionsInactiveWriter, &fftWriter, &startSplatTracker, &logger](
-                        std::vector<Core::Particle*>& particles, BTree::Tree& tree, double time, int timestep,
+                        &hdf5Writer, &ionsInactiveWriter, &fftWriter, &startSplatTracker, &logger](
+                        std::vector<Core::Particle*>& particles, double time, int timestep,
                         bool lastTimestep) {
 
                     if (timestep%fftWriteInterval==0) {
-                        avgPositionWriter->writeTimestep(tree, time);
                         ionsInactiveWriter->writeTimestep(ionsInactive, time);
                         if (fftWriteMode==UNRESOLVED) {
                             fftWriter->writeTimestep(time);

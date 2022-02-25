@@ -222,7 +222,7 @@ int main(int argc, const char * argv[]) {
                 [exciteMode, rfMode, excitePulseLength, excitePulsePotential,
                         omega, &swiftWaveForm, &V_0, &V_0_ramp,
                         &potentialArrays, &potentialsFactorsDc, &potentialFactorsRf, &potentialFactorsExcite]
-                        (Core::Particle* particle, int /*particleIndex*/, auto& /*tree*/, double time, unsigned int timestep)
+                        (Core::Particle* particle, int /*particleIndex*/,  double time, unsigned int timestep)
                         -> Core::Vector {
 
                     Core::Vector pos = particle->getLocation();
@@ -260,17 +260,17 @@ int main(int argc, const char * argv[]) {
 
         auto accelerationFunctionQIT =
                 [spaceChargeFactor, &trapFieldFunction](
-                        Core::Particle* particle, int particleIndex,
-                        auto& tree, double time, unsigned int timestep) -> Core::Vector {
+                        Core::Particle* particle, int particleIndex, SpaceCharge::FieldCalculator& scFieldCalculator,
+                        double time, unsigned int timestep) -> Core::Vector {
 
                     double particleCharge = particle->getCharge();
 
-                    Core::Vector trapForce = trapFieldFunction(particle, particleIndex, tree, time, timestep);
+                    Core::Vector trapForce = trapFieldFunction(particle, particleIndex, time, timestep);
 
                     Core::Vector spaceChargeForce(0, 0, 0);
                     if (spaceChargeFactor>0) {
                         spaceChargeForce =
-                                tree.computeEFieldFromTree(*particle)*(particleCharge*spaceChargeFactor);
+                                scFieldCalculator.computeEFieldFromSpaceCharge(*particle)*(particleCharge*spaceChargeFactor);
                     }
 
                     //update the additional parameters for writing them later to the trajectory:
@@ -284,32 +284,6 @@ int main(int argc, const char * argv[]) {
                     return ((trapForce+spaceChargeForce)/particle->getMass());
                 };
 
-        auto accelerationFunctionQIT_parallel =
-                [spaceChargeFactor, &trapFieldFunction](
-                        Core::Particle* particle, int particleIndex,
-                        auto& tree, double time, unsigned int timestep) -> Core::Vector {
-
-                    double particleCharge = particle->getCharge();
-
-                    Core::Vector rfForce = trapFieldFunction(particle, particleIndex, tree, time, timestep);
-
-                    Core::Vector spaceChargeForce(0, 0, 0);
-                    if (spaceChargeFactor>0) {
-                        spaceChargeForce =
-                                tree.computeEFieldFromTree(*particle)*(particleCharge*spaceChargeFactor);
-                    }
-
-                    //update the additional parameters for writing them later to the trajectory:
-                    particle->setFloatAttribute(key_trapForce_x, rfForce.x());
-                    particle->setFloatAttribute(key_trapForce_y, rfForce.y());
-                    particle->setFloatAttribute(key_trapForce_z, rfForce.z());
-                    particle->setFloatAttribute(key_spaceCharge_x, spaceChargeForce.x());
-                    particle->setFloatAttribute(key_spaceCharge_y, spaceChargeForce.y());
-                    particle->setFloatAttribute(key_spaceCharge_z, spaceChargeForce.z());
-
-                    return ((rfForce+spaceChargeForce)/particle->getMass());
-                };
-
         // Prepare ion start / stop tracker and ion start monitoring / ion termination functions
         ParticleSimulation::ParticleStartSplatTracker startSplatTracker;
         auto particleStartMonitoringFct = [&startSplatTracker](Core::Particle* particle, double time) {
@@ -319,7 +293,7 @@ int main(int argc, const char * argv[]) {
         auto otherActionsFunctionQIT = [&simulationDomainBoundaries, &ionsInactive, &potentialArrays, &startSplatTracker](
                 Core::Vector& newPartPos, Core::Particle* particle,
                 int /*particleIndex*/,
-                auto& /*tree*/, double time, unsigned int /*timestep*/) {
+                 double time, unsigned int /*timestep*/) {
             // if the ion is out of the boundary box or ends up in an electrode:
             // Terminate the ion
             // (since all potential arrays of the simulation define the basis functions of a linear combination,
@@ -381,7 +355,7 @@ int main(int argc, const char * argv[]) {
         auto timestepWriteFunction =
                 [trajectoryWriteInterval, fftWriteInterval, fftWriteMode, &V_0, &V_rf_export, &ionsInactive,
                         &hdf5Writer, &startSplatTracker, &ionsInactiveWriter, &fftWriter, &integratorPtr, &logger](
-                        std::vector<Core::Particle*>& particles, auto& /*tree*/, double time, unsigned int timestep,
+                        std::vector<Core::Particle*>& particles,  double time, unsigned int timestep,
                         bool lastTimestep) {
 
                     // check if simulation should be terminated (if all particles are terminated)
@@ -440,7 +414,7 @@ int main(int argc, const char * argv[]) {
         else if (integratorMode==PARALLEL_VERLET) {
             Integration::ParallelVerletIntegrator verletIntegrator(
                     particlePtrs,
-                    accelerationFunctionQIT_parallel, timestepWriteFunction, otherActionsFunctionQIT,
+                    accelerationFunctionQIT, timestepWriteFunction, otherActionsFunctionQIT,
                     particleStartMonitoringFct,
                     &hsModel);
 
