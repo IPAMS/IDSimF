@@ -48,38 +48,6 @@ namespace Integration{
     class ParallelVerletIntegrator: public AbstractTimeIntegrator {
 
         public:
-            typedef std::function
-                    <Core::Vector (Core::Particle* particle,
-                                   std::size_t particleIndex,
-                                   BTree::ParallelTree& tree,
-                                   double time,
-                                   unsigned int timestep)>
-                    accelerationFctType;
-
-            /**
-             * type definition for functions exporting data in every timestep
-             */
-            typedef std::function
-                    <void (std::vector<Core::Particle*>& particles,
-                           BTree::ParallelTree& tree,
-                           double time,
-                           unsigned int timestep,
-                           bool lastTimestep)>
-                    timestepWriteFctType;
-
-
-            /**
-              * type definition for functions defining "other actions", which are additional arbitrary actions performed
-              * in every time step of the integration
-              */
-            typedef std::function
-                    <void (Core::Vector& newPartPos,
-                           Core::Particle* particle,
-                           std::size_t particleIndex,
-                           BTree::ParallelTree& tree,
-                           double time,
-                           unsigned int timestep)>
-                    otherActionsFctType;
 
             ParallelVerletIntegrator(
                     const std::vector<Core::Particle*>& particles,

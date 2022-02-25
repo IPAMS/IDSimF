@@ -30,6 +30,7 @@
 
 #include "Core_particle.hpp"
 #include "Core_vector.hpp"
+#include "Integration_generic.hpp"
 #include <cstdio>
 #include <vector>
 #include <functional>

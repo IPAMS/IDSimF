@@ -34,6 +34,7 @@
 #ifndef BTree_tree_hpp
 #define BTree_tree_hpp
 
+#include "SC_generic.hpp"
 #include "BTree_node.hpp"
 #include <memory>
 #include <list>
@@ -47,7 +48,7 @@ namespace Core{
 namespace BTree {
     using treeParticlePtrList = std::list<std::unique_ptr<BTree::TreeParticle>>;
 
-    class Tree {
+    class Tree: public SpaceCharge::FieldCalculator{
 
     public:
         Tree(Core::Vector min, Core::Vector max);
@@ -59,7 +60,7 @@ namespace BTree {
 
         //charge calculation methods:
         void computeChargeDistribution();
-        Core::Vector computeEFieldFromTree(Core::Particle &particle);
+        Core::Vector computeEFieldFromSpaceCharge(Core::Particle &particle);
 
         //particle modification methods:
         void insertParticle(Core::Particle &particle, size_t ext_index);

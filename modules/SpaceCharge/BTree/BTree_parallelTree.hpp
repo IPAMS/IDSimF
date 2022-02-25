@@ -27,6 +27,7 @@
 #ifndef BTree_parallelTree_hpp
 #define BTree_parallelTree_hpp
 
+#include "SC_generic.hpp"
 #include "BTree_parallelNode.hpp"
 #include <cstdio>
 #include <list>
@@ -35,7 +36,7 @@
 namespace BTree {
     using treeParticlePtrList = std::list<std::unique_ptr<BTree::TreeParticle>>;
 
-    class ParallelTree {
+    class ParallelTree: public SpaceCharge::FieldCalculator{
     public:
         // Constructor:
         ParallelTree(Core::Vector min, Core::Vector max);
@@ -47,7 +48,7 @@ namespace BTree {
 
         std::size_t init();
         std::vector<std::size_t> countNodesOnLevels();
-        Core::Vector computeEFieldFromTree(Core::Particle &particle);
+        Core::Vector computeEFieldFromSpaceCharge(Core::Particle &particle);
 
         void insertParticle(Core::Particle &particle, std::size_t ext_index);
         void removeParticle(std::size_t ext_index);

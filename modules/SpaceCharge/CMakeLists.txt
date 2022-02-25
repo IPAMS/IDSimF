@@ -14,8 +14,10 @@ set(SOURCE_FILES
         BTree/BTree_parallelTree.cpp
         BTree/BTree_parallelTree.hpp
         BTree/BTree_genericBaseNode.cpp
-        BTree/BTree_genericBaseNode.hpp)
+        BTree/BTree_genericBaseNode.hpp
+        SC_generic.cpp
+        SC_generic.hpp)
 
 add_library(spacecharge STATIC ${SOURCE_FILES})
-target_include_directories(spacecharge PUBLIC BTree)
+target_include_directories(spacecharge PUBLIC . BTree)
 target_link_libraries(spacecharge core)

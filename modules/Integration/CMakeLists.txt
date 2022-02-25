@@ -1,6 +1,7 @@
 project(IDSimF_integration)
 
 set(SOURCE_FILES
+        Integration_generic.hpp
         Integration_abstractTimeIntegrator.hpp
         Integration_abstractTimeIntegrator.cpp
         Integration_velocityIntegrator.hpp

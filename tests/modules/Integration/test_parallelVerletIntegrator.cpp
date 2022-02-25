@@ -26,6 +26,7 @@
  ****************************/
 
 #include "Integration_parallelVerletIntegrator.hpp"
+#include "SC_generic.hpp"
 #include "Core_vector.hpp"
 #include "Core_particle.hpp"
 #include "Core_randomGenerators.hpp"
@@ -44,7 +45,7 @@ TEST_CASE( "Test parallel verlet integrator", "[ParticleSimulation][ParallelVerl
     double ionAcceleration = 10.0; //((1000V / 100mm) * elementary charge) / 100 amu = 9.64e9 m/s^2
     double dt = 1e-4;
 
-    auto accelerationFct = [ionAcceleration](Core::Particle* /*particle*/, int /*particleIndex*/, BTree::ParallelTree& /*tree*/,
+    auto accelerationFct = [ionAcceleration](Core::Particle* /*particle*/, int /*particleIndex*/, SpaceCharge::FieldCalculator& /*tree*/,
                                              double /*time*/, int /*timestep*/){
         Core::Vector result(ionAcceleration, 0, ionAcceleration * 0.5);
         return (result);
@@ -153,7 +154,7 @@ TEST_CASE( "Test parallel verlet integrator", "[ParticleSimulation][ParallelVerl
             SECTION("Integration should run through and functions should be called") {
 
                 unsigned int nTimestepsRecorded = 0;
-                auto timestepWriteFct = [&nTimestepsRecorded](std::vector<Core::Particle*>& /*particles*/, BTree::ParallelTree& /*tree*/,
+                auto timestepWriteFct = [&nTimestepsRecorded](std::vector<Core::Particle*>& /*particles*/,
                                                               double /*time*/, int /*timestep*/, bool /*lastTimestep*/){
                     nTimestepsRecorded++;
                 };
@@ -161,7 +162,7 @@ TEST_CASE( "Test parallel verlet integrator", "[ParticleSimulation][ParallelVerl
                 unsigned int nParticlesTouched = 0;
                 auto otherActionsFct = [&nParticlesTouched] (
                         Core::Vector& /*newPartPos*/, Core::Particle* /*particle*/,
-                        int /*particleIndex*/, BTree::ParallelTree& /*tree*/, double /*time*/, int /*timestep*/){
+                        int /*particleIndex*/, double /*time*/, int /*timestep*/){
                     nParticlesTouched++;
                 };
 
@@ -204,14 +205,14 @@ TEST_CASE( "Test parallel verlet integrator", "[ParticleSimulation][ParallelVerl
                 unsigned int terminationTimeStep = 40;
 
                 unsigned int nTimestepsRecorded = 0;
-                auto timestepWriteFct = [&nTimestepsRecorded](std::vector<Core::Particle*>& /*particles*/, BTree::ParallelTree& /*tree*/,
+                auto timestepWriteFct = [&nTimestepsRecorded](std::vector<Core::Particle*>& /*particles*/,
                                                               double /*time*/, int /*timestep*/, bool /*lastTimestep*/){
                     nTimestepsRecorded++;
                 };
 
                 auto terminationActionFct = [&integratorPtr, terminationTimeStep] (
                         Core::Vector& /*newPartPos*/, Core::Particle* /*particle*/,
-                        int /*particleIndex*/, BTree::ParallelTree& /*tree*/, double /*time*/, unsigned int timestep){
+                        int /*particleIndex*/, double /*time*/, unsigned int timestep){
                     if (timestep >= terminationTimeStep){
                         integratorPtr->setTerminationState();
                     }

@@ -43,7 +43,7 @@ TEST_CASE("Test serial verlet integrator", "[ParticleSimulation][VerletIntegrato
 
     double ionAcceleration = 10.0; //((1000V / 100mm) * elementary charge) / 100 amu = 9.64e9 m/s^2
 
-    auto accelerationFct = [ionAcceleration](Core::Particle* /*particle*/, int /*particleIndex*/, BTree::Tree& /*tree*/,
+    auto accelerationFct = [ionAcceleration](Core::Particle* /*particle*/, int /*particleIndex*/, SpaceCharge::FieldCalculator& /*tree*/,
                                              double /*time*/, int /*timestep*/){
         Core::Vector result(ionAcceleration, 0, ionAcceleration * 0.5);
         return (result);
@@ -117,7 +117,7 @@ TEST_CASE("Test serial verlet integrator", "[ParticleSimulation][VerletIntegrato
         SECTION("Verlet integrator should run through and should call functions"){
 
             unsigned int nTimeStepsRecorded = 0;
-            auto timestepWriteFct = [&nTimeStepsRecorded](std::vector<Core::Particle*>& /*particles*/, BTree::Tree& /*tree*/, double /*time*/, int /*timestep*/,
+            auto timestepWriteFct = [&nTimeStepsRecorded](std::vector<Core::Particle*>& /*particles*/, double /*time*/, int /*timestep*/,
                                        bool /*lastTimestep*/){
                 nTimeStepsRecorded++;
             };
@@ -125,7 +125,7 @@ TEST_CASE("Test serial verlet integrator", "[ParticleSimulation][VerletIntegrato
             int nParticlesTouched = 0;
             auto otherActionsFct = [&nParticlesTouched] (
                     Core::Vector& /*newPartPos*/,Core::Particle* /*particle*/,
-                    int /*particleIndex*/, BTree::Tree& /*tree*/, double /*time*/, int /*timestep*/){
+                    int /*particleIndex*/, double /*time*/, int /*timestep*/){
                 nParticlesTouched++;
             };
 
@@ -169,8 +169,7 @@ TEST_CASE("Test serial verlet integrator", "[ParticleSimulation][VerletIntegrato
             unsigned int terminationTimeStep = 50;
 
             auto timestepStopFct = [&integratorPtr, terminationTimeStep](
-                    std::vector<Core::Particle*>& /*particles*/, BTree::Tree& /*tree*/,
-                    double /*time*/, unsigned int timestep, bool /*lastTimestep*/){
+                    std::vector<Core::Particle*>& /*particles*/, double /*time*/, unsigned int timestep, bool /*lastTimestep*/){
                 if (timestep >= terminationTimeStep){
                     integratorPtr->setTerminationState();
                 }
@@ -195,7 +194,7 @@ TEST_CASE("Test serial verlet integrator", "[ParticleSimulation][VerletIntegrato
 
         auto accelerationFctReactive = [ionAcceleration] (
                 Core::Particle* particle, int /*particleIndex*/,
-                BTree::Tree& /*tree*/, double /*time*/, int /*timestep*/){
+                SpaceCharge::FieldCalculator& /*fc*/, double /*time*/, int /*timestep*/){
             Core::Vector result(ionAcceleration * particle->getCharge() / particle->getMass(), 0,0);
             return(result);
         };

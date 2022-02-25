@@ -60,62 +60,27 @@ namespace Integration{
 
     public:
 
-        /**
-        * type definition for acceleration calculation functions
-        */
-        typedef std::function
-                <Core::Vector (Core::Particle* particle,
-                                std::size_t particleIndex,
-                                BTree::Tree& tree,
-                                double time,
-                                unsigned int timestep)>
-                accelerationFctType;
+        VerletIntegrator(
+                std::vector<Core::Particle*> particles,
+                accelerationFctType accelerationFunction,
+                timestepWriteFctType timestepWriteFunction = nullptr,
+                otherActionsFctType otherActionsFunction = nullptr,
+                AbstractTimeIntegrator::particleStartMonitoringFctType ionStartMonitoringFunction = nullptr,
+                CollisionModel::AbstractCollisionModel* collisionModel = nullptr
+        );
 
-        /**
-         * type definition for functions exporting data in every timestep
-         */
-        typedef std::function
-                <void (std::vector<Core::Particle*>& particles,
-                       BTree::Tree& tree,
-                       double time,
-                       unsigned int timestep,
-                       bool lastTimestep)>
-                timestepWriteFctType;
+        VerletIntegrator(
+                accelerationFctType accelerationFunction,
+                timestepWriteFctType timestepWriteFunction = nullptr,
+                otherActionsFctType otherActionsFunction = nullptr,
+                AbstractTimeIntegrator::particleStartMonitoringFctType ionStartMonitoringFunction = nullptr,
+                CollisionModel::AbstractCollisionModel* collisionModel = nullptr
+        );
 
-        /**
-         * type definition for functions defining "other actions", which are additional arbitrary actions performed
-         * in every time step of the integration
-         */
-        typedef std::function
-                <void (Core::Vector& newPartPos,
-                       Core::Particle* particle,
-                       std::size_t particleIndex,
-                       BTree::Tree& tree,
-                       double time,
-                       unsigned int timestep)>
-                otherActionsFctType;
-
-            VerletIntegrator(
-                    std::vector<Core::Particle*> particles,
-                    accelerationFctType accelerationFunction,
-                    timestepWriteFctType timestepWriteFunction = nullptr,
-                    otherActionsFctType otherActionsFunction = nullptr,
-                    AbstractTimeIntegrator::particleStartMonitoringFctType ionStartMonitoringFunction = nullptr,
-                    CollisionModel::AbstractCollisionModel* collisionModel = nullptr
-            );
-
-            VerletIntegrator(
-                    accelerationFctType accelerationFunction,
-                    timestepWriteFctType timestepWriteFunction = nullptr,
-                    otherActionsFctType otherActionsFunction = nullptr,
-                    AbstractTimeIntegrator::particleStartMonitoringFctType ionStartMonitoringFunction = nullptr,
-                    CollisionModel::AbstractCollisionModel* collisionModel = nullptr
-            );
-
-            void addParticle(Core::Particle* particle) override;
-            void run(unsigned int nTimesteps, double dt) override;
-            void runSingleStep(double dt) override;
-            void finalizeSimulation() override;
+        void addParticle(Core::Particle* particle) override;
+        void run(unsigned int nTimesteps, double dt) override;
+        void runSingleStep(double dt) override;
+        void finalizeSimulation() override;
 
     private:
         CollisionModel::AbstractCollisionModel* collisionModel_ = nullptr; ///< a gas collision model active in the simulation

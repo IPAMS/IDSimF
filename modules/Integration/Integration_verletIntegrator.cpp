@@ -35,9 +35,9 @@
  */
 Integration::VerletIntegrator::VerletIntegrator(
         std::vector<Core::Particle *> particles,
-        Integration::VerletIntegrator::accelerationFctType accelerationFunction,
-        Integration::VerletIntegrator::timestepWriteFctType timestepWriteFunction,
-        Integration::VerletIntegrator::otherActionsFctType otherActionsFunction,
+        Integration::accelerationFctType accelerationFunction,
+        Integration::timestepWriteFctType timestepWriteFunction,
+        Integration::otherActionsFctType otherActionsFunction,
         Integration::AbstractTimeIntegrator::particleStartMonitoringFctType ionStartMonitoringFunction,
         CollisionModel::AbstractCollisionModel* collisionModel) :
     Integration::AbstractTimeIntegrator(particles, ionStartMonitoringFunction),
@@ -56,9 +56,9 @@ Integration::VerletIntegrator::VerletIntegrator(
  * @param collisionModel a collision model, modeling the interaction between charged particles and background gas
  */
 Integration::VerletIntegrator::VerletIntegrator(
-        Integration::VerletIntegrator::accelerationFctType accelerationFunction,
-        Integration::VerletIntegrator::timestepWriteFctType timestepWriteFunction,
-        Integration::VerletIntegrator::otherActionsFctType otherActionsFunction,
+        Integration::accelerationFctType accelerationFunction,
+        Integration::timestepWriteFctType timestepWriteFunction,
+        Integration::otherActionsFctType otherActionsFunction,
         Integration::AbstractTimeIntegrator::particleStartMonitoringFctType ionStartMonitoringFunction,
         CollisionModel::AbstractCollisionModel* collisionModel) :
     AbstractTimeIntegrator(ionStartMonitoringFunction),
@@ -93,7 +93,7 @@ void Integration::VerletIntegrator::run(unsigned int nTimesteps, double dt) {
     this->runState_ = RUNNING;
     bearParticles_(0.0);
     if (timestepWriteFunction_ !=nullptr) {
-        timestepWriteFunction_(particles_, tree_, time_, timestep_, false);
+        timestepWriteFunction_(particles_, time_, timestep_, false);
     }
 
     for (unsigned int step=0; step< nTimesteps; ++step){
@@ -147,7 +147,7 @@ void Integration::VerletIntegrator::runSingleStep(double dt) {
         if (particles_[i]->isActive() == true){
 
             if (otherActionsFunction_ != nullptr) {
-                otherActionsFunction_(newPos_[i], particles_[i], i, tree_, time_, timestep_);
+                otherActionsFunction_(newPos_[i], particles_[i], i, time_, timestep_);
             }
             tree_.updateParticleLocation(i,newPos_[i]);
         }
@@ -155,7 +155,7 @@ void Integration::VerletIntegrator::runSingleStep(double dt) {
     timestep_++;
     time_ = time_ + dt;
     if (timestepWriteFunction_ != nullptr){
-        timestepWriteFunction_(particles_,tree_,time_,timestep_,false);
+        timestepWriteFunction_(particles_, time_, timestep_, false);
     }
 }
 
@@ -164,7 +164,7 @@ void Integration::VerletIntegrator::runSingleStep(double dt) {
  */
 void Integration::VerletIntegrator::finalizeSimulation(){
     if (timestepWriteFunction_ !=nullptr) {
-        timestepWriteFunction_(particles_, tree_, time_, timestep_, true);
+        timestepWriteFunction_(particles_, time_, timestep_, true);
     }
 }
 
