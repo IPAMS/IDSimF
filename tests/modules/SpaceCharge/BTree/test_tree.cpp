@@ -89,7 +89,7 @@ TEST_CASE( "Test serial tree semantics / particle management","[Tree]") {
         CHECK( testTree.getNumberOfParticles() == 1);
         CHECK(testTree.getRoot()->getNumberOfParticles() == 1);
 
-        CHECK(testTree.getParticle(1)->get() == &testIon1);
+        CHECK(testTree.getParticle(1)->wrappedParticle == &testIon1);
     }
 
     SECTION( "Test external index particle access"){
@@ -105,18 +105,18 @@ TEST_CASE( "Test serial tree semantics / particle management","[Tree]") {
         testTree.insertParticle(testIon3,30);
         testTree.insertParticle(testIon4,40);
 
-        CHECK( (testTree.getParticle(30)->get() == &testIon3));
-        CHECK( (testTree.getParticle(40)->get() == &testIon4));
+        CHECK( (testTree.getParticle(30)->wrappedParticle == &testIon3));
+        CHECK( (testTree.getParticle(40)->wrappedParticle == &testIon4));
 
         testTree.insertParticle(testIon5,15);
 
-        CHECK( (testTree.getParticle(15)->get() == &testIon5));
+        CHECK( (testTree.getParticle(15)->wrappedParticle == &testIon5));
 
         testTree.removeParticle(20);
         testTree.removeParticle(30);
 
-        CHECK( (testTree.getParticle(15)->get() == &testIon5));
-        CHECK( (testTree.getParticle(10)->get() == &testIon1));
+        CHECK( (testTree.getParticle(15)->wrappedParticle == &testIon5));
+        CHECK( (testTree.getParticle(10)->wrappedParticle == &testIon1));
 
         CHECK( testTree.getNumberOfParticles() == 3);
     }
@@ -184,7 +184,7 @@ TEST_CASE( "Test serial tree charge distribution calculation","[Tree]"){
 
         BTree::treeParticlePtrList * particleList= testTree.getParticleList();
         CHECK(particleList->size() == 3);
-        CHECK(particleList->front()->get() == &testIon3);
+        CHECK(particleList->front()->wrappedParticle == &testIon3);
     }
 
     SECTION("Test particle insertion and carge calculation with another particle configuration"){

@@ -153,7 +153,7 @@ TEST_CASE( "Test particle insertion and remove in serial node", "[Node]") {
 
         //Test if particles host node is set correctly and the host node has correct characteristics:
         BTree::AbstractNode* hostNode5 = testIon5.getHostNode();
-        Core::Vector pos = testIon5.get()->getLocation();
+        Core::Vector pos = testIon5.wrappedParticle->getLocation();
         Core::Vector min = hostNode5->getMin();
         Core::Vector max = hostNode5->getMax();
 
