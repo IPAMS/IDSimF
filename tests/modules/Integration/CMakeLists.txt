@@ -6,6 +6,10 @@ set(SOURCE_FILES
         test_parallelVerletIntegrator.cpp
         test_velocityIntegrator.cpp)
 
+if(USE_FMM_3D)
+    set (SOURCE_FILES ${SOURCE_FILES})
+endif()
+
 set(TEST_FILE_FOLDER ${CMAKE_SOURCE_DIR}/tests/testfields)
 set(TEST_FILES
         ${TEST_FILE_FOLDER}/RS_verlet_test.conf
