@@ -19,7 +19,7 @@ file(COPY ${TEST_FILES} DESTINATION .)
 
 add_executable(test_CollisionModels ${SOURCE_FILES})
 target_include_directories(test_CollisionModels PUBLIC ${CMAKE_SOURCE_DIR}/libs/catch)
-target_link_libraries(test_CollisionModels core btree integration rs collisionmodels particlesimulation)
+target_link_libraries(test_CollisionModels core spacecharge integration rs collisionmodels particlesimulation)
 target_link_libraries(test_CollisionModels ${VTK_LIBRARIES})
 
 add_test(NAME test_CollisionModels COMMAND test_CollisionModels)

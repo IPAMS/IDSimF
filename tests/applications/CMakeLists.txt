@@ -22,6 +22,6 @@ target_include_directories(test_Applications PRIVATE
         ${CMAKE_SOURCE_DIR}/libs/catch
         ${CMAKE_SOURCE_DIR}/tests/util)
 
-target_link_libraries(test_Applications core btree particlesimulation apputils)
+target_link_libraries(test_Applications core spacecharge particlesimulation apputils)
 
 add_test(NAME test_Applications COMMAND test_Applications)

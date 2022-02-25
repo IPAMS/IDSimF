@@ -4,7 +4,7 @@ set(SOURCE_FILES
         BT-spaceChargeMinimalParallelSim.cpp)
 
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
-target_link_libraries(${PROJECT_NAME} core apputils btree collisionmodels particlesimulation)
+target_link_libraries(${PROJECT_NAME} core apputils spacecharge collisionmodels particlesimulation)
 target_link_libraries(${PROJECT_NAME} ${VTK_LIBRARIES} ${HDF5_CXX_LIBRARIES} ${HDF5_LIBRARIES})
 
 # register example runs for CTest

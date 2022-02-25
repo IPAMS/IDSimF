@@ -22,6 +22,6 @@ target_include_directories(test_Integration PUBLIC
         ${CMAKE_SOURCE_DIR}/libs/catch
         ${CMAKE_SOURCE_DIR}/tests/util)
 
-target_link_libraries(test_Integration core integration file_io btree particlesimulation collisionmodels ${HDF5_CXX_LIBRARIES} ${HDF5_LIBRARIES})
+target_link_libraries(test_Integration core integration file_io spacecharge particlesimulation collisionmodels ${HDF5_CXX_LIBRARIES} ${HDF5_LIBRARIES})
 
 add_test(NAME test_Integration COMMAND test_Integration)

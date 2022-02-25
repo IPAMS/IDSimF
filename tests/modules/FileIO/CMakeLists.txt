@@ -34,6 +34,6 @@ target_include_directories(test_FileIO PUBLIC
         ${CMAKE_SOURCE_DIR}/libs/jsoncpp/json
         ${CMAKE_SOURCE_DIR}/tests/util)
 
-target_link_libraries(test_FileIO core file_io btree collisionmodels rs ${HDF5_CXX_LIBRARIES} ${HDF5_LIBRARIES})
+target_link_libraries(test_FileIO core file_io spacecharge collisionmodels rs ${HDF5_CXX_LIBRARIES} ${HDF5_LIBRARIES})
 
 add_test(NAME test_FileIO COMMAND test_FileIO)

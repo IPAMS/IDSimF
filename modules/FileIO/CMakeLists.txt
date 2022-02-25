@@ -25,5 +25,5 @@ set(SOURCE_FILES
 add_library(file_io STATIC ${SOURCE_FILES})
 target_include_directories(file_io PUBLIC .)
 
-target_link_libraries(file_io core btree particlesimulation)
+target_link_libraries(file_io core spacecharge particlesimulation)
 target_link_libraries(file_io ${HDF5_CXX_LIBRARIES} ${HDF5_LIBRARIES} spdlog::spdlog)

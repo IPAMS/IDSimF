@@ -19,5 +19,5 @@ endif()
 add_library(integration STATIC ${SOURCE_FILES})
 target_include_directories(integration PUBLIC .)
 
-target_link_libraries(integration core btree collisionmodels file_io)
+target_link_libraries(integration core spacecharge collisionmodels file_io)
 target_link_libraries(integration spdlog::spdlog)

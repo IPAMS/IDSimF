@@ -13,6 +13,6 @@ target_include_directories(test_BTree PUBLIC
         ${CMAKE_SOURCE_DIR}/libs/catch
         ${CMAKE_SOURCE_DIR}/tests/util)
 
-target_link_libraries(test_BTree core btree particlesimulation)
+target_link_libraries(test_BTree core spacecharge particlesimulation)
 
 add_test(NAME test_BTree COMMAND test_BTree)
