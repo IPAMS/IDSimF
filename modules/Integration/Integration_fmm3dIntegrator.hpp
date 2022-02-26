@@ -29,4 +29,56 @@
 #ifndef IDSIMF_INTEGRATION_FMM3DINTEGRATOR_HPP
 #define IDSIMF_INTEGRATION_FMM3DINTEGRATOR_HPP
 
+#include "Core_particle.hpp"
+#include "Core_vector.hpp"
+#include "Integration_abstractTimeIntegrator.hpp"
+#include "CollisionModel_AbstractCollisionModel.hpp"
+#include "FMM3D_fmmSolver.hpp"
+#include <vector>
+namespace Integration{
+
+    //std::function<Core::Vector(Core::Particle* particle, int particleIndex, Core::Tree& tree, double time, int timestep)> accelerationFctType;
+
+    class FMMVerletIntegrator : public AbstractTimeIntegrator {
+    public:
+
+        FMMVerletIntegrator(
+            const std::vector<Core::Particle*>& particles,
+            accelerationFctType accelerationFunction,
+            timestepWriteFctType timestepWriteFunction = nullptr,
+            otherActionsFctType otherActionsFunction = nullptr,
+            AbstractTimeIntegrator::particleStartMonitoringFctType ionStartMonitoringFunction = nullptr,
+            CollisionModel::AbstractCollisionModel* collisionModel = nullptr
+        );
+
+        FMMVerletIntegrator(
+            accelerationFctType accelerationFunction,
+            timestepWriteFctType timestepWriteFunction = nullptr,
+            otherActionsFctType otherActionsFunction = nullptr,
+            AbstractTimeIntegrator::particleStartMonitoringFctType ionStartMonitoringFunction = nullptr,
+            CollisionModel::AbstractCollisionModel* collisionModel = nullptr
+        );
+
+        void addParticle(Core::Particle* particle) override;
+        void run(unsigned int nTimesteps, double dt) override;
+        void runSingleStep(double dt) override;
+        void finalizeSimulation() override;
+
+    private:
+        FMM3D::FMMSolver solver_;
+
+        CollisionModel::AbstractCollisionModel* collisionModel_ = nullptr; ///< the gas collision model to perform while integrating
+
+        accelerationFctType accelerationFunction_ = nullptr;   ///< function to calculate particle acceleration
+        timestepWriteFctType timestepWriteFunction_ = nullptr; ///< function to export / write time step results
+        otherActionsFctType otherActionsFunction_ = nullptr;   ///< function for arbitrary other actions in the simulation
+
+        std::vector<Core::Vector>  newPos_;  ///< new position (after time step) for particles
+        std::vector<Core::Vector>  a_t_;     ///< last time step acceleration for particles
+        std::vector<Core::Vector>  a_tdt_;   ///< new acceleration for particles
+
+    };
+}
+
+
 #endif //IDSIMF_INTEGRATION_FMM3DINTEGRATOR_HPP

@@ -1,8 +1,8 @@
 #include "BTree_tree.hpp"
-#include "BTree_parallelTree.hpp"
 #include "Core_particle.hpp"
 #include "Integration_verletIntegrator.hpp"
 #include "Integration_parallelVerletIntegrator.hpp"
+#include "Integration_fmm3dIntegrator.hpp"
 #include "FileIO_trajectoryHDF5Writer.hpp"
 #include "PSim_util.hpp"
 #include "CollisionModel_StatisticalDiffusion.hpp"
@@ -10,6 +10,7 @@
 #include "CLI11.hpp"
 #include <iostream>
 #include <numeric>
+
 
 void runIntegrator(Integration::AbstractTimeIntegrator &integrator, unsigned int timeSteps, double dt, std::string message){
     std::cout << "Benchmark " <<message << std::endl;
@@ -46,6 +47,57 @@ unsigned int prepareIons(std::vector<std::unique_ptr<Core::Particle>> &particles
     return nTotal;
 }
 
+template<class integratorT> std::vector<Core::Vector> runSimulation(unsigned int nIonsPerDirection, unsigned int timeSteps,
+                                                                    double dt, double spaceChargeFactor,
+                                                                    bool useCollisionModel, std::string runName){
+
+    // define functions for the trajectory integration ==================================================
+    auto accelerationFunction =
+            [spaceChargeFactor](
+                    Core::Particle *particle, int /*particleIndex*/,
+                    SpaceCharge::FieldCalculator& scFieldCalculator, double /*time*/, int /*timestep*/) -> Core::Vector{
+
+                double particleCharge = particle->getCharge();
+
+                Core::Vector spaceChargeForce(0,0,0);
+                if (spaceChargeFactor > 0) {
+                    spaceChargeForce =
+                            scFieldCalculator.getEFieldFromSpaceCharge(*particle) * (particleCharge * spaceChargeFactor);
+                }
+                return (spaceChargeForce / particle->getMass());
+            };
+
+    std::vector<std::unique_ptr<Core::Particle>> particles;
+    std::vector<Core::Particle*>particlePtrs;
+
+    unsigned int nIonsTotal = prepareIons(particles, particlePtrs, nIonsPerDirection);
+
+    CollisionModel::StatisticalDiffusionModel sdsCollisionModel(100000.0, 298, 28, 3.64e-9);
+    CollisionModel::AbstractCollisionModel *collisionModel;
+    if (useCollisionModel){
+        collisionModel = &sdsCollisionModel;
+        for (unsigned int i=0; i<nIonsTotal; ++i){
+            sdsCollisionModel.setSTPParameters(*particlePtrs[i]);
+        }
+    }
+    else {
+        collisionModel = nullptr;
+    }
+
+    integratorT integrator(
+            particlePtrs,
+            accelerationFunction, nullptr, nullptr, nullptr, collisionModel);
+
+    runIntegrator(integrator, timeSteps, dt, runName);
+
+    std::vector<Core::Vector> result;
+    for (unsigned int i=0; i<nIonsTotal; ++i){
+        result.push_back(particles[i]->getLocation());
+    }
+
+    return result;
+}
+
 int main(int argc, char** argv) {
     CLI::App app{"Simple benchmark of space charge calculation", "simpleSpaceCharge benchmark"};
 
@@ -64,73 +116,38 @@ int main(int argc, char** argv) {
     double dt = 1e-3;
     double spaceChargeFactor = 1.0;
 
-    // define functions for the trajectory integration ==================================================
-    auto accelerationFunction =
-            [spaceChargeFactor](
-                    Core::Particle *particle, int /*particleIndex*/,
-                    SpaceCharge::FieldCalculator& scFieldCalculator, double /*time*/, int /*timestep*/) -> Core::Vector{
-
-                double particleCharge = particle->getCharge();
-
-                Core::Vector spaceChargeForce(0,0,0);
-                if (spaceChargeFactor > 0) {
-                    spaceChargeForce =
-                            scFieldCalculator.getEFieldFromSpaceCharge(*particle) * (particleCharge * spaceChargeFactor);
-                }
-                return (spaceChargeForce / particle->getMass());
-            };
-
-
-    auto hdf5Writer = std::make_unique<FileIO::TrajectoryHDF5Writer>(
-            "test_trajectories.hd5");
-
-    std::vector<std::unique_ptr<Core::Particle>> particlesSerial;
-    std::vector<Core::Particle*>particlePtrsSerial;
-    std::vector<std::unique_ptr<Core::Particle>> particlesParallelNew;
-    std::vector<Core::Particle*>particlePtrsParallelNew;
-
-    unsigned int nIonsTotal = prepareIons(particlesSerial, particlePtrsSerial, nIonsPerDirection);
-    prepareIons(particlesParallelNew, particlePtrsParallelNew, nIonsPerDirection);
-    
-    CollisionModel::StatisticalDiffusionModel sdsCollisionModel(100000.0, 298, 28, 3.64e-9);
-    CollisionModel::AbstractCollisionModel *collisionModel;
-    if (useCollisionModel){
-        collisionModel = &sdsCollisionModel;
-        for (unsigned int i=0; i<nIonsTotal; ++i){
-            sdsCollisionModel.setSTPParameters(*particlePtrsSerial[i]);
-            sdsCollisionModel.setSTPParameters(*particlePtrsParallelNew[i]);
-        }
-
-    }
-    else {
-        collisionModel = nullptr;
-    }
+    //auto hdf5Writer = std::make_unique<FileIO::TrajectoryHDF5Writer>(
+    //        "test_trajectories.hd5");
 
 
     // simulate ===============================================================================================
-    Integration::VerletIntegrator verletIntegratorSerial(
-            particlePtrsSerial,
-            accelerationFunction, nullptr, nullptr, nullptr, collisionModel);
+    //std::vector<Core::Vector> locationsSerial = runSimulation<Integration::VerletIntegrator>(
+    //        nIonsPerDirection, timeSteps, dt, spaceChargeFactor, useCollisionModel, "serial");
 
-    Integration::ParallelVerletIntegrator verletIntegratorParallel(
-            particlePtrsParallelNew,
-            accelerationFunction, nullptr, nullptr, nullptr, collisionModel);
+    std::vector<Core::Vector> locationsParallel = runSimulation<Integration::ParallelVerletIntegrator>(
+            nIonsPerDirection, timeSteps, dt, spaceChargeFactor, useCollisionModel, "parallel");
 
-    runIntegrator(verletIntegratorSerial, timeSteps, dt, "serial");
-    runIntegrator(verletIntegratorParallel, timeSteps, dt, "parallel");
+    std::vector<Core::Vector> locationsFmm = runSimulation<Integration::FMMVerletIntegrator>(
+            nIonsPerDirection, timeSteps, dt, spaceChargeFactor, useCollisionModel, "fmm");
 
-    std::vector<double> diffMags;
+    std::size_t nIonsTotal = locationsParallel.size();
+
+    //std::vector<double> diffMagsTrees;
+    std::vector<double> diffMagsFMM;
     for (unsigned int i=0; i<nIonsTotal; ++i){
-        diffMags.push_back( (particlesSerial[i]->getLocation() - particlesParallelNew[i]->getLocation()).magnitude() );
+        //diffMagsTrees.push_back( (locationsSerial[i] - locationsParallel[i]).magnitude() );
+        diffMagsFMM.push_back( (locationsParallel[i] - locationsFmm[i]).magnitude() );
     }
-    double sum = std::accumulate(diffMags.begin(), diffMags.end(), 0.0);
+    //double sumTrees = std::accumulate(diffMagsTrees.begin(), diffMagsTrees.end(), 0.0);
+    double sumFmm = std::accumulate(diffMagsFMM.begin(), diffMagsFMM.end(), 0.0);
 
-    if (verbose) {
+    /*if (verbose) {
         for (unsigned int i = 0; i<nIonsTotal; ++i) {
-            std::cout << particlesSerial[i]->getLocation() << " | " << particlesParallelNew[i]->getLocation() << " | "
-                      << (particlesSerial[i]->getLocation()-particlesParallelNew[i]->getLocation()).magnitude()
+            std::cout << locationsSerial[i] << " | " << locationsParallel[i] << " | "
+                      << (locationsSerial[i]-locationsParallel[i]).magnitude()
                       << std::endl;
         }
-    }
-    std::cout << "sum diff: " << sum <<std::endl;
+    }*/
+    //std::cout << "sum diff trees: " << sumTrees << "sum diff fmm: " << sumFmm <<std::endl;
+    std::cout << "sum diff fmm: " << sumFmm <<std::endl;
 }

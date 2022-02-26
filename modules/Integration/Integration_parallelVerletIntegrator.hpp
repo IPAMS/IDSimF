@@ -35,9 +35,6 @@
 #include "Core_vector.hpp"
 #include "BTree_parallelTree.hpp"
 #include "Integration_abstractTimeIntegrator.hpp"
-#include "FileIO_simpleVTKwriter.hpp"
-#include "FileIO_trajectoryExplorerJSONwriter.hpp"
-#include "FileIO_averageChargePositionWriter.hpp"
 #include "CollisionModel_AbstractCollisionModel.hpp"
 #include <vector>
 
