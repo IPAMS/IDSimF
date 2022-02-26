@@ -19,9 +19,9 @@
  along with IDSimF.  If not, see <https://www.gnu.org/licenses/>.
 
  ------------
- test_node.cpp
+ test_fmmSolver.cpp
 
- Testing of nodes of the serial version of the Barnes-Hut tree
+ Basic testing of FMM3D based FMM solver
 
  ****************************/
 #include "FMM3D_fmmSolver.hpp"
