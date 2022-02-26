@@ -72,6 +72,7 @@ add_subdirectory (modules/ParticleSimulation)
 
 add_subdirectory (tests/modules/Core)
 add_subdirectory (tests/modules/SpaceCharge/BTree)
+add_subdirectory (tests/modules/SpaceCharge/FMM3D)
 add_subdirectory (tests/modules/RS)
 add_subdirectory (tests/modules/CollisionModels)
 add_subdirectory (tests/modules/ParticleSimulation)

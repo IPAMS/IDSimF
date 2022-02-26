@@ -18,6 +18,13 @@ set(SOURCE_FILES
         SC_generic.cpp
         SC_generic.hpp)
 
+if(USE_FMM_3D)
+    set (SOURCE_FILES ${SOURCE_FILES}
+            FMM3D/FMM3D_fmmSolver.cpp
+            FMM3D/FMM3D_fmmSolver.hpp)
+endif()
+
+
 add_library(spacecharge STATIC ${SOURCE_FILES})
-target_include_directories(spacecharge PUBLIC . BTree)
+target_include_directories(spacecharge PUBLIC . BTree FMM3D)
 target_link_libraries(spacecharge core)
