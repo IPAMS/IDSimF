@@ -17,37 +17,13 @@
 
  You should have received a copy of the GNU General Public License
  along with IDSimF.  If not, see <https://www.gnu.org/licenses/>.
- ------------
-
- FMM3D_fmmSolver.hpp
-
- Coulombic Particle / Particle (space charge) solver based on FMM3D library
-
  ****************************/
 
-#ifndef IDSIMF_FMM3D_FMMSOLVER_HPP
-#define IDSIMF_FMM3D_FMMSOLVER_HPP
+#include "FMM3D_fmmSolver_C_interface.h"
+#include "lfmm3d_c.h"
 
-#include "SC_generic.hpp"
-#include "Core_vector.hpp"
-#include "Core_particle.hpp"
-
-namespace FMM3D{
-
-    /**
-     * Abstract base class for Barnes-Hut Tree nodes
-     */
-    class FMMSolver : public SpaceCharge::FieldCalculator {
-
-    public:
-
-        //void insertParticle(Core::Particle &particle, std::size_t ext_index);
-        //void removeParticle(size_t ext_index);
-
-        [[nodiscard]] Core::Vector computeEFieldFromSpaceCharge(Core::Particle& particle) override;
-
-    private:
-        void computeChargeDistribution();
-    };
-}
-#endif //IDSIMF_FMM3D_FMMSOLVER_HPP
+void lfmm3d_s_c_g_wrapper(double *eps, int *nsource,
+                          double *source, double *charge,
+                          double *pot, double *grad, int *ier){
+    lfmm3d_s_c_g_(eps, nsource, source, charge, pot, grad, ier);
+};

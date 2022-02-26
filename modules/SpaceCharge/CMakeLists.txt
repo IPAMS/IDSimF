@@ -21,10 +21,18 @@ set(SOURCE_FILES
 if(USE_FMM_3D)
     set (SOURCE_FILES ${SOURCE_FILES}
             FMM3D/FMM3D_fmmSolver.cpp
-            FMM3D/FMM3D_fmmSolver.hpp)
+            FMM3D/FMM3D_fmmSolver.hpp
+            FMM3D/FMM3D_fmmSolver_C_interface.c
+            FMM3D/FMM3D_fmmSolver_C_interface.h)
 endif()
 
 
 add_library(spacecharge STATIC ${SOURCE_FILES})
 target_include_directories(spacecharge PUBLIC . BTree FMM3D)
 target_link_libraries(spacecharge core)
+
+if(USE_FMM_3D)
+    target_include_directories(spacecharge PUBLIC ${FMM_3D_PATH}/c)
+    target_link_libraries(spacecharge ${FMM_3D_PATH}/lib/libfmm3d.so)
+endif()
+

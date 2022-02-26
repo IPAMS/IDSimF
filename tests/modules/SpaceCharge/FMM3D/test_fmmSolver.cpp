@@ -35,6 +35,5 @@ TEST_CASE( "Test basic particle/particle interaction calculation with FMM3D", "[
 
     Core::Particle testParticle;
     Core::Vector spaceChargeForce = fmmSolver.computeEFieldFromSpaceCharge(testParticle);
-
     CHECK(spaceChargeForce.x() == 1.0);
 }

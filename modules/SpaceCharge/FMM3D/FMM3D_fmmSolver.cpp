@@ -20,7 +20,46 @@
  ****************************/
 
 #include "FMM3D_fmmSolver.hpp"
+extern "C" {
+    #include "FMM3D_fmmSolver_C_interface.h"
+}
+#include "Core_randomGenerators.hpp"
+#include <vector>
+#include <iostream>
 
 Core::Vector FMM3D::FMMSolver::computeEFieldFromSpaceCharge(Core::Particle& particle) {
+
+    computeChargeDistribution();
     return{1.0, 0.0, 0.0};
+}
+
+
+void FMM3D::FMMSolver::computeChargeDistribution() {
+    Core::RandomSource* rndSource = Core::globalRandomGeneratorPool->getThreadRandomSource();
+
+    int ns=200000;
+    int ier=0;
+
+    std::vector<double> sources(3*ns);
+    std::vector<double> charges(ns);
+    std::vector<double> pot(ns);
+    std::vector<double> grad(3*ns);
+
+    // initialize arrays
+    for(int i=0; i<ns; ++i)
+    {
+        sources[3*i] = pow(rndSource->uniformRealRndValue() ,2);
+        sources[3*i+1] = pow(rndSource->uniformRealRndValue() ,2);
+        sources[3*i+2] = pow(rndSource->uniformRealRndValue() ,2);
+
+        charges[i] = 1.0;
+
+    }
+
+    double eps = 0.5e-6;
+
+// call the fmm routine
+    lfmm3d_s_c_g_wrapper(&eps, &ns, sources.data(), charges.data(), pot.data(), grad.data(), &ier);
+
+    std::cout << "FMM Result" << pot[0]<<" "<<grad[0]<<" "<<grad[1]<<" "<<grad[2];
 }
