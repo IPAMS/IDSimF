@@ -27,13 +27,26 @@
 #include "FMM3D_fmmSolver.hpp"
 #include "Core_vector.hpp"
 #include "Core_particle.hpp"
+#include "PSim_boxStartZone.hpp"
 #include "catch.hpp"
 #include "test_util.hpp"
 
 TEST_CASE( "Test basic particle/particle interaction calculation with FMM3D", "[FMM3D]"){
+    std::size_t nions = 10000;
+    Core::Vector boxSize(0.002, 0.002, 0.002);
+    ParticleSimulation::BoxStartZone startZone(boxSize);
+    std::vector<std::unique_ptr<Core::Particle>> ions= startZone.getRandomParticlesInStartZone(nions, 1);
+
     FMM3D::FMMSolver fmmSolver;
 
-    Core::Particle testParticle;
-    Core::Vector spaceChargeForce = fmmSolver.computeEFieldFromSpaceCharge(testParticle);
-    CHECK(spaceChargeForce.x() == 1.0);
+    for (std::size_t i=0; i<nions; i++){
+        fmmSolver.insertParticle((*ions[i]),i+1);
+    }
+
+    fmmSolver.computeChargeDistribution();
+
+    Core::Vector spaceChargeForce = fmmSolver.getEFieldFromSpaceCharge(*ions[0].get());
+    CHECK(spaceChargeForce.x() != 0.0);
+    CHECK(spaceChargeForce.y() != 0.0);
+    CHECK(spaceChargeForce.z() != 0.0);
 }

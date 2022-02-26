@@ -382,7 +382,7 @@ TEST_CASE( "Test field calculation in serial node", "[Node]") {
         testTree.insertParticle(testIon4,4);
 
         testTree.computeChargeDistribution();
-        Core::Vector testField1 = testTree.computeEFieldFromSpaceCharge(testIon1);
+        Core::Vector testField1 = testTree.getEFieldFromSpaceCharge(testIon1);
         CHECK( Approx(testField1.x()).epsilon(1e-4) == -1.4399645e-9);
         CHECK( Approx(testField1.y()).epsilon(1e-4) == -1.4399645e-9/4.0);
         CHECK( Approx(testField1.z()).epsilon(1e-4) == 1.4399645e-7);
@@ -415,7 +415,7 @@ TEST_CASE( "Test field calculation in serial node", "[Node]") {
         CHECK(testTree.getRoot()->getNumberOfParticles() == 8);
         CHECK(testTree.getRoot()->getCharge() - 8.0*Core::ELEMENTARY_CHARGE < 1e-30);
 
-        Core::Vector testField1 = testTree.computeEFieldFromSpaceCharge(testIon1);
+        Core::Vector testField1 = testTree.getEFieldFromSpaceCharge(testIon1);
         CHECK( ((testField1.x() < 2e-25) && (testField1.y() < 2e-25) && (testField1.z() < 2e-25)) );
     }
 

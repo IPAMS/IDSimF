@@ -266,7 +266,7 @@ int main(int argc, const char * argv[]) {
                     }
                     else {
                         Core::Vector spaceChargeForce =
-                                scFieldCalculator.computeEFieldFromSpaceCharge(*particle)*(particleCharge*spaceChargeFactor);
+                                scFieldCalculator.getEFieldFromSpaceCharge(*particle)*(particleCharge*spaceChargeFactor);
                         return ((fieldForce+spaceChargeForce)/particle->getMass());
                     }
                 };

@@ -60,7 +60,7 @@ namespace BTree {
 
         //charge calculation methods:
         void computeChargeDistribution();
-        Core::Vector computeEFieldFromSpaceCharge(Core::Particle &particle);
+        Core::Vector getEFieldFromSpaceCharge(Core::Particle &particle) override;
 
         //particle modification methods:
         void insertParticle(Core::Particle &particle, size_t ext_index);

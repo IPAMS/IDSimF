@@ -173,7 +173,7 @@ int main(int argc, const char * argv[]) {
                     }
                     Core::Vector spaceChargeField(0, 0, 0);
                     if (spaceChargeFactor>0) {
-                        spaceChargeField = scFieldCalculator.computeEFieldFromSpaceCharge(*particle)*spaceChargeFactor;
+                        spaceChargeField = scFieldCalculator.getEFieldFromSpaceCharge(*particle)*spaceChargeFactor;
                     }
 
                     if (ionRecordMode==FULL) {

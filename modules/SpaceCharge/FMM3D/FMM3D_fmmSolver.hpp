@@ -31,23 +31,41 @@
 #include "SC_generic.hpp"
 #include "Core_vector.hpp"
 #include "Core_particle.hpp"
+#include <list>
+#include <vector>
+#include <unordered_map>
+
 
 namespace FMM3D{
 
+    struct particleListEntry{
+        Core::Particle* particle;
+        Core::Vector gradient;
+        double potential;
+    };
+
+    using particlePtrList = std::list<particleListEntry>;
     /**
      * Abstract base class for Barnes-Hut Tree nodes
      */
     class FMMSolver : public SpaceCharge::FieldCalculator {
 
     public:
+        FMMSolver();
 
-        //void insertParticle(Core::Particle &particle, std::size_t ext_index);
-        //void removeParticle(size_t ext_index);
+        void insertParticle(Core::Particle &particle, std::size_t ext_index);
+        void removeParticle(std::size_t ext_index);
+        [[nodiscard]] std::size_t getNumberOfParticles() const;
 
-        [[nodiscard]] Core::Vector computeEFieldFromSpaceCharge(Core::Particle& particle) override;
+        [[nodiscard]] Core::Vector getEFieldFromSpaceCharge(Core::Particle& particle) override;
+        void computeChargeDistribution();
 
     private:
-        void computeChargeDistribution();
+        std::unique_ptr<particlePtrList> iVec_; ///< a linked particle list, stores the particles in a linear order
+        std::unique_ptr<std::unordered_map<std::size_t, particlePtrList::const_iterator>> iMap_; ///< a map between the ion indices (keys used by SIMION) and the pointers into the internal particle list
+        std::unique_ptr<std::unordered_map<Core::Particle*, particlePtrList::const_iterator>> pMap_; ///< a map between the particle pointers and the pointers into the internal particle list
+        //std::unique_ptr<std::vector<double>> gradients_; ///<
+        //std::unique_ptr<std::vector<double>> potentials_; ///<
     };
 }
 #endif //IDSIMF_FMM3D_FMMSOLVER_HPP

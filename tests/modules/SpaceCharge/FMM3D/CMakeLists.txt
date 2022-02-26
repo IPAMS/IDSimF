@@ -9,6 +9,6 @@ target_include_directories(test_FMM3D PUBLIC
         ${CMAKE_SOURCE_DIR}/libs/catch
         ${CMAKE_SOURCE_DIR}/tests/util)
 
-target_link_libraries(test_FMM3D core spacecharge)
+target_link_libraries(test_FMM3D core spacecharge particlesimulation)
 
 add_test(NAME test_FMM3D COMMAND test_FMM3D)

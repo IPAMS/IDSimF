@@ -159,7 +159,7 @@ int main(int argc, const char * argv[]) {
                                 (electricFieldQuadEntrance->getInterpolatedVector(pos.x(), pos.y(), pos.z(), 0)
                                         *V_entrance);
 
-                Core::Vector spaceChargeForce = scFieldCalculator.computeEFieldFromSpaceCharge(*particle)*spaceChargeFactor;
+                Core::Vector spaceChargeForce = scFieldCalculator.getEFieldFromSpaceCharge(*particle)*spaceChargeFactor;
                 Core::Vector result = (E+spaceChargeForce)*particleCharge/particle->getMass();
                 return (result);
             }

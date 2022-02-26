@@ -86,7 +86,7 @@ std::vector<std::size_t> BTree::ParallelTree::countNodesOnLevels()
  * @param particle A particle to calculate the total electric field for
  * @return The electric field on the particle resulting from the particles in the tree
  */
-Core::Vector BTree::ParallelTree::computeEFieldFromSpaceCharge(Core::Particle &particle){
+Core::Vector BTree::ParallelTree::getEFieldFromSpaceCharge(Core::Particle &particle){
 
     Core::Vector efield= Core::Vector(0.0,0.0,0.0);
     Core::Vector loc=particle.getLocation();

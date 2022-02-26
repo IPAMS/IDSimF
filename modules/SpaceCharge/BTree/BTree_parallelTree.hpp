@@ -48,7 +48,7 @@ namespace BTree {
 
         std::size_t init();
         std::vector<std::size_t> countNodesOnLevels();
-        Core::Vector computeEFieldFromSpaceCharge(Core::Particle &particle);
+        Core::Vector getEFieldFromSpaceCharge(Core::Particle &particle);
 
         void insertParticle(Core::Particle &particle, std::size_t ext_index);
         void removeParticle(std::size_t ext_index);

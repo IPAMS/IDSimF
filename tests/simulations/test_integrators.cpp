@@ -66,7 +66,7 @@ TEST_CASE("Compare results of serial and parallel varlet integrators with a line
                 Core::Vector spaceChargeForce(0,0,0);
                 if (spaceChargeFactor > 0) {
                     spaceChargeForce =
-                            fieldCalculator.computeEFieldFromSpaceCharge(*particle) * (particleCharge * spaceChargeFactor);
+                            fieldCalculator.getEFieldFromSpaceCharge(*particle) * (particleCharge * spaceChargeFactor);
                 }
                 return (spaceChargeForce / particle->getMass());
             };

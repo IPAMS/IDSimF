@@ -286,7 +286,7 @@ int main(int argc, const char * argv[]) {
                     Core::Vector spaceChargeForce(0, 0, 0);
                     if (spaceChargeFactor>0) {
                         spaceChargeForce =
-                                scFieldCalculator.computeEFieldFromSpaceCharge(*particle)*(particleCharge*spaceChargeFactor);
+                                scFieldCalculator.getEFieldFromSpaceCharge(*particle)*(particleCharge*spaceChargeFactor);
                     }
 
                     //update the additional parameters for writing them later to the trajectory:

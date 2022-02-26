@@ -39,7 +39,7 @@ namespace SpaceCharge{
 
     public:
         virtual ~FieldCalculator() = default;
-        virtual Core::Vector computeEFieldFromSpaceCharge(Core::Particle &particle) = 0;
+        virtual Core::Vector getEFieldFromSpaceCharge(Core::Particle &particle) = 0;
     };
 }
 
