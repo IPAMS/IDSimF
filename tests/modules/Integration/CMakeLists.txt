@@ -7,7 +7,7 @@ set(SOURCE_FILES
         test_velocityIntegrator.cpp)
 
 if(USE_FMM_3D)
-    set (SOURCE_FILES ${SOURCE_FILES})
+    set (SOURCE_FILES ${SOURCE_FILES} test_fmmVerletIntegrator.cpp)
 endif()
 
 set(TEST_FILE_FOLDER ${CMAKE_SOURCE_DIR}/tests/testfields)

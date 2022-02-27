@@ -50,6 +50,9 @@ Integration::FMMVerletIntegrator::FMMVerletIntegrator(
 
 void Integration::FMMVerletIntegrator::addParticle(Core::Particle* particle) {
     particles_.push_back(particle);
+    a_t_.emplace_back(Core::Vector(0,0,0));
+    a_tdt_.emplace_back(Core::Vector(0,0,0));
+
     solver_.insertParticle(*particle, nParticles_);
     ++nParticles_;
 }
@@ -83,7 +86,7 @@ void Integration::FMMVerletIntegrator::runSingleStep(double dt) {
     // then: perform particle update / velocity verlet time integration
     std::size_t i;
     #pragma omp parallel \
-            default(none) shared(newPos_, a_tdt_, a_t_, dt, particles_) \
+            default(none) shared(a_tdt_, a_t_, dt, particles_) \
             private(i) //firstprivate(MyNod)
     {
 
@@ -96,7 +99,7 @@ void Integration::FMMVerletIntegrator::runSingleStep(double dt) {
                     collisionModel_->updateModelParameters(*(particles_[i]));
                 }
 
-                newPos_[i] = particles_[i]->getLocation() + particles_[i]->getVelocity() * dt + a_t_[i]*(1.0/2.0*dt*dt);
+                Core::Vector newPos = particles_[i]->getLocation() + particles_[i]->getVelocity() * dt + a_t_[i]*(1.0/2.0*dt*dt);
                 a_tdt_[i] = accelerationFunction_(particles_[i], i, solver_, time_, timestep_);
                 //acceleration changes due to background interaction:
 
@@ -110,13 +113,14 @@ void Integration::FMMVerletIntegrator::runSingleStep(double dt) {
                 //velocity changes due to background interaction:
                 if (collisionModel_ != nullptr) {
                     collisionModel_->modifyVelocity(*(particles_[i]),dt);
-                    collisionModel_->modifyPosition(newPos_[i], *(particles_[i]), dt);
+                    collisionModel_->modifyPosition(newPos, *(particles_[i]), dt);
                 }
 
                 if (otherActionsFunction_ != nullptr) {
-                    otherActionsFunction_(newPos_[i], particles_[i], i, time_, timestep_);
+                    otherActionsFunction_(newPos, particles_[i], i, time_, timestep_);
                 }
 
+                particles_[i]->setLocation(newPos);
             }
         }
     }

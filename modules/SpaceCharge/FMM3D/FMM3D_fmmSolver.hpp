@@ -38,6 +38,8 @@
 
 namespace FMM3D{
 
+    constexpr double NEGATIVE_ELECTRIC_CONSTANT = -1.0* Core::ELECTRIC_CONSTANT;
+
     struct particleListEntry{
         Core::Particle* particle;
         Core::Vector gradient;

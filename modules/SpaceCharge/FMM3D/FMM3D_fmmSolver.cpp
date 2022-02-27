@@ -71,7 +71,7 @@ std::size_t FMM3D::FMMSolver::getNumberOfParticles() const{
 
 Core::Vector FMM3D::FMMSolver::getEFieldFromSpaceCharge(Core::Particle& particle) {
     auto iter =(*pMap_)[&particle];
-    return iter->gradient;
+    return iter->gradient/NEGATIVE_ELECTRIC_CONSTANT;
 }
 
 
@@ -95,13 +95,18 @@ void FMM3D::FMMSolver::computeChargeDistribution() {
         i++;
     }
 
-    double eps = 0.5e-6;
+    //double eps = 0.5e-6;
+    double eps = 0.5e-5;
 
     // call the actual fmm routine
     int ier =0;
     int nP = nParticles;
     lfmm3d_s_c_g_wrapper(&eps, &nP, sources.data(), charges.data(),
                          potentials.data(), gradients.data(), &ier);
+
+    if (ier != 0){
+        throw (std::runtime_error("FMM Calculation failed"));
+    }
 
     i = 0;
     for (FMM3D::particleListEntry& pListEntry : *iVec_) {

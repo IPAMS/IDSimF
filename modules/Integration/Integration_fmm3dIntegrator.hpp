@@ -73,7 +73,6 @@ namespace Integration{
         timestepWriteFctType timestepWriteFunction_ = nullptr; ///< function to export / write time step results
         otherActionsFctType otherActionsFunction_ = nullptr;   ///< function for arbitrary other actions in the simulation
 
-        std::vector<Core::Vector>  newPos_;  ///< new position (after time step) for particles
         std::vector<Core::Vector>  a_t_;     ///< last time step acceleration for particles
         std::vector<Core::Vector>  a_tdt_;   ///< new acceleration for particles
 

@@ -10,10 +10,12 @@
 #include "CLI11.hpp"
 #include <iostream>
 #include <numeric>
+#include <omp.h>
 
 
-void runIntegrator(Integration::AbstractTimeIntegrator &integrator, unsigned int timeSteps, double dt, std::string message){
+void runIntegrator(Integration::AbstractTimeIntegrator &integrator, unsigned int timeSteps, unsigned int numberOfParticles, double dt, std::string message){
     std::cout << "Benchmark " <<message << std::endl;
+    std::cout << "number of particles: " <<numberOfParticles << std::endl;
     AppUtils::Stopwatch stopWatch;
     stopWatch.start();
 
@@ -61,9 +63,11 @@ template<class integratorT> std::vector<Core::Vector> runSimulation(unsigned int
 
                 Core::Vector spaceChargeForce(0,0,0);
                 if (spaceChargeFactor > 0) {
+                    Core::Vector sf = scFieldCalculator.getEFieldFromSpaceCharge(*particle);
                     spaceChargeForce =
-                            scFieldCalculator.getEFieldFromSpaceCharge(*particle) * (particleCharge * spaceChargeFactor);
+                            sf * (particleCharge * spaceChargeFactor);
                 }
+
                 return (spaceChargeForce / particle->getMass());
             };
 
@@ -88,7 +92,7 @@ template<class integratorT> std::vector<Core::Vector> runSimulation(unsigned int
             particlePtrs,
             accelerationFunction, nullptr, nullptr, nullptr, collisionModel);
 
-    runIntegrator(integrator, timeSteps, dt, runName);
+    runIntegrator(integrator, timeSteps, nIonsTotal, dt, runName);
 
     std::vector<Core::Vector> result;
     for (unsigned int i=0; i<nIonsTotal; ++i){
@@ -108,13 +112,21 @@ int main(int argc, char** argv) {
 
     bool verbose = false;
     app.add_flag("-v,--verbose", verbose, "be verbose");
-    CLI11_PARSE(app, argc, argv);
 
 
-    unsigned int nIonsPerDirection = 23;
-    unsigned int timeSteps = 200;
+    unsigned int nIonsPerDirection = 1;//23;
+    app.add_option("--n_ions,-i", nIonsPerDirection, "number of ions per direction")->required();
+
+    unsigned int timeSteps = 1;
+    app.add_option("--time_steps,-t", timeSteps, "number of time steps")->required();
     double dt = 1e-3;
     double spaceChargeFactor = 1.0;
+
+    int numberOfThreads_= 1;
+    app.add_option("--n_threads,-n", numberOfThreads_, "number of parallel threads")->required();
+    CLI11_PARSE(app, argc, argv);
+
+    omp_set_num_threads(numberOfThreads_);
 
     //auto hdf5Writer = std::make_unique<FileIO::TrajectoryHDF5Writer>(
     //        "test_trajectories.hd5");
@@ -125,12 +137,12 @@ int main(int argc, char** argv) {
     //        nIonsPerDirection, timeSteps, dt, spaceChargeFactor, useCollisionModel, "serial");
 
     std::vector<Core::Vector> locationsParallel = runSimulation<Integration::ParallelVerletIntegrator>(
-            nIonsPerDirection, timeSteps, dt, spaceChargeFactor, useCollisionModel, "parallel");
+            nIonsPerDirection, timeSteps, dt, spaceChargeFactor, useCollisionModel, "parallel BTree");
 
     std::vector<Core::Vector> locationsFmm = runSimulation<Integration::FMMVerletIntegrator>(
-            nIonsPerDirection, timeSteps, dt, spaceChargeFactor, useCollisionModel, "fmm");
+            nIonsPerDirection, timeSteps, dt, spaceChargeFactor, useCollisionModel, "FMM3D");
 
-    std::size_t nIonsTotal = locationsParallel.size();
+    /*std::size_t nIonsTotal = locationsParallel.size();
 
     //std::vector<double> diffMagsTrees;
     std::vector<double> diffMagsFMM;
@@ -141,13 +153,13 @@ int main(int argc, char** argv) {
     //double sumTrees = std::accumulate(diffMagsTrees.begin(), diffMagsTrees.end(), 0.0);
     double sumFmm = std::accumulate(diffMagsFMM.begin(), diffMagsFMM.end(), 0.0);
 
-    /*if (verbose) {
+    if (verbose) {
         for (unsigned int i = 0; i<nIonsTotal; ++i) {
-            std::cout << locationsSerial[i] << " | " << locationsParallel[i] << " | "
-                      << (locationsSerial[i]-locationsParallel[i]).magnitude()
+            std::cout << locationsParallel[i] << " | " << locationsFmm[i] << " | "
+                      << (locationsParallel[i]-locationsFmm[i]).magnitude()
                       << std::endl;
         }
-    }*/
+    }
     //std::cout << "sum diff trees: " << sumTrees << "sum diff fmm: " << sumFmm <<std::endl;
-    std::cout << "sum diff fmm: " << sumFmm <<std::endl;
+    std::cout << "sum diff fmm: " << sumFmm <<std::endl;*/
 }
