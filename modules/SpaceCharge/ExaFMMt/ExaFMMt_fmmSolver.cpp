@@ -20,7 +20,57 @@
  ****************************/
 
 #include "ExaFMMt_fmmSolver.hpp"
+#include "build_tree.h"
+#include "build_list.h"
+#include "laplace.h"
 
 void ExaFMMt::FMMSolver::computeChargeDistribution(){
 
+    // step 1: Prepare sources and targets
+    std::size_t nParticles = getNumberOfParticles();
+
+    exafmm_t::Bodies<exafmm_t::real_t> sources(nParticles);
+    exafmm_t::Bodies<exafmm_t::real_t> targets(nParticles);
+
+    std::size_t i = 0;
+    Core::Vector particlePos;
+    for (const SpaceCharge::particleListEntry& pListEntry : *iVec_) {
+
+        sources[i].ibody = i;
+        targets[i].ibody = i;
+
+        particlePos = pListEntry.particle -> getLocation();
+        sources[i].X[0] = particlePos.x();
+        sources[i].X[1] = particlePos.y();
+        sources[i].X[2] = particlePos.z();
+
+        targets[i].X[0] = particlePos.x();
+        targets[i].X[1] = particlePos.y();
+        targets[i].X[2] = particlePos.z();
+
+        sources[i].q = pListEntry.particle -> getCharge();
+        ++i;
+    }
+
+    // step 2: Create an Fmm instance for Laplace kernel.
+    int P = 8;         // expansion order
+    int ncrit = 400;   // max number of bodies per leaf
+    exafmm_t::LaplaceFmm fmm(P, ncrit);
+
+    // step 3: Build and balance the octree.
+    exafmm_t::NodePtrs<exafmm_t::real_t> leafs, nonleafs;
+    exafmm_t::Nodes<exafmm_t::real_t> nodes;
+
+    exafmm_t::get_bounds(sources, targets, fmm.x0, fmm.r0);
+    nodes = exafmm_t::build_tree(sources, targets, leafs, nonleafs, fmm);
+
+    // step 4: Build lists and pre-compute invariant matrices.
+    exafmm_t::init_rel_coord();
+    exafmm_t::build_list(nodes, fmm);
+    fmm.M2L_setup(nonleafs);
+    fmm.precompute();
+
+    // step 5: Use FMM to evaluate potential
+    fmm.upward_pass(nodes, leafs);
+    fmm.downward_pass(nodes, leafs);
 }

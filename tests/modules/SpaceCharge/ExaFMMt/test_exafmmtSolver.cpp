@@ -45,10 +45,10 @@ TEST_CASE( "Test basic particle/particle interaction calculation with ExaFMMt", 
 
     CHECK(exafmmSolver.getNumberOfParticles() == 10000);
 
-    /*fmmSolver.computeChargeDistribution();
+    exafmmSolver.computeChargeDistribution();
 
-    Core::Vector spaceChargeForce = fmmSolver.getEFieldFromSpaceCharge(*ions[0].get());
+    Core::Vector spaceChargeForce = exafmmSolver.getEFieldFromSpaceCharge(*ions[0].get());
     CHECK(spaceChargeForce.x() != 0.0);
     CHECK(spaceChargeForce.y() != 0.0);
-    CHECK(spaceChargeForce.z() != 0.0);*/
+    CHECK(spaceChargeForce.z() != 0.0);
 }

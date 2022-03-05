@@ -43,6 +43,17 @@ if(USE_FMM_3D)
 endif()
 
 if(USE_EXAFMMT)
+    set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_LIST_DIR}/ExaFMMt/cmake/findFFTW")
+
+    message(STATUS ${CMAKE_MODULE_PATH})
     target_include_directories(spacecharge PUBLIC ${EXAFMMT_PATH}/include)
-    #target_link_libraries(spacecharge ${FMM_3D_PATH}/lib/libfmm3d.so)
+
+    find_package(BLAS REQUIRED)
+    find_package(LAPACK REQUIRED)
+    find_package(FFTW REQUIRED)
+
+    target_link_libraries (spacecharge
+            ${BLAS_LIBRARIES}
+            ${LAPACK_LIBRARIES}
+            ${FFTW_LIBRARIES})
 endif()
