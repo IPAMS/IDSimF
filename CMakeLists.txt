@@ -44,6 +44,8 @@ include_directories(${HDF5_INCLUDE_DIRS})
 #optional libraries / optional features-------------
 option (USE_CPP_FSLIB "Use stdc++fs" OFF)
 option (USE_EIGEN "Use Eigen based tests / experimental implementations" OFF)
+
+## FMM3d library ----
 if(NOT DEFINED FMM_3D_PATH)
     set(USE_FMM_3D false)
 else()
@@ -56,6 +58,22 @@ if(USE_FMM_3D)
 else()
     message(STATUS "FMM 3d is FALSE")
 endif()
+
+## exafmm-t library ----
+if(NOT DEFINED EXAFMMT_PATH)
+    set(USE_EXAFMMT false)
+else()
+    set(USE_EXAFMMT true)
+endif()
+
+if(USE_EXAFMMT)
+    message(STATUS "ExaFMM-t is TRUE, path is:")
+    message(STATUS ${EXAFMMT_PATH})
+else()
+    message(STATUS "ExaFMM-t is FALSE")
+endif()
+
+
 #-------------------------------
 
 # third party libraries ------------------------------------
@@ -72,7 +90,6 @@ add_subdirectory (modules/ParticleSimulation)
 
 add_subdirectory (tests/modules/Core)
 add_subdirectory (tests/modules/SpaceCharge/BTree)
-add_subdirectory (tests/modules/SpaceCharge/FMM3D)
 add_subdirectory (tests/modules/RS)
 add_subdirectory (tests/modules/CollisionModels)
 add_subdirectory (tests/modules/ParticleSimulation)
@@ -80,6 +97,9 @@ add_subdirectory (tests/modules/Integration)
 add_subdirectory (tests/modules/FileIO)
 add_subdirectory (tests/simulations)
 add_subdirectory (tests/applications)
+# Optional Tests -----
+add_subdirectory (tests/modules/SpaceCharge/FMM3D)
+add_subdirectory (tests/modules/SpaceCharge/ExaFMMt)
 
 add_subdirectory (tests/benchmarks/errorfunction)
 add_subdirectory (tests/benchmarks/filewriter/HDF5filewriter)

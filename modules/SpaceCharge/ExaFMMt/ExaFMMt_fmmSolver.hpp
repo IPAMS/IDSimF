@@ -17,25 +17,26 @@
 
  You should have received a copy of the GNU General Public License
  along with IDSimF.  If not, see <https://www.gnu.org/licenses/>.
- ------------
 
- FMM3D_fmmSolver.hpp
+ ------------
+ ExaFMMt_fmmSolver.hpp
 
  Coulombic Particle / Particle (space charge) solver based on FMM3D library
 
  ****************************/
-
-#ifndef IDSIMF_FMM3D_FMMSOLVER_HPP
-#define IDSIMF_FMM3D_FMMSOLVER_HPP
+#ifndef IDSIMF_EXAFMMT_FMMSOLVER_HPP
+#define IDSIMF_EXAFMMT_FMMSOLVER_HPP
 
 #include "SC_generic.hpp"
 
-namespace FMM3D{
+namespace ExaFMMt{
 
     class FMMSolver : public SpaceCharge::GenericFMMSolver {
 
     public:
         void computeChargeDistribution() override;
+
     };
 }
-#endif //IDSIMF_FMM3D_FMMSOLVER_HPP
+
+#endif //IDSIMF_EXAFMMT_FMMSOLVER_HPP

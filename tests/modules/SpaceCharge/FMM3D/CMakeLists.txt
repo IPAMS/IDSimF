@@ -2,7 +2,7 @@ project(test_FMM3D)
 
 set(SOURCE_FILES
         test_main.cpp
-        test_fmmSolver.cpp)
+        test_fmm3DSolver.cpp)
 
 add_executable(test_FMM3D ${SOURCE_FILES})
 target_include_directories(test_FMM3D PUBLIC

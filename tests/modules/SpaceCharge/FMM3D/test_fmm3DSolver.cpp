@@ -1,7 +1,7 @@
 /***************************
  Ion Dynamics Simulation Framework (IDSimF)
 
- Copyright 2020 - Physical and Theoretical Chemistry /
+ Copyright 2022 - Physical and Theoretical Chemistry /
  Institute of Pure and Applied Mass Spectrometry
  of the University of Wuppertal, Germany
 

@@ -26,9 +26,15 @@ if(USE_FMM_3D)
             FMM3D/FMM3D_fmmSolver_C_interface.h)
 endif()
 
+if(USE_EXAFMMT)
+    set (SOURCE_FILES ${SOURCE_FILES}
+            ExaFMMt/ExaFMMt_fmmSolver.cpp
+            ExaFMMt/ExaFMMt_fmmSolver.hpp)
+endif()
+
 
 add_library(spacecharge STATIC ${SOURCE_FILES})
-target_include_directories(spacecharge PUBLIC . BTree FMM3D)
+target_include_directories(spacecharge PUBLIC . BTree FMM3D ExaFMMt)
 target_link_libraries(spacecharge core)
 
 if(USE_FMM_3D)
@@ -36,3 +42,7 @@ if(USE_FMM_3D)
     target_link_libraries(spacecharge ${FMM_3D_PATH}/lib/libfmm3d.so)
 endif()
 
+if(USE_EXAFMMT)
+    target_include_directories(spacecharge PUBLIC ${EXAFMMT_PATH}/include)
+    #target_link_libraries(spacecharge ${FMM_3D_PATH}/lib/libfmm3d.so)
+endif()

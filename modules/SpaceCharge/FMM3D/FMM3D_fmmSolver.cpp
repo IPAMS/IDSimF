@@ -27,53 +27,6 @@ extern "C" {
 #include <vector>
 #include <iostream>
 
-/**
- * Default Constructor
- */
-FMM3D::FMMSolver::FMMSolver() {
-    iVec_ = std::make_unique<particlePtrList>();
-    iMap_ = std::make_unique<std::unordered_map<std::size_t, particlePtrList::const_iterator>>();
-    pMap_ = std::make_unique<std::unordered_map<Core::Particle*, particlePtrList::const_iterator>>();
-}
-
-/**
- Insert particle into the field solver
-
- \param particle the particle to insert
- \param ext_index an external index number for the particle / numerical particle id (most likely from simion)
- */
-void FMM3D::FMMSolver::insertParticle(Core::Particle &particle, std::size_t ext_index){
-    iVec_->push_front({&particle, Core::Vector(), 0.0});
-    iMap_->insert({ext_index, iVec_->cbegin()});
-    pMap_->insert({&particle, iVec_->cbegin()});
-}
-
-/**
- Removes a particle with a given particle index / particle id and its hosting leaf node
- from the fmm solver
-
- \param ext_index the external numerical particle id
- */
-void FMM3D::FMMSolver::removeParticle(std::size_t ext_index){
-    auto iter =(*iMap_)[ext_index];
-    Core::Particle* particle = iter->particle;
-    iMap_->erase(ext_index);
-    pMap_->erase(particle);
-    iVec_->erase(iter);
-}
-
-/**
- Gets the number of particles in the fmm solver
- */
-std::size_t FMM3D::FMMSolver::getNumberOfParticles() const{
-    return(iVec_->size());
-}
-
-Core::Vector FMM3D::FMMSolver::getEFieldFromSpaceCharge(Core::Particle& particle) {
-    auto iter =(*pMap_)[&particle];
-    return iter->gradient/NEGATIVE_ELECTRIC_CONSTANT;
-}
-
 
 void FMM3D::FMMSolver::computeChargeDistribution() {
     std::size_t nParticles = getNumberOfParticles();
@@ -85,7 +38,7 @@ void FMM3D::FMMSolver::computeChargeDistribution() {
 
     std::size_t i = 0;
     Core::Vector particlePos;
-    for (const FMM3D::particleListEntry& pListEntry : *iVec_) {
+    for (const SpaceCharge::particleListEntry& pListEntry : *iVec_) {
         particlePos = pListEntry.particle -> getLocation();
         sources[3*i] = particlePos.x();
         sources[3*i+1] = particlePos.y();
@@ -109,7 +62,7 @@ void FMM3D::FMMSolver::computeChargeDistribution() {
     }
 
     i = 0;
-    for (FMM3D::particleListEntry& pListEntry : *iVec_) {
+    for (SpaceCharge::particleListEntry& pListEntry : *iVec_) {
         pListEntry.potential = potentials[i];
         pListEntry.gradient = {gradients[3*i], gradients[3*i+1], gradients[3*i+2]};
         i++;
