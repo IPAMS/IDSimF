@@ -128,6 +128,13 @@ double Core::Vector::magnitudeSquared() const{
 }
 
 // overloaded operators:
+Core::Vector& Core::Vector::operator+=(const Core::Vector &rhs){
+    this->x_ += rhs.x_;
+    this->y_ += rhs.y_;
+    this->z_ += rhs.z_;
+
+    return *this;
+}
 Core::Vector Core::operator+(const Core::Vector &lhs, const Core::Vector & rhs){
     return Core::Vector(lhs.x_ + rhs.x_, lhs.y_ + rhs.y_, lhs.z_ + rhs.z_);
 }

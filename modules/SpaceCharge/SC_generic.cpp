@@ -25,7 +25,7 @@
 /**
  * Default Constructor
  */
-SpaceCharge::GenericFMMSolver::GenericFMMSolver() {
+SpaceCharge::GenericSpaceChargeSolver::GenericSpaceChargeSolver() {
     iVec_ = std::make_unique<particlePtrList>();
     iMap_ = std::make_unique<std::unordered_map<std::size_t, particlePtrList::const_iterator>>();
     pMap_ = std::make_unique<std::unordered_map<Core::Particle*, particlePtrList::const_iterator>>();
@@ -37,7 +37,7 @@ SpaceCharge::GenericFMMSolver::GenericFMMSolver() {
  \param particle the particle to insert
  \param ext_index an external index number for the particle / numerical particle id (most likely from simion)
  */
-void SpaceCharge::GenericFMMSolver::insertParticle(Core::Particle &particle, std::size_t ext_index){
+void SpaceCharge::GenericSpaceChargeSolver::insertParticle(Core::Particle &particle, std::size_t ext_index){
     iVec_->push_front({&particle, Core::Vector(), 0.0});
     iMap_->insert({ext_index, iVec_->cbegin()});
     pMap_->insert({&particle, iVec_->cbegin()});
@@ -49,7 +49,7 @@ void SpaceCharge::GenericFMMSolver::insertParticle(Core::Particle &particle, std
 
  \param ext_index the external numerical particle id
  */
-void SpaceCharge::GenericFMMSolver::removeParticle(std::size_t ext_index){
+void SpaceCharge::GenericSpaceChargeSolver::removeParticle(std::size_t ext_index){
     auto iter =(*iMap_)[ext_index];
     Core::Particle* particle = iter->particle;
     iMap_->erase(ext_index);
@@ -60,11 +60,11 @@ void SpaceCharge::GenericFMMSolver::removeParticle(std::size_t ext_index){
 /**
  Gets the number of particles in the fmm solver
  */
-std::size_t SpaceCharge::GenericFMMSolver::getNumberOfParticles() const{
+std::size_t SpaceCharge::GenericSpaceChargeSolver::getNumberOfParticles() const{
     return(iVec_->size());
 }
 
-Core::Vector SpaceCharge::GenericFMMSolver::getEFieldFromSpaceCharge(Core::Particle& particle) {
+Core::Vector SpaceCharge::GenericSpaceChargeSolver::getEFieldFromSpaceCharge(Core::Particle& particle) {
     auto iter =(*pMap_)[&particle];
     return iter->gradient/NEGATIVE_ELECTRIC_CONSTANT;
 }

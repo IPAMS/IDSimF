@@ -9,21 +9,22 @@
 
 const std::string vectorsApproxEqual("Vectors approximately equal");
 
-inline std::string vectorApproxCompare(const Core::Vector &lhs, const Core::Vector &rhs){
+inline std::string vectorApproxCompare(const Core::Vector &lhs, const Core::Vector &rhs,
+                                       double epsilon=std::numeric_limits<float>::epsilon()*100.0){
     bool equal = true;
     std::stringstream ss;
 
-    if (lhs.x() != Approx(rhs.x())){
+    if (lhs.x() != Approx(rhs.x()).epsilon(epsilon)){
         equal = false;
         ss << "x coord unequal "<<lhs.x() <<" != "<<rhs.x()<<std::endl;
     }
 
-    if (lhs.y() != Approx(rhs.y())){
+    if (lhs.y() != Approx(rhs.y()).epsilon(epsilon)){
         equal = false;
         ss << "y coord unequal "<<lhs.y() <<" != "<<rhs.y()<<std::endl;
     }
 
-    if (lhs.z() != Approx(rhs.z())){
+    if (lhs.z() != Approx(rhs.z()).epsilon(epsilon)){
         equal = false;
         ss << "z coord unequal "<<lhs.z() <<" != "<<rhs.z()<<std::endl;
     }

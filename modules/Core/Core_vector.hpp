@@ -60,6 +60,7 @@ namespace Core {
         [[nodiscard]] double magnitudeSquared() const;
 
         // overloaded operators:
+        Vector& operator+=(const Vector &rhs);
         friend Vector operator+(const Vector &lhs, const Vector &rhs);
         friend Vector operator-(const Vector &lhs, const Vector &rhs);
         friend double operator*(const Vector &lhs, const Vector &rhs);

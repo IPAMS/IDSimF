@@ -31,7 +31,7 @@
 
 namespace ExaFMMt{
 
-    class FMMSolver : public SpaceCharge::GenericFMMSolver {
+    class FMMSolver : public SpaceCharge::GenericSpaceChargeSolver {
 
     public:
         void computeChargeDistribution() override;

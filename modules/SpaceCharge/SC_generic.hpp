@@ -60,16 +60,16 @@ namespace SpaceCharge{
     /**
      * Abstract base class for Barnes-Hut Tree nodes
      */
-    class GenericFMMSolver : public SpaceCharge::FieldCalculator {
+    class GenericSpaceChargeSolver : public SpaceCharge::FieldCalculator {
 
     public:
-        GenericFMMSolver();
+        GenericSpaceChargeSolver();
 
         void insertParticle(Core::Particle &particle, std::size_t ext_index);
         void removeParticle(std::size_t ext_index);
         [[nodiscard]] std::size_t getNumberOfParticles() const;
 
-        [[nodiscard]] Core::Vector getEFieldFromSpaceCharge(Core::Particle& particle) override;
+        [[nodiscard]] virtual Core::Vector getEFieldFromSpaceCharge(Core::Particle& particle) override;
         virtual void computeChargeDistribution() = 0;
 
     protected:

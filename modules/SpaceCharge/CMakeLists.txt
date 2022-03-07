@@ -16,7 +16,9 @@ set(SOURCE_FILES
         BTree/BTree_genericBaseNode.cpp
         BTree/BTree_genericBaseNode.hpp
         SC_generic.cpp
-        SC_generic.hpp)
+        SC_generic.hpp
+        SC_fullSumSolver.cpp
+        SC_fullSumSolver.hpp)
 
 if(USE_FMM_3D)
     set (SOURCE_FILES ${SOURCE_FILES}

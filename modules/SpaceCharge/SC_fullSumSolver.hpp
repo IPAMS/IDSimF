@@ -17,25 +17,26 @@
 
  You should have received a copy of the GNU General Public License
  along with IDSimF.  If not, see <https://www.gnu.org/licenses/>.
+
  ------------
+ SC_fullSumSolver.hpp
 
- FMM3D_fmmSolver.hpp
-
- Coulombic Particle / Particle (space charge) solver based on FMM3D library
+ A naive / full sum space charge solver (primarily for testing purposes)
 
  ****************************/
-
-#ifndef IDSIMF_FMM3D_FMMSOLVER_HPP
-#define IDSIMF_FMM3D_FMMSOLVER_HPP
+#ifndef IDSIMF_SC_FULLSUMSOLVER_HPP
+#define IDSIMF_SC_FULLSUMSOLVER_HPP
 
 #include "SC_generic.hpp"
 
-namespace FMM3D{
+namespace SpaceCharge{
 
-    class FMMSolver : public SpaceCharge::GenericSpaceChargeSolver {
+    class FullSumSolver : public GenericSpaceChargeSolver {
 
     public:
+        [[nodiscard]] virtual Core::Vector getEFieldFromSpaceCharge(Core::Particle& particle) override;
         void computeChargeDistribution() override;
+
     };
 }
-#endif //IDSIMF_FMM3D_FMMSOLVER_HPP
+#endif //IDSIMF_SC_FULLSUMSOLVER_HPP

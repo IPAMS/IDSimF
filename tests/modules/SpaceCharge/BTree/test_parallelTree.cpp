@@ -28,6 +28,7 @@
 #include "Core_vector.hpp"
 #include "BTree_parallelTree.hpp"
 #include "PSim_util.hpp"
+#include "SC_fullSumSolver.hpp"
 #include "test_particleInit.hpp"
 #include "catch.hpp"
 #include "test_util.hpp"
@@ -262,23 +263,24 @@ TEST_CASE( "Test parallel tree charge distribution calculation","[Tree]"){
         std::size_t nPerDirection = 20;
         auto ions = getIonsInLattice(nPerDirection);
 
+        SpaceCharge::FullSumSolver fullSumSolver;
         std::size_t i = 0;
         for (auto& ion: ions){
+            fullSumSolver.insertParticle(*ion, i);
             testTree.insertParticle(*ion, i);
             ++i;
         }
 
         testTree.init();
+        fullSumSolver.computeChargeDistribution();
         CHECK(testTree.getNumberOfParticles() == nPerDirection * nPerDirection * nPerDirection);
 
         Core::Vector force1 = testTree.getEFieldFromSpaceCharge(*ions[1]);
-        CHECK(Approx(force1.x()) == -0.00001432556993);
-        CHECK(Approx(force1.y()) == -0.00001441462718);
-        CHECK(Approx(force1.z()) == -0.00001066240335);
+        Core::Vector fullSumForce1 = fullSumSolver.getEFieldFromSpaceCharge(*ions[1]);
+        CHECK( ((force1-fullSumForce1).magnitude() / force1.magnitude()) < 1e-2);
 
         Core::Vector force10 = testTree.getEFieldFromSpaceCharge(*ions[10]);
-        CHECK(Approx(force10.x()) == -0.00001871213089);
-        CHECK(Approx(force10.y()) == -0.00001875807577);
-        CHECK(Approx(force10.z()) ==  6.893621943E-7);
+        Core::Vector fullSumForce10 = fullSumSolver.getEFieldFromSpaceCharge(*ions[10]);
+        CHECK( ((force10-fullSumForce10).magnitude() / force10.magnitude()) < 1.5e-2);
     }
 }

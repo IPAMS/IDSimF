@@ -30,6 +30,7 @@
 #include "BTree_tree.hpp"
 #include "PSim_boxStartZone.hpp"
 #include "PSim_util.hpp"
+#include "SC_fullSumSolver.hpp"
 #include "test_particleInit.hpp"
 #include "catch.hpp"
 #include "test_util.hpp"
@@ -264,5 +265,29 @@ TEST_CASE( "Test serial tree charge distribution calculation","[Tree]"){
         CHECK(std::abs(topForce.y())-107 < 1.5 );
         CHECK(std::abs(topForce.x()) < 1 );
         CHECK(std::abs(topForce.z()) < 1 );
+    }
+
+    SECTION( "Test force calculation with a large number of particles in a latticed cube"){
+        std::size_t nPerDirection = 20;
+        auto ions = getIonsInLattice(nPerDirection);
+
+        SpaceCharge::FullSumSolver fullSumSolver;
+        std::size_t i = 0;
+        for (auto& ion: ions){
+            fullSumSolver.insertParticle(*ion, i);
+            testTree.insertParticle(*ion, i);
+            ++i;
+        }
+
+        testTree.computeChargeDistribution();
+        CHECK(testTree.getNumberOfParticles() == nPerDirection * nPerDirection * nPerDirection);
+
+        Core::Vector force1 = testTree.getEFieldFromSpaceCharge(*ions[1]);
+        Core::Vector fullSumForce1 = fullSumSolver.getEFieldFromSpaceCharge(*ions[1]);
+        CHECK( ((force1-fullSumForce1).magnitude() / force1.magnitude()) < 1e-2);
+
+        Core::Vector force10 = testTree.getEFieldFromSpaceCharge(*ions[10]);
+        Core::Vector fullSumForce10 = fullSumSolver.getEFieldFromSpaceCharge(*ions[10]);
+        CHECK( ((force10-fullSumForce10).magnitude() / force10.magnitude()) < 1.5e-2);
     }
 }
