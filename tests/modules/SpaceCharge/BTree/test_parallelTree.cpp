@@ -28,7 +28,7 @@
 #include "Core_vector.hpp"
 #include "BTree_parallelTree.hpp"
 #include "PSim_util.hpp"
-#include "test_particleStarting.hpp"
+#include "test_particleInit.hpp"
 #include "catch.hpp"
 #include "test_util.hpp"
 #include <iostream>
@@ -196,7 +196,7 @@ TEST_CASE( "Test parallel tree charge distribution calculation","[Tree]"){
         CHECK(testTree.getEFieldFromSpaceCharge(testIon3) != Core::Vector(0.0,0.0,0.0));
     }
 
-    SECTION( "Test force calculation with a large number of particles in a cube"){
+    SECTION( "Test force calculation with a large number of particles in a random cube"){
 
         //Test particle add increases the number of particles:
         Core::Particle testIon1(Core::Vector(0.0,0.0,0.0), 1.0);
@@ -256,5 +256,29 @@ TEST_CASE( "Test parallel tree charge distribution calculation","[Tree]"){
         CHECK(std::abs(topForce.y())-107 < 1.5 );
         CHECK(std::abs(topForce.x()) < 1 );
         CHECK(std::abs(topForce.z()) < 1 );
+    }
+
+    SECTION( "Test force calculation with a large number of particles in a latticed cube"){
+        std::size_t nPerDirection = 20;
+        auto ions = getIonsInLattice(nPerDirection);
+
+        std::size_t i = 0;
+        for (auto& ion: ions){
+            testTree.insertParticle(*ion, i);
+            ++i;
+        }
+
+        testTree.init();
+        CHECK(testTree.getNumberOfParticles() == nPerDirection * nPerDirection * nPerDirection);
+
+        Core::Vector force1 = testTree.getEFieldFromSpaceCharge(*ions[1]);
+        CHECK(Approx(force1.x()) == -0.00001432556993);
+        CHECK(Approx(force1.y()) == -0.00001441462718);
+        CHECK(Approx(force1.z()) == -0.00001066240335);
+
+        Core::Vector force10 = testTree.getEFieldFromSpaceCharge(*ions[10]);
+        CHECK(Approx(force10.x()) == -0.00001871213089);
+        CHECK(Approx(force10.y()) == -0.00001875807577);
+        CHECK(Approx(force10.z()) ==  6.893621943E-7);
     }
 }

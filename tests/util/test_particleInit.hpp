@@ -24,8 +24,8 @@
  Description
 
  ****************************/
-#ifndef IDSIMF_TEST_PARTICLESTARTING_HPP
-#define IDSIMF_TEST_PARTICLESTARTING_HPP
+#ifndef IDSIMF_TEST_PARTICLEINIT_HPP
+#define IDSIMF_TEST_PARTICLEINIT_HPP
 
 #include "PSim_boxStartZone.hpp"
 
@@ -38,4 +38,24 @@ inline std::vector<std::unique_ptr<Core::Particle>> getRandomIonsInBox(std::size
     return startZone.getRandomParticlesInStartZone(numIons, 1.0);
 }
 
-#endif //IDSIMF_TEST_PARTICLESTARTING_HPP
+inline std::vector<std::unique_ptr<Core::Particle>> getIonsInLattice(unsigned int nPerDirection){
+
+    std::vector<std::unique_ptr<Core::Particle>> particles;
+    unsigned int nTotal = 0;
+    for (unsigned int i=0; i<nPerDirection; i++){
+        double pX = i*1.0/nPerDirection;
+        for (unsigned int j=0; j<nPerDirection; j++){
+            double pY = j*1.0/nPerDirection;
+            for (unsigned int k=0; k<nPerDirection; k++){
+                double pZ = k*1.0/nPerDirection;
+                std::unique_ptr<Core::Particle> newIon = std::make_unique<Core::Particle>(Core::Vector(pX,pY,pZ), 1.0);
+                newIon -> setMassAMU(100);
+                particles.push_back(std::move(newIon));
+                nTotal++;
+            }
+        }
+    }
+    return particles;
+}
+
+#endif //IDSIMF_TEST_PARTICLEINIT_HPP

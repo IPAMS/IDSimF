@@ -1,9 +1,7 @@
 #include "BTree_tree.hpp"
 #include "Core_particle.hpp"
-#include "Integration_verletIntegrator.hpp"
 #include "Integration_parallelVerletIntegrator.hpp"
 #include "Integration_fmm3dIntegrator.hpp"
-#include "FileIO_trajectoryHDF5Writer.hpp"
 #include "PSim_util.hpp"
 #include "CollisionModel_StatisticalDiffusion.hpp"
 #include "appUtils_stopwatch.hpp"
@@ -24,7 +22,6 @@ void runIntegrator(Integration::AbstractTimeIntegrator &integrator, unsigned int
     stopWatch.stop();
     std::cout << "elapsed wall time:"<< stopWatch.elapsedSecondsWall()<<std::endl;
     std::cout << "elapsed cpu time:"<< stopWatch.elapsedSecondsCPU()<<std::endl;
-
 }
 
 

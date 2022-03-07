@@ -89,7 +89,7 @@ add_subdirectory (modules/Integration)
 add_subdirectory (modules/ParticleSimulation)
 
 add_subdirectory (tests/modules/Core)
-add_subdirectory (tests/modules/SpaceCharge/BTree)
+add_subdirectory (tests/modules/SpaceCharge)
 add_subdirectory (tests/modules/RS)
 add_subdirectory (tests/modules/CollisionModels)
 add_subdirectory (tests/modules/ParticleSimulation)
@@ -97,9 +97,6 @@ add_subdirectory (tests/modules/Integration)
 add_subdirectory (tests/modules/FileIO)
 add_subdirectory (tests/simulations)
 add_subdirectory (tests/applications)
-# Optional Tests -----
-add_subdirectory (tests/modules/SpaceCharge/FMM3D)
-add_subdirectory (tests/modules/SpaceCharge/ExaFMMt)
 
 add_subdirectory (tests/benchmarks/errorfunction)
 add_subdirectory (tests/benchmarks/filewriter/HDF5filewriter)
