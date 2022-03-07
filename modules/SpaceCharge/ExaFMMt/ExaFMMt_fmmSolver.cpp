@@ -34,11 +34,11 @@ void ExaFMMt::FMMSolver::computeChargeDistribution(){
 
     std::size_t i = 0;
     Core::Vector particlePos;
-    for (const SpaceCharge::particleListEntry& pListEntry : *iVec_) {
-
+    std::vector<SpaceCharge::particleListEntry*> pListEntriesPtrs;
+    for (SpaceCharge::particleListEntry& pListEntry : *iVec_) {
+        pListEntriesPtrs.emplace_back(&pListEntry);
         sources[i].ibody = i;
         targets[i].ibody = i;
-
         particlePos = pListEntry.particle -> getLocation();
         sources[i].X[0] = particlePos.x();
         sources[i].X[1] = particlePos.y();
@@ -64,6 +64,7 @@ void ExaFMMt::FMMSolver::computeChargeDistribution(){
     exafmm_t::get_bounds(sources, targets, fmm.x0, fmm.r0);
     nodes = exafmm_t::build_tree(sources, targets, leafs, nonleafs, fmm);
 
+
     // step 4: Build lists and pre-compute invariant matrices.
     exafmm_t::init_rel_coord();
     exafmm_t::build_list(nodes, fmm);
@@ -71,6 +72,20 @@ void ExaFMMt::FMMSolver::computeChargeDistribution(){
     fmm.precompute();
 
     // step 5: Use FMM to evaluate potential
-    fmm.upward_pass(nodes, leafs);
-    fmm.downward_pass(nodes, leafs);
+    fmm.upward_pass(nodes, leafs, false);
+    fmm.downward_pass(nodes, leafs, false);
+
+    #pragma omp parallel for
+    for (size_t i=0; i<leafs.size(); ++i) {
+        exafmm_t::Node<exafmm_t::real_t>* leaf = leafs[i];
+        std::vector<int> & itrgs = leaf->itrgs;
+        for (size_t j=0; j<itrgs.size(); ++j) {
+            pListEntriesPtrs[itrgs[j]]->potential = leaf->trg_value[4*j+0];
+            pListEntriesPtrs[itrgs[j]]->gradient = {
+                    leaf->trg_value[4*j+1],
+                    leaf->trg_value[4*j+2],
+                    leaf->trg_value[4*j+3]
+                    };
+        }
+    }
 }

@@ -35,7 +35,6 @@ namespace ExaFMMt{
 
     public:
         void computeChargeDistribution() override;
-
     };
 }
 
