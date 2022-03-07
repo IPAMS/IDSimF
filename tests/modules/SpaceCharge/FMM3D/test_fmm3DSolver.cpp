@@ -28,25 +28,34 @@
 #include "Core_vector.hpp"
 #include "Core_particle.hpp"
 #include "PSim_boxStartZone.hpp"
+#include "SC_fullSumSolver.hpp"
 #include "catch.hpp"
 #include "test_util.hpp"
 
 TEST_CASE( "Test basic particle/particle interaction calculation with FMM3D", "[FMM3D]"){
-    std::size_t nions = 10000;
-    Core::Vector boxSize(0.002, 0.002, 0.002);
-    ParticleSimulation::BoxStartZone startZone(boxSize);
-    std::vector<std::unique_ptr<Core::Particle>> ions= startZone.getRandomParticlesInStartZone(nions, 1);
 
-    FMM3D::FMMSolver fmmSolver;
+    FMM3D::FMMSolver fmm3dSolver;
+    SpaceCharge::FullSumSolver fullSumSolver;
 
-    for (std::size_t i=0; i<nions; i++){
-        fmmSolver.insertParticle((*ions[i]),i+1);
+    SECTION("Force in random box should be approximately the same as with full sum"){
+        std::size_t nIons = 10000;
+        Core::Vector boxSize(0.002, 0.002, 0.002);
+        ParticleSimulation::BoxStartZone startZone(boxSize);
+        std::vector<std::unique_ptr<Core::Particle>> ions= startZone.getRandomParticlesInStartZone(nIons, 1);
+
+        for (std::size_t i=0; i<nIons; i++){
+            fmm3dSolver.insertParticle((*ions[i]), i+1);
+            fullSumSolver.insertParticle((*ions[i]), i+1);
+        }
+
+        CHECK(fmm3dSolver.getNumberOfParticles() == nIons);
+        CHECK(fullSumSolver.getNumberOfParticles() == nIons);
+
+        fmm3dSolver.computeChargeDistribution();
+
+        Core::Vector forceExa0 = fmm3dSolver.getEFieldFromSpaceCharge(*ions[0].get());
+        Core::Vector forceFullSum0 = fullSumSolver.getEFieldFromSpaceCharge(*ions[0].get());
+
+        CHECK( ((forceExa0-forceFullSum0).magnitude() / forceExa0.magnitude()) < 1e-6);
     }
-
-    fmmSolver.computeChargeDistribution();
-
-    Core::Vector spaceChargeForce = fmmSolver.getEFieldFromSpaceCharge(*ions[0].get());
-    CHECK(spaceChargeForce.x() != 0.0);
-    CHECK(spaceChargeForce.y() != 0.0);
-    CHECK(spaceChargeForce.z() != 0.0);
 }
