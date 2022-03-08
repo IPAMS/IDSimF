@@ -32,6 +32,7 @@
 #include "catch.hpp"
 #include "test_util.hpp"
 #include "test_particleInit.hpp"
+
 #include <iostream>
 
 TEST_CASE( "Test particle/particle interaction calculation with ExaFMMt", "[ExaFMMt]"){
@@ -53,35 +54,21 @@ TEST_CASE( "Test particle/particle interaction calculation with ExaFMMt", "[ExaF
         CHECK(exafmmSolver.getNumberOfParticles() == nIons);
         CHECK(fullSumSolver.getNumberOfParticles() == nIons);
 
-
-
         exafmmSolver.computeChargeDistribution();
 
         Core::Vector force1 = exafmmSolver.getEFieldFromSpaceCharge(*ions[1]);
         Core::Vector fullSumForce1 = fullSumSolver.getEFieldFromSpaceCharge(*ions[1]);
-        CHECK( ((force1-fullSumForce1).magnitude() / force1.magnitude()) < 1e-2);
-        std::cout << std::endl;
-        std::cout << "x: "<<force1.x() / fullSumForce1.x() << std::endl;
-        std::cout << "y: "<<force1.y() / fullSumForce1.y() << std::endl;
-        std::cout << "z: "<<force1.z() / fullSumForce1.z() << std::endl;
-        std::cout << "--------------------------------------------" << std::endl;
+        CHECK(vectorApproxCompare(force1, fullSumForce1) == vectorsApproxEqual);
 
         Core::Vector force10 = exafmmSolver.getEFieldFromSpaceCharge(*ions[10]);
         Core::Vector fullSumForce10 = fullSumSolver.getEFieldFromSpaceCharge(*ions[10]);
-        CHECK( ((force10-fullSumForce10).magnitude() / force10.magnitude()) < 1e-2);
-        std::cout << "x: "<< force10.x() / fullSumForce10.x() << std::endl;
-        std::cout << "y: "<<force10.y() / fullSumForce10.y() << std::endl;
-        std::cout << "z: "<<force10.z() / fullSumForce10.z() << std::endl;
-        std::cout << "--------------------------------------------" << std::endl;
-
-        //CHECK( ((forceExa0-forceFullSum0).magnitude() / forceExa0.magnitude()) < 1e-2);
+        CHECK(vectorApproxCompare(force10, fullSumForce10) == vectorsApproxEqual);
     }
 
     SECTION( "Test force calculation with a large number of particles in a latticed cube"){
         std::size_t nPerDirection = 15;
         auto ions = getIonsInLattice(nPerDirection);
 
-        SpaceCharge::FullSumSolver fullSumSolver;
         std::size_t i = 0;
         for (auto& ion: ions){
             fullSumSolver.insertParticle(*ion, i);
@@ -94,49 +81,42 @@ TEST_CASE( "Test particle/particle interaction calculation with ExaFMMt", "[ExaF
 
         Core::Vector force1 = exafmmSolver.getEFieldFromSpaceCharge(*ions[1]);
         Core::Vector fullSumForce1 = fullSumSolver.getEFieldFromSpaceCharge(*ions[1]);
-        CHECK( ((force1-fullSumForce1).magnitude() / force1.magnitude()) < 1e-2);
-        std::cout << std::endl;
-        std::cout << "x: "<<force1.x() / fullSumForce1.x() << std::endl;
-        std::cout << "y: "<<force1.y() / fullSumForce1.y() << std::endl;
-        std::cout << "z: "<<force1.z() / fullSumForce1.z() << std::endl;
-        std::cout << "--------------------------------------------" << std::endl;
+        CHECK(vectorApproxCompare(force1, fullSumForce1) == vectorsApproxEqual);
 
         Core::Vector force10 = exafmmSolver.getEFieldFromSpaceCharge(*ions[10]);
         Core::Vector fullSumForce10 = fullSumSolver.getEFieldFromSpaceCharge(*ions[10]);
-        CHECK( ((force10-fullSumForce10).magnitude() / force10.magnitude()) < 1e-2);
-        std::cout << "x: "<< force10.x() / fullSumForce10.x() << std::endl;
-        std::cout << "y: "<<force10.y() / fullSumForce10.y() << std::endl;
-        std::cout << "z: "<<force10.z() / fullSumForce10.z() << std::endl;
-        std::cout << "--------------------------------------------" << std::endl;
+        CHECK(vectorApproxCompare(force10, fullSumForce10) == vectorsApproxEqual);
 
         Core::Vector force100 = exafmmSolver.getEFieldFromSpaceCharge(*ions[100]);
         Core::Vector fullSumForce100 = fullSumSolver.getEFieldFromSpaceCharge(*ions[100]);
-        CHECK( ((force100-fullSumForce100).magnitude() / force100.magnitude()) < 1e-2);
-        std::cout << "x: "<< force100.x() / fullSumForce100.x() << std::endl;
-        std::cout << "y: "<<force100.y() / fullSumForce100.y() << std::endl;
-        std::cout << "z: "<<force100.z() / fullSumForce100.z() << std::endl;
-        std::cout << "--------------------------------------------" << std::endl;
-
-        /*CHECK(vectorApproxCompare(
-                force1,
-                fullSumForce1) == vectorsApproxEqual);*/
-
-        //search for ion:
-        double x_correct = fullSumForce1.x();
-
-        for (auto& ion: ions){
-            Core::Vector sField = exafmmSolver.getEFieldFromSpaceCharge(*ion);
-
-            if ( std::abs(sField.x() - x_correct) < 3e-9 ){
-                std::cout << fullSumForce1 << std::endl;
-                std::cout << sField << std::endl;
-                std::cout << "---------" << std::endl;
-            }
-        }
-
-        //Core::Vector force10 = exafmmSolver.getEFieldFromSpaceCharge(*ions[10]);
-        //Core::Vector fullSumForce10 = fullSumSolver.getEFieldFromSpaceCharge(*ions[10]);
-        //CHECK( ((force10-fullSumForce10).magnitude() / force10.magnitude()) < 1.5e-2);
+        CHECK(vectorApproxCompare(force100, fullSumForce100) == vectorsApproxEqual);
     }
 
+    SECTION( "Test force calculation with small cube of charges"){
+
+        std::vector<Core::Particle> particles = {
+            Core::Particle(Core::Vector( 0.1, 0.1, 0.1), 1.0),
+            Core::Particle(Core::Vector( 0.1,-0.1, 0.1), 1.0),
+            Core::Particle(Core::Vector(-0.1, 0.1, 0.1), 1.0),
+            Core::Particle(Core::Vector(-0.1,-0.1, 0.1), 1.0),
+            Core::Particle(Core::Vector( 0.1, 0.1,-0.1), 1.0),
+            Core::Particle(Core::Vector( 0.1,-0.1,-0.1), 1.0),
+            Core::Particle(Core::Vector(-0.1, 0.1,-0.1), 1.0),
+            Core::Particle(Core::Vector(-0.1,-0.1,-0.1), 1.0),
+            Core::Particle(Core::Vector( 0.0, 0.0, 0.2), 1.0)
+        };
+
+        std::size_t i=0;
+        for (auto& particle: particles){
+            exafmmSolver.insertParticle(particle, i);
+            fullSumSolver.insertParticle(particle, i);
+            ++i;
+        }
+
+        exafmmSolver.computeChargeDistribution();
+
+        Core::Vector force1 = exafmmSolver.getEFieldFromSpaceCharge(particles[8]);
+        Core::Vector fullSumForce1 = fullSumSolver.getEFieldFromSpaceCharge(particles[8]);
+        CHECK(vectorApproxCompare(force1, fullSumForce1) == vectorsApproxEqual);
+    }
 }

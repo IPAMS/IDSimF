@@ -34,6 +34,7 @@ namespace ExaFMMt{
     class FMMSolver : public SpaceCharge::GenericSpaceChargeSolver {
 
     public:
+        [[nodiscard]] virtual Core::Vector getEFieldFromSpaceCharge(Core::Particle& particle) override;
         void computeChargeDistribution() override;
     };
 }

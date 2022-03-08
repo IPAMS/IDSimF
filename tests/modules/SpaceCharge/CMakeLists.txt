@@ -18,7 +18,6 @@ if(USE_EXAFMMT)
         ExaFMMt/test_exafmmtSolver.cpp)
 endif()
 
-
 add_executable(test_SpaceCharge ${SOURCE_FILES})
 target_include_directories(test_SpaceCharge PUBLIC
         ${CMAKE_SOURCE_DIR}/libs/catch

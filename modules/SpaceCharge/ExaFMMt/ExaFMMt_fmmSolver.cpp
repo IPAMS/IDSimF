@@ -24,6 +24,11 @@
 #include "build_list.h"
 #include "laplace.h"
 
+Core::Vector ExaFMMt::FMMSolver::getEFieldFromSpaceCharge(Core::Particle& particle) {
+    auto iter =(*pMap_)[&particle];
+    return iter->gradient/SpaceCharge::NEGATIVE_EPSILON_0;
+}
+
 void ExaFMMt::FMMSolver::computeChargeDistribution(){
 
     // step 1: Prepare sources and targets
@@ -80,7 +85,6 @@ void ExaFMMt::FMMSolver::computeChargeDistribution(){
         exafmm_t::Node<exafmm_t::real_t>* leaf = leafs[k];
         std::vector<int> & itrgs = leaf->itrgs;
         for (size_t j=0; j<itrgs.size(); ++j) {
-            std::cout << itrgs[j] <<" ";
             pListEntriesPtrs[itrgs[j]]->potential = leaf->trg_value[4*j+0];
             pListEntriesPtrs[itrgs[j]]->gradient = {
                     leaf->trg_value[4*j+1],

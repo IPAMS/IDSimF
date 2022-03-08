@@ -49,6 +49,7 @@ namespace SpaceCharge{
     };
 
     constexpr double NEGATIVE_ELECTRIC_CONSTANT = -1.0* Core::ELECTRIC_CONSTANT;
+    constexpr double NEGATIVE_EPSILON_0 = -1.0* Core::EPSILON_0;
 
     struct particleListEntry{
         Core::Particle* particle;
