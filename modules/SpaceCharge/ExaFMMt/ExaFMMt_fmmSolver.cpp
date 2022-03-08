@@ -75,11 +75,12 @@ void ExaFMMt::FMMSolver::computeChargeDistribution(){
     fmm.upward_pass(nodes, leafs, false);
     fmm.downward_pass(nodes, leafs, false);
 
-    #pragma omp parallel for
-    for (size_t i=0; i<leafs.size(); ++i) {
-        exafmm_t::Node<exafmm_t::real_t>* leaf = leafs[i];
+    //#pragma omp parallel for default(none) shared(leafs, pListEntriesPtrs)
+    for (size_t k=0; k<leafs.size(); ++k) {
+        exafmm_t::Node<exafmm_t::real_t>* leaf = leafs[k];
         std::vector<int> & itrgs = leaf->itrgs;
         for (size_t j=0; j<itrgs.size(); ++j) {
+            std::cout << itrgs[j] <<" ";
             pListEntriesPtrs[itrgs[j]]->potential = leaf->trg_value[4*j+0];
             pListEntriesPtrs[itrgs[j]]->gradient = {
                     leaf->trg_value[4*j+1],
