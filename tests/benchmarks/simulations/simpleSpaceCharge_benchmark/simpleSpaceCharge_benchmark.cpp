@@ -1,7 +1,14 @@
 #include "BTree_tree.hpp"
 #include "Core_particle.hpp"
 #include "Integration_parallelVerletIntegrator.hpp"
-#include "Integration_fmm3dIntegrator.hpp"
+#include "Integration_fmmIntegrator.hpp"
+#ifdef WITH_FMM_3d
+    #include "FMM3D_fmmSolver.hpp"
+#endif
+
+#ifdef WITH_EXAFMMT
+    #include "ExaFMMt_fmmSolver.hpp"
+#endif
 #include "PSim_util.hpp"
 #include "CollisionModel_StatisticalDiffusion.hpp"
 #include "appUtils_stopwatch.hpp"
@@ -99,6 +106,29 @@ template<class integratorT> std::vector<Core::Vector> runSimulation(unsigned int
     return result;
 }
 
+void analyzeParticleLocationDifferences(std::vector<Core::Vector> &locationsA,
+                                        std::vector<Core::Vector> &locationsB,
+                                        std::string analysisName){
+    std::vector<double> diffMags;
+    std::size_t nIonsTotal= locationsA.size();
+    for (unsigned int i=0; i<nIonsTotal; ++i){
+        //diffMagsTrees.push_back( (locationsSerial[i] - locationsParallel[i]).magnitude() );
+        diffMags.push_back( (locationsA[i] - locationsB[i]).magnitude() );
+    }
+    //double sumTrees = std::accumulate(diffMagsTrees.begin(), diffMagsTrees.end(), 0.0);
+    double sum = std::accumulate(diffMags.begin(), diffMags.end(), 0.0);
+
+    /*if (verbose) {
+        for (unsigned int i = 0; i<nIonsTotal; ++i) {
+            std::cout << locationsParallel[i] << " | " << locationsFmm[i] << " | "
+            << (locationsParallel[i]-locationsFmm[i]).magnitude()
+            << std::endl;
+        }
+    }*/
+    //std::cout << "sum diff trees: " << sumTrees << "sum diff fmm: " << sumFmm <<std::endl;
+    std::cout << "sum diff "<<analysisName<<": " << sum <<std::endl;
+}
+
 int main(int argc, char** argv) {
     CLI::App app{"Simple benchmark of space charge calculation", "simpleSpaceCharge benchmark"};
 
@@ -125,10 +155,6 @@ int main(int argc, char** argv) {
 
     omp_set_num_threads(numberOfThreads_);
 
-    //auto hdf5Writer = std::make_unique<FileIO::TrajectoryHDF5Writer>(
-    //        "test_trajectories.hd5");
-
-
     // simulate ===============================================================================================
     //std::vector<Core::Vector> locationsSerial = runSimulation<Integration::VerletIntegrator>(
     //        nIonsPerDirection, timeSteps, dt, spaceChargeFactor, useCollisionModel, "serial");
@@ -136,27 +162,22 @@ int main(int argc, char** argv) {
     std::vector<Core::Vector> locationsParallel = runSimulation<Integration::ParallelVerletIntegrator>(
             nIonsPerDirection, timeSteps, dt, spaceChargeFactor, useCollisionModel, "parallel BTree");
 
-    std::vector<Core::Vector> locationsFmm = runSimulation<Integration::FMMVerletIntegrator>(
+#ifdef WITH_FMM_3d
+    std::vector<Core::Vector> locationsFmm = runSimulation<Integration::FMMVerletIntegrator<FMM3D::FMMSolver>>(
             nIonsPerDirection, timeSteps, dt, spaceChargeFactor, useCollisionModel, "FMM3D");
+#endif
 
-    /*std::size_t nIonsTotal = locationsParallel.size();
+#ifdef WITH_EXAFMMT
+    std::vector<Core::Vector> locationsExa = runSimulation<Integration::FMMVerletIntegrator<ExaFMMt::FMMSolver>>(
+            nIonsPerDirection, timeSteps, dt, spaceChargeFactor, useCollisionModel, "EXAFMMT");
+#endif
 
-    //std::vector<double> diffMagsTrees;
-    std::vector<double> diffMagsFMM;
-    for (unsigned int i=0; i<nIonsTotal; ++i){
-        //diffMagsTrees.push_back( (locationsSerial[i] - locationsParallel[i]).magnitude() );
-        diffMagsFMM.push_back( (locationsParallel[i] - locationsFmm[i]).magnitude() );
-    }
-    //double sumTrees = std::accumulate(diffMagsTrees.begin(), diffMagsTrees.end(), 0.0);
-    double sumFmm = std::accumulate(diffMagsFMM.begin(), diffMagsFMM.end(), 0.0);
 
-    if (verbose) {
-        for (unsigned int i = 0; i<nIonsTotal; ++i) {
-            std::cout << locationsParallel[i] << " | " << locationsFmm[i] << " | "
-                      << (locationsParallel[i]-locationsFmm[i]).magnitude()
-                      << std::endl;
-        }
-    }
-    //std::cout << "sum diff trees: " << sumTrees << "sum diff fmm: " << sumFmm <<std::endl;
-    std::cout << "sum diff fmm: " << sumFmm <<std::endl;*/
+#ifdef WITH_FMM_3d
+    analyzeParticleLocationDifferences(locationsParallel, locationsFmm, "parallel BTree vs. FMM3d");
+#endif
+
+#ifdef WITH_EXAFMMT
+    analyzeParticleLocationDifferences(locationsParallel, locationsExa, "parallel BTree vs. ExaFMM");
+#endif
 }

@@ -48,29 +48,23 @@ option (USE_EIGEN "Use Eigen based tests / experimental implementations" OFF)
 ## FMM3d library ----
 if(NOT DEFINED FMM_3D_PATH)
     set(USE_FMM_3D false)
+    message(STATUS "FMM 3d is FALSE")
 else()
     set(USE_FMM_3D true)
-endif()
-
-if(USE_FMM_3D)
     message(STATUS "FMM 3d is TRUE, path is:")
     message(STATUS ${FMM_3D_PATH})
-else()
-    message(STATUS "FMM 3d is FALSE")
+    add_compile_definitions(WITH_FMM_3d)
 endif()
 
 ## exafmm-t library ----
 if(NOT DEFINED EXAFMMT_PATH)
     set(USE_EXAFMMT false)
+    message(STATUS "ExaFMM-t is FALSE")
 else()
     set(USE_EXAFMMT true)
-endif()
-
-if(USE_EXAFMMT)
     message(STATUS "ExaFMM-t is TRUE, path is:")
     message(STATUS ${EXAFMMT_PATH})
-else()
-    message(STATUS "ExaFMM-t is FALSE")
+    add_compile_definitions(WITH_EXAFMMT)
 endif()
 
 

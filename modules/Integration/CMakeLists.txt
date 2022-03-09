@@ -13,8 +13,8 @@ set(SOURCE_FILES
 
 if(USE_FMM_3D)
     set (SOURCE_FILES ${SOURCE_FILES}
-            Integration_fmm3dIntegrator.cpp
-            Integration_fmm3dIntegrator.hpp)
+            Integration_fmmIntegrator.cpp
+            Integration_fmmIntegrator.hpp)
 endif()
 
 add_library(integration STATIC ${SOURCE_FILES})
