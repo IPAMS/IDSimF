@@ -36,6 +36,10 @@ namespace FMM3D{
 
     public:
         void computeChargeDistribution() override;
+        void setRequestedPrecision(double requestedPrecision);
+
+    private:
+        double requestedPrecision_ = 0.5e-6;
     };
 }
 #endif //IDSIMF_FMM3D_FMMSOLVER_HPP

@@ -48,13 +48,10 @@ void FMM3D::FMMSolver::computeChargeDistribution() {
         i++;
     }
 
-    //double eps = 0.5e-6;
-    double eps = 0.5e-5;
-
     // call the actual fmm routine
     int ier =0;
     int nP = nParticles;
-    lfmm3d_s_c_g_wrapper(&eps, &nP, sources.data(), charges.data(),
+    lfmm3d_s_c_g_wrapper(&requestedPrecision_, &nP, sources.data(), charges.data(),
                          potentials.data(), gradients.data(), &ier);
 
     if (ier != 0){
@@ -67,4 +64,8 @@ void FMM3D::FMMSolver::computeChargeDistribution() {
         pListEntry.gradient = {gradients[3*i], gradients[3*i+1], gradients[3*i+2]};
         i++;
     }
+}
+
+void FMM3D::FMMSolver::setRequestedPrecision(double requestedPrecision) {
+    requestedPrecision_ = requestedPrecision;
 }

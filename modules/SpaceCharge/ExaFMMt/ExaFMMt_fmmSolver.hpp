@@ -31,11 +31,18 @@
 
 namespace ExaFMMt{
 
+    // add expansion order template
     class FMMSolver : public SpaceCharge::GenericSpaceChargeSolver {
 
     public:
         [[nodiscard]] virtual Core::Vector getEFieldFromSpaceCharge(Core::Particle& particle) override;
         void computeChargeDistribution() override;
+        void setExpansionOrder(int expansionOrder);
+        void setMaxBodiesPerLeaf(int maxBodiesPerLeaf);
+
+    private:
+        int expansionOrder_ = 8;
+        int maxBodiesPerLeaf_ = 400;
     };
 }
 
