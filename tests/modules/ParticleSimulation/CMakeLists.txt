@@ -23,6 +23,7 @@ set(TEST_FILES
         ${TEST_FILE_FOLDER}/simion_test_planar_3d.pa
         ${TEST_FILE_FOLDER}/simion_test_planar_3d_mirrored.pa
         ${TEST_FILE_FOLDER}/test_linear_vector_field_01.h5
+        ${TEST_FILE_FOLDER}/test_linear_scalar_field_01.h5
         ${TEST_FILE_FOLDER}/quad_dev_flow_3d.h5
         )
 file(COPY ${TEST_FILES} DESTINATION .)
