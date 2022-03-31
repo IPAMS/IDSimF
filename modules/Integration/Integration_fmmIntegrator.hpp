@@ -146,7 +146,9 @@ namespace Integration{
         bearParticles_(time_);
 
         // first: Calculate charge distribution with particle positions and charges at the beginning of the time step
-        solver_.computeChargeDistribution();
+        if (nParticles_ > 0){
+            solver_.computeChargeDistribution();
+        }
 
         // then: perform particle update / velocity verlet time integration
         #pragma omp parallel \
