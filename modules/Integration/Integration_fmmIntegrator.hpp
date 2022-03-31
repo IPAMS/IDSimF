@@ -64,6 +64,7 @@ namespace Integration{
         void run(unsigned int nTimesteps, double dt) override;
         void runSingleStep(double dt) override;
         void finalizeSimulation() override;
+        FMMSolverT* getFMMSolver();
 
     private:
         FMMSolverT solver_;
@@ -201,7 +202,13 @@ namespace Integration{
             timestepWriteFunction_(particles_, time_, timestep_, true);
         }
     }
+
+    template <class FMMsolverT>
+    FMMsolverT* FMMVerletIntegrator<FMMsolverT>::getFMMSolver() {
+        return &solver_;
+    }
 }
+
 
 
 #endif //IDSIMF_INTEGRATION_FMMINTEGRATOR_HPP
