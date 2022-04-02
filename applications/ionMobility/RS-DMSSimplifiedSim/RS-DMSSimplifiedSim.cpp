@@ -122,13 +122,6 @@ int main(int argc, const char * argv[]) {
         FileIO::TrajectoryHDF5Writer trajectoryWriter(hdf5Filename);
         trajectoryWriter.setParticleAttributes(auxParamNames, additionalParamTFct);
 
-        // read particle configuration ==========================================================
-        unsigned int ionsInactive = 0;
-        unsigned int nAllParticles = 0;
-        for (const auto ni: nParticles){
-            nAllParticles += ni;
-        }
-
         std::unique_ptr<FileIO::Scalar_writer> cvFieldWriter;
         int cvHighResLogPeriod = 0;
         if (simConf->isParameter("log_cv_field_period")){
@@ -141,9 +134,13 @@ int main(int argc, const char * argv[]) {
         std::unique_ptr<FileIO::Scalar_writer> voltageWriter;
         voltageWriter = std::make_unique<FileIO::Scalar_writer>(projectName+ "_voltages.csv");
 
+
+
         // init simulation  =====================================================================
 
         // create and add simulation particles:
+        // read particle configuration ==========================================================
+        unsigned int ionsInactive = 0;
         unsigned int nParticlesTotal = 0;
         std::vector<uniqueReactivePartPtr>particles;
         std::vector<Core::Particle*>particlesPtrs;
@@ -265,7 +262,7 @@ int main(int argc, const char * argv[]) {
                 logger->info("CV corrected ts:{} time:{:.2e} new CV:{} diffMeanPos:{}", step, rsSim.simulationTime(), fieldCVSetpoint_VPerM, diffMeanZPos);
             }
 
-            if (ionsInactive>=nAllParticles || AppUtils::SignalHandler::isTerminationSignaled()){
+            if (ionsInactive>=nParticlesTotal || AppUtils::SignalHandler::isTerminationSignaled()){
                 timestepWriteFct(particlesPtrs, rsSim.simulationTime(), step, true);
                 break;
             }
