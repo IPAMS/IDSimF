@@ -449,7 +449,6 @@ int main(int argc, const char * argv[]) {
                         hdf5Writer->writeTimestep(particles, time);
                         hdf5Writer->finalizeTrajectory();
                         logger->info("finished ts:{} time:{:.2e}", timestep, time);
-                        std::cout << "finished ts:" << timestep << " time:" << time << std::endl;
                     }
                     else if (timestep%trajectoryWriteInterval==0) {
                         logger->info("ts:{} time:{:.2e} V_rf:{:.1f} ions existing:{} ions inactive:{}",
@@ -504,26 +503,26 @@ int main(int argc, const char * argv[]) {
         }
 #endif
 #ifdef WITH_EXAFMMT
-        Integration::FMMVerletIntegrator<ExaFMMt::FMMSolver> integrator(
-                particlePtrs,
-                accelerationFunctionQIT, timestepWriteFunction,
-                otherActionsFunctionQIT, particleStartMonitoringFct,
-                &hsModel);
+        else if (integratorMode==EXAFMM_VERLET) {
+            Integration::FMMVerletIntegrator<ExaFMMt::FMMSolver> integrator(
+                    particlePtrs,
+                    accelerationFunctionQIT, timestepWriteFunction,
+                    otherActionsFunctionQIT, particleStartMonitoringFct,
+                    &hsModel);
 
-        if (simConf->isParameter("ExaFMM_order")) {
-            integrator.getFMMSolver()->setExpansionOrder(simConf->intParameter("ExaFMM_order"));
+            if (simConf->isParameter("ExaFMM_order")) {
+                integrator.getFMMSolver()->setExpansionOrder(simConf->intParameter("ExaFMM_order"));
+            }
+
+            AppUtils::SignalHandler::setReceiver(integrator);
+            integrator.run(timeSteps, dt);
         }
-
-        AppUtils::SignalHandler::setReceiver(integrator);
-        integrator.run(timeSteps, dt);
 #endif
 
         if (rfAmplitudeMode==RAMPED_RF) {
             hdf5Writer->writeNumericListDataset("V_rf", V_rf_export);
         }
-
         stopWatch.stop();
-
         logger->info("CPU time: {} s", stopWatch.elapsedSecondsCPU());
         logger->info("Finished in {} seconds (wall clock time)", stopWatch.elapsedSecondsWall());
         return EXIT_SUCCESS;
