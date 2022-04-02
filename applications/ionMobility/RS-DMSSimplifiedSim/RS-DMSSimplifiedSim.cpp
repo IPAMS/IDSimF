@@ -31,7 +31,7 @@
 #include "RS_SimulationConfiguration.hpp"
 #include "RS_ConfigFileParser.hpp"
 #include "RS_ConcentrationFileWriter.hpp"
-#include "FileIO_trajectoryExplorerJSONwriter.hpp"
+#include "FileIO_trajectoryHDF5Writer.hpp"
 #include "FileIO_scalar_writer.hpp"
 #include "PSim_util.hpp"
 #include "appUtils_simulationConfiguration.hpp"
@@ -110,8 +110,17 @@ int main(int argc, const char * argv[]) {
         // prepare file writer  =================================================================
         RS::ConcentrationFileWriter resultFilewriter(projectName+"_conc.csv");
 
-        auto jsonWriter = std::make_unique<FileIO::TrajectoryExplorerJSONwriter>(projectName+ "_trajectories.json");
-        jsonWriter->setScales(1000,1);
+        std::vector<std::string> auxParamNames = {"chemical id"};
+        auto additionalParamTFct = [](Core::Particle* particle) -> std::vector<int> {
+            std::vector<int> result = {
+                    particle->getIntegerAttribute(key_ChemicalIndex)
+            };
+            return result;
+        };
+
+        std::string hdf5Filename = projectName+"_trajectories.hd5";
+        FileIO::TrajectoryHDF5Writer trajectoryWriter(hdf5Filename);
+        trajectoryWriter.setParticleAttributes(auxParamNames, additionalParamTFct);
 
         // read particle configuration ==========================================================
         unsigned int ionsInactive = 0;
@@ -153,7 +162,7 @@ int main(int argc, const char * argv[]) {
                 // init position and initial chemical species of the particle:
                 particle->setLocation(initialPositions[k]);
                 int substIndex = substanceIndices.at(particle->getSpecies());
-                particle->setFloatAttribute(key_ChemicalIndex, substIndex);
+                particle->setIntegerAttribute(key_ChemicalIndex, substIndex);
 
                 particlesPtrs.push_back(particle.get());
                 rsSim.addParticle(particle.get(), nParticlesTotal);
@@ -176,14 +185,8 @@ int main(int argc, const char * argv[]) {
         SVFieldFctType SVFieldFct = createSVFieldFunction(svMode, fieldWavePeriod);
         CVFieldFctType CVFieldFct = createCVFieldFunction(cvMode, fieldWavePeriod, simConf);
 
-        FileIO::partAttribTransformFctType additionalParameterTransformFct =
-                [=](Core::Particle* particle) -> std::vector<double> {
-                    std::vector<double> result = {particle->getFloatAttribute(key_ChemicalIndex)};
-                    return result;
-                };
-
         auto timestepWriteFct =
-                [&jsonWriter, &voltageWriter, &additionalParameterTransformFct, trajectoryWriteInterval,
+                [&trajectoryWriter, &voltageWriter, trajectoryWriteInterval,
                         &rsSim, &resultFilewriter, concentrationWriteInterval, &fieldMagnitude, &logger]
                         (std::vector<Core::Particle *> &particles, double time, int timestep, bool lastTimestep){
 
@@ -192,25 +195,22 @@ int main(int argc, const char * argv[]) {
                 voltageWriter->writeTimestep(fieldMagnitude, time);
             }
             if (lastTimestep) {
-                jsonWriter->writeTimestep(
-                        particles, additionalParameterTransformFct, time, true);
-
-                jsonWriter->writeSplatTimes(particles);
-                jsonWriter->writeIonMasses(particles);
-                logger->info("finished ts:{} time:{:.2e}", timestep, time);
+                trajectoryWriter.writeTimestep(particles, time);
+                trajectoryWriter.writeSplatTimes(particles);
+                trajectoryWriter.finalizeTrajectory();
+                trajectoryWriter.writeTimestep(particles, time);
             }
 
             else if (timestep % trajectoryWriteInterval ==0){
                 rsSim.logConcentrations(logger);
-                jsonWriter->writeTimestep(
-                        particles, additionalParameterTransformFct, time, false);
+                trajectoryWriter.writeTimestep(particles, time);
             }
         };
 
         auto particlesReactedFct = [substanceIndices](RS::ReactiveParticle* particle){
             //we had an reaction event: Update the chemical species for the trajectory
             int substIndex = substanceIndices.at(particle->getSpecies());
-            particle->setFloatAttribute(key_ChemicalIndex, substIndex);
+            particle->setIntegerAttribute(key_ChemicalIndex, substIndex);
         };
 
 
