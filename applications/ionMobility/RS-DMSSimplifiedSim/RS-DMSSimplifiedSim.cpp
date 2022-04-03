@@ -72,6 +72,7 @@ int main(int argc, const char * argv[]) {
         //Define background temperature
         double backgroundTemperature_K = simConf->doubleParameter("background_temperature_K");
         double backgroundPressure_Pa = simConf->doubleParameter("background_pressure_Pa");
+        double reducedPressure = standardPressure_Pa / backgroundPressure_Pa;
 
         //field parameters:
         CVMode cvMode = parseCVModeConfiguration(simConf);
@@ -134,6 +135,8 @@ int main(int argc, const char * argv[]) {
         std::unique_ptr<FileIO::Scalar_writer> voltageWriter;
         voltageWriter = std::make_unique<FileIO::Scalar_writer>(projectName+ "_voltages.csv");
 
+        std::unique_ptr<FileIO::Scalar_writer> mobilityWriter;
+        mobilityWriter = std::make_unique<FileIO::Scalar_writer>(projectName+ "_mobility.csv");
 
 
         // init simulation  =====================================================================
@@ -183,13 +186,27 @@ int main(int argc, const char * argv[]) {
         CVFieldFctType CVFieldFct = createCVFieldFunction(cvMode, fieldWavePeriod, simConf);
 
         auto timestepWriteFct =
-                [&trajectoryWriter, &voltageWriter, trajectoryWriteInterval,
-                        &rsSim, &resultFilewriter, concentrationWriteInterval, &fieldMagnitude, &logger]
+                [&trajectoryWriter, &voltageWriter, trajectoryWriteInterval, reducedPressure,
+                        &rsSim, &resultFilewriter, &mobilityWriter, concentrationWriteInterval, &fieldMagnitude, &logger]
                         (std::vector<Core::Particle *> &particles, double time, int timestep, bool lastTimestep){
 
             if (timestep % concentrationWriteInterval ==0) {
                 resultFilewriter.writeTimestep(rsSim);
                 voltageWriter->writeTimestep(fieldMagnitude, time);
+
+                // calculate average mobility
+                // calculate summed mobility:
+                double mobilitySum = 0.0;
+                std::size_t nParticles = particles.size();
+
+                #pragma omp parallel for reduction (+:mobilitySum) default(none) shared(particles) firstprivate(nParticles, reducedPressure)
+                for (std::size_t i = 0; i<nParticles; ++i) {
+                    mobilitySum += particles[i]->getMobility() * reducedPressure;
+                }
+
+                double averageMobility = mobilitySum/nParticles;
+                mobilityWriter->writeTimestep(averageMobility, time);
+
             }
             if (lastTimestep) {
                 trajectoryWriter.writeTimestep(particles, time);
@@ -217,7 +234,6 @@ int main(int argc, const char * argv[]) {
         stopWatch.start();
 
         reactionConditions.temperature = backgroundTemperature_K;
-        double reducedPressure = standardPressure_Pa / backgroundPressure_Pa;
         for (int step=0; step<nSteps; step++) {
 
             double cvFieldNow_VPerM = CVFieldFct(fieldCVSetpoint_VPerM, rsSim.simulationTime());
@@ -249,6 +265,7 @@ int main(int argc, const char * argv[]) {
             if ( (cvMode == AUTO_CV || cvMode == MODULATED_AUTO_CV) && step % nStepsPerOscillation == 0) {
                 //calculate current mean z-position:
                 double buf = 0.0;
+                #pragma omp parallel for reduction (+:buf) default(none) shared(particles) firstprivate(nParticlesTotal)
                 for (unsigned int i = 0; i < nParticlesTotal; i++) {
                     buf += particles[i]->getLocation().z();
                 }
