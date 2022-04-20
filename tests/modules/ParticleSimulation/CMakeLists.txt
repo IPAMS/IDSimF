@@ -15,6 +15,7 @@ set(TEST_FILES
         ${TEST_FILE_FOLDER}/swift_test_sin.csv
         ${TEST_FILE_FOLDER}/swift_test_transient.csv
         ${TEST_FILE_FOLDER}/low_sample_waveform.csv
+        ${TEST_FILE_FOLDER}/triangle_waveform.csv
         ${TEST_FILE_FOLDER}/simion_test_cylindrical.pa
         ${TEST_FILE_FOLDER}/simion_test_cylindrical_mirrored.pa
         ${TEST_FILE_FOLDER}/simion_test_planar_2d.pa
