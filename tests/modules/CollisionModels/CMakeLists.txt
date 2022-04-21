@@ -7,7 +7,11 @@ set(SOURCE_FILES
         test_CollisionStatistics.cpp
         test_StatisticalDiffusion.cpp
         test_util.cpp
-        test_MultiCollisionModel.cpp test_SoftSphere.cpp)
+        test_MultiCollisionModel.cpp 
+        test_SoftSphere.cpp
+        test_MDInteractions.cpp
+        test_Atom.cpp
+        test_Molecule.cpp)
 
 set(TEST_FILE_FOLDER ${CMAKE_SOURCE_DIR}/tests/testfields)
 set(TEST_FILES
