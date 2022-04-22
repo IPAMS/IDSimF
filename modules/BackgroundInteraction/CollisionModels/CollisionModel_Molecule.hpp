@@ -44,33 +44,36 @@ namespace CollisionModel{
         Molecule() = default;
         ~Molecule() = default;
         Molecule(Core::Vector &comPos, Core::Vector &comVel);
-        Molecule(Core::Vector &comPos, Core::Vector &comVel, Core::Vector &angles, std::vector<CollisionModel::Atom*> atms);
+        Molecule(Core::Vector &comPos, Core::Vector &comVel, Core::Vector &agls, std::vector<CollisionModel::Atom*> atms);
 
         // Setter
         void setComPos(Core::Vector comPos);
-        void setComvel(Core::Vector comVel);
-        void setAngles(Core::Vector angles);
+        void setComVel(Core::Vector comVel);
+        void setAngles(Core::Vector agls);
 
         // Getter 
-        Core::Vector& getComPos() const;
-        Core::Vector& getComvel() const;
-        Core::Vector& getAngles() const;
-        bool isDipole() const;
-        bool isIon() const;
+        Core::Vector& getComPos();
+        Core::Vector& getComVel();
+        Core::Vector& getAngles();
+        bool getIsDipole() const;
+        bool getIsIon() const;
         double getMass() const;
-        Core::Vector& getDipole() const;
+        Core::Vector getDipole() const;
         double getDipoleMag() const;
         std::size_t getAtomCount() const;
 
         // Member functions
-        void calcMass();
-        void calcDipole();
         void addAtom(CollisionModel::Atom* atm);
         void removeAtom(CollisionModel::Atom* atm);
-        void setIsDipole();
-        void setIsIon();
+        
 
     private:
+
+        // Helper functions
+        void calcMass();
+        void calcDipole();
+        void setIsDipole();
+        void setIsIon();
 
         // Attributes
         Core::Vector centerOfMassPos = {0.0, 0.0, 0.0}; // Center-of-mass position of the molecule [m]
@@ -82,7 +85,7 @@ namespace CollisionModel{
         Core::Vector dipole = {0.0, 0.0, 0.0}; // Dipole vector of the molecule [C*m]
         double dipoleMag = 0.0; // Magnitude of dipole [C]
         std::size_t atomCount = 0; // Number of atoms belonging to the molecule
-        std::vector<CollisionModel::Atom*> atoms = {&Atom()}; // Vector of all atoms belonging to this molecule 
+        std::vector<CollisionModel::Atom*> atoms; // Vector of all atoms belonging to this molecule 
 
         
     };
