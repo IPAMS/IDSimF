@@ -44,27 +44,47 @@ namespace CollisionModel{
         // Constructors
         Atom() = default;
         ~Atom() = default;
-        Atom(const Core::Vector &rel_pos, double massAMU, double chargeElemCharges);
-        Atom(const Core::Vector &rel_pos, double massAMU, double chargeElemCharges, double partChargeElemCharges);
-        Atom(const Core::Vector &rel_pos, double massAMU, double chargeElemCharges, double partChargeElemCharges, Atom::AtomType element, double sig, double eps);
+        Atom(const Core::Vector &relPos, double massAMU, double chargeElemCharges);
+        Atom(const Core::Vector &relPos, double massAMU, double chargeElemCharges, double partChargeElemCharges);
+        Atom(const Core::Vector &relPos, double massAMU, double chargeElemCharges, double partChargeElemCharges, AtomType element, double sig, double eps);
 
         //Setter 
-        
+        void setRelativePosition(Core::Vector relPos);
+        void setMass(double massAMU);
+        void setType(AtomType element);
+        void setSigma(double sig);
+        void setEpsilon(double eps);
+        void setCharge(double chargeElemCharges);
+        void setPartCharge(double partChargeElemCharges);
 
         //Getter
+        Core::Vector& getRelativePosition();
+        double getMass() const;
+        AtomType getType() const;
+        double getSigma() const;
+        double getEpsilon() const;
+        double getCharge() const;
+        double getPartCharge() const;
 
+        // Member function
 
+        void rotate(const Core::Vector &angles); 
+
+        //Helper functions
+
+        static double calcLJEps(const Atom &atm1, const Atom &atm2);
+        static double calcLJSig(const Atom &atm1, const Atom &atm2);
 
     private:
 
         // Attributes 
         Core::Vector relativePosition = Core::Vector(0.0, 0.0, 0.0); // Relative position to the center-of-mass of the parent molecule [m]
         double mass = 0.0; // Mass of the atom [kg]
-        Atom::AtomType type = AtomType::H; // Element of the atom 
-        double sigma = 0.0; // Lennard Jones parameter sigma w.r.t its own type [m]
-        double eps = 0.0; // Lennard Jones parameter epsilon w.r.t its own type [J]
         double charge = 0.0; // Charge [C]
-        double partial_charge = 0.0; // Partial charge for dipole moments [C]
+        double partialCharge = 0.0; // Partial charge for dipole moments [C]
+        AtomType type = AtomType::H; // Element of the atom 
+        double sigma = 0.0; // Lennard Jones parameter sigma w.r.t its own type [m]
+        double epsilon = 0.0; // Lennard Jones parameter epsilon w.r.t its own type [J]
 
 
     };
