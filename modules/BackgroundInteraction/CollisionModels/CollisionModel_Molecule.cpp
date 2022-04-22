@@ -193,9 +193,12 @@ void CollisionModel::Molecule::removeAtom(CollisionModel::Atom* atm){
  */
 void CollisionModel::Molecule::setIsDipole(){
 
+
     if(this->getIsIon() == 0){
+        double tol = 10E-15;
         for(auto* atom : atoms){
-            if(atom->getPartCharge() != 0){
+            if(atom->getPartCharge() / Core::ELEMENTARY_CHARGE > tol && 
+                atom->getPartCharge() / Core::ELEMENTARY_CHARGE < -tol){
                 this->isDipole = 1;
                 break;
             }

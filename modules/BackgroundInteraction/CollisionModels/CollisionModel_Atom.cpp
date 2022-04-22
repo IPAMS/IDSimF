@@ -88,7 +88,7 @@ void CollisionModel::Atom::setMass(double massAMU){
  * Sets new atom type
  */
 void CollisionModel::Atom::setType(CollisionModel::Atom::AtomType element){
-    this->type = type;
+    this->type = element;
 }
 
 /**
