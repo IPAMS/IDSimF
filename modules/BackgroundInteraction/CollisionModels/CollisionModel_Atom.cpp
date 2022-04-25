@@ -181,8 +181,25 @@ double CollisionModel::Atom::getPartCharge() const{
  * @param angles The current x-y-z rotation angles of the molecule
  */
 void CollisionModel::Atom::rotate(const Core::Vector &angles){
-    // NOTE: construct inverse rotation matrix by hand 
-}
+    
+    double tmp_x = angles.x();
+    double tmp_y = angles.y();
+    double tmp_z = angles.z();
+
+    double new_rel_x = cos(tmp_y) * cos(tmp_z)*relativePosition.x() 
+                        + (sin(tmp_x) * sin(tmp_y) * cos(tmp_z) + cos(tmp_x) * sin(tmp_z)) * relativePosition.y() 
+                        + (sin(tmp_x) * sin(tmp_z) - cos(tmp_x) * sin(tmp_y) * cos(tmp_z)) * relativePosition.z();
+    double new_rel_y = - cos(tmp_y) * sin(tmp_z) * relativePosition.x()
+                        + (cos(tmp_x) * cos(tmp_z) - sin(tmp_x) * sin(tmp_y) * sin(tmp_z)) * relativePosition.y()
+                        + (cos(tmp_x) * sin(tmp_y) * sin(tmp_z) + sin(tmp_x)*cos(tmp_z)) * relativePosition.z();
+    double new_rel_z = sin(tmp_y) * relativePosition.x()
+                        - sin(tmp_x) * cos(tmp_y) * relativePosition.y()
+                        + cos(tmp_x) * cos(tmp_y) * relativePosition.z();
+
+    this->relativePosition.x(new_rel_x);
+    this->relativePosition.y(new_rel_y);
+    this->relativePosition.z(new_rel_z);
+}       
 
 /**
  * Calculates the approximate LJ interaction parameter epsilon between two atoms 

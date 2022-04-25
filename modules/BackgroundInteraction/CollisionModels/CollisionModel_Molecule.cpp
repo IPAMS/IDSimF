@@ -21,7 +21,7 @@
 
 #include "CollisionModel_Molecule.hpp"
 #include <algorithm>
-#include <cmath>
+
 
 /**
  * Creates an empty molecule with a center-of-mass position and velocity
