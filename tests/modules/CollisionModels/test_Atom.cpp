@@ -29,7 +29,6 @@
 #include "Core_constants.hpp"
 #include "catch.hpp"
 #include "test_util.hpp"
-#include <iostream>
 
 TEST_CASE("Basic Atom construction tests", "[CollisionModels][Atom]") {
 
