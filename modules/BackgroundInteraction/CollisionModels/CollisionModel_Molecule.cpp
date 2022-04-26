@@ -28,7 +28,7 @@
  * @param comPos the center-of-mass position of the created molecule
  * @param comVel the center-of-mass velocity of the created molecule
  */
-CollisionModel::Molecule::Molecule(Core::Vector &comPos, Core::Vector &comVel):
+CollisionModel::Molecule::Molecule(const Core::Vector &comPos, const Core::Vector &comVel):
     centerOfMassPos(comPos),
     centerOfMassVel(comVel)
 {}
@@ -43,8 +43,8 @@ CollisionModel::Molecule::Molecule(Core::Vector &comPos, Core::Vector &comVel):
  * @param agls the angles in x-y-z of the atoms relative position w.r.t the center-of-mass 
  * @param atms the vector with atoms contained in the molecule
  */
-CollisionModel::Molecule::Molecule(Core::Vector &comPos, Core::Vector &comVel, 
-                                    Core::Vector &agls, std::vector<CollisionModel::Atom*> atms):
+CollisionModel::Molecule::Molecule(const Core::Vector &comPos, const Core::Vector &comVel, 
+                                    const Core::Vector &agls, std::vector<CollisionModel::Atom*> atms):
     centerOfMassPos(comPos),
     centerOfMassVel(comVel),
     angles(agls),
@@ -53,7 +53,9 @@ CollisionModel::Molecule::Molecule(Core::Vector &comPos, Core::Vector &comVel,
     this->calcDipole();
     this->calcMass();
     this->setIsDipole();
-    this->setIsIon();   
+    this->setIsIon(); 
+    this->rotateMolecule();
+    this->atomCount = atoms.size();  
 }
 
 /**
@@ -141,6 +143,13 @@ std::size_t CollisionModel::Molecule::getAtomCount() const{
 }
 
 /**
+ * Gets the vector of atoms belonging to the molecule
+ */
+std::vector<CollisionModel::Atom*> CollisionModel::Molecule::getAtoms() const{
+    return atoms;
+}
+
+/**
  * Calculates the current mass of the molecule
  */
 void CollisionModel::Molecule::calcMass(){
@@ -169,6 +178,7 @@ void CollisionModel::Molecule::calcDipole(){
  */
 void CollisionModel::Molecule::addAtom(CollisionModel::Atom* atm){
     this->atoms.push_back(atm);
+    this->atomCount++;
     this->calcDipole();
     this->calcMass();
     this->setIsDipole();
@@ -182,6 +192,7 @@ void CollisionModel::Molecule::removeAtom(CollisionModel::Atom* atm){
     auto atm_it = std::find(std::begin(atoms), std::end(atoms), atm);
     if(atm_it != std::end(atoms)) 
         atoms.erase(atm_it);
+    this->atomCount--;
     this->calcDipole();
     this->calcMass();
     this->setIsDipole();
@@ -194,18 +205,10 @@ void CollisionModel::Molecule::removeAtom(CollisionModel::Atom* atm){
 void CollisionModel::Molecule::setIsDipole(){
 
 
-    if(this->getIsIon() == 0){
-        double tol = 10E-15;
-        for(auto* atom : atoms){
-            if(atom->getPartCharge() / Core::ELEMENTARY_CHARGE > tol && 
-                atom->getPartCharge() / Core::ELEMENTARY_CHARGE < -tol){
-                this->isDipole = 1;
-                break;
-            }
-        }
-        this->isDipole = 0;
+    if(this->dipoleMag > 0 || this->dipoleMag < 0){
+        this->isDipole = true;
     }else{
-        this->isDipole = 0;
+        this->isDipole = false;
     }
     
 }
@@ -221,9 +224,15 @@ void CollisionModel::Molecule::setIsIon(){
     }
     double tol = 10E-15;
     if(sumCharge < tol && sumCharge > -tol){
-        this->isIon = 0;
+        this->isIon = false;
     }else{
-        this->isIon = 1;
+        this->isIon = true;
     }
     
+}
+
+void CollisionModel::Molecule::rotateMolecule(){
+    for(auto* atom : atoms){
+       atom->rotate(this->angles);
+    }
 }

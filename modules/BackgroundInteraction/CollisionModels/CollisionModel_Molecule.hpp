@@ -43,8 +43,8 @@ namespace CollisionModel{
         // Constructors
         Molecule() = default;
         ~Molecule() = default;
-        Molecule(Core::Vector &comPos, Core::Vector &comVel);
-        Molecule(Core::Vector &comPos, Core::Vector &comVel, Core::Vector &agls, std::vector<CollisionModel::Atom*> atms);
+        Molecule(const Core::Vector &comPos, const Core::Vector &comVel);
+        Molecule(const Core::Vector &comPos, const Core::Vector &comVel, const Core::Vector &agls, std::vector<CollisionModel::Atom*> atms);
 
         // Setter
         void setComPos(Core::Vector comPos);
@@ -61,10 +61,12 @@ namespace CollisionModel{
         Core::Vector getDipole() const;
         double getDipoleMag() const;
         std::size_t getAtomCount() const;
+        std::vector<CollisionModel::Atom*> getAtoms() const;
 
         // Member functions
         void addAtom(CollisionModel::Atom* atm);
         void removeAtom(CollisionModel::Atom* atm);
+        void rotateMolecule();
         
 
     private:
@@ -74,6 +76,7 @@ namespace CollisionModel{
         void calcDipole();
         void setIsDipole();
         void setIsIon();
+        
 
         // Attributes
         Core::Vector centerOfMassPos = {0.0, 0.0, 0.0}; // Center-of-mass position of the molecule [m]
