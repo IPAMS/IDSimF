@@ -41,13 +41,66 @@
 #ifndef IDSIMF_COLLISIONMODEL_MDINTERACTIONS_H
 #define IDSIMF_COLLISIONMODEL_MDINTERACTIONS_H
 
+#include "Core_constants.hpp"
 #include "CollisionModel_AbstractCollisionModel.hpp"
+#include "CollisionModel_SpatialFieldFunctions.hpp"
+#include "CollisionModel_MathFunctions.hpp"
+#include "CollisionModel_Molecule.hpp"
+#include "RS_AbstractReaction.hpp"
+#include <cstdio>
+#include <functional>
 
 namespace CollisionModel{
 
     class MDInteractionsModel : public AbstractCollisionModel {
 
     public:
+        constexpr static double DIAMETER_N2 = 3.64e-10;
+        constexpr static double DIAMETER_HE = 2.80e-10;
+
+        MDInteractionsModel() = default;
+
+        MDInteractionsModel(
+            double staticPressure,
+            double staticTemperature,
+            double collisionGasMassAmu,
+            double collisionGasDiameterM, 
+            double collisionGasPolarizabilityM3);
+
+        MDInteractionsModel(
+            std::function<double(Core::Vector& location)> pressureFunction,
+            std::function<Core::Vector(Core::Vector& location)> velocityFunction,
+            double StaticTemperature,
+            double collisionGasMassAmu,
+            double collisionGasDiameterM, 
+            double collisionGasPolarizabilityM3);
+
+        MDInteractionsModel(
+            std::function<double(Core::Vector& location)> pressureFunction,
+            std::function<Core::Vector(Core::Vector& location)> velocityFunction,
+            std::function<double(const Core::Vector&)> temperatureFunction,
+            double collisionGasMassAmu,
+            double collisionGasDiameterM, 
+            double collisionGasPolarizabilityM3);
+
+        void initializeModelParameters(CollisionModel::Molecule& mole) const;
+
+        void updateModelParameters(CollisionModel::Molecule& mole) const;
+
+        void modifyAcceleration(Core::Vector& acceleration,
+                                        CollisionModel::Molecule& mole,
+                                        double dt);
+
+        void modifyVelocity(CollisionModel::Molecule& mole, CollisionModel::Molecule& bgMole,
+                                    double dt);
+
+        void modifyPosition(Core::Vector& position,
+                                    CollisionModel::Molecule& mole,
+                                    double dt);
+
+        void leapfrogIntern(std::vector<CollisionModel::Molecule*> moleculesPtr, double dt, double finalTime);
+
+        std::vector<Core::Vector> forceFieldMD(std::vector<CollisionModel::Molecule*> moleculesPtr);
 
         void initializeModelParameters(Core::Particle& ion) const;
 
@@ -56,13 +109,23 @@ namespace CollisionModel{
         void modifyAcceleration(Core::Vector& acceleration,
                                         Core::Particle& particle,
                                         double dt);
-
         void modifyVelocity(Core::Particle& particle,
                                     double dt);
-
         void modifyPosition(Core::Vector& position,
                                     Core::Particle& particle,
                                     double dt);
+
+
+    private:
+        double collisionGasMass_kg_ = 0.0;    ///< mass of the neutral colliding gas particles in kg
+        double collisionGasDiameter_m_ = 0.0; ///< effective collision diameter of the neutral collision gas particles in m
+        double collisionGasPolarizability_m3_ = 0.0; ///< polarizability of the collision gas in m^3
+
+        std::function<double(Core::Vector&)> pressureFunction_ = nullptr; ///< a spatial pressure function
+        std::function<Core::Vector(Core::Vector&)> velocityFunction_ = nullptr; ///< a spatial velocity function
+        std::function<double(const Core::Vector&)>temperatureFunction_ = nullptr;  ///< Spatial temperature function
+        std::function<void(RS::CollisionConditions, Core::Particle&)> afterCollisionActionFunction_ = nullptr;
+        ///< Function with things to do after a collision (e.g. collision based chemical reactions)
     };
 
 }
