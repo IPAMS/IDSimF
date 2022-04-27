@@ -76,7 +76,7 @@ TEST_CASE("Basic test Molecule creation", "[CollisionModels][Molecule]") {
         CollisionModel::Molecule mole = CollisionModel::Molecule(Core::Vector(0.5, 1.0, -0.3), 
                                                                     Core::Vector(-1.5, 0.3, 0.33),
                                                                     Core::Vector(0.0, 0.0, 0.0),
-                                                                    atoms);
+                                                                    atoms, 0.5);
 
         CHECK(mole.getComPos() == Core::Vector(0.5, 1.0, -0.3));
         CHECK(mole.getComVel() == Core::Vector(-1.5, 0.3, 0.33));
@@ -88,6 +88,7 @@ TEST_CASE("Basic test Molecule creation", "[CollisionModels][Molecule]") {
         CHECK(isExactDoubleEqual(mole.getDipoleMag(), 0.0));
         CHECK(isExactDoubleEqual(mole.getAtomCount(), 2));
         CHECK(mole.getAtoms().empty() == false);
+        CHECK(isExactDoubleEqual(mole.getDiameter(), 0.5));
     }
 
     SECTION("Constructor with position, velocity and atoms (dipole and ion)"){
@@ -105,7 +106,7 @@ TEST_CASE("Basic test Molecule creation", "[CollisionModels][Molecule]") {
         CollisionModel::Molecule mole = CollisionModel::Molecule(Core::Vector(0.5, 1.0, -0.3), 
                                                                     Core::Vector(-1.5, 0.3, 0.33),
                                                                     Core::Vector(0.0, 0.0, 0.0),
-                                                                    atoms);
+                                                                    atoms, 0.5);
 
         CHECK(mole.getComPos() == Core::Vector(0.5, 1.0, -0.3));
         CHECK(mole.getComVel() == Core::Vector(-1.5, 0.3, 0.33));
@@ -117,6 +118,7 @@ TEST_CASE("Basic test Molecule creation", "[CollisionModels][Molecule]") {
         CHECK(mole.getDipoleMag() == Approx(2.96E-17).margin(0.001E-15));
         CHECK(isExactDoubleEqual(mole.getAtomCount(), 2));
         CHECK(mole.getAtoms().empty() == false);
+        CHECK(isExactDoubleEqual(mole.getDiameter(), 0.5));
     }
 
     SECTION("Constructor with position, velocity and atoms (non-dipole and ion)"){
@@ -132,7 +134,7 @@ TEST_CASE("Basic test Molecule creation", "[CollisionModels][Molecule]") {
         CollisionModel::Molecule mole = CollisionModel::Molecule(Core::Vector(0.5, 1.0, -0.3), 
                                                                     Core::Vector(-1.5, 0.3, 0.33),
                                                                     Core::Vector(0.0, 0.0, 0.0),
-                                                                    atoms);
+                                                                    atoms, 0.5);
 
         CHECK(mole.getComPos() == Core::Vector(0.5, 1.0, -0.3));
         CHECK(mole.getComVel() == Core::Vector(-1.5, 0.3, 0.33));
@@ -144,6 +146,7 @@ TEST_CASE("Basic test Molecule creation", "[CollisionModels][Molecule]") {
         CHECK(mole.getDipoleMag() == Approx(0.0).margin(1E-13));
         CHECK(isExactDoubleEqual(mole.getAtomCount(), 2));
         CHECK(mole.getAtoms().empty() == false);
+        CHECK(isExactDoubleEqual(mole.getDiameter(), 0.5));
     }
 
     SECTION("Constructor with position, velocity and atoms (non-dipole and non-ion)"){
@@ -158,7 +161,7 @@ TEST_CASE("Basic test Molecule creation", "[CollisionModels][Molecule]") {
         CollisionModel::Molecule mole = CollisionModel::Molecule(Core::Vector(0.5, 1.0, -0.3), 
                                                                     Core::Vector(-1.5, 0.3, 0.33),
                                                                     Core::Vector(0.0, 0.0, 0.0),
-                                                                    atoms);
+                                                                    atoms, 0.5);
 
         CHECK(mole.getComPos() == Core::Vector(0.5, 1.0, -0.3));
         CHECK(mole.getComVel() == Core::Vector(-1.5, 0.3, 0.33));
@@ -170,6 +173,7 @@ TEST_CASE("Basic test Molecule creation", "[CollisionModels][Molecule]") {
         CHECK(mole.getDipoleMag() == Approx(0.0).margin(1E-13));
         CHECK(isExactDoubleEqual(mole.getAtomCount(), 2));
         CHECK(mole.getAtoms().empty() == false);
+        CHECK(isExactDoubleEqual(mole.getDiameter(), 0.5));
     }
 }
 
@@ -182,7 +186,7 @@ TEST_CASE("Basic Molecule setter tests", "[CollisionModels][Molecule]") {
     CollisionModel::Molecule mole = CollisionModel::Molecule(Core::Vector(0.5, 1.0, -0.3), 
                                                                 Core::Vector(-1.5, 0.3, 0.33),
                                                                 Core::Vector(0.0, 0.0, 0.0),
-                                                                atoms);
+                                                                atoms, 0.5);
     
     mole.setComPos(Core::Vector(0.1, 0.1, 0.1));
     CHECK(mole.getComPos() == Core::Vector(0.1, 0.1, 0.1));
@@ -192,6 +196,9 @@ TEST_CASE("Basic Molecule setter tests", "[CollisionModels][Molecule]") {
 
     mole.setAngles(Core::Vector(0.1, 0.1, 0.1));
     CHECK(mole.getAngles() == Core::Vector(0.1, 0.1, 0.1));
+
+    mole.setDiameter(0.2);
+    CHECK(isExactDoubleEqual(mole.getDiameter(), 0.2));
     
 
 }
@@ -204,7 +211,7 @@ TEST_CASE("Molecule add/remove atoms tests", "[CollisionModels][Molecule]") {
     CollisionModel::Molecule mole = CollisionModel::Molecule(Core::Vector(0.5, 1.0, -0.3), 
                                                                 Core::Vector(-1.5, 0.3, 0.33),
                                                                 Core::Vector(0.0, 0.0, 0.0),
-                                                                atoms);
+                                                                atoms, 0.5);
                                                     
     mole.addAtom(&atm1);
     CHECK(isExactDoubleEqual(mole.getAtomCount(), 1));
@@ -222,7 +229,7 @@ TEST_CASE("Molecule ability to change properties of atoms", "[CollisionModels][M
     CollisionModel::Molecule mole = CollisionModel::Molecule(Core::Vector(0.5, 1.0, -0.3), 
                                                                 Core::Vector(-1.5, 0.3, 0.33),
                                                                 Core::Vector(0.0, 0.0, 0.0),
-                                                                atoms);
+                                                                atoms, 0.5);
                                                     
     mole.addAtom(&atm1);
     for(auto* atom : mole.getAtoms()){

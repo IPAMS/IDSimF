@@ -42,13 +42,16 @@ CollisionModel::Molecule::Molecule(const Core::Vector &comPos, const Core::Vecto
  * @param comVel the center-of-mass velocity of the created molecule
  * @param agls the angles in x-y-z of the atoms relative position w.r.t the center-of-mass 
  * @param atms the vector with atoms contained in the molecule
+ * @param diam molecule diameter in m
  */
 CollisionModel::Molecule::Molecule(const Core::Vector &comPos, const Core::Vector &comVel, 
-                                    const Core::Vector &agls, std::vector<CollisionModel::Atom*> atms):
+                                    const Core::Vector &agls, std::vector<CollisionModel::Atom*> atms,
+                                    double diam):
     centerOfMassPos(comPos),
     centerOfMassVel(comVel),
     angles(agls),
-    atoms(atms)
+    atoms(atms),
+    diameter(diam)
 {
     this->calcDipole();
     this->calcMass();
@@ -77,7 +80,16 @@ void CollisionModel::Molecule::setComVel(Core::Vector comVel){
  */
 void CollisionModel::Molecule::setAngles(Core::Vector agls){
     this->angles = agls;
+    this->rotateMolecule();
 }
+
+/**
+ * Sets new diameter of the molecule
+ */
+void CollisionModel::Molecule::setDiameter(double diam){
+    this->diameter = diam;
+}
+
 
 /**
  * Gets the center-of-mass position
@@ -147,6 +159,13 @@ std::size_t CollisionModel::Molecule::getAtomCount() const{
  */
 std::vector<CollisionModel::Atom*> CollisionModel::Molecule::getAtoms() const{
     return atoms;
+}
+
+/**
+ * Gets the diameter
+ */
+double CollisionModel::Molecule::getDiameter() const{
+    return diameter;
 }
 
 /**

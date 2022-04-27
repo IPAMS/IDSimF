@@ -44,12 +44,15 @@ namespace CollisionModel{
         Molecule() = default;
         ~Molecule() = default;
         Molecule(const Core::Vector &comPos, const Core::Vector &comVel);
-        Molecule(const Core::Vector &comPos, const Core::Vector &comVel, const Core::Vector &agls, std::vector<CollisionModel::Atom*> atms);
+        Molecule(const Core::Vector &comPos, const Core::Vector &comVel, 
+                 const Core::Vector &agls, std::vector<CollisionModel::Atom*> atms,
+                 double diam);
 
         // Setter
         void setComPos(Core::Vector comPos);
         void setComVel(Core::Vector comVel);
         void setAngles(Core::Vector agls);
+        void setDiameter(double diam);
 
         // Getter 
         Core::Vector& getComPos();
@@ -62,6 +65,7 @@ namespace CollisionModel{
         double getDipoleMag() const;
         std::size_t getAtomCount() const;
         std::vector<CollisionModel::Atom*> getAtoms() const;
+        double getDiameter() const;
 
         // Member functions
         void addAtom(CollisionModel::Atom* atm);
@@ -89,6 +93,7 @@ namespace CollisionModel{
         double dipoleMag = 0.0; // Magnitude of dipole [C]
         std::size_t atomCount = 0; // Number of atoms belonging to the molecule
         std::vector<CollisionModel::Atom*> atoms; // Vector of all atoms belonging to this molecule 
+        double diameter = 0.0; // Diameter of the molecule for collision probability [m]
 
         
     };
