@@ -83,6 +83,8 @@ namespace CollisionModel{
             double collisionGasDiameterM, 
             double collisionGasPolarizabilityM3);
 
+        // FIXME: deriving from AbstractCollisionModel is senseless, since functions do not match.
+        
         void initializeModelParameters(CollisionModel::Molecule& mole) const;
 
         void updateModelParameters(CollisionModel::Molecule& mole) const;

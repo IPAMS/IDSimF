@@ -83,7 +83,6 @@ void CollisionModel::MDInteractionsModel::modifyVelocity(CollisionModel::Molecul
     Core::RandomSource* rndSource = Core::globalRandomGeneratorPool->getThreadRandomSource();
 
     // Calculate collision cross section between particle and collision gas:
-    // FIXME: add diamater function for molecule (let it act like a point particle before collision)
     double sigma_m2 = M_PI * std::pow( (mole.getDiameter() + collisionGasDiameter_m_)/2.0, 2.0);
     Core::Vector moleculeComPosition = mole.getComPos();
     double localPressure_Pa = pressureFunction_(moleculeComPosition);
@@ -139,8 +138,37 @@ void CollisionModel::MDInteractionsModel::modifyVelocity(CollisionModel::Molecul
     // TODO: Construct the actual molecule and its atoms - do this before call to this function 
     // TODO: Construct the background gas particle - do this before call to this function
 
-    // Switch to COM frame 
+    // Give background gas its position, velocity, rotation:
 
+    // Calculate the standard deviation of the one dimensional velocity distribution of the
+    // background gas particles. Std. dev. in one dimension is given from Maxwell-Boltzmann
+    // as sqrt(kT / particle mass).
+    double  vrStdevBgMolecule = std::sqrt( Core::K_BOLTZMANN * temperature_K / (collisionGasMass_kg_) );
+    Core::Vector velocityBgMolecule = {rndSource->normalRealRndValue() * vrStdevBgMolecule, 
+                                        rndSource->normalRealRndValue() * vrStdevBgMolecule,
+                                        rndSource->normalRealRndValue() * vrStdevBgMolecule};
+    bgMole.setComVel(velocityBgMolecule);
+
+    // put the collision gas in the half-sphere in front of the molecule 
+    double phi = M_PI/2 - M_PI * rndSource->normalRealRndValue();
+    double theta = M_PI - M_PI * rndSource->normalRealRndValue();
+    Core::Vector positionBgMolecule = {mole.getComPos().x() + sin(phi) * cos(theta) * 2 * mole.getDiameter(),
+                                        mole.getComPos().y() + sin(phi) * sin(theta) * 2 * mole.getDiameter(),
+                                        mole.getComPos().z() + cos(phi) * 2 * mole.getDiameter()};
+    bgMole.setComPos(positionBgMolecule);
+    // rotate it randomly 
+    bgMole.setAngles(Core::Vector(rndSource->uniformRealRndValue(), 
+                                  rndSource->uniformRealRndValue(), 
+                                  rndSource->uniformRealRndValue()));
+    bgMole.rotateMolecule();
+
+    // Give molecule a random orientation:
+    mole.setAngles(Core::Vector(rndSource->uniformRealRndValue(), 
+                                rndSource->uniformRealRndValue(), 
+                                rndSource->uniformRealRndValue()));
+    mole.rotateMolecule();
+
+    // Switch to COM frame 
     Core::Vector momentumSum = Core::Vector(0.0, 0.0, 0.0);
     Core::Vector positionSum = Core::Vector(0.0, 0.0, 0.0);
     double massSum = 0;
@@ -159,6 +187,12 @@ void CollisionModel::MDInteractionsModel::modifyVelocity(CollisionModel::Molecul
     double finalTime = 4E-13; //  final integration time in seconds
     double timeStep = 1E-15; // step size in seconds 
     leapfrogIntern(moleculesPtr, timeStep, finalTime);
+
+    // reset to lab frame 
+    for(auto* molecule : moleculesPtr){
+        molecule->setComPos(molecule->getComPos() + (positionSum / massSum) + (momentumSum / massSum) * finalTime);
+        molecule->setComVel(molecule->getComVel() + (momentumSum / massSum));
+    }
 
 
 }
