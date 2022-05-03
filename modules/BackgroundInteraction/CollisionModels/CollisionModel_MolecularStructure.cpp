@@ -19,19 +19,8 @@
  along with IDSimF.  If not, see <https://www.gnu.org/licenses/>.
  ****************************/
 
-#include "CollisionModel_Molecule.hpp"
+#include "CollisionModel_MolecularStructure.hpp"
 #include <algorithm>
-
-
-/**
- * Creates an empty molecule with a center-of-mass position and velocity
- * @param comPos the center-of-mass position of the created molecule
- * @param comVel the center-of-mass velocity of the created molecule
- */
-CollisionModel::Molecule::Molecule(const Core::Vector &comPos, const Core::Vector &comVel):
-    centerOfMassPos(comPos),
-    centerOfMassVel(comVel)
-{}
 
 /**
  * @brief Creates a molecule with given atoms and the starting angle configuration (rotation). 
@@ -44,12 +33,7 @@ CollisionModel::Molecule::Molecule(const Core::Vector &comPos, const Core::Vecto
  * @param atms the vector with atoms contained in the molecule
  * @param diam molecule diameter in m
  */
-CollisionModel::Molecule::Molecule(const Core::Vector &comPos, const Core::Vector &comVel, 
-                                    const Core::Vector &agls, std::vector<CollisionModel::Atom*> atms,
-                                    double diam):
-    centerOfMassPos(comPos),
-    centerOfMassVel(comVel),
-    angles(agls),
+CollisionModel::MolecularStructure::MolecularStructure(std::vector<CollisionModel::Atom*> atms, double diam):
     atoms(atms),
     diameter(diam)
 {
@@ -57,121 +41,76 @@ CollisionModel::Molecule::Molecule(const Core::Vector &comPos, const Core::Vecto
     this->calcMass();
     this->setIsDipole();
     this->setIsIon(); 
-    this->rotateMolecule();
     this->atomCount = atoms.size();  
 }
 
 /**
- * Sets new center-of-mass position
+ * Sets new diameter of the MolecularStructure
  */
-void CollisionModel::Molecule::setComPos(Core::Vector comPos){
-    this->centerOfMassPos = comPos;
-}
-
-/**
- * Sets new center-of-mass velocity
- */
-void CollisionModel::Molecule::setComVel(Core::Vector comVel){
-    this->centerOfMassVel = comVel;
-}
-
-/**
- * Sets new angles of the atoms w.r.t. the center-of-mass of the molecule
- */
-void CollisionModel::Molecule::setAngles(Core::Vector agls){
-    this->angles = agls;
-    this->rotateMolecule();
-}
-
-/**
- * Sets new diameter of the molecule
- */
-void CollisionModel::Molecule::setDiameter(double diam){
+void CollisionModel::MolecularStructure::setDiameter(double diam){
     this->diameter = diam;
 }
 
-
 /**
- * Gets the center-of-mass position
+ * Returns if the MolecularStructure is a permanent dipole or not
  */
-Core::Vector& CollisionModel::Molecule::getComPos(){
-    return centerOfMassPos;
-}
-
-/**
- * Gets the center-of-mass velocity
- */
-Core::Vector& CollisionModel::Molecule::getComVel(){
-    return centerOfMassVel;
-}
-
-/**
- * Gets the angles of the atoms w.r.t. the center-of-mass of the molecule
- */
-Core::Vector& CollisionModel::Molecule::getAngles(){
-    return angles;
-}
-
-/**
- * Returns if the molecule is a permanent dipole or not
- */
-bool CollisionModel::Molecule::getIsDipole() const{
+bool CollisionModel::MolecularStructure::getIsDipole() const{
     return isDipole;
 }
 
 /**
- * Returns if the molecule is an ion or not
+ * Returns if the MolecularStructure is an ion or not
  */
-bool CollisionModel::Molecule::getIsIon() const{
+bool CollisionModel::MolecularStructure::getIsIon() const{
     return isIon;
 }
 
 /**
- * Gets mass of the molecule
+ * Gets mass of the MolecularStructure
  */
-double CollisionModel::Molecule::getMass() const{
+double CollisionModel::MolecularStructure::getMass() const{
     return mass;
 }
 
 /**
  * Gets the dipole vector
  */
-Core::Vector CollisionModel::Molecule::getDipole() const{
+Core::Vector CollisionModel::MolecularStructure::getDipole() const{
     return dipole;
 }
 
 /**
  * Gets the dipole magnitude
  */
-double CollisionModel::Molecule::getDipoleMag() const{
+double CollisionModel::MolecularStructure::getDipoleMag() const{
     return dipoleMag;
 }
 
 /**
- * Gets the number of atoms belonging to the molecule
+ * Gets the number of atoms belonging to the MolecularStructure
  */
-std::size_t CollisionModel::Molecule::getAtomCount() const{
+std::size_t CollisionModel::MolecularStructure::getAtomCount() const{
     return atomCount;
 }
 
 /**
- * Gets the vector of atoms belonging to the molecule
+ * Gets the vector of atoms belonging to the MolecularStructure
  */
-std::vector<CollisionModel::Atom*> CollisionModel::Molecule::getAtoms() const{
+std::vector<CollisionModel::Atom*> CollisionModel::MolecularStructure::getAtoms() const{
     return atoms;
 }
 
 /**
  * Gets the diameter
  */
-double CollisionModel::Molecule::getDiameter() const{
+double CollisionModel::MolecularStructure::getDiameter() const{
     return diameter;
 }
 
 /**
- * Calculates the current mass of the molecule
+ * Calculates the current mass of the MolecularStructure
  */
-void CollisionModel::Molecule::calcMass(){
+void CollisionModel::MolecularStructure::calcMass(){
     this->mass = 0;
     for(auto* atom : atoms){
         this->mass += atom->getMass();
@@ -182,7 +121,7 @@ void CollisionModel::Molecule::calcMass(){
 /**
  * Calculates the current dipole vector
  */
-void CollisionModel::Molecule::calcDipole(){
+void CollisionModel::MolecularStructure::calcDipole(){
     
     this->dipole = Core::Vector(0.0, 0.0, 0.0);
     for(auto* atom : atoms){
@@ -194,9 +133,9 @@ void CollisionModel::Molecule::calcDipole(){
 }
 
 /**
- * Adds an additional atom to the molecule. Mass and dipole are recalculated.
+ * Adds an additional atom to the MolecularStructure. Mass and dipole are recalculated.
  */
-void CollisionModel::Molecule::addAtom(CollisionModel::Atom* atm){
+void CollisionModel::MolecularStructure::addAtom(CollisionModel::Atom* atm){
     this->atoms.push_back(atm);
     this->atomCount++;
     this->calcDipole();
@@ -206,9 +145,9 @@ void CollisionModel::Molecule::addAtom(CollisionModel::Atom* atm){
 }
 
 /**
- * Removes an atom from the molecule. Mass and dipole are recalculated.
+ * Removes an atom from the MolecularStructure. Mass and dipole are recalculated.
  */
-void CollisionModel::Molecule::removeAtom(CollisionModel::Atom* atm){
+void CollisionModel::MolecularStructure::removeAtom(CollisionModel::Atom* atm){
     auto atm_it = std::find(std::begin(atoms), std::end(atoms), atm);
     if(atm_it != std::end(atoms)) 
         atoms.erase(atm_it);
@@ -220,9 +159,9 @@ void CollisionModel::Molecule::removeAtom(CollisionModel::Atom* atm){
 }
 
 /**
- * Determines if the molecule is a dipole and sets the flag accordingly.
+ * Determines if the MolecularStructure is a dipole and sets the flag accordingly.
  */
-void CollisionModel::Molecule::setIsDipole(){
+void CollisionModel::MolecularStructure::setIsDipole(){
 
 
     if(this->dipoleMag > 0 || this->dipoleMag < 0){
@@ -234,9 +173,9 @@ void CollisionModel::Molecule::setIsDipole(){
 }
 
 /**
- * Determines if the molecule is an ion and sets the flag accordingly.
+ * Determines if the MolecularStructure is an ion and sets the flag accordingly.
  */
-void CollisionModel::Molecule::setIsIon(){
+void CollisionModel::MolecularStructure::setIsIon(){
 
     double sumCharge = 0;
     for(auto* atom : atoms){
@@ -251,8 +190,3 @@ void CollisionModel::Molecule::setIsIon(){
     
 }
 
-void CollisionModel::Molecule::rotateMolecule(){
-    for(auto* atom : atoms){
-       atom->rotate(this->angles);
-    }
-}

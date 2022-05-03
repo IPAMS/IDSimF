@@ -24,7 +24,9 @@ set(SOURCE_FILES
         CollisionModel_Atom.cpp
         CollisionModel_Atom.hpp
         CollisionModel_Molecule.cpp
-        CollisionModel_Molecule.hpp )
+        CollisionModel_Molecule.hpp
+        CollisionModel_MolecularStructure.cpp
+        CollisionModel_MolecularStructure.hpp )
 
 add_library(collisionmodels STATIC ${SOURCE_FILES})
 target_include_directories(collisionmodels PUBLIC .)
