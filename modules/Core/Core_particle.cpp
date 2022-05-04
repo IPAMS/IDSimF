@@ -22,6 +22,137 @@
 #include "Core_particle.hpp"
 #include <iostream>
 
+// // FIXME: copy and move functionality 
+// Core::Particle& Core::Particle::operator=( const Core::Particle& part)
+// {
+//     if(&part == this){
+//         return *this;
+//     }
+//     index_ = part.index_;
+//     location_ = part.location_;
+//     velocity_ = part.velocity_;
+//     acceleration_ = part.acceleration_;
+//     charge_ = part.charge_;
+//     mobility_ = part.mobility_;
+//     mass_ = part.mass_;
+//     diameter_ = part.diameter_;
+//     STP_meanFreePath_ = part.STP_meanFreePath_;
+//     STP_meanThermalVelocity_ = part.STP_meanThermalVelocity_;
+//     active_ = part.active_;
+//     invalid_ = part.invalid_;
+//     timeOfBirth_ = part.timeOfBirth_;
+//     splatTime_ = part.splatTime_;
+//     attributesFloat_ = part.attributesFloat_;
+//     attributesInteger_ = part.attributesInteger_;
+//     auxCollisionParams_ = part.auxCollisionParams_;
+//     molstrPtr.reset( new CollisionModel::MolecularStructure( *part.molstrPtr ) );
+//     return *this;
+// }
+
+// Core::Particle& Core::Particle::operator=( Core::Particle&& part)
+// {   
+//     if(&part == this){
+//         return *this;
+//     }
+//     index_ = part.index_;
+//     part.index_ = 0;
+//     location_ = part.location_;
+//     part.location_ = Core::Vector(0.0, 0.0, 0.0);
+//     velocity_ = part.velocity_;
+//     part.velocity_ = Core::Vector(0.0, 0.0, 0.0);
+//     acceleration_ = part.acceleration_;
+//     part.acceleration_ = Core::Vector(0.0, 0.0, 0.0);
+//     charge_ = part.charge_;
+//     part.charge_ = 0;
+//     mobility_ = part.mobility_;
+//     part.mobility_ = 0;
+//     mass_ = part.mass_;
+//     part.mass_ = 0;
+//     diameter_ = part.diameter_;
+//     part.diameter_ = 0;
+//     STP_meanFreePath_ = part.STP_meanFreePath_;
+//     part.STP_meanFreePath_ = 0;
+//     STP_meanThermalVelocity_ = part.STP_meanThermalVelocity_;
+//     part.STP_meanThermalVelocity_ = 0;
+//     active_ = part.active_;
+//     part.active_ = true;
+//     invalid_ = part.invalid_;
+//     part.invalid_ = false;
+//     timeOfBirth_ = part.timeOfBirth_;
+//     part.timeOfBirth_ = 0;
+//     splatTime_ = part.splatTime_;
+//     part.splatTime_ = 0;
+//     attributesFloat_ = part.attributesFloat_;
+//     part.attributesFloat_ = {};
+//     attributesInteger_ = part.attributesInteger_;
+//     part.attributesInteger_ = {};
+//     auxCollisionParams_ = part.auxCollisionParams_;
+//     part.auxCollisionParams_ = {0.0, 0.0, 0.0};
+//     molstrPtr = std::move( part.molstrPtr );
+//     return *this;
+// }
+
+// Core::Particle::Particle(const Core::Particle& part) :
+//     index_(part.index_),
+//     location_(part.location_),
+//     velocity_(part.velocity_),
+//     acceleration_(part.acceleration_),
+//     charge_(part.charge_),
+//     mobility_(part.mobility_),
+//     mass_(part.mass_),
+//     diameter_(part.diameter_),
+//     STP_meanFreePath_(part.STP_meanFreePath_),
+//     STP_meanThermalVelocity_(part.STP_meanThermalVelocity_),
+//     active_(part.active_),
+//     invalid_(part.invalid_),
+//     timeOfBirth_(part.timeOfBirth_),
+//     splatTime_(part.splatTime_),
+//     attributesFloat_(part.attributesFloat_),
+//     attributesInteger_(part.attributesInteger_),
+//     auxCollisionParams_(part.auxCollisionParams_),
+//     molstrPtr(new CollisionModel::MolecularStructure(*part.molstrPtr))
+// {}
+
+// Core::Particle::Particle(Core::Particle&& part) :
+//     index_(part.index_),
+//     location_(part.location_),
+//     velocity_(part.velocity_),
+//     acceleration_(part.acceleration_),
+//     charge_(part.charge_),
+//     mobility_(part.mobility_),
+//     mass_(part.mass_),
+//     diameter_(part.diameter_),
+//     STP_meanFreePath_(part.STP_meanFreePath_),
+//     STP_meanThermalVelocity_(part.STP_meanThermalVelocity_),
+//     active_(part.active_),
+//     invalid_(part.invalid_),
+//     timeOfBirth_(part.timeOfBirth_),
+//     splatTime_(part.splatTime_),
+//     attributesFloat_(part.attributesFloat_),
+//     attributesInteger_(part.attributesInteger_),
+//     auxCollisionParams_(part.auxCollisionParams_)
+// {
+//     part.index_ = 0;
+//     part.location_ = Core::Vector(0.0, 0.0, 0.0);
+//     part.velocity_ = Core::Vector(0.0, 0.0, 0.0);
+//     part.acceleration_ = Core::Vector(0.0, 0.0, 0.0);
+//     part.charge_ = 0;
+//     part.mobility_ = 0;
+//     part.mass_ = 0;
+//     part.diameter_ = 0;
+//     part.STP_meanFreePath_ = 0;
+//     part.STP_meanThermalVelocity_ = 0;
+//     part.active_ = true;
+//     part.invalid_ = false;
+//     part.timeOfBirth_ = 0;
+//     part.splatTime_ = 0;
+//     part.attributesFloat_ = {};
+//     part.attributesInteger_ = {};
+//     part.auxCollisionParams_ = {0.0, 0.0, 0.0};
+//     molstrPtr = std::move( part.molstrPtr );
+// }
+
+
 /**
  * Creates a massless charged particle at a location
  * @param location the location of the created particle
@@ -100,7 +231,7 @@ Core::Particle::Particle(const Core::Vector &location, const Core::Vector &veloc
 Core::Particle::Particle(const Core::Vector &location, const Core::Vector &velocity,
                           double chargeElemCharges, double massAMU,
                           double collisionDiameterM, double timeOfBirth, 
-                          std::unique_ptr<CollisionModel::MolecularStructure> moleculeStructure):
+                          std::shared_ptr<CollisionModel::MolecularStructure> moleculeStructure):
     location_(location),
     velocity_(velocity),
     charge_(chargeElemCharges * Core::ELEMENTARY_CHARGE),
@@ -108,7 +239,7 @@ Core::Particle::Particle(const Core::Vector &location, const Core::Vector &veloc
     mass_(massAMU * Core::AMU_TO_KG),
     diameter_(collisionDiameterM),
     timeOfBirth_(timeOfBirth),
-    molstrPtr(std::move(moleculeStructure))
+    molstrPtr(moleculeStructure)
 {}
 
 
@@ -361,13 +492,13 @@ double Core::Particle::getSplatTime() const{
 /**
  * Sets the molecular structure pointer
  */
-void Core::Particle::setMolecularStructure(std::unique_ptr<CollisionModel::MolecularStructure> molecularStructurePtr){
-    this->molstrPtr = std::move(molecularStructurePtr);
+void Core::Particle::setMolecularStructure(std::shared_ptr<CollisionModel::MolecularStructure> molecularStructurePtr){
+    this->molstrPtr = molecularStructurePtr;
 }
 
 /**
  * Gets the molecular structure pointer 
  */
-CollisionModel::MolecularStructure& Core::Particle::getMolecularStructure() const{
+CollisionModel::MolecularStructure& Core::Particle::getMolecularStructure(){
     return (*molstrPtr);
 }

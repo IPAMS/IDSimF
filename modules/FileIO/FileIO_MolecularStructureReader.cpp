@@ -48,7 +48,7 @@ void FileIO::MolecularStructureReader::readMolecularStructure(std::string filena
             if(line[0] == '#'){
                 // get molecule structure key for the hash map
                 line.erase(std::remove_if(line.begin(), line.end(), [](char chr){ return chr == '#' || chr == ',';}), line.end());
-                std::unique_ptr<CollisionModel::MolecularStructure> molstrPtr = std::make_unique<CollisionModel::MolecularStructure>();
+                std::shared_ptr<CollisionModel::MolecularStructure> molstrPtr = std::make_shared<CollisionModel::MolecularStructure>();
                 CollisionModel::MolecularStructure::molecularStructureCollection.insert({line, std::move(molstrPtr)});
                 lastMolecule = line;
                 // get diamater from next line

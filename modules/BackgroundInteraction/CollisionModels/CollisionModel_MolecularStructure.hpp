@@ -43,10 +43,12 @@ namespace CollisionModel{
 
     public:
         // Hash map to collect molecular structures so they can be constructed in the collision model later 
-        static std::unordered_map<std::string,  std::unique_ptr<MolecularStructure>> molecularStructureCollection;
+        static std::unordered_map<std::string,  std::shared_ptr<MolecularStructure>> molecularStructureCollection;
 
         // Constructors
         MolecularStructure() = default;
+        //MolecularStructure(const MolecularStructure& A);
+
         ~MolecularStructure() = default;
         MolecularStructure(std::vector<CollisionModel::Atom*> atms, double diam);
 
@@ -67,7 +69,7 @@ namespace CollisionModel{
         void addAtom(CollisionModel::Atom* atm);
         void removeAtom(CollisionModel::Atom* atm);
 
-        static std::unordered_map<std::string, std::unique_ptr<MolecularStructure>> createCollection();
+        static std::unordered_map<std::string, std::shared_ptr<MolecularStructure>> createCollection();
         
 
     private:

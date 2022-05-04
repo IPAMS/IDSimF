@@ -214,6 +214,7 @@ TEST_CASE("Basic test Molecule creation", "[CollisionModels][Molecule]") {
         atm2.setMass(3);
         std::vector<CollisionModel::Atom*> atoms = {&atm1, &atm2};
 
+
         CollisionModel::MolecularStructure molstr = CollisionModel::MolecularStructure(atoms, 0.5);
 
         CollisionModel::Molecule mole = CollisionModel::Molecule(Core::Vector(0.5, 1.0, -0.3), 
