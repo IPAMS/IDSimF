@@ -88,6 +88,31 @@ Core::Particle::Particle(const Core::Vector &location, const Core::Vector &veloc
 
 
 /**
+* Creates a charged particle at a location
+* @param location the location of the created particle
+* @param velocity the velocity of the created particle
+* @param chargeElemCharges the charge of the particle (in units of elementary charges)
+* @param massAMU the mass of the charged particle (in atomic mass units)
+* @param collisionDiameterM the effective collision diameter of the particle (in m)
+* @param timeOfBirth the time when this particle was created
+* @param moleculeStructure pointer to the molecule which should be used in the MD Collision Model 
+*/
+Core::Particle::Particle(const Core::Vector &location, const Core::Vector &velocity,
+                          double chargeElemCharges, double massAMU,
+                          double collisionDiameterM, double timeOfBirth, 
+                          std::unique_ptr<CollisionModel::MolecularStructure> moleculeStructure):
+    location_(location),
+    velocity_(velocity),
+    charge_(chargeElemCharges * Core::ELEMENTARY_CHARGE),
+    mobility_(3.5e-4),
+    mass_(massAMU * Core::AMU_TO_KG),
+    diameter_(collisionDiameterM),
+    timeOfBirth_(timeOfBirth),
+    molstrPtr(std::move(moleculeStructure))
+{}
+
+
+/**
  * Sets a new location
  */
 void Core::Particle::setLocation(Core::Vector location){
@@ -331,4 +356,18 @@ void Core::Particle::setSplatTime(double splatTime){
  */
 double Core::Particle::getSplatTime() const{
     return (splatTime_);
+}
+
+/**
+ * Sets the molecular structure pointer
+ */
+void Core::Particle::setMolecularStructure(std::unique_ptr<CollisionModel::MolecularStructure> molecularStructurePtr){
+    this->molstrPtr = std::move(molecularStructurePtr);
+}
+
+/**
+ * Gets the molecular structure pointer 
+ */
+CollisionModel::MolecularStructure& Core::Particle::getMolecularStructure() const{
+    return (*molstrPtr);
 }

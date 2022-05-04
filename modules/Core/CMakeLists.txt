@@ -14,4 +14,4 @@ set(SOURCE_FILES
         Core_math.hpp)
 
 add_library(core STATIC ${SOURCE_FILES})
-target_include_directories(core PUBLIC .)
+target_include_directories(core PUBLIC . ${CMAKE_SOURCE_DIR}/modules/BackgroundInteraction/CollisionModels)

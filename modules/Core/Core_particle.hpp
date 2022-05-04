@@ -30,6 +30,7 @@
 
 #include "Core_constants.hpp"
 #include "Core_vector.hpp"
+#include "CollisionModel_MolecularStructure.hpp"
 #include <unordered_map>
 #include <array>
 #include <memory>
@@ -50,6 +51,8 @@ namespace Core {
         Particle(const Core::Vector &location, const Core::Vector &velocity, double chargeElemCharges, double massAMU);
         Particle(const Core::Vector &location, const Core::Vector &velocity, double chargeElemCharges, double massAMU, double timeOfBirth);
         Particle(const Core::Vector &location, const Core::Vector &velocity, double chargeElemCharges, double massAMU, double collisionDiameterM, double timeOfBirth);
+        Particle(const Core::Vector &location, const Core::Vector &velocity, double chargeElemCharges, 
+                    double massAMU, double collisionDiameterM, double timeOfBirth, std::unique_ptr<CollisionModel::MolecularStructure> moleculeStructure);
 
         //setters and getters for the members of the particle:
         void setLocation(Core::Vector location);
@@ -91,6 +94,9 @@ namespace Core {
         void setSplatTime(double splatTime);
         [[nodiscard]] double getSplatTime() const;
 
+        void setMolecularStructure(std::unique_ptr<CollisionModel::MolecularStructure> molecularStructurePtr);
+        [[nodiscard]] CollisionModel::MolecularStructure& getMolecularStructure() const;
+
     private:
         //all internal variable are in SI units
         std::size_t index_ = 0; ///< an external index (mostly the index of the particle in the reaction model)
@@ -112,6 +118,7 @@ namespace Core {
         std::unordered_map<std::string, double> attributesFloat_; ///< an arbitrary set of additional floating point attributes, accessible by a name
         std::unordered_map<std::string, int> attributesInteger_; ///< an arbitrary set of additional integer attributes, accessible by a name
         std::array<double, 3> auxCollisionParams_ {0.0,0.0,0.0}; ///< quickly accessible parameters for collision models
+        std::unique_ptr<CollisionModel::MolecularStructure> molstrPtr;
     };
 
     typedef std::unique_ptr<Core::Particle> uniquePartPtr;

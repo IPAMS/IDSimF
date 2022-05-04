@@ -42,6 +42,7 @@ namespace CollisionModel{
     class MolecularStructure {
 
     public:
+        // Hash map to collect molecular structures so they can be constructed in the collision model later 
         static std::unordered_map<std::string,  std::unique_ptr<MolecularStructure>> molecularStructureCollection;
 
         // Constructors
@@ -90,7 +91,6 @@ namespace CollisionModel{
 
         
     };
-    //std::unordered_map<std::string, CollisionModel::MolecularStructure*> MolecularStructure::molecularStructureCollection;
 
 }
 
