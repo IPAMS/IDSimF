@@ -214,3 +214,21 @@ double CollisionModel::Atom::calcLJEps(const CollisionModel::Atom &atm1, const C
 double CollisionModel::Atom::calcLJSig(const CollisionModel::Atom &atm1, const CollisionModel::Atom &atm2){
     return (atm1.getSigma() + atm2.getSigma()) / 2;
 }
+
+CollisionModel::Atom::AtomType CollisionModel::Atom::from_string(std::string str) {
+    if(str == "C") {
+        return CollisionModel::Atom::AtomType::C;
+    } else if(str == "O") {
+        return CollisionModel::Atom::AtomType::O;
+    } else if(str == "N") {
+        return CollisionModel::Atom::AtomType::N;
+    } else if(str == "H") {
+        return CollisionModel::Atom::AtomType::H;
+    } else if(str == "He") {
+        return CollisionModel::Atom::AtomType::He;
+    } else if(str == "Ar") {
+        return CollisionModel::Atom::AtomType::Ar;
+    } else {
+        throw std::invalid_argument("No such AtomType can be found.");
+    }
+}

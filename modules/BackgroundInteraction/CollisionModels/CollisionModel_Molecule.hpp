@@ -32,6 +32,7 @@
 #include "CollisionModel_Atom.hpp"
 #include "Core_constants.hpp"
 #include "Core_vector.hpp"
+#include "CollisionModel_MolecularStructure.hpp"
 #include <vector>
 
 namespace CollisionModel{
@@ -47,6 +48,7 @@ namespace CollisionModel{
         Molecule(const Core::Vector &comPos, const Core::Vector &comVel, 
                  const Core::Vector &agls, std::vector<CollisionModel::Atom*> atms,
                  double diam);
+        Molecule(const Core::Vector &comPos, const Core::Vector &comVel, CollisionModel::MolecularStructure* structure);
 
         // Setter
         void setComPos(Core::Vector comPos);

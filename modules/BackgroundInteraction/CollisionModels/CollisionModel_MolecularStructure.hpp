@@ -33,12 +33,16 @@
 #include "Core_constants.hpp"
 #include "Core_vector.hpp"
 #include <vector>
+#include <unordered_map>
+#include <string>
+#include <memory>
 
 namespace CollisionModel{
 
     class MolecularStructure {
 
     public:
+        static std::unordered_map<std::string,  std::unique_ptr<MolecularStructure>> molecularStructureCollection;
 
         // Constructors
         MolecularStructure() = default;
@@ -61,6 +65,8 @@ namespace CollisionModel{
         // Member functions
         void addAtom(CollisionModel::Atom* atm);
         void removeAtom(CollisionModel::Atom* atm);
+
+        static std::unordered_map<std::string, std::unique_ptr<MolecularStructure>> createCollection();
         
 
     private:
@@ -79,11 +85,12 @@ namespace CollisionModel{
         Core::Vector dipole = {0.0, 0.0, 0.0}; // Dipole vector of the molecule [C*m]
         double dipoleMag = 0.0; // Magnitude of dipole [C]
         std::size_t atomCount = 0; // Number of atoms belonging to the molecule
-        std::vector<CollisionModel::Atom*> atoms; // Vector of all atoms belonging to this molecule 
+        std::vector<CollisionModel::Atom*> atoms = {}; // Vector of all atoms belonging to this molecule 
         double diameter = 0.0; // Diameter of the molecule for collision probability [m]
 
         
     };
+    //std::unordered_map<std::string, CollisionModel::MolecularStructure*> MolecularStructure::molecularStructureCollection;
 
 }
 

@@ -21,6 +21,7 @@
 
 #include "CollisionModel_Molecule.hpp"
 #include <algorithm>
+#include <iostream>
 
 
 /**
@@ -59,6 +60,25 @@ CollisionModel::Molecule::Molecule(const Core::Vector &comPos, const Core::Vecto
     this->setIsIon(); 
     this->rotateMolecule();
     this->atomCount = atoms.size();  
+}
+
+CollisionModel::Molecule::Molecule(const Core::Vector &comPos, const Core::Vector &comVel, 
+                                    CollisionModel::MolecularStructure* structure):
+    centerOfMassPos(comPos),
+    centerOfMassVel(comVel),
+    isDipole(structure->getIsDipole()),
+    isIon(structure->getIsIon()),
+    mass(structure->getMass()),
+    dipole(structure->getDipole()),
+    dipoleMag(structure->getDipoleMag()),
+    atomCount(structure->getAtoms().size()),
+    diameter(structure->getDiameter())
+{
+    atoms.resize(atomCount);
+    for(size_t i = 0; i < atomCount; i++) {
+        this->atoms.at(i) = new Atom(*structure->getAtoms().at(i));
+    }
+
 }
 
 /**

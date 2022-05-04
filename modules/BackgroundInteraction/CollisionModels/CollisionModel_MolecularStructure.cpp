@@ -22,14 +22,13 @@
 #include "CollisionModel_MolecularStructure.hpp"
 #include <algorithm>
 
+
+
 /**
- * @brief Creates a molecule with given atoms and the starting angle configuration (rotation). 
+ * @brief Creates a molecular structur with given atoms. 
  *          The mass and dipole is calculated through the information given by the atoms and does not need 
  *          to be specified.
  * 
- * @param comPos the center-of-mass position of the created molecule
- * @param comVel the center-of-mass velocity of the created molecule
- * @param agls the angles in x-y-z of the atoms relative position w.r.t the center-of-mass 
  * @param atms the vector with atoms contained in the molecule
  * @param diam molecule diameter in m
  */
@@ -190,3 +189,10 @@ void CollisionModel::MolecularStructure::setIsIon(){
     
 }
 
+std::unordered_map<std::string, std::unique_ptr<CollisionModel::MolecularStructure> > CollisionModel::MolecularStructure::createCollection(){
+    
+    std::unordered_map<std::string, std::unique_ptr<CollisionModel::MolecularStructure> > molecularCollection;
+    return molecularCollection;
+}
+
+std::unordered_map<std::string, std::unique_ptr<CollisionModel::MolecularStructure> > CollisionModel::MolecularStructure::molecularStructureCollection = CollisionModel::MolecularStructure::createCollection();

@@ -32,6 +32,7 @@
 
 #include "Core_constants.hpp"
 #include "Core_vector.hpp"
+#include <exception>
 
 namespace CollisionModel{
 
@@ -40,6 +41,7 @@ namespace CollisionModel{
     public:
 
         enum class AtomType : int {C, O, N, H, He, Ar}; // NOTE: This might not be necessary when directly saving the LJ params 
+        static AtomType from_string(std::string str); // Returns enum based on string 
 
         // Constructors
         Atom() = default;

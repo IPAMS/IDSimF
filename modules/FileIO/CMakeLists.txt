@@ -20,7 +20,9 @@ set(SOURCE_FILES
         FileIO_HDF5Reader.cpp
         FileIO_trajectoryHDF5Writer.hpp
         FileIO_trajectoryHDF5Writer.cpp
-        FileIO_trajectoryWriterDefs.hpp)
+        FileIO_trajectoryWriterDefs.hpp
+        FileIO_MolecularStructureReader.hpp
+        FileIO_MolecularStructureReader.cpp)
 
 add_library(file_io STATIC ${SOURCE_FILES})
 target_include_directories(file_io PUBLIC .)

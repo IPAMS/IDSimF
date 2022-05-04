@@ -29,6 +29,7 @@
 #include "Core_constants.hpp"
 #include "catch.hpp"
 #include "test_util.hpp"
+#include "CollisionModel_MolecularStructure.hpp"
 #include <iostream>
 
 TEST_CASE("Basic test Molecule creation", "[CollisionModels][Molecule]") {
@@ -174,6 +175,66 @@ TEST_CASE("Basic test Molecule creation", "[CollisionModels][Molecule]") {
         CHECK(isExactDoubleEqual(mole.getAtomCount(), 2));
         CHECK(mole.getAtoms().empty() == false);
         CHECK(isExactDoubleEqual(mole.getDiameter(), 0.5));
+    }
+
+    SECTION("Constructor through molecular structure object"){
+        CollisionModel::Atom atm1 = CollisionModel::Atom();
+        atm1.setRelativePosition(Core::Vector(0, 370/2, 0));
+        atm1.setMass(1);
+        CollisionModel::Atom atm2 = CollisionModel::Atom();
+        atm2.setRelativePosition(Core::Vector(0, -370/2, 0));
+        atm2.setMass(3);
+        std::vector<CollisionModel::Atom*> atoms = {&atm1, &atm2};
+
+        CollisionModel::MolecularStructure molstr = CollisionModel::MolecularStructure(atoms, 0.5);
+
+        CollisionModel::Molecule mole = CollisionModel::Molecule(Core::Vector(0.5, 1.0, -0.3), 
+                                                                    Core::Vector(-1.5, 0.3, 0.33),
+                                                                    &molstr);
+
+        CHECK(mole.getComPos() == Core::Vector(0.5, 1.0, -0.3));
+        CHECK(mole.getComVel() == Core::Vector(-1.5, 0.3, 0.33));
+        CHECK(mole.getAngles() == Core::Vector(0.0, 0.0, 0.0));
+        CHECK(mole.getDipole().y() == Approx(0.0).margin(1E-13));
+        CHECK(mole.getIsDipole() == false);
+        CHECK(mole.getIsIon() == false);
+        CHECK(isExactDoubleEqual(mole.getMass(), 4*Core::AMU_TO_KG));
+        CHECK(mole.getDipoleMag() == Approx(0.0).margin(1E-13));
+        CHECK(isExactDoubleEqual(mole.getAtomCount(), 2));
+        CHECK(mole.getAtoms().empty() == false);
+        CHECK(isExactDoubleEqual(mole.getDiameter(), 0.5));
+    }
+
+    SECTION("Constructor through molecular structure object, leaving structure untouched"){
+        CollisionModel::Atom atm1 = CollisionModel::Atom();
+        atm1.setRelativePosition(Core::Vector(0, 370/2, 0));
+        atm1.setMass(1);
+        CollisionModel::Atom atm2 = CollisionModel::Atom();
+        atm2.setRelativePosition(Core::Vector(0, -370/2, 0));
+        atm2.setMass(3);
+        std::vector<CollisionModel::Atom*> atoms = {&atm1, &atm2};
+
+        CollisionModel::MolecularStructure molstr = CollisionModel::MolecularStructure(atoms, 0.5);
+
+        CollisionModel::Molecule mole = CollisionModel::Molecule(Core::Vector(0.5, 1.0, -0.3), 
+                                                                    Core::Vector(-1.5, 0.3, 0.33),
+                                                                    &molstr);
+
+        CHECK(mole.getComPos() == Core::Vector(0.5, 1.0, -0.3));
+        CHECK(mole.getComVel() == Core::Vector(-1.5, 0.3, 0.33));
+        CHECK(mole.getAngles() == Core::Vector(0.0, 0.0, 0.0));
+        CHECK(mole.getDipole().y() == Approx(0.0).margin(1E-13));
+        CHECK(mole.getIsDipole() == false);
+        CHECK(mole.getIsIon() == false);
+        CHECK(isExactDoubleEqual(mole.getMass(), 4*Core::AMU_TO_KG));
+        CHECK(mole.getDipoleMag() == Approx(0.0).margin(1E-13));
+        CHECK(isExactDoubleEqual(mole.getAtomCount(), 2));
+        CHECK(mole.getAtoms().empty() == false);
+        CHECK(isExactDoubleEqual(mole.getDiameter(), 0.5));
+
+        mole.getAtoms().at(0)->getRelativePosition().y(2);
+        CHECK(molstr.getAtoms().at(0)->getRelativePosition().y() == Approx(370/2).margin(1E-13));
+        CHECK(mole.getAtoms().at(0)->getRelativePosition().y() == Approx(2).margin(1E-13));
     }
 }
 
