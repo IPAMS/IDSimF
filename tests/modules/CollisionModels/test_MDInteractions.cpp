@@ -30,38 +30,27 @@
 #include "CollisionModel_Atom.hpp"
 #include "Core_constants.hpp"
 #include "catch.hpp"
+#include "FileIO_MolecularStructureReader.hpp"
 #include <iostream>
 
 TEST_CASE("Basic test MD Interactions model", "[CollisionModels][MDInteractionsModel]") {
 
     double diameterHe = CollisionModel::MDInteractionsModel::DIAMETER_HE;
-    CollisionModel::Molecule ion;
-    CollisionModel::Molecule gas;
-    double eps_Ar = 0.2339 * 4.1868 * 1E3 / Core::N_AVOGADRO; 
-    double sig_Ar = 3.401 * 1E-10;
-    double eps_He = 0.02 * 4.1868 * 1E3 / Core::N_AVOGADRO; 
-    double sig_He = 2.556 * 1E-10;
-    CollisionModel::Atom argon1 = CollisionModel::Atom(Core::Vector(0, 2.90E-10, 0), 39.948, 0, -1, 
-                                    CollisionModel::Atom::AtomType::Ar, sig_Ar, eps_Ar);
-    CollisionModel::Atom argon2 = CollisionModel::Atom(Core::Vector(0, -2.90E-10, 0), 39.948, 0, +1, 
-                                    CollisionModel::Atom::AtomType::Ar, sig_Ar, eps_Ar);
-    CollisionModel::Atom helium = CollisionModel::Atom(Core::Vector(0, 0, 0), 4.003, -1, 0, 
-                                    CollisionModel::Atom::AtomType::He, sig_He, eps_He);
-    ion.addAtom(&argon1);
-    ion.addAtom(&argon2);
-    ion.setComVel(Core::Vector(10,0,0));
+    FileIO::MolecularStructureReader reader = FileIO::MolecularStructureReader();
+    reader.readMolecularStructure("test_molecularstructure_reader.csv");
+    Core::Particle ion;
+    ion.setMolecularStructure(CollisionModel::MolecularStructure::molecularStructureCollection.at("Ar2"));
+    ion.setVelocity(Core::Vector(100.0, 0.0, 0.0));
     ion.setDiameter(100*4E-10);
-    gas.addAtom(&helium);
-    std::cout << "Vel: " << ion.getComVel().magnitude() << std::endl;
-
     CollisionModel::MDInteractionsModel mdSim = CollisionModel::MDInteractionsModel(1.0, 298, 4.003, 
-                                                                                    diameterHe, 0.205E-30);
+                                                                                    diameterHe, 0.205E-30, "He");
+    std::cout << "Vel: " << ion.getVelocity().magnitude() << std::endl;
+
     //for(int i = 0; i < 200; i++)
-    mdSim.modifyVelocity(ion, gas, 2e-7);
+    mdSim.modifyVelocity(ion, 2e-7);
 
-    std::cout << "Vel: " << ion.getComVel().magnitude() << std::endl;
-    std::cout << "Pos: " << ion.getComPos() << std::endl;
-
+    std::cout << "Vel: " << ion.getVelocity().magnitude() << std::endl;
+    std::cout << "Pos: " << ion.getLocation() << std::endl;
 
     
 }

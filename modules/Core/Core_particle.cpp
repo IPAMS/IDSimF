@@ -499,6 +499,6 @@ void Core::Particle::setMolecularStructure(std::shared_ptr<CollisionModel::Molec
 /**
  * Gets the molecular structure pointer 
  */
-CollisionModel::MolecularStructure& Core::Particle::getMolecularStructure(){
-    return (*molstrPtr);
+std::shared_ptr<CollisionModel::MolecularStructure> Core::Particle::getMolecularStructure(){
+    return molstrPtr;
 }

@@ -22,21 +22,6 @@
 #include "CollisionModel_MolecularStructure.hpp"
 #include <algorithm>
 
-// CollisionModel::MolecularStructure::MolecularStructure(const CollisionModel::MolecularStructure& A) :
-//             isDipole(A.isDipole),
-//             isIon(A.isIon), // Flag to denote the molecule is an ion 
-//             mass(A.mass), // Mass of the molecule [kg]
-//             dipole(A.dipole), // Dipole vector of the molecule [C*m]
-//             dipoleMag(A.dipoleMag), // Magnitude of dipole [C]
-//             atomCount(A.atomCount), // Number of atoms belonging to the molecule
-//             atoms(atomCount), // Vector of all atoms belonging to this molecule 
-//             diameter(A.diameter) // Diameter of the molecule for collision probability [m]
-// {
-//                 for (std::size_t i = 0; i < A.atomCount; ++i){
-//                     atoms[i] = new CollisionModel::Atom(*A.atoms[i]);
-//                 }
-// }
-
 /**
  * @brief Creates a molecular structur with given atoms. 
  *          The mass and dipole is calculated through the information given by the atoms and does not need 
@@ -202,6 +187,7 @@ void CollisionModel::MolecularStructure::setIsIon(){
     
 }
 
+// create an empty static collection of molecular structures
 std::unordered_map<std::string, std::shared_ptr<CollisionModel::MolecularStructure> > CollisionModel::MolecularStructure::createCollection(){
     
     std::unordered_map<std::string, std::shared_ptr<CollisionModel::MolecularStructure> > molecularCollection;

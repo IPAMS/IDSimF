@@ -48,7 +48,7 @@ namespace CollisionModel{
         Molecule(const Core::Vector &comPos, const Core::Vector &comVel, 
                  const Core::Vector &agls, std::vector<CollisionModel::Atom*> atms,
                  double diam);
-        Molecule(const Core::Vector &comPos, const Core::Vector &comVel, CollisionModel::MolecularStructure* structure);
+        Molecule(const Core::Vector &comPos, const Core::Vector &comVel, std::shared_ptr<CollisionModel::MolecularStructure> structure);
 
         // Setter
         void setComPos(Core::Vector comPos);

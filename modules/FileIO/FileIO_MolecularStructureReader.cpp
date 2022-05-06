@@ -49,7 +49,7 @@ void FileIO::MolecularStructureReader::readMolecularStructure(std::string filena
                 // get molecule structure key for the hash map
                 line.erase(std::remove_if(line.begin(), line.end(), [](char chr){ return chr == '#' || chr == ',';}), line.end());
                 std::shared_ptr<CollisionModel::MolecularStructure> molstrPtr = std::make_shared<CollisionModel::MolecularStructure>();
-                CollisionModel::MolecularStructure::molecularStructureCollection.insert({line, std::move(molstrPtr)});
+                CollisionModel::MolecularStructure::molecularStructureCollection.insert({line, molstrPtr});
                 lastMolecule = line;
                 // get diamater from next line
                 if(std::getline(in, line)){
@@ -83,8 +83,8 @@ void FileIO::MolecularStructureReader::readMolecularStructure(std::string filena
 
                 // eight double values necessary to initialize
                 if (atomValues.size() == 8) {
-                    CollisionModel::Atom atm = CollisionModel::Atom(
-                                Core::Vector(atomValues[0], atomValues[1], atomValues[2]), //location
+                    CollisionModel::Atom* atm = new CollisionModel::Atom(
+                                Core::Vector(atomValues[0]*1E-10, atomValues[1]*1E-10, atomValues[2]*1E-10), //location in angström
                                 atomValues[3], // mass in amu
                                 atomValues[4], // charge in e
                                 atomValues[5], // part. charge in e
@@ -95,7 +95,7 @@ void FileIO::MolecularStructureReader::readMolecularStructure(std::string filena
                     // Insert atom to the correct molecule structure
                     auto it = CollisionModel::MolecularStructure::molecularStructureCollection.find(lastMolecule);
                     if (it != CollisionModel::MolecularStructure::molecularStructureCollection.end()) {
-                        it->second->addAtom(&atm);
+                        it->second->addAtom(atm);
                     }
 
                 } else {

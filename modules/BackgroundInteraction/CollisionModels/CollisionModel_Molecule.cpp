@@ -63,7 +63,7 @@ CollisionModel::Molecule::Molecule(const Core::Vector &comPos, const Core::Vecto
 }
 
 CollisionModel::Molecule::Molecule(const Core::Vector &comPos, const Core::Vector &comVel, 
-                                    CollisionModel::MolecularStructure* structure):
+                                    std::shared_ptr<CollisionModel::MolecularStructure> structure):
     centerOfMassPos(comPos),
     centerOfMassVel(comVel),
     isDipole(structure->getIsDipole()),

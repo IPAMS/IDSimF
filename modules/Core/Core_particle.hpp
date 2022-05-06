@@ -101,7 +101,7 @@ namespace Core {
         [[nodiscard]] double getSplatTime() const;
 
         void setMolecularStructure(std::shared_ptr<CollisionModel::MolecularStructure> molecularStructurePtr);
-        [[nodiscard]] CollisionModel::MolecularStructure& getMolecularStructure();
+        [[nodiscard]] std::shared_ptr<CollisionModel::MolecularStructure> getMolecularStructure();
 
     private:
         //all internal variable are in SI units

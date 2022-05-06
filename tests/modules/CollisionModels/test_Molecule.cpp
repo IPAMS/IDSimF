@@ -31,6 +31,7 @@
 #include "test_util.hpp"
 #include "CollisionModel_MolecularStructure.hpp"
 #include <iostream>
+#include <memory>
 
 TEST_CASE("Basic test Molecule creation", "[CollisionModels][Molecule]") {
 
@@ -186,11 +187,11 @@ TEST_CASE("Basic test Molecule creation", "[CollisionModels][Molecule]") {
         atm2.setMass(3);
         std::vector<CollisionModel::Atom*> atoms = {&atm1, &atm2};
 
-        CollisionModel::MolecularStructure molstr = CollisionModel::MolecularStructure(atoms, 0.5);
+        std::shared_ptr<CollisionModel::MolecularStructure> molstr = std::make_shared<CollisionModel::MolecularStructure>(atoms, 0.5);
 
         CollisionModel::Molecule mole = CollisionModel::Molecule(Core::Vector(0.5, 1.0, -0.3), 
                                                                     Core::Vector(-1.5, 0.3, 0.33),
-                                                                    &molstr);
+                                                                    molstr);
 
         CHECK(mole.getComPos() == Core::Vector(0.5, 1.0, -0.3));
         CHECK(mole.getComVel() == Core::Vector(-1.5, 0.3, 0.33));
@@ -215,11 +216,11 @@ TEST_CASE("Basic test Molecule creation", "[CollisionModels][Molecule]") {
         std::vector<CollisionModel::Atom*> atoms = {&atm1, &atm2};
 
 
-        CollisionModel::MolecularStructure molstr = CollisionModel::MolecularStructure(atoms, 0.5);
+        std::shared_ptr<CollisionModel::MolecularStructure> molstr = std::make_shared<CollisionModel::MolecularStructure>(atoms, 0.5);
 
         CollisionModel::Molecule mole = CollisionModel::Molecule(Core::Vector(0.5, 1.0, -0.3), 
                                                                     Core::Vector(-1.5, 0.3, 0.33),
-                                                                    &molstr);
+                                                                    molstr);
 
         CHECK(mole.getComPos() == Core::Vector(0.5, 1.0, -0.3));
         CHECK(mole.getComVel() == Core::Vector(-1.5, 0.3, 0.33));
@@ -234,7 +235,7 @@ TEST_CASE("Basic test Molecule creation", "[CollisionModels][Molecule]") {
         CHECK(isExactDoubleEqual(mole.getDiameter(), 0.5));
 
         mole.getAtoms().at(0)->getRelativePosition().y(2);
-        CHECK(molstr.getAtoms().at(0)->getRelativePosition().y() == Approx(370/2).margin(1E-13));
+        CHECK(molstr->getAtoms().at(0)->getRelativePosition().y() == Approx(370/2).margin(1E-13));
         CHECK(mole.getAtoms().at(0)->getRelativePosition().y() == Approx(2).margin(1E-13));
     }
 }

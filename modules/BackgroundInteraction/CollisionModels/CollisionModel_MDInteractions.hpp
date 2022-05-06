@@ -49,6 +49,7 @@
 #include "RS_AbstractReaction.hpp"
 #include <cstdio>
 #include <functional>
+#include <string>
 
 namespace CollisionModel{
 
@@ -59,13 +60,14 @@ namespace CollisionModel{
         constexpr static double DIAMETER_HE = 2.80e-10;
 
         MDInteractionsModel() = default;
-
+        
         MDInteractionsModel(
             double staticPressure,
             double staticTemperature,
             double collisionGasMassAmu,
             double collisionGasDiameterM, 
-            double collisionGasPolarizabilityM3);
+            double collisionGasPolarizabilityM3,
+            std::string collisionMolecule);
 
         MDInteractionsModel(
             std::function<double(Core::Vector& location)> pressureFunction,
@@ -73,7 +75,8 @@ namespace CollisionModel{
             double StaticTemperature,
             double collisionGasMassAmu,
             double collisionGasDiameterM, 
-            double collisionGasPolarizabilityM3);
+            double collisionGasPolarizabilityM3,
+            std::string collisionMolecule);
 
         MDInteractionsModel(
             std::function<double(Core::Vector& location)> pressureFunction,
@@ -81,24 +84,9 @@ namespace CollisionModel{
             std::function<double(const Core::Vector&)> temperatureFunction,
             double collisionGasMassAmu,
             double collisionGasDiameterM, 
-            double collisionGasPolarizabilityM3);
+            double collisionGasPolarizabilityM3,
+            std::string collisionMolecule);
 
-        // FIXME: deriving from AbstractCollisionModel is senseless, since functions do not match.
-        
-        void initializeModelParameters(CollisionModel::Molecule& mole) const;
-
-        void updateModelParameters(CollisionModel::Molecule& mole) const;
-
-        void modifyAcceleration(Core::Vector& acceleration,
-                                        CollisionModel::Molecule& mole,
-                                        double dt);
-
-        void modifyVelocity(CollisionModel::Molecule& mole, CollisionModel::Molecule& bgMole,
-                                    double dt);
-
-        void modifyPosition(Core::Vector& position,
-                                    CollisionModel::Molecule& mole,
-                                    double dt);
 
         void leapfrogIntern(std::vector<CollisionModel::Molecule*> moleculesPtr, double dt, double finalTime);
 
@@ -113,6 +101,7 @@ namespace CollisionModel{
                                         double dt);
         void modifyVelocity(Core::Particle& particle,
                                     double dt);
+
         void modifyPosition(Core::Vector& position,
                                     Core::Particle& particle,
                                     double dt);
@@ -122,6 +111,7 @@ namespace CollisionModel{
         double collisionGasMass_kg_ = 0.0;    ///< mass of the neutral colliding gas particles in kg
         double collisionGasDiameter_m_ = 0.0; ///< effective collision diameter of the neutral collision gas particles in m
         double collisionGasPolarizability_m3_ = 0.0; ///< polarizability of the collision gas in m^3
+        std::string collisionMolecule_ = "";
 
         std::function<double(Core::Vector&)> pressureFunction_ = nullptr; ///< a spatial pressure function
         std::function<Core::Vector(Core::Vector&)> velocityFunction_ = nullptr; ///< a spatial velocity function
