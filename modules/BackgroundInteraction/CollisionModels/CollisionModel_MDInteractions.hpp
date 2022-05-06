@@ -67,7 +67,9 @@ namespace CollisionModel{
             double collisionGasMassAmu,
             double collisionGasDiameterM, 
             double collisionGasPolarizabilityM3,
-            std::string collisionMolecule);
+            std::string collisionMolecule,
+            double integrationTime,
+            double subTimeStep);
 
         MDInteractionsModel(
             std::function<double(Core::Vector& location)> pressureFunction,
@@ -76,7 +78,9 @@ namespace CollisionModel{
             double collisionGasMassAmu,
             double collisionGasDiameterM, 
             double collisionGasPolarizabilityM3,
-            std::string collisionMolecule);
+            std::string collisionMolecule,
+            double integrationTime,
+            double subTimeStep);
 
         MDInteractionsModel(
             std::function<double(Core::Vector& location)> pressureFunction,
@@ -85,7 +89,9 @@ namespace CollisionModel{
             double collisionGasMassAmu,
             double collisionGasDiameterM, 
             double collisionGasPolarizabilityM3,
-            std::string collisionMolecule);
+            std::string collisionMolecule,
+            double integrationTime,
+            double subTimeStep);
 
 
         void leapfrogIntern(std::vector<CollisionModel::Molecule*> moleculesPtr, double dt, double finalTime);
@@ -112,6 +118,8 @@ namespace CollisionModel{
         double collisionGasDiameter_m_ = 0.0; ///< effective collision diameter of the neutral collision gas particles in m
         double collisionGasPolarizability_m3_ = 0.0; ///< polarizability of the collision gas in m^3
         std::string collisionMolecule_ = "";
+        double integrationTime_ = 0.0;
+        double subTimeStep_ = 0.0;
 
         std::function<double(Core::Vector&)> pressureFunction_ = nullptr; ///< a spatial pressure function
         std::function<Core::Vector(Core::Vector&)> velocityFunction_ = nullptr; ///< a spatial velocity function

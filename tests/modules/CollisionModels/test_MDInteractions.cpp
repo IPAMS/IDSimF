@@ -28,6 +28,7 @@
 #include "CollisionModel_MDInteractions.hpp"
 #include "CollisionModel_Molecule.hpp"
 #include "CollisionModel_Atom.hpp"
+#include "Core_randomGenerators.hpp"
 #include "Core_constants.hpp"
 #include "catch.hpp"
 #include "FileIO_MolecularStructureReader.hpp"
@@ -35,22 +36,24 @@
 
 TEST_CASE("Basic test MD Interactions model", "[CollisionModels][MDInteractionsModel]") {
 
+    Core::globalRandomGeneratorPool = std::make_unique<Core::TestRandomGeneratorPool>();
+
     double diameterHe = CollisionModel::MDInteractionsModel::DIAMETER_HE;
     FileIO::MolecularStructureReader reader = FileIO::MolecularStructureReader();
     reader.readMolecularStructure("test_molecularstructure_reader.csv");
     Core::Particle ion;
     ion.setMolecularStructure(CollisionModel::MolecularStructure::molecularStructureCollection.at("Ar2"));
     ion.setVelocity(Core::Vector(100.0, 0.0, 0.0));
-    ion.setDiameter(100*4E-10);
+    ion.setDiameter(4E-10);
     CollisionModel::MDInteractionsModel mdSim = CollisionModel::MDInteractionsModel(1.0, 298, 4.003, 
-                                                                                    diameterHe, 0.205E-30, "He");
-    std::cout << "Vel: " << ion.getVelocity().magnitude() << std::endl;
-
-    //for(int i = 0; i < 200; i++)
-    mdSim.modifyVelocity(ion, 2e-7);
-
-    std::cout << "Vel: " << ion.getVelocity().magnitude() << std::endl;
-    std::cout << "Pos: " << ion.getLocation() << std::endl;
+                                                                                    diameterHe, 0.205E-30, "He", 50E-14, 1E-16);
+    
+    for(int i = 0; i < 200; i++)
+        mdSim.modifyVelocity(ion, 2e-7);
+        
+    CHECK(Approx(ion.getVelocity().x()) ==  101.5028529188);
+    CHECK(Approx(ion.getVelocity().y()) ==  -19.852792081);
+    CHECK(Approx(ion.getVelocity().z()) ==  -57.0631567274);
 
     
 }

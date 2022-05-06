@@ -33,7 +33,9 @@ CollisionModel::MDInteractionsModel::MDInteractionsModel(double staticPressure,
                                                         double collisionGasMassAmu,
                                                         double collisionGasDiameterM, 
                                                         double collisionGasPolarizabilityM3,
-                                                        std::string collisionMolecule) :
+                                                        std::string collisionMolecule,
+                                                        double integrationTime,
+                                                        double subTimeStep) :
         MDInteractionsModel(
         getConstantDoubleFunction(staticPressure),
         getConstantVectorFunction(Core::Vector(0.0, 0.0, 0.0)),
@@ -41,7 +43,9 @@ CollisionModel::MDInteractionsModel::MDInteractionsModel(double staticPressure,
         collisionGasMassAmu,
         collisionGasDiameterM,
         collisionGasPolarizabilityM3,
-        collisionMolecule) { }
+        collisionMolecule,
+        integrationTime,
+        subTimeStep) { }
 
 CollisionModel::MDInteractionsModel::MDInteractionsModel(std::function<double(Core::Vector& location)> pressureFunction,
                                                         std::function<Core::Vector(Core::Vector& location)> velocityFunction,
@@ -49,7 +53,9 @@ CollisionModel::MDInteractionsModel::MDInteractionsModel(std::function<double(Co
                                                         double collisionGasMassAmu,
                                                         double collisionGasDiameterM, 
                                                         double collisionGasPolarizabilityM3,
-                                                        std::string collisionMolecule) :
+                                                        std::string collisionMolecule,
+                                                        double integrationTime,
+                                                        double subTimeStep) :
         MDInteractionsModel(
                 std::move(pressureFunction),
                 std::move(velocityFunction),
@@ -57,7 +63,9 @@ CollisionModel::MDInteractionsModel::MDInteractionsModel(std::function<double(Co
                 collisionGasMassAmu,
                 collisionGasDiameterM, 
                 collisionGasPolarizabilityM3,
-                collisionMolecule) { }
+                collisionMolecule,
+                integrationTime,
+                subTimeStep) { }
 
 CollisionModel::MDInteractionsModel::MDInteractionsModel(std::function<double(Core::Vector& location)> pressureFunction,
                                                         std::function<Core::Vector(Core::Vector& location)> velocityFunction,
@@ -65,12 +73,16 @@ CollisionModel::MDInteractionsModel::MDInteractionsModel(std::function<double(Co
                                                         double collisionGasMassAmu,
                                                         double collisionGasDiameterM, 
                                                         double collisionGasPolarizabilityM3,
-                                                        std::string collisionMolecule) :
+                                                        std::string collisionMolecule,
+                                                        double integrationTime,
+                                                        double subTimeStep) :
 
         collisionGasMass_kg_(collisionGasMassAmu*Core::AMU_TO_KG),
         collisionGasDiameter_m_(collisionGasDiameterM),
         collisionGasPolarizability_m3_(collisionGasPolarizabilityM3),
         collisionMolecule_(collisionMolecule),
+        integrationTime_(integrationTime),
+        subTimeStep_(subTimeStep),
         pressureFunction_(std::move(pressureFunction)),
         velocityFunction_(std::move(velocityFunction)),
         temperatureFunction_(std::move(temperatureFunction)) { }
@@ -148,7 +160,6 @@ void CollisionModel::MDInteractionsModel::modifyVelocity(Core::Particle& particl
     // Collision happens
     // Construct the actual molecule and its atoms 
     CollisionModel::Molecule mole = CollisionModel::Molecule(particle.getLocation(), particle.getVelocity(), particle.getMolecularStructure());
-    std::cout << "Part: " << CollisionModel::MolecularStructure::molecularStructureCollection.at("Ar2")->getAtoms().at(0)->getEpsilon() << std::endl;
 
 
     // Construct the background gas particle 
@@ -179,8 +190,6 @@ void CollisionModel::MDInteractionsModel::modifyVelocity(Core::Particle& particl
                                              mole.getComVel().z() * -1};
     velocityToIonBgMolecule = velocityToIonBgMolecule / velocityToIonBgMolecule.magnitude() * velocityMagnitudeBgMolecule;
     bgMole.setComVel(velocityToIonBgMolecule);
-    std::cout << velocityMagnitudeBgMolecule << std::endl;
-    std::cout << velocityToIonBgMolecule << std::endl;
 
 
     // rotate it randomly 
@@ -189,9 +198,9 @@ void CollisionModel::MDInteractionsModel::modifyVelocity(Core::Particle& particl
                                   rndSource->uniformRealRndValue()));
 
     // // Give molecule a random orientation:
-    // mole.setAngles(Core::Vector(rndSource->uniformRealRndValue(), 
-    //                             rndSource->uniformRealRndValue(), 
-    //                             rndSource->uniformRealRndValue()));
+    mole.setAngles(Core::Vector(rndSource->uniformRealRndValue(), 
+                                rndSource->uniformRealRndValue(), 
+                                rndSource->uniformRealRndValue()));
 
     // Switch to COM frame 
     Core::Vector momentumSum = Core::Vector(0.0, 0.0, 0.0);
@@ -209,8 +218,8 @@ void CollisionModel::MDInteractionsModel::modifyVelocity(Core::Particle& particl
     }
 
     // Call the sub-integrator
-    double finalTime = 50E-14; //  final integration time in seconds
-    double timeStep = 1E-16; // step size in seconds 
+    double finalTime = integrationTime_; //  final integration time in seconds
+    double timeStep = subTimeStep_; // step size in seconds 
     leapfrogIntern(moleculesPtr, timeStep, finalTime);
 
     // reset to lab frame 
@@ -412,7 +421,6 @@ std::vector<Core::Vector> CollisionModel::MDInteractionsModel::forceFieldMD(std:
                                 (eField[0]*eFieldDerivative[5] + eField[1]*eFieldDerivative[3] + eField[2]*eFieldDerivative[4]));
             forceMolecules.at(i) += ionInducedForce;
             forceMolecules.at(j) += ionInducedForce * (-1);
-            std::cout << "Induced: " << 1/Core::ELECTRIC_CONSTANT * collisionGasPolarizability_m3_  << std::endl;
         }
     }
     return forceMolecules;
