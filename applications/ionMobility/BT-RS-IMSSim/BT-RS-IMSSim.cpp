@@ -47,6 +47,7 @@
 #include "appUtils_commandlineParser.hpp"
 #include "CollisionModel_MDInteractions.hpp"
 #include "FileIO_MolecularStructureReader.hpp"
+#include "Core_randomGenerators.hpp"
 #include "json.h"
 #include <iostream>
 #include <cmath>
@@ -66,6 +67,8 @@ std::string key_ChemicalIndex = "keyChemicalIndex";
 int main(int argc, const char *argv[]){
 
     try {
+        Core::globalRandomGeneratorPool = std::make_unique<Core::TestRandomGeneratorPool>();
+
         // open configuration, parse configuration file =========================================
         AppUtils::CommandlineParser cmdLineParser(argc, argv, "BT-RS-DMSSim", "DMS Simulation with trajectories and chemistry", false);
         std::string projectName = cmdLineParser.resultName();
@@ -201,7 +204,7 @@ int main(int argc, const char *argv[]){
         for (std::size_t i = 0; i<nParticles.size(); i++) {
             RS::Substance* subst = rsSimConf->substance(i);
             std::vector<Core::Vector> initialPositions =
-                    ParticleSimulation::util::getRandomPositionsInBox(nParticles[i], initCorner, initBoxSize);
+                    ParticleSimulation::util::getPositionsOnGrid(nParticles[i], initCorner, initBoxSize, 7);
             for (unsigned int k = 0; k<nParticles[i]; k++) {
                 uniqueReactivePartPtr particle = std::make_unique<RS::ReactiveParticle>(subst);
 

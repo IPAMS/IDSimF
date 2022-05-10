@@ -52,7 +52,7 @@ void performBenchmark(int nSamples){
 
 int main() {
 
-    int n = 40000;
+    int n = 400000;
     performBenchmark(n);
     return 0;
 }

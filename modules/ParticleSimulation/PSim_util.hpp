@@ -54,6 +54,8 @@ namespace ParticleSimulation {
 
         [[nodiscard]] std::vector<Core::Vector> getRandomPositionsInBox(unsigned int nPositions, Core::Vector corner, Core::Vector boxSize);
 
+        [[nodiscard]] std::vector<Core::Vector> getPositionsOnGrid(unsigned int nPositions, Core::Vector corner, Core::Vector boxSize, unsigned int nPerDirection);
+
         //std::vector<std::unique_ptr<Core::Particle>>
         //getRandomIonsInBox(int numIons, double charge, Core::Vector corner, Core::Vector boxSize, double timeOfBirthRange=0.0);
 
