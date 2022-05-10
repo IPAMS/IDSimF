@@ -27,6 +27,7 @@
 #include <array>
 #include <iostream>
 #include <fstream>
+#include <valgrind/memcheck.h>
 
 CollisionModel::MDInteractionsModel::MDInteractionsModel(double staticPressure,
                                                         double staticTemperature,
@@ -109,7 +110,6 @@ void CollisionModel::MDInteractionsModel::modifyVelocity(Core::Particle& particl
     double sigma_m2 = M_PI * std::pow( (particle.getDiameter() + collisionGasDiameter_m_)/2.0, 2.0);
     Core::Vector moleculeComPosition = particle.getLocation();
     double localPressure_Pa = pressureFunction_(moleculeComPosition);
-
     if (Core::isDoubleEqual(localPressure_Pa, 0.0)){
         return; //pressure 0 means no collision at all
     }
@@ -156,11 +156,11 @@ void CollisionModel::MDInteractionsModel::modifyVelocity(Core::Particle& particl
     if (rndSource->uniformRealRndValue() > collisionProb){
         return; // no collision takes place
     }           
-
+    
     // Collision happens
     // Construct the actual molecule and its atoms 
     CollisionModel::Molecule mole = CollisionModel::Molecule(particle.getLocation(), particle.getVelocity(), particle.getMolecularStructure());
-
+    //std::cout << mole.getAtoms().at(0)->getRelativePosition() << std::endl;
 
     // Construct the background gas particle 
 
@@ -226,9 +226,6 @@ void CollisionModel::MDInteractionsModel::modifyVelocity(Core::Particle& particl
     for(auto* molecule : moleculesPtr){
         molecule->setComPos(molecule->getComPos() + (positionSum / massSum) + (momentumSum / massSum) * finalTime);
         molecule->setComVel(molecule->getComVel() + (momentumSum / massSum));
-        for(auto* atom : molecule->getAtoms()){
-            delete atom;
-        }
     }
     
     // set the velocity and position of the relevant Particle 
@@ -243,8 +240,8 @@ void CollisionModel::MDInteractionsModel::modifyPosition(Core::Vector& /*positio
 
 void CollisionModel::MDInteractionsModel::leapfrogIntern(std::vector<CollisionModel::Molecule*> moleculesPtr, double dt, double finalTime){
 
-    std::ofstream positionOut;
-    positionOut.open("position_output.txt");
+    // std::ofstream positionOut;
+    // positionOut.open("position_output.txt");
     int nSteps = int(round(finalTime/dt));
     //size_t nMolecules = moleculesPtr.size();
 
@@ -263,9 +260,9 @@ void CollisionModel::MDInteractionsModel::leapfrogIntern(std::vector<CollisionMo
         
         // time step for the new position 
         for(auto* molecule : moleculesPtr){
-            if(j%50 == 0){
-                positionOut << molecule->getMass()/Core::AMU_TO_KG << ", " << molecule->getComPos().x() << ", " << molecule->getComPos().y() << ", " << molecule->getComPos().z() << std::endl;
-            }    
+            // if(j%50 == 0){
+            //     positionOut << molecule->getMass()/Core::AMU_TO_KG << ", " << molecule->getComPos().x() << ", " << molecule->getComPos().y() << ", " << molecule->getComPos().z() << std::endl;
+            // }    
             Core::Vector newComPos =  molecule->getComPos() + molecule->getComVel() * dt;
             molecule->setComPos(newComPos);
         }
@@ -288,7 +285,7 @@ std::vector<Core::Vector> CollisionModel::MDInteractionsModel::forceFieldMD(std:
     size_t nMolecules = moleculesPtr.size();
     std::vector<Core::Vector> forceMolecules(nMolecules); // save all the forces acting on each molecule
     // each molecule interacts with each other molecule
-    for (size_t i = 0; i < nMolecules; i++){
+    for (size_t i = 0; i+1 < nMolecules; i++){
         for (size_t j = i+1; j < nMolecules; j++){
             /* 
             * therefore we need the interaction between each atom of a molecule with the atoms of the
@@ -296,11 +293,11 @@ std::vector<Core::Vector> CollisionModel::MDInteractionsModel::forceFieldMD(std:
             */ 
 
             // construct E-field acting on the molecule
-            std::array<double, 3> eField = {};
-            std::array<double, 6> eFieldDerivative = {};
+            std::array<double, 3> eField = {0., 0., 0.};
+            std::array<double, 6> eFieldDerivative = {0., 0., 0., 0., 0., 0.};
 
-            for(auto* atomI : moleculesPtr.at(i)->getAtoms()){
-                for(auto* atomJ : moleculesPtr.at(j)->getAtoms()){
+            for(auto& atomI : moleculesPtr.at(i)->getAtoms()){
+                for(auto& atomJ : moleculesPtr.at(j)->getAtoms()){
                     
                     // First contribution: Lennard-Jones potential 
                     // This always contributes to the experienced force 
@@ -371,8 +368,8 @@ std::vector<Core::Vector> CollisionModel::MDInteractionsModel::forceFieldMD(std:
 
                     // Third contribution: ion <-> permanent dipole potential
                     // This requires an ion and a dipole to be present 
-                    double dipoleDistanceScalar;
-                    double dipoleX, dipoleY, dipoleZ;
+                    double dipoleDistanceScalar = 0;
+                    double dipoleX = 0, dipoleY = 0, dipoleZ = 0;
                     currentCharge = 0;
                     if(int(atomI->getCharge()/Core::ELEMENTARY_CHARGE) != 0 && 
                         moleculesPtr.at(j)->getIsDipole() == true){

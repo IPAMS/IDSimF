@@ -45,6 +45,8 @@
 #include "appUtils_stopwatch.hpp"
 #include "appUtils_signalHandler.hpp"
 #include "appUtils_commandlineParser.hpp"
+#include "CollisionModel_MDInteractions.hpp"
+#include "FileIO_MolecularStructureReader.hpp"
 #include "json.h"
 #include <iostream>
 #include <cmath>
@@ -55,7 +57,7 @@ enum IntegratorType{
     VERLET, SIMPLE, NO_INTEGRATOR
 };
 enum CollisionModelType{
-    HS, SDS, NO_COLLISONS
+    HS, SDS, MD, NO_COLLISONS
 };
 
 std::string key_ChemicalIndex = "keyChemicalIndex";
@@ -94,6 +96,13 @@ int main(int argc, const char *argv[]){
         std::vector<double> collisionGasMasses_Amu = simConf->doubleVectorParameter("collision_gas_masses_amu");
         std::vector<double> collisionGasDiameters_angstrom = simConf->doubleVectorParameter(
                 "collision_gas_diameters_angstrom");
+        
+        std::vector<std::string> collisionGasIdentifier;
+        std::vector<std::string> particleIdentifier;
+        if(transportModelType=="btree_MD"){
+            collisionGasIdentifier = simConf->stringVectorParameter("collision_gas_identifier");
+            particleIdentifier = simConf->stringVectorParameter("particle_identifier");
+        }
 
         std::size_t nBackgroundGases = backgroundPartialPressures_Pa.size();
         if (collisionGasMasses_Amu.size()!=nBackgroundGases || collisionGasDiameters_angstrom.size()!=nBackgroundGases) {
@@ -126,6 +135,13 @@ int main(int argc, const char *argv[]){
         for (std::size_t i = 0; i<discreteSubstances.size(); i++) {
             substanceIndices.insert(std::pair<RS::Substance*, int>(discreteSubstances[i], i));
             ionMobility.push_back(discreteSubstances[i]->mobility());
+        }
+
+        //read molecular structure file
+        if(transportModelType=="btree_MD"){
+            std::string mdCollisionConfFile = simConf->pathRelativeToConfFile(simConf->stringParameter("md_configuration"));
+            FileIO::MolecularStructureReader mdConfReader = FileIO::MolecularStructureReader();
+            mdConfReader.readMolecularStructure(mdCollisionConfFile);
         }
 
         // prepare file writer  =================================================================
@@ -190,6 +206,9 @@ int main(int argc, const char *argv[]){
                 uniqueReactivePartPtr particle = std::make_unique<RS::ReactiveParticle>(subst);
 
                 particle->setLocation(initialPositions[k]);
+                if(transportModelType=="btree_MD"){
+                    particle->setMolecularStructure(CollisionModel::MolecularStructure::molecularStructureCollection.at(particleIdentifier[i]));
+                }
                 particlesPtrs.push_back(particle.get());
                 rsSim.addParticle(particle.get(), nParticlesTotal);
                 particles.push_back(std::move(particle));
@@ -207,7 +226,7 @@ int main(int argc, const char *argv[]){
         // ======================================================================================
 
         //check which integrator type we have to setup:
-        std::vector<std::string> verletTypes{"btree_SDS", "btree_HS"};
+        std::vector<std::string> verletTypes{"btree_SDS", "btree_HS", "btree_MD"};
         auto vType = std::find(std::begin(verletTypes), std::end(verletTypes), transportModelType);
 
         IntegratorType integratorType;
@@ -350,6 +369,28 @@ int main(int argc, const char *argv[]){
 
             collisionModelPtr = std::move(collisionModel);
             collisionModelType = HS;
+        }
+        else if (transportModelType=="btree_MD") {
+            //prepare multimodel with multiple MD models (one per collision gas)
+            std::vector<std::unique_ptr<CollisionModel::AbstractCollisionModel>> mdModels;
+            for (std::size_t i = 0; i<nBackgroundGases; ++i) {
+                auto mdModel = std::make_unique<CollisionModel::MDInteractionsModel>(
+                        backgroundPartialPressures_Pa[i],
+                        backgroundTemperature_K,
+                        collisionGasMasses_Amu[i],
+                        collisionGasDiameters_m[i],
+                        0.205E-30,
+                        collisionGasIdentifier[i],
+                        10E-14, 
+                        1E-15);
+                mdModels.emplace_back(std::move(mdModel));
+            }
+
+            std::unique_ptr<CollisionModel::MultiCollisionModel> collisionModel =
+                    std::make_unique<CollisionModel::MultiCollisionModel>(std::move(mdModels));
+
+            collisionModelPtr = std::move(collisionModel);
+            collisionModelType = MD;
         }
 
         //init trajectory simulation object:

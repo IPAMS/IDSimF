@@ -74,7 +74,8 @@ TEST_CASE("Basic test Molecule creation", "[CollisionModels][Molecule]") {
         atm2.setRelativePosition(Core::Vector(0, -370/2, 0));
         atm2.setMass(3);
 
-        std::vector<CollisionModel::Atom*> atoms = {&atm1, &atm2};
+        std::vector<std::shared_ptr<CollisionModel::Atom>> atoms = {
+            std::make_shared<CollisionModel::Atom>(std::move(atm1)), std::make_shared<CollisionModel::Atom>(std::move(atm2))};
         CollisionModel::Molecule mole = CollisionModel::Molecule(Core::Vector(0.5, 1.0, -0.3), 
                                                                     Core::Vector(-1.5, 0.3, 0.33),
                                                                     Core::Vector(0.0, 0.0, 0.0),
@@ -104,7 +105,9 @@ TEST_CASE("Basic test Molecule creation", "[CollisionModels][Molecule]") {
         atm2.setCharge(1);
         atm2.setPartCharge(0.5);
 
-        std::vector<CollisionModel::Atom*> atoms = {&atm1, &atm2};
+        
+        std::vector<std::shared_ptr<CollisionModel::Atom>> atoms = {
+            std::make_shared<CollisionModel::Atom>(std::move(atm1)), std::make_shared<CollisionModel::Atom>(std::move(atm2))};
         CollisionModel::Molecule mole = CollisionModel::Molecule(Core::Vector(0.5, 1.0, -0.3), 
                                                                     Core::Vector(-1.5, 0.3, 0.33),
                                                                     Core::Vector(0.0, 0.0, 0.0),
@@ -132,7 +135,8 @@ TEST_CASE("Basic test Molecule creation", "[CollisionModels][Molecule]") {
         atm2.setMass(3);
         atm2.setCharge(1);
 
-        std::vector<CollisionModel::Atom*> atoms = {&atm1, &atm2};
+        std::vector<std::shared_ptr<CollisionModel::Atom>> atoms = {
+            std::make_shared<CollisionModel::Atom>(std::move(atm1)), std::make_shared<CollisionModel::Atom>(std::move(atm2))};
         CollisionModel::Molecule mole = CollisionModel::Molecule(Core::Vector(0.5, 1.0, -0.3), 
                                                                     Core::Vector(-1.5, 0.3, 0.33),
                                                                     Core::Vector(0.0, 0.0, 0.0),
@@ -159,7 +163,8 @@ TEST_CASE("Basic test Molecule creation", "[CollisionModels][Molecule]") {
         atm2.setRelativePosition(Core::Vector(0, -370/2, 0));
         atm2.setMass(3);
 
-        std::vector<CollisionModel::Atom*> atoms = {&atm1, &atm2};
+        std::vector<std::shared_ptr<CollisionModel::Atom>> atoms = {
+            std::make_shared<CollisionModel::Atom>(std::move(atm1)), std::make_shared<CollisionModel::Atom>(std::move(atm2))};
         CollisionModel::Molecule mole = CollisionModel::Molecule(Core::Vector(0.5, 1.0, -0.3), 
                                                                     Core::Vector(-1.5, 0.3, 0.33),
                                                                     Core::Vector(0.0, 0.0, 0.0),
@@ -185,7 +190,8 @@ TEST_CASE("Basic test Molecule creation", "[CollisionModels][Molecule]") {
         CollisionModel::Atom atm2 = CollisionModel::Atom();
         atm2.setRelativePosition(Core::Vector(0, -370/2, 0));
         atm2.setMass(3);
-        std::vector<CollisionModel::Atom*> atoms = {&atm1, &atm2};
+        std::vector<std::shared_ptr<CollisionModel::Atom>> atoms = {
+            std::make_shared<CollisionModel::Atom>(std::move(atm1)), std::make_shared<CollisionModel::Atom>(std::move(atm2))};
 
         std::shared_ptr<CollisionModel::MolecularStructure> molstr = std::make_shared<CollisionModel::MolecularStructure>(atoms, 0.5);
 
@@ -213,8 +219,8 @@ TEST_CASE("Basic test Molecule creation", "[CollisionModels][Molecule]") {
         CollisionModel::Atom atm2 = CollisionModel::Atom();
         atm2.setRelativePosition(Core::Vector(0, -370/2, 0));
         atm2.setMass(3);
-        std::vector<CollisionModel::Atom*> atoms = {&atm1, &atm2};
-
+        std::vector<std::shared_ptr<CollisionModel::Atom>> atoms = {
+            std::make_shared<CollisionModel::Atom>(std::move(atm1)), std::make_shared<CollisionModel::Atom>(std::move(atm2))};
 
         std::shared_ptr<CollisionModel::MolecularStructure> molstr = std::make_shared<CollisionModel::MolecularStructure>(atoms, 0.5);
 
@@ -245,7 +251,8 @@ TEST_CASE("Basic Molecule setter tests", "[CollisionModels][Molecule]") {
     CollisionModel::Atom atm1 = CollisionModel::Atom();
     CollisionModel::Atom atm2 = CollisionModel::Atom();
 
-    std::vector<CollisionModel::Atom*> atoms = {&atm1, &atm2};
+        std::vector<std::shared_ptr<CollisionModel::Atom>> atoms = {
+            std::make_shared<CollisionModel::Atom>(std::move(atm1)), std::make_shared<CollisionModel::Atom>(std::move(atm2))};
     CollisionModel::Molecule mole = CollisionModel::Molecule(Core::Vector(0.5, 1.0, -0.3), 
                                                                 Core::Vector(-1.5, 0.3, 0.33),
                                                                 Core::Vector(0.0, 0.0, 0.0),
@@ -270,17 +277,17 @@ TEST_CASE("Molecule add/remove atoms tests", "[CollisionModels][Molecule]") {
     CollisionModel::Atom atm1 = CollisionModel::Atom();
     CollisionModel::Atom atm2 = CollisionModel::Atom();
 
-    std::vector<CollisionModel::Atom*> atoms = {};
+    std::vector<std::shared_ptr<CollisionModel::Atom>> atoms = {};
     CollisionModel::Molecule mole = CollisionModel::Molecule(Core::Vector(0.5, 1.0, -0.3), 
                                                                 Core::Vector(-1.5, 0.3, 0.33),
                                                                 Core::Vector(0.0, 0.0, 0.0),
                                                                 atoms, 0.5);
-                                                    
-    mole.addAtom(&atm1);
+                                                   
+    mole.addAtom(std::make_shared<CollisionModel::Atom>(std::move(atm1)));
     CHECK(isExactDoubleEqual(mole.getAtomCount(), 1));
-    mole.addAtom(&atm2);
+    mole.addAtom(std::make_shared<CollisionModel::Atom>(std::move(atm2)));
     CHECK(isExactDoubleEqual(mole.getAtomCount(), 2));
-    mole.removeAtom(&atm2);
+    mole.removeAtom(std::make_shared<CollisionModel::Atom>(std::move(atm2)));
     CHECK(isExactDoubleEqual(mole.getAtomCount(), 1));
     
 }
@@ -288,17 +295,17 @@ TEST_CASE("Molecule add/remove atoms tests", "[CollisionModels][Molecule]") {
 TEST_CASE("Molecule ability to change properties of atoms", "[CollisionModels][Molecule]") {
     CollisionModel::Atom atm1 = CollisionModel::Atom();
 
-    std::vector<CollisionModel::Atom*> atoms = {};
+    std::vector<std::shared_ptr<CollisionModel::Atom>> atoms = {};
     CollisionModel::Molecule mole = CollisionModel::Molecule(Core::Vector(0.5, 1.0, -0.3), 
                                                                 Core::Vector(-1.5, 0.3, 0.33),
                                                                 Core::Vector(0.0, 0.0, 0.0),
                                                                 atoms, 0.5);
                                                     
-    mole.addAtom(&atm1);
-    for(auto* atom : mole.getAtoms()){
+    mole.addAtom(std::make_shared<CollisionModel::Atom>(std::move(atm1)));
+    for(auto& atom : mole.getAtoms()){
         atom->setMass(5);
     }
-    CHECK(isExactDoubleEqual(atm1.getMass(), 5*Core::AMU_TO_KG));
+    CHECK(isExactDoubleEqual(mole.getAtoms().at(0)->getMass(), 5*Core::AMU_TO_KG));
     
     
 }

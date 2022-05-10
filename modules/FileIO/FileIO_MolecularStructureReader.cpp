@@ -83,14 +83,14 @@ void FileIO::MolecularStructureReader::readMolecularStructure(std::string filena
 
                 // eight double values necessary to initialize
                 if (atomValues.size() == 8) {
-                    CollisionModel::Atom* atm = new CollisionModel::Atom(
-                                Core::Vector(atomValues[0]*1E-10, atomValues[1]*1E-10, atomValues[2]*1E-10), //location in angström
-                                atomValues[3], // mass in amu
-                                atomValues[4], // charge in e
-                                atomValues[5], // part. charge in e
+                    std::shared_ptr<CollisionModel::Atom> atm = std::make_shared<CollisionModel::Atom>(
+                                Core::Vector(atomValues.at(0)*1E-10, atomValues.at(1)*1E-10, atomValues.at(2)*1E-10), //location in angström
+                                atomValues.at(3), // mass in amu
+                                atomValues.at(4), // charge in e
+                                atomValues.at(5), // part. charge in e
                                 CollisionModel::Atom::from_string(atomType), // Atom type
-                                atomValues[6] * 1E-10,  // sigma in angström
-                                atomValues[7] * 1E3 / Core::N_AVOGADRO  // epsilon in kJ/mol
+                                atomValues.at(6) * 1E-10,  // sigma in angström
+                                atomValues.at(7) * 1E3 / Core::N_AVOGADRO  // epsilon in kJ/mol
                     );
                     // Insert atom to the correct molecule structure
                     auto it = CollisionModel::MolecularStructure::molecularStructureCollection.find(lastMolecule);

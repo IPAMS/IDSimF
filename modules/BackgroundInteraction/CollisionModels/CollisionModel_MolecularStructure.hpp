@@ -50,7 +50,7 @@ namespace CollisionModel{
         //MolecularStructure(const MolecularStructure& A);
 
         ~MolecularStructure() = default;
-        MolecularStructure(std::vector<CollisionModel::Atom*> atms, double diam);
+        MolecularStructure(std::vector<std::shared_ptr<CollisionModel::Atom>> atms, double diam);
 
         // Setter
         void setDiameter(double diam);
@@ -62,12 +62,12 @@ namespace CollisionModel{
         Core::Vector getDipole() const;
         double getDipoleMag() const;
         std::size_t getAtomCount() const;
-        std::vector<CollisionModel::Atom*> getAtoms() const;
+        std::vector<std::shared_ptr<CollisionModel::Atom>> getAtoms() const;
         double getDiameter() const;
 
         // Member functions
-        void addAtom(CollisionModel::Atom* atm);
-        void removeAtom(CollisionModel::Atom* atm);
+        void addAtom(std::shared_ptr<CollisionModel::Atom> atm);
+        void removeAtom(std::shared_ptr<CollisionModel::Atom> atm);
 
         static std::unordered_map<std::string, std::shared_ptr<MolecularStructure>> createCollection();
         
@@ -88,7 +88,7 @@ namespace CollisionModel{
         Core::Vector dipole = {0.0, 0.0, 0.0}; // Dipole vector of the molecule [C*m]
         double dipoleMag = 0.0; // Magnitude of dipole [C]
         std::size_t atomCount = 0; // Number of atoms belonging to the molecule
-        std::vector<CollisionModel::Atom*> atoms = {}; // Vector of all atoms belonging to this molecule 
+        std::vector<std::shared_ptr<Atom>> atoms = {}; // Vector of all atoms belonging to this molecule 
         double diameter = 0.0; // Diameter of the molecule for collision probability [m]
 
         

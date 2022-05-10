@@ -46,7 +46,7 @@ CollisionModel::Molecule::Molecule(const Core::Vector &comPos, const Core::Vecto
  * @param diam molecule diameter in m
  */
 CollisionModel::Molecule::Molecule(const Core::Vector &comPos, const Core::Vector &comVel, 
-                                    const Core::Vector &agls, std::vector<CollisionModel::Atom*> atms,
+                                    const Core::Vector &agls, std::vector<std::shared_ptr<CollisionModel::Atom>> &atms,
                                     double diam):
     centerOfMassPos(comPos),
     centerOfMassVel(comVel),
@@ -76,7 +76,7 @@ CollisionModel::Molecule::Molecule(const Core::Vector &comPos, const Core::Vecto
 {
     atoms.resize(atomCount);
     for(size_t i = 0; i < atomCount; i++) {
-        this->atoms.at(i) = new Atom(*structure->getAtoms().at(i));
+        this->atoms.at(i) = std::make_shared<Atom>(*(structure->getAtoms().at(i)));
     }
 
 }
@@ -177,7 +177,7 @@ std::size_t CollisionModel::Molecule::getAtomCount() const{
 /**
  * Gets the vector of atoms belonging to the molecule
  */
-std::vector<CollisionModel::Atom*> CollisionModel::Molecule::getAtoms() const{
+std::vector<std::shared_ptr<CollisionModel::Atom>> CollisionModel::Molecule::getAtoms() const{
     return atoms;
 }
 
@@ -193,7 +193,7 @@ double CollisionModel::Molecule::getDiameter() const{
  */
 void CollisionModel::Molecule::calcMass(){
     this->mass = 0;
-    for(auto* atom : atoms){
+    for(auto& atom : atoms){
         this->mass += atom->getMass();
     }
     
@@ -205,7 +205,7 @@ void CollisionModel::Molecule::calcMass(){
 void CollisionModel::Molecule::calcDipole(){
     
     this->dipole = Core::Vector(0.0, 0.0, 0.0);
-    for(auto* atom : atoms){
+    for(auto& atom : atoms){
         Core::Vector relChargePos = atom->getRelativePosition() * atom->getPartCharge();
         this->dipole += relChargePos;
     }
@@ -216,7 +216,7 @@ void CollisionModel::Molecule::calcDipole(){
 /**
  * Adds an additional atom to the molecule. Mass and dipole are recalculated.
  */
-void CollisionModel::Molecule::addAtom(CollisionModel::Atom* atm){
+void CollisionModel::Molecule::addAtom(std::shared_ptr<CollisionModel::Atom> atm){
     this->atoms.push_back(atm);
     this->atomCount++;
     this->calcDipole();
@@ -228,7 +228,7 @@ void CollisionModel::Molecule::addAtom(CollisionModel::Atom* atm){
 /**
  * Removes an atom from the molecule. Mass and dipole are recalculated.
  */
-void CollisionModel::Molecule::removeAtom(CollisionModel::Atom* atm){
+void CollisionModel::Molecule::removeAtom(std::shared_ptr<CollisionModel::Atom> atm){
     auto atm_it = std::find(std::begin(atoms), std::end(atoms), atm);
     if(atm_it != std::end(atoms)) 
         atoms.erase(atm_it);
@@ -259,7 +259,7 @@ void CollisionModel::Molecule::setIsDipole(){
 void CollisionModel::Molecule::setIsIon(){
 
     double sumCharge = 0;
-    for(auto* atom : atoms){
+    for(auto& atom : atoms){
         sumCharge += atom->getCharge() / Core::ELEMENTARY_CHARGE;
     }
     double tol = 10E-15;
@@ -272,7 +272,7 @@ void CollisionModel::Molecule::setIsIon(){
 }
 
 void CollisionModel::Molecule::rotateMolecule(){
-    for(auto* atom : atoms){
+    for(auto& atom : atoms){
        atom->rotate(this->angles);
     }
 }

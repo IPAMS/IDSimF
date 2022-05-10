@@ -30,7 +30,7 @@
  * @param atms the vector with atoms contained in the molecule
  * @param diam molecule diameter in m
  */
-CollisionModel::MolecularStructure::MolecularStructure(std::vector<CollisionModel::Atom*> atms, double diam):
+CollisionModel::MolecularStructure::MolecularStructure(std::vector<std::shared_ptr<CollisionModel::Atom>> atms, double diam):
     atoms(atms),
     diameter(diam)
 {
@@ -93,7 +93,7 @@ std::size_t CollisionModel::MolecularStructure::getAtomCount() const{
 /**
  * Gets the vector of atoms belonging to the MolecularStructure
  */
-std::vector<CollisionModel::Atom*> CollisionModel::MolecularStructure::getAtoms() const{
+std::vector<std::shared_ptr<CollisionModel::Atom>> CollisionModel::MolecularStructure::getAtoms() const{
     return atoms;
 }
 
@@ -109,7 +109,7 @@ double CollisionModel::MolecularStructure::getDiameter() const{
  */
 void CollisionModel::MolecularStructure::calcMass(){
     this->mass = 0;
-    for(auto* atom : atoms){
+    for(auto& atom : atoms){
         this->mass += atom->getMass();
     }
     
@@ -121,7 +121,7 @@ void CollisionModel::MolecularStructure::calcMass(){
 void CollisionModel::MolecularStructure::calcDipole(){
     
     this->dipole = Core::Vector(0.0, 0.0, 0.0);
-    for(auto* atom : atoms){
+    for(auto& atom : atoms){
         Core::Vector relChargePos = atom->getRelativePosition() * atom->getPartCharge();
         this->dipole += relChargePos;
     }
@@ -132,7 +132,7 @@ void CollisionModel::MolecularStructure::calcDipole(){
 /**
  * Adds an additional atom to the MolecularStructure. Mass and dipole are recalculated.
  */
-void CollisionModel::MolecularStructure::addAtom(CollisionModel::Atom* atm){
+void CollisionModel::MolecularStructure::addAtom(std::shared_ptr<CollisionModel::Atom> atm){
     this->atoms.push_back(atm);
     this->atomCount++;
     this->calcDipole();
@@ -144,7 +144,7 @@ void CollisionModel::MolecularStructure::addAtom(CollisionModel::Atom* atm){
 /**
  * Removes an atom from the MolecularStructure. Mass and dipole are recalculated.
  */
-void CollisionModel::MolecularStructure::removeAtom(CollisionModel::Atom* atm){
+void CollisionModel::MolecularStructure::removeAtom(std::shared_ptr<CollisionModel::Atom> atm){
     auto atm_it = std::find(std::begin(atoms), std::end(atoms), atm);
     if(atm_it != std::end(atoms)) 
         atoms.erase(atm_it);
@@ -175,7 +175,7 @@ void CollisionModel::MolecularStructure::setIsDipole(){
 void CollisionModel::MolecularStructure::setIsIon(){
 
     double sumCharge = 0;
-    for(auto* atom : atoms){
+    for(auto& atom : atoms){
         sumCharge += atom->getCharge() / Core::ELEMENTARY_CHARGE;
     }
     double tol = 10E-15;
