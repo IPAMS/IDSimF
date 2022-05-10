@@ -27,7 +27,6 @@
 #include <array>
 #include <iostream>
 #include <fstream>
-#include <valgrind/memcheck.h>
 
 CollisionModel::MDInteractionsModel::MDInteractionsModel(double staticPressure,
                                                         double staticTemperature,
@@ -229,7 +228,6 @@ void CollisionModel::MDInteractionsModel::modifyVelocity(Core::Particle& particl
     }
     
     // set the velocity and position of the relevant Particle 
-    particle.setLocation(mole.getComPos());
     particle.setVelocity(mole.getComVel());
 
 }

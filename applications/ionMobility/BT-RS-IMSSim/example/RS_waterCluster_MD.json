@@ -6,7 +6,7 @@
   "trajectory_write_velocities":"false",
   "space_charge_factor":0,
   "reaction_configuration":"./RS_ReacSys_noReaction.conf",
-  "n_particles":[2000],
+  "n_particles":[200],
   "electric_field_mag_Vm-1":1000,
   "start_width_yz_mm":1,
   "start_width_x_mm":1,

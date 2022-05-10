@@ -67,7 +67,7 @@ std::string key_ChemicalIndex = "keyChemicalIndex";
 int main(int argc, const char *argv[]){
 
     try {
-        Core::globalRandomGeneratorPool = std::make_unique<Core::TestRandomGeneratorPool>();
+        //Core::globalRandomGeneratorPool = std::make_unique<Core::TestRandomGeneratorPool>();
 
         // open configuration, parse configuration file =========================================
         AppUtils::CommandlineParser cmdLineParser(argc, argv, "BT-RS-DMSSim", "DMS Simulation with trajectories and chemistry", false);
@@ -204,7 +204,7 @@ int main(int argc, const char *argv[]){
         for (std::size_t i = 0; i<nParticles.size(); i++) {
             RS::Substance* subst = rsSimConf->substance(i);
             std::vector<Core::Vector> initialPositions =
-                    ParticleSimulation::util::getPositionsOnGrid(nParticles[i], initCorner, initBoxSize, 7);
+                    ParticleSimulation::util::getRandomPositionsInBox(nParticles[i], initCorner, initBoxSize);
             for (unsigned int k = 0; k<nParticles[i]; k++) {
                 uniqueReactivePartPtr particle = std::make_unique<RS::ReactiveParticle>(subst);
 
