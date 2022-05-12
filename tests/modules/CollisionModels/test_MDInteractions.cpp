@@ -51,9 +51,9 @@ TEST_CASE("Basic test MD Interactions model", "[CollisionModels][MDInteractionsM
     for(int i = 0; i < 200; i++)
         mdSim.modifyVelocity(ion, 2e-7);
         
-    CHECK(Approx(ion.getVelocity().x()) ==  101.5028529188);
-    CHECK(Approx(ion.getVelocity().y()) ==  -19.852792081);
-    CHECK(Approx(ion.getVelocity().z()) ==  -57.0631567274);
+    CHECK(Approx(ion.getVelocity().x()) ==  104.5473799753);
+    CHECK(Approx(ion.getVelocity().y()) ==  -4.8256082277);
+    CHECK(Approx(ion.getVelocity().z()) ==  -6.12683848);
 
     
 }

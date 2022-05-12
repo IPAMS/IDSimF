@@ -103,6 +103,7 @@ void CollisionModel::MDInteractionsModel::modifyAcceleration(Core::Vector& /*acc
 
 void CollisionModel::MDInteractionsModel::modifyVelocity(Core::Particle& particle, double dt) {
 
+    //std::cout << particle.getVelocity() << std::endl;
     Core::RandomSource* rndSource = Core::globalRandomGeneratorPool->getThreadRandomSource();
 
     // Calculate collision cross section between particle and collision gas:
@@ -171,9 +172,9 @@ void CollisionModel::MDInteractionsModel::modifyVelocity(Core::Particle& particl
     // put the collision gas in the half-sphere in front of the molecule 
     double phi = M_PI/2 - M_PI * rndSource->uniformRealRndValue();
     double theta = M_PI - M_PI * rndSource->uniformRealRndValue();
-    Core::Vector positionBgMolecule = {mole.getComPos().x() + sin(theta) * cos(phi) * 1.3 * mole.getDiameter(),
-                                        mole.getComPos().y() + sin(phi) * sin(theta) * 1.3 * mole.getDiameter(),
-                                        mole.getComPos().z() + cos(theta) * 1.3 * mole.getDiameter()};
+    Core::Vector positionBgMolecule = {mole.getComPos().x() + sin(theta) * cos(phi) * 1.5 * mole.getDiameter(),
+                                        mole.getComPos().y() + sin(phi) * sin(theta) * 1.5 * mole.getDiameter(),
+                                        mole.getComPos().z() + cos(theta) * 1.5 * mole.getDiameter()};
     bgMole.setComPos(positionBgMolecule);
 
     // Calculate the standard deviation of the one dimensional velocity distribution of the
@@ -229,6 +230,8 @@ void CollisionModel::MDInteractionsModel::modifyVelocity(Core::Particle& particl
     
     // set the velocity and position of the relevant Particle 
     particle.setVelocity(mole.getComVel());
+    //std::cout << particle.getVelocity() << std::endl;
+
 
 }
 

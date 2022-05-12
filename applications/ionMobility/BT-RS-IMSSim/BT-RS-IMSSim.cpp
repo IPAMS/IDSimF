@@ -102,9 +102,15 @@ int main(int argc, const char *argv[]){
         
         std::vector<std::string> collisionGasIdentifier;
         std::vector<std::string> particleIdentifier;
+        std::vector<double> collisionGasPolarizability_m3;
+        double subIntegratorIntegrationTime_s;
+        double subIntegratorStepSize_s;
         if(transportModelType=="btree_MD"){
+            collisionGasPolarizability_m3 = simConf->doubleVectorParameter("collision_gas_polarizability_m3");
             collisionGasIdentifier = simConf->stringVectorParameter("collision_gas_identifier");
             particleIdentifier = simConf->stringVectorParameter("particle_identifier");
+            subIntegratorIntegrationTime_s = simConf->doubleParameter("sub_integrator_integration_time_s");
+            subIntegratorStepSize_s = simConf->doubleParameter("sub_integrator_step_size_s");
         }
 
         std::size_t nBackgroundGases = backgroundPartialPressures_Pa.size();
@@ -211,6 +217,7 @@ int main(int argc, const char *argv[]){
                 particle->setLocation(initialPositions[k]);
                 if(transportModelType=="btree_MD"){
                     particle->setMolecularStructure(CollisionModel::MolecularStructure::molecularStructureCollection.at(particleIdentifier[i]));
+                    particle->setDiameter(particle->getMolecularStructure()->getDiameter());
                 }
                 particlesPtrs.push_back(particle.get());
                 rsSim.addParticle(particle.get(), nParticlesTotal);
@@ -382,10 +389,10 @@ int main(int argc, const char *argv[]){
                         backgroundTemperature_K,
                         collisionGasMasses_Amu[i],
                         collisionGasDiameters_m[i],
-                        0.205E-30,
+                        collisionGasPolarizability_m3[i],
                         collisionGasIdentifier[i],
-                        10E-14, 
-                        1E-15);
+                        subIntegratorIntegrationTime_s, 
+                        subIntegratorStepSize_s);
                 mdModels.emplace_back(std::move(mdModel));
             }
 

@@ -30,7 +30,7 @@ void performBenchmark(int nSamples){
     ion.setVelocity(Core::Vector(100.0, 0.0, 0.0));
     ion.setDiameter(100*4E-10);
     CollisionModel::MDInteractionsModel mdSim = CollisionModel::MDInteractionsModel(1.0, 298, 4.003, 
-                                                                                    diameterHe, 0.205E-30, "He", 50E-14, 1E-16);
+                                                                                    diameterHe, 0.205E-30, "He", 50E-14, 1E-15);
 
 
     std::cout << "Benchmark molecular dynamics collision model ";
@@ -52,7 +52,7 @@ void performBenchmark(int nSamples){
 
 int main() {
 
-    int n = 400000;
+    int n = 40000;
     performBenchmark(n);
     return 0;
 }
