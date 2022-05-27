@@ -11,7 +11,8 @@ set(SOURCE_FILES
         test_SoftSphere.cpp
         test_MDInteractions.cpp
         test_Atom.cpp
-        test_Molecule.cpp)
+        test_Molecule.cpp
+        test_MDVerlet.cpp)
 
 set(TEST_FILE_FOLDER ${CMAKE_SOURCE_DIR}/tests/testfields)
 set(TEST_FILES
@@ -23,7 +24,8 @@ set(TEST_FILES
 file(COPY ${TEST_FILES} DESTINATION .)
 
 add_executable(test_CollisionModels ${SOURCE_FILES})
-target_include_directories(test_CollisionModels PUBLIC ${CMAKE_SOURCE_DIR}/libs/catch ${CMAKE_SOURCE_DIR}/tests/util)
+target_include_directories(test_CollisionModels PUBLIC ${CMAKE_SOURCE_DIR}/libs/catch ${CMAKE_SOURCE_DIR}/tests/util ${CMAKE_SOURCE_DIR}/libs/jsoncpp/json
+                                ${CMAKE_SOURCE_DIR}/applications/util)
 target_link_libraries(test_CollisionModels core spacecharge integration rs collisionmodels particlesimulation)
 target_link_libraries(test_CollisionModels ${VTK_LIBRARIES})
 

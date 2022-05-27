@@ -183,7 +183,7 @@ void CollisionModel::HardSphereModel::modifyVelocity(Core::Particle &ion, double
     if (rndSource->uniformRealRndValue() > collisionProb){
         return; // no collision takes place
     }
-
+    
     // Now we know that a collision happens: Perform the collision
 
     // Calculate the standard deviation of the one dimensional velocity distribution of the

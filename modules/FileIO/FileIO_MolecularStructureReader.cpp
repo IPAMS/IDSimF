@@ -27,6 +27,7 @@
 #include <algorithm>
 #include <exception>
 #include <memory>
+#include <iostream>
 
 
 void FileIO::MolecularStructureReader::readMolecularStructure(std::string filename){

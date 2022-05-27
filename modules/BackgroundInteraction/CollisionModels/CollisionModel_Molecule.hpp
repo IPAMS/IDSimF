@@ -66,7 +66,7 @@ namespace CollisionModel{
         Core::Vector getDipole() const;
         double getDipoleMag() const;
         std::size_t getAtomCount() const;
-        std::vector<std::shared_ptr<CollisionModel::Atom>> getAtoms() const;
+        std::vector<std::shared_ptr<CollisionModel::Atom>>& getAtoms();
         double getDiameter() const;
 
         // Member functions

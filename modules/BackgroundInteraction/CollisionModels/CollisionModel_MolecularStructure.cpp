@@ -21,6 +21,7 @@
 
 #include "CollisionModel_MolecularStructure.hpp"
 #include <algorithm>
+#include <iostream>
 
 /**
  * @brief Creates a molecular structur with given atoms. 
@@ -110,6 +111,7 @@ double CollisionModel::MolecularStructure::getDiameter() const{
 void CollisionModel::MolecularStructure::calcMass(){
     this->mass = 0;
     for(auto& atom : atoms){
+        //std::cout << atom->getMass() << " " << (int)atom->getType() << std::endl;
         this->mass += atom->getMass();
     }
     

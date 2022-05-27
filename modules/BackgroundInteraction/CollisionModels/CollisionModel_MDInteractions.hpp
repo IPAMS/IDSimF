@@ -93,10 +93,17 @@ namespace CollisionModel{
             double integrationTime,
             double subTimeStep);
 
+        double calcSign(double value);
 
         void leapfrogIntern(std::vector<CollisionModel::Molecule*> moleculesPtr, double dt, double finalTime);
 
+        void rk4Intern(std::vector<CollisionModel::Molecule*> moleculesPtr, double dt, double finalTime);
+
+        void rk4InternAdaptiveStep(std::vector<CollisionModel::Molecule*> moleculesPtr, double dt, double finalTime);
+
         std::vector<Core::Vector> forceFieldMD(std::vector<CollisionModel::Molecule*> moleculesPtr);
+
+        // std::vector<Core::Vector> forceFieldMDRk4(std::vector<CollisionModel::Molecule*> moleculesPtr, std::vector<Core::Vector>& r);
 
         void initializeModelParameters(Core::Particle& ion) const;
 

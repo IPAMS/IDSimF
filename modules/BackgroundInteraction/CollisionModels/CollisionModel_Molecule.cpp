@@ -177,7 +177,7 @@ std::size_t CollisionModel::Molecule::getAtomCount() const{
 /**
  * Gets the vector of atoms belonging to the molecule
  */
-std::vector<std::shared_ptr<CollisionModel::Atom>> CollisionModel::Molecule::getAtoms() const{
+std::vector<std::shared_ptr<CollisionModel::Atom>>& CollisionModel::Molecule::getAtoms(){
     return atoms;
 }
 
@@ -194,6 +194,7 @@ double CollisionModel::Molecule::getDiameter() const{
 void CollisionModel::Molecule::calcMass(){
     this->mass = 0;
     for(auto& atom : atoms){
+        //std::cout << atom->getMass() << " " << (int)atom->getType() << std::endl;
         this->mass += atom->getMass();
     }
     

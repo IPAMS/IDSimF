@@ -26,11 +26,17 @@ void performBenchmark(int nSamples){
     FileIO::MolecularStructureReader reader = FileIO::MolecularStructureReader();
     reader.readMolecularStructure("test_molecularstructure_reader.csv");
     Core::Particle ion;
-    ion.setMolecularStructure(CollisionModel::MolecularStructure::molecularStructureCollection.at("Ar2"));
+    ion.setMolecularStructure(CollisionModel::MolecularStructure::molecularStructureCollection.at("H2+"));
     ion.setVelocity(Core::Vector(100.0, 0.0, 0.0));
-    ion.setDiameter(100*4E-10);
-    CollisionModel::MDInteractionsModel mdSim = CollisionModel::MDInteractionsModel(1.0, 298, 4.003, 
-                                                                                    diameterHe, 0.205E-30, "He", 50E-14, 1E-15);
+    CollisionModel::MDInteractionsModel mdSim = CollisionModel::MDInteractionsModel(
+                        100000,
+                        298,
+                        4.003,
+                        2.89e-10,
+                        0.203e-30,
+                        "He",
+                        500e-14, 
+                        5e-14);
 
 
     std::cout << "Benchmark molecular dynamics collision model ";
@@ -52,7 +58,7 @@ void performBenchmark(int nSamples){
 
 int main() {
 
-    int n = 40000;
+    int n = 4000;
     performBenchmark(n);
     return 0;
 }
