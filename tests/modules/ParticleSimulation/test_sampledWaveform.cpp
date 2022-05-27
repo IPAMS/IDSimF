@@ -85,7 +85,8 @@ TEST_CASE("Test sampled waveform / SWIFT waveform reader", "[ParticleSimulation]
         CHECK(sw.getInterpolatedValue(0.25) == Approx(0.5));
         CHECK(sw.getInterpolatedValue(0.5) == Approx(1.0));
         CHECK(sw.getInterpolatedValue(0.75) == Approx(0.5));
-        CHECK(sw.getInterpolatedValue(0.99) == Approx(0.0));
+        CHECK(sw.getInterpolatedValue(0.99) == Approx(0.02));
+        CHECK(sw.getInterpolatedValue(0.9999) == Approx(0.0002));
     }
 
     SECTION( "Non existing input file should lead to good()==false") {
