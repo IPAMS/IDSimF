@@ -1,11 +1,11 @@
 {
-  "sim_time_steps":750,
-  "dt_s":4.5e-10,
+  "sim_time_steps":25000,
+  "dt_s":1.0e-11,
   "concentrations_write_interval":10,
   "trajectory_write_interval":10,
   "trajectory_write_velocities":"true",
   "space_charge_factor":0,
-  "reaction_configuration":"./RS_ReacSys_noReaction_water.conf",
+  "reaction_configuration":"./RS_ReacSys_noReaction_waterO2.conf",
   "n_particles":[200],
   "electric_field_mag_Vm-1":5000,
   "start_width_yz_mm":1,
@@ -18,8 +18,8 @@
   "collision_gas_diameters_angstrom":[2.8],
   "collision_gas_polarizability_m3":[0.205e-30],
   "collision_gas_identifier":["He"],
-  "particle_identifier":["Ar+"],
+  "particle_identifier":["O2+"],
   "md_configuration":"./md_configuration.csv",
-  "sub_integrator_integration_time_s":500e-14,
-  "sub_integrator_step_size_s":4e-16
+  "sub_integrator_integration_time_s":1e-10,
+  "sub_integrator_step_size_s":1e-16
 }
