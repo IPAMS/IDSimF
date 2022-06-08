@@ -115,14 +115,14 @@ void CollisionModel::MDInteractionsModel::modifyAcceleration(Core::Vector& /*acc
 }
 
 void CollisionModel::MDInteractionsModel::modifyVelocity(Core::Particle& particle, double dt) {
-    //std::cout << particle.getVelocity() << std::endl;
-    //std::cout << particle.getVelocity() << std::endl;
-    //std::cout <<"Vel1: " <<particle.getVelocity() << std::endl;
-
     Core::RandomSource* rndSource = Core::globalRandomGeneratorPool->getThreadRandomSource();
 
-    // Calculate collision cross section between particle and collision gas: # 1.2 for 10Td
-    double sigma_m2 = M_PI * std::pow( (1.20*particle.getDiameter() + collisionGasDiameter_m_)/2.0, 2.0);
+    // Calculate collision cross section between particle and collision gas:
+    double collisionRadius = (particle.getDiameter() + collisionGasDiameter_m_)/2.0; 
+    // std::cout << collisionRadius << '\n';
+    double sigma_m2 = M_PI * collisionRadius * collisionRadius;
+    // double sigma_m2 = M_PI * av_sigma * av_sigma;
+    // std::cout << "av_sigma " << M_PI * av_sigma * av_sigma << " sigma_m2 " << sigma_m2 << '\n';
     Core::Vector moleculeComPosition = particle.getLocation();
     double localPressure_Pa = pressureFunction_(moleculeComPosition);
     if (Core::isDoubleEqual(localPressure_Pa, 0.0)){
@@ -166,126 +166,91 @@ void CollisionModel::MDInteractionsModel::modifyVelocity(Core::Particle& particl
     
     // FIXME: The time step length dt is unrestricted
     // Possible mitigation: Throw warning / exception if collision probability becomes too high
-
+    if(collisionProb > 0.02)
+        std::cout << "collisionProb " << collisionProb << '\n';
     // Decide if a collision actually happens:
     if (rndSource->uniformRealRndValue() > collisionProb){
         return; // no collision takes place
     }     
-    //std::cout << collisionProb << std::endl;      
-    
-    // Collision happens
-    // Construct the actual molecule and its atoms 
-    CollisionModel::Molecule mole = CollisionModel::Molecule(particle.getLocation(), particle.getVelocity(), particle.getMolecularStructure());
-    //std::cout << mole.getAtoms().at(0)->getRelativePosition() << std::endl;
+    bool trajectorySuccess = false;
+    int iterations = 0;
+    double spawnRad = 20.E-10;
+    double collisionTheta = std::asin(collisionRadius / spawnRad);
+    // std::cout << "collisionTheta " << collisionTheta << '\n';
+    do{
+        // Collision happens
+        // Construct the actual molecule and its atoms 
+        CollisionModel::Molecule mole = CollisionModel::Molecule(Core::Vector(0.0, 0.0, 0.0), Core::Vector(0.0, 0.0, 0.0), particle.getMolecularStructure());
 
-    // Construct the background gas particle 
+        // Construct the background gas particle 
+        CollisionModel::Molecule bgMole = CollisionModel::Molecule(Core::Vector(0.0, 0.0, 0.0), Core::Vector(0.0, 0.0, 0.0), 
+                                            CollisionModel::MolecularStructure::molecularStructureCollection.at(collisionMolecule_));
 
-    CollisionModel::Molecule bgMole = CollisionModel::Molecule(Core::Vector(0.0, 0.0, 0.0), Core::Vector(0.0, 0.0, 0.0), 
-                                        CollisionModel::MolecularStructure::molecularStructureCollection.at(collisionMolecule_));
+        // Give background gas its position, velocity, rotation:
+        // Calculate the standard deviation of the one dimensional velocity distribution of the
+        // background gas particles. Std. dev. in one dimension is given from Maxwell-Boltzmann
+        // as sqrt(kT / particle mass).
+        double  vrStdevBgMolecule = std::sqrt( Core::K_BOLTZMANN * temperature_K / (collisionGasMass_kg_) );
+        Core::Vector velocityBgMolecule = { rndSource->normalRealRndValue() * vrStdevBgMolecule - particle.getVelocity().x(), 
+                                            rndSource->normalRealRndValue() * vrStdevBgMolecule - particle.getVelocity().y(),
+                                            rndSource->normalRealRndValue() * vrStdevBgMolecule - particle.getVelocity().z()};
 
-    // Give background gas its position, velocity, rotation:
+        bgMole.setComVel(velocityBgMolecule);
 
-    // put the collision gas in the half-sphere in front of the molecule 
-    // TODO: change this to a circular plane 
-    double phi = M_PI/2 - M_PI * rndSource->uniformRealRndValue(); 
-    double theta = M_PI - M_PI * rndSource->uniformRealRndValue();
-    //double theta = M_PI/2;
-    // Core::Vector positionBgMolecule = {mole.getComPos().x() + 12e-10/*+ sin(theta) * cos(phi) * 1.5 * mole.getDiameter()*/,
-    //                                     mole.getComPos().y() /*+ sin(phi) * sin(theta) * 1.5 * mole.getDiameter()*/,
-    //                                     mole.getComPos().z() /*+ cos(theta) * 1.5 * mole.getDiameter()*/};
-    double collisionRadius = (mole.getDiameter() + collisionGasDiameter_m_)/2.0; // 1.12 factor is ok
-    Core::Vector positionBgMolecule = {mole.getComPos().x() + mole.getComVel().x() / mole.getComVel().magnitude() * 7.5e-10  + sin(theta) * cos(phi)  * 1* collisionRadius,
-                                        mole.getComPos().y()  + mole.getComVel().y() / mole.getComVel().magnitude() * 7.5e-10   + sin(phi) * sin(theta)  * 1* collisionRadius,
-                                        mole.getComPos().z()  + mole.getComVel().z() / mole.getComVel().magnitude() * 7.5e-10  + cos(theta) * 1* collisionRadius};
-    
-    // // put the collision gas in the half-sphere in front of the molecule 
-    // // TODO: change this to a circular plane 
-    // double collisionRadius = 1.2*(mole.getDiameter() + collisionGasDiameter_m_)/2.0;
-    // double dist = 8.e-10;
-    // double phi_max = asin(collisionRadius/dist);
-    // double theta_s = acos(mole.getComVel().z() / dist);
-    // double phi_s = atan2(mole.getComVel().y(), mole.getComVel().x());
-    // double phi = phi_max * (rndSource->uniformRealRndValue()-.5) + phi_s; //stay
-    // double theta = 2. * M_PI * rndSource->uniformRealRndValue() + theta_s;
-    
-    // Core::Vector positionBgMolecule = mole.getComPos() + Core::Vector{sin(theta) * cos(phi), sin(phi) * sin(theta), cos(theta)} * dist;
-    
-    bgMole.setComPos(positionBgMolecule);
-    // Core::Vector positionBgMolecule = { mole.getComVel().x(),
-    //                                          mole.getComVel().y(),
-    //                                          mole.getComVel().z()};
-    // positionBgMolecule = positionBgMolecule / positionBgMolecule.magnitude() * 1.5 * mole.getDiameter();
-    // bgMole.setComPos(positionBgMolecule);
+        // calculate random point on sphere
+        // as follows:
+        // draw random number in as long until magnitude is less than 1
+        // normalize result
+        double circleVectorMagnitude = 0;
+        Core::Vector circleVector(0,0,0);
+        double directionAngle = 0;
+        do{
+            circleVector = Core::Vector{
+                  (rndSource->uniformRealRndValue() * 2 - 1)
+                , (rndSource->uniformRealRndValue() * 2 - 1)
+                , (rndSource->uniformRealRndValue() * 2 - 1)
+            };
+            circleVectorMagnitude = circleVector.magnitude();
+            circleVector = spawnRad / circleVectorMagnitude * circleVector;
+            directionAngle  = std::acos(
+                ( (-1. * circleVector) * velocityBgMolecule) 
+                / ( spawnRad * velocityBgMolecule.magnitude() )
+            );
+        }while(circleVectorMagnitude > 1 || directionAngle > collisionTheta);
+        bgMole.setComPos(circleVector);
+       
 
+        // rotate it randomly 
+        bgMole.setAngles(Core::Vector(rndSource->uniformRealRndValue(), 
+                                    rndSource->uniformRealRndValue(), 
+                                    rndSource->uniformRealRndValue()));
 
-    // Calculate the standard deviation of the one dimensional velocity distribution of the
-    // background gas particles. Std. dev. in one dimension is given from Maxwell-Boltzmann
-    // as sqrt(kT / particle mass).
-    double  vrStdevBgMolecule = std::sqrt( Core::K_BOLTZMANN * temperature_K / (collisionGasMass_kg_) );
-    Core::Vector velocityBgMolecule = { rndSource->normalRealRndValue() * vrStdevBgMolecule, 
-                                        rndSource->normalRealRndValue() * vrStdevBgMolecule,
-                                        rndSource->normalRealRndValue() * vrStdevBgMolecule};
-    // velocityBgMolecule = velocityBgMolecule * 0.;
-    // bgMole.setComVel(velocityBgMolecule);
-    double velocityMagnitudeBgMolecule = velocityBgMolecule.magnitude();
-    //double velocityMagnitudeBgMolecule = rndSource->normalRealRndValue() * vrStdevBgMolecule;
-    Core::Vector velocityToIonBgMolecule = { mole.getComVel().x() * -1,
-                                             mole.getComVel().y() * -1,
-                                             mole.getComVel().z() * -1};
-    velocityToIonBgMolecule = velocityToIonBgMolecule / velocityToIonBgMolecule.magnitude() * velocityMagnitudeBgMolecule;
-    //std::cout << velocityToIonBgMolecule << std::endl;
-    //bgMole.setComVel(Core::Vector(0.0, 0.0, 0.0));
-    bgMole.setComVel(velocityToIonBgMolecule);
-    //std::cout << bgMole.getComVel() << std::endl;
-    // std::cout << mole.getMass() << " "  << bgMole.getMass() << std::endl;
+        // Give molecule a random orientation:
+        mole.setAngles(Core::Vector(rndSource->uniformRealRndValue(), 
+                                    rndSource->uniformRealRndValue(), 
+                                    rndSource->uniformRealRndValue()));
 
-    // rotate it randomly 
-    bgMole.setAngles(Core::Vector(rndSource->uniformRealRndValue(), 
-                                  rndSource->uniformRealRndValue(), 
-                                  rndSource->uniformRealRndValue()));
+        std::vector<CollisionModel::Molecule*> moleculesPtr = {&mole, &bgMole};
 
-    // Give molecule a random orientation:
-    mole.setAngles(Core::Vector(rndSource->uniformRealRndValue(), 
-                                rndSource->uniformRealRndValue(), 
-                                rndSource->uniformRealRndValue()));
+        std::vector<Core::Vector> startVelocity;
+        double startEnergy = 0;
+        for(auto* molecule : moleculesPtr){
+            startVelocity.push_back(molecule->getComVel());
+            startEnergy += 0.5 * molecule->getMass() * molecule->getComVel().magnitudeSquared();
+        }
 
-    // Switch to COM frame 
-    Core::Vector momentumSum = Core::Vector(0.0, 0.0, 0.0);
-    Core::Vector positionSum = Core::Vector(0.0, 0.0, 0.0);
-    double massSum = 0;
-    std::vector<CollisionModel::Molecule*> moleculesPtr = {&mole, &bgMole};
-    for(auto* molecule : moleculesPtr){
-        momentumSum += molecule->getComVel() * molecule->getMass();
-        positionSum += molecule->getComPos() * molecule->getMass();
-        massSum += molecule->getMass();
-    }
-    for(auto* molecule : moleculesPtr){
-        molecule->setComVel(molecule->getComVel() - (momentumSum / massSum));
-        molecule->setComPos(molecule->getComPos() - (positionSum / massSum));
-    }
-    // std::cout <<"Vel1COM: " << mole.getComVel() << std::endl;
-    // std::cout <<"Vel1COMBG: " << bgMole.getComVel() << std::endl;
-
-
-    // Call the sub-integrator
-    double finalTime = integrationTime_; //  final integration time in seconds
-    double timeStep = subTimeStep_; // step size in seconds 
-    leapfrogIntern(moleculesPtr, timeStep, finalTime);
-
-    // std::cout <<"Vel2COM: " << mole.getComVel() << std::endl;
-    // std::cout <<"Vel2COMBG: " << bgMole.getComVel() << std::endl;
-
-    //reset to lab frame 
-    for(auto* molecule : moleculesPtr){
-        molecule->setComPos(molecule->getComPos() + (positionSum / massSum) + (momentumSum / massSum) * finalTime);
-        molecule->setComVel(molecule->getComVel() + (momentumSum / massSum));
-    }
-    
-    // set the velocity and position of the relevant Particle 
-    particle.setVelocity(mole.getComVel());
-    // std::cout <<"Vel2: " <<particle.getVelocity() << std::endl;
-    // std::cout <<"Vel2BG: " << bgMole.getComVel() << std::endl;
-    //std::cout << particle.getVelocity() << std::endl;
+        // Call the sub-integrator
+        double finalTime = integrationTime_; //  final integration time in seconds
+        double timeStep = subTimeStep_; // step size in seconds 
+        trajectorySuccess = leapfrogIntern(moleculesPtr, timeStep, finalTime, collisionRadius);
+        if(trajectorySuccess){
+            // set the velocity and position of the relevant Particle 
+            particle.setVelocity(mole.getComVel() + particle.getVelocity());
+        }
+        ++iterations;
+    }while(!trajectorySuccess && iterations < 10000);
+    if(iterations>1)
+        std::cout << "iterations " << iterations << '\n';
 
 
 }
@@ -294,12 +259,17 @@ void CollisionModel::MDInteractionsModel::modifyPosition(Core::Vector& /*positio
 
 }
 
-void CollisionModel::MDInteractionsModel::leapfrogIntern(std::vector<CollisionModel::Molecule*> moleculesPtr, double dt, double finalTime){
+bool CollisionModel::MDInteractionsModel::leapfrogIntern(std::vector<CollisionModel::Molecule*> moleculesPtr, double dt, double finalTime, double requiredRad){
 
-    std::ofstream positionOut;
-    positionOut.open("position_output.txt");
-    // std::ofstream velocityOut;
-    // velocityOut.open("velocity_output.txt");
+    bool wasHit = false;
+    std::vector<double> startDistances;
+    size_t moleculesPtr_size = moleculesPtr.size();
+    for(size_t i = 0; i < moleculesPtr_size; ++i){
+        for(size_t j = i+1; j < moleculesPtr_size; ++j){
+            startDistances.push_back((moleculesPtr.at(i)->getComPos() - moleculesPtr.at(j)->getComPos()).magnitude());
+        }
+    }
+
     
     int nSteps = int(round(finalTime/dt));
     //std::cout << nSteps << std::endl;
@@ -308,8 +278,10 @@ void CollisionModel::MDInteractionsModel::leapfrogIntern(std::vector<CollisionMo
     std::vector<Core::Vector> forceMolecules = forceFieldMD(moleculesPtr);
 
     // do the first half step for the velocity, as per leapfrog definition
+    double energyStart = 0;
     size_t i = 0;
     for(auto* molecule : moleculesPtr){
+        energyStart += 0.5 * molecule->getComVel().magnitudeSquared() * molecule->getMass();
         Core::Vector newComVel =  molecule->getComVel() + forceMolecules.at(i) / molecule->getMass() * dt/2;
         molecule->setComVel(newComVel);
         i++;
@@ -320,14 +292,23 @@ void CollisionModel::MDInteractionsModel::leapfrogIntern(std::vector<CollisionMo
        
         // time step for the new position 
         i = 0;
+        double energyEnd = 0;
         for(auto* molecule : moleculesPtr){
-            // if(i == 0){
-            //     positionOut << molecule->getComPos().magnitude() << std::endl;
-            // }
-            positionOut << molecule->getMass()/Core::AMU_TO_KG << ", " << molecule->getComPos().x() << ", " << molecule->getComPos().y() << ", " << molecule->getComPos().z() << std::endl;
             Core::Vector newComPos =  molecule->getComPos() + molecule->getComVel() * dt;
             molecule->setComPos(newComPos);
+            energyEnd += 0.5 * molecule->getComVel().magnitudeSquared() * molecule->getMass();
             i++;
+        }
+        size_t index = 0;
+        for(size_t k = 0; k < moleculesPtr_size; ++k){
+            for(size_t l = k+1; l < moleculesPtr_size; ++l){
+                if((moleculesPtr.at(l)->getComPos() - moleculesPtr.at(k)->getComPos()).magnitude() > startDistances.at(index++)){
+                    return wasHit;
+                }
+                else if((moleculesPtr.at(l)->getComPos() - moleculesPtr.at(k)->getComPos()).magnitude() <= requiredRad){
+                    wasHit=true;
+                }
+            }
         }
 
         // recalculate the force
@@ -335,18 +316,12 @@ void CollisionModel::MDInteractionsModel::leapfrogIntern(std::vector<CollisionMo
         i = 0;
         // time step for the new velocity
         for(auto* molecule : moleculesPtr){
-            // if(i == 0){
-            //     velocityOut << molecule->getComVel().magnitude() << std::endl;
-            // }
             Core::Vector newComVel =  molecule->getComVel() + forceMolecules.at(i) / molecule->getMass() * dt;
-            // if(j%50){
-            //     std::cout << i << " newVel: " <<newComVel << std::endl;
-            // }
-            
             molecule->setComVel(newComVel);
             i++;
         }
     }
+    return false;
 
 }
 

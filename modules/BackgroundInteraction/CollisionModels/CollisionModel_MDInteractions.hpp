@@ -95,7 +95,7 @@ namespace CollisionModel{
 
         double calcSign(double value);
 
-        void leapfrogIntern(std::vector<CollisionModel::Molecule*> moleculesPtr, double dt, double finalTime);
+        bool leapfrogIntern(std::vector<CollisionModel::Molecule*> moleculesPtr, double dt, double finalTime, double requiredRad);
 
         void rk4Intern(std::vector<CollisionModel::Molecule*> moleculesPtr, double dt, double finalTime);
 
