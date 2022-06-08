@@ -58,6 +58,7 @@ namespace Core {
         //mathematical methods:
         [[nodiscard]] double magnitude() const;
         [[nodiscard]] double magnitudeSquared() const;
+        [[nodiscard]] Vector crossProduct(const Vector &rhs) const;
 
         // overloaded operators:
         Vector& operator+=(const Vector &rhs);
@@ -66,6 +67,7 @@ namespace Core {
         friend double operator*(const Vector &lhs, const Vector &rhs);
         friend Vector operator*(const Vector &lhs, double rhs);
         friend Vector operator/(const Vector &lhs, double rhs);
+        friend Vector operator*(double lhs, const Vector &rhs);
 
         friend bool operator==(Vector const &lhs, Vector const &rhs);
         friend bool operator!=(const Vector &lhs, const Vector &rhs);
@@ -87,6 +89,7 @@ namespace Core {
     double operator*(const Vector &lhs, const Vector &rhs);
     Vector operator*(const Vector &lhs, double rhs);
     Vector operator/(const Vector &lhs, double rhs);
+    Vector operator*(double lhs, const Vector &rhs);
 
     bool operator==(Vector const &lhs, Vector const &rhs);
     bool operator!=(const Vector &lhs, const Vector &rhs);
