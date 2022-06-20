@@ -74,12 +74,9 @@ void performBenchmark(size_t nSamples, size_t nParticles){
             }
         }
     }
-
-
     stopWatch.stop();
     std::cout << "elapsed wall time:"<< stopWatch.elapsedSecondsWall()<<std::endl;
     std::cout << "elapsed cpu time:"<< stopWatch.elapsedSecondsCPU()<<std::endl;
-  
 }
 
 int main(int argc, char** argv) {
