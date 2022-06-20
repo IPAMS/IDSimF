@@ -14,11 +14,13 @@
 #include "FileIO_MolecularStructureReader.hpp"
 #include "Core_particle.hpp"
 #include "appUtils_stopwatch.hpp"
+#include "CLI11.hpp"
 
+#include <omp.h>
 #include <ctime>
 #include <iostream>
 
-void performBenchmark(int nSamples){
+void performBenchmark(size_t nSamples, size_t nParticles){
 
     double diameterHe = CollisionModel::MDInteractionsModel::DIAMETER_HE;
     FileIO::MolecularStructureReader reader = FileIO::MolecularStructureReader();
@@ -26,7 +28,6 @@ void performBenchmark(int nSamples){
 
     std::vector<Core::uniquePartPtr>particles;
     std::vector<Core::Particle*>particlesPtrs;
-    size_t nParticles = 200;
     double yPos = 0;
     for (size_t i=0; i<nParticles; ++i){
         Core::uniquePartPtr particle = std::make_unique<Core::Particle>(
@@ -55,13 +56,13 @@ void performBenchmark(int nSamples){
                         1e-16);
 
 
-    std::cout << "Benchmark molecular dynamics collision model ";
+    std::cout << "Benchmark molecular dynamics collision model "<<std::endl;
 
     AppUtils::Stopwatch stopWatch;
     stopWatch.start();
 
-    for(int j = 0; j < nSamples; j++){
-        #pragma omp parallel for num_threads(7)
+    for(size_t j = 0; j < nSamples; j++){
+        #pragma omp parallel
         for (size_t i =0; i<nParticles; ++i){
             mdSim.modifyVelocity(*particlesPtrs[i], 1e-11);
         }
@@ -74,9 +75,23 @@ void performBenchmark(int nSamples){
   
 }
 
-int main() {
+int main(int argc, char** argv) {
+    CLI::App app{"Simple benchmark of md collision model", "md collision model benchmark"};
 
-    int n = 400;
-    performBenchmark(n);
+    bool verbose = false;
+    app.add_flag("-v,--verbose", verbose, "be verbose");
+
+    unsigned int nParticles = 1;//23;
+    app.add_option("--n_particles,-p", nParticles, "number of particles")->required();
+
+    unsigned int nSamples = 1;
+    app.add_option("--samples,-s", nSamples, "number of samples")->required();
+
+    int numberOfThreads= 1;
+    app.add_option("--n_threads,-t", numberOfThreads, "number of parallel threads")->required();
+    CLI11_PARSE(app, argc, argv);
+
+    omp_set_num_threads(numberOfThreads);
+    performBenchmark(nParticles, nSamples);
     return 0;
 }
