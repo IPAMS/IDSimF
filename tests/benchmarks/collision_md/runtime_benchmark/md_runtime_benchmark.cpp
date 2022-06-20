@@ -7,9 +7,7 @@
 
  ------------
 
- A simple runtime benchmark for the Hard Sphere Collision Model in IDSimF
-
- @author Walter Wissdorf
+ A simple runtime benchmark for the MD Collision Model
  ****************************/
 
 #include "CollisionModel_MDInteractions.hpp"
@@ -25,18 +23,36 @@ void performBenchmark(int nSamples){
     double diameterHe = CollisionModel::MDInteractionsModel::DIAMETER_HE;
     FileIO::MolecularStructureReader reader = FileIO::MolecularStructureReader();
     reader.readMolecularStructure("test_molecularstructure_reader.csv");
-    Core::Particle ion;
-    ion.setMolecularStructure(CollisionModel::MolecularStructure::molecularStructureCollection.at("H2+"));
-    ion.setVelocity(Core::Vector(100.0, 0.0, 0.0));
+
+    std::vector<Core::uniquePartPtr>particles;
+    std::vector<Core::Particle*>particlesPtrs;
+    size_t nParticles = 200;
+    double yPos = 0;
+    for (size_t i=0; i<nParticles; ++i){
+        Core::uniquePartPtr particle = std::make_unique<Core::Particle>(
+                Core::Vector(0.0,yPos,0.0),
+                Core::Vector(0.0,0.0,0.0),
+                1.0,
+                39);
+        particle->setVelocity(Core::Vector(600.0, 0.0, 0.0));
+        particle->setMolecularStructure(CollisionModel::MolecularStructure::molecularStructureCollection.at("Ar+"));
+        particle->setDiameter(particle->getMolecularStructure()->getDiameter());
+        particlesPtrs.push_back(particle.get());
+        particles.push_back(std::move(particle));
+        yPos = yPos+0.0001;
+    }
+    // Core::Particle ion;
+    // ion.setMolecularStructure(CollisionModel::MolecularStructure::molecularStructureCollection.at("H2+"));
+    // ion.setVelocity(Core::Vector(100.0, 0.0, 0.0));
     CollisionModel::MDInteractionsModel mdSim = CollisionModel::MDInteractionsModel(
-                        100000,
+                        10000,
                         298,
                         4.003,
-                        2.89e-10,
+                        diameterHe,
                         0.203e-30,
                         "He",
-                        500e-14, 
-                        5e-14);
+                        1e-10, 
+                        1e-16);
 
 
     std::cout << "Benchmark molecular dynamics collision model ";
@@ -44,21 +60,23 @@ void performBenchmark(int nSamples){
     AppUtils::Stopwatch stopWatch;
     stopWatch.start();
 
-    for (int i =0; i<nSamples; ++i){
-        mdSim.modifyVelocity(ion, 4e-6);
+    for(int j = 0; j < nSamples; j++){
+        #pragma omp parallel for num_threads(7)
+        for (size_t i =0; i<nParticles; ++i){
+            mdSim.modifyVelocity(*particlesPtrs[i], 1e-11);
+        }
     }
-    Core::Vector ionVelo = ion.getVelocity();
 
 
     stopWatch.stop();
     std::cout << "elapsed wall time:"<< stopWatch.elapsedSecondsWall()<<std::endl;
     std::cout << "elapsed cpu time:"<< stopWatch.elapsedSecondsCPU()<<std::endl;
-    std::cout << "ion velocity: "<< ionVelo<<std::endl;
+  
 }
 
 int main() {
 
-    int n = 4000;
+    int n = 400;
     performBenchmark(n);
     return 0;
 }
