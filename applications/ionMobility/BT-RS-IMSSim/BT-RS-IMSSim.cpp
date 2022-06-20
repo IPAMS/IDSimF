@@ -35,6 +35,7 @@
 #include "PSim_constants.hpp"
 #include "Integration_verletIntegrator.hpp"
 #include "Integration_velocityIntegrator.hpp"
+#include "Integration_parallelVerletIntegrator.hpp"
 #include "FileIO_trajectoryHDF5Writer.hpp"
 #include "CollisionModel_AbstractCollisionModel.hpp"
 #include "CollisionModel_HardSphere.hpp"
@@ -55,7 +56,7 @@
 #include <numeric>
 
 enum IntegratorType{
-    VERLET, SIMPLE, NO_INTEGRATOR
+    VERLET, VERLET_PARALLEL, SIMPLE, NO_INTEGRATOR
 };
 enum CollisionModelType{
     HS, SDS, MD, NO_COLLISONS
@@ -105,7 +106,7 @@ int main(int argc, const char *argv[]){
         std::vector<double> collisionGasPolarizability_m3;
         double subIntegratorIntegrationTime_s;
         double subIntegratorStepSize_s;
-        if(transportModelType=="btree_MD"){
+        if(transportModelType=="btree_MD" || transportModelType=="btree_MD_P"){
             collisionGasPolarizability_m3 = simConf->doubleVectorParameter("collision_gas_polarizability_m3");
             collisionGasIdentifier = simConf->stringVectorParameter("collision_gas_identifier");
             particleIdentifier = simConf->stringVectorParameter("particle_identifier");
@@ -147,7 +148,7 @@ int main(int argc, const char *argv[]){
         }
 
         //read molecular structure file
-        if(transportModelType=="btree_MD"){
+        if(transportModelType=="btree_MD" || transportModelType=="btree_MD_P"){
             std::string mdCollisionConfFile = simConf->pathRelativeToConfFile(simConf->stringParameter("md_configuration"));
             FileIO::MolecularStructureReader mdConfReader = FileIO::MolecularStructureReader();
             mdConfReader.readMolecularStructure(mdCollisionConfFile);
@@ -215,7 +216,7 @@ int main(int argc, const char *argv[]){
                 uniqueReactivePartPtr particle = std::make_unique<RS::ReactiveParticle>(subst);
 
                 particle->setLocation(initialPositions[k]);
-                if(transportModelType=="btree_MD"){
+                if(transportModelType=="btree_MD" || transportModelType=="btree_MD_P"){
                     particle->setMolecularStructure(CollisionModel::MolecularStructure::molecularStructureCollection.at(particleIdentifier[i]));
                     particle->setDiameter(particle->getMolecularStructure()->getDiameter());
                 }
@@ -236,13 +237,19 @@ int main(int argc, const char *argv[]){
         // ======================================================================================
 
         //check which integrator type we have to setup:
-        std::vector<std::string> verletTypes{"btree_SDS", "btree_HS", "btree_MD"};
+        std::vector<std::string> verletTypes{"btree_SDS", "btree_HS", "btree_MD", "btree_MD_P"};
         auto vType = std::find(std::begin(verletTypes), std::end(verletTypes), transportModelType);
 
         IntegratorType integratorType;
         if (vType!=std::end(verletTypes)) {
-            integratorType = VERLET;
-            logger->info("Verlet type simulation");
+            if(*vType == "btree_MD_P"){
+                integratorType = VERLET_PARALLEL;
+                logger->info("Parallel Verlet type simulation");
+            }else{
+                integratorType = VERLET;
+                logger->info("Verlet type simulation");
+            }
+            
         }
         else if (transportModelType=="simple") {
             integratorType = SIMPLE;
@@ -380,7 +387,7 @@ int main(int argc, const char *argv[]){
             collisionModelPtr = std::move(collisionModel);
             collisionModelType = HS;
         }
-        else if (transportModelType=="btree_MD") {
+        else if (transportModelType=="btree_MD" || transportModelType=="btree_MD_P") {
             //prepare multimodel with multiple MD models (one per collision gas)
             std::vector<std::unique_ptr<CollisionModel::AbstractCollisionModel>> mdModels;
             for (std::size_t i = 0; i<nBackgroundGases; ++i) {
@@ -411,6 +418,12 @@ int main(int argc, const char *argv[]){
                     accelerationFctVerlet, timestepWriteFctVerlet, otherActionsFunctionIMSVerlet,
                     ParticleSimulation::noFunction,
                     collisionModelPtr.get());
+        }else if(integratorType==VERLET_PARALLEL){
+            trajectoryIntegrator = std::make_unique<Integration::ParallelVerletIntegrator>(
+                particlesPtrs,
+                accelerationFctVerlet, timestepWriteFctVerlet, otherActionsFunctionIMSVerlet, 
+                ParticleSimulation::noFunction,
+                collisionModelPtr.get());
         }
         else if (integratorType==SIMPLE) {
 
