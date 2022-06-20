@@ -61,10 +61,17 @@ void performBenchmark(size_t nSamples, size_t nParticles){
     AppUtils::Stopwatch stopWatch;
     stopWatch.start();
 
-    for(size_t j = 0; j < nSamples; j++){
-        #pragma omp parallel
-        for (size_t i =0; i<nParticles; ++i){
-            mdSim.modifyVelocity(*particlesPtrs[i], 1e-11);
+    std::size_t i;
+    #pragma omp parallel \
+            default(none) \
+            private(i) \
+            firstprivate(mdSim, nParticles, nSamples,particlesPtrs)
+    {
+        for (size_t j = 0; j<nSamples; j++) {
+            #pragma omp for
+            for (i = 0; i<nParticles; ++i) {
+                mdSim.modifyVelocity(*particlesPtrs[i], 1e-11);
+            }
         }
     }
 
