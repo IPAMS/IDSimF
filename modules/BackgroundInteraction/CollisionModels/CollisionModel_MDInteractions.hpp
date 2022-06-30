@@ -69,7 +69,10 @@ namespace CollisionModel{
             double collisionGasPolarizabilityM3,
             std::string collisionMolecule,
             double integrationTime,
-            double subTimeStep);
+            double subTimeStep,
+            double collisionRadiusScaling,
+            double angleThetaScaling, 
+            double spawnRadius);
 
         MDInteractionsModel(
             std::function<double(Core::Vector& location)> pressureFunction,
@@ -80,7 +83,10 @@ namespace CollisionModel{
             double collisionGasPolarizabilityM3,
             std::string collisionMolecule,
             double integrationTime,
-            double subTimeStep);
+            double subTimeStep,
+            double collisionRadiusScaling,
+            double angleThetaScaling,
+            double spawnRadius);
 
         MDInteractionsModel(
             std::function<double(Core::Vector& location)> pressureFunction,
@@ -91,7 +97,10 @@ namespace CollisionModel{
             double collisionGasPolarizabilityM3,
             std::string collisionMolecule,
             double integrationTime,
-            double subTimeStep);
+            double subTimeStep,
+            double collisionRadiusScaling,
+            double angleThetaScaling,
+            double spawnRadius);
 
         double calcSign(double value);
 
@@ -99,9 +108,9 @@ namespace CollisionModel{
 
         void rk4Intern(std::vector<CollisionModel::Molecule*> moleculesPtr, double dt, double finalTime);
 
-        void rk4InternAdaptiveStep(std::vector<CollisionModel::Molecule*> moleculesPtr, double dt, double finalTime);
+        bool rk4InternAdaptiveStep(std::vector<CollisionModel::Molecule*> moleculesPtr, double dt, double finalTime, double requiredRad);
 
-        std::vector<Core::Vector> forceFieldMD(std::vector<CollisionModel::Molecule*> moleculesPtr);
+        void forceFieldMD(std::vector<CollisionModel::Molecule*>& moleculesPtr, std::vector<Core::Vector>& forceMolecules);
 
         // std::vector<Core::Vector> forceFieldMDRk4(std::vector<CollisionModel::Molecule*> moleculesPtr, std::vector<Core::Vector>& r);
 
@@ -127,6 +136,9 @@ namespace CollisionModel{
         std::string collisionMolecule_ = "";
         double integrationTime_ = 0.0;
         double subTimeStep_ = 0.0;
+        double collisionRadiusScaling_ = 0.0;
+        double angleThetaScaling_ = 0.0;
+        double spawnRadius_ = 0.0;
 
         std::function<double(Core::Vector&)> pressureFunction_ = nullptr; ///< a spatial pressure function
         std::function<Core::Vector(Core::Vector&)> velocityFunction_ = nullptr; ///< a spatial velocity function

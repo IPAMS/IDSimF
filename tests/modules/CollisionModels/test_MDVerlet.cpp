@@ -169,7 +169,10 @@ TEST_CASE( "Test MD and integrator", "[ParticleSimulation][VelocityIntegrator][t
                         0.203e-30,
                         "He",
                         400e-14, 
-                        1e-17);
+                        1e-17, 
+                        2,
+                        1,
+                        25);
         mdModels.emplace_back(std::move(mdModel));
         std::unique_ptr<CollisionModel::MultiCollisionModel> collisionModel =
                     std::make_unique<CollisionModel::MultiCollisionModel>(std::move(mdModels));

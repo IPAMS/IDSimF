@@ -45,15 +45,15 @@ void performBenchmark(size_t nSamples, size_t nParticles){
     // Core::Particle ion;
     // ion.setMolecularStructure(CollisionModel::MolecularStructure::molecularStructureCollection.at("H2+"));
     // ion.setVelocity(Core::Vector(100.0, 0.0, 0.0));
-    CollisionModel::MDInteractionsModel mdSim = CollisionModel::MDInteractionsModel(
-                        10000,
-                        298,
-                        4.003,
-                        diameterHe,
-                        0.203e-30,
-                        "He",
-                        1e-10, 
-                        1e-16);
+    // CollisionModel::MDInteractionsModel mdSim = CollisionModel::MDInteractionsModel(
+    //                     10000,
+    //                     298,
+    //                     4.003,
+    //                     diameterHe,
+    //                     0.203e-30,
+    //                     "He",
+    //                     1e-10, 
+    //                     1e-16);
 
 
     std::cout << "Benchmark molecular dynamics collision model "<<std::endl;
@@ -63,12 +63,24 @@ void performBenchmark(size_t nSamples, size_t nParticles){
 
     std::size_t i;
     #pragma omp parallel \
-            default(none) \
-            private(i) \
-            firstprivate(mdSim, nParticles, nSamples,particlesPtrs)
+        default(none) \
+        firstprivate(particlesPtrs, nParticles, nSamples,  diameterHe)
     {
+        CollisionModel::MDInteractionsModel mdSim = CollisionModel::MDInteractionsModel(
+                10000,
+                298,
+                4.003,
+                diameterHe,
+                0.203e-30,
+                "He",
+                1e-10,
+                1e-16,
+                2,
+                1,
+                25);
+
         for (size_t j = 0; j<nSamples; j++) {
-            #pragma omp for
+            #pragma omp for schedule(dynamic, nParticles/20)
             for (i = 0; i<nParticles; ++i) {
                 mdSim.modifyVelocity(*particlesPtrs[i], 1e-11);
             }
@@ -96,6 +108,6 @@ int main(int argc, char** argv) {
     CLI11_PARSE(app, argc, argv);
 
     omp_set_num_threads(numberOfThreads);
-    performBenchmark(nParticles, nSamples);
+    performBenchmark(nSamples, nParticles);
     return 0;
 }

@@ -71,7 +71,7 @@ int main(int argc, const char *argv[]){
         //Core::globalRandomGeneratorPool = std::make_unique<Core::TestRandomGeneratorPool>();
 
         // open configuration, parse configuration file =========================================
-        AppUtils::CommandlineParser cmdLineParser(argc, argv, "BT-RS-DMSSim", "DMS Simulation with trajectories and chemistry", false);
+        AppUtils::CommandlineParser cmdLineParser(argc, argv, "BT-RS-IMSSim", "IMS Simulation with trajectories and chemistry", true);
         std::string projectName = cmdLineParser.resultName();
         AppUtils::logger_ptr logger = cmdLineParser.logger();
 
@@ -104,14 +104,20 @@ int main(int argc, const char *argv[]){
         std::vector<std::string> collisionGasIdentifier;
         std::vector<std::string> particleIdentifier;
         std::vector<double> collisionGasPolarizability_m3;
-        double subIntegratorIntegrationTime_s;
-        double subIntegratorStepSize_s;
+        double subIntegratorIntegrationTime_s = 0;
+        double subIntegratorStepSize_s = 0;
+        double collisionRadiusScaling = 0;
+        double angleThetaScaling = 0;
+        double spawnRadius_m = 0; 
         if(transportModelType=="btree_MD" || transportModelType=="btree_MD_P"){
             collisionGasPolarizability_m3 = simConf->doubleVectorParameter("collision_gas_polarizability_m3");
             collisionGasIdentifier = simConf->stringVectorParameter("collision_gas_identifier");
             particleIdentifier = simConf->stringVectorParameter("particle_identifier");
             subIntegratorIntegrationTime_s = simConf->doubleParameter("sub_integrator_integration_time_s");
             subIntegratorStepSize_s = simConf->doubleParameter("sub_integrator_step_size_s");
+            collisionRadiusScaling = simConf->doubleParameter("collision_radius_scaling");
+            angleThetaScaling = simConf->doubleParameter("angle_theta_scaling");
+            spawnRadius_m = simConf->doubleParameter("spawn_radius_m");
         }
 
         std::size_t nBackgroundGases = backgroundPartialPressures_Pa.size();
@@ -399,7 +405,10 @@ int main(int argc, const char *argv[]){
                         collisionGasPolarizability_m3[i],
                         collisionGasIdentifier[i],
                         subIntegratorIntegrationTime_s, 
-                        subIntegratorStepSize_s);
+                        subIntegratorStepSize_s,
+                        collisionRadiusScaling,
+                        angleThetaScaling,
+                        spawnRadius_m);
                 mdModels.emplace_back(std::move(mdModel));
             }
 
@@ -419,6 +428,7 @@ int main(int argc, const char *argv[]){
                     ParticleSimulation::noFunction,
                     collisionModelPtr.get());
         }else if(integratorType==VERLET_PARALLEL){
+            
             trajectoryIntegrator = std::make_unique<Integration::ParallelVerletIntegrator>(
                 particlesPtrs,
                 accelerationFctVerlet, timestepWriteFctVerlet, otherActionsFunctionIMSVerlet, 
