@@ -117,7 +117,7 @@ void Integration::ParallelVerletIntegrator::runSingleStep(double dt){
             private(i) //firstprivate(MyNod)
     {
 
-        #pragma omp for
+        #pragma omp for schedule(dynamic, nParticles_/25)
         for (i=0; i<nParticles_; i++){
 
             if (particles_[i]->isActive()){
