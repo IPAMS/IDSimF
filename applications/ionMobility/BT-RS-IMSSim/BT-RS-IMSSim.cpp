@@ -41,6 +41,7 @@
 #include "CollisionModel_HardSphere.hpp"
 #include "CollisionModel_StatisticalDiffusion.hpp"
 #include "CollisionModel_MultiCollisionModel.hpp"
+#include "CollisionModel_SoftSphere.hpp"
 #include "appUtils_simulationConfiguration.hpp"
 #include "appUtils_logging.hpp"
 #include "appUtils_stopwatch.hpp"
@@ -59,7 +60,7 @@ enum IntegratorType{
     VERLET, VERLET_PARALLEL, SIMPLE, NO_INTEGRATOR
 };
 enum CollisionModelType{
-    HS, SDS, MD, NO_COLLISONS
+    HS, SS, SDS, MD, NO_COLLISONS
 };
 
 std::string key_ChemicalIndex = "keyChemicalIndex";
@@ -243,19 +244,12 @@ int main(int argc, const char *argv[]){
         // ======================================================================================
 
         //check which integrator type we have to setup:
-        std::vector<std::string> verletTypes{"btree_SDS", "btree_HS", "btree_MD", "btree_MD_P"};
+        std::vector<std::string> verletTypes{"btree_SDS", "btree_HS", "btree_MD", "btree_SS"};
         auto vType = std::find(std::begin(verletTypes), std::end(verletTypes), transportModelType);
 
         IntegratorType integratorType;
         if (vType!=std::end(verletTypes)) {
-            if(*vType == "btree_MD_P"){
                 integratorType = VERLET_PARALLEL;
-                logger->info("Parallel Verlet type simulation");
-            }else{
-                integratorType = VERLET;
-                logger->info("Verlet type simulation");
-            }
-            
         }
         else if (transportModelType=="simple") {
             integratorType = SIMPLE;
@@ -393,7 +387,7 @@ int main(int argc, const char *argv[]){
             collisionModelPtr = std::move(collisionModel);
             collisionModelType = HS;
         }
-        else if (transportModelType=="btree_MD" || transportModelType=="btree_MD_P") {
+        else if (transportModelType=="btree_MD") {
             //prepare multimodel with multiple MD models (one per collision gas)
             std::vector<std::unique_ptr<CollisionModel::AbstractCollisionModel>> mdModels;
             for (std::size_t i = 0; i<nBackgroundGases; ++i) {
@@ -418,17 +412,15 @@ int main(int argc, const char *argv[]){
             collisionModelPtr = std::move(collisionModel);
             collisionModelType = MD;
         }
+        else if (transportModelType=="btree_SS") {
+            // Add Softsphere Model here
+
+        }
 
         //init trajectory simulation object:
         std::unique_ptr<Integration::AbstractTimeIntegrator> trajectoryIntegrator = nullptr;
-        if (integratorType==VERLET) {
-            trajectoryIntegrator = std::make_unique<Integration::VerletIntegrator>(
-                    particlesPtrs,
-                    accelerationFctVerlet, timestepWriteFctVerlet, otherActionsFunctionIMSVerlet,
-                    ParticleSimulation::noFunction,
-                    collisionModelPtr.get());
-        }else if(integratorType==VERLET_PARALLEL){
-            
+
+        if(integratorType==VERLET_PARALLEL){
             trajectoryIntegrator = std::make_unique<Integration::ParallelVerletIntegrator>(
                 particlesPtrs,
                 accelerationFctVerlet, timestepWriteFctVerlet, otherActionsFunctionIMSVerlet, 
@@ -436,7 +428,6 @@ int main(int argc, const char *argv[]){
                 collisionModelPtr.get());
         }
         else if (integratorType==SIMPLE) {
-
             auto velocityFctSimple = [eFieldMagnitude, backgroundPTRatio](Core::Particle* particle, int /*particleIndex*/,
                                                                           double /*time*/, int /*timestep*/) {
                 double particleMobility = particle->getMobility();

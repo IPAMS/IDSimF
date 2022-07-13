@@ -11,7 +11,7 @@
   "start_width_yz_mm":1,
   "start_width_x_mm":1,
   "stop_position_x_mm":100,
-  "transport_model_type":"btree_MD_P",
+  "transport_model_type":"btree_MD",
   "background_temperature_K":298,
   "background_partial_pressures_Pa":[2000],
   "collision_gas_masses_amu":[4.003],
