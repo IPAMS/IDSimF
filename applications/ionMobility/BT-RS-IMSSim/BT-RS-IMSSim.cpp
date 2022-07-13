@@ -110,7 +110,7 @@ int main(int argc, const char *argv[]){
         double collisionRadiusScaling = 0;
         double angleThetaScaling = 0;
         double spawnRadius_m = 0; 
-        if(transportModelType=="btree_MD" || transportModelType=="btree_MD_P"){
+        if(transportModelType=="btree_MD"){
             collisionGasPolarizability_m3 = simConf->doubleVectorParameter("collision_gas_polarizability_m3");
             collisionGasIdentifier = simConf->stringVectorParameter("collision_gas_identifier");
             particleIdentifier = simConf->stringVectorParameter("particle_identifier");
@@ -155,7 +155,7 @@ int main(int argc, const char *argv[]){
         }
 
         //read molecular structure file
-        if(transportModelType=="btree_MD" || transportModelType=="btree_MD_P"){
+        if(transportModelType=="btree_MD" ){
             std::string mdCollisionConfFile = simConf->pathRelativeToConfFile(simConf->stringParameter("md_configuration"));
             FileIO::MolecularStructureReader mdConfReader = FileIO::MolecularStructureReader();
             mdConfReader.readMolecularStructure(mdCollisionConfFile);
