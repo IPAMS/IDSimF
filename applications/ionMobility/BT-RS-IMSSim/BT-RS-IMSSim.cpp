@@ -223,7 +223,7 @@ int main(int argc, const char *argv[]){
                 uniqueReactivePartPtr particle = std::make_unique<RS::ReactiveParticle>(subst);
 
                 particle->setLocation(initialPositions[k]);
-                if(transportModelType=="btree_MD" || transportModelType=="btree_MD_P"){
+                if(transportModelType=="btree_MD"){
                     particle->setMolecularStructure(CollisionModel::MolecularStructure::molecularStructureCollection.at(particleIdentifier[i]));
                     particle->setDiameter(particle->getMolecularStructure()->getDiameter());
                 }
@@ -244,7 +244,7 @@ int main(int argc, const char *argv[]){
         // ======================================================================================
 
         //check which integrator type we have to setup:
-        std::vector<std::string> verletTypes{"btree_SDS", "btree_HS", "btree_MD", "btree_SS", "btree_MD_P"};
+        std::vector<std::string> verletTypes{"btree_SDS", "btree_HS", "btree_MD", "btree_SS"};
         auto vType = std::find(std::begin(verletTypes), std::end(verletTypes), transportModelType);
 
         IntegratorType integratorType;
@@ -387,7 +387,7 @@ int main(int argc, const char *argv[]){
             collisionModelPtr = std::move(collisionModel);
             collisionModelType = HS;
         }
-        else if (transportModelType=="btree_MD" || transportModelType=="btree_MD_P") {
+        else if (transportModelType=="btree_MD") {
             //prepare multimodel with multiple MD models (one per collision gas)
             std::vector<std::unique_ptr<CollisionModel::AbstractCollisionModel>> mdModels;
             for (std::size_t i = 0; i<nBackgroundGases; ++i) {
