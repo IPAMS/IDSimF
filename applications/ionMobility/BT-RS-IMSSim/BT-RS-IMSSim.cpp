@@ -244,7 +244,7 @@ int main(int argc, const char *argv[]){
         // ======================================================================================
 
         //check which integrator type we have to setup:
-        std::vector<std::string> verletTypes{"btree_SDS", "btree_HS", "btree_MD", "btree_SS"};
+        std::vector<std::string> verletTypes{"btree_SDS", "btree_HS", "btree_MD", "btree_SS", "btree_MD_P"};
         auto vType = std::find(std::begin(verletTypes), std::end(verletTypes), transportModelType);
 
         IntegratorType integratorType;
@@ -387,7 +387,7 @@ int main(int argc, const char *argv[]){
             collisionModelPtr = std::move(collisionModel);
             collisionModelType = HS;
         }
-        else if (transportModelType=="btree_MD") {
+        else if (transportModelType=="btree_MD" || transportModelType=="btree_MD_P") {
             //prepare multimodel with multiple MD models (one per collision gas)
             std::vector<std::unique_ptr<CollisionModel::AbstractCollisionModel>> mdModels;
             for (std::size_t i = 0; i<nBackgroundGases; ++i) {
