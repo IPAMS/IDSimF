@@ -184,7 +184,7 @@ std::vector<Core::Vector> ParticleSimulation::util::getRandomPositionsInBox(unsi
 }
  */
 
-std::vector<Core::Vector> ParticleSimulation::util::getPositionsOnGrid(unsigned int nPositions, Core::Vector corner, Core::Vector boxSize, unsigned int nPerDirection){
+std::vector<Core::Vector> ParticleSimulation::util::getPositionsOnGrid(Core::Vector corner, Core::Vector boxSize, unsigned int nPerDirection){
 
     std::vector<Core::Vector> result;
     for (unsigned int i=0; i<nPerDirection; i++){
