@@ -36,7 +36,7 @@
 
 TEST_CASE("Basic test MD Interactions model", "[CollisionModels][MDInteractionsModel]") {
 
-    //Core::globalRandomGeneratorPool = std::make_unique<Core::TestRandomGeneratorPool>();
+    Core::globalRandomGeneratorPool = std::make_unique<Core::TestRandomGeneratorPool>();
 
     double diameterHe = CollisionModel::MDInteractionsModel::DIAMETER_HE;
     FileIO::MolecularStructureReader reader = FileIO::MolecularStructureReader();
@@ -44,16 +44,15 @@ TEST_CASE("Basic test MD Interactions model", "[CollisionModels][MDInteractionsM
     Core::Particle ion;
     ion.setMolecularStructure(CollisionModel::MolecularStructure::molecularStructureCollection.at("Ar+"));
     ion.setVelocity(Core::Vector(600.0, 0.0, 0.0));
-    ion.setDiameter(3.4E-10);
     CollisionModel::MDInteractionsModel mdSim = CollisionModel::MDInteractionsModel(2000000, 298, 4.003, 
-                                                                                    diameterHe, 0.205E-30, "He", 1e-10, 1E-16, 2, 1, 25);
+                                                                                    3*diameterHe, 0.205E-30, "He", 1e-10, 1E-16, 1, 4, 35e-10);
     
     for(int i = 0; i < 1; i++)
         mdSim.modifyVelocity(ion, 2e-11);
         
-    // CHECK(Approx(ion.getVelocity().x()) ==  104.5473799753);
-    // CHECK(Approx(ion.getVelocity().y()) ==  -4.8256082277);
-    // CHECK(Approx(ion.getVelocity().z()) ==  -6.12683848);
+    CHECK(Approx(ion.getVelocity().x()) ==  616.7784099091);
+    CHECK(Approx(ion.getVelocity().y()) ==  9.9825566288);
+    CHECK(Approx(ion.getVelocity().z()) ==  -19.0017715144);
 
     
 }

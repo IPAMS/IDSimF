@@ -91,14 +91,9 @@ TEST_CASE( "Test MD and integrator", "[ParticleSimulation][VelocityIntegrator][t
         auto accelerationFctVerlet =
                 []
                         (Core::Particle* particle, int /*particleIndex*/, SpaceCharge::FieldCalculator& /*scFieldCalculator*/, double /*time*/, int /*timestep*/) {
-    
-
                     Core::Vector fieldForce(2e-15, 0, 0);
+                    return (fieldForce/particle->getMass());
 
-                    
-                    //return (fieldForce/particle->getMass());
-                    return Core::Vector(0.0, 0.0, 0.0);
-                    
                 };
 
         auto timestepWriteFctSimple =
@@ -169,10 +164,10 @@ TEST_CASE( "Test MD and integrator", "[ParticleSimulation][VelocityIntegrator][t
                         0.203e-30,
                         "He",
                         400e-14, 
-                        1e-17, 
+                        1e-15, 
                         2,
-                        1,
-                        25);
+                        4,
+                        25e-10);
         mdModels.emplace_back(std::move(mdModel));
         std::unique_ptr<CollisionModel::MultiCollisionModel> collisionModel =
                     std::make_unique<CollisionModel::MultiCollisionModel>(std::move(mdModels));
