@@ -110,6 +110,8 @@ int main(int argc, const char *argv[]){
         double collisionRadiusScaling = 0;
         double angleThetaScaling = 0;
         double spawnRadius_m = 0; 
+        double trajectoryDistance_m = 0;
+        bool saveTrajectory = false;
         if(transportModelType=="btree_MD"){
             collisionGasPolarizability_m3 = simConf->doubleVectorParameter("collision_gas_polarizability_m3");
             collisionGasIdentifier = simConf->stringVectorParameter("collision_gas_identifier");
@@ -119,6 +121,8 @@ int main(int argc, const char *argv[]){
             collisionRadiusScaling = simConf->doubleParameter("collision_radius_scaling");
             angleThetaScaling = simConf->doubleParameter("angle_theta_scaling");
             spawnRadius_m = simConf->doubleParameter("spawn_radius_m");
+            saveTrajectory = simConf->boolParameter("save_trajectory");
+            trajectoryDistance_m = simConf->doubleParameter("trajectory_distance_m");
         }
 
         std::size_t nBackgroundGases = backgroundPartialPressures_Pa.size();
@@ -155,10 +159,11 @@ int main(int argc, const char *argv[]){
         }
 
         //read molecular structure file
+        std::unordered_map<std::string,  std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection;
         if(transportModelType=="btree_MD" ){
             std::string mdCollisionConfFile = simConf->pathRelativeToConfFile(simConf->stringParameter("md_configuration"));
             FileIO::MolecularStructureReader mdConfReader = FileIO::MolecularStructureReader();
-            mdConfReader.readMolecularStructure(mdCollisionConfFile);
+            molecularStructureCollection = mdConfReader.readMolecularStructure(mdCollisionConfFile);
         }
 
         // prepare file writer  =================================================================
@@ -224,7 +229,7 @@ int main(int argc, const char *argv[]){
 
                 particle->setLocation(initialPositions[k]);
                 if(transportModelType=="btree_MD"){
-                    particle->setMolecularStructure(CollisionModel::MolecularStructure::molecularStructureCollection.at(particleIdentifier[i]));
+                    particle->setMolecularStructure(molecularStructureCollection.at(particleIdentifier[i]));
                     particle->setDiameter(particle->getMolecularStructure()->getDiameter());
                 }
                 particlesPtrs.push_back(particle.get());
@@ -402,7 +407,10 @@ int main(int argc, const char *argv[]){
                         subIntegratorStepSize_s,
                         collisionRadiusScaling,
                         angleThetaScaling,
-                        spawnRadius_m);
+                        spawnRadius_m, 
+                        molecularStructureCollection,
+                        saveTrajectory, 
+                        trajectoryDistance_m);
                 mdModels.emplace_back(std::move(mdModel));
             }
 

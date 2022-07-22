@@ -28,14 +28,17 @@
 #ifndef IDSIM_FILEIO_MOLECULARSTRUCTUREREADER
 #define IDSIM_FILEIO_MOLECULARSTRUCTUREREADER
 
+#include "CollisionModel_MolecularStructure.hpp"
 #include <string>
+#include <unordered_map>
+#include <memory>
 
 namespace FileIO
 {
     class MolecularStructureReader{
 
         public:
-            void readMolecularStructure(std::string filename);
+            std::unordered_map<std::string,  std::shared_ptr<CollisionModel::MolecularStructure>> readMolecularStructure(std::string filename);
 
         private:
             const std::string delimiter = ",";

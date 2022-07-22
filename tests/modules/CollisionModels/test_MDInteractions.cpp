@@ -40,12 +40,21 @@ TEST_CASE("Basic test MD Interactions model", "[CollisionModels][MDInteractionsM
 
     double diameterHe = CollisionModel::MDInteractionsModel::DIAMETER_HE;
     FileIO::MolecularStructureReader reader = FileIO::MolecularStructureReader();
-    reader.readMolecularStructure("test_molecularstructure_reader.csv");
+    std::unordered_map<std::string,  std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection = reader.readMolecularStructure("test_molecularstructure_reader.csv");
     Core::Particle ion;
-    ion.setMolecularStructure(CollisionModel::MolecularStructure::molecularStructureCollection.at("Ar+"));
+    ion.setMolecularStructure(molecularStructureCollection.at("Ar+"));
     ion.setVelocity(Core::Vector(600.0, 0.0, 0.0));
     CollisionModel::MDInteractionsModel mdSim = CollisionModel::MDInteractionsModel(2000000, 298, 4.003, 
-                                                                                    3*diameterHe, 0.205E-30, "He", 1e-10, 1E-16, 1, 4, 35e-10);
+                                                                                    3*diameterHe,
+                                                                                    0.205E-30, 
+                                                                                    "He", 
+                                                                                    1e-10, 
+                                                                                    1E-16, 
+                                                                                    1, 4, 
+                                                                                    35e-10, 
+                                                                                    molecularStructureCollection, 
+                                                                                    false, 
+                                                                                    2e-10);
     
     for(int i = 0; i < 1; i++)
         mdSim.modifyVelocity(ion, 2e-11);

@@ -41,7 +41,10 @@ CollisionModel::MDInteractionsModel::MDInteractionsModel(double staticPressure,
                                                         double subTimeStep,
                                                         double collisionRadiusScaling,
                                                         double angleThetaScaling,
-                                                        double spawnRadius) :
+                                                        double spawnRadius,
+                                                        std::unordered_map<std::string,  std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection,
+                                                        bool saveTrajectory, 
+                                                        double trajectoryDistance) :
         MDInteractionsModel(
         getConstantDoubleFunction(staticPressure),
         getConstantVectorFunction(Core::Vector(0.0, 0.0, 0.0)),
@@ -54,7 +57,10 @@ CollisionModel::MDInteractionsModel::MDInteractionsModel(double staticPressure,
         subTimeStep,
         collisionRadiusScaling,
         angleThetaScaling,
-        spawnRadius) { }
+        spawnRadius,
+        molecularStructureCollection, 
+        saveTrajectory, 
+        trajectoryDistance) { }
 
 CollisionModel::MDInteractionsModel::MDInteractionsModel(std::function<double(Core::Vector& location)> pressureFunction,
                                                         std::function<Core::Vector(Core::Vector& location)> velocityFunction,
@@ -67,7 +73,10 @@ CollisionModel::MDInteractionsModel::MDInteractionsModel(std::function<double(Co
                                                         double subTimeStep,
                                                         double collisionRadiusScaling,
                                                         double angleThetaScaling,
-                                                        double spawnRadius) :
+                                                        double spawnRadius,
+                                                        std::unordered_map<std::string,  std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection,
+                                                        bool saveTrajectory, 
+                                                        double trajectoryDistance) :
         MDInteractionsModel(
                 std::move(pressureFunction),
                 std::move(velocityFunction),
@@ -80,7 +89,10 @@ CollisionModel::MDInteractionsModel::MDInteractionsModel(std::function<double(Co
                 subTimeStep,
                 collisionRadiusScaling,
                 angleThetaScaling, 
-                spawnRadius) { }
+                spawnRadius,
+                molecularStructureCollection, 
+                saveTrajectory, 
+                trajectoryDistance) { }
 
 CollisionModel::MDInteractionsModel::MDInteractionsModel(std::function<double(Core::Vector& location)> pressureFunction,
                                                         std::function<Core::Vector(Core::Vector& location)> velocityFunction,
@@ -93,7 +105,10 @@ CollisionModel::MDInteractionsModel::MDInteractionsModel(std::function<double(Co
                                                         double subTimeStep,
                                                         double collisionRadiusScaling,
                                                         double angleThetaScaling,
-                                                        double spawnRadius) :
+                                                        double spawnRadius,
+                                                        std::unordered_map<std::string,  std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection,
+                                                        bool saveTrajectory, 
+                                                        double trajectoryDistance) :
 
         collisionGasMass_kg_(collisionGasMassAmu*Core::AMU_TO_KG),
         collisionGasDiameter_m_(collisionGasDiameterM),
@@ -104,9 +119,12 @@ CollisionModel::MDInteractionsModel::MDInteractionsModel(std::function<double(Co
         collisionRadiusScaling_(collisionRadiusScaling),
         angleThetaScaling_(angleThetaScaling),
         spawnRadius_(spawnRadius),
+        saveTrajectory_(saveTrajectory),
+        trajectoryDistance_(trajectoryDistance),
         pressureFunction_(std::move(pressureFunction)),
         velocityFunction_(std::move(velocityFunction)),
-        temperatureFunction_(std::move(temperatureFunction)) { }
+        temperatureFunction_(std::move(temperatureFunction)),
+        molecularStructureCollection_(std::move(molecularStructureCollection)) { }
 
 
 double CollisionModel::MDInteractionsModel::calcSign(double value){
@@ -117,6 +135,18 @@ double CollisionModel::MDInteractionsModel::calcSign(double value){
     }else{
         return 0;
     }
+}
+
+void CollisionModel::MDInteractionsModel::writeTrajectory(double distance, Core::Vector positionBgMolecule, bool endOfTrajectory, std::ofstream& file){
+    if(endOfTrajectory == true){
+        if(distance < trajectoryDistance_){
+            file << positionBgMolecule.x() << ", " << positionBgMolecule.y() << ", " << positionBgMolecule.z() << ", " << distance <<std::endl;
+        }
+        file << "###" << std::endl;
+    }else if(distance < trajectoryDistance_){
+        file << positionBgMolecule.x() << ", " << positionBgMolecule.y() << ", " << positionBgMolecule.z() << ", " << distance <<std::endl;
+    }
+    
 }
 
 void CollisionModel::MDInteractionsModel::initializeModelParameters(Core::Particle& /*ion*/) const {
@@ -200,7 +230,7 @@ void CollisionModel::MDInteractionsModel::modifyVelocity(Core::Particle& particl
 
         // Construct the background gas particle 
         CollisionModel::Molecule bgMole = CollisionModel::Molecule(Core::Vector(0.0, 0.0, 0.0), Core::Vector(0.0, 0.0, 0.0), 
-                                            CollisionModel::MolecularStructure::molecularStructureCollection.at(collisionMolecule_));
+                                            molecularStructureCollection_.at(collisionMolecule_));
 
         // Give background gas its position, velocity, rotation:
         // Calculate the standard deviation of the one dimensional velocity distribution of the
@@ -264,8 +294,10 @@ void CollisionModel::MDInteractionsModel::modifyVelocity(Core::Particle& particl
             particle.setVelocity(mole.getComVel() + particle.getVelocity());
         }
         ++iterations;
-    }while(!trajectorySuccess && iterations < 10000 );
-
+    }while(!trajectorySuccess && iterations < 100);
+    if(trajectorySuccess == false){
+        std::cerr << "No trajectory that hit the collision sphere was found.\n"; 
+    }
 }
 
 void CollisionModel::MDInteractionsModel::modifyPosition(Core::Vector& /*position*/, Core::Particle& /*particle*/, double /*dt*/) {
@@ -346,7 +378,6 @@ void CollisionModel::MDInteractionsModel::rk4Intern(std::vector<CollisionModel::
 
     size_t i = 0;
 
-    // start the actual leapfrog iteration
     for (int j = 0; j < nSteps; j++){
         
         std::vector<Core::Vector> velocityMolecules(nMolecules);
@@ -417,8 +448,14 @@ void CollisionModel::MDInteractionsModel::rk4Intern(std::vector<CollisionModel::
 }
 
 
-bool CollisionModel::MDInteractionsModel::rk4InternAdaptiveStep(std::vector<CollisionModel::Molecule*> moleculesPtr, double dt, double finalTime, double requiredRad){
-
+bool CollisionModel::MDInteractionsModel::rk4InternAdaptiveStep(std::vector<CollisionModel::Molecule*> moleculesPtr, double dt, double finalTime, 
+                                                                    double requiredRad){
+    static std::ofstream positionOut;
+    if(saveTrajectory_ == true){
+        if(!positionOut.is_open())
+            positionOut.open("position_output.txt");
+    }
+    
     
     double integrationTimeSum = 0;
     size_t nMolecules = moleculesPtr.size();
@@ -426,6 +463,7 @@ bool CollisionModel::MDInteractionsModel::rk4InternAdaptiveStep(std::vector<Coll
 
     size_t i = 0;
     int steps = 0;
+    double distance = 0.0;
     
     bool wasHit = false;
     std::vector<double> startDistances;
@@ -438,11 +476,11 @@ bool CollisionModel::MDInteractionsModel::rk4InternAdaptiveStep(std::vector<Coll
     std::vector<Core::Vector> positionMolecules(nMolecules);
     std::vector<Core::Vector> initialPositionMolecules(nMolecules);
     std::vector<Core::Vector> initialVelocityMolecules(nMolecules);
-    double length[6][5] = { {1./4, 0, 0, 0, 0},
-                                {3./32, 9./32, 0, 0, 0},
-                                {1932./2197, -7200./2197, 7296./2197, 0, 0},
-                                {439./216, -8, 3680./513, -645./4104, 0},
-                                {-8./27, 2, -3544./2565, 1859./4104, -11./40}};
+    double weight[6][5] = { {1./4, 0, 0, 0, 0},
+                            {3./32, 9./32, 0, 0, 0},
+                            {1932./2197, -7200./2197, 7296./2197, 0, 0},
+                            {439./216, -8, 3680./513, -645./4104, 0},
+                            {-8./27, 2, -3544./2565, 1859./4104, -11./40}};
     double mass[nMolecules];
     std::array<std::array<Core::Vector, 2>, 6> k; 
     std::array<std::array<Core::Vector, 2>, 6> l; 
@@ -493,7 +531,7 @@ bool CollisionModel::MDInteractionsModel::rk4InternAdaptiveStep(std::vector<Coll
             for(size_t m = 0; m < 5; m++){
                 i = 0;
                 for(auto* molecule : moleculesPtr){
-                    positionMolecules[i] += l[n-1][i]*length[n-1][m];
+                    positionMolecules[i] += l[n-1][i]*weight[n-1][m];
                     molecule->setComPos(positionMolecules[i]);
                     i++;
                 }
@@ -503,15 +541,28 @@ bool CollisionModel::MDInteractionsModel::rk4InternAdaptiveStep(std::vector<Coll
             for(size_t m = 0; m < 5; m++){
                 for(i = 0; i < nMolecules; i++){
                     k[n][i] = forceMolecules[i] * dt / mass[i];
-                    l[n][i] = (velocityMolecules[i] + k[n-1][i]*length[n-1][m])*dt;
+                    l[n][i] = (velocityMolecules[i] + k[n-1][i]*weight[n-1][m])*dt;
                 }
             }
              
         }
+        
+        if(saveTrajectory_ == true){
+            for(size_t k = 0; k < nMolecules; ++k){
+                for(size_t l = k+1; l < nMolecules; ++l){
+                    distance = (moleculesPtr[l]->getComPos() - moleculesPtr[k]->getComPos()).magnitude();
+                }
+            }
+        }
 
         i = 0;
         for(auto* molecule : moleculesPtr){
-            
+            if(saveTrajectory_ == true && molecule->getMolecularStructureName() == collisionMolecule_){
+                // std::cout << molecule->getMolecularStructureName() << " " << collisionMolecule_ <<std::endl;
+                writeTrajectory(distance, molecule->getComPos(), false, positionOut);
+            }
+
+
             //Core::Vector newComPosOrder5 = initialPositionMolecules[i] + (l[0][i] * 16./135 + l[2][i] * 6656./12825 + l[3][i] * 28561./56430 + l[4][i] * (-9./50) + l[5][i] * 2./55); 
             Core::Vector newComVelOrder5 = initialVelocityMolecules[i] + (k[0][i] * 16./135 + k[2][i] * 6656./12825 + k[3][i] * 28561./56430 + k[4][i] * (-9./50) + k[5][i] * 2./55); 
 
@@ -541,6 +592,11 @@ bool CollisionModel::MDInteractionsModel::rk4InternAdaptiveStep(std::vector<Coll
         for(size_t k = 0; k < nMolecules; ++k){
             for(size_t l = k+1; l < nMolecules; ++l){
                 if((moleculesPtr[l]->getComPos() - moleculesPtr[k]->getComPos()).magnitude() > startDistances[index++]){
+                    if(saveTrajectory_ == true && moleculesPtr[l]->getMolecularStructureName() == collisionMolecule_ && wasHit == true){
+                        std::cout << moleculesPtr[l]->getMolecularStructureName() << " " << collisionMolecule_ <<std::endl;
+                        writeTrajectory((moleculesPtr[l]->getComPos() - moleculesPtr[k]->getComPos()).magnitude(), 
+                                        moleculesPtr[l]->getComPos(), true, positionOut);
+                    }
                     return wasHit;
                 }
                 if((moleculesPtr[l]->getComPos() - moleculesPtr[k]->getComPos()).magnitude() <= requiredRad){

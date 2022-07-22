@@ -24,7 +24,7 @@ void performBenchmark(size_t nSamples, size_t nParticles){
 
     double diameterHe = CollisionModel::MDInteractionsModel::DIAMETER_HE;
     FileIO::MolecularStructureReader reader = FileIO::MolecularStructureReader();
-    reader.readMolecularStructure("test_molecularstructure_reader.csv");
+    std::unordered_map<std::string,  std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection = reader.readMolecularStructure("test_molecularstructure_reader.csv");
 
     std::vector<Core::uniquePartPtr>particles;
     std::vector<Core::Particle*>particlesPtrs;
@@ -36,7 +36,7 @@ void performBenchmark(size_t nSamples, size_t nParticles){
                 1.0,
                 39);
         particle->setVelocity(Core::Vector(600.0, 0.0, 0.0));
-        particle->setMolecularStructure(CollisionModel::MolecularStructure::molecularStructureCollection.at("Ar+"));
+        particle->setMolecularStructure(molecularStructureCollection.at("Ar+"));
         particle->setDiameter(particle->getMolecularStructure()->getDiameter());
         particlesPtrs.push_back(particle.get());
         particles.push_back(std::move(particle));
@@ -64,7 +64,7 @@ void performBenchmark(size_t nSamples, size_t nParticles){
     std::size_t i;
     #pragma omp parallel \
         default(none) \
-        firstprivate(particlesPtrs, nParticles, nSamples,  diameterHe)
+        firstprivate(particlesPtrs, nParticles, nSamples,  diameterHe, molecularStructureCollection)
     {
         CollisionModel::MDInteractionsModel mdSim = CollisionModel::MDInteractionsModel(
                 10000,
@@ -77,7 +77,10 @@ void performBenchmark(size_t nSamples, size_t nParticles){
                 1e-16,
                 2,
                 1,
-                25);
+                25, 
+                molecularStructureCollection, 
+                false, 
+                2e-10);
 
         for (size_t j = 0; j<nSamples; j++) {
             #pragma omp for schedule(dynamic, nParticles/20)

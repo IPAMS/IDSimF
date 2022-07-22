@@ -72,7 +72,8 @@ CollisionModel::Molecule::Molecule(const Core::Vector &comPos, const Core::Vecto
     dipole(structure->getDipole()),
     dipoleMag(structure->getDipoleMag()),
     atomCount(structure->getAtoms().size()),
-    diameter(structure->getDiameter())
+    diameter(structure->getDiameter()), 
+    molecularStructureName(structure->getName())
 {
     atoms.resize(atomCount);
     for(size_t i = 0; i < atomCount; i++) {
@@ -110,6 +111,9 @@ void CollisionModel::Molecule::setDiameter(double diam){
     this->diameter = diam;
 }
 
+void CollisionModel::Molecule::setMolecularStructureName(std::string name){
+    this->molecularStructureName = name;
+}
 
 /**
  * Gets the center-of-mass position
@@ -186,6 +190,13 @@ std::vector<std::shared_ptr<CollisionModel::Atom>>& CollisionModel::Molecule::ge
  */
 double CollisionModel::Molecule::getDiameter() const{
     return diameter;
+}
+
+/**
+ * Gets the identifier of the molecular structure 
+ */
+std::string CollisionModel::Molecule::getMolecularStructureName() const{
+    return molecularStructureName;
 }
 
 /**

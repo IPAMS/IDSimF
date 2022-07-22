@@ -31,9 +31,10 @@
  * @param atms the vector with atoms contained in the molecule
  * @param diam molecule diameter in m
  */
-CollisionModel::MolecularStructure::MolecularStructure(std::vector<std::shared_ptr<CollisionModel::Atom>> atms, double diam):
+CollisionModel::MolecularStructure::MolecularStructure(std::vector<std::shared_ptr<CollisionModel::Atom>> atms, double diam, std::string name):
     atoms(atms),
-    diameter(diam)
+    diameter(diam),
+    structureName(name)
 {
     this->calcDipole();
     this->calcMass();
@@ -47,6 +48,10 @@ CollisionModel::MolecularStructure::MolecularStructure(std::vector<std::shared_p
  */
 void CollisionModel::MolecularStructure::setDiameter(double diam){
     this->diameter = diam;
+}
+
+void CollisionModel::MolecularStructure::setName(std::string name){
+    this->structureName = name;
 }
 
 /**
@@ -103,6 +108,10 @@ std::vector<std::shared_ptr<CollisionModel::Atom>> CollisionModel::MolecularStru
  */
 double CollisionModel::MolecularStructure::getDiameter() const{
     return diameter;
+}
+
+std::string CollisionModel::MolecularStructure::getName() const{
+    return structureName;
 }
 
 /**
@@ -190,10 +199,10 @@ void CollisionModel::MolecularStructure::setIsIon(){
 }
 
 // create an empty static collection of molecular structures
-std::unordered_map<std::string, std::shared_ptr<CollisionModel::MolecularStructure> > CollisionModel::MolecularStructure::createCollection(){
+// std::unordered_map<std::string, std::shared_ptr<CollisionModel::MolecularStructure> > CollisionModel::MolecularStructure::createCollection(){
     
-    std::unordered_map<std::string, std::shared_ptr<CollisionModel::MolecularStructure> > molecularCollection;
-    return molecularCollection;
-}
+//     std::unordered_map<std::string, std::shared_ptr<CollisionModel::MolecularStructure> > molecularCollection;
+//     return molecularCollection;
+// }
 
-std::unordered_map<std::string, std::shared_ptr<CollisionModel::MolecularStructure> > CollisionModel::MolecularStructure::molecularStructureCollection = CollisionModel::MolecularStructure::createCollection();
+// std::unordered_map<std::string, std::shared_ptr<CollisionModel::MolecularStructure> > CollisionModel::MolecularStructure::molecularStructureCollection = CollisionModel::MolecularStructure::createCollection();
