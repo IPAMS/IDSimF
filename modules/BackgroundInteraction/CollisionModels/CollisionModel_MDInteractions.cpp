@@ -137,14 +137,14 @@ double CollisionModel::MDInteractionsModel::calcSign(double value){
     }
 }
 
-void CollisionModel::MDInteractionsModel::writeTrajectory(double distance, Core::Vector positionBgMolecule, bool endOfTrajectory, std::ofstream& file){
+void CollisionModel::MDInteractionsModel::writeTrajectory(double distance, Core::Vector positionBgMolecule, bool endOfTrajectory, std::ofstream& file, double time){
     if(endOfTrajectory == true){
         if(distance < trajectoryDistance_){
-            file << positionBgMolecule.x() << ", " << positionBgMolecule.y() << ", " << positionBgMolecule.z() << ", " << distance <<std::endl;
+            file << positionBgMolecule.x() << ", " << positionBgMolecule.y() << ", " << positionBgMolecule.z() << ", " << distance << ", " << time << std::endl;
         }
         file << "###" << std::endl;
     }else if(distance < trajectoryDistance_){
-        file << positionBgMolecule.x() << ", " << positionBgMolecule.y() << ", " << positionBgMolecule.z() << ", " << distance <<std::endl;
+        file << positionBgMolecule.x() << ", " << positionBgMolecule.y() << ", " << positionBgMolecule.z() << ", " << distance << ", " << time << std::endl;
     }
     
 }
@@ -558,8 +558,7 @@ bool CollisionModel::MDInteractionsModel::rk4InternAdaptiveStep(std::vector<Coll
         i = 0;
         for(auto* molecule : moleculesPtr){
             if(saveTrajectory_ == true && molecule->getMolecularStructureName() == collisionMolecule_){
-                // std::cout << molecule->getMolecularStructureName() << " " << collisionMolecule_ <<std::endl;
-                writeTrajectory(distance, molecule->getComPos(), false, positionOut);
+                writeTrajectory(distance, molecule->getComPos(), false, positionOut, integrationTimeSum);
             }
 
 
@@ -593,9 +592,8 @@ bool CollisionModel::MDInteractionsModel::rk4InternAdaptiveStep(std::vector<Coll
             for(size_t l = k+1; l < nMolecules; ++l){
                 if((moleculesPtr[l]->getComPos() - moleculesPtr[k]->getComPos()).magnitude() > startDistances[index++]){
                     if(saveTrajectory_ == true && moleculesPtr[l]->getMolecularStructureName() == collisionMolecule_ && wasHit == true){
-                        std::cout << moleculesPtr[l]->getMolecularStructureName() << " " << collisionMolecule_ <<std::endl;
                         writeTrajectory((moleculesPtr[l]->getComPos() - moleculesPtr[k]->getComPos()).magnitude(), 
-                                        moleculesPtr[l]->getComPos(), true, positionOut);
+                                        moleculesPtr[l]->getComPos(), true, positionOut, integrationTimeSum);
                     }
                     return wasHit;
                 }
