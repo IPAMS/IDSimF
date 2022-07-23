@@ -33,7 +33,6 @@
 #include "RS_ConcentrationFileWriter.hpp"
 #include "PSim_util.hpp"
 #include "PSim_constants.hpp"
-#include "Integration_verletIntegrator.hpp"
 #include "Integration_velocityIntegrator.hpp"
 #include "Integration_parallelVerletIntegrator.hpp"
 #include "FileIO_trajectoryHDF5Writer.hpp"

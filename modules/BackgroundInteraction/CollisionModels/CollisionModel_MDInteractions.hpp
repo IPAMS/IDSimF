@@ -73,9 +73,7 @@ namespace CollisionModel{
             double collisionRadiusScaling,
             double angleThetaScaling, 
             double spawnRadius,
-            std::unordered_map<std::string,  std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection, 
-            bool saveTrajectory, 
-            double trajectoryDistance);
+            std::unordered_map<std::string,  std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection);
 
         MDInteractionsModel(
             std::function<double(Core::Vector& location)> pressureFunction,
@@ -90,9 +88,7 @@ namespace CollisionModel{
             double collisionRadiusScaling,
             double angleThetaScaling,
             double spawnRadius,
-            std::unordered_map<std::string,  std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection,
-            bool saveTrajectory, 
-            double trajectoryDistance);
+            std::unordered_map<std::string,  std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection);
 
         MDInteractionsModel(
             std::function<double(Core::Vector& location)> pressureFunction,
@@ -107,13 +103,13 @@ namespace CollisionModel{
             double collisionRadiusScaling,
             double angleThetaScaling,
             double spawnRadius,
-            std::unordered_map<std::string,  std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection,
-            bool saveTrajectory, 
-            double trajectoryDistance);
+            std::unordered_map<std::string,  std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection);
+
+        void setTrajectoryWriter(const std::string& trajectoryFileName, double trajectoryDistance);
 
         double calcSign(double value);
 
-        void writeTrajectory(double distance, Core::Vector positionBgMolecule, bool endOfTrajectory, std::ofstream& file, double time);
+        void writeTrajectory(double distance, Core::Vector positionBgMolecule, bool endOfTrajectory, std::ofstream* file, double time);
 
         bool leapfrogIntern(std::vector<CollisionModel::Molecule*> moleculesPtr, double dt, double finalTime, double requiredRad);
 
@@ -152,6 +148,7 @@ namespace CollisionModel{
         double spawnRadius_ = 0.0;
         bool saveTrajectory_ = false;
         double trajectoryDistance_ = 0.0;
+        std::unique_ptr<std::ofstream> trajectoryOutputStream_;
 
         std::function<double(Core::Vector&)> pressureFunction_ = nullptr; ///< a spatial pressure function
         std::function<Core::Vector(Core::Vector&)> velocityFunction_ = nullptr; ///< a spatial velocity function
