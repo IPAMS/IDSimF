@@ -407,9 +407,11 @@ int main(int argc, const char *argv[]){
                         collisionRadiusScaling,
                         angleThetaScaling,
                         spawnRadius_m, 
-                        molecularStructureCollection,
-                        saveTrajectory, 
-                        trajectoryDistance_m);
+                        molecularStructureCollection);
+
+                if (saveTrajectory){
+                    mdModel->setTrajectoryWriter(projectName+"_md_trajectories.txt", trajectoryDistance_m);
+                }
                 mdModels.emplace_back(std::move(mdModel));
             }
 
