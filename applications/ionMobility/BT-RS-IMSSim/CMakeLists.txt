@@ -24,6 +24,10 @@ add_test(NAME BT-RS-IMSSim_waterCluster_simple COMMAND ${PROJECT_NAME}
 add_test(NAME BT-RS-IMSSim_waterCluster_thermalizing COMMAND ${PROJECT_NAME}
         "example/RS_waterCluster_thermalizing.json" "run_BT-RS-IMSSim_waterCluster_thermalizing" -n ${N_THREADS})
 
+add_test(NAME BT-RS-IMSSim_waterCluster_MD_short COMMAND ${PROJECT_NAME}
+        "example/RS_waterCluster_MD_short.json" "run_BT-RS-IMSSim_waterCluster_MD_short" -n ${N_THREADS})
+
+
 add_custom_command(TARGET ${PROJECT_NAME} PRE_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${CMAKE_CURRENT_SOURCE_DIR}/example/ $<TARGET_FILE_DIR:${PROJECT_NAME}>/example/)
