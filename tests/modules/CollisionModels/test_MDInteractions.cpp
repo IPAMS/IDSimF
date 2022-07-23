@@ -52,16 +52,17 @@ TEST_CASE("Basic test MD Interactions model", "[CollisionModels][MDInteractionsM
                                                                                     1E-16, 
                                                                                     1, 4, 
                                                                                     35e-10, 
-                                                                                    molecularStructureCollection, 
-                                                                                    false, 
-                                                                                    2e-10);
-    
-    for(int i = 0; i < 1; i++)
-        mdSim.modifyVelocity(ion, 2e-11);
-        
+                                                                                    molecularStructureCollection);
+
+    mdSim.setTrajectoryWriter("MD_collisions_microscopic_trajectories_test.txt", 2e-8);
+
+    mdSim.modifyVelocity(ion, 2e-11);
+
     CHECK(Approx(ion.getVelocity().x()) ==  616.7784099091);
     CHECK(Approx(ion.getVelocity().y()) ==  9.9825566288);
     CHECK(Approx(ion.getVelocity().z()) ==  -19.0017715144);
 
-    
+    //for(int i = 0; i < 1; i++)
+    //    mdSim.modifyVelocity(ion, 2e-11);
+
 }
