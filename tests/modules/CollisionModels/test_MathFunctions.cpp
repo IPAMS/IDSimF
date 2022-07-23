@@ -27,7 +27,7 @@
 
 #include "CollisionModel_MathFunctions.hpp"
 #include "catch.hpp"
-
+#include <array>
 
 
 TEST_CASE("Test random functions implementation", "[CollisionModels][Math]") {
