@@ -189,14 +189,18 @@ TEST_CASE( "Test RS simulations", "[RS][Simulation]") {
     }
 
     SECTION( "Parallelized simulation with water clusters, static reaction conditions and post reaction function should be correct") {
+
+        //switch back to real random generator, since the test generator induced artifacts with multithreading
+        Core::globalRandomGeneratorPool = std::make_unique<Core::RandomGeneratorPool>();
+
         RS::Simulation sim = RS::Simulation(parser.parseFile("RS_waterCluster_test.conf"));
         RS::SimulationConfiguration* simConf = sim.simulationConfiguration();
 
         RS::Substance* Cl1 = simConf->substanceByName("Cl_1");
 
         std::size_t nParticles = 100000;
-        int nSteps = 200;
-        double dt = 1.0e-4;
+        int nSteps = 500;
+        double dt = 6.0e-4;
         std::vector<uniqueReactivePartPtr> particles;
         for (std::size_t i=0; i < nParticles; ++i) {
             uniqueReactivePartPtr particle = std::make_unique<RS::ReactiveParticle>(Cl1);
@@ -230,13 +234,16 @@ TEST_CASE( "Test RS simulations", "[RS][Simulation]") {
         CHECK(sim.timestep() == nSteps);
         CHECK(sim.simulationTime() == Approx(nSteps* dt));
 
-        RS::AbstractReaction* reacCl1Forward = simConf->reaction(0);
-        RS::AbstractReaction* reacCl2Forward = simConf->reaction(2);
-        CHECK(reacCl1Forward->getLabel() == "cl1_forward");
-        CHECK(reacCl2Forward->getLabel() == "cl2_forward");
+        RS::AbstractReaction* reacCl3Forward = simConf->reaction(4);
+        RS::AbstractReaction* reacCl4Forward = simConf->reaction(6);
+        CHECK(reacCl3Forward->getLabel() == "cl3_forward");
+        CHECK(reacCl4Forward->getLabel() == "cl4_forward");
 
-        CHECK( ( sim.reactionEvents(reacCl1Forward) > 85000 && sim.reactionEvents(reacCl1Forward) < 87500) );
-        CHECK( ( sim.reactionEvents(reacCl2Forward) > 58000 && sim.reactionEvents(reacCl2Forward) < 61000) );
+        sim.printConcentrations();
+        sim.printReactionStatistics();
+
+        CHECK( ( sim.reactionEvents(reacCl3Forward) > 383000 && sim.reactionEvents(reacCl3Forward) < 386000) );
+        CHECK( ( sim.reactionEvents(reacCl4Forward) > 3022000 && sim.reactionEvents(reacCl4Forward) < 3029000) );
         CHECK( sim.totalReactionEvents() > 0);
         CHECK( sim.totalReactionEvents()  == totalCountedWithFunction);
         CHECK( particles[0]->getIntegerAttribute("reacted") > 0);
