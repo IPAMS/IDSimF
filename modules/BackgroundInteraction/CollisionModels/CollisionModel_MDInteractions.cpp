@@ -121,18 +121,13 @@ CollisionModel::MDInteractionsModel::MDInteractionsModel(std::function<double(Co
  */
 void CollisionModel::MDInteractionsModel::setTrajectoryWriter(const std::string& trajectoryFileName,
                                                               double trajectoryDistance,
-                                                              std::function<bool()> trajectoryRecordingActiveFunction) {
+                                                              int recordTrajectoryStartTimestep) {
 
     trajectoryOutputStream_ = std::make_unique<std::ofstream>();
     trajectoryOutputStream_->open(trajectoryFileName);
 
     if (trajectoryOutputStream_->good()){
-        if (trajectoryRecordingActiveFunction ==nullptr) {
-            trajectoryRecordingActive_ = [](){ return true; };
-        }
-        else {
-            trajectoryRecordingActive_ = std::move(trajectoryRecordingActiveFunction);
-        }
+        recordTrajectoryStartTimeStep_ = recordTrajectoryStartTimestep;
         trajectoryDistance_ = trajectoryDistance;
     }
     else{
@@ -170,8 +165,10 @@ void CollisionModel::MDInteractionsModel::updateModelParticleParameters(Core::Pa
 
 }
 
-void CollisionModel::MDInteractionsModel::updateModelTimestepParameters(int timestep, double /*time*/) const {
-
+void CollisionModel::MDInteractionsModel::updateModelTimestepParameters(int timestep, double /*time*/) {
+    if (timestep > recordTrajectoryStartTimeStep_){
+        recordTrajectory_ = true;
+    }
 }
 
 void CollisionModel::MDInteractionsModel::modifyAcceleration(Core::Vector& /*acceleration*/, Core::Particle& /*particle*/,
@@ -558,7 +555,7 @@ bool CollisionModel::MDInteractionsModel::rk4InternAdaptiveStep(std::vector<Coll
 
         }
 
-        if(trajectoryRecordingActive_() == true){
+        if(recordTrajectory_ == true){
             for(size_t k = 0; k < nMolecules; ++k){
                 for(size_t l = k+1; l < nMolecules; ++l){
                     distance = (moleculesPtr[l]->getComPos() - moleculesPtr[k]->getComPos()).magnitude();
@@ -568,7 +565,7 @@ bool CollisionModel::MDInteractionsModel::rk4InternAdaptiveStep(std::vector<Coll
 
         i = 0;
         for(auto* molecule : moleculesPtr){
-            if(trajectoryRecordingActive_() == true && molecule->getMolecularStructureName() == collisionMolecule_){
+            if(recordTrajectory_ == true && molecule->getMolecularStructureName() == collisionMolecule_){
                 writeTrajectory(distance, molecule->getComPos(), false, trajectoryOutputStream_.get(), integrationTimeSum);
             }
 
@@ -602,7 +599,7 @@ bool CollisionModel::MDInteractionsModel::rk4InternAdaptiveStep(std::vector<Coll
         for(size_t k = 0; k < nMolecules; ++k){
             for(size_t l = k+1; l < nMolecules; ++l){
                 if((moleculesPtr[l]->getComPos() - moleculesPtr[k]->getComPos()).magnitude() > startDistances[index++]){
-                    if(trajectoryRecordingActive_() == true && moleculesPtr[l]->getMolecularStructureName() == collisionMolecule_ && wasHit == true){
+                    if(recordTrajectory_ == true && moleculesPtr[l]->getMolecularStructureName() == collisionMolecule_ && wasHit == true){
                         writeTrajectory((moleculesPtr[l]->getComPos() - moleculesPtr[k]->getComPos()).magnitude(),
                                         moleculesPtr[l]->getComPos(), true, trajectoryOutputStream_.get(), integrationTimeSum);
                     }

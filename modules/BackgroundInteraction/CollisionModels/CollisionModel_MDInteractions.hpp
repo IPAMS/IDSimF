@@ -107,7 +107,7 @@ namespace CollisionModel{
 
         void setTrajectoryWriter(const std::string& trajectoryFileName,
                                  double trajectoryDistance,
-                                 std::function<bool()> trajectoryRecordingActiveFct = nullptr);
+                                 int startTimeStep=0);
 
         double calcSign(double value);
 
@@ -127,7 +127,7 @@ namespace CollisionModel{
 
         void updateModelParticleParameters(Core::Particle& ion) const;
 
-        void updateModelTimestepParameters(int timestep, double time) const;
+        void updateModelTimestepParameters(int timestep, double time);
 
         void modifyAcceleration(Core::Vector& acceleration,
                                         Core::Particle& particle,
@@ -151,6 +151,8 @@ namespace CollisionModel{
         double angleThetaScaling_ = 0.0;
         double spawnRadius_ = 0.0;
         double trajectoryDistance_ = 0.0;
+        bool recordTrajectory_ = false;
+        int recordTrajectoryStartTimeStep_ = 0;
         std::unique_ptr<std::ofstream> trajectoryOutputStream_;
 
         std::function<double(Core::Vector&)> pressureFunction_ = nullptr; ///< a spatial pressure function
@@ -159,8 +161,6 @@ namespace CollisionModel{
         std::function<void(RS::CollisionConditions, Core::Particle&)> afterCollisionActionFunction_ = nullptr;
         ///< Function with things to do after a collision (e.g. collision based chemical reactions)
         std::unordered_map<std::string,  std::shared_ptr<MolecularStructure>> molecularStructureCollection_;
-
-        std::function<bool()> trajectoryRecordingActive_ = [](){ return false; }; ///< Function which decides if trajectory recording is active
     };
 
 }

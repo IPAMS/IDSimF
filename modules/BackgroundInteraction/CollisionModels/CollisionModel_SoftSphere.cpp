@@ -29,7 +29,7 @@ void CollisionModel::SoftSphereModel::updateModelParticleParameters(Core::Partic
 
 }
 
-void CollisionModel::SoftSphereModel::updateModelTimestepParameters(int /*timestep*/, double /*time*/) const {}
+void CollisionModel::SoftSphereModel::updateModelTimestepParameters(int /*timestep*/, double /*time*/) {}
 
 void CollisionModel::SoftSphereModel::modifyAcceleration(Core::Vector &acceleration, Core::Particle &particle,
                                                          double dt) {

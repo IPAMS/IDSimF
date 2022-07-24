@@ -217,7 +217,7 @@ void CollisionModel::StatisticalDiffusionModel::initializeModelParticleParameter
 /**
  * Updates model parameters dependent on timestep or simulation time
  */
-void CollisionModel::StatisticalDiffusionModel::updateModelTimestepParameters(int /*timestep*/, double /*time*/) const {}
+void CollisionModel::StatisticalDiffusionModel::updateModelTimestepParameters(int /*timestep*/, double /*time*/) {}
 
 /**
  * Modifies the acceleration due to the background gas interaction
