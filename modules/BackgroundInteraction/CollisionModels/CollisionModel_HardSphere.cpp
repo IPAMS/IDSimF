@@ -115,7 +115,7 @@ CollisionModel::HardSphereModel::HardSphereModel(
 
 void CollisionModel::HardSphereModel::updateModelParticleParameters(Core::Particle& /*ion*/) const {}
 
-void CollisionModel::HardSphereModel::initializeModelParameters(Core::Particle& /*ion*/) const {}
+void CollisionModel::HardSphereModel::initializeModelParticleParameters(Core::Particle& /*ion*/) const {}
 
 void CollisionModel::HardSphereModel::updateModelTimestepParameters(int /*timestep*/, double /*time*/) const {}
 

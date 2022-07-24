@@ -123,7 +123,7 @@ namespace CollisionModel{
 
         // std::vector<Core::Vector> forceFieldMDRk4(std::vector<CollisionModel::Molecule*> moleculesPtr, std::vector<Core::Vector>& r);
 
-        void initializeModelParameters(Core::Particle& ion) const;
+        void initializeModelParticleParameters(Core::Particle& ion) const;
 
         void updateModelParticleParameters(Core::Particle& ion) const;
 

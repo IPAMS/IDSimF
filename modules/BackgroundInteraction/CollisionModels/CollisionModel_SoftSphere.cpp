@@ -21,7 +21,7 @@
 
 #include "CollisionModel_SoftSphere.hpp"
 
-void CollisionModel::SoftSphereModel::initializeModelParameters(Core::Particle &ion) const {
+void CollisionModel::SoftSphereModel::initializeModelParticleParameters(Core::Particle &ion) const {
 
 }
 

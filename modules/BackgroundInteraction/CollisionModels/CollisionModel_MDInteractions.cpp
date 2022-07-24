@@ -162,7 +162,7 @@ void CollisionModel::MDInteractionsModel::writeTrajectory(double distance, Core:
 
 }
 
-void CollisionModel::MDInteractionsModel::initializeModelParameters(Core::Particle& /*ion*/) const {
+void CollisionModel::MDInteractionsModel::initializeModelParticleParameters(Core::Particle& /*ion*/) const {
 
 }
 

@@ -39,7 +39,7 @@ namespace CollisionModel {
 
             virtual ~AbstractCollisionModel() = default;
 
-            virtual void initializeModelParameters(Core::Particle& ion) const = 0;
+            virtual void initializeModelParticleParameters(Core::Particle& ion) const = 0;
             virtual void updateModelParticleParameters(Core::Particle& ion) const = 0;
             virtual void updateModelTimestepParameters(int timestep, double time) const = 0;
 

@@ -209,7 +209,7 @@ void CollisionModel::StatisticalDiffusionModel::updateModelParticleParameters(Co
 /**
  * Inits model parameters which are not dependent on ion position / timestep for an ion
  */
-void CollisionModel::StatisticalDiffusionModel::initializeModelParameters(Core::Particle &ion) const {
+void CollisionModel::StatisticalDiffusionModel::initializeModelParticleParameters(Core::Particle &ion) const {
     this->setSTPParameters(ion);
 }
 

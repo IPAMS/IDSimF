@@ -42,11 +42,11 @@ void CollisionModel::MultiCollisionModel::updateModelParticleParameters(Core::Pa
 }
 
 /**
- * Calls initializeModelParameters for all combined sub models
+ * Calls initializeModelParticleParameters for all combined sub models
  */
-void CollisionModel::MultiCollisionModel::initializeModelParameters(Core::Particle &ion) const{
+void CollisionModel::MultiCollisionModel::initializeModelParticleParameters(Core::Particle &ion) const{
     for(const auto &model: models_){
-        model->initializeModelParameters(ion);
+        model->initializeModelParticleParameters(ion);
     }
 }
 
