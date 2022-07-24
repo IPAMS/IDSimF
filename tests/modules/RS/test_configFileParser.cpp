@@ -121,6 +121,7 @@ TEST_CASE("Test parsing of chemical systems with RS config file parser", "[RS][C
         reac_compare_1.updateStaticReactionConcentration();
 
         reactionConditions.temperature = 598;
+        reactionConditions.pressure = 1.0;
         double k_test = reac_compare_1.attemptReaction(reactionConditions, &dummyParticle, 1.0).reactionProbability;
         double k_1 = r1->attemptReaction(reactionConditions, &dummyParticle, 1.0).reactionProbability;
 
@@ -137,7 +138,6 @@ TEST_CASE("Test parsing of chemical systems with RS config file parser", "[RS][C
                 "a field dependent vant hoff test reaction");
 
         reactionConditions.electricField= 10000;
-
 
         k_test = reac_compare_3.attemptReaction(reactionConditions, &dummyParticle, 1.0).reactionProbability;
         double k_3 = r3->attemptReaction(reactionConditions, &dummyParticle, 1.0).reactionProbability;
