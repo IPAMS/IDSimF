@@ -111,6 +111,7 @@ int main(int argc, const char *argv[]){
         double spawnRadius_m = 0; 
         double trajectoryDistance_m = 0;
         bool saveTrajectory = false;
+        int saveTrajectoryStartTimeStep = 0;
         if(transportModelType=="btree_MD"){
             collisionGasPolarizability_m3 = simConf->doubleVectorParameter("collision_gas_polarizability_m3");
             collisionGasIdentifier = simConf->stringVectorParameter("collision_gas_identifier");
@@ -122,6 +123,7 @@ int main(int argc, const char *argv[]){
             spawnRadius_m = simConf->doubleParameter("spawn_radius_m");
             saveTrajectory = simConf->boolParameter("save_trajectory");
             trajectoryDistance_m = simConf->doubleParameter("trajectory_distance_m");
+            saveTrajectoryStartTimeStep = simConf->intParameter("trajectory_start_time_step");
         }
 
         std::size_t nBackgroundGases = backgroundPartialPressures_Pa.size();
@@ -410,7 +412,8 @@ int main(int argc, const char *argv[]){
                         molecularStructureCollection);
 
                 if (saveTrajectory){
-                    mdModel->setTrajectoryWriter(projectName+"_md_trajectories.txt", trajectoryDistance_m);
+                    mdModel->setTrajectoryWriter(projectName+"_md_trajectories.txt",
+                                                 trajectoryDistance_m, saveTrajectoryStartTimeStep);
                 }
                 mdModels.emplace_back(std::move(mdModel));
             }
@@ -471,9 +474,9 @@ int main(int argc, const char *argv[]){
                 particles[i]->setFloatAttribute(key_ChemicalIndex, substIndex);
 
                 if (reacted && collisionModelType==SDS) {
-                    //we had an reaction event: update the collision model parameters for the particle which are not
+                    //we had a reaction event: update the collision model parameters for the particle which are not
                     //based on location (mostly STP parameters in SDS)
-                    collisionModelPtr->initializeModelParameters(*particles[i]);
+                    collisionModelPtr->initializeModelParticleParameters(*particles[i]);
                 }
             }
             rsSim.advanceTimestep(dt_s);
