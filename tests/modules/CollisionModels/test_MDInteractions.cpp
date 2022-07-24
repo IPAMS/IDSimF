@@ -64,5 +64,4 @@ TEST_CASE("Basic test MD Interactions model", "[CollisionModels][MDInteractionsM
 
     //for(int i = 0; i < 1; i++)
     //    mdSim.modifyVelocity(ion, 2e-11);
-
 }

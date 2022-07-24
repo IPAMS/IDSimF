@@ -33,11 +33,11 @@ CollisionModel::MultiCollisionModel::MultiCollisionModel(
         models_(std::move(models)){}
 
 /**
- * Calls updateModelParameters for all combined sub models
+ * Calls updateModelParticleParameters for all combined sub models
  */
-void CollisionModel::MultiCollisionModel::updateModelParameters(Core::Particle &ion) const{
+void CollisionModel::MultiCollisionModel::updateModelParticleParameters(Core::Particle &ion) const{
     for(const auto &model: models_){
-        model->updateModelParameters(ion);
+        model->updateModelParticleParameters(ion);
     }
 }
 
@@ -47,6 +47,15 @@ void CollisionModel::MultiCollisionModel::updateModelParameters(Core::Particle &
 void CollisionModel::MultiCollisionModel::initializeModelParameters(Core::Particle &ion) const{
     for(const auto &model: models_){
         model->initializeModelParameters(ion);
+    }
+}
+
+/**
+ * Calls updateModelTimestepParameters for all combined sub models
+ */
+void CollisionModel::MultiCollisionModel::updateModelTimestepParameters(int timestep, double time) const {
+    for(const auto &model: models_){
+        model->updateModelTimestepParameters(timestep, time);
     }
 }
 

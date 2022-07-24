@@ -113,9 +113,11 @@ CollisionModel::HardSphereModel::HardSphereModel(
         temperatureFunction_(std::move(temperatureFunction)),
         afterCollisionActionFunction_(std::move(afterCollisionFunction)) { }
 
-void CollisionModel::HardSphereModel::updateModelParameters(Core::Particle& /*ion*/) const {}
+void CollisionModel::HardSphereModel::updateModelParticleParameters(Core::Particle& /*ion*/) const {}
 
 void CollisionModel::HardSphereModel::initializeModelParameters(Core::Particle& /*ion*/) const {}
+
+void CollisionModel::HardSphereModel::updateModelTimestepParameters(int /*timestep*/, double /*time*/) const {}
 
 void CollisionModel::HardSphereModel::modifyAcceleration(Core::Vector& /*acceleration*/, Core::Particle& /*ion*/,
                                                          double /*dt*/) {}

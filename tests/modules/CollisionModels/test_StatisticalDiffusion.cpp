@@ -44,7 +44,7 @@ TEST_CASE( "Test SDS collison model", "[CollisionModels][SDS]") {
         Core::Particle ion;
         ion.setMassAMU(100);
         sds.setSTPParameters(ion);
-        sds.updateModelParameters(ion);
+        sds.updateModelParticleParameters(ion);
         for (int i=0; i< 100; i++){
             //Core::Vector position = ion.getLocation();
             sds.modifyPosition(ion.getLocation(),ion,1e-2);
@@ -62,7 +62,7 @@ TEST_CASE( "Test SDS collison model", "[CollisionModels][SDS]") {
         Core::Particle ion;
         ion.setMassAMU(12);
         sds.setSTPParameters(ion);
-        sds.updateModelParameters(ion);
+        sds.updateModelParticleParameters(ion);
         for (int i=0; i< 100; i++){
             //Core::Vector position = ion.getLocation();
             sds.modifyPosition(ion.getLocation(),ion,1e-2);
