@@ -29,7 +29,7 @@ void performBenchmark(int nSamples, double dt){
     ion.setMassAMU(100);
     ion.setVelocity({100,0.0,0.0});
     sds.setSTPParameters(ion);
-    sds.updateModelParameters(ion);
+    sds.updateModelParticleParameters(ion);
 
     for (int i=0; i< nSamples; ++i){
         Core::Vector acceleration {200, 0.0, 0.0};

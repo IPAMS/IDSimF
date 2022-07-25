@@ -34,6 +34,14 @@
 #include "FileIO_MolecularStructureReader.hpp"
 #include <iostream>
 
+std::string readTextFile(std::string filename){
+    std::ifstream ifs(filename);
+    std::string content;
+    content.assign( (std::istreambuf_iterator<char>(ifs) ), (std::istreambuf_iterator<char>() ) );
+
+    return content;
+}
+
 TEST_CASE("Basic test MD Interactions model", "[CollisionModels][MDInteractionsModel]") {
 
     Core::globalRandomGeneratorPool = std::make_unique<Core::TestRandomGeneratorPool>();
@@ -54,15 +62,34 @@ TEST_CASE("Basic test MD Interactions model", "[CollisionModels][MDInteractionsM
                                                                                     35e-10, 
                                                                                     molecularStructureCollection);
 
-    mdSim.setTrajectoryWriter("MD_collisions_microscopic_trajectories_test.txt", 2e-8);
-
-    mdSim.modifyVelocity(ion, 2e-11);
+    double dt = 2e-11;
+    mdSim.setTrajectoryWriter("MD_collisions_microscopic_trajectories_test.txt", 2e-8, 5);
+    mdSim.modifyVelocity(ion, dt);
 
     CHECK(Approx(ion.getVelocity().x()) ==  616.7784099091);
     CHECK(Approx(ion.getVelocity().y()) ==  9.9825566288);
     CHECK(Approx(ion.getVelocity().z()) ==  -19.0017715144);
 
-    //for(int i = 0; i < 1; i++)
-    //    mdSim.modifyVelocity(ion, 2e-11);
 
+    int timestep = 0;
+    double time = 0.0;
+    for(int i = 0; i < 4; i++) {
+        mdSim.updateModelTimestepParameters(timestep, time);
+        mdSim.modifyVelocity(ion, 2e-11);
+        timestep++;
+        time += dt;
+    }
+
+    std::string readBack_early = readTextFile("MD_collisions_microscopic_trajectories_test.txt");
+    CHECK(readBack_early == "");
+
+    for(int i = 0; i < 4; i++) {
+        mdSim.updateModelTimestepParameters(timestep, time);
+        mdSim.modifyVelocity(ion, 2e-11);
+        timestep++;
+        time += dt;
+    }
+
+    std::string readBack_late = readTextFile("MD_collisions_microscopic_trajectories_test.txt");
+    CHECK(readBack_late.size() == 611638);
 }

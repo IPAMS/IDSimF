@@ -21,13 +21,15 @@
 
 #include "CollisionModel_SoftSphere.hpp"
 
-void CollisionModel::SoftSphereModel::initializeModelParameters(Core::Particle &ion) const {
+void CollisionModel::SoftSphereModel::initializeModelParticleParameters(Core::Particle &ion) const {
 
 }
 
-void CollisionModel::SoftSphereModel::updateModelParameters(Core::Particle &ion) const {
+void CollisionModel::SoftSphereModel::updateModelParticleParameters(Core::Particle &ion) const {
 
 }
+
+void CollisionModel::SoftSphereModel::updateModelTimestepParameters(int /*timestep*/, double /*time*/) {}
 
 void CollisionModel::SoftSphereModel::modifyAcceleration(Core::Vector &acceleration, Core::Particle &particle,
                                                          double dt) {

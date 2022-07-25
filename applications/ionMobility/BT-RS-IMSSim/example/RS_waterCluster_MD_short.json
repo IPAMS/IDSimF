@@ -26,5 +26,6 @@
   "angle_theta_scaling":1,
   "spawn_radius_m":25e-10,
   "save_trajectory":"true",
-  "trajectory_distance_m":10e-10
+  "trajectory_distance_m":10e-10,
+  "trajectory_start_time_step":100
 }

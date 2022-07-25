@@ -105,7 +105,9 @@ namespace CollisionModel{
             double spawnRadius,
             std::unordered_map<std::string,  std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection);
 
-        void setTrajectoryWriter(const std::string& trajectoryFileName, double trajectoryDistance);
+        void setTrajectoryWriter(const std::string& trajectoryFileName,
+                                 double trajectoryDistance,
+                                 int startTimeStep=0);
 
         double calcSign(double value);
 
@@ -121,9 +123,11 @@ namespace CollisionModel{
 
         // std::vector<Core::Vector> forceFieldMDRk4(std::vector<CollisionModel::Molecule*> moleculesPtr, std::vector<Core::Vector>& r);
 
-        void initializeModelParameters(Core::Particle& ion) const;
+        void initializeModelParticleParameters(Core::Particle& ion) const;
 
-        void updateModelParameters(Core::Particle& ion) const;
+        void updateModelParticleParameters(Core::Particle& ion) const;
+
+        void updateModelTimestepParameters(int timestep, double time);
 
         void modifyAcceleration(Core::Vector& acceleration,
                                         Core::Particle& particle,
@@ -146,8 +150,9 @@ namespace CollisionModel{
         double collisionRadiusScaling_ = 0.0;
         double angleThetaScaling_ = 0.0;
         double spawnRadius_ = 0.0;
-        bool saveTrajectory_ = false;
         double trajectoryDistance_ = 0.0;
+        bool recordTrajectory_ = false;
+        int recordTrajectoryStartTimeStep_ = 0;
         std::unique_ptr<std::ofstream> trajectoryOutputStream_;
 
         std::function<double(Core::Vector&)> pressureFunction_ = nullptr; ///< a spatial pressure function

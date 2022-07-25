@@ -78,9 +78,7 @@ void performBenchmark(size_t nSamples, size_t nParticles){
                 2,
                 1,
                 25, 
-                molecularStructureCollection, 
-                false, 
-                2e-10);
+                molecularStructureCollection);
 
         for (size_t j = 0; j<nSamples; j++) {
             #pragma omp for schedule(dynamic, nParticles/20)
