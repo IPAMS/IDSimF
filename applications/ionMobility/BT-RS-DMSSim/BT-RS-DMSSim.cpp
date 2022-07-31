@@ -274,7 +274,7 @@ int main(int argc, const char * argv[]) {
 
         auto timestepWriteFct =
                 [&trajectoryWriter, &voltageWriter, trajectoryWriteInterval, &rsSim, &resultFilewriter, concentrationWriteInterval,
-                 &totalFieldNow_VPerM, &logger, &meanZPos]
+                 &totalFieldNow_VPerM, &logger]
                         (std::vector<Core::Particle*>& particles, double time, int timestep,
                          bool lastTimestep) {
 
@@ -289,8 +289,8 @@ int main(int argc, const char * argv[]) {
                         logger->info("finished ts:{} time:{:.2e}", timestep, time);
                     }
                     else if (timestep%trajectoryWriteInterval==0) {
-                        logger->info("ts:{}  time:{:.2e} average cloud z position:({:.2e})",
-                                timestep, time, meanZPos);
+                        logger->info("ts:{}  time:{:.2e}",
+                                timestep, time);
                         rsSim.logConcentrations(logger);
                         trajectoryWriter.writeTimestep(particles, time);
                     }
