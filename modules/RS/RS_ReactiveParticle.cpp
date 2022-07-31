@@ -38,6 +38,12 @@ RS::ReactiveParticle::ReactiveParticle(Substance* species, Core::Vector location
     this->setSpecies(species);
 }
 
+/**
+ * Sets a new species for the reactive particle
+ *
+ * Warning: This sets the low field mobility *and* the actual current mobility to the
+ * low field mobility of the species
+ */
 void RS::ReactiveParticle::setSpecies(RS::Substance* species){
     species_ = species;
     this->updateParticleParametersFromSpecies_();
@@ -49,6 +55,7 @@ RS::Substance* RS::ReactiveParticle::getSpecies() const{
 
 void RS::ReactiveParticle::updateParticleParametersFromSpecies_() {
     RS::Substance* species = this->getSpecies();
+    this->setLowFieldMobility(species->lowFieldMobility());
     this->setMobility(species->lowFieldMobility());
     this->setMassAMU(species->mass());
     this->setDiameter(species->collisionDiameter());
