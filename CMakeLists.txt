@@ -10,7 +10,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 add_compile_options(-Wdelete-non-virtual-dtor -Wall -Wextra -Wsign-conversion -Wfloat-equal -Wfloat-conversion -Wimplicit-fallthrough)
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-    add_compile_options(-Wshorten-64-to-32) #-Wzero-as-null-pointer-constant)
+    add_compile_options(-Wshorten-64-to-32 -stdlib=libc++) #-Wzero-as-null-pointer-constant)
+    add_link_options(-stdlib=libc++)
 endif()
 
 ## get number of cores for parallel test runs:
@@ -97,6 +98,7 @@ add_subdirectory (tests/benchmarks/filewriter/HDF5filewriter)
 add_subdirectory (tests/benchmarks/collision_hardsphere/runtime_benchmark)
 add_subdirectory (tests/benchmarks/collision_hardsphere/maxwell_benchmark)
 add_subdirectory (tests/benchmarks/collision_sds/runtime_benchmark)
+add_subdirectory (tests/benchmarks/collision_md/runtime_benchmark)
 add_subdirectory (tests/benchmarks/RS/runtime_benchmark)
 add_subdirectory (tests/benchmarks/simionPA/runtime_benchmark)
 add_subdirectory (tests/benchmarks/simionPA/samplingErrors_benchmark)

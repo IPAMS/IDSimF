@@ -48,18 +48,18 @@ namespace CollisionModel{
 
     public:
 
-        void initializeModelParameters(Core::Particle& ion) const;
-
-        void updateModelParameters(Core::Particle& ion) const;
+        void initializeModelParticleParameters(Core::Particle& ion) const override;
+        void updateModelParticleParameters(Core::Particle& ion) const override;
+        void updateModelTimestepParameters(int timestep, double time) override;
 
         void modifyAcceleration(Core::Vector& acceleration,
                                         Core::Particle& particle,
-                                        double dt);
+                                        double dt) override;
         void modifyVelocity(Core::Particle& particle,
-                                    double dt);
+                                    double dt)  override;
         void modifyPosition(Core::Vector& position,
                                     Core::Particle& particle,
-                                    double dt);
+                                    double dt) override;
     };
 
 }

@@ -373,7 +373,7 @@ int main(int argc, const char * argv[]) {
         auto particlesHasReactedFct = [&collisionModelPtr, &substanceIndices](RS::ReactiveParticle* particle){
             //we had an reaction event: Count it (access to total counted value has to be synchronized)
             if (collisionModelPtr != nullptr) {
-                collisionModelPtr->initializeModelParameters(*particle);
+                collisionModelPtr->initializeModelParticleParameters(*particle);
             }
             int substIndex = substanceIndices.at(particle->getSpecies());
             particle->setIntegerAttribute(key_ChemicalIndex, substIndex);

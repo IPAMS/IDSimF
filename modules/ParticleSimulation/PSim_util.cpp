@@ -184,6 +184,29 @@ std::vector<Core::Vector> ParticleSimulation::util::getRandomPositionsInBox(unsi
 }
  */
 
+std::vector<Core::Vector> ParticleSimulation::util::getPositionsOnGrid(Core::Vector corner, Core::Vector boxSize, unsigned int nPerDirection){
+
+    std::vector<Core::Vector> result;
+    for (unsigned int i=0; i<nPerDirection; i++){
+        double pX = i*boxSize.x()/nPerDirection;
+        for (unsigned int j=0; j<nPerDirection; j++){
+            double pY = j*boxSize.y()/nPerDirection;
+            for (unsigned int k=0; k<nPerDirection; k++){
+                double pZ = k*boxSize.z()/nPerDirection;
+                result.push_back(
+                    Core::Vector(
+                        corner.x() + pX,
+                        corner.y() + pY,
+                        corner.z() + pZ)
+                );
+            }
+        }
+    }
+
+    return result;
+}
+
+
 /**
  * Generates a starting vector at position x,y,z
  *

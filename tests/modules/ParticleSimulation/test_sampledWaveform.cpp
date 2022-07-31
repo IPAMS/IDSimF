@@ -27,6 +27,7 @@
 
 #include "PSim_sampledWaveform.hpp"
 #include "catch.hpp"
+#include <iostream>
 
 
 TEST_CASE("Test sampled waveform / SWIFT waveform reader", "[ParticleSimulation][SampledWaveform][file readers]") {
@@ -74,6 +75,18 @@ TEST_CASE("Test sampled waveform / SWIFT waveform reader", "[ParticleSimulation]
         CHECK(sw.getInterpolatedValue(0.50) == Approx(4.0));
         CHECK(sw.getInterpolatedValue(0.975) == Approx(0.5));
         CHECK_THROWS(sw.getInterpolatedValue(1.1));
+    }
+
+    SECTION("Triangle Waveform should work") {
+        ParticleSimulation::SampledWaveform sw("triangle_waveform.csv");
+        CHECK(sw.good());
+        CHECK(sw.size() == 2);
+        CHECK(sw.getInterpolatedValue(0.0) == Approx(0.0));
+        CHECK(sw.getInterpolatedValue(0.25) == Approx(0.5));
+        CHECK(sw.getInterpolatedValue(0.5) == Approx(1.0));
+        CHECK(sw.getInterpolatedValue(0.75) == Approx(0.5));
+        CHECK(sw.getInterpolatedValue(0.99) == Approx(0.02));
+        CHECK(sw.getInterpolatedValue(0.9999) == Approx(0.0002));
     }
 
     SECTION( "Non existing input file should lead to good()==false") {

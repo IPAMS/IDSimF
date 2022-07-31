@@ -33,18 +33,22 @@
 #include "RS_ConcentrationFileWriter.hpp"
 #include "PSim_util.hpp"
 #include "PSim_constants.hpp"
-#include "Integration_verletIntegrator.hpp"
 #include "Integration_velocityIntegrator.hpp"
+#include "Integration_parallelVerletIntegrator.hpp"
 #include "FileIO_trajectoryHDF5Writer.hpp"
 #include "CollisionModel_AbstractCollisionModel.hpp"
 #include "CollisionModel_HardSphere.hpp"
 #include "CollisionModel_StatisticalDiffusion.hpp"
 #include "CollisionModel_MultiCollisionModel.hpp"
+#include "CollisionModel_SoftSphere.hpp"
 #include "appUtils_simulationConfiguration.hpp"
 #include "appUtils_logging.hpp"
 #include "appUtils_stopwatch.hpp"
 #include "appUtils_signalHandler.hpp"
 #include "appUtils_commandlineParser.hpp"
+#include "CollisionModel_MDInteractions.hpp"
+#include "FileIO_MolecularStructureReader.hpp"
+#include "Core_randomGenerators.hpp"
 #include "json.h"
 #include <iostream>
 #include <cmath>
@@ -52,10 +56,10 @@
 #include <numeric>
 
 enum IntegratorType{
-    VERLET, SIMPLE, NO_INTEGRATOR
+    VERLET, VERLET_PARALLEL, SIMPLE, NO_INTEGRATOR
 };
 enum CollisionModelType{
-    HS, SDS, NO_COLLISONS
+    HS, SS, SDS, MD, NO_COLLISONS
 };
 
 std::string key_ChemicalIndex = "keyChemicalIndex";
@@ -64,8 +68,10 @@ std::string key_ChemicalIndex = "keyChemicalIndex";
 int main(int argc, const char *argv[]){
 
     try {
+        //Core::globalRandomGeneratorPool = std::make_unique<Core::TestRandomGeneratorPool>();
+
         // open configuration, parse configuration file =========================================
-        AppUtils::CommandlineParser cmdLineParser(argc, argv, "BT-RS-DMSSim", "DMS Simulation with trajectories and chemistry", false);
+        AppUtils::CommandlineParser cmdLineParser(argc, argv, "BT-RS-IMSSim", "IMS Simulation with trajectories and chemistry", true);
         std::string projectName = cmdLineParser.resultName();
         AppUtils::logger_ptr logger = cmdLineParser.logger();
 
@@ -94,6 +100,31 @@ int main(int argc, const char *argv[]){
         std::vector<double> collisionGasMasses_Amu = simConf->doubleVectorParameter("collision_gas_masses_amu");
         std::vector<double> collisionGasDiameters_angstrom = simConf->doubleVectorParameter(
                 "collision_gas_diameters_angstrom");
+        
+        std::vector<std::string> collisionGasIdentifier;
+        std::vector<std::string> particleIdentifier;
+        std::vector<double> collisionGasPolarizability_m3;
+        double subIntegratorIntegrationTime_s = 0;
+        double subIntegratorStepSize_s = 0;
+        double collisionRadiusScaling = 0;
+        double angleThetaScaling = 0;
+        double spawnRadius_m = 0; 
+        double trajectoryDistance_m = 0;
+        bool saveTrajectory = false;
+        int saveTrajectoryStartTimeStep = 0;
+        if(transportModelType=="btree_MD"){
+            collisionGasPolarizability_m3 = simConf->doubleVectorParameter("collision_gas_polarizability_m3");
+            collisionGasIdentifier = simConf->stringVectorParameter("collision_gas_identifier");
+            particleIdentifier = simConf->stringVectorParameter("particle_identifier");
+            subIntegratorIntegrationTime_s = simConf->doubleParameter("sub_integrator_integration_time_s");
+            subIntegratorStepSize_s = simConf->doubleParameter("sub_integrator_step_size_s");
+            collisionRadiusScaling = simConf->doubleParameter("collision_radius_scaling");
+            angleThetaScaling = simConf->doubleParameter("angle_theta_scaling");
+            spawnRadius_m = simConf->doubleParameter("spawn_radius_m");
+            saveTrajectory = simConf->boolParameter("save_trajectory");
+            trajectoryDistance_m = simConf->doubleParameter("trajectory_distance_m");
+            saveTrajectoryStartTimeStep = simConf->intParameter("trajectory_start_time_step");
+        }
 
         std::size_t nBackgroundGases = backgroundPartialPressures_Pa.size();
         if (collisionGasMasses_Amu.size()!=nBackgroundGases || collisionGasDiameters_angstrom.size()!=nBackgroundGases) {
@@ -126,6 +157,14 @@ int main(int argc, const char *argv[]){
         for (std::size_t i = 0; i<discreteSubstances.size(); i++) {
             substanceIndices.insert(std::pair<RS::Substance*, int>(discreteSubstances[i], i));
             ionMobility.push_back(discreteSubstances[i]->mobility());
+        }
+
+        //read molecular structure file
+        std::unordered_map<std::string,  std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection;
+        if(transportModelType=="btree_MD" ){
+            std::string mdCollisionConfFile = simConf->pathRelativeToConfFile(simConf->stringParameter("md_configuration"));
+            FileIO::MolecularStructureReader mdConfReader = FileIO::MolecularStructureReader();
+            molecularStructureCollection = mdConfReader.readMolecularStructure(mdCollisionConfFile);
         }
 
         // prepare file writer  =================================================================
@@ -190,6 +229,10 @@ int main(int argc, const char *argv[]){
                 uniqueReactivePartPtr particle = std::make_unique<RS::ReactiveParticle>(subst);
 
                 particle->setLocation(initialPositions[k]);
+                if(transportModelType=="btree_MD"){
+                    particle->setMolecularStructure(molecularStructureCollection.at(particleIdentifier[i]));
+                    particle->setDiameter(particle->getMolecularStructure()->getDiameter());
+                }
                 particlesPtrs.push_back(particle.get());
                 rsSim.addParticle(particle.get(), nParticlesTotal);
                 particles.push_back(std::move(particle));
@@ -207,13 +250,12 @@ int main(int argc, const char *argv[]){
         // ======================================================================================
 
         //check which integrator type we have to setup:
-        std::vector<std::string> verletTypes{"btree_SDS", "btree_HS"};
+        std::vector<std::string> verletTypes{"btree_SDS", "btree_HS", "btree_MD", "btree_SS"};
         auto vType = std::find(std::begin(verletTypes), std::end(verletTypes), transportModelType);
 
         IntegratorType integratorType;
         if (vType!=std::end(verletTypes)) {
-            integratorType = VERLET;
-            logger->info("Verlet type simulation");
+                integratorType = VERLET_PARALLEL;
         }
         else if (transportModelType=="simple") {
             integratorType = SIMPLE;
@@ -351,18 +393,53 @@ int main(int argc, const char *argv[]){
             collisionModelPtr = std::move(collisionModel);
             collisionModelType = HS;
         }
+        else if (transportModelType=="btree_MD") {
+            //prepare multimodel with multiple MD models (one per collision gas)
+            std::vector<std::unique_ptr<CollisionModel::AbstractCollisionModel>> mdModels;
+            for (std::size_t i = 0; i<nBackgroundGases; ++i) {
+                auto mdModel = std::make_unique<CollisionModel::MDInteractionsModel>(
+                        backgroundPartialPressures_Pa[i],
+                        backgroundTemperature_K,
+                        collisionGasMasses_Amu[i],
+                        collisionGasDiameters_m[i],
+                        collisionGasPolarizability_m3[i],
+                        collisionGasIdentifier[i],
+                        subIntegratorIntegrationTime_s, 
+                        subIntegratorStepSize_s,
+                        collisionRadiusScaling,
+                        angleThetaScaling,
+                        spawnRadius_m, 
+                        molecularStructureCollection);
+
+                if (saveTrajectory){
+                    mdModel->setTrajectoryWriter(projectName+"_md_trajectories.txt",
+                                                 trajectoryDistance_m, saveTrajectoryStartTimeStep);
+                }
+                mdModels.emplace_back(std::move(mdModel));
+            }
+
+            std::unique_ptr<CollisionModel::MultiCollisionModel> collisionModel =
+                    std::make_unique<CollisionModel::MultiCollisionModel>(std::move(mdModels));
+
+            collisionModelPtr = std::move(collisionModel);
+            collisionModelType = MD;
+        }
+        else if (transportModelType=="btree_SS") {
+            // Add Softsphere Model here
+
+        }
 
         //init trajectory simulation object:
         std::unique_ptr<Integration::AbstractTimeIntegrator> trajectoryIntegrator = nullptr;
-        if (integratorType==VERLET) {
-            trajectoryIntegrator = std::make_unique<Integration::VerletIntegrator>(
-                    particlesPtrs,
-                    accelerationFctVerlet, timestepWriteFctVerlet, otherActionsFunctionIMSVerlet,
-                    ParticleSimulation::noFunction,
-                    collisionModelPtr.get());
+
+        if(integratorType==VERLET_PARALLEL){
+            trajectoryIntegrator = std::make_unique<Integration::ParallelVerletIntegrator>(
+                particlesPtrs,
+                accelerationFctVerlet, timestepWriteFctVerlet, otherActionsFunctionIMSVerlet, 
+                ParticleSimulation::noFunction,
+                collisionModelPtr.get());
         }
         else if (integratorType==SIMPLE) {
-
             auto velocityFctSimple = [eFieldMagnitude, backgroundPTRatio](Core::Particle* particle, int /*particleIndex*/,
                                                                           double /*time*/, int /*timestep*/) {
                 double particleMobility = particle->getMobility();
@@ -397,9 +474,9 @@ int main(int argc, const char *argv[]){
                 particles[i]->setFloatAttribute(key_ChemicalIndex, substIndex);
 
                 if (reacted && collisionModelType==SDS) {
-                    //we had an reaction event: update the collision model parameters for the particle which are not
+                    //we had a reaction event: update the collision model parameters for the particle which are not
                     //based on location (mostly STP parameters in SDS)
-                    collisionModelPtr->initializeModelParameters(*particles[i]);
+                    collisionModelPtr->initializeModelParticleParameters(*particles[i]);
                 }
             }
             rsSim.advanceTimestep(dt_s);

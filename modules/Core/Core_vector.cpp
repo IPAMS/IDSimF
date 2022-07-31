@@ -127,6 +127,14 @@ double Core::Vector::magnitudeSquared() const{
     return (x_*x_ + y_*y_ + z_*z_);
 }
 
+Core::Vector Core::Vector::crossProduct(const Core::Vector &rhs) const{
+    return Core::Vector(
+          y_ * rhs.z() - z_ * rhs.y()
+        , z_ * rhs.x() - x_ * rhs.z()
+        , x_ * rhs.y() - y_ * rhs.x()
+    );
+}
+
 // overloaded operators:
 Core::Vector& Core::Vector::operator+=(const Core::Vector &rhs){
     this->x_ += rhs.x_;
@@ -153,6 +161,10 @@ Core::Vector Core::operator*(const Core::Vector &lhs, double rhs){
 
 Core::Vector Core::operator/(const Core::Vector &lhs, double rhs){
     return lhs * (1.0 / rhs);
+}
+
+Core::Vector Core::operator*(double lhs, const Core::Vector &rhs){
+    return rhs * lhs;
 }
 
 // Vector equality means, exact, floating point equality here, thus deactivate

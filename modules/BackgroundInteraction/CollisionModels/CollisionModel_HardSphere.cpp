@@ -113,9 +113,11 @@ CollisionModel::HardSphereModel::HardSphereModel(
         temperatureFunction_(std::move(temperatureFunction)),
         afterCollisionActionFunction_(std::move(afterCollisionFunction)) { }
 
-void CollisionModel::HardSphereModel::updateModelParameters(Core::Particle& /*ion*/) const {}
+void CollisionModel::HardSphereModel::updateModelParticleParameters(Core::Particle& /*ion*/) const {}
 
-void CollisionModel::HardSphereModel::initializeModelParameters(Core::Particle& /*ion*/) const {}
+void CollisionModel::HardSphereModel::initializeModelParticleParameters(Core::Particle& /*ion*/) const {}
+
+void CollisionModel::HardSphereModel::updateModelTimestepParameters(int /*timestep*/, double /*time*/) {}
 
 void CollisionModel::HardSphereModel::modifyAcceleration(Core::Vector& /*acceleration*/, Core::Particle& /*ion*/,
                                                          double /*dt*/) {}
@@ -183,7 +185,7 @@ void CollisionModel::HardSphereModel::modifyVelocity(Core::Particle &ion, double
     if (rndSource->uniformRealRndValue() > collisionProb){
         return; // no collision takes place
     }
-
+    
     // Now we know that a collision happens: Perform the collision
 
     // Calculate the standard deviation of the one dimensional velocity distribution of the

@@ -19,24 +19,34 @@
  along with IDSimF.  If not, see <https://www.gnu.org/licenses/>.
 
  ------------
- test_MathFunctions.cpp
+ FileIO_molecularStructureReader.hpp
 
- Testing of mathematical functions for collision modeling
+ Reader class for molecular structure data from csv files
 
  ****************************/
 
-#include "CollisionModel_MathFunctions.hpp"
-#include "catch.hpp"
-#include <array>
+#ifndef IDSIM_FILEIO_MOLECULARSTRUCTUREREADER
+#define IDSIM_FILEIO_MOLECULARSTRUCTUREREADER
+
+#include "CollisionModel_MolecularStructure.hpp"
+#include <string>
+#include <unordered_map>
+#include <memory>
+
+namespace FileIO
+{
+    class MolecularStructureReader{
+
+        public:
+            std::unordered_map<std::string,  std::shared_ptr<CollisionModel::MolecularStructure>> readMolecularStructure(std::string filename);
+
+        private:
+            const std::string delimiter = ",";
+            const std::string moleculeDelimiter = "#";
+        
+    };
+    
+} 
 
 
-TEST_CASE("Test random functions implementation", "[CollisionModels][Math]") {
-    SECTION("Spherical random vectors should have the correct length") {
-        std::array<double,5> dists = {1.0,2.0,10.0,100.0,1000.0};
-
-        for(const auto& dist: dists){
-            Core::Vector vec = CollisionModel::sphereRand(dist);
-            REQUIRE(Approx(vec.magnitude()) == dist);
-        }
-    }
-}
+#endif // !IDSIM_FILEIO_MOLECULARSTRUCTUREREADER

@@ -9,7 +9,8 @@ set(SOURCE_FILES
         test_simpleFileWriters.cpp
         test_inductionCurrentWriter.cpp
         test_hdf5FileWriter.cpp
-        test_hdf5FileReader.cpp)
+        test_hdf5FileReader.cpp
+        test_MolecularStructureReader.cpp)
 
 set(TEST_FILE_FOLDER ${CMAKE_SOURCE_DIR}/tests/testfields)
 set(TEST_FILES
@@ -25,7 +26,7 @@ set(TEST_FILES
         ${TEST_FILE_FOLDER}/quad_dev_pressure_3d.h5
         ${TEST_FILE_FOLDER}/capacitor_test_pa/cylinder_capacitor.pa1
         ${TEST_FILE_FOLDER}/capacitor_test_pa/cylinder_capacitor.pa2
-        )
+        ${TEST_FILE_FOLDER}/test_molecularstructure_reader.csv )
 file(COPY ${TEST_FILES} DESTINATION .)
 
 add_executable(test_FileIO ${SOURCE_FILES})
