@@ -84,10 +84,10 @@ namespace Core {
         void setIntegerAttribute(const std::string& key, int value);
         std::array<double, 3>& getAuxCollisionParams();
 
-        void setLowFieldMobility(double lowFieldMobility);
-        [[nodiscard]] double getLowFieldMobility() const;
         void setMobility(double mobility);
         [[nodiscard]] double getMobility() const;
+        void setLowFieldMobility(double lowFieldMobility);
+        [[nodiscard]] double getLowFieldMobility() const;
         void setMeanFreePathSTP(double meanFreePathSTP);
         [[nodiscard]] double getMeanFreePathSTP() const;
         void setMeanThermalVelocitySTP(double meanVelocitySTP);
