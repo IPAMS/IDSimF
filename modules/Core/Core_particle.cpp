@@ -211,7 +211,6 @@ Core::Particle::Particle(const Core::Vector &location, const Core::Vector &veloc
         location_(location),
         velocity_(velocity),
         charge_(chargeElemCharges * Core::ELEMENTARY_CHARGE),
-        lowFieldMobility_(3.5e-4),
         mass_(massAMU * Core::AMU_TO_KG),
         diameter_(collisionDiameterM),
         timeOfBirth_(timeOfBirth)
@@ -235,7 +234,6 @@ Core::Particle::Particle(const Core::Vector &location, const Core::Vector &veloc
         location_(location),
         velocity_(velocity),
         charge_(chargeElemCharges * Core::ELEMENTARY_CHARGE),
-        lowFieldMobility_(3.5e-4),
         mass_(massAMU * Core::AMU_TO_KG),
         diameter_(collisionDiameterM),
         timeOfBirth_(timeOfBirth),
