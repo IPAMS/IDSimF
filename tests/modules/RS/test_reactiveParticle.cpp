@@ -41,7 +41,7 @@ TEST_CASE("Test basic instantiation and setting of species in reactive particle"
     RS::Substance sub2("Testsubstance2",RS::Substance::substanceType::discrete);
     sub2.collisionDiameter(100.0);
     sub2.mass(10);
-    sub2.mobility(0.1);
+    sub2.lowFieldMobility(0.1);
     sub2.charge(20);
 
     rp.setSpecies(&sub2);

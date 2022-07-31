@@ -58,7 +58,7 @@ TEST_CASE( "Test basic RS simulation semantics", "[RS][Simulation]") {
 
         //check if parameters are set by the species at particle generation:
         Cluster_2.charge(5.0);
-        Cluster_2.mobility(20);
+        Cluster_2.lowFieldMobility(20);
         uniqueReactivePartPtr p2_2 = std::make_unique<RS::ReactiveParticle>(&Cluster_2);
         CHECK( Approx(p2_2->getCharge() - 5.0*Core::ELEMENTARY_CHARGE) == 0.0);
 
@@ -175,8 +175,8 @@ TEST_CASE( "Test RS simulations", "[RS][Simulation]") {
         CHECK(sim.getParticle(1).getSpecies() == subst_A);
 
         //Check if simulation updates particles according to substances:
-        CHECK(isExactDoubleEqual(sim.getParticle(2).getMobility(), subst_C->mobility()));
-        CHECK(isExactDoubleEqual(sim.getParticle(1).getMobility(), subst_A->mobility()));
+        CHECK(isExactDoubleEqual(sim.getParticle(2).getMobility(), subst_C->lowFieldMobility()));
+        CHECK(isExactDoubleEqual(sim.getParticle(1).getMobility(), subst_A->lowFieldMobility()));
 
         CHECK(isExactDoubleEqual(sim.getParticle(2).getDiameter(), subst_C->collisionDiameter()));
         CHECK(isExactDoubleEqual(sim.getParticle(1).getDiameter(), subst_A->collisionDiameter()));

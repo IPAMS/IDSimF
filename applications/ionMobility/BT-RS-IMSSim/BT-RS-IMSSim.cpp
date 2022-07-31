@@ -156,7 +156,7 @@ int main(int argc, const char *argv[]){
         std::vector<double> ionMobility; // = simConf->doubleVectorParameter("ion_mobility",confRoot);
         for (std::size_t i = 0; i<discreteSubstances.size(); i++) {
             substanceIndices.insert(std::pair<RS::Substance*, int>(discreteSubstances[i], i));
-            ionMobility.push_back(discreteSubstances[i]->mobility());
+            ionMobility.push_back(discreteSubstances[i]->lowFieldMobility());
         }
 
         //read molecular structure file

@@ -58,7 +58,7 @@ TEST_CASE("RS Substance: Test basic instantiation", "[RS][Substance]") {
         sub.staticConcentration(1.0e10);
         REQUIRE(isExactDoubleEqual(sub.staticConcentration(),  1.0e10));
 
-        sub.mobility(5.0);
-        REQUIRE(isExactDoubleEqual(sub.mobility(), 5.0));
+        sub.lowFieldMobility(5.0);
+        REQUIRE(isExactDoubleEqual(sub.lowFieldMobility(), 5.0));
     }
 }

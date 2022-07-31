@@ -49,7 +49,7 @@ RS::Substance* RS::ReactiveParticle::getSpecies() const{
 
 void RS::ReactiveParticle::updateParticleParametersFromSpecies_() {
     RS::Substance* species = this->getSpecies();
-    this->setMobility(species->mobility());
+    this->setMobility(species->lowFieldMobility());
     this->setMassAMU(species->mass());
     this->setDiameter(species->collisionDiameter());
     this->setChargeElementary(species->charge());

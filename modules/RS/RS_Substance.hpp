@@ -67,8 +67,8 @@ namespace RS {
         void charge(double newCharge);
         [[nodiscard]] double mass() const;
         void mass(double newMass);
-        [[nodiscard]] double mobility() const;
-        void mobility(double newMobility);
+        [[nodiscard]] double lowFieldMobility() const;
+        void lowFieldMobility(double newLowFieldMobility);
         [[nodiscard]] double collisionDiameter() const;
         void collisionDiameter(double newCollisionDiameter);
         [[nodiscard]] double staticConcentration() const;
@@ -81,7 +81,7 @@ namespace RS {
         double staticConcentration_ = 0.0; ///< the static background concentration (for isotropic substances)
         double mass_ = 0.0; ///< the mass of molecules of this substance
         double charge_ = 0.0; ///< the charge of molecules of this substance
-        double mobility_ = 0.0; ///< the electrical ion mobility of molecules of this substance
+        double lowFieldMobility_ = 0.0; ///< the electrical low field ion mobility of molecules of this substance
         double collisionDiameter_ = 0.0; ///< the effective collision diameter of molecules of this substance
         substanceType type_; ///< the type of this substance
 

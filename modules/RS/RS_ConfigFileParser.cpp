@@ -66,7 +66,7 @@ bool RS::ConfigFileParser::parseSubstances(SimulationConfiguration *simConf, con
             {
                 subst->mass(std::strtof(optNumber1.c_str(), nullptr));
                 subst->charge(std::strtof(optNumber2.c_str(), nullptr));
-                subst->mobility(std::strtof(optNumber3.c_str(), nullptr));
+                subst->lowFieldMobility(std::strtof(optNumber3.c_str(), nullptr));
                 subst->collisionDiameter(std::strtof(optNumber4.c_str(), nullptr));
 
             } else if (subst->type() == RS::Substance::substanceType::discrete) {
@@ -196,7 +196,7 @@ bool RS::ConfigFileParser::parseReactions(SimulationConfiguration *simConf, cons
                 double mobility = 0.0;
                 for (const auto& ed:educts){
                     if (ed.first->type() == RS::Substance::substanceType::discrete){
-                        mobility = ed.first->mobility();
+                        mobility = ed.first->lowFieldMobility();
                     }
                 }
 
@@ -396,9 +396,9 @@ std::unique_ptr<RS::SimulationConfiguration> RS::ConfigFileParser::getTestConfig
     std::unique_ptr<RS::Substance> s_C= std::unique_ptr<RS::Substance>(
             new RS::Substance("C",RS::Substance::substanceType::discrete));
 
-    s_A->mobility(0.1);
-    s_B->mobility(0.2);
-    s_C->mobility(0.3);
+    s_A->lowFieldMobility(0.1);
+    s_B->lowFieldMobility(0.2);
+    s_C->lowFieldMobility(0.3);
 
     s_A->collisionDiameter(1e-5);
     s_B->collisionDiameter(2e-5);
