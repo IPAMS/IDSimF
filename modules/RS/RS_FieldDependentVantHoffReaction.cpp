@@ -31,8 +31,9 @@
  * @param H_R the forward reaction enthalpy of this reaction
  * @param K_s the equilibrium constant between forward and backward reaction rate
  * @param kBackward the backward reaction rate (reaction rate of the background reaction)
- * @param electricMobility the electrical mobility (in SI units, pressure is in Pa) at
+ * @param electricMobility the electrical mobility of the ionic educt (in SI units, pressure is in Pa) at
  * standard conditions (101325 Pa and 271.15 K)
+ * @param energyLossRatio
  * @param collisionGasMassAmu the molecular mass of the background gas particles (in AMU)
  * @param label a texutal label to identify the reaction
  */

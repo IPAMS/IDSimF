@@ -208,13 +208,13 @@ Core::Particle::Particle(const Core::Vector &location, const Core::Vector &veloc
 Core::Particle::Particle(const Core::Vector &location, const Core::Vector &velocity,
                           double chargeElemCharges, double massAMU,
                           double collisionDiameterM, double timeOfBirth):
-    location_(location),
-    velocity_(velocity),
-    charge_(chargeElemCharges * Core::ELEMENTARY_CHARGE),
-    mobility_(3.5e-4),
-    mass_(massAMU * Core::AMU_TO_KG),
-    diameter_(collisionDiameterM),
-    timeOfBirth_(timeOfBirth)
+        location_(location),
+        velocity_(velocity),
+        charge_(chargeElemCharges * Core::ELEMENTARY_CHARGE),
+        lowFieldMobility_(3.5e-4),
+        mass_(massAMU * Core::AMU_TO_KG),
+        diameter_(collisionDiameterM),
+        timeOfBirth_(timeOfBirth)
 {}
 
 
@@ -232,14 +232,14 @@ Core::Particle::Particle(const Core::Vector &location, const Core::Vector &veloc
                           double chargeElemCharges, double massAMU,
                           double collisionDiameterM, double timeOfBirth, 
                           std::shared_ptr<CollisionModel::MolecularStructure> moleculeStructure):
-    location_(location),
-    velocity_(velocity),
-    charge_(chargeElemCharges * Core::ELEMENTARY_CHARGE),
-    mobility_(3.5e-4),
-    mass_(massAMU * Core::AMU_TO_KG),
-    diameter_(collisionDiameterM),
-    timeOfBirth_(timeOfBirth),
-    molstrPtr(moleculeStructure)
+        location_(location),
+        velocity_(velocity),
+        charge_(chargeElemCharges * Core::ELEMENTARY_CHARGE),
+        lowFieldMobility_(3.5e-4),
+        mass_(massAMU * Core::AMU_TO_KG),
+        diameter_(collisionDiameterM),
+        timeOfBirth_(timeOfBirth),
+        molstrPtr(moleculeStructure)
 {}
 
 
@@ -390,18 +390,33 @@ std::array<double,3>& Core::Particle::getAuxCollisionParams() {
 }
 
 /**
- * Sets the mobility
+ * Sets the (actual) electrical mobility
  */
 void Core::Particle::setMobility(double mobility){
     this->mobility_ = mobility;
 }
 
 /**
- * Gets the mobility
+ * Gets the (actual) electrical mobility
  */
 double Core::Particle::getMobility() const{
     return(mobility_);
 }
+
+/**
+ * Sets the low field electrical mobility (reduced mobility with vanishing electric field)
+ */
+void Core::Particle::setLowFieldMobility(double lowFieldMobility) {
+    this->lowFieldMobility_ = lowFieldMobility;
+}
+
+/**
+ * Gets the low field electrical mobility (reduced mobility with vanishing electric field)
+ */
+double Core::Particle::getLowFieldMobility() const {
+    return(lowFieldMobility_);
+}
+
 
 /**
  * Sets the mean free path at standard temperature and standard pressure
