@@ -112,10 +112,12 @@ int main(int argc, const char * argv[]) {
         //read ion mobility scaling configuration ==============================================
         MobilityScalingMode mobilitScalingMode;
         std::unique_ptr<ParticleSimulation::SampledFunction> mobilityScalingFct= nullptr;
+        ParticleSimulation::SampledFunction* mobilityScalingFctPtr = nullptr;
         if (simConf->isParameter("mobility_scaling_function")){
             std::string  scalingFunctionFilename = simConf->pathRelativeToConfFile(
                     simConf->stringParameter("mobility_scaling_function"));
             mobilityScalingFct = std::make_unique<ParticleSimulation::SampledFunction>(scalingFunctionFilename);
+            mobilityScalingFctPtr = mobilityScalingFct.get();
             mobilitScalingMode = FIELD_SCALING_FUNCTION;
             if(!mobilityScalingFct->good()){
                 throw(std::invalid_argument("Mobility function data not good"));
@@ -260,12 +262,15 @@ int main(int argc, const char * argv[]) {
             reactionConditions.electricField = fieldMagnitude;
             rsSim.performTimestep(reactionConditions, dt_s, particlesReactedFct);
 
-            #pragma omp parallel default(none) shared(particles, mobilityScalingFct) firstprivate(mobilitScalingMode, nParticlesTotal, reducedPressure, fieldMagnitude, dt_s)
+            #pragma omp parallel default(none) shared(particles, mobilityScalingFctPtr) firstprivate(mobilitScalingMode, nParticlesTotal, reducedPressure, fieldMagnitude, dt_s)
             {
                 // 1 Td: = 10e-17 V*cm^2 = 10e-17 V*cm^2 = 10e-21 V*m^2
                 // 2.688e19 molek/cm^3 at atmospheric pressure,
-                double reducedField = (fieldMagnitude/100.0) / (reducedPressure * 2.688e2); // 2.688e19 molek/cm^3 at atmospheric pressure
-                double mobilityScalingFactor = mobilityScalingFct->getInterpolatedValue(abs(reducedField));
+                double mobilityScalingFactor = 0.0;
+                if (mobilitScalingMode == FIELD_SCALING_FUNCTION) {
+                    double reducedField = (fieldMagnitude/100.0)/(reducedPressure*2.688e2);
+                    mobilityScalingFactor = mobilityScalingFctPtr->getInterpolatedValue(abs(reducedField));
+                }
 
                 #pragma omp for
                 for (unsigned int i = 0; i<nParticlesTotal; i++) {
