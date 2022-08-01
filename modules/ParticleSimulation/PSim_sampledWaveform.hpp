@@ -21,7 +21,7 @@
  ------------
  PSim_swiftWaveform.hpp
 
- Sampled excitation waveform for SWIFT simulations
+ Sampled periodic waveform, for example for SWIFT excitation waveforms
  (with simple input from CSV files)
 
  ****************************/
