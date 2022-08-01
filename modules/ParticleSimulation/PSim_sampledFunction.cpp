@@ -21,6 +21,7 @@
 #include "PSim_sampledFunction.hpp"
 #include <fstream>
 #include <cmath>
+#include <algorithm>
 
 
 ParticleSimulation::SampledFunction::SampledFunction(std::string filename) {
