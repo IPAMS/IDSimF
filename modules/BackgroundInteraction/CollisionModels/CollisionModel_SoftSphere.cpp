@@ -113,14 +113,14 @@ CollisionModel::SoftSphereModel::SoftSphereModel(
         temperatureFunction_(std::move(temperatureFunction)),
         afterCollisionActionFunction_(std::move(afterCollisionFunction)) { }
 
-void CollisionModel::SoftSphereModel::updateModelParticleParameters(Core::Particle &ion) const {}
+void CollisionModel::SoftSphereModel::updateModelParticleParameters(Core::Particle& /*ion*/) const {}
 
-void CollisionModel::SoftSphereModel::initializeModelParticleParameters(Core::Particle &ion) const {}
+void CollisionModel::SoftSphereModel::initializeModelParticleParameters(Core::Particle& /*ion*/) const {}
 
 void CollisionModel::SoftSphereModel::updateModelTimestepParameters(int /*timestep*/, double /*time*/) {}
 
-void CollisionModel::SoftSphereModel::modifyAcceleration(Core::Vector &acceleration, Core::Particle &ion,
-                                                         double dt) {}
+void CollisionModel::SoftSphereModel::modifyAcceleration(Core::Vector& /*acceleration*/, Core::Particle& /*ion*/,
+                                                         double /*dt*/) {}
 
 /**
  * Modify the velocity of a charged particle "ion" with a potential random collision in time step "dt"
@@ -188,8 +188,9 @@ void CollisionModel::SoftSphereModel::modifyVelocity(Core::Particle &ion, double
 
     // Now we know that a collision happens: Perform the collision
 
-    // Set the alpha valua
-    ion.setFloatAttribute("vss_collision_alpha", 1.0);
+    // Set the alpha value
+
+    double vss_collision_alpha = ion.getFloatAttribute("vss_collision_alpha");
 
     // Calculate the standard deviation of the one dimensional velocity distribution of the
     // background gas particles. Std. dev. in one dimension is given from Maxwell-Boltzmann
@@ -243,11 +244,44 @@ void CollisionModel::SoftSphereModel::modifyVelocity(Core::Particle &ion, double
     // cannot differ from the precollsion energy (law of conservation of energy). Thus, the postcollision
     // energy can be calculated using the precollision viscosity vector.
     double vFrameCollidingBackRestSquared = vFrameCollidingBackRest.magnitude() * vFrameCollidingBackRest.magnitude();
+    // std::cout << "vFrameCollidingBackRest: " << vFrameCollidingBackRest << "\n";
+    // std::cout << "vFrameCollidingBackRestSquared: " << vFrameCollidingBackRestSquared << "\n";
     double postCollisionEnergy = 0.5 * reducedMass_kg_ * vFrameCollidingBackRestSquared;
+    // std::cout << "postCollisionEnergy = " << postCollisionEnergy << "\n";
 
     // Determine angle of the collision plane round the collision axis. All collision
     // planes are equally probable, since there is no preferential direction.
     double impactTheta = PI_2*rndSource->uniformRealRndValue();
+    // std::cout << "impactTheta = " << impactTheta << "\n";
+
+    // Calculate the resulting vectors
+    Core::Vector postCollisionVectorBackRest;
+    // If-Else-Clauses to check if collision is approximately Hard Sphere.
+    if (std::abs(1.0 -(1/vss_collision_alpha)) < 0.001){
+
+        // Calculate the scattering angle, while assuming approximately Hard Sphere Collision. Thus, no dependency
+        // on the alpha soft sphere scattering value.
+        double cosX = 2 * rndSource->uniformRealRndValue() - 1;
+        double sinX = std::sqrt(1 - (cosX*cosX));
+
+        postCollisionVectorBackRest.x(vFrameCollidingBackRest.x() * cosX);
+        postCollisionVectorBackRest.y(vFrameCollidingBackRest.y() * std::cos(impactTheta));
+        postCollisionVectorBackRest.z(vFrameCollidingBackRest.z() * std::sin(impactTheta));}
+
+    else{
+        double cosX = 2 * std::pow(rndSource->uniformRealRndValue(), (1/vss_collision_alpha)) - 1;
+        double sinX = std::sqrt(1- cosX * cosX);
+
+        double d = std::sqrt(vFrameCollidingBackRest.x() * vFrameCollidingBackRest.x() + vFrameCollidingBackRest.y() * vFrameCollidingBackRest.y());
+
+        if(d>1.0e-6){
+            postCollisionVectorBackRest.x(vFrameCollidingBackRest.x() * cosX);
+            postCollisionVectorBackRest.y(vFrameCollidingBackRest.y() * std::cos(impactTheta));
+            postCollisionVectorBackRest.z(vFrameCollidingBackRest.z() * std::sin(impactTheta));}
+        }
+    }
+
+
 
 
 

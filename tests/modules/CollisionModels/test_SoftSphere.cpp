@@ -42,16 +42,22 @@ TEST_CASE("Basic test Soft Sphere model", "[CollisionModels][SoftSphereModel]") 
     ion.setVelocity(Core::Vector(100,0,0));
     ion.setMassAMU(28.0);
     int n = 100;
+    ion.setFloatAttribute("vss_collision_alpha", 1.0);
 
     SECTION("Test without maxwellian approximation"){
         CollisionModel::SoftSphereModel vss = CollisionModel::SoftSphereModel(
-                1.0,298,4.0,diameterHe,false);
+                1.0,
+                298,
+                4.0,
+                diameterHe,
+                false);
 
         for (int i =0; i<n; i++){
             vss.modifyVelocity(ion, 2e-7);
         }
 
         Core::Vector ionVelo = ion.getVelocity();
+        std::cout << ionVelo;
 
         //CHECK(Approx(ionVelo.x()) ==  -27.2881052);
         //CHECK(Approx(ionVelo.y()) ==  32.5138876);
