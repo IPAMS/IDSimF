@@ -8,7 +8,8 @@ set(SOURCE_FILES
         test_util.cpp
         test_simionPotentialArray.cpp
         test_startZones.cpp
-        test_particleStartSplatTracker.cpp)
+        test_particleStartSplatTracker.cpp
+        test_sampledFunction.cpp)
 
 set(TEST_FILE_FOLDER ${CMAKE_SOURCE_DIR}/tests/testfields)
 set(TEST_FILES
@@ -16,6 +17,8 @@ set(TEST_FILES
         ${TEST_FILE_FOLDER}/swift_test_transient.csv
         ${TEST_FILE_FOLDER}/low_sample_waveform.csv
         ${TEST_FILE_FOLDER}/triangle_waveform.csv
+        ${TEST_FILE_FOLDER}/function_linear.csv
+        ${TEST_FILE_FOLDER}/function_quadratic.csv
         ${TEST_FILE_FOLDER}/simion_test_cylindrical.pa
         ${TEST_FILE_FOLDER}/simion_test_cylindrical_mirrored.pa
         ${TEST_FILE_FOLDER}/simion_test_planar_2d.pa

@@ -44,7 +44,8 @@ CollisionModel::HardSphereModel::HardSphereModel(
                 staticTemperature,
                 collisionGasMassAmu,
                 collisionGasDiameterM,
-                maxwellianApproximation) { }
+                maxwellianApproximation)
+{}
 
 /**
  * Constructor for static background gas pressure and temperature with a custom
