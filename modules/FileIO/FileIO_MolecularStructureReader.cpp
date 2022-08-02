@@ -48,6 +48,7 @@ std::unordered_map<std::string,  std::shared_ptr<CollisionModel::MolecularStruct
             if(line[0] == '#'){
                 // get molecule structure key for the hash map
                 line.erase(std::remove_if(line.begin(), line.end(), [](char chr){ return chr == '#' || chr == ',';}), line.end());
+                line.erase(std::remove(line.begin(), line.end(), '\r' ), line.end());
                 std::shared_ptr<CollisionModel::MolecularStructure> molstrPtr = std::make_shared<CollisionModel::MolecularStructure>();
                 molecularStructureCollection.insert({line, molstrPtr});
                 lastMolecule = line;
@@ -68,6 +69,7 @@ std::unordered_map<std::string,  std::shared_ptr<CollisionModel::MolecularStruct
                 while ((pos = line.find(delimiter)) != std::string::npos) {
                     token = line.substr(0, pos);
                     line.erase(0, pos + delimiter.length());
+                    //line.erase(std::remove(line.begin(), line.end(), '\r' ), line.end());
                     auto occurenceDelimiter = std::count(line.begin(), line.end(), ',');
                     // AtomType is not a double so save this seperatly
                     if(occurenceDelimiter == 7){
