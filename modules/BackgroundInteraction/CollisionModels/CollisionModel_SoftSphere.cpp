@@ -20,26 +20,240 @@
  ****************************/
 
 #include "CollisionModel_SoftSphere.hpp"
+#include "Core_math.hpp"
+#include "Core_randomGenerators.hpp"
+#include "Core_utils.hpp"
 
-void CollisionModel::SoftSphereModel::initializeModelParticleParameters(Core::Particle &ion) const {
+/**
+ * Constructor for static background gas pressure and temperature
+ *
+ * if maxwellianApproximation is true, the colliding background gas particle velocity is drawn
+ * from a Maxwell Boltzmann distribution instead of the more correct relative velocity distribution
+ * between charged particle and background gas
+ */
+CollisionModel::SoftSphereModel::SoftSphereModel(
+        double staticPressure,
+        double staticTemperature,
+        double collisionGasMassAmu,
+        double collisionGasDiameterM,
+        bool maxwellianApproximation)
+        :
+        SoftSphereModel(
+                getConstantDoubleFunction(staticPressure),
+                getConstantVectorFunction(Core::Vector(0.0, 0.0, 0.0)),
+                staticTemperature,
+                collisionGasMassAmu,
+                collisionGasDiameterM,
+                maxwellianApproximation) { }
 
-}
+/**
+* Constructor for static background gas pressure and temperature with a custom
+* after collision function (most probably to model collision based reactions).
+* After collision functions perform custom operations with the colliding particle and the
+* conditions of the individual collision.
+*
+*/
+CollisionModel::SoftSphereModel::SoftSphereModel(
+        double staticPressure,
+        double staticTemperature,
+        double collisionGasMassAmu,
+        double collisionGasDiameterM,
+        std::function<void(RS::CollisionConditions, Core::Particle&)> afterCollisionFunction,
+        bool maxwellianApproximation)
+        :
+        SoftSphereModel(
+                getConstantDoubleFunction(staticPressure),
+                getConstantVectorFunction(Core::Vector(0.0, 0.0, 0.0)),
+                getConstantDoubleFunction(staticTemperature),
+                collisionGasMassAmu,
+                collisionGasDiameterM,
+                std::move(afterCollisionFunction),
+                maxwellianApproximation) { }
 
-void CollisionModel::SoftSphereModel::updateModelParticleParameters(Core::Particle &ion) const {
+/**
+ * Constructor for location dependent pressure and velocity, given as spatially resolved
+ * functions.
+ */
+CollisionModel::SoftSphereModel::SoftSphereModel(
+        std::function<double(Core::Vector& location)> pressureFunction,
+        std::function<Core::Vector(Core::Vector& location)> velocityFunction,
+        double staticTemperature,
+        double collisionGasMassAmu,
+        double collisionGasDiameterM,
+        bool maxwellianApproximation)
+        :
+        SoftSphereModel(
+                std::move(pressureFunction),
+                std::move(velocityFunction),
+                getConstantDoubleFunction(staticTemperature),
+                collisionGasMassAmu,
+                collisionGasDiameterM,
+                nullptr,
+                maxwellianApproximation) { }
 
-}
+/**
+* Constructor for location dependent pressure and velocity, given as spatially resolved
+* functions and custom after collision function (most probably to model collision based reactions).
+*/
+CollisionModel::SoftSphereModel::SoftSphereModel(
+        std::function<double(Core::Vector& location)> pressureFunction,
+        std::function<Core::Vector(Core::Vector& location)> velocityFunction,
+        std::function<double(const Core::Vector&)>temperatureFunction,
+        double collisionGasMassAmu,
+        double collisionGasDiameterM,
+        std::function<void(RS::CollisionConditions, Core::Particle&)> afterCollisionFunction,
+        bool maxwellianApproximation)
+        :
+        maxwellianApproximation_(maxwellianApproximation),
+        collisionGasMass_Amu_(collisionGasMassAmu),
+        collisionGasMass_kg_(collisionGasMassAmu*Core::AMU_TO_KG),
+        collisionGasDiameter_m_(collisionGasDiameterM),
+        pressureFunction_(std::move(pressureFunction)),
+        velocityFunction_(std::move(velocityFunction)),
+        temperatureFunction_(std::move(temperatureFunction)),
+        afterCollisionActionFunction_(std::move(afterCollisionFunction)) { }
+
+void CollisionModel::SoftSphereModel::updateModelParticleParameters(Core::Particle &ion) const {}
+
+void CollisionModel::SoftSphereModel::initializeModelParticleParameters(Core::Particle &ion) const {}
 
 void CollisionModel::SoftSphereModel::updateModelTimestepParameters(int /*timestep*/, double /*time*/) {}
 
-void CollisionModel::SoftSphereModel::modifyAcceleration(Core::Vector &acceleration, Core::Particle &particle,
-                                                         double dt) {
+void CollisionModel::SoftSphereModel::modifyAcceleration(Core::Vector &acceleration, Core::Particle &ion,
+                                                         double dt) {}
+
+/**
+ * Modify the velocity of a charged particle "ion" with a potential random collision in time step "dt"
+ * (only one or none collision can happen, not multiple. Thus, the probability of multiple colllision events
+ * happening in "dt" has to be low)
+ */
+void CollisionModel::SoftSphereModel::modifyVelocity(Core::Particle &ion, double dt) {
+
+    Core::RandomSource* rndSource = Core::globalRandomGeneratorPool->getThreadRandomSource();
+
+    // Calculate collision cross section between particle and collision gas:
+    //   TODO: It seems to be unnecessary to constantly recalculate this
+    //   value, cache the calculated values somehow?
+    double sigma_m2 = M_PI * std::pow( (ion.getDiameter() + collisionGasDiameter_m_)/2.0, 2.0);
+
+    Core::Vector pLocation = ion.getLocation();
+    double localPressure_Pa = pressureFunction_(pLocation);
+
+    if (Core::isDoubleEqual(localPressure_Pa, 0.0)){
+        return; //pressure 0 means no collision at all
+    }
+
+    // Transform the frame of reference in a frame where the mean background gas velocity is zero.
+    Core::Vector vGasMean = velocityFunction_(pLocation);
+    Core::Vector vFrameMeanBackRest = ion.getVelocity() - vGasMean;
+
+    double vRelIonMeanBackRest = vFrameMeanBackRest.magnitude(); //relative ion relative to bulk gas velocity
+
+    // Calculate the mean free path (MFP) from current ion velocity:
+
+    // a static ion leads in static gas leads to a relative velocity of zero, which leads
+    // to undefined behavior due to division by zero later.
+    // The whole process converges to the MFP and collision probability of a static ion, thus
+    // it is possible to assume a small velocity (1 nm/s) for the static ions to get rid of undefined behavior
+    if (vRelIonMeanBackRest < 1e-9){
+        vRelIonMeanBackRest = 1e-9;
+    }
+
+    // Calculate the mean gas speed (m/s)
+    double temperature_K = temperatureFunction_(pLocation);
+    double vMeanGas = std::sqrt(8.0*Core::K_BOLTZMANN*temperature_K/M_PI/(collisionGasMass_Amu_ * Core::AMU_TO_KG));
+
+    // Calculate the median gas speed (m/s)
+    double vMedianGas = std::sqrt(2.0*Core::K_BOLTZMANN*temperature_K/(collisionGasMass_Amu_ * Core::AMU_TO_KG));
+
+    // Compute the mean relative speed (m/s) between ion and gas.
+    double s = vRelIonMeanBackRest / vMedianGas;
+    double cMeanRel = vMeanGas * (
+            (s + 1.0/(2.0*s)) * 0.5 * PI_SQRT * std::erf(s) + 0.5 * std::exp(-s*s) );
+
+    // Compute mean-free-path (m)
+    double effectiveMFP_m = Core::K_BOLTZMANN * temperature_K *
+                            (vRelIonMeanBackRest / cMeanRel) / (localPressure_Pa * sigma_m2);
+
+    // Compute probability of collision in the current time-step.
+    double collisionProb = 1.0 - std::exp(-vRelIonMeanBackRest * dt / effectiveMFP_m);
+
+    // FIXME: The time step length dt is unrestricted
+    // Possible mitigation: Throw warning / exception if collision probability becomes too high
+
+    // Decide if a collision actually happens:
+    if (rndSource->uniformRealRndValue() > collisionProb){
+        return; // no collision takes place
+    }
+
+    // Now we know that a collision happens: Perform the collision
+
+    // Set the alpha valua
+    ion.setFloatAttribute("vss_collision_alpha", 1.0);
+
+    // Calculate the standard deviation of the one dimensional velocity distribution of the
+    // background gas particles. Std. dev. in one dimension is given from Maxwell-Boltzmann
+    // as sqrt(kT / particle mass).
+    double  vrStdevGas = std::sqrt( Core::K_BOLTZMANN * temperature_K / (collisionGasMass_Amu_ * Core::AMU_TO_KG) );
+
+    // Compute the velocity vector of the background gas particle colliding with the ion.
+
+    Core::Vector vGasParticle;
+    if (maxwellianApproximation_){
+        // Fast, approximate option: Calculate the gas particle velocity with a simple
+        // Maxwell-Boltzmann distribution
+        vGasParticle.x(rndSource->normalRealRndValue() * vrStdevGas);
+        vGasParticle.y(rndSource->normalRealRndValue() * vrStdevGas);
+        vGasParticle.z(rndSource->normalRealRndValue() * vrStdevGas);
+    }
+    else {
+        // More correct but slower option:
+
+        // A rejection method is used to account for the relative velocities between the ion and
+        // the neutral background gas particles.
+        // The probability of a gas particle with v_gas to hit the ion is
+        // given by p(v_gas) = |v_gas - v_ion| f(v_gas) with f(v_gas) as the velocity
+        // (Maxwell-Boltzmann) distribution of the background gas particles.
+        double vGasParticleMagnitude;
+
+        // vGasParticleUpperScale reasonable upper-bound for the length of the relative gas particle
+        // velocity "vGasParticleMagnitude".
+        // Here three standard deviations of the mean three dimensional background particle velocity is used
+        double vGasParticleUpperScale = vRelIonMeanBackRest + vrStdevGas * SQRT3_3;
+        do {
+            vGasParticle.x(rndSource->normalRealRndValue() * vrStdevGas);
+            vGasParticle.y(rndSource->normalRealRndValue() * vrStdevGas);
+            vGasParticle.z(rndSource->normalRealRndValue() * vrStdevGas);
+            vGasParticleMagnitude = (vGasParticle - vFrameMeanBackRest).magnitude();
+        }
+        while (rndSource->uniformRealRndValue() >= (vGasParticleMagnitude / vGasParticleUpperScale));
+    }
+
+    // Define a new reference frame with the colliding background gas particle at rest
+    // for the subsequent analysis
+    Core::Vector vFrameCollidingBackRest = vFrameMeanBackRest - vGasParticle;
+
+
+    // Calculate the reduced mass
+    double ionMass_kg = ion.getMass();
+    double reducedMass_kg_ = (collisionGasMass_kg_ * ionMass_kg) / (collisionGasMass_kg_ + ionMass_kg);
+
+
+    // Calculate the postcollision energy through E = 1/2 mv^2. The postcollision energy
+    // cannot differ from the precollsion energy (law of conservation of energy). Thus, the postcollision
+    // energy can be calculated using the precollision viscosity vector.
+    double vFrameCollidingBackRestSquared = vFrameCollidingBackRest.magnitude() * vFrameCollidingBackRest.magnitude();
+    double postCollisionEnergy = 0.5 * reducedMass_kg_ * vFrameCollidingBackRestSquared;
+
+    // Determine angle of the collision plane round the collision axis. All collision
+    // planes are equally probable, since there is no preferential direction.
+    double impactTheta = PI_2*rndSource->uniformRealRndValue();
+
+
+
+
+
 
 }
 
-void CollisionModel::SoftSphereModel::modifyVelocity(Core::Particle &particle, double dt) {
-
-}
-
-void CollisionModel::SoftSphereModel::modifyPosition(Core::Vector &position, Core::Particle &particle, double dt) {
-
-}
+void CollisionModel::SoftSphereModel::modifyPosition(Core::Vector &position, Core::Particle &ion, double dt) {}
