@@ -88,8 +88,7 @@ namespace CollisionModel{
                 double collisionGasDiameterM,
                 std::function<void(RS::CollisionConditions, Core::Particle&)>afterCollisionFunction,
                 bool maxwellianApproximation = false);
-
-
+        
         void updateModelParticleParameters(Core::Particle& ion) const override;
         void initializeModelParticleParameters(Core::Particle& ion) const override;
         void updateModelTimestepParameters(int timestep, double time) override;

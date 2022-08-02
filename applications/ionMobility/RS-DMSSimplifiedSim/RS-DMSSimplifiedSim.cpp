@@ -34,6 +34,7 @@
 #include "FileIO_trajectoryHDF5Writer.hpp"
 #include "FileIO_scalar_writer.hpp"
 #include "PSim_util.hpp"
+#include "PSim_sampledFunction.hpp"
 #include "appUtils_simulationConfiguration.hpp"
 #include "appUtils_logging.hpp"
 #include "appUtils_stopwatch.hpp"
@@ -46,6 +47,7 @@
 
 const std::string key_ChemicalIndex = "keyChemicalIndex";
 const double standardPressure_Pa = 102300; //101325
+enum MobilityScalingMode {STATIC_MOBILITY, FIELD_SCALING_FUNCTION};
 
 int main(int argc, const char * argv[]) {
 
@@ -105,6 +107,24 @@ int main(int argc, const char * argv[]) {
         for (std::size_t i=0; i<discreteSubstances.size(); i++){
             substanceIndices.insert(std::pair<RS::Substance*,int>(discreteSubstances[i], i));
             ionMobility.push_back(discreteSubstances[i]->lowFieldMobility());
+        }
+
+        //read ion mobility scaling configuration ==============================================
+        MobilityScalingMode mobilitScalingMode;
+        std::unique_ptr<ParticleSimulation::SampledFunction> mobilityScalingFct= nullptr;
+        ParticleSimulation::SampledFunction* mobilityScalingFctPtr = nullptr;
+        if (simConf->isParameter("mobility_scaling_function")){
+            std::string  scalingFunctionFilename = simConf->pathRelativeToConfFile(
+                    simConf->stringParameter("mobility_scaling_function"));
+            mobilityScalingFct = std::make_unique<ParticleSimulation::SampledFunction>(scalingFunctionFilename);
+            mobilityScalingFctPtr = mobilityScalingFct.get();
+            mobilitScalingMode = FIELD_SCALING_FUNCTION;
+            if(!mobilityScalingFct->good()){
+                throw(std::invalid_argument("Mobility function data not good"));
+            }
+        }
+        else{
+            mobilitScalingMode = STATIC_MOBILITY;
         }
 
 
@@ -242,12 +262,24 @@ int main(int argc, const char * argv[]) {
             reactionConditions.electricField = fieldMagnitude;
             rsSim.performTimestep(reactionConditions, dt_s, particlesReactedFct);
 
-            #pragma omp parallel default(none) shared(particles) firstprivate(nParticlesTotal, reducedPressure, fieldMagnitude, dt_s)
+            #pragma omp parallel default(none) shared(particles, mobilityScalingFctPtr) firstprivate(mobilitScalingMode, nParticlesTotal, reducedPressure, fieldMagnitude, dt_s)
             {
+                // 1 Td: = 10e-17 V*cm^2 = 10e-17 V*cm^2 = 10e-21 V*m^2
+                // 2.688e19 molek/cm^3 at atmospheric pressure,
+                double mobilityScalingFactor = 0.0;
+                if (mobilitScalingMode == FIELD_SCALING_FUNCTION) {
+                    double reducedField = (fieldMagnitude/100.0)/(reducedPressure*2.688e2);
+                    mobilityScalingFactor = mobilityScalingFctPtr->getInterpolatedValue(abs(reducedField));
+                }
+
                 #pragma omp for
                 for (unsigned int i = 0; i<nParticlesTotal; i++) {
                     // move particle in z axis according to particle mobility:
                     RS::ReactiveParticle* particle = particles[i].get();
+
+                    if (mobilitScalingMode == FIELD_SCALING_FUNCTION){
+                        particle->setMobility(particle->getLowFieldMobility()*mobilityScalingFactor);
+                    }
 
                     double particleShift = particle->getMobility()*reducedPressure*fieldMagnitude*dt_s;
                     Core::Vector particleLocation = particle->getLocation();
