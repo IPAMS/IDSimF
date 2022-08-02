@@ -151,7 +151,8 @@ namespace CollisionModel{
         double angleThetaScaling_ = 0.0;
         double spawnRadius_ = 0.0;
         double trajectoryDistance_ = 0.0;
-        bool recordTrajectory_ = false;
+        bool trajectoryRecordingActive_ = false;
+        bool modelRecordsTrajectories_ = false;
         int recordTrajectoryStartTimeStep_ = 0;
         std::unique_ptr<std::ofstream> trajectoryOutputStream_;
 
