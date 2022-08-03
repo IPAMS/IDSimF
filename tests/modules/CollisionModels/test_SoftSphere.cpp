@@ -58,10 +58,6 @@ TEST_CASE("Basic test Soft Sphere model", "[CollisionModels][SoftSphereModel]") 
 
         Core::Vector ionVelo = ion.getVelocity();
         std::cout << ionVelo;
-
-        //CHECK(Approx(ionVelo.x()) ==  -27.2881052);
-        //CHECK(Approx(ionVelo.y()) ==  32.5138876);
-        //CHECK(Approx(ionVelo.z()) ==  -128.48497);
     }
 }
 
