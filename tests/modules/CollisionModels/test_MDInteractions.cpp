@@ -38,7 +38,6 @@ std::string readTextFile(std::string filename){
     std::ifstream ifs(filename);
     std::string content;
     content.assign( (std::istreambuf_iterator<char>(ifs) ), (std::istreambuf_iterator<char>() ) );
-
     return content;
 }
 
@@ -91,5 +90,10 @@ TEST_CASE("Basic test MD Interactions model", "[CollisionModels][MDInteractionsM
     }
 
     std::string readBack_late = readTextFile("MD_collisions_microscopic_trajectories_test.txt");
-    CHECK(readBack_late.size() == 611638);
+
+    std::ifstream fstream("MD_collisions_microscopic_trajectories_test.txt");
+    std::string line;
+    long i=0;
+    for (i = 0; std::getline(fstream, line); ++i);
+    CHECK(i > 5000);
 }
