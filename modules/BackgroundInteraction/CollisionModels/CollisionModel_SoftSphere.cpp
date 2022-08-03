@@ -189,9 +189,8 @@ void CollisionModel::SoftSphereModel::modifyVelocity(Core::Particle &ion, double
 
     // Now we know that a collision happens: Perform the collision
 
-    // Set the alpha value
-
-    double vss_collision_alpha = ion.getFloatAttribute("vss_collision_alpha");
+    // Get the alpha value
+    double vss_collision_alpha = ion.getFloatAttribute(VSS_ALPHA);
 
     // Calculate the standard deviation of the one dimensional velocity distribution of the
     // background gas particles. Std. dev. in one dimension is given from Maxwell-Boltzmann
