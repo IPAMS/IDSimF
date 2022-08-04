@@ -79,6 +79,10 @@ TEST_CASE("Basic test MD Interactions model", "[CollisionModels][MDInteractionsM
         time += dt;
     }
 
+    CHECK(Approx(ion.getVelocity().x()).margin(0.02) ==  479.5777664095);
+    CHECK(Approx(ion.getVelocity().y()).margin(0.02) ==  -45.9512880269);
+    CHECK(Approx(ion.getVelocity().z()).margin(0.01) ==  151.2568045226);
+
     std::string readBack_early = readTextFile("MD_collisions_microscopic_trajectories_test.txt");
     CHECK(readBack_early == "");
 
@@ -89,11 +93,38 @@ TEST_CASE("Basic test MD Interactions model", "[CollisionModels][MDInteractionsM
         time += dt;
     }
 
-    std::string readBack_late = readTextFile("MD_collisions_microscopic_trajectories_test.txt");
-
     std::ifstream fstream("MD_collisions_microscopic_trajectories_test.txt");
     std::string line;
-    long i=0;
-    for (i = 0; std::getline(fstream, line); ++i);
+    long i;
+    for (i = 0; std::getline(fstream, line); ++i){
+        if (i==100){
+
+            //parse line
+            std::string delimiter = ",";
+            size_t pos = 0;
+            std::string token;
+            std::vector<double> values;
+            do{
+                token = line.substr(0, pos);
+                line.erase(0, pos + delimiter.length());
+                values.push_back(std::strtod(token.c_str(), nullptr));
+            }  while ((pos = line.find(delimiter)) != std::string::npos);
+
+            std::vector<double> compareValues = {1.97047e-10, 1.58704e-09, 2.41647e-11, 1.59938e-09, 3.30249e-12};
+            std::vector<double> compareMargins = {2e-10, 2e-9, 2e-9, 2e-9, 2e-9};
+
+            CHECK(values.size() == compareValues.size());
+
+            CHECK(Approx(values[0]).margin(compareMargins[0]) ==  compareValues[0]);
+            CHECK(Approx(values[1]).margin(compareMargins[1]) ==  compareValues[1]);
+            CHECK(Approx(values[2]).margin(compareMargins[2]) ==  compareValues[2]);
+            CHECK(Approx(values[3]).margin(compareMargins[3]) ==  compareValues[3]);
+            CHECK(Approx(values[4]).margin(compareMargins[4]) ==  compareValues[4]);
+
+            //compare individual values
+        }
+    }
     CHECK(i > 5000);
+
+
 }
