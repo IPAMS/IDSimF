@@ -227,9 +227,6 @@ void CollisionModel::HardSphereModel::modifyVelocity(Core::Particle &ion, double
         while (rndSource->uniformRealRndValue() >= (vGasParticleMagnitude / vGasParticleUpperScale));
     }
 
-
-
-
     // Define a new reference frame with the colliding background gas particle at rest
     // for the subsequent analysis
     Core::Vector vFrameCollidingBackRest = vFrameMeanBackRest - vGasParticle;
