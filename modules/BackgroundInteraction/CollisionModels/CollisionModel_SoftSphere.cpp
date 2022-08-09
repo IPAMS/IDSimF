@@ -251,8 +251,6 @@ void CollisionModel::SoftSphereModel::modifyVelocity(Core::Particle &ion, double
     // planes are equally probable, since there is no preferential direction.
     double impactTheta = PI_2 * rndSource->uniformRealRndValue();
 
-    double vPreCollisionMagnitude = cmfPreCollision.magnitude();
-
     // Calculate the resulting vectors
     // Core::Vector postCollisionVectorBackRest;
 
@@ -268,10 +266,10 @@ void CollisionModel::SoftSphereModel::modifyVelocity(Core::Particle &ion, double
         // on the alpha soft sphere scattering value.
         cosX = 2 * rndSource->uniformRealRndValue() - 1;
         // sinX = std::sqrt(1 - cosX * cosX);
-
-        cmfPostCollision.x((vFrameCollidingBackRest.magnitude() * vFrameCollidingBackRest.magnitude()) * cosX);
-        cmfPostCollision.y((vFrameCollidingBackRest.magnitude() * vFrameCollidingBackRest.magnitude()) * std::cos(impactTheta));
-        cmfPostCollision.z((vFrameCollidingBackRest.magnitude() * vFrameCollidingBackRest.magnitude()) * std::sin(impactTheta));
+        double vFrameCollidingBackRestMagnitude = vFrameCollidingBackRest.magnitude();
+        cmfPostCollision.x(vFrameCollidingBackRestMagnitude * cosX);
+        cmfPostCollision.y(vFrameCollidingBackRestMagnitude * std::cos(impactTheta));
+        cmfPostCollision.z(vFrameCollidingBackRestMagnitude * std::sin(impactTheta));
     }
     else {
         cosX = 2 * std::pow(rndSource->uniformRealRndValue(), (1 / vss_collision_alpha)) - 1;
