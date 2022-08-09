@@ -189,15 +189,10 @@ void CollisionModel::SoftSphereModel::modifyVelocity(Core::Particle &ion, double
 
     // Now we know that a collision happens: Perform the collision
 
-    // Get the alpha value
-    double vss_collision_alpha = ion.getFloatAttribute(VSS_ALPHA);
-
-    // Calculate the standard deviation of the one dimensional velocity distribution of the
+     // Calculate the standard deviation of the one dimensional velocity distribution of the
     // background gas particles. Std. dev. in one dimension is given from Maxwell-Boltzmann
     // as sqrt(kT / particle mass).
     double vrStdevGas = std::sqrt(Core::K_BOLTZMANN * temperature_K / (collisionGasMass_Amu_ * Core::AMU_TO_KG));
-    // std::cout << "collisionGaskg:" << collisionGasMass_Amu_ * Core::AMU_TO_KG << "\n";
-    // std::cout << "collisionGasAMU:" << collisionGasMass_Amu_ << "\n";
 
     // Compute the velocity vector of the background gas particle colliding with the ion.
 
@@ -230,33 +225,33 @@ void CollisionModel::SoftSphereModel::modifyVelocity(Core::Particle &ion, double
         } while (rndSource->uniformRealRndValue() >= (vGasParticleMagnitude / vGasParticleUpperScale));
     }
 
-    // Define a new reference frame with the colliding background gas particle at rest
-    // for the subsequent analysis
-    Core::Vector vFrameCollidingBackRest = vFrameMeanBackRest - vGasParticle;
+    Core::Vector vIonPreCollision = ion.getVelocity();
 
-    // Calculate the postcollision energy through E = 1/2 mv^2. The postcollision energy
+    // Transform the frame of reference in a center of mass frame.
+    double ionMass_kg = ion.getMass();
+    double massDivisor = 1 / (ionMass_kg + collisionGasMass_kg_);
+    Core::Vector cmfPreCollision;
+    cmfPreCollision.x((ionMass_kg * vIonPreCollision.x() + collisionGasMass_kg_ * vGasParticle.x()) * massDivisor);
+    cmfPreCollision.y((ionMass_kg * vIonPreCollision.y() + collisionGasMass_kg_ * vGasParticle.y()) * massDivisor);
+    cmfPreCollision.z((ionMass_kg * vIonPreCollision.z() + collisionGasMass_kg_ * vGasParticle.z()) * massDivisor);
+
+    // Get the alpha value
+    double vss_collision_alpha = ion.getFloatAttribute(VSS_ALPHA);
+
+
+    // Calculate the postcollision energy through E = 1/2 mv^2, with the velocity being the reference frame of
+    // the colliding background gas particle at rest.
+    Core::Vector vFrameCollidingBackRest = vFrameMeanBackRest - vGasParticle;
+    // double reducedMass = ionMass_kg * collisionGasMass_kg_ / (ionMass_kg + collisionGasMass_kg_);
     // cannot differ from the precollsion energy (law of conservation of energy). Thus, the postcollision
     // energy can be calculated using the precollision viscosity vector.
-
-    double ionMass_kg = ion.getMass();
-    // double reducedMass_kg_ = (collisionGasMass_kg_ * ionMass_kg) / (collisionGasMass_kg_ + ionMass_kg);
-    // double vFrameCollidingBackRestSquared = vFrameCollidingBackRest.magnitude() * vFrameCollidingBackRest.magnitude();
-    // double postCollisionEnergy = 0.5 * reducedMass_kg_ * vFrameCollidingBackRestSquared;
-
-    // Calculate the sum of the Diameters
-    double DiameterSum = collisionGasDiameter_m_ + ion.getDiameter();
+    // double kineticEnergy = 0.5 * reducedMass * (vFrameMeanBackRest.magnitude()*vFrameMeanBackRest.magnitude());
 
     // Determine angle of the collision plane round the collision axis. All collision
     // planes are equally probable, since there is no preferential direction.
     double impactTheta = PI_2 * rndSource->uniformRealRndValue();
 
-    // Compute spherical coordinates in current velocity reference frame.
-    Core::Vector vFrameCollidingRest_sp = cartesianToPolar(vFrameCollidingBackRest);
-
-    // (the resulting vector contains now polar coordinates in degrees)
-    double vIon_sp = vFrameCollidingRest_sp.x();
-    double azimuthIon = vFrameCollidingRest_sp.y();
-    double elevationIon = vFrameCollidingRest_sp.z();
+    double vPreCollisionMagnitude = cmfPreCollision.magnitude();
 
     // Calculate the resulting vectors
     // Core::Vector postCollisionVectorBackRest;
@@ -264,69 +259,52 @@ void CollisionModel::SoftSphereModel::modifyVelocity(Core::Particle &ion, double
     // calculate cosX and sinX as impactAngle
     double cosX;
     double sinX;
-    double impactAngle;
-    double impactOffset;
+    Core::Vector cmfPostCollision;
 
     // If-Else-Clauses to check if collision is approximately Hard Sphere.
     if (std::abs(1.0 - (1 / vss_collision_alpha)) < 0.001) {
 
         // Calculate the scattering angle, while assuming approximately Hard Sphere Collision. Thus, no dependency
         // on the alpha soft sphere scattering value.
-        double cosX = 2 * rndSource->uniformRealRndValue() - 1;
-        double sinX = std::sqrt(1 - cosX * cosX);
-        double impactAngle = acos(cosX);
+        cosX = 2 * rndSource->uniformRealRndValue() - 1;
+        // sinX = std::sqrt(1 - cosX * cosX);
 
-        double impactOffset = std::sqrt(rndSource->uniformRealRndValue());
-
-    } else {
-        double cosX = 2 * std::pow(rndSource->uniformRealRndValue(), (1 / vss_collision_alpha)) - 1;
-        double sinX = std::sqrt(1 - cosX * cosX);
-        double impactAngle = acos(cosX);
-
-        double impactOffset = DiameterSum * std::pow(std::cos(impactAngle / 2), vss_collision_alpha);
+        cmfPostCollision.x((vFrameCollidingBackRest.magnitude() * vFrameCollidingBackRest.magnitude()) * cosX);
+        cmfPostCollision.y((vFrameCollidingBackRest.magnitude() * vFrameCollidingBackRest.magnitude()) * std::cos(impactTheta));
+        cmfPostCollision.z((vFrameCollidingBackRest.magnitude() * vFrameCollidingBackRest.magnitude()) * std::sin(impactTheta));
     }
+    else {
+        cosX = 2 * std::pow(rndSource->uniformRealRndValue(), (1 / vss_collision_alpha)) - 1;
+        sinX = std::sqrt(1 - cosX * cosX);
 
-    // Velocity components of the ion relative to the collision axis
-    // (connection axis between the particle centers in the moment of collision)
-    double vIonNormal = vIon_sp * cosX;   //normal velocity
-    double vIonRadial = vIon_sp * sinX;   //radial velocity
+        double d = std::sqrt(cmfPreCollision.x() * cmfPreCollision.x() + cmfPreCollision.y() * cmfPreCollision.y());
 
-    double d = std::sqrt(vFrameCollidingBackRest.x() * vFrameCollidingBackRest.x() +
-                         vFrameCollidingBackRest.y() * vFrameCollidingBackRest.y());
+        // Modify ion velocity in the normal direction due to elastic collision
+        if (d < 1.0e-6 or std::abs(1.0 - (1 / vss_collision_alpha)) < 0.001) {
 
-    // Modify ion velocity in the normal direction due to elastic collision
-    // The force acts in the normal direction, which is also normal to the collision plane
-    // (Tangential plane of the particle surfaces in the point of contact)
-    double vIonNormalAfterCollision;
-    if (d > 1.0e-6) {
-        double vIonNormalAfterCollision = ((vIonNormal + sinX * d * std::sin(impactTheta))
-                                           * (ionMass_kg - collisionGasMass_kg_)) / (ionMass_kg + collisionGasMass_kg_);
-    } else {
-        double vIonNormalAfterCollision = (vIonNormal * (ionMass_kg - collisionGasMass_kg_))
-                                          / (ionMass_kg + collisionGasMass_kg_);
+            cmfPostCollision.x(cmfPreCollision.x() * cosX + sinX * d * std::sin(impactTheta));
+            cmfPostCollision.y(cmfPreCollision.y() * cosX + (sinX * std::cos(impactTheta) * cmfPreCollision.z() -
+                                                             cmfPreCollision.x() * cmfPreCollision.y() * sinX *
+                                                             std::sin(impactTheta) / d));
+            cmfPostCollision.z(cmfPreCollision.z() * cosX + (sinX * std::cos(impactTheta) * cmfPreCollision.y() -
+                                                             cmfPreCollision.x() * cmfPreCollision.z() * sinX *
+                                                             std::sin(impactTheta) / d));
+        } else {
+            cmfPostCollision.x(cmfPreCollision.x() * cosX);
+            cmfPostCollision.y(cmfPreCollision.x() * std::cos(impactTheta));
+            cmfPostCollision.z(cmfPreCollision.x() * std::sin(impactTheta));
+        }
     }
-
-    // Rotate frame in a way that ion velocity is on the y axis, which also means
-    // that the angle between the y axis and the resulting velocity vector is the
-    // angle the particle was scattered by
-    Core::Vector vFrameRot = elevationRotate(
-            Core::Vector(vIonNormalAfterCollision, vIonRadial, 0),
-            M_PI_2 - impactAngle);
-
-    // Select the orientation of the plane the collision is taking place in by
-    // rotating around the y axis with the angle theta
-    vFrameRot = azimuthRotate(vFrameRot, impactTheta);
 
     // Rotate reference frame back to the original reference frame
-    vFrameRot = elevationRotate(vFrameRot, -M_PI_2 + elevationIon);
-    vFrameRot = azimuthRotate(vFrameRot, azimuthIon);
-
-    // Translate reference frame back to original velocity rference frame
-    // relative to the ion
-    Core::Vector vFrameFinal = vFrameRot + vGasParticle + vGasMean;
+    Core::Vector vIonPostCollision;
+    vIonPostCollision.x(cmfPreCollision.x() + (collisionGasMass_kg_ * massDivisor) * cmfPostCollision.x());
+    vIonPostCollision.y(cmfPreCollision.y() + (collisionGasMass_kg_ * massDivisor) * cmfPostCollision.y());
+    vIonPostCollision.z(cmfPreCollision.z() + (collisionGasMass_kg_ * massDivisor) * cmfPostCollision.z());
 
     // Set resulting velocity vector of the ion after the elastic collision
-    ion.setVelocity(vFrameFinal);
+    ion.setVelocity(vIonPostCollision);
+
 
     // After the collision is finished:
     // Handle additional collision actions (e.g. collision based reactions etc.):
