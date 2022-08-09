@@ -59,7 +59,7 @@ enum IntegratorType{
     VERLET, VERLET_PARALLEL, SIMPLE, NO_INTEGRATOR
 };
 enum CollisionModelType{
-    HS, SS, SDS, MD, NO_COLLISONS
+    HS, VSS, SDS, MD, NO_COLLISONS
 };
 
 std::string key_ChemicalIndex = "keyChemicalIndex";
@@ -167,6 +167,12 @@ int main(int argc, const char *argv[]){
             molecularStructureCollection = mdConfReader.readMolecularStructure(mdCollisionConfFile);
         }
 
+        // prepare softsphere collision model alpha values
+        std::vector<double> vssCollisionAlpha;
+        if(transportModelType=="btree_VSS"){
+            vssCollisionAlpha = simConf->doubleVectorParameter("vss_collision_alpha");
+        }
+
         // prepare file writer  =================================================================
         RS::ConcentrationFileWriter resultFilewriter(projectName+"_conc.csv");
 
@@ -233,6 +239,9 @@ int main(int argc, const char *argv[]){
                     particle->setMolecularStructure(molecularStructureCollection.at(particleIdentifier[i]));
                     particle->setDiameter(particle->getMolecularStructure()->getDiameter());
                 }
+                if(transportModelType=="btree_VSS"){
+                    particle->setFloatAttribute(CollisionModel::SoftSphereModel::VSS_ALPHA, vssCollisionAlpha[i]);
+                }
                 particlesPtrs.push_back(particle.get());
                 rsSim.addParticle(particle.get(), nParticlesTotal);
                 particles.push_back(std::move(particle));
@@ -250,7 +259,7 @@ int main(int argc, const char *argv[]){
         // ======================================================================================
 
         //check which integrator type we have to setup:
-        std::vector<std::string> verletTypes{"btree_SDS", "btree_HS", "btree_MD", "btree_SS"};
+        std::vector<std::string> verletTypes{"btree_SDS", "btree_HS", "btree_MD", "btree_VSS"};
         auto vType = std::find(std::begin(verletTypes), std::end(verletTypes), transportModelType);
 
         IntegratorType integratorType;
@@ -424,9 +433,24 @@ int main(int argc, const char *argv[]){
             collisionModelPtr = std::move(collisionModel);
             collisionModelType = MD;
         }
-        else if (transportModelType=="btree_SS") {
-            // Add Softsphere Model here
+        else if (transportModelType=="btree_VSS") {
+            //prepare multimodel with multiple Soft Sphere models (one per collision gas)
+            std::vector<std::unique_ptr<CollisionModel::AbstractCollisionModel>> vssModels;
+            for (std::size_t i = 0; i<nBackgroundGases; ++i) {
+                auto vssModel = std::make_unique<CollisionModel::SoftSphereModel>(
+                        backgroundPartialPressures_Pa[i],
+                        backgroundTemperature_K,
+                        collisionGasMasses_Amu[i],
+                        collisionGasDiameters_m[i]);
 
+                vssModels.emplace_back(std::move(vssModel));
+            }
+
+            std::unique_ptr<CollisionModel::MultiCollisionModel> collisionModel =
+                    std::make_unique<CollisionModel::MultiCollisionModel>(std::move(vssModels));
+
+            collisionModelPtr = std::move(collisionModel);
+            collisionModelType = VSS;
         }
 
         //init trajectory simulation object:

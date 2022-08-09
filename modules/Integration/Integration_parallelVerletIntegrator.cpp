@@ -143,7 +143,9 @@ void Integration::ParallelVerletIntegrator::runSingleStep(double dt){
 
                 //velocity changes due to background interaction:
                 if (collisionModel_ != nullptr) {
+                    //std::cout << "before:" << particles_[i]->getVelocity() << std::endl;
                     collisionModel_->modifyVelocity(*(particles_[i]),dt);
+                    //std::cout << "after:" << particles_[i]->getVelocity() << std::endl;
                 }
             }
         }

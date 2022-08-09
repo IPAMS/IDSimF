@@ -19,9 +19,9 @@
  along with IDSimF.  If not, see <https://www.gnu.org/licenses/>.
 
  ------------
- CollisionModel_HardSphere.hpp
+ CollisionModel_SoftSphere.hpp
 
- Hard Sphere model for ion / neutral gas particle collisions
+ Soft Sphere model for ion / neutral gas particle collisions
 
  This model follows the modelling of the HS1 collision model by David Manura,
  for SIMION 8.0 (Scientific Instrument Services, Inc.).
@@ -41,25 +41,86 @@
 #define IDSIMF_COLLISIONMODEL_SOFTSPHERE_H
 
 #include "CollisionModel_AbstractCollisionModel.hpp"
+#include "CollisionModel_SpatialFieldFunctions.hpp"
+#include "RS_AbstractReaction.hpp"
 
 namespace CollisionModel{
 
     class SoftSphereModel : public AbstractCollisionModel {
 
     public:
+        constexpr static double DIAMETER_N2 = 3.64e-10;
+        constexpr static double DIAMETER_HE = 2.80e-10;
+        inline static const std::string VSS_ALPHA = "vss_collision_alpha";
+
+        SoftSphereModel(
+                double staticPressure,
+                double staticTemperature,
+                double collisionGasMassAmu,
+                double collisionGasDiameterM,
+                bool maxwellianApproximation = false);
+
+        SoftSphereModel(
+                double staticPressure,
+                double staticTemperature,
+                double collisionGasMassAmu,
+                double collisionGasDiameterM,
+                std::function<void(RS::CollisionConditions, Core::Particle&)>afterCollisionFunction,
+                bool maxwellianApproximation = false);
+
+        SoftSphereModel(
+                std::function<double(Core::Vector& location)>pressureFunction,
+                std::function<Core::Vector(Core::Vector& location)>velocityFunction,
+                double StaticTemperature,
+                double collisionGasMassAmu,
+                double collisionGasDiameterM,
+                bool maxwellianApproximation = false);
+
+        SoftSphereModel(
+                std::function<double(Core::Vector& location)>pressureFunction,
+                std::function<Core::Vector(Core::Vector& location)>velocityFunction,
+                std::function<double(const Core::Vector&)>temperatureFunction,
+                double collisionGasMassAmu,
+                double collisionGasDiameterM,
+                std::function<void(RS::CollisionConditions, Core::Particle&)>afterCollisionFunction,
+                bool maxwellianApproximation = false);
 
         void initializeModelParticleParameters(Core::Particle& ion) const override;
+
         void updateModelParticleParameters(Core::Particle& ion) const override;
+
         void updateModelTimestepParameters(int timestep, double time) override;
 
-        void modifyAcceleration(Core::Vector& acceleration,
-                                        Core::Particle& particle,
-                                        double dt) override;
-        void modifyVelocity(Core::Particle& particle,
-                                    double dt)  override;
-        void modifyPosition(Core::Vector& position,
-                                    Core::Particle& particle,
-                                    double dt) override;
+        void modifyAcceleration(
+                Core::Vector& acceleration,
+                Core::Particle& ion,
+                double dt) override;
+
+        void modifyVelocity(
+                Core::Particle& ion,
+                double dt)  override;
+
+        void modifyPosition(
+                Core::Vector& position,
+                Core::Particle& ion,
+                double dt) override;
+
+    private:
+        const double PI_SQRT = std::sqrt(M_PI);
+        const double PI_2 = 2.0*M_PI;
+        const double SQRT3_3 = std::sqrt(3) * 3;
+
+        bool maxwellianApproximation_ = false;  ///< flag if a pure maxwellian approximation for the gas particles is used
+        double collisionGasMass_Amu_ = 0.0;   ///< mass of the neutral colliding gas particles in amu
+        double collisionGasMass_kg_ = 0.0;    ///< mass of the neutral colliding gas particles in kg
+
+        double collisionGasDiameter_m_ = 0.0; ///< effective collision diameter of the neutral collision gas particles in m
+
+        std::function<double(Core::Vector&)> pressureFunction_ = nullptr; ///< a spatial pressure function
+        std::function<Core::Vector(Core::Vector&)> velocityFunction_ = nullptr; ///< a spatial velocity function
+        std::function<double(const Core::Vector&)>temperatureFunction_ = nullptr;  ///< Spatial temperature function
+        std::function<void(RS::CollisionConditions, Core::Particle&)> afterCollisionActionFunction_ = nullptr;
+        ///< Function with things to do after a collision (e.g. collision based chemical reactions)
     };
 
 }
