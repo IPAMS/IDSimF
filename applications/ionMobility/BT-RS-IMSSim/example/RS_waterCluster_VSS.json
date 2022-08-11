@@ -16,5 +16,5 @@
   "background_partial_pressures_Pa":[100000],
   "collision_gas_masses_amu":[28.0],
   "collision_gas_diameters_angstrom":[3.64],
-  "vss_collision_alpha": [1.0, 1.0]
+  "vss_collision_alpha": [1.4, 1.0]
 }
