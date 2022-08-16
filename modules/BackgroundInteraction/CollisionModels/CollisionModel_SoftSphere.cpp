@@ -131,11 +131,6 @@ void CollisionModel::SoftSphereModel::modifyVelocity(Core::Particle &ion, double
 
     Core::RandomSource *rndSource = Core::globalRandomGeneratorPool->getThreadRandomSource();
 
-    // Calculate collision cross section between particle and collision gas:
-    //   TODO: It seems to be unnecessary to constantly recalculate this
-    //   value, cache the calculated values somehow?
-    double sigma_m2 = M_PI * std::pow((ion.getDiameter() + collisionGasDiameter_m_) / 2.0, 2.0);
-
     Core::Vector pLocation = ion.getLocation();
     double localPressure_Pa = pressureFunction_(pLocation);
 
@@ -148,6 +143,25 @@ void CollisionModel::SoftSphereModel::modifyVelocity(Core::Particle &ion, double
     Core::Vector vFrameMeanBackRest = ion.getVelocity() - vGasMean;
 
     double vRelIonMeanBackRest = vFrameMeanBackRest.magnitude(); //relative ion relative to bulk gas velocity
+
+    // Calculate collision cross section between particle and collision gas:
+    // TODO: It seems to be unnecessary to constantly recalculate this
+    // value, cache the calculated values somehow?
+    // Correct the Sum of the Diameters variable according to kinetic energy
+    double m1 = ion.getMass();
+    double m2 = collisionGasMass_kg_;
+    double reducedMass = (m1 * m2) / (m1 + m2);
+    double kineticEnergy = 0.5 * reducedMass * (vRelIonMeanBackRest*vRelIonMeanBackRest);
+    double vss_collision_omega = ion.getFloatAttribute(VSS_OMEGA);
+    double DiameterCorrectionParameter = std::sqrt(std::pow(kineticEnergy, -vss_collision_omega));
+    double sigma_m2;
+    if(vss_collision_omega!=0.0){
+        double correctedMeanDiameter = ((ion.getDiameter() + collisionGasDiameter_m_) / 2.0) * DiameterCorrectionParameter;
+        sigma_m2 = M_PI * std::pow(correctedMeanDiameter, 2.0);
+    }
+    else{
+        sigma_m2 = M_PI * std::pow(((ion.getDiameter() + collisionGasDiameter_m_) / 2.0), 2.0);
+    }
 
     // Calculate the mean free path (MFP) from current ion velocity:
 
@@ -278,8 +292,7 @@ void CollisionModel::SoftSphereModel::modifyVelocity(Core::Particle &ion, double
 
         double d = std::sqrt(cmfPreCollision.x() * cmfPreCollision.x() + cmfPreCollision.y() * cmfPreCollision.y());
         // Modify ion velocity in the normal direction due to elastic collision
-        if (d < 1.0e-6)                                             {
-
+        if (d < 1.0e-6){
             cmfPostCollision.x(cmfPreCollision.x() * cosX + sinX * d * std::sin(impactTheta));
             cmfPostCollision.y(cmfPreCollision.y() * cosX + (sinX * std::cos(impactTheta) * cmfPreCollision.z() -
                                                              cmfPreCollision.x() * cmfPreCollision.y() * sinX *
