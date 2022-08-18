@@ -232,6 +232,8 @@ CollisionModel::Atom::AtomType CollisionModel::Atom::from_string(std::string str
         return CollisionModel::Atom::AtomType::Cl;
     } else if(str == "Li") {
         return CollisionModel::Atom::AtomType::Li;
+    } else if(str == "Sn") {
+        return CollisionModel::Atom::AtomType::Sn;
     } else {
         throw std::invalid_argument("No such AtomType can be found.");
     }
