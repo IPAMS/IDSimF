@@ -52,6 +52,7 @@ namespace CollisionModel{
         constexpr static double DIAMETER_N2 = 3.64e-10;
         constexpr static double DIAMETER_HE = 2.80e-10;
         inline static const std::string VSS_ALPHA = "vss_collision_alpha";
+        inline static const std::string VSS_OMEGA = "vss_collision_omega";
 
         SoftSphereModel(
                 double staticPressure,

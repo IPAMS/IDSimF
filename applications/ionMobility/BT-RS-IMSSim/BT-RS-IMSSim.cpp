@@ -169,8 +169,10 @@ int main(int argc, const char *argv[]){
 
         // prepare softsphere collision model alpha values
         std::vector<double> vssCollisionAlpha;
+        std::vector<double> vssCollisionOmega;
         if(transportModelType=="btree_VSS"){
             vssCollisionAlpha = simConf->doubleVectorParameter("vss_collision_alpha");
+            vssCollisionOmega = simConf->doubleVectorParameter("vss_collision_omega");
         }
 
         // prepare file writer  =================================================================
@@ -241,6 +243,7 @@ int main(int argc, const char *argv[]){
                 }
                 if(transportModelType=="btree_VSS"){
                     particle->setFloatAttribute(CollisionModel::SoftSphereModel::VSS_ALPHA, vssCollisionAlpha[i]);
+                    particle->setFloatAttribute(CollisionModel::SoftSphereModel::VSS_OMEGA, vssCollisionOmega[i]);
                 }
                 particlesPtrs.push_back(particle.get());
                 rsSim.addParticle(particle.get(), nParticlesTotal);

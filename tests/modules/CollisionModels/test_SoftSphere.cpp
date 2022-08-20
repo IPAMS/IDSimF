@@ -43,6 +43,7 @@ TEST_CASE("Basic test Soft Sphere model", "[CollisionModels][SoftSphereModel]") 
     ion.setMassAMU(28.0);
     int n = 100;
     ion.setFloatAttribute("vss_collision_alpha", 1.0);
+    ion.setFloatAttribute("vss_collision_omega", 0.01);
 
     SECTION("Test without maxwellian approximation"){
         CollisionModel::SoftSphereModel vss = CollisionModel::SoftSphereModel(
