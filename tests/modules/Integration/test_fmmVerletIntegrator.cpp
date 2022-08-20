@@ -32,6 +32,10 @@
 
 #ifdef WITH_EXAFMMT
     #include "ExaFMMt_fmmSolver.hpp"
+#else
+    namespace ExaFMMt{
+        class FMMSolver;
+    }
 #endif
 
 #include "SC_generic.hpp"

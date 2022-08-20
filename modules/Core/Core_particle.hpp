@@ -86,6 +86,8 @@ namespace Core {
 
         void setMobility(double mobility);
         [[nodiscard]] double getMobility() const;
+        void setLowFieldMobility(double lowFieldMobility);
+        [[nodiscard]] double getLowFieldMobility() const;
         void setMeanFreePathSTP(double meanFreePathSTP);
         [[nodiscard]] double getMeanFreePathSTP() const;
         void setMeanThermalVelocitySTP(double meanVelocitySTP);
@@ -110,7 +112,8 @@ namespace Core {
         Core::Vector velocity_ = Core::Vector(0.0, 0.0, 0.0); ///< The velocity of the particle (m/s)
         Core::Vector acceleration_ = Core::Vector(0.0, 0.0, 0.0); ///< The acceleration of the particle (m/s^2)
         double charge_ = 0.0;           ///< The charge of the particle (C)
-        double mobility_ = 0.0;         ///< The electrical mobility of the charged particle (m^2 / (V*s))
+        double lowFieldMobility_ = 0.0; ///< The low field (with vanishing electric field) electrical mobility of the charged particle (m^2 / (V*s))
+        double mobility_ = 0.0;         ///< The actual electrical mobility of the charged particle (m^2 / (V*s))
         double mass_ = 0.0;             ///< The mass of the particle (kg)
         double diameter_ = 0.0;         ///< (collision) diameter of the particle (m^2)
         double STP_meanFreePath_ = 0.0; ///< mean free path at standard temperature and pressure (m)

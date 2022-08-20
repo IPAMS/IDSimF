@@ -26,10 +26,39 @@
  ****************************/
 
 #include "CollisionModel_SoftSphere.hpp"
+#include "Core_constants.hpp"
+#include "Core_randomGenerators.hpp"
+#include "Core_particle.hpp"
 #include "catch.hpp"
 
-TEST_CASE("Basic test Soft Sphere model", "[CollisionModels][SoftSphereModel]") {
 
-    CollisionModel::SoftSphereModel ssm;
+TEST_CASE("Basic test Soft Sphere model", "[CollisionModels][SoftSphereModel]") {
+    //Set the global random generator to a test random number generator to make the test experiment fully deterministic:
+    Core::globalRandomGeneratorPool = std::make_unique<Core::TestRandomGeneratorPool>();
+
+    double diameterHe = CollisionModel::SoftSphereModel::DIAMETER_HE;
+    Core::Particle ion;
+    ion.setDiameter(CollisionModel::SoftSphereModel::DIAMETER_HE);
+    ion.setVelocity(Core::Vector(100,0,0));
+    ion.setMassAMU(28.0);
+    int n = 100;
+    ion.setFloatAttribute("vss_collision_alpha", 1.0);
+    ion.setFloatAttribute("vss_collision_omega", 0.01);
+
+    SECTION("Test without maxwellian approximation"){
+        CollisionModel::SoftSphereModel vss = CollisionModel::SoftSphereModel(
+                1.0,
+                298,
+                4.0,
+                diameterHe,
+                false);
+
+        for (int i =0; i<n; i++){
+            vss.modifyVelocity(ion, 2e-7);
+        }
+
+        Core::Vector ionVelo = ion.getVelocity();
+        std::cout << ionVelo;
+    }
 }
 

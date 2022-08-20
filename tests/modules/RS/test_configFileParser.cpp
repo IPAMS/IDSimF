@@ -121,6 +121,7 @@ TEST_CASE("Test parsing of chemical systems with RS config file parser", "[RS][C
         reac_compare_1.updateStaticReactionConcentration();
 
         reactionConditions.temperature = 598;
+        reactionConditions.pressure = 1.0;
         double k_test = reac_compare_1.attemptReaction(reactionConditions, &dummyParticle, 1.0).reactionProbability;
         double k_1 = r1->attemptReaction(reactionConditions, &dummyParticle, 1.0).reactionProbability;
 
@@ -137,7 +138,6 @@ TEST_CASE("Test parsing of chemical systems with RS config file parser", "[RS][C
                 "a field dependent vant hoff test reaction");
 
         reactionConditions.electricField= 10000;
-
 
         k_test = reac_compare_3.attemptReaction(reactionConditions, &dummyParticle, 1.0).reactionProbability;
         double k_3 = r3->attemptReaction(reactionConditions, &dummyParticle, 1.0).reactionProbability;
@@ -176,14 +176,14 @@ TEST_CASE("Test parsing of chemical systems with RS config file parser", "[RS][C
         CHECK(simConf->substance(2)->type() == RS::Substance::substanceType::discrete);
         CHECK(isExactDoubleEqual(simConf->substance(2)->mass(), 55));
         CHECK(isExactDoubleEqual(simConf->substance(2)->charge(), 1.0));
-        CHECK(simConf->substance(2)->mobility() == Approx(0.000235).epsilon(1e-6));
+        CHECK(simConf->substance(2)->lowFieldMobility() == Approx(0.000235).epsilon(1e-6));
         CHECK(simConf->substance(2)->collisionDiameter() == Approx(7.0e-10).epsilon(1e-5));
 
         CHECK(simConf->substance(3)->name() == "Cl_4");
         CHECK(simConf->substance(3)->type() == RS::Substance::substanceType::discrete);
         CHECK(isExactDoubleEqual(simConf->substance(3)->mass(), 73));
         CHECK(isExactDoubleEqual(simConf->substance(3)->charge(), 1.0));
-        CHECK(simConf->substance(3)->mobility() == Approx(2.09e-4).epsilon(1e-6));
+        CHECK(simConf->substance(3)->lowFieldMobility() == Approx(2.09e-4).epsilon(1e-6));
         CHECK(simConf->substance(3)->collisionDiameter() == Approx(9.0e-10).epsilon(1e-5));
 
         std::vector<RS::Substance*> discreteSubstances = simConf->getAllDiscreteSubstances();
@@ -207,7 +207,7 @@ TEST_CASE("Test parsing of chemical systems with RS config file parser", "[RS][C
         REQUIRE(simConf->substance(4)->type() == RS::Substance::substanceType::discrete);
         REQUIRE(isExactDoubleEqual(simConf->substance(4)->mass(), 91));
         REQUIRE(isExactDoubleEqual(simConf->substance(4)->charge(), 1.0));
-        REQUIRE(simConf->substance(4)->mobility() == Approx(1.90e-4).epsilon(1e-6));
+        REQUIRE(simConf->substance(4)->lowFieldMobility() == Approx(1.90e-4).epsilon(1e-6));
         REQUIRE(simConf->substance(4)->collisionDiameter() == Approx(10.0e-10).epsilon(1e-5));
 
         std::vector<RS::Substance*> discreteSubstances = simConf->getAllDiscreteSubstances();

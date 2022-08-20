@@ -145,6 +145,10 @@ namespace Integration{
     void FMMVerletIntegrator<FMMSolverT>::runSingleStep(double dt) {
         bearParticles_(time_);
 
+        if (collisionModel_ !=nullptr){
+            collisionModel_->updateModelTimestepParameters(timestep_, time_);
+        }
+
         // first: Calculate charge distribution with particle positions and charges at the beginning of the time step
         if (nParticles_ > 0){
             solver_.computeChargeDistribution();
@@ -161,7 +165,7 @@ namespace Integration{
                 if (particles_[i]->isActive()){
 
                     if (collisionModel_ != nullptr) {
-                        collisionModel_->updateModelParameters(*(particles_[i]));
+                        collisionModel_->updateModelParticleParameters(*(particles_[i]));
                     }
 
                     Core::Vector newPos = particles_[i]->getLocation() + particles_[i]->getVelocity() * dt + a_t_[i]*(1.0/2.0*dt*dt);

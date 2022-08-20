@@ -193,7 +193,7 @@ TEST_CASE("Basic test Molecule creation", "[CollisionModels][Molecule]") {
         std::vector<std::shared_ptr<CollisionModel::Atom>> atoms = {
             std::make_shared<CollisionModel::Atom>(std::move(atm1)), std::make_shared<CollisionModel::Atom>(std::move(atm2))};
 
-        std::shared_ptr<CollisionModel::MolecularStructure> molstr = std::make_shared<CollisionModel::MolecularStructure>(atoms, 0.5);
+        std::shared_ptr<CollisionModel::MolecularStructure> molstr = std::make_shared<CollisionModel::MolecularStructure>(atoms, 0.5, "Test");
 
         CollisionModel::Molecule mole = CollisionModel::Molecule(Core::Vector(0.5, 1.0, -0.3), 
                                                                     Core::Vector(-1.5, 0.3, 0.33),
@@ -222,7 +222,7 @@ TEST_CASE("Basic test Molecule creation", "[CollisionModels][Molecule]") {
         std::vector<std::shared_ptr<CollisionModel::Atom>> atoms = {
             std::make_shared<CollisionModel::Atom>(std::move(atm1)), std::make_shared<CollisionModel::Atom>(std::move(atm2))};
 
-        std::shared_ptr<CollisionModel::MolecularStructure> molstr = std::make_shared<CollisionModel::MolecularStructure>(atoms, 0.5);
+        std::shared_ptr<CollisionModel::MolecularStructure> molstr = std::make_shared<CollisionModel::MolecularStructure>(atoms, 0.5, "Test");
 
         CollisionModel::Molecule mole = CollisionModel::Molecule(Core::Vector(0.5, 1.0, -0.3), 
                                                                     Core::Vector(-1.5, 0.3, 0.33),

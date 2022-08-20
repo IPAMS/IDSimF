@@ -114,11 +114,15 @@ void Integration::VerletIntegrator::runSingleStep(double dt) {
 
     bearParticles_(time_);
 
+    if (collisionModel_ !=nullptr){
+        collisionModel_->updateModelTimestepParameters(timestep_, time_);
+    }
+
     for (std::size_t i=0; i<nParticles_; ++i){
         if (particles_[i]->isActive() == true){
 
             if (collisionModel_ !=nullptr) {
-                collisionModel_->updateModelParameters(*(particles_[i]));
+                collisionModel_->updateModelParticleParameters(*(particles_[i]));
             }
 
             newPos_[i] = particles_[i]->getLocation() + particles_[i]->getVelocity() * dt + a_t_[i]*(1.0/2.0*dt*dt);

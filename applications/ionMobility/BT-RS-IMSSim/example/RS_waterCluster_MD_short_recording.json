@@ -1,5 +1,5 @@
 {
-  "sim_time_steps":300000,
+  "sim_time_steps":200,
   "dt_s":1.0e-11,
   "concentrations_write_interval":10,
   "trajectory_write_interval":50,
@@ -25,7 +25,7 @@
   "collision_radius_scaling":2,
   "angle_theta_scaling":1,
   "spawn_radius_m":25e-10,
-  "save_trajectory":"false",
+  "save_trajectory":"true",
   "trajectory_distance_m":10e-10,
   "trajectory_start_time_step":100
 }

@@ -20,17 +20,15 @@
  ****************************/
 
 #include "FileIO_MolecularStructureReader.hpp"
-#include "CollisionModel_MolecularStructure.hpp"
 #include "Core_constants.hpp"
 #include <fstream>
 #include <vector>
 #include <algorithm>
 #include <exception>
-#include <memory>
 #include <iostream>
 
 
-void FileIO::MolecularStructureReader::readMolecularStructure(std::string filename){
+std::unordered_map<std::string,  std::shared_ptr<CollisionModel::MolecularStructure>> FileIO::MolecularStructureReader::readMolecularStructure(std::string filename){
 
     //open stream:
     std::ifstream in;
@@ -44,18 +42,21 @@ void FileIO::MolecularStructureReader::readMolecularStructure(std::string filena
         std::string lastMolecule;
         std::string token;
         std::string fullLine;
+        std::unordered_map<std::string,  std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection;
 
         while(std::getline(in, line)) {
             if(line[0] == '#'){
                 // get molecule structure key for the hash map
                 line.erase(std::remove_if(line.begin(), line.end(), [](char chr){ return chr == '#' || chr == ',';}), line.end());
+                line.erase(std::remove(line.begin(), line.end(), '\r' ), line.end());
                 std::shared_ptr<CollisionModel::MolecularStructure> molstrPtr = std::make_shared<CollisionModel::MolecularStructure>();
-                CollisionModel::MolecularStructure::molecularStructureCollection.insert({line, molstrPtr});
+                molecularStructureCollection.insert({line, molstrPtr});
                 lastMolecule = line;
+                molecularStructureCollection.at(lastMolecule)->setName(lastMolecule);
                 // get diamater from next line
                 if(std::getline(in, line)){
                     line.erase(std::remove_if(line.begin(), line.end(), [](char chr){ return chr == ',';}), line.end());
-                    CollisionModel::MolecularStructure::molecularStructureCollection.at(lastMolecule)->setDiameter( std::strtod(line.c_str(), nullptr) * 1E-10);
+                    molecularStructureCollection.at(lastMolecule)->setDiameter( std::strtod(line.c_str(), nullptr) * 1E-10);
                 }
 
             }else{
@@ -68,6 +69,7 @@ void FileIO::MolecularStructureReader::readMolecularStructure(std::string filena
                 while ((pos = line.find(delimiter)) != std::string::npos) {
                     token = line.substr(0, pos);
                     line.erase(0, pos + delimiter.length());
+                    //line.erase(std::remove(line.begin(), line.end(), '\r' ), line.end());
                     auto occurenceDelimiter = std::count(line.begin(), line.end(), ',');
                     // AtomType is not a double so save this seperatly
                     if(occurenceDelimiter == 7){
@@ -85,17 +87,17 @@ void FileIO::MolecularStructureReader::readMolecularStructure(std::string filena
                 // eight double values necessary to initialize
                 if (atomValues.size() == 8) {
                     std::shared_ptr<CollisionModel::Atom> atm = std::make_shared<CollisionModel::Atom>(
-                                Core::Vector(atomValues.at(0)*1E-10, atomValues.at(1)*1E-10, atomValues.at(2)*1E-10), //location in angström
+                                Core::Vector(atomValues.at(0)*1E-10, atomValues.at(1)*1E-10, atomValues.at(2)*1E-10), //location in angström -> m
                                 atomValues.at(3), // mass in amu
                                 atomValues.at(4), // charge in e
                                 atomValues.at(5), // part. charge in e
                                 CollisionModel::Atom::from_string(atomType), // Atom type
-                                atomValues.at(6) * 1E-10,  // sigma in angström
-                                atomValues.at(7) * 1E3 / Core::N_AVOGADRO  // epsilon in kJ/mol
+                                atomValues.at(6) * 1E-10,  // sigma in angström -> m
+                                atomValues.at(7) * 1E3 / Core::N_AVOGADRO  // epsilon in kJ/mol -> J
                     );
                     // Insert atom to the correct molecule structure
-                    auto it = CollisionModel::MolecularStructure::molecularStructureCollection.find(lastMolecule);
-                    if (it != CollisionModel::MolecularStructure::molecularStructureCollection.end()) {
+                    auto it = molecularStructureCollection.find(lastMolecule);
+                    if (it != molecularStructureCollection.end()) {
                         it->second->addAtom(atm);
                     }
 
@@ -104,6 +106,7 @@ void FileIO::MolecularStructureReader::readMolecularStructure(std::string filena
                 }
             }
         }
+        return molecularStructureCollection;
         
     }
     else{

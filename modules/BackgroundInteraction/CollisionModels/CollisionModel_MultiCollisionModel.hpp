@@ -40,8 +40,9 @@ namespace CollisionModel{
     public:
         explicit MultiCollisionModel(std::vector<std::unique_ptr<AbstractCollisionModel>> models);
 
-        void updateModelParameters(Core::Particle& ion) const override;
-        void initializeModelParameters(Core::Particle& ion) const override;
+        void updateModelParticleParameters(Core::Particle& ion) const override;
+        void initializeModelParticleParameters(Core::Particle& ion) const override;
+        void updateModelTimestepParameters(int timestep, double time) override;
 
         void modifyAcceleration(Core::Vector& acceleration,
                                 Core::Particle& ion,

@@ -55,6 +55,7 @@ namespace CollisionModel{
         void setComVel(Core::Vector comVel);
         void setAngles(Core::Vector agls);
         void setDiameter(double diam);
+        void setMolecularStructureName(std::string name);
 
         // Getter 
         Core::Vector& getComPos();
@@ -68,6 +69,7 @@ namespace CollisionModel{
         std::size_t getAtomCount() const;
         std::vector<std::shared_ptr<CollisionModel::Atom>>& getAtoms();
         double getDiameter() const;
+        std::string getMolecularStructureName() const; 
 
         // Member functions
         void addAtom(std::shared_ptr<CollisionModel::Atom> atm);
@@ -96,6 +98,7 @@ namespace CollisionModel{
         std::size_t atomCount = 0; // Number of atoms belonging to the molecule
         std::vector<std::shared_ptr<CollisionModel::Atom>> atoms; // Vector of all atoms belonging to this molecule 
         double diameter = 0.0; // Diameter of the molecule for collision probability [m]
+        std::string molecularStructureName = "";
 
         
     };

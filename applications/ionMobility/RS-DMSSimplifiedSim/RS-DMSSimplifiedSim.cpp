@@ -31,9 +31,10 @@
 #include "RS_SimulationConfiguration.hpp"
 #include "RS_ConfigFileParser.hpp"
 #include "RS_ConcentrationFileWriter.hpp"
-#include "FileIO_trajectoryExplorerJSONwriter.hpp"
+#include "FileIO_trajectoryHDF5Writer.hpp"
 #include "FileIO_scalar_writer.hpp"
 #include "PSim_util.hpp"
+#include "PSim_sampledFunction.hpp"
 #include "appUtils_simulationConfiguration.hpp"
 #include "appUtils_logging.hpp"
 #include "appUtils_stopwatch.hpp"
@@ -46,6 +47,7 @@
 
 const std::string key_ChemicalIndex = "keyChemicalIndex";
 const double standardPressure_Pa = 102300; //101325
+enum MobilityScalingMode {STATIC_MOBILITY, FIELD_SCALING_FUNCTION};
 
 int main(int argc, const char * argv[]) {
 
@@ -72,6 +74,7 @@ int main(int argc, const char * argv[]) {
         //Define background temperature
         double backgroundTemperature_K = simConf->doubleParameter("background_temperature_K");
         double backgroundPressure_Pa = simConf->doubleParameter("background_pressure_Pa");
+        double reducedPressure = standardPressure_Pa / backgroundPressure_Pa;
 
         //field parameters:
         CVMode cvMode = parseCVModeConfiguration(simConf);
@@ -103,22 +106,42 @@ int main(int argc, const char * argv[]) {
         std::vector<double> ionMobility; // = simConf->doubleVectorParameter("ion_mobility");
         for (std::size_t i=0; i<discreteSubstances.size(); i++){
             substanceIndices.insert(std::pair<RS::Substance*,int>(discreteSubstances[i], i));
-            ionMobility.push_back(discreteSubstances[i]->mobility());
+            ionMobility.push_back(discreteSubstances[i]->lowFieldMobility());
+        }
+
+        //read ion mobility scaling configuration ==============================================
+        MobilityScalingMode mobilitScalingMode;
+        std::unique_ptr<ParticleSimulation::SampledFunction> mobilityScalingFct= nullptr;
+        ParticleSimulation::SampledFunction* mobilityScalingFctPtr = nullptr;
+        if (simConf->isParameter("mobility_scaling_function")){
+            std::string  scalingFunctionFilename = simConf->pathRelativeToConfFile(
+                    simConf->stringParameter("mobility_scaling_function"));
+            mobilityScalingFct = std::make_unique<ParticleSimulation::SampledFunction>(scalingFunctionFilename);
+            mobilityScalingFctPtr = mobilityScalingFct.get();
+            mobilitScalingMode = FIELD_SCALING_FUNCTION;
+            if(!mobilityScalingFct->good()){
+                throw(std::invalid_argument("Mobility function data not good"));
+            }
+        }
+        else{
+            mobilitScalingMode = STATIC_MOBILITY;
         }
 
 
         // prepare file writer  =================================================================
         RS::ConcentrationFileWriter resultFilewriter(projectName+"_conc.csv");
 
-        auto jsonWriter = std::make_unique<FileIO::TrajectoryExplorerJSONwriter>(projectName+ "_trajectories.json");
-        jsonWriter->setScales(1000,1);
+        std::vector<std::string> auxParamNames = {"chemical id"};
+        auto additionalParamTFct = [](Core::Particle* particle) -> std::vector<int> {
+            std::vector<int> result = {
+                    particle->getIntegerAttribute(key_ChemicalIndex)
+            };
+            return result;
+        };
 
-        // read particle configuration ==========================================================
-        unsigned int ionsInactive = 0;
-        unsigned int nAllParticles = 0;
-        for (const auto ni: nParticles){
-            nAllParticles += ni;
-        }
+        std::string hdf5Filename = projectName+"_trajectories.hd5";
+        FileIO::TrajectoryHDF5Writer trajectoryWriter(hdf5Filename);
+        trajectoryWriter.setParticleAttributes(auxParamNames, additionalParamTFct);
 
         std::unique_ptr<FileIO::Scalar_writer> cvFieldWriter;
         int cvHighResLogPeriod = 0;
@@ -132,9 +155,15 @@ int main(int argc, const char * argv[]) {
         std::unique_ptr<FileIO::Scalar_writer> voltageWriter;
         voltageWriter = std::make_unique<FileIO::Scalar_writer>(projectName+ "_voltages.csv");
 
+        std::unique_ptr<FileIO::Scalar_writer> mobilityWriter;
+        mobilityWriter = std::make_unique<FileIO::Scalar_writer>(projectName+ "_mobility.csv");
+
+
         // init simulation  =====================================================================
 
         // create and add simulation particles:
+        // read particle configuration ==========================================================
+        unsigned int ionsInactive = 0;
         unsigned int nParticlesTotal = 0;
         std::vector<uniqueReactivePartPtr>particles;
         std::vector<Core::Particle*>particlesPtrs;
@@ -153,7 +182,7 @@ int main(int argc, const char * argv[]) {
                 // init position and initial chemical species of the particle:
                 particle->setLocation(initialPositions[k]);
                 int substIndex = substanceIndices.at(particle->getSpecies());
-                particle->setFloatAttribute(key_ChemicalIndex, substIndex);
+                particle->setIntegerAttribute(key_ChemicalIndex, substIndex);
 
                 particlesPtrs.push_back(particle.get());
                 rsSim.addParticle(particle.get(), nParticlesTotal);
@@ -176,41 +205,46 @@ int main(int argc, const char * argv[]) {
         SVFieldFctType SVFieldFct = createSVFieldFunction(svMode, fieldWavePeriod);
         CVFieldFctType CVFieldFct = createCVFieldFunction(cvMode, fieldWavePeriod, simConf);
 
-        FileIO::partAttribTransformFctType additionalParameterTransformFct =
-                [=](Core::Particle* particle) -> std::vector<double> {
-                    std::vector<double> result = {particle->getFloatAttribute(key_ChemicalIndex)};
-                    return result;
-                };
-
         auto timestepWriteFct =
-                [&jsonWriter, &voltageWriter, &additionalParameterTransformFct, trajectoryWriteInterval,
-                        &rsSim, &resultFilewriter, concentrationWriteInterval, &fieldMagnitude, &logger]
+                [&trajectoryWriter, &voltageWriter, trajectoryWriteInterval, reducedPressure,
+                        &rsSim, &resultFilewriter, &mobilityWriter, concentrationWriteInterval, &fieldMagnitude, &logger]
                         (std::vector<Core::Particle *> &particles, double time, int timestep, bool lastTimestep){
 
             if (timestep % concentrationWriteInterval ==0) {
                 resultFilewriter.writeTimestep(rsSim);
                 voltageWriter->writeTimestep(fieldMagnitude, time);
+
+                // calculate average mobility
+                // calculate summed mobility:
+                double mobilitySum = 0.0;
+                std::size_t nParticles = particles.size();
+
+                #pragma omp parallel for reduction (+:mobilitySum) default(none) shared(particles) firstprivate(nParticles, reducedPressure)
+                for (std::size_t i = 0; i<nParticles; ++i) {
+                    mobilitySum += particles[i]->getMobility() * reducedPressure;
+                }
+
+                double averageMobility = mobilitySum/nParticles;
+                mobilityWriter->writeTimestep(averageMobility, time);
+
             }
             if (lastTimestep) {
-                jsonWriter->writeTimestep(
-                        particles, additionalParameterTransformFct, time, true);
-
-                jsonWriter->writeSplatTimes(particles);
-                jsonWriter->writeIonMasses(particles);
-                logger->info("finished ts:{} time:{:.2e}", timestep, time);
+                trajectoryWriter.writeTimestep(particles, time);
+                trajectoryWriter.writeSplatTimes(particles);
+                trajectoryWriter.finalizeTrajectory();
+                trajectoryWriter.writeTimestep(particles, time);
             }
 
             else if (timestep % trajectoryWriteInterval ==0){
                 rsSim.logConcentrations(logger);
-                jsonWriter->writeTimestep(
-                        particles, additionalParameterTransformFct, time, false);
+                trajectoryWriter.writeTimestep(particles, time);
             }
         };
 
         auto particlesReactedFct = [substanceIndices](RS::ReactiveParticle* particle){
             //we had an reaction event: Update the chemical species for the trajectory
             int substIndex = substanceIndices.at(particle->getSpecies());
-            particle->setFloatAttribute(key_ChemicalIndex, substIndex);
+            particle->setIntegerAttribute(key_ChemicalIndex, substIndex);
         };
 
 
@@ -220,7 +254,6 @@ int main(int argc, const char * argv[]) {
         stopWatch.start();
 
         reactionConditions.temperature = backgroundTemperature_K;
-        double reducedPressure = standardPressure_Pa / backgroundPressure_Pa;
         for (int step=0; step<nSteps; step++) {
 
             double cvFieldNow_VPerM = CVFieldFct(fieldCVSetpoint_VPerM, rsSim.simulationTime());
@@ -229,12 +262,24 @@ int main(int argc, const char * argv[]) {
             reactionConditions.electricField = fieldMagnitude;
             rsSim.performTimestep(reactionConditions, dt_s, particlesReactedFct);
 
-            #pragma omp parallel default(none) shared(particles) firstprivate(nParticlesTotal, reducedPressure, fieldMagnitude, dt_s)
+            #pragma omp parallel default(none) shared(particles, mobilityScalingFctPtr) firstprivate(mobilitScalingMode, nParticlesTotal, reducedPressure, fieldMagnitude, dt_s)
             {
+                // 1 Td: = 10e-17 V*cm^2 = 10e-17 V*cm^2 = 10e-21 V*m^2
+                // 2.688e19 molek/cm^3 at atmospheric pressure,
+                double mobilityScalingFactor = 0.0;
+                if (mobilitScalingMode == FIELD_SCALING_FUNCTION) {
+                    double reducedField = (fieldMagnitude/100.0)/(reducedPressure*2.688e2);
+                    mobilityScalingFactor = mobilityScalingFctPtr->getInterpolatedValue(abs(reducedField));
+                }
+
                 #pragma omp for
                 for (unsigned int i = 0; i<nParticlesTotal; i++) {
                     // move particle in z axis according to particle mobility:
                     RS::ReactiveParticle* particle = particles[i].get();
+
+                    if (mobilitScalingMode == FIELD_SCALING_FUNCTION){
+                        particle->setMobility(particle->getLowFieldMobility()*mobilityScalingFactor);
+                    }
 
                     double particleShift = particle->getMobility()*reducedPressure*fieldMagnitude*dt_s;
                     Core::Vector particleLocation = particle->getLocation();
@@ -252,6 +297,7 @@ int main(int argc, const char * argv[]) {
             if ( (cvMode == AUTO_CV || cvMode == MODULATED_AUTO_CV) && step % nStepsPerOscillation == 0) {
                 //calculate current mean z-position:
                 double buf = 0.0;
+                #pragma omp parallel for reduction (+:buf) default(none) shared(particles) firstprivate(nParticlesTotal)
                 for (unsigned int i = 0; i < nParticlesTotal; i++) {
                     buf += particles[i]->getLocation().z();
                 }
@@ -265,7 +311,7 @@ int main(int argc, const char * argv[]) {
                 logger->info("CV corrected ts:{} time:{:.2e} new CV:{} diffMeanPos:{}", step, rsSim.simulationTime(), fieldCVSetpoint_VPerM, diffMeanZPos);
             }
 
-            if (ionsInactive>=nAllParticles || AppUtils::SignalHandler::isTerminationSignaled()){
+            if (ionsInactive>=nParticlesTotal || AppUtils::SignalHandler::isTerminationSignaled()){
                 timestepWriteFct(particlesPtrs, rsSim.simulationTime(), step, true);
                 break;
             }

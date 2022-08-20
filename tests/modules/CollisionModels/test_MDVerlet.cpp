@@ -52,7 +52,7 @@ TEST_CASE( "Test MD and integrator", "[ParticleSimulation][VelocityIntegrator][t
         
         std::string mdCollisionConfFile = "test_molecularstructure_reader.csv";
         FileIO::MolecularStructureReader mdConfReader = FileIO::MolecularStructureReader();
-        mdConfReader.readMolecularStructure(mdCollisionConfFile);
+        std::unordered_map<std::string,  std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection = mdConfReader.readMolecularStructure(mdCollisionConfFile);
 
         FileIO::partAttribTransformFctType additionalParamTFct;
         std::vector<std::string> auxParamNames;
@@ -91,14 +91,9 @@ TEST_CASE( "Test MD and integrator", "[ParticleSimulation][VelocityIntegrator][t
         auto accelerationFctVerlet =
                 []
                         (Core::Particle* particle, int /*particleIndex*/, SpaceCharge::FieldCalculator& /*scFieldCalculator*/, double /*time*/, int /*timestep*/) {
-    
-
                     Core::Vector fieldForce(2e-15, 0, 0);
+                    return (fieldForce/particle->getMass());
 
-                    
-                    //return (fieldForce/particle->getMass());
-                    return Core::Vector(0.0, 0.0, 0.0);
-                    
                 };
 
         auto timestepWriteFctSimple =
@@ -152,7 +147,7 @@ TEST_CASE( "Test MD and integrator", "[ParticleSimulation][VelocityIntegrator][t
                     1.0,
                     39);
             particle->setVelocity(Core::Vector(600.0, 0.0, 0.0));
-            particle->setMolecularStructure(CollisionModel::MolecularStructure::molecularStructureCollection.at("Ar+"));
+            particle->setMolecularStructure(molecularStructureCollection.at("Ar+"));
             particle->setDiameter(particle->getMolecularStructure()->getDiameter());
             particlesPtrs.push_back(particle.get());
             particles.push_back(std::move(particle));
@@ -169,7 +164,11 @@ TEST_CASE( "Test MD and integrator", "[ParticleSimulation][VelocityIntegrator][t
                         0.203e-30,
                         "He",
                         400e-14, 
-                        1e-17);
+                        1e-15, 
+                        2,
+                        4,
+                        25e-10,
+                        molecularStructureCollection);
         mdModels.emplace_back(std::move(mdModel));
         std::unique_ptr<CollisionModel::MultiCollisionModel> collisionModel =
                     std::make_unique<CollisionModel::MultiCollisionModel>(std::move(mdModels));

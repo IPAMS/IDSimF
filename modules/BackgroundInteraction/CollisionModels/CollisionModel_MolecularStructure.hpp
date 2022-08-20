@@ -43,17 +43,18 @@ namespace CollisionModel{
 
     public:
         // Hash map to collect molecular structures so they can be constructed in the collision model later 
-        static std::unordered_map<std::string,  std::shared_ptr<MolecularStructure>> molecularStructureCollection;
+        // static std::unordered_map<std::string,  std::shared_ptr<MolecularStructure>> molecularStructureCollection;
 
         // Constructors
         MolecularStructure() = default;
         //MolecularStructure(const MolecularStructure& A);
 
         ~MolecularStructure() = default;
-        MolecularStructure(std::vector<std::shared_ptr<CollisionModel::Atom>> atms, double diam);
+        MolecularStructure(std::vector<std::shared_ptr<CollisionModel::Atom>> atms, double diam, std::string name);
 
         // Setter
         void setDiameter(double diam);
+        void setName(std::string name);
 
         // Getter
         bool getIsDipole() const;
@@ -64,12 +65,13 @@ namespace CollisionModel{
         std::size_t getAtomCount() const;
         std::vector<std::shared_ptr<CollisionModel::Atom>> getAtoms() const;
         double getDiameter() const;
+        std::string getName() const; 
 
         // Member functions
         void addAtom(std::shared_ptr<CollisionModel::Atom> atm);
         void removeAtom(std::shared_ptr<CollisionModel::Atom> atm);
 
-        static std::unordered_map<std::string, std::shared_ptr<MolecularStructure>> createCollection();
+        // static std::unordered_map<std::string, std::shared_ptr<MolecularStructure>> createCollection();
         
 
     private:
@@ -90,6 +92,7 @@ namespace CollisionModel{
         std::size_t atomCount = 0; // Number of atoms belonging to the molecule
         std::vector<std::shared_ptr<Atom>> atoms = {}; // Vector of all atoms belonging to this molecule 
         double diameter = 0.0; // Diameter of the molecule for collision probability [m]
+        std::string structureName = "";
 
         
     };

@@ -44,7 +44,8 @@ CollisionModel::HardSphereModel::HardSphereModel(
                 staticTemperature,
                 collisionGasMassAmu,
                 collisionGasDiameterM,
-                maxwellianApproximation) { }
+                maxwellianApproximation)
+{}
 
 /**
  * Constructor for static background gas pressure and temperature with a custom
@@ -113,9 +114,11 @@ CollisionModel::HardSphereModel::HardSphereModel(
         temperatureFunction_(std::move(temperatureFunction)),
         afterCollisionActionFunction_(std::move(afterCollisionFunction)) { }
 
-void CollisionModel::HardSphereModel::updateModelParameters(Core::Particle& /*ion*/) const {}
+void CollisionModel::HardSphereModel::updateModelParticleParameters(Core::Particle& /*ion*/) const {}
 
-void CollisionModel::HardSphereModel::initializeModelParameters(Core::Particle& /*ion*/) const {}
+void CollisionModel::HardSphereModel::initializeModelParticleParameters(Core::Particle& /*ion*/) const {}
+
+void CollisionModel::HardSphereModel::updateModelTimestepParameters(int /*timestep*/, double /*time*/) {}
 
 void CollisionModel::HardSphereModel::modifyAcceleration(Core::Vector& /*acceleration*/, Core::Particle& /*ion*/,
                                                          double /*dt*/) {}
@@ -223,9 +226,6 @@ void CollisionModel::HardSphereModel::modifyVelocity(Core::Particle &ion, double
         }
         while (rndSource->uniformRealRndValue() >= (vGasParticleMagnitude / vGasParticleUpperScale));
     }
-
-
-
 
     // Define a new reference frame with the colliding background gas particle at rest
     // for the subsequent analysis

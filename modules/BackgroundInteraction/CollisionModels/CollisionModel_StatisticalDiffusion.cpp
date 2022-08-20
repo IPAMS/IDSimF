@@ -189,7 +189,7 @@ void CollisionModel::StatisticalDiffusionModel::setSTPParameters(Core::Particle 
 /**
  * Updates internal model parameters for an ion which are dependent on ion position / timestep
  */
-void CollisionModel::StatisticalDiffusionModel::updateModelParameters(Core::Particle &ion) const {
+void CollisionModel::StatisticalDiffusionModel::updateModelParticleParameters(Core::Particle &ion) const {
 
     Core::Vector particle_location = ion.getLocation();
 
@@ -209,9 +209,15 @@ void CollisionModel::StatisticalDiffusionModel::updateModelParameters(Core::Part
 /**
  * Inits model parameters which are not dependent on ion position / timestep for an ion
  */
-void CollisionModel::StatisticalDiffusionModel::initializeModelParameters(Core::Particle &ion) const {
+void CollisionModel::StatisticalDiffusionModel::initializeModelParticleParameters(Core::Particle &ion) const {
     this->setSTPParameters(ion);
 }
+
+
+/**
+ * Updates model parameters dependent on timestep or simulation time
+ */
+void CollisionModel::StatisticalDiffusionModel::updateModelTimestepParameters(int /*timestep*/, double /*time*/) {}
 
 /**
  * Modifies the acceleration due to the background gas interaction

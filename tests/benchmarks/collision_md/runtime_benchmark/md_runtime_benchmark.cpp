@@ -11,7 +11,6 @@
  ****************************/
 
 #include "CollisionModel_MDInteractions.hpp"
-#include "CollisionModel_HardSphere.hpp"
 #include "FileIO_MolecularStructureReader.hpp"
 #include "Core_particle.hpp"
 #include "appUtils_stopwatch.hpp"
@@ -21,37 +20,11 @@
 #include <ctime>
 #include <iostream>
 
-// Implement simple test method
-//void
-
-void myWorkFct(double dt) {
-    //Core::RandomSource* rndSource = Core::globalRandomGeneratorPool->getThreadRandomSource();
-
-    // Calculate collision cross section between particle and collision gas:
-    //   TODO: It seems to be unnecessary to constantly recalculate this
-    //   value, cache the calculated values somehow?
-    Core::Vector velocity = {0.1,0.1,0.1};
-
-    double x = velocity.x();
-    double y = velocity.y();
-
-    for (int i=0; i<100; ++i){
-        x = x * sin(i*dt);
-        y = y * cos(i*dt);
-    }
-
-    velocity.x(x);
-    velocity.y(y);
-
-//ion.setVelocity(velocity);
-}
-
-
 void performBenchmark(size_t nSamples, size_t nParticles){
 
-    //double diameterHe = CollisionModel::MDInteractionsModel::DIAMETER_HE;
-    //FileIO::MolecularStructureReader reader = FileIO::MolecularStructureReader();
-    //reader.readMolecularStructure("test_molecularstructure_reader.csv");
+    double diameterHe = CollisionModel::MDInteractionsModel::DIAMETER_HE;
+    FileIO::MolecularStructureReader reader = FileIO::MolecularStructureReader();
+    std::unordered_map<std::string,  std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection = reader.readMolecularStructure("test_molecularstructure_reader.csv");
 
     std::vector<Core::uniquePartPtr>particles;
     std::vector<Core::Particle*>particlesPtrs;
@@ -63,8 +36,8 @@ void performBenchmark(size_t nSamples, size_t nParticles){
                 1.0,
                 39);
         particle->setVelocity(Core::Vector(600.0, 0.0, 0.0));
-        //particle->setMolecularStructure(CollisionModel::MolecularStructure::molecularStructureCollection.at("Ar+"));
-        //particle->setDiameter(particle->getMolecularStructure()->getDiameter());
+        particle->setMolecularStructure(molecularStructureCollection.at("Ar+"));
+        particle->setDiameter(particle->getMolecularStructure()->getDiameter());
         particlesPtrs.push_back(particle.get());
         particles.push_back(std::move(particle));
         yPos = yPos+0.0001;
@@ -72,19 +45,28 @@ void performBenchmark(size_t nSamples, size_t nParticles){
     // Core::Particle ion;
     // ion.setMolecularStructure(CollisionModel::MolecularStructure::molecularStructureCollection.at("H2+"));
     // ion.setVelocity(Core::Vector(100.0, 0.0, 0.0));
+    // CollisionModel::MDInteractionsModel mdSim = CollisionModel::MDInteractionsModel(
+    //                     10000,
+    //                     298,
+    //                     4.003,
+    //                     diameterHe,
+    //                     0.203e-30,
+    //                     "He",
+    //                     1e-10, 
+    //                     1e-16);
 
 
-
-    std::cout << "Benchmark molecular dynamics collision model  << Iter 4"<<std::endl;
+    std::cout << "Benchmark molecular dynamics collision model "<<std::endl;
 
     AppUtils::Stopwatch stopWatch;
     stopWatch.start();
 
-
-    //shared(diameterHe, particlesPtrs)
-    //{
-        //Core::Particle myParticle = *particlesPtrs[0];
-        /*CollisionModel::MDInteractionsModel mdSim = CollisionModel::MDInteractionsModel(
+    std::size_t i;
+    #pragma omp parallel \
+        default(none) \
+        firstprivate(particlesPtrs, nParticles, nSamples,  diameterHe, molecularStructureCollection)
+    {
+        CollisionModel::MDInteractionsModel mdSim = CollisionModel::MDInteractionsModel(
                 10000,
                 298,
                 4.003,
@@ -92,26 +74,19 @@ void performBenchmark(size_t nSamples, size_t nParticles){
                 0.203e-30,
                 "He",
                 1e-10,
-                1e-16);*/
-
-        /*CollisionModel::HardSphereModel hs = CollisionModel::HardSphereModel(
-                1.0,298,4.0,diameterHe,true);*/
+                1e-16,
+                2,
+                1,
+                25, 
+                molecularStructureCollection);
 
         for (size_t j = 0; j<nSamples; j++) {
-            std::size_t i;
-            #pragma omp parallel \
-                default(none) \
-                private(i) \
-                firstprivate(nParticles, nSamples)
-                {
-                    #pragma omp for
-                    for (i = 0; i<nParticles; ++i) {
-                        //mdSim.modifyVelocity(*particlesPtrs[i], 1e-11);
-                        //hs.modifyVelocity(*particlesPtrs[i], 1e-11);
-                        myWorkFct(1e-11);
-                    }
-                }
+            #pragma omp for schedule(dynamic, nParticles/20)
+            for (i = 0; i<nParticles; ++i) {
+                mdSim.modifyVelocity(*particlesPtrs[i], 1e-11);
+            }
         }
+    }
     stopWatch.stop();
     std::cout << "elapsed wall time:"<< stopWatch.elapsedSecondsWall()<<std::endl;
     std::cout << "elapsed cpu time:"<< stopWatch.elapsedSecondsCPU()<<std::endl;
@@ -134,6 +109,7 @@ int main(int argc, char** argv) {
     CLI11_PARSE(app, argc, argv);
 
     omp_set_num_threads(numberOfThreads);
-    performBenchmark(nParticles, nSamples);
+    performBenchmark(nSamples, nParticles);
     return 0;
 }
+

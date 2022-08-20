@@ -124,8 +124,8 @@ void RS::Substance::staticConcentration(double newStaticConcentration){
  
  \returns the electrical mobility of the substance
  */
-double RS::Substance::mobility() const{
-    return mobility_;
+double RS::Substance::lowFieldMobility() const{
+    return lowFieldMobility_;
 }
 
 /**
@@ -149,10 +149,10 @@ double RS::Substance::collisionDiameter() const{
 /**
  Set the electrical mobility of the substance
 
- \param newMobility the electrical mobility to set
+ \param newLowFieldMobility the electrical mobility to set
  */
-void RS::Substance::mobility(double newMobility){
-    mobility_ = newMobility;
+void RS::Substance::lowFieldMobility(double newLowFieldMobility){
+    lowFieldMobility_ = newLowFieldMobility;
 }
 
 bool RS::operator<(const RS::Substance& a, const RS::Substance& b){

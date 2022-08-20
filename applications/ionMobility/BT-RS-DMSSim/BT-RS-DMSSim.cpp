@@ -180,7 +180,7 @@ int main(int argc, const char * argv[]) {
         std::vector<double> ionMobility; // = simConf->doubleVectorParameter("ion_mobility");
         for (std::size_t i = 0; i<discreteSubstances.size(); ++i) {
             substanceIndices.insert(std::pair<RS::Substance*, int>(discreteSubstances[i], i));
-            ionMobility.push_back(discreteSubstances[i]->mobility());
+            ionMobility.push_back(discreteSubstances[i]->lowFieldMobility());
         }
 
 
@@ -274,7 +274,7 @@ int main(int argc, const char * argv[]) {
 
         auto timestepWriteFct =
                 [&trajectoryWriter, &voltageWriter, trajectoryWriteInterval, &rsSim, &resultFilewriter, concentrationWriteInterval,
-                 &totalFieldNow_VPerM, &logger, &meanZPos]
+                 &totalFieldNow_VPerM, &logger]
                         (std::vector<Core::Particle*>& particles, double time, int timestep,
                          bool lastTimestep) {
 
@@ -289,10 +289,11 @@ int main(int argc, const char * argv[]) {
                         logger->info("finished ts:{} time:{:.2e}", timestep, time);
                     }
                     else if (timestep%trajectoryWriteInterval==0) {
-                        logger->info("ts:{}  time:{:.2e} average cloud z position:({:.2e})",
-                                timestep, time, meanZPos);
+                        logger->info("ts:{}  time:{:.2e}",
+                                timestep, time);
                         rsSim.logConcentrations(logger);
-                        trajectoryWriter.writeTimestep(particles, time);                    }
+                        trajectoryWriter.writeTimestep(particles, time);
+                    }
                 };
 
         auto otherActionsFct = [electrodeHalfDistance_m, electrodeLength_m, &ionsInactive](
@@ -372,7 +373,7 @@ int main(int argc, const char * argv[]) {
         auto particlesHasReactedFct = [&collisionModelPtr, &substanceIndices](RS::ReactiveParticle* particle){
             //we had an reaction event: Count it (access to total counted value has to be synchronized)
             if (collisionModelPtr != nullptr) {
-                collisionModelPtr->initializeModelParameters(*particle);
+                collisionModelPtr->initializeModelParticleParameters(*particle);
             }
             int substIndex = substanceIndices.at(particle->getSpecies());
             particle->setIntegerAttribute(key_ChemicalIndex, substIndex);

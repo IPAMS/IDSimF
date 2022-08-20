@@ -56,11 +56,11 @@ TEST_CASE( "Test parallel tree semantics / particle management","[Tree]") {
         testTree.removeParticle(1);
         CHECK(testTree.getParticleList()->size() == 2);
         CHECK(root->getNumberOfParticles() == 2);
-        CHECK( (root->getCharge() - 11*Core::ELEMENTARY_CHARGE) < 1e-100);
+        CHECK( Approx(root->getCharge()) == 11*Core::ELEMENTARY_CHARGE);
 
         testTree.removeParticle(2);
         CHECK( root->getCenterOfCharge() == Core::Vector(0.001,0.0,0.0));
-        CHECK( (root->getCharge() - 8*Core::ELEMENTARY_CHARGE) < 1e-100);
+        CHECK( Approx(root->getCharge()) == 8*Core::ELEMENTARY_CHARGE);
 
         testTree.removeParticle(3);
 

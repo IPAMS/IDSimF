@@ -111,19 +111,23 @@ void Integration::ParallelVerletIntegrator::runSingleStep(double dt){
     //std::vector<BTree::ParallelNode*> MyNod(numberOfNodes_, nullptr);
 
     //
+
+    if (collisionModel_ !=nullptr){
+        collisionModel_->updateModelTimestepParameters(timestep_, time_);
+    }
     std::size_t i;
     #pragma omp parallel \
             default(none) shared(newPos_, a_tdt_, a_t_, dt, particles_) \
             private(i) //firstprivate(MyNod)
     {
 
-        #pragma omp for
+        #pragma omp for schedule(dynamic, 40)
         for (i=0; i<nParticles_; i++){
 
             if (particles_[i]->isActive()){
 
                 if (collisionModel_ != nullptr) {
-                    collisionModel_->updateModelParameters(*(particles_[i]));
+                    collisionModel_->updateModelParticleParameters(*(particles_[i]));
                 }
 
                 newPos_[i] = particles_[i]->getLocation() + particles_[i]->getVelocity() * dt + a_t_[i]*(1.0/2.0*dt*dt);
@@ -139,7 +143,9 @@ void Integration::ParallelVerletIntegrator::runSingleStep(double dt){
 
                 //velocity changes due to background interaction:
                 if (collisionModel_ != nullptr) {
+                    //std::cout << "before:" << particles_[i]->getVelocity() << std::endl;
                     collisionModel_->modifyVelocity(*(particles_[i]),dt);
+                    //std::cout << "after:" << particles_[i]->getVelocity() << std::endl;
                 }
             }
         }
