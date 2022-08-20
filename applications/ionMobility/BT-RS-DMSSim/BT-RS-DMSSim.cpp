@@ -292,7 +292,8 @@ int main(int argc, const char * argv[]) {
                         logger->info("ts:{}  time:{:.2e} average cloud z position:({:.2e})",
                                 timestep, time, meanZPos);
                         rsSim.logConcentrations(logger);
-                        trajectoryWriter.writeTimestep(particles, time);                    }
+                        trajectoryWriter.writeTimestep(particles, time);
+                    }
                 };
 
         auto otherActionsFct = [electrodeHalfDistance_m, electrodeLength_m, &ionsInactive](

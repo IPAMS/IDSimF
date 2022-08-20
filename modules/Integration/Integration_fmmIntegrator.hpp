@@ -64,6 +64,7 @@ namespace Integration{
         void run(unsigned int nTimesteps, double dt) override;
         void runSingleStep(double dt) override;
         void finalizeSimulation() override;
+        FMMSolverT* getFMMSolver();
 
     private:
         FMMSolverT solver_;
@@ -145,7 +146,9 @@ namespace Integration{
         bearParticles_(time_);
 
         // first: Calculate charge distribution with particle positions and charges at the beginning of the time step
-        solver_.computeChargeDistribution();
+        if (nParticles_ > 0){
+            solver_.computeChargeDistribution();
+        }
 
         // then: perform particle update / velocity verlet time integration
         #pragma omp parallel \
@@ -201,7 +204,13 @@ namespace Integration{
             timestepWriteFunction_(particles_, time_, timestep_, true);
         }
     }
+
+    template <class FMMsolverT>
+    FMMsolverT* FMMVerletIntegrator<FMMsolverT>::getFMMSolver() {
+        return &solver_;
+    }
 }
+
 
 
 #endif //IDSIMF_INTEGRATION_FMMINTEGRATOR_HPP

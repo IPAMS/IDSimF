@@ -58,9 +58,7 @@ void ExaFMMt::FMMSolver::computeChargeDistribution(){
     }
 
     // step 2: Create an Fmm instance for Laplace kernel.
-    int P = 8;         // expansion order
-    int ncrit = 400;   // max number of bodies per leaf
-    exafmm_t::LaplaceFmm fmm(P, ncrit);
+    exafmm_t::LaplaceFmm fmm(expansionOrder_, maxBodiesPerLeaf_);
 
     // step 3: Build and balance the octree.
     exafmm_t::NodePtrs<exafmm_t::real_t> leafs, nonleafs;
@@ -93,4 +91,12 @@ void ExaFMMt::FMMSolver::computeChargeDistribution(){
                     };
         }
     }
+}
+
+void ExaFMMt::FMMSolver::setExpansionOrder(int expansionOrder) {
+    expansionOrder_ = expansionOrder;
+}
+
+void ExaFMMt::FMMSolver::setMaxBodiesPerLeaf(int maxBodiesPerLeaf) {
+    maxBodiesPerLeaf_ = maxBodiesPerLeaf;
 }
