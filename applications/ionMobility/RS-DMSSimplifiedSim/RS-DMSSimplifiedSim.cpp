@@ -269,7 +269,7 @@ int main(int argc, const char * argv[]) {
                 double mobilityScalingFactor = 0.0;
                 if (mobilitScalingMode == FIELD_SCALING_FUNCTION) {
                     double reducedField = (fieldMagnitude/100.0)/(reducedPressure*2.688e2);
-                    mobilityScalingFactor = mobilityScalingFctPtr->getInterpolatedValue(abs(reducedField));
+                    mobilityScalingFactor = mobilityScalingFctPtr->getInterpolatedValue(fabs(reducedField));
                 }
 
                 #pragma omp for
