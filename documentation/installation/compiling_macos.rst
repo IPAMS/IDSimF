@@ -4,7 +4,7 @@
 Building guide: MacOS
 ---------------------
 
-IDSimF is developed and tested on MacOS extensively. This guide is describing compilation on MacOS 10.14 Mojave with the open source package management system `Macports <https://www.macports.org/>`_. However, compilation of IDSimF on other MacOS versions and with different package management systems, particularly `Homebrew <https://brew.sh>`_, should be possible in a similar way to this guide. 
+IDSimF is developed and tested on MacOS extensively. This guide is describing compilation on MacOS Monterey with the open source package management system `Macports <https://www.macports.org/>`_. However, compilation of IDSimF on other MacOS versions and with different package management systems, particularly `Homebrew <https://brew.sh>`_, should be possible in a similar way to this guide. 
 
 This installation guide assumes that you have `Macports <https://www.macports.org/>`_ installed. Xcode and the Xcode commandline tools are required for Macports and are therefore assumed to be installed too. This guide also assumes that you have basic familiarity with the command line / terminal and the ``port`` command line tool of Macports. 
 
@@ -37,24 +37,24 @@ This should make ``git`` and ``cmake`` available. This can be verified by checki
     git version 2.28.0
 
     $ cmake --version
-    cmake version 3.18.1
+    cmake version 3.23.3
 
 
 Install a C++17 compatible C++ compiler :
 -----------------------------------------
 
 IDSimF is written in C++17, therefore a recent compiler fully supporting the C++17 language standard has to be used to compile IDSimF. The c++ compiler of `gnu compiler collection (gcc) <https://gcc.gnu.org/>`_  gnu compiler collection (``g++``
-) in major version 9 is readily available with macports and is compatible with IDSimF. Install it with 
+) in major version 12 is readily available with macports and is compatible with IDSimF. Install it with 
 
 .. code-block:: console
 
-    sudo port install gcc9
+    sudo port install gcc12
 
-Alternatively, the `llvm <https://www.llvm.org/>`_ c++ frontend `clang <https://clang.llvm.org/>`_  in major version 10 is also available and can be used to compile IDSimF. Install it with 
+Alternatively, the `llvm <https://www.llvm.org/>`_ c++ frontend `clang <https://clang.llvm.org/>`_  in major version 14 is also available and can be used to compile IDSimF. Install it with 
 
 .. code-block:: console
 
-    sudo port install clang-10
+    sudo port install clang-14
 
 
 Clone the IDSimF repository 
@@ -87,20 +87,20 @@ In the build folder, prepare a build / binary tree for the compilation with ``g+
 
 .. code-block:: console
 
-    cmake .. -DCMAKE_CXX_COMPILER=/opt/local/bin/g++-mp-9 -DCMAKE_BUILD_TYPE=Release
+    cmake .. -DCMAKE_CXX_COMPILER=g++-mp-12 -DCMAKE_BUILD_TYPE=Release
 
 The build options are: 
 
-    + ``-DCMAKE_CXX_COMPILER=/usr/bin/g++-mp-9`` sets the used c++ compiler to the ``g++-9`` compiler with `OpenMP <https://www.openmp.org>`_ parallelization support, which is installed at ``/opt/local/bin/``. 
+    + ``-DCMAKE_CXX_COMPILER=/opt/local/bin/g++-mp-12`` sets the used c++ compiler to the ``g++-12`` compiler with `OpenMP <https://www.openmp.org>`_ parallelization support. Macports installs the compiler at ``/opt/local/bin/`` but also sets the ``PATH`` variable, so that the path to the compiler has not to be set explicitly. 
     + ``-DCMAKE_BUILD_TYPE=Release`` sets the build type to `Release` which means, that optimizations are switched on and debugging information is removed from the compiled binary. This results in a significantly faster binary than when building with debugging information switched on (``-DCMAKE_BUILD_TYPE=Debug``) which is required to analyze the compiled binary with debugging tools. 
 
 Configuring a build with ``clang`` is very similar:
 
 .. code-block:: console
 
-    cmake .. -DCMAKE_CXX_COMPILER=/opt/local/bin/clang++-mp-10 -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_FLAGS="-stdlib=macports-libstdc++"
+    cmake .. -DCMAKE_CXX_COMPILER=clang++-mp-14 -DCMAKE_BUILD_TYPE=Release
 
-Here the c++ compiler installed with the `clang-10` package, ``clang++-10`` is used as compiler. The additional configuration option ``-DCMAKE_CXX_FLAGS="-stdlib=macports-libstdc++"`` switches the c++ standard library ``libstdc++`` from the version shipped with Xcode to a version shipped by Macports. This is required since the Xcode version is missing some features required by IDSimF. This should not be required with later MacOS versions. 
+Here the c++ compiler with `OpenMP <https://www.openmp.org>`_ parallelization support, installed with the `clang-14` package, ``clang++-mp-14`` is used as compiler. 
 
 Building
 ........
@@ -111,3 +111,4 @@ Test the build
 ..............
 
 After compilation has finished without problems, the IDSimF build can be tested by :doc:`running tests or benchmarks <testing_installation>`.
+

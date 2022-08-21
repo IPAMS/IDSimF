@@ -27,10 +27,10 @@ Compiler
 
 IDSimF is developed in C++17 and uses `OpenMP <https://www.openmp.org/>`_, thus a recent compiler with OpenMP support is required. 
 
-Compilation of IDSimF was tested with 
+Compilation of IDSimF was recently tested with 
 
-* clang version 10.0.0 (installed with Macports) on MacOS 10.14 and 10.13
-* gcc version 9.2.0 (installed with Macports) on MacOS 10.14 
+* clang version 14 (installed with Macports) on MacOS 12 (Monterey)
+* gcc version 12 (installed with Macports) on  MacOS 12 (Monterey)
 * gcc version 9.2.1 on Ubuntu 18 LTS
 * gcc version 8.2.1 on openSUSE Leap 42.3 (with ``USE_CPP_FSLIB`` flag on)
 * gcc version 9.3.0. on Windows 10 in an Ubuntu 20.04 LTS within the Windows Subsystem for Linux
