@@ -30,10 +30,14 @@
 
 #include "Core_constants.hpp"
 #include "Core_vector.hpp"
-#include "CollisionModel_MolecularStructure.hpp"
 #include <unordered_map>
 #include <array>
 #include <memory>
+
+//forward declare molecular collision model classes:
+namespace CollisionModel{
+    class MolecularStructure;
+}
 
 namespace Core {
 

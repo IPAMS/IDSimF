@@ -24,6 +24,9 @@ target_include_directories(apputils PUBLIC
         ${CMAKE_SOURCE_DIR}/libs/CLI11)
 
 target_link_libraries(apputils particlesimulation integration spdlog::spdlog)
+if(OpenMP_CXX_FOUND)
+    target_link_libraries(apputils OpenMP::OpenMP_CXX)
+endif()
 if (USE_CPP_FSLIB)
     target_link_libraries(apputils stdc++fs)
 endif()

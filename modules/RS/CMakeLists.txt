@@ -32,3 +32,6 @@ set(SOURCE_FILES
 add_library(rs STATIC ${SOURCE_FILES})
 target_include_directories(rs PUBLIC .)
 target_link_libraries(rs core spacecharge spdlog::spdlog)
+if(OpenMP_CXX_FOUND)
+    target_link_libraries(rs OpenMP::OpenMP_CXX)
+endif()

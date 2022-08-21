@@ -22,3 +22,6 @@ target_include_directories(integration PUBLIC .)
 
 target_link_libraries(integration core spacecharge collisionmodels file_io)
 target_link_libraries(integration spdlog::spdlog)
+if(OpenMP_CXX_FOUND)
+    target_link_libraries(integration OpenMP::OpenMP_CXX)
+endif()

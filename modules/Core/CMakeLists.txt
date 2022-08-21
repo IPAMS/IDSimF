@@ -14,4 +14,8 @@ set(SOURCE_FILES
         Core_math.hpp)
 
 add_library(core STATIC ${SOURCE_FILES})
-target_include_directories(core PUBLIC . ${CMAKE_SOURCE_DIR}/modules/BackgroundInteraction/CollisionModels)
+if(OpenMP_CXX_FOUND)
+    target_link_libraries(core PRIVATE OpenMP::OpenMP_CXX)
+endif()
+target_include_directories(core PUBLIC .)
+# target_include_directories(core PUBLIC . ${CMAKE_SOURCE_DIR}/modules/BackgroundInteraction/CollisionModels)
