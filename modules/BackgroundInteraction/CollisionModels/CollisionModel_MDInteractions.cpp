@@ -277,7 +277,6 @@ void CollisionModel::MDInteractionsModel::modifyVelocity(Core::Particle& particl
                 ( (-1. * circleVector) * velocityBgMolecule)
                 / ( spawnRad * velocityBgMolecule.magnitude() )
             );
-
         }while(circleVectorMagnitude > 1 || directionAngle >  angleThetaScaling_ * collisionTheta);
 
         bgMole.setComPos(circleVector);
@@ -309,6 +308,7 @@ void CollisionModel::MDInteractionsModel::modifyVelocity(Core::Particle& particl
             particle.setVelocity(mole.getComVel() + particle.getVelocity());
         }
         ++iterations;
+
     }while(!trajectorySuccess && iterations < 100);
     if(trajectorySuccess == false){
         std::cerr << "No trajectory that hit the collision sphere was found.\n";
@@ -384,12 +384,21 @@ bool CollisionModel::MDInteractionsModel::leapfrogIntern(std::vector<CollisionMo
 
 }
 
-void CollisionModel::MDInteractionsModel::rk4Intern(std::vector<CollisionModel::Molecule*> moleculesPtr, double dt, double finalTime){
+bool CollisionModel::MDInteractionsModel::rk4Intern(std::vector<CollisionModel::Molecule*> moleculesPtr, double dt, double finalTime,
+                                                                    double requiredRad){
 
 
     int nSteps = int(round(finalTime/dt));
     size_t nMolecules = moleculesPtr.size();
     std::vector<Core::Vector> forceMolecules(nMolecules);
+
+    bool wasHit = false;
+    std::vector<double> startDistances;
+    for(size_t i = 0; i < nMolecules; ++i){
+        for(size_t j = i+1; j < nMolecules; ++j){
+            startDistances.push_back((moleculesPtr[i]->getComPos() - moleculesPtr[j]->getComPos()).magnitude());
+        }
+    }
 
     size_t i = 0;
 
@@ -459,7 +468,21 @@ void CollisionModel::MDInteractionsModel::rk4Intern(std::vector<CollisionModel::
             molecule->setComVel(newComVel);
             i++;
         }
+
+        size_t index = 0;
+        for(size_t k = 0; k < nMolecules; ++k){
+            for(size_t l = k+1; l < nMolecules; ++l){
+                if((moleculesPtr[l]->getComPos() - moleculesPtr[k]->getComPos()).magnitude() > startDistances[index++]){
+                    return wasHit;
+                }
+                if((moleculesPtr[l]->getComPos() - moleculesPtr[k]->getComPos()).magnitude() <= requiredRad){
+                    wasHit=true;
+                }
+            }
+        }
     }
+
+    return false;
 }
 
 
