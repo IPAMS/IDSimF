@@ -102,6 +102,35 @@ Configuring a build with ``clang`` is very similar:
 
 Here the c++ compiler with `OpenMP <https://www.openmp.org>`_ parallelization support, installed with the `clang-14` package, ``clang++-mp-14`` is used as compiler. 
 
+Optional FMM Libraries
+......................
+
+.. include:: default_exafmm_t.rst
+
+.. note::
+    It was not possible to compile exafmm-t with Apple Sillicon (ARM) cpus due to missing SIMD instructions
+
+.....
+FMM3D
+.....
+
+Clone / download `FMM3D <https://fmm3d.readthedocs.io/en/latest/index.html>`_ into a local directory and follow the install instructions `install instructions <https://fmm3d.readthedocs.io/en/latest/install.html#obtaining-fmm3d>`_. If all dependencies are available, configuration is done by running make in the FMM3D directory, after setting MacOS specific build configuration by replacing ``make.inc`` with the MacOS specific include file: 
+
+.. code-block:: console
+    
+    cd FMM3D
+    cp make.inc.macos.gnu make.inc
+    make install
+
+After building, FMM3D can be used in an IDSimF build by providing the path into the FMM3D directory as ``FMM_3D_PATH`` parameter. For example, if exafmm-t was cloned to ``/usr/libs/FMM3D``, the additional cmake option is:
+
+.. code-block:: console
+
+    -DFMM_3D_PATH=/usr/libs/FMM3D
+
+.. note::
+    On newer MacOS versions, the compiled FMM3D library has to be installed into a system library directory with ``make install`` with administrator privileges due to security restrictions. 
+
 Building
 ........
 

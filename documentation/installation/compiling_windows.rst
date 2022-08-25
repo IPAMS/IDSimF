@@ -82,6 +82,10 @@ Preparing the build
 
 .. include:: default_cmake_configuration.rst
 
+Optional FMM Libraries
+++++++++++++++++++++++
+
+The optional FMM libraries, `exafmm-t <https://exafmm.github.io/exafmm-t>`_ and `FMM3D <https://fmm3d.readthedocs.io/en/latest/index.html>`_ were not yet tested with cygwin. It should be possible to compile them within the cygwin environment if all dependencies of those libraries are available within cygwin.
     
 Building
 ++++++++

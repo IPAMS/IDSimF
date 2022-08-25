@@ -61,6 +61,12 @@ Preparing the build
 
 .. include:: default_cmake_configuration.rst
 
+Optional FMM Libraries
+......................
+
+.. include:: default_exafmm_t.rst
+
+.. include:: default_fmm3d.rst
     
 Building
 ........

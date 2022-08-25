@@ -104,6 +104,13 @@ Configuring the build with ``clang`` is very similar: :
 
 Here the c++ compiler installed with the `clang-10` package, ``clang++-10``, is used as compiler. Explicitly linking the filesystem library is not necessary with ``clang``. 
 
+Optional FMM Libraries
+......................
+
+.. include:: default_exafmm_t.rst
+
+.. include:: default_fmm3d.rst
+
 Building
 ........
 

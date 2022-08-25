@@ -35,11 +35,15 @@ Compilation of the current IDSimF release was tested with
 * gcc version 8.2.1 on openSUSE Leap 42.3 (with ``USE_CPP_FSLIB`` flag on and activated ``Exafmm-t`` and ``FMM3D`` external FMM libraries)
 * gcc version 9.3.0. on Windows 10 in an Ubuntu 20.04 LTS within the Windows Subsystem for Linux
 
-
-Currently, IDsimF was only tested on systems with x86-64 CPUs. Technically it should be possible to compile IDSimF also for other CPU architectures, particularly ARM. 
+IDSimF was tested on systems with x86-64 and ARM (Apple M1) CPUs, currently there are no obvious restrictions in IDSimF regarding the CPU architecture.
 
 Libraries and Dependencies
 ==========================
+
+------------------
+Required Libraries
+------------------
+
 
 IDSimF currently depends on one external libraries which have to be available on the target system: 
 
@@ -47,10 +51,24 @@ IDSimF currently depends on one external libraries which have to be available on
 
 When the HDF5 library is installed on the target system, usually through a package management tool of the target system, CMake should find it without further configuration. 
 
-There are currently two libraries which are packaged into the source distribution of IDSimF: 
+There are currently two required libraries which are packaged into the source distribution of IDSimF: 
 
 * `Catch2 <https://github.com/catchorg/Catch2>`_ unit test framework
 * `jsoncpp <https://github.com/open-source-parsers/jsoncpp>`_ JSON file parsing library
+
+
+----------------------------------------------
+Optional Fast Multipole Method (FMM) Libraries
+----------------------------------------------
+
+The `Fast Multipole Method (FMM) <https://en.wikipedia.org/wiki/Fast_multipole_method>`_ is an approach to calculate the forces and therefore interactions between large numbers of particles in an an efficient way. It is used for many applications, e.g. gravitational interactions or coulombic interactions, therefore there are multiple open source libraries which provide FMM capabilities. 
+
+Beside the internal fast coulomb solver, based on a `Barnes Hut Tree algorithm <https://en.wikipedia.org/wiki/Barnes%E2%80%93Hut_simulation>`_, IDSimF can currently use two FMM libraries for the calculation of coulombic inter-particle interactions:
+
+* `exafmm-t <https://exafmm.github.io/exafmm-t>`_ 
+* `FMM3D <https://fmm3d.readthedocs.io/en/latest/index.html>`_ 
+
+To prepare a build with activated FMM libraries, the locations of the libraries have to be provided to CMake in the configuration step, via the ``EXAFMMT_PATH`` and ``FMM_3D_PATH`` variables. Details are described in the compilation / installation guides below.
 
 
 Guides: Cloning the IDSimF repository and compiling IDSimF 
