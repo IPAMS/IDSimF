@@ -77,11 +77,11 @@ void performBenchmark(size_t nSamples, size_t nParticles){
                 1e-16,
                 2,
                 1,
-                25, 
+                25e-10, 
                 molecularStructureCollection);
 
         for (size_t j = 0; j<nSamples; j++) {
-            #pragma omp for schedule(dynamic, nParticles/20)
+            #pragma omp for schedule(dynamic, 100)
             for (i = 0; i<nParticles; ++i) {
                 mdSim.modifyVelocity(*particlesPtrs[i], 1e-11);
             }
