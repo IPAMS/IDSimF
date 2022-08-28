@@ -19,6 +19,9 @@ The modules are the building blocks to create an IDSimF simulation application. 
 :doc:`ParticleSimulation <particlesimulation>`: Facilities for particle trajectory simulation
     Provides algorithms, data structures and methods for charged particle trajectory simulations. This module contains for example trajectory integrators, file readers and writers, potential arrays and interpolated scalar and vector fields. 
 
+:doc:`FileIO <file_io>`: Input and output of simulation data in files
+    Provides input and output of simulation data and simulation results in files.
+
 :doc:`CollisionModel <collisionmodels>`: Background gas collision modeling
     Provides models to describe the collisional interaction between charged particles and neutral background gas. 
 

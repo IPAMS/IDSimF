@@ -98,6 +98,7 @@ Documentation
    modules/space_charge
    modules/integration
    modules/particlesimulation
+   modules/file_io
    modules/collisionmodels
    modules/rs
    modules/apputils
