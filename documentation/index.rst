@@ -95,7 +95,7 @@ Documentation
 
    modules/module_overview
    modules/core
-   modules/btree
+   modules/space_charge
    modules/particlesimulation
    modules/collisionmodels
    modules/rs
