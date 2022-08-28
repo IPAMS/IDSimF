@@ -7,46 +7,6 @@ Module: particleSimulation
 The `ParticleSimulation` module provides algorithms, data structures, input/output and data transformation methods required for actual charged particle trajectory simulations. 
 
 
-Time Integrators
-================
-
-A central aspect of IDSimF is time integration of the particle motion, which is done by time integrators. 
-
-
-:cpp:class:`Integration::AbstractTimeIntegrator` is the abstract super class of all time integrators, which provides a basic common interface for time integration:
-
-.. doxygenclass:: Integration::AbstractTimeIntegrator
-    :members:
-    :undoc-members:
-
-
--------------------
-Velocity Integrator
--------------------
-
-:cpp:class:`Integration::VelocityIntegrator` is a simple integrator which uses the current velocity in a time step to move the particle. Thus, it ignores particle inertia. Furthermore, space charge and background gas interactions are ignored by this integrator.
-
-.. doxygenclass:: Integration::VelocityIntegrator
-    :members:
-    :undoc-members:
-
-
-------------------
-Verlet Integrators
-------------------
-
-:cpp:class:`Integration::VerletIntegrator` and :cpp:class:`Integration::ParallelVerletIntegrator` are a serial (non parallelized) and parallelized version of a time integrator implementing the Verlet integration scheme. Space charge and background gas interactions are considered with verlet integrators.
-
-.. doxygenclass:: Integration::VerletIntegrator
-    :members:
-    :undoc-members:
-
-
-.. doxygenclass:: Integration::ParallelVerletIntegrator
-    :members:
-    :undoc-members:
-
-
 Data Structures / Simulation Objects
 ====================================
 

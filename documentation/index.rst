@@ -96,6 +96,7 @@ Documentation
    modules/module_overview
    modules/core
    modules/space_charge
+   modules/integration
    modules/particlesimulation
    modules/collisionmodels
    modules/rs

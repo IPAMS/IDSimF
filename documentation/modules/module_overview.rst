@@ -10,7 +10,10 @@ The modules are the building blocks to create an IDSimF simulation application. 
 :doc:`Core <core>`: Core data structures and base facilities 
     Bundles basic data structures like vectors and basic facilities required in most other modules like random generators.
 
-:doc:`SpaceCharge <space_charge>`: Space Charge 
+:doc:`SpaceCharge <space_charge>`: Space Charge simulation
+    Provides algorithms / methods to simulate electric particle-particle interaction (space charge). 
+
+:doc:`Integration <integration>`: Numerical integration of particle motion
     Provides algorithms / methods to simulate electric particle-particle interaction (space charge). 
 
 :doc:`ParticleSimulation <particlesimulation>`: Facilities for particle trajectory simulation
