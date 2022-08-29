@@ -115,7 +115,7 @@ namespace CollisionModel{
 
         bool leapfrogIntern(std::vector<CollisionModel::Molecule*> moleculesPtr, double dt, double finalTime, double requiredRad);
 
-        void rk4Intern(std::vector<CollisionModel::Molecule*> moleculesPtr, double dt, double finalTime);
+        bool rk4Intern(std::vector<CollisionModel::Molecule*> moleculesPtr, double dt, double finalTime, double requiredRad);
 
         bool rk4InternAdaptiveStep(std::vector<CollisionModel::Molecule*> moleculesPtr, double dt, double finalTime, double requiredRad);
 
