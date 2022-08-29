@@ -4,7 +4,7 @@
 BT-RS-DMSSim
 ============
 
-Simulation of ion motion and chemical induced differential mobility in a Differential Ion Mobility (DMS) separation device with idealized planar electrodes, including background gas interaction, ion chemistry and space charge: Ions are drifting in a gap between two planar electrodes on which an asymmetric RF bisinusoidal high voltage waveform, the Separation Voltage (SV) is applied. Due to different ion mobilities in the high field phase and the low field phase of the SV, ions are drifting in the direction perpendicular to the elelctrodes. This drift is countered by an DC Compensation Voltage (CV), which is scanned to get an differential mobility spectrum. 
+Simulation of ion motion and chemical induced differential mobility in a Differential Ion Mobility (DMS) separation device with idealized planar electrodes, including background gas interaction, ion chemistry and space charge: Ions are drifting in a gap between two planar electrodes on which an asymmetric RF high voltage waveform, the Separation Voltage (SV) is applied. Due to different ion mobilities in the high field phase and the low field phase of the SV, ions are drifting in the direction perpendicular to the electrodes. This drift is countered by an DC Compensation Voltage (CV), which is scanned to get an differential mobility spectrum. 
 
 There are multiple physical and chemical mechanisms leading to differential mobility of ions. This application is currently primarily intended to simulate the chemically induced differential mobility of clustered small ions. The varying electric acceleration in the high and low field phase of the SV induce a variation of the effective ion temperature of the clustered ions. Therefore, the average cluster size is reduced in the high field phase, since high effective temperature leads to declustering.  If the clusters can reform / regrow in the low field phase, this leads to changing average sizes of the clusters between high and low field phases, which in turn leads to different mobility in the high and low field phases. 
 
@@ -79,6 +79,14 @@ Simulation configuration description
 
 ``cv_relaxation_parameter`` : 
     Dampening parameter for the minimization process when ``cv_mode`` is ``auto``.
+
+``sv_mode`` : 
+    Separation waveform mode:
+
+    * ``bi_sin``: "Classical" DMS wave form: A superposition of two sine waves, one with the base SV frequency and one with the double frequency, resulting in in a high and low field phase. 
+    * ``square``: Ideal square waveform with 1/2 ratio between low and high field phase
+    * ``clipped_sin``: A clipped sine SV waveform, with half an sine wave as high field phase and a clipped phase as low field phase
+
 
 ``sv_Vmm-1`` : 
     Separation voltage in V per mm.

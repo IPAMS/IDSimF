@@ -74,6 +74,14 @@ Simulation configuration description
 ``cv_relaxation_parameter`` : 
     Dampening parameter for the minimization process when ``cv_mode`` is ``auto``.
 
+``sv_mode`` : 
+    Separation waveform mode:
+
+    * ``bi_sin``: "Classical" DMS wave form: A superposition of two sine waves, one with the base SV frequency and one with the double frequency, resulting in in a high and low field phase. 
+    * ``square``: Ideal square waveform with 1/2 ratio between low and high field phase.
+    * ``clipped_sin``: A clipped sine SV waveform, with half an sine wave as high field phase and a clipped phase as low field phase.
+
+
 ``sv_Vmm-1`` : 
     Separation voltage in V per mm.
 
