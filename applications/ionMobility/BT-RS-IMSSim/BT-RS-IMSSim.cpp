@@ -241,6 +241,7 @@ int main(int argc, const char *argv[]){
                     particle->setMolecularStructure(molecularStructureCollection.at(particleIdentifier[i]));
                     particle->setDiameter(particle->getMolecularStructure()->getDiameter());
                 }
+
                 if(transportModelType=="btree_VSS"){
                     particle->setFloatAttribute(CollisionModel::SoftSphereModel::VSS_ALPHA, vssCollisionAlpha[i]);
                     particle->setFloatAttribute(CollisionModel::SoftSphereModel::VSS_OMEGA, vssCollisionOmega[i]);
