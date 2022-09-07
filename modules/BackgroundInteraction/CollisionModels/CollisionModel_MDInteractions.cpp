@@ -293,6 +293,7 @@ void CollisionModel::MDInteractionsModel::modifyVelocity(Core::Particle& particl
 
         std::vector<CollisionModel::Molecule*> moleculesPtr = {&mole, &bgMole};
 
+        // possible check for energy conservation 
         std::vector<Core::Vector> startVelocity;
         double startEnergy = 0;
         for(auto* molecule : moleculesPtr){
@@ -322,6 +323,9 @@ void CollisionModel::MDInteractionsModel::modifyPosition(Core::Vector& /*positio
 bool CollisionModel::MDInteractionsModel::leapfrogIntern(std::vector<CollisionModel::Molecule*> moleculesPtr, double dt, double finalTime, double requiredRad){
 
     bool wasHit = false;
+
+    // distances need to be saved so integration can be stopped if particles leave 
+    // the domain of interest 
     std::vector<double> startDistances;
     size_t moleculesPtr_size = moleculesPtr.size();
     for(size_t i = 0; i < moleculesPtr_size; ++i){
@@ -405,26 +409,21 @@ bool CollisionModel::MDInteractionsModel::rk4Intern(std::vector<CollisionModel::
     for (int j = 0; j < nSteps; j++){
 
         std::vector<Core::Vector> velocityMolecules(nMolecules);
-        i = 0;
-        for(auto* molecule : moleculesPtr){
-            velocityMolecules.at(i) = molecule->getComVel();
-            i++;
-        }
         std::vector<Core::Vector> positionMolecules(nMolecules);
         i = 0;
         for(auto* molecule : moleculesPtr){
+            velocityMolecules.at(i) = molecule->getComVel();
             positionMolecules.at(i) = molecule->getComPos();
             i++;
         }
+        
         std::vector<Core::Vector> initialPositionMolecules(nMolecules);
-        for(size_t k = 0; k < nMolecules; k++){
-            initialPositionMolecules.at(k) = Core::Vector( positionMolecules.at(k).x(), positionMolecules.at(k).y(),positionMolecules.at(k).z() );
-        }
         std::vector<Core::Vector> initialVelocityMolecules(nMolecules);
         for(size_t k = 0; k < nMolecules; k++){
+            initialPositionMolecules.at(k) = Core::Vector( positionMolecules.at(k).x(), positionMolecules.at(k).y(),positionMolecules.at(k).z() );
             initialVelocityMolecules.at(k) = Core::Vector( velocityMolecules.at(k).x(), velocityMolecules.at(k).y(), velocityMolecules.at(k).z() );
         }
-
+        
         double length[3] = {1./2, 1./2, 1};
         double mass[nMolecules];
         i = 0;
@@ -497,6 +496,8 @@ bool CollisionModel::MDInteractionsModel::rk4InternAdaptiveStep(std::vector<Coll
     int steps = 0;
     double distance = 0.0;
 
+    // distances need to be saved so integration can be stopped if particles leave 
+    // the domain of interest 
     bool wasHit = false;
     std::vector<double> startDistances;
     for(size_t i = 0; i < nMolecules; ++i){
@@ -523,20 +524,13 @@ bool CollisionModel::MDInteractionsModel::rk4InternAdaptiveStep(std::vector<Coll
         i = 0;
         for(auto* molecule : moleculesPtr){
             velocityMolecules[i] = molecule->getComVel();
-            i++;
-        }
-
-        i = 0;
-        for(auto* molecule : moleculesPtr){
             positionMolecules[i] = molecule->getComPos();
             i++;
         }
 
-        for(size_t k = 0; k < nMolecules; k++){
-            initialPositionMolecules[k] = Core::Vector( positionMolecules[k].x(), positionMolecules[k].y(),positionMolecules[k].z() );
-        }
 
         for(size_t k = 0; k < nMolecules; k++){
+            initialPositionMolecules[k] = Core::Vector( positionMolecules[k].x(), positionMolecules[k].y(),positionMolecules[k].z() );
             initialVelocityMolecules[k] = Core::Vector( velocityMolecules[k].x(), velocityMolecules[k].y(), velocityMolecules[k].z() );
         }
 
@@ -570,6 +564,7 @@ bool CollisionModel::MDInteractionsModel::rk4InternAdaptiveStep(std::vector<Coll
             }
 
             forceFieldMD(moleculesPtr, forceMolecules);
+            
             for(size_t m = 0; m < 5; m++){
                 for(i = 0; i < nMolecules; i++){
                     k[n][i] = forceMolecules[i] * dt / mass[i];
@@ -606,8 +601,12 @@ bool CollisionModel::MDInteractionsModel::rk4InternAdaptiveStep(std::vector<Coll
             double globalDelta = std::max({deltaX, deltaY, deltaZ});
             integrationTimeSum += dt;
 
-            double newdt = dt * std::pow((1e-5/globalDelta), 1./5) * 0.9;
+            double tolerance = 1e-5;
+            double newdt = dt * std::pow((tolerance/globalDelta), 1./5) * 0.9;
 
+            // limit the possible range of time steps that can be chosen 
+            // if step size too small integartion take too long
+            // if step size is too big integration errors start to occur 
             if(newdt >= 1e-19 && !std::isinf(newdt) && newdt <= 1e-13){
                 dt = newdt;
             }
@@ -642,144 +641,147 @@ bool CollisionModel::MDInteractionsModel::rk4InternAdaptiveStep(std::vector<Coll
 
 void CollisionModel::MDInteractionsModel::forceFieldMD(std::vector<CollisionModel::Molecule*>& moleculesPtr, std::vector<Core::Vector>& forceMolecules){
 
-    //std::vector<Core::Vector> forceMolecules(nMolecules); // save all the forces acting on each molecule
+    //std::vector<Core::Vector> forceMolecules(nMolecules); 
+    // save all the forces acting on each molecule
     CollisionModel::Molecule* ion = moleculesPtr[0];
     CollisionModel::Molecule* bgGas = moleculesPtr[1];
     forceMolecules[0] = Core::Vector(0.0, 0.0, 0.0);
     forceMolecules[1] = Core::Vector(0.0, 0.0, 0.0);
-    
-        /* 
-        * therefore we need the interaction between each atom of a molecule with the atoms of the
-        * other one 
-        */ 
 
-        // construct E-field acting on the molecule
-        std::array<double, 3> eField = {0., 0., 0.};
-        std::array<double, 6> eFieldDerivative = {0., 0., 0., 0., 0., 0.};
-
-        for(auto& atomI : ion->getAtoms()){
-            for(auto& atomJ : bgGas->getAtoms()){
-                
-                // First contribution: Lennard-Jones potential 
-                // This always contributes to the experienced force 
-                Core::Vector absPosAtomI = ion->getComPos() + atomI->getRelativePosition();
-                Core::Vector absPosAtomJ = bgGas->getComPos() + atomJ->getRelativePosition();
+    // construct E-field acting on the molecule
+    std::array<double, 3> eField = {0., 0., 0.};
+    std::array<double, 6> eFieldDerivative = {0., 0., 0., 0., 0., 0.};
 
 
-                Core::Vector distance = absPosAtomI - absPosAtomJ;
-                if(distance.magnitude() < 1E-25){
-                    forceMolecules[0] += Core::Vector(1e-10, 1e-10, 1e-10);
-                    forceMolecules[1] += Core::Vector(1e-10, 1e-10, 1e-10) * (-1);
-                    break;
-                }
-                if(distance.magnitude() > 1E20){
-                    return;
-                }
-                double distanceSquared = distance.magnitudeSquared();
-                double distanceSquaredInverse = 1./distanceSquared;
-                double sigma = CollisionModel::Atom::calcLJSig(*atomI, *atomJ);
-                double sigma6 = sigma * sigma * sigma * sigma * sigma * sigma;
-                double epsilon = CollisionModel::Atom::calcLJEps(*atomI, *atomJ);
-                double ljFactor = 24 * epsilon * distanceSquaredInverse*distanceSquaredInverse*distanceSquaredInverse*distanceSquaredInverse * 
-                                    (2 * distanceSquaredInverse*distanceSquaredInverse*distanceSquaredInverse * sigma6 * sigma6 - sigma6);
-                // calculate the force that acts on the atoms and add it to the overall force on the molecule
-                Core::Vector atomForce;
-                atomForce.x(distance.x() * ljFactor);
-                atomForce.y(distance.y() * ljFactor);
-                atomForce.z(distance.z() * ljFactor);
-                forceMolecules[0] += atomForce;
-                forceMolecules[1] += atomForce * (-1);
+    /* 
+    * therefore we need the interaction between each atom of a molecule with the atoms of the
+    * other one 
+    */ 
+    for(auto& atomI : ion->getAtoms()){
+        for(auto& atomJ : bgGas->getAtoms()){
+            
+            // First contribution: Lennard-Jones potential 
+            // This always contributes to the experienced force 
+            Core::Vector absPosAtomI = ion->getComPos() + atomI->getRelativePosition();
+            Core::Vector absPosAtomJ = bgGas->getComPos() + atomJ->getRelativePosition();
 
-                // Second contribution: C4 ion-induced dipole potential
-                // This requires an ion and one neutrally charged molecule to be present
-                double distanceCubed = distanceSquared * sqrt(distanceSquared);
-                double currentCharge = 0;
-                // Check if one of the molecules is an ion and the other one is not
-                if(int(atomI->getCharge()/Core::ELEMENTARY_CHARGE) != 0 && 
-                    moleculesPtr[1]->getIsIon() == false &&
-                    moleculesPtr[1]->getIsDipole() == false){
-                    currentCharge = atomI->getCharge();
 
-                }else if (moleculesPtr[0]->getIsIon() == false && 
-                            int(atomJ->getCharge()/Core::ELEMENTARY_CHARGE) != 0 &&
-                            moleculesPtr[0]->getIsDipole() == false){
-                    currentCharge = atomJ->getCharge();
-                }
-                
-                if(distance.magnitude() <= 22e-10){
-                    eField[0] += distance.x() * currentCharge / distanceCubed; // E-field in x
-                    eField[1] += distance.y() * currentCharge / distanceCubed; // E-field in y
-                    eField[2] += distance.z() * currentCharge / distanceCubed; // E-field in z
-                    
-                    // derivative x to x
-                    eFieldDerivative[0] += currentCharge / distanceCubed - 
-                                            3 * currentCharge * distance.x() * distance.x() / (distanceCubed * distanceSquared); 
-                    // derivative x to y
-                    eFieldDerivative[1] += -3 * currentCharge * distance.x() * distance.y() / (distanceCubed * distanceSquared);
-                    // derivative y to y
-                    eFieldDerivative[2] += currentCharge / distanceCubed - 
-                                            3 * currentCharge * distance.y() * distance.y() / (distanceCubed * distanceSquared);
-                    // derivative y to z
-                    eFieldDerivative[3] += -3 * currentCharge * distance.y() * distance.z() / (distanceCubed * distanceSquared);
-                    // derivative z to z
-                    eFieldDerivative[4] += currentCharge / distanceCubed - 
-                                            3 * currentCharge * distance.z() * distance.z() / (distanceCubed * distanceSquared);
-                    // derivative x to z
-                    eFieldDerivative[5] += -3 * currentCharge * distance.x() * distance.z() / (distanceCubed * distanceSquared);
-                }
-                
-
-                // Third contribution: ion <-> permanent dipole potential
-                // This requires an ion and a dipole to be present 
-                double dipoleDistanceScalar = 0;
-                double dipoleX = 0, dipoleY = 0, dipoleZ = 0;
-                currentCharge = 0;
-                if(int(atomI->getCharge()/Core::ELEMENTARY_CHARGE) != 0 && 
-                    moleculesPtr[1]->getIsDipole() == true){
-
-                    currentCharge = atomI->getCharge();
-                    dipoleX = moleculesPtr[1]->getDipole().x();
-                    dipoleY = moleculesPtr[1]->getDipole().y();
-                    dipoleZ = moleculesPtr[1]->getDipole().z();
-                    dipoleDistanceScalar =  dipoleX * distance.x() + 
-                                            dipoleY * distance.y() + 
-                                            dipoleZ * distance.z();
-
-                }else if (moleculesPtr[0]->getIsDipole() == true && 
-                            int(atomJ->getCharge()/Core::ELEMENTARY_CHARGE) != 0){
-
-                    currentCharge = atomJ->getCharge();
-                    dipoleX = moleculesPtr[0]->getDipole().x();
-                    dipoleY = moleculesPtr[0]->getDipole().y();
-                    dipoleZ = moleculesPtr[0]->getDipole().z();
-                    dipoleDistanceScalar =  dipoleX * distance.x() + 
-                                            dipoleY * distance.y() + 
-                                            dipoleZ * distance.z();
-                }
-                Core::Vector ionDipoleForce;
-                ionDipoleForce.x(-currentCharge * 1./Core::ELECTRIC_CONSTANT * 
-                                    (1./distanceCubed * dipoleX - 
-                                    3 * dipoleDistanceScalar * 1./(distanceCubed*distanceSquared) * distance.x()) );
-                ionDipoleForce.y(-currentCharge * 1./Core::ELECTRIC_CONSTANT * 
-                                    (1./distanceCubed * dipoleY - 
-                                    3 * dipoleDistanceScalar * 1./(distanceCubed*distanceSquared) * distance.y()) );
-                ionDipoleForce.z(-currentCharge * 1./Core::ELECTRIC_CONSTANT * 
-                                    (1./distanceCubed * dipoleZ - 
-                                    3 * dipoleDistanceScalar * 1./(distanceCubed*distanceSquared) * distance.z()) );
-                forceMolecules[0] += ionDipoleForce;
-                forceMolecules[1] += ionDipoleForce * (-1);
+            Core::Vector distance = absPosAtomI - absPosAtomJ;
+            // avoid singularity at zero distance 
+            if(distance.magnitude() < 1E-25){
+                forceMolecules[0] += Core::Vector(1e-10, 1e-10, 1e-10);
+                forceMolecules[1] += Core::Vector(1e-10, 1e-10, 1e-10) * (-1);
+                break;
             }
-        }
+            // cut-off
+            if(distance.magnitude() > 1E20){
+                return;
+            }
+            double distanceSquared = distance.magnitudeSquared();
+            double distanceSquaredInverse = 1./distanceSquared;
+            double sigma = CollisionModel::Atom::calcLJSig(*atomI, *atomJ);
+            double sigma6 = sigma * sigma * sigma * sigma * sigma * sigma;
+            double epsilon = CollisionModel::Atom::calcLJEps(*atomI, *atomJ);
+            double ljFactor = 24 * epsilon * distanceSquaredInverse*distanceSquaredInverse*distanceSquaredInverse*distanceSquaredInverse * 
+                                (2 * distanceSquaredInverse*distanceSquaredInverse*distanceSquaredInverse * sigma6 * sigma6 - sigma6);
+            // calculate the force that acts on the atoms and add it to the overall force on the molecule
+            Core::Vector atomForce;
+            atomForce.x(distance.x() * ljFactor);
+            atomForce.y(distance.y() * ljFactor);
+            atomForce.z(distance.z() * ljFactor);
+            forceMolecules[0] += atomForce;
+            forceMolecules[1] += atomForce * (-1);
 
-        // add the C4 ion induced force
-        Core::Vector ionInducedForce;
-        ionInducedForce.x(1./Core::ELECTRIC_CONSTANT * collisionGasPolarizability_m3_ * 
-                            (eField[0]*eFieldDerivative[0] + eField[1]*eFieldDerivative[1] + eField[2]*eFieldDerivative[5]));
-        ionInducedForce.y(1./Core::ELECTRIC_CONSTANT * collisionGasPolarizability_m3_ * 
-                            (eField[0]*eFieldDerivative[1] + eField[1]*eFieldDerivative[2] + eField[2]*eFieldDerivative[3]));
-        ionInducedForce.z(1./Core::ELECTRIC_CONSTANT * collisionGasPolarizability_m3_ * 
-                            (eField[0]*eFieldDerivative[5] + eField[1]*eFieldDerivative[3] + eField[2]*eFieldDerivative[4]));
-        forceMolecules[0] += ionInducedForce;
-        forceMolecules[1] += ionInducedForce * (-1);
+            // Second contribution: C4 ion-induced dipole potential
+            // This requires an ion and one neutrally charged molecule to be present
+            double distanceCubed = distanceSquared * sqrt(distanceSquared);
+            double currentCharge = 0;
+            // Check if one of the molecules is an ion and the other one is not
+            if(int(atomI->getCharge()/Core::ELEMENTARY_CHARGE) != 0 && 
+                moleculesPtr[1]->getIsIon() == false &&
+                moleculesPtr[1]->getIsDipole() == false){
+                currentCharge = atomI->getCharge();
+
+            }else if (moleculesPtr[0]->getIsIon() == false && 
+                        int(atomJ->getCharge()/Core::ELEMENTARY_CHARGE) != 0 &&
+                        moleculesPtr[0]->getIsDipole() == false){
+                currentCharge = atomJ->getCharge();
+            }
+            
+            if(distance.magnitude() <= 22e-10){
+                eField[0] += distance.x() * currentCharge / distanceCubed; // E-field in x
+                eField[1] += distance.y() * currentCharge / distanceCubed; // E-field in y
+                eField[2] += distance.z() * currentCharge / distanceCubed; // E-field in z
+                
+                // derivative x to x
+                eFieldDerivative[0] += currentCharge / distanceCubed - 
+                                        3 * currentCharge * distance.x() * distance.x() / (distanceCubed * distanceSquared); 
+                // derivative x to y
+                eFieldDerivative[1] += -3 * currentCharge * distance.x() * distance.y() / (distanceCubed * distanceSquared);
+                // derivative y to y
+                eFieldDerivative[2] += currentCharge / distanceCubed - 
+                                        3 * currentCharge * distance.y() * distance.y() / (distanceCubed * distanceSquared);
+                // derivative y to z
+                eFieldDerivative[3] += -3 * currentCharge * distance.y() * distance.z() / (distanceCubed * distanceSquared);
+                // derivative z to z
+                eFieldDerivative[4] += currentCharge / distanceCubed - 
+                                        3 * currentCharge * distance.z() * distance.z() / (distanceCubed * distanceSquared);
+                // derivative x to z
+                eFieldDerivative[5] += -3 * currentCharge * distance.x() * distance.z() / (distanceCubed * distanceSquared);
+            }
+            
+
+            // Third contribution: ion <-> permanent dipole potential
+            // This requires an ion and a dipole to be present 
+            double dipoleDistanceScalar = 0;
+            double dipoleX = 0, dipoleY = 0, dipoleZ = 0;
+            currentCharge = 0;
+            if(int(atomI->getCharge()/Core::ELEMENTARY_CHARGE) != 0 && 
+                moleculesPtr[1]->getIsDipole() == true){
+
+                currentCharge = atomI->getCharge();
+                dipoleX = moleculesPtr[1]->getDipole().x();
+                dipoleY = moleculesPtr[1]->getDipole().y();
+                dipoleZ = moleculesPtr[1]->getDipole().z();
+                dipoleDistanceScalar =  dipoleX * distance.x() + 
+                                        dipoleY * distance.y() + 
+                                        dipoleZ * distance.z();
+
+            }else if (moleculesPtr[0]->getIsDipole() == true && 
+                        int(atomJ->getCharge()/Core::ELEMENTARY_CHARGE) != 0){
+
+                currentCharge = atomJ->getCharge();
+                dipoleX = moleculesPtr[0]->getDipole().x();
+                dipoleY = moleculesPtr[0]->getDipole().y();
+                dipoleZ = moleculesPtr[0]->getDipole().z();
+                dipoleDistanceScalar =  dipoleX * distance.x() + 
+                                        dipoleY * distance.y() + 
+                                        dipoleZ * distance.z();
+            }
+            Core::Vector ionDipoleForce;
+            ionDipoleForce.x(-currentCharge * 1./Core::ELECTRIC_CONSTANT * 
+                                (1./distanceCubed * dipoleX - 
+                                3 * dipoleDistanceScalar * 1./(distanceCubed*distanceSquared) * distance.x()) );
+            ionDipoleForce.y(-currentCharge * 1./Core::ELECTRIC_CONSTANT * 
+                                (1./distanceCubed * dipoleY - 
+                                3 * dipoleDistanceScalar * 1./(distanceCubed*distanceSquared) * distance.y()) );
+            ionDipoleForce.z(-currentCharge * 1./Core::ELECTRIC_CONSTANT * 
+                                (1./distanceCubed * dipoleZ - 
+                                3 * dipoleDistanceScalar * 1./(distanceCubed*distanceSquared) * distance.z()) );
+            forceMolecules[0] += ionDipoleForce;
+            forceMolecules[1] += ionDipoleForce * (-1);
+        }
+    }
+
+    // add the C4 ion-induced dipole force contribution 
+    Core::Vector ionInducedForce;
+    ionInducedForce.x(1./Core::ELECTRIC_CONSTANT * collisionGasPolarizability_m3_ * 
+                        (eField[0]*eFieldDerivative[0] + eField[1]*eFieldDerivative[1] + eField[2]*eFieldDerivative[5]));
+    ionInducedForce.y(1./Core::ELECTRIC_CONSTANT * collisionGasPolarizability_m3_ * 
+                        (eField[0]*eFieldDerivative[1] + eField[1]*eFieldDerivative[2] + eField[2]*eFieldDerivative[3]));
+    ionInducedForce.z(1./Core::ELECTRIC_CONSTANT * collisionGasPolarizability_m3_ * 
+                        (eField[0]*eFieldDerivative[5] + eField[1]*eFieldDerivative[3] + eField[2]*eFieldDerivative[4]));
+    forceMolecules[0] += ionInducedForce;
+    forceMolecules[1] += ionInducedForce * (-1);
     
 }
