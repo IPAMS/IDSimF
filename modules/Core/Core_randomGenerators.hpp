@@ -146,7 +146,7 @@ namespace Core{
     };
 
     /**
-     * Random distribution which *non* random samples wich are gaussian normal distributed (with mu=0.0 and sigma=1.0).
+     * Test random distribution which *non* random samples which are gaussian normal distributed (with mu=0.0 and sigma=1.0).
      * The samples are sequentially chosen from a small set of predetermined test values
      */
     class NormalTestDistribution: public RandomDistribution{

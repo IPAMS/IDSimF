@@ -25,10 +25,10 @@ add_test(NAME BT-RS-IMSSim_waterCluster_thermalizing COMMAND ${PROJECT_NAME}
         "example/RS_waterCluster_thermalizing.json" "run_BT-RS-IMSSim_waterCluster_thermalizing" -n ${N_THREADS})
 
 add_test(NAME BT-RS-IMSSim_MD_short_no_recording COMMAND ${PROJECT_NAME}
-        "example/RS_waterCluster_MD_short_no_recording.json" "run_BT-RS-IMSSim_waterCluster_MD_short_no_recording" -n ${N_THREADS})
+        "example/RS_MDCollisions_O2-He_short_no_recording.json" "run_BT-RS-IMSSim_RS_MDCollisions_O2-He_short_no_recording" -n ${N_THREADS})
 
 add_test(NAME BT-RS-IMSSim_MD_short_recording COMMAND ${PROJECT_NAME}
-        "example/RS_waterCluster_MD_short_recording.json" "run_BT-RS-IMSSim_waterCluster_MD_short_recording" -n ${N_THREADS})
+        "example/RS_MDCollisions_O2-He_short_recording.json" "run_BT-RS-IMSSim_RS_MDCollisions_O2-He_short_recording" -n ${N_THREADS})
 
 add_custom_command(TARGET ${PROJECT_NAME} PRE_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory

@@ -21,6 +21,10 @@ add_test(NAME BT-RS-DMSSim_waterCluster_temperatureGradient COMMAND ${PROJECT_NA
 add_test(NAME BT-RS-DMSSim_waterCluster_modulatedCV COMMAND ${PROJECT_NAME}
         "example/RS_waterCluster_modulatedCV.json" "run_BT-RS-DMSSim_waterCluster_modulatedCV" -n ${N_THREADS})
 
+add_test(NAME BT-RS-DMSSim_MD_colllisions COMMAND ${PROJECT_NAME}
+        "example/RS_MDCollisions_O2-He_short.json" "run_RS_MDCollisions_O2-He_short" -n ${N_THREADS})
+
+
 add_custom_command(TARGET ${PROJECT_NAME} PRE_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${CMAKE_CURRENT_SOURCE_DIR}/example/ $<TARGET_FILE_DIR:${PROJECT_NAME}>/example/)
