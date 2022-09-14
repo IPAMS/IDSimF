@@ -227,7 +227,7 @@ void CollisionModel::MDInteractionsModel::modifyVelocity(Core::Particle& particl
 
     // FIXME: The time step length dt is unrestricted
     // Possible mitigation: Throw warning / exception if collision probability becomes too high
-    if(collisionProb > 0.02)
+    if(collisionProb > 0.12)
         std::cout << "collisionProb " << collisionProb << '\n';
     // Decide if a collision actually happens:
     if (rndSource->uniformRealRndValue() > collisionProb){
