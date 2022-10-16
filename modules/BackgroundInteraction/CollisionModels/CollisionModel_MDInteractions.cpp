@@ -70,7 +70,8 @@ CollisionModel::MDInteractionsModel::MDInteractionsModel(std::function<double(Co
                                                         double collisionRadiusScaling,
                                                         double angleThetaScaling,
                                                         double spawnRadius,
-                                                        std::unordered_map<std::string,  std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection) :
+                                                        std::unordered_map<std::string,
+                                                        std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection) :
         MDInteractionsModel(
                 std::move(pressureFunction),
                 std::move(velocityFunction),
@@ -98,7 +99,9 @@ CollisionModel::MDInteractionsModel::MDInteractionsModel(std::function<double(Co
                                                         double collisionRadiusScaling,
                                                         double angleThetaScaling,
                                                         double spawnRadius,
-                                                        std::unordered_map<std::string,  std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection) :
+                                                        std::unordered_map<std::string,
+                                                        std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection,
+                                                        AppUtils::logger_ptr logger) :
 
         collisionGasMass_kg_(collisionGasMassAmu*Core::AMU_TO_KG),
         collisionGasDiameter_m_(collisionGasDiameterM),
@@ -112,7 +115,8 @@ CollisionModel::MDInteractionsModel::MDInteractionsModel(std::function<double(Co
         pressureFunction_(std::move(pressureFunction)),
         velocityFunction_(std::move(velocityFunction)),
         temperatureFunction_(std::move(temperatureFunction)),
-        molecularStructureCollection_(std::move(molecularStructureCollection)) { }
+        molecularStructureCollection_(std::move(molecularStructureCollection)),
+        logger(logger){ }
 
 /**
  * Activates trajectory writing and sets trajectory writer configuration
@@ -278,7 +282,7 @@ void CollisionModel::MDInteractionsModel::modifyVelocity(Core::Particle& particl
                 / ( spawnRad * velocityBgMolecule.magnitude() )
             );
 
-        }while(circleVectorMagnitude > 1 || directionAngle >  angleThetaScaling_ * collisionTheta);
+        } while (circleVectorMagnitude > 1 || directionAngle >  angleThetaScaling_ * collisionTheta);
 
         bgMole.setComPos(circleVector);
 
@@ -309,7 +313,7 @@ void CollisionModel::MDInteractionsModel::modifyVelocity(Core::Particle& particl
             particle.setVelocity(mole.getComVel() + particle.getVelocity());
         }
         ++iterations;
-    }while(!trajectorySuccess && iterations < 100);
+    } while (!trajectorySuccess && iterations < 100);
     if(trajectorySuccess == false){
         std::cerr << "No trajectory that hit the collision sphere was found.\n";
     }

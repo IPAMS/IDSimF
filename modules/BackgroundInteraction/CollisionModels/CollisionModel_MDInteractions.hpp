@@ -47,6 +47,7 @@
 #include "CollisionModel_MathFunctions.hpp"
 #include "CollisionModel_Molecule.hpp"
 #include "RS_AbstractReaction.hpp"
+#include "appUtils_logging.hpp"
 #include <cstdio>
 #include <functional>
 #include <string>
@@ -73,7 +74,8 @@ namespace CollisionModel{
             double collisionRadiusScaling,
             double angleThetaScaling, 
             double spawnRadius,
-            std::unordered_map<std::string,  std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection);
+            std::unordered_map<std::string,
+            std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection);
 
         MDInteractionsModel(
             std::function<double(Core::Vector& location)> pressureFunction,
@@ -88,7 +90,7 @@ namespace CollisionModel{
             double collisionRadiusScaling,
             double angleThetaScaling,
             double spawnRadius,
-            std::unordered_map<std::string,  std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection);
+            std::unordered_map<std::string, std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection);
 
         MDInteractionsModel(
             std::function<double(Core::Vector& location)> pressureFunction,
@@ -103,7 +105,8 @@ namespace CollisionModel{
             double collisionRadiusScaling,
             double angleThetaScaling,
             double spawnRadius,
-            std::unordered_map<std::string,  std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection);
+            std::unordered_map<std::string, std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection,
+            AppUtils::logger_ptr logger= nullptr);
 
         void setTrajectoryWriter(const std::string& trajectoryFileName,
                                  double trajectoryDistance,
@@ -154,6 +157,8 @@ namespace CollisionModel{
         bool trajectoryRecordingActive_ = false;
         bool modelRecordsTrajectories_ = false;
         int recordTrajectoryStartTimeStep_ = 0;
+
+        AppUtils::logger_ptr logger = nullptr;
         std::unique_ptr<std::ofstream> trajectoryOutputStream_;
 
         std::function<double(Core::Vector&)> pressureFunction_ = nullptr; ///< a spatial pressure function
