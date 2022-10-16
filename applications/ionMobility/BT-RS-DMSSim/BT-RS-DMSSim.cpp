@@ -27,6 +27,7 @@
  ****************************/
 
 #include "Core_utils.hpp"
+#include "Core_randomGenerators.hpp"
 #include "RS_Simulation.hpp"
 #include "RS_SimulationConfiguration.hpp"
 #include "RS_ConfigFileParser.hpp"
@@ -58,6 +59,8 @@ enum CollisionType {SDS, HS, MD, NO_COLLISION};
 int main(int argc, const char * argv[]) {
 
     try {
+        Core::
+
         // open configuration, parse configuration file =========================================
         AppUtils::CommandlineParser cmdLineParser(argc, argv, "BT-RS-DMSSim", "DMS Simulation with trajectories and chemistry", true);
         std::string projectName = cmdLineParser.resultName();

@@ -35,6 +35,13 @@ internalRandomSource(Core::rdSeed())
 {}
 
 /**
+ * Sets the random seed of the bit source
+ */
+void Core::MersenneBitSource::seed(Core::rndBit_type seed) {
+    internalRandomSource.seed(seed);
+}
+
+/**
  * Maximum value of the value range
  */
 /*Core::rndBit_type Core::MersenneBitSource::max() {
@@ -142,6 +149,13 @@ double Core::NormalTestDistribution::rndValue() {
 }
 
 /**
+ * Sets the random seed of the random generator pool element
+ */
+void Core::RandomGeneratorPool::RNGPoolElement::seed(Core::rndBit_type seed) {
+    rngGenerator_.internalRandomSource.seed(seed);
+}
+
+/**
  * Get uniformly distributed random value
  * @return random value, uniformly distrbuted in the interval [0, 1]
  */
@@ -172,6 +186,15 @@ Core::RandomGeneratorPool::RandomGeneratorPool() {
     int nMaxThreads_ = omp_get_max_threads();
     for (int i=0; i<nMaxThreads_; ++i){
         elements_.emplace_back(std::make_unique<Core::RandomGeneratorPool::RNGPoolElement>());
+    }
+}
+
+/**
+ * Sets a new random seed for all elements of the pools
+ */
+void Core::RandomGeneratorPool::setSeedForElements(Core::rndBit_type newSeed) {
+    for (int i=0; i<elements_.size(); ++i) {
+        elements_[i]->seed(newSeed);
     }
 }
 
