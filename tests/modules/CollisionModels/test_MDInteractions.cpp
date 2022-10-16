@@ -125,6 +125,48 @@ TEST_CASE("Basic test MD Interactions model", "[CollisionModels][MDInteractionsM
         }
     }
     CHECK(i > 5000);
+}
 
+
+TEST_CASE("Reproduce wrong collision", "[CollisionModels][MDInteractionsModel]") {
+
+    FileIO::MolecularStructureReader reader = FileIO::MolecularStructureReader();
+    std::unordered_map<std::string,  std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection = reader.readMolecularStructure("test_molecularstructure_reader.csv");
+    CollisionModel::Molecule mole = CollisionModel::Molecule(
+            Core::Vector(0.0, 0.0, 0.0),
+            Core::Vector(0.0, 0.0, 0.0),
+            molecularStructureCollection.at("Ar+"));
+
+    // Construct the background gas particle
+    CollisionModel::Molecule bgMole = CollisionModel::Molecule(
+            Core::Vector(0.0, 0.0, 0.0),
+            Core::Vector(0.0, 0.0, 0.0),
+            molecularStructureCollection.at("He"));
+
+    double diameterHe = CollisionModel::MDInteractionsModel::DIAMETER_HE;
+
+    double collisionRadiusScaling = 2.0;
+
+    CollisionModel::MDInteractionsModel mdSim = CollisionModel::MDInteractionsModel(
+            2000000, 298, 4.003,
+            3*diameterHe,
+            0.205E-30,
+            "He",
+            1e-10,
+            1E-16,
+            collisionRadiusScaling, 1,
+            35e-10,
+            molecularStructureCollection);
+
+    bgMole.setComPos({1.6905050149374716e-09, 7.882860479075753e-10, -2.3496378233986436e-09});
+    bgMole.setComVel({-1848.0048078989612, 862.0310727273678, 2556.1253608501447});
+
+    std::vector<CollisionModel::Molecule*> moleculesPtr = {&mole, &bgMole};
+
+
+    double collisionRadius = collisionRadiusScaling*(mole.getDiameter() + diameterHe)/2.0;
+    bool trajectorySuccess = mdSim.rk4InternAdaptiveStep(moleculesPtr, 1e-16, 1e-10, collisionRadius);
+    std::cout << bgMole.getComVel();
+    CHECK(trajectorySuccess);
 
 }

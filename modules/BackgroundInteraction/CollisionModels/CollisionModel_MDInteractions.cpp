@@ -244,6 +244,8 @@ void CollisionModel::MDInteractionsModel::modifyVelocity(Core::Particle& particl
     int iterations = 0;
     double spawnRad = spawnRadius_;
     double collisionTheta = std::asin(collisionRadius / spawnRad);
+
+
     do{
         // Collision happens
         // Construct the actual molecule and its atoms
@@ -300,6 +302,7 @@ void CollisionModel::MDInteractionsModel::modifyVelocity(Core::Particle& particl
 
         std::vector<CollisionModel::Molecule*> moleculesPtr = {&mole, &bgMole};
 
+
         std::vector<Core::Vector> startVelocity;
         double startEnergy = 0;
         for(auto* molecule : moleculesPtr){
@@ -318,7 +321,7 @@ void CollisionModel::MDInteractionsModel::modifyVelocity(Core::Particle& particl
 
         trajectorySuccess = rk4InternAdaptiveStep(moleculesPtr, timeStep, finalTime, collisionRadius);
         if(trajectorySuccess){
-            if (mole.getComVel().magnitude() > warningOutVelocityThreshold_){
+            if (mole.getComVel().magnitude() > warningOutVelocityThreshold_ && logger != nullptr){
 
                 Core::Vector bgMole_endComPos = bgMole.getComPos();
                 Core::Vector bgMole_endComVel = bgMole.getComVel();
