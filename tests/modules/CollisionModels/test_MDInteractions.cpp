@@ -167,6 +167,7 @@ TEST_CASE("Reproduce wrong collision", "[CollisionModels][MDInteractionsModel]")
     double collisionRadius = collisionRadiusScaling*(mole.getDiameter() + diameterHe)/2.0;
     bool trajectorySuccess = mdSim.rk4InternAdaptiveStep(moleculesPtr, 1e-16, 1e-10, collisionRadius);
     std::cout << bgMole.getComVel();
-    CHECK(trajectorySuccess);
+    CHECK(Approx(bgMole.getComVel().magnitude()) == 3269.8644041702);
+    CHECK(!trajectorySuccess);
 
 }
