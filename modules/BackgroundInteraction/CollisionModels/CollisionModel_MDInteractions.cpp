@@ -101,7 +101,8 @@ CollisionModel::MDInteractionsModel::MDInteractionsModel(std::function<double(Co
                                                         double spawnRadius,
                                                         std::unordered_map<std::string,
                                                         std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection,
-                                                        AppUtils::logger_ptr logger) :
+                                                        AppUtils::logger_ptr logger,
+                                                        double warningOutVelocityThreshold) :
 
         collisionGasMass_kg_(collisionGasMassAmu*Core::AMU_TO_KG),
         collisionGasDiameter_m_(collisionGasDiameterM),
@@ -116,7 +117,8 @@ CollisionModel::MDInteractionsModel::MDInteractionsModel(std::function<double(Co
         velocityFunction_(std::move(velocityFunction)),
         temperatureFunction_(std::move(temperatureFunction)),
         molecularStructureCollection_(std::move(molecularStructureCollection)),
-        logger(logger){ }
+        logger(logger),
+        warningOutVelocityThreshold_(warningOutVelocityThreshold) {}
 
 /**
  * Activates trajectory writing and sets trajectory writer configuration
@@ -231,7 +233,7 @@ void CollisionModel::MDInteractionsModel::modifyVelocity(Core::Particle& particl
 
     // FIXME: The time step length dt is unrestricted
     // Possible mitigation: Throw warning / exception if collision probability becomes too high
-    if(collisionProb > 0.12)
+    if(collisionProb > 0.20)
         std::cout << "collisionProb " << collisionProb << '\n';
     // Decide if a collision actually happens:
     if (rndSource->uniformRealRndValue() > collisionProb){
@@ -308,8 +310,36 @@ void CollisionModel::MDInteractionsModel::modifyVelocity(Core::Particle& particl
         // Call the sub-integrator
         double finalTime = integrationTime_; //  final integration time in seconds
         double timeStep = subTimeStep_; // step size in seconds
+
+        Core::Vector bgMole_originalComPos = bgMole.getComPos();
+        Core::Vector bgMole_originalComVel = bgMole.getComVel();
+        Core::Vector mole_originalComPos = mole.getComPos();
+        Core::Vector mole_originalComVel = mole.getComVel();
+
         trajectorySuccess = rk4InternAdaptiveStep(moleculesPtr, timeStep, finalTime, collisionRadius);
         if(trajectorySuccess){
+            if (mole.getComVel().magnitude() > warningOutVelocityThreshold_){
+
+                Core::Vector bgMole_endComPos = bgMole.getComPos();
+                Core::Vector bgMole_endComVel = bgMole.getComVel();
+                Core::Vector mole_endComPos = mole.getComPos();
+                Core::Vector mole_endComVel = mole.getComVel();
+
+                logger->info("MD collision, collision velocity magnitude of particle {} is {}", particle.getIndex(), mole.getComVel().magnitude());
+                logger->info("Backgr. Molec. start CoM Pos: {} {} {} CoM Velo {} {} {}",
+                        bgMole_originalComPos.x(), bgMole_originalComPos.y(),bgMole_originalComPos.z(),
+                        bgMole_originalComVel.x(), bgMole_originalComVel.y(),bgMole_originalComVel.z());
+                logger->info("        Molec. start CoM Pos: {} {} {} CoM Velo {} {} {}",
+                        mole_originalComPos.x(), mole_originalComPos.y(),mole_originalComPos.z(),
+                        mole_originalComVel.x(), mole_originalComVel.y(),mole_originalComVel.z());
+
+                logger->info("Backgr. Molec. end   CoM Pos: {} {} {} CoM Velo {} {} {}",
+                        bgMole_endComPos.x(), bgMole_endComPos.y(),bgMole_endComPos.z(),
+                        bgMole_endComVel.x(), bgMole_endComVel.y(),bgMole_endComVel.z());
+                logger->info("        Molec. end   CoM Pos: {} {} {} CoM Velo {} {} {}",
+                        mole_endComPos.x(), mole_endComPos.y(),mole_endComPos.z(),
+                        mole_endComVel.x(), mole_endComVel.y(),mole_endComVel.z());
+            }
             particle.setVelocity(mole.getComVel() + particle.getVelocity());
         }
         ++iterations;

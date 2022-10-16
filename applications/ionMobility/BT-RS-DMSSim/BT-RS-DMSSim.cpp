@@ -248,6 +248,7 @@ int main(int argc, const char * argv[]) {
 
                 particle->setLocation(initialPositions[k]);
                 particle->setIntegerAttribute(key_ChemicalIndex, substIndex);
+                particle->setIndex(nParticlesTotal);
 
                 particlesPtrs.push_back(particle.get());
                 rsSim.addParticle(particle.get(), nParticlesTotal);
@@ -388,6 +389,7 @@ int main(int argc, const char * argv[]) {
                 double collisionRadiusScaling = simConf->doubleParameter("collision_radius_scaling");
                 double angleThetaScaling = simConf->doubleParameter("angle_theta_scaling");
                 double spawnRadius_m = simConf->doubleParameter("spawn_radius_m");
+                double velocityWarningThreshold = simConf->doubleParameter("after_collision_velocity_warning_threshold");
 
                 //construct MD model:
                 std::unique_ptr<CollisionModel::MDInteractionsModel> collisionModel =
@@ -404,7 +406,9 @@ int main(int argc, const char * argv[]) {
                             collisionRadiusScaling,
                             angleThetaScaling,
                             spawnRadius_m,
-                            molecularStructureCollection);
+                            molecularStructureCollection,
+                            logger,
+                            velocityWarningThreshold);
 
 
                 // Init particles with MD parameters:

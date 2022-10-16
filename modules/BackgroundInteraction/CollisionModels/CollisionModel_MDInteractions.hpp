@@ -106,7 +106,8 @@ namespace CollisionModel{
             double angleThetaScaling,
             double spawnRadius,
             std::unordered_map<std::string, std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection,
-            AppUtils::logger_ptr logger= nullptr);
+            AppUtils::logger_ptr logger= nullptr,
+            double warningOutVelocityThreshold = 2000.0);
 
         void setTrajectoryWriter(const std::string& trajectoryFileName,
                                  double trajectoryDistance,
@@ -159,6 +160,7 @@ namespace CollisionModel{
         int recordTrajectoryStartTimeStep_ = 0;
 
         AppUtils::logger_ptr logger = nullptr;
+        double warningOutVelocityThreshold_ = 2000.0; ///< Warning threshold of the CoM after the collision, if
         std::unique_ptr<std::ofstream> trajectoryOutputStream_;
 
         std::function<double(Core::Vector&)> pressureFunction_ = nullptr; ///< a spatial pressure function
