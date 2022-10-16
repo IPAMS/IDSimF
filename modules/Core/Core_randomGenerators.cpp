@@ -255,6 +255,13 @@ Core::TestBitSource* Core::TestRandomGeneratorPool::TestRNGPoolElement::getRando
 }
 
 /**
+ * Sets new random seed (currently not implemented, does nothing!)
+ */
+void Core::TestRandomGeneratorPool::setSeedForElements(unsigned int newSeed) {
+
+}
+
+/**
  * Get a new uniform test distribution in the interval [min, max].
  *
  * @param min Lower boundary of the interval of the random values

@@ -165,6 +165,7 @@ namespace Core{
     class AbstractRandomGeneratorPool{
     public:
         virtual ~AbstractRandomGeneratorPool() =default;
+        virtual void setSeedForElements(rndBit_type newSeed) =0;
         virtual RndDistPtr getUniformDistribution(double min, double max) =0;
         virtual RandomSource* getThreadRandomSource() =0;
         virtual RandomSource* getRandomSource(std::size_t index) =0;
@@ -190,7 +191,7 @@ namespace Core{
         };
 
         RandomGeneratorPool();
-        void setSeedForElements(rndBit_type newSeed);
+        void setSeedForElements(rndBit_type newSeed) override;
         RndDistPtr getUniformDistribution(double min, double max) override;
         RNGPoolElement* getThreadRandomSource() override;
         RNGPoolElement* getRandomSource(std::size_t index) override;
@@ -219,6 +220,7 @@ namespace Core{
         };
 
         TestRandomGeneratorPool() = default;
+        void setSeedForElements(rndBit_type newSeed) override;
         RndDistPtr getUniformDistribution(double min, double max) override;
         TestRNGPoolElement* getThreadRandomSource() override;
         TestRNGPoolElement* getRandomSource(std::size_t index) override;

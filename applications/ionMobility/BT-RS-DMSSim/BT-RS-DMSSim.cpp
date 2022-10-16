@@ -59,8 +59,6 @@ enum CollisionType {SDS, HS, MD, NO_COLLISION};
 int main(int argc, const char * argv[]) {
 
     try {
-        Core::
-
         // open configuration, parse configuration file =========================================
         AppUtils::CommandlineParser cmdLineParser(argc, argv, "BT-RS-DMSSim", "DMS Simulation with trajectories and chemistry", true);
         std::string projectName = cmdLineParser.resultName();
@@ -68,6 +66,11 @@ int main(int argc, const char * argv[]) {
 
         std::string confFileName = cmdLineParser.confFileName();
         AppUtils::simConf_ptr simConf = cmdLineParser.simulationConfiguration();
+
+        // setting random generator seed manually (for debugging / reproduction purposes):
+        unsigned int randomSeed = simConf->unsignedIntParameter("random_seed");
+        Core::globalRandomGeneratorPool->setSeedForElements(randomSeed);
+
 
         std::vector<unsigned int> nParticles = simConf->unsignedIntVectorParameter("n_particles");
         unsigned int nSteps = simConf->unsignedIntParameter("sim_time_steps");

@@ -1,6 +1,6 @@
 {
   "random_seed": 1234,
-  "sim_time_steps":2500,
+  "sim_time_steps":1000,
   "sim_time_steps_per_sv_oscillation":450000,
   "concentrations_write_interval":10,
   "trajectory_write_interval":250,
