@@ -173,6 +173,7 @@ void CollisionModel::MDInteractionsModel::updateModelParticleParameters(Core::Pa
 }
 
 void CollisionModel::MDInteractionsModel::updateModelTimestepParameters(int timestep, double /*time*/) {
+    currentTimeStep_ = timestep;
     if (modelRecordsTrajectories_ && timestep > recordTrajectoryStartTimeStep_){
         trajectoryRecordingActive_ = true;
     }
@@ -328,7 +329,7 @@ void CollisionModel::MDInteractionsModel::modifyVelocity(Core::Particle& particl
                 Core::Vector mole_endComPos = mole.getComPos();
                 Core::Vector mole_endComVel = mole.getComVel();
 
-                logger->info("MD collision, collision velocity magnitude of particle {} is {}", particle.getIndex(), mole.getComVel().magnitude());
+                logger->info("MD collision, collision velocity magnitude of particle {} in timestep {} is {}", particle.getIndex(), currentTimeStep_, mole.getComVel().magnitude());
                 logger->info("Backgr. Molec. start CoM Pos: {} {} {} CoM Velo {} {} {}",
                         bgMole_originalComPos.x(), bgMole_originalComPos.y(),bgMole_originalComPos.z(),
                         bgMole_originalComVel.x(), bgMole_originalComVel.y(),bgMole_originalComVel.z());
@@ -645,6 +646,8 @@ bool CollisionModel::MDInteractionsModel::rk4InternAdaptiveStep(std::vector<Coll
                 }
                 if((moleculesPtr[l]->getComPos() - moleculesPtr[k]->getComPos()).magnitude() <= requiredRad){
                     wasHit=true;
+
+
                 }
             }
         }

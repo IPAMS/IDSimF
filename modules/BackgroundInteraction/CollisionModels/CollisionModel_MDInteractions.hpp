@@ -158,6 +158,7 @@ namespace CollisionModel{
         bool trajectoryRecordingActive_ = false;
         bool modelRecordsTrajectories_ = false;
         int recordTrajectoryStartTimeStep_ = 0;
+        int currentTimeStep_ = 0;
 
         AppUtils::logger_ptr logger = nullptr;
         double warningOutVelocityThreshold_ = 2000.0; ///< Warning threshold of the CoM after the collision, if
