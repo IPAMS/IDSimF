@@ -153,15 +153,12 @@ double CollisionModel::MDInteractionsModel::calcSign(double value){
 }
 
 void CollisionModel::MDInteractionsModel::writeTrajectory(double distance, Core::Vector positionBgMolecule, bool endOfTrajectory, std::ofstream* file, double time){
-    if(endOfTrajectory == true){
-        if(distance < trajectoryDistance_){
-            *file << positionBgMolecule.x() << ", " << positionBgMolecule.y() << ", " << positionBgMolecule.z() << ", " << distance << ", " << time << std::endl;
-        }
-        *file << "###" << std::endl;
-    }else if(distance < trajectoryDistance_){
+    if(distance < trajectoryDistance_){
         *file << positionBgMolecule.x() << ", " << positionBgMolecule.y() << ", " << positionBgMolecule.z() << ", " << distance << ", " << time << std::endl;
     }
-
+    if(endOfTrajectory == true){
+        *file << "###" << std::endl;
+    }
 }
 
 void CollisionModel::MDInteractionsModel::initializeModelParticleParameters(Core::Particle& /*ion*/) const {
