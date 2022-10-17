@@ -416,6 +416,16 @@ int main(int argc, const char * argv[]) {
                             logger,
                             velocityWarningThreshold);
 
+                // Set trajectory writing options:
+                bool saveTrajectory = simConf->boolParameter("save_trajectory");
+
+                if (saveTrajectory){
+                    int saveTrajectoryStartTimeStep = simConf->intParameter("trajectory_start_time_step");
+                    double trajectoryDistance_m = simConf->doubleParameter("trajectory_distance_m");
+                    collisionModel->setTrajectoryWriter(projectName+"_md_trajectories.txt",
+                            trajectoryDistance_m, saveTrajectoryStartTimeStep);
+                }
+
 
                 // Init particles with MD parameters:
                 unsigned int particleIndex = 0;
