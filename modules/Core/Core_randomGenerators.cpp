@@ -257,7 +257,7 @@ Core::TestBitSource* Core::TestRandomGeneratorPool::TestRNGPoolElement::getRando
 /**
  * Sets new random seed (currently not implemented, does nothing!)
  */
-void Core::TestRandomGeneratorPool::setSeedForElements(unsigned int newSeed) {
+void Core::TestRandomGeneratorPool::setSeedForElements(Core::rndBit_type newSeed) {
 
 }
 
