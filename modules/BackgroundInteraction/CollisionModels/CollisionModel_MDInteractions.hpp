@@ -117,6 +117,13 @@ namespace CollisionModel{
 
         void writeTrajectory(double distance, Core::Vector positionBgMolecule, bool endOfTrajectory, std::ofstream* file, double time);
 
+        void writeTrajectoryFull(double distance,
+                                 Core::Vector positionBgMolecule,
+                                 Core::Vector velocityBgMolecule,
+                                 //Core::Vector positionMolecule,
+                                 //Core::Vector velocityMolecule,
+                                 bool endOfTrajectory, std::ofstream* file, double time);
+
         bool leapfrogIntern(std::vector<CollisionModel::Molecule*> moleculesPtr, double dt, double finalTime, double requiredRad);
 
         void rk4Intern(std::vector<CollisionModel::Molecule*> moleculesPtr, double dt, double finalTime);

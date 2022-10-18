@@ -158,20 +158,27 @@ TEST_CASE("Reproduce wrong collision", "[CollisionModels][MDInteractionsModel]")
             35e-10,
             molecularStructureCollection);
 
-    mdSim.setTrajectoryWriter("MD_collisions_faulty_collision.txt", 2e-8, 0);
+    mdSim.setTrajectoryWriter("MD_collisions_faulty_collision_3.txt", 2e-8, 0);
     mdSim.updateModelTimestepParameters(1, 0.0);
 
-    bgMole.setComPos({1.6905050149374716e-09, 7.882860479075753e-10, -2.3496378233986436e-09});
-    bgMole.setComVel({-1848.0048078989612, 862.0310727273678, 2556.1253608501447});
+
+    //bgMole.setComPos({ -2.0e-09, 0.0e-09, 0.0});
+    //bgMole.setComVel({300000, 0.0, 0.0});
+
+    bgMole.setComPos({ 8.541581052482649e-10, 6.575599924079876e-10, 2.7996479756610655e-09});
+    bgMole.setComVel({-741.8990734098763, -577.7889746251697, -2452.572234441529});
+
+    //bgMole.setComPos({1.6905050149374716e-09, 7.882860479075753e-10, -2.3496378233986436e-09});
+    //bgMole.setComVel({-1848.0048078989612, 862.0310727273678, 2556.1253608501447});
     //bgMole.setComVel({-1848.0048078989612, -862.0310727273678, 2556.1253608501447});
 
     std::vector<CollisionModel::Molecule*> moleculesPtr = {&mole, &bgMole};
 
     std::cout << bgMole.getComVel()<< std::endl;
     double collisionRadius = collisionRadiusScaling*(mole.getDiameter() + diameterHe)/2.0;
-    bool trajectorySuccess = mdSim.rk4InternAdaptiveStep(moleculesPtr, 1e-16, 1e-10, 4*collisionRadius);
+    bool trajectorySuccess = mdSim.rk4InternAdaptiveStep(moleculesPtr, 1.001e-16, 1e-10, 4*collisionRadius);
     std::cout << bgMole.getComVel()<< std::endl;
-    CHECK(Approx(bgMole.getComVel().magnitude()) == 3269.8644041702);
+    // CHECK(Approx(bgMole.getComVel().magnitude()) == 3269.8644041702);
     CHECK(trajectorySuccess);
 
 }
