@@ -601,14 +601,22 @@ bool CollisionModel::MDInteractionsModel::rk4InternAdaptiveStep(std::vector<Coll
             integrationTimeSum += dt;
 
             double tolerance = 1e-5;
-            double newdt = dt * std::pow((tolerance/globalDelta), 1./5) * 0.9;
+            double newdt = dt * std::pow((1e-5/globalDelta), 1./5) * 0.9;
 
             // limit the possible range of time steps that can be chosen 
             // if step size too small integartion take too long
             // if step size is too big integration errors start to occur 
-            if(newdt >= 1e-19 && !std::isinf(newdt) && newdt <= 1e-13 || (distance < 1.1e-10 && newdt < 8e-14) ){
+           
+            double testdist = 3.2e-10;
+            if(distance < testdist){
+                newdt = dt * std::pow((1e-5/globalDelta), 1./5) * 0.85;
+            }
+           
+            if(newdt >= 1e-19 && !std::isinf(newdt) && newdt <= 1e-13 ){
                 dt = newdt;
             }
+
+            
 
 
 

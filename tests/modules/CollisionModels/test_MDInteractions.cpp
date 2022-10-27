@@ -79,9 +79,9 @@ TEST_CASE("Basic test MD Interactions model", "[CollisionModels][MDInteractionsM
         time += dt;
     }
 
-    CHECK(Approx(ion.getVelocity().x()).margin(0.2) ==  479.5777664095);
-    CHECK(Approx(ion.getVelocity().y()).margin(0.2) ==  -45.949614597);
-    CHECK(Approx(ion.getVelocity().z()).margin(0.4) ==  151.2568045226);
+    CHECK(Approx(ion.getVelocity().x()).margin(0.2) ==  480.5157390518);
+    CHECK(Approx(ion.getVelocity().y()).margin(0.2) ==  -47.5997527738);
+    CHECK(Approx(ion.getVelocity().z()).margin(0.4) ==  152.0755591014);
 
     std::string readBack_early = readTextFile("MD_collisions_microscopic_trajectories_test.txt");
     CHECK(readBack_early == "");
@@ -110,7 +110,7 @@ TEST_CASE("Basic test MD Interactions model", "[CollisionModels][MDInteractionsM
                 values.push_back(std::strtod(token.c_str(), nullptr));
             }  while ((pos = line.find(delimiter)) != std::string::npos);
 
-            std::vector<double> compareValues = {1.97047e-10, 1.58704e-09, 2.41647e-11, 1.59938e-09, 3.30249e-12};
+            std::vector<double> compareValues = {1.97047e-10, 1.58704e-09, 2.41647e-11, -1.29948e-09, 3.30249e-12};
             std::vector<double> compareMargins = {2e-10, 2e-9, 2e-9, 2e-9, 2e-7};
 
             CHECK(values.size() == compareValues.size());
