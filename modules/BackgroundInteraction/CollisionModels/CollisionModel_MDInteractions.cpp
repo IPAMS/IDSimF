@@ -574,13 +574,12 @@ bool CollisionModel::MDInteractionsModel::rk4InternAdaptiveStep(std::vector<Coll
 
         }
 
-        if(trajectoryRecordingActive_ == true){
-            for(size_t k = 0; k < nMolecules; ++k){
-                for(size_t l = k+1; l < nMolecules; ++l){
-                    distance = (moleculesPtr[l]->getComPos() - moleculesPtr[k]->getComPos()).magnitude();
-                }
+        for(size_t k = 0; k < nMolecules; ++k){
+            for(size_t l = k+1; l < nMolecules; ++l){
+                distance = (moleculesPtr[l]->getComPos() - moleculesPtr[k]->getComPos()).magnitude();
             }
         }
+    
 
         i = 0;
         for(auto* molecule : moleculesPtr){
@@ -607,9 +606,10 @@ bool CollisionModel::MDInteractionsModel::rk4InternAdaptiveStep(std::vector<Coll
             // limit the possible range of time steps that can be chosen 
             // if step size too small integartion take too long
             // if step size is too big integration errors start to occur 
-            if(newdt >= 1e-19 && !std::isinf(newdt) && newdt <= 1e-13){
+            if(newdt >= 1e-19 && !std::isinf(newdt) && newdt <= 1e-13 || (distance < 1.1e-10 && newdt < 8e-14) ){
                 dt = newdt;
             }
+
 
 
             molecule->setComPos(newComPosOrder4);
