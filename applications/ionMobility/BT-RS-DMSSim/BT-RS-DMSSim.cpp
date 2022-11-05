@@ -67,9 +67,11 @@ int main(int argc, const char * argv[]) {
         std::string confFileName = cmdLineParser.confFileName();
         AppUtils::simConf_ptr simConf = cmdLineParser.simulationConfiguration();
 
-        // setting random generator seed manually (for debugging / reproduction purposes):
-        unsigned int randomSeed = simConf->unsignedIntParameter("random_seed");
-        Core::globalRandomGeneratorPool->setSeedForElements(randomSeed);
+        // optionally setting random generator seed manually (for debugging / reproduction purposes):
+        if (simConf->isParameter("random_seed")) {
+            unsigned int randomSeed = simConf->unsignedIntParameter("random_seed");
+            Core::globalRandomGeneratorPool->setSeedForElements(randomSeed);
+        }
 
 
         std::vector<unsigned int> nParticles = simConf->unsignedIntVectorParameter("n_particles");
@@ -395,7 +397,6 @@ int main(int argc, const char * argv[]) {
                 double collisionRadiusScaling = simConf->doubleParameter("collision_radius_scaling");
                 double angleThetaScaling = simConf->doubleParameter("angle_theta_scaling");
                 double spawnRadius_m = simConf->doubleParameter("spawn_radius_m");
-                double velocityWarningThreshold = simConf->doubleParameter("after_collision_velocity_warning_threshold");
 
                 //construct MD model:
                 std::unique_ptr<CollisionModel::MDInteractionsModel> collisionModel =
@@ -412,9 +413,7 @@ int main(int argc, const char * argv[]) {
                             collisionRadiusScaling,
                             angleThetaScaling,
                             spawnRadius_m,
-                            molecularStructureCollection,
-                            logger,
-                            velocityWarningThreshold);
+                            molecularStructureCollection);
 
                 // Set trajectory writing options:
                 bool saveTrajectory = simConf->boolParameter("save_trajectory");

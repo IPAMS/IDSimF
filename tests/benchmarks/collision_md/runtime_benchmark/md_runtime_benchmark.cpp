@@ -42,19 +42,6 @@ void performBenchmark(size_t nSamples, size_t nParticles){
         particles.push_back(std::move(particle));
         yPos = yPos+0.0001;
     }
-    // Core::Particle ion;
-    // ion.setMolecularStructure(CollisionModel::MolecularStructure::molecularStructureCollection.at("H2+"));
-    // ion.setVelocity(Core::Vector(100.0, 0.0, 0.0));
-    // CollisionModel::MDInteractionsModel mdSim = CollisionModel::MDInteractionsModel(
-    //                     10000,
-    //                     298,
-    //                     4.003,
-    //                     diameterHe,
-    //                     0.203e-30,
-    //                     "He",
-    //                     1e-10, 
-    //                     1e-16);
-
 
     std::cout << "Benchmark molecular dynamics collision model "<<std::endl;
 
@@ -77,11 +64,11 @@ void performBenchmark(size_t nSamples, size_t nParticles){
                 1e-16,
                 2,
                 1,
-                25, 
+                25e-10, 
                 molecularStructureCollection);
 
         for (size_t j = 0; j<nSamples; j++) {
-            #pragma omp for schedule(dynamic, nParticles/20)
+            #pragma omp for schedule(dynamic, 100)
             for (i = 0; i<nParticles; ++i) {
                 mdSim.modifyVelocity(*particlesPtrs[i], 1e-11);
             }

@@ -62,6 +62,16 @@ CollisionModel::Molecule::Molecule(const Core::Vector &comPos, const Core::Vecto
     this->atomCount = atoms.size();  
 }
 
+/**
+ * @brief Creates a molecule given by the molecular structure. 
+ *          The mass and dipole is calculated through the information given by the atoms and does not need 
+ *          to be specified.
+ * 
+ * @param comPos the center-of-mass position of the created molecule
+ * @param comVel the center-of-mass velocity of the created molecule
+ * @param structure molecular structure
+ */
+
 CollisionModel::Molecule::Molecule(const Core::Vector &comPos, const Core::Vector &comVel, 
                                     std::shared_ptr<CollisionModel::MolecularStructure> structure):
     centerOfMassPos(comPos),
@@ -111,6 +121,9 @@ void CollisionModel::Molecule::setDiameter(double diam){
     this->diameter = diam;
 }
 
+/**
+ * Sets name of the molecular structure 
+ */
 void CollisionModel::Molecule::setMolecularStructureName(std::string name){
     this->molecularStructureName = name;
 }
@@ -283,6 +296,9 @@ void CollisionModel::Molecule::setIsIon(){
     
 }
 
+/**
+ * Rotates the molecule by an angle set beforehand 
+ */
 void CollisionModel::Molecule::rotateMolecule(){
     for(auto& atom : atoms){
        atom->rotate(this->angles);

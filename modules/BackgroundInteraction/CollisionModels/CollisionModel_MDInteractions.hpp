@@ -105,9 +105,7 @@ namespace CollisionModel{
             double collisionRadiusScaling,
             double angleThetaScaling,
             double spawnRadius,
-            std::unordered_map<std::string, std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection,
-            AppUtils::logger_ptr logger= nullptr,
-            double warningOutVelocityThreshold = 2000.0);
+            std::unordered_map<std::string, std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection);
 
         void setTrajectoryWriter(const std::string& trajectoryFileName,
                                  double trajectoryDistance,
@@ -117,23 +115,13 @@ namespace CollisionModel{
 
         void writeTrajectory(double distance, Core::Vector positionBgMolecule, bool endOfTrajectory, std::ofstream* file, double time);
 
-        void writeTrajectoryFull(double distance,
-                                 Core::Vector positionBgMolecule,
-                                 Core::Vector velocityBgMolecule,
-                                 Core::Vector forceMolecule,
-                                 //Core::Vector positionMolecule,
-                                 //Core::Vector velocityMolecule,
-                                 bool endOfTrajectory, std::ofstream* file, double time);
-
         bool leapfrogIntern(std::vector<CollisionModel::Molecule*> moleculesPtr, double dt, double finalTime, double requiredRad);
 
-        void rk4Intern(std::vector<CollisionModel::Molecule*> moleculesPtr, double dt, double finalTime);
+        bool rk4Intern(std::vector<CollisionModel::Molecule*> moleculesPtr, double dt, double finalTime, double requiredRad);
 
         bool rk4InternAdaptiveStep(std::vector<CollisionModel::Molecule*> moleculesPtr, double dt, double finalTime, double requiredRad);
 
         void forceFieldMD(std::vector<CollisionModel::Molecule*>& moleculesPtr, std::vector<Core::Vector>& forceMolecules);
-
-        // std::vector<Core::Vector> forceFieldMDRk4(std::vector<CollisionModel::Molecule*> moleculesPtr, std::vector<Core::Vector>& r);
 
         void initializeModelParticleParameters(Core::Particle& ion) const;
 
@@ -156,20 +144,16 @@ namespace CollisionModel{
         double collisionGasMass_kg_ = 0.0;    ///< mass of the neutral colliding gas particles in kg
         double collisionGasDiameter_m_ = 0.0; ///< effective collision diameter of the neutral collision gas particles in m
         double collisionGasPolarizability_m3_ = 0.0; ///< polarizability of the collision gas in m^3
-        std::string collisionMolecule_ = "";
-        double integrationTime_ = 0.0;
-        double subTimeStep_ = 0.0;
-        double collisionRadiusScaling_ = 0.0;
-        double angleThetaScaling_ = 0.0;
-        double spawnRadius_ = 0.0;
-        double trajectoryDistance_ = 0.0;
-        bool trajectoryRecordingActive_ = false;
-        bool modelRecordsTrajectories_ = false;
-        int recordTrajectoryStartTimeStep_ = 0;
-        int currentTimeStep_ = 0;
-
-        AppUtils::logger_ptr logger = nullptr;
-        double warningOutVelocityThreshold_ = 2000.0; ///< Warning threshold of the CoM after the collision, if
+        std::string collisionMolecule_ = ""; ///< particle identifier of the collision gas
+        double integrationTime_ = 0.0; ///< integration time of the sub-integrator 
+        double subTimeStep_ = 0.0; ///< step size of the sub-integrator 
+        double collisionRadiusScaling_ = 0.0; ///< scaling for the radius of the collision sphere 
+        double angleThetaScaling_ = 0.0; ///<  scaling for the angle theta 
+        double spawnRadius_ = 0.0; ///< radius of the spawn sphere for the background gas particle
+        double trajectoryDistance_ = 0.0; ///< distance at which the trajectory recording begins
+        bool trajectoryRecordingActive_ = false; 
+        bool modelRecordsTrajectories_ = false; ///< flag if trajectory will be recorded
+        int recordTrajectoryStartTimeStep_ = 0; ///< time step at which the trajectory recording begins
         std::unique_ptr<std::ofstream> trajectoryOutputStream_;
 
         std::function<double(Core::Vector&)> pressureFunction_ = nullptr; ///< a spatial pressure function
@@ -177,7 +161,7 @@ namespace CollisionModel{
         std::function<double(const Core::Vector&)>temperatureFunction_ = nullptr;  ///< Spatial temperature function
         std::function<void(RS::CollisionConditions, Core::Particle&)> afterCollisionActionFunction_ = nullptr;
         ///< Function with things to do after a collision (e.g. collision based chemical reactions)
-        std::unordered_map<std::string,  std::shared_ptr<MolecularStructure>> molecularStructureCollection_;
+        std::unordered_map<std::string,  std::shared_ptr<MolecularStructure>> molecularStructureCollection_; ///< collection of all available molecular structures 
     };
 
 }
