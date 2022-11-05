@@ -127,9 +127,7 @@ TEST_CASE("Basic test MD Interactions model", "[CollisionModels][MDInteractionsM
     CHECK(i > 5000);
 }
 
-
-TEST_CASE("Reproduce wrong collision", "[CollisionModels][MDInteractionsModel]") {
-
+void runMalfunctioningCollision(std::string trajectoryFilename, double dt){
     FileIO::MolecularStructureReader reader = FileIO::MolecularStructureReader();
     std::unordered_map<std::string,  std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection = reader.readMolecularStructure("test_molecularstructure_reader.csv");
     CollisionModel::Molecule mole = CollisionModel::Molecule(
@@ -158,7 +156,7 @@ TEST_CASE("Reproduce wrong collision", "[CollisionModels][MDInteractionsModel]")
             35e-10,
             molecularStructureCollection);
 
-    mdSim.setTrajectoryWriter("MD_collisions_faulty_collision_3.txt", 2e-8, 0);
+    mdSim.setTrajectoryWriter(trajectoryFilename, 2e-8, 0);
     mdSim.updateModelTimestepParameters(1, 0.0);
 
 
@@ -176,9 +174,17 @@ TEST_CASE("Reproduce wrong collision", "[CollisionModels][MDInteractionsModel]")
 
     std::cout << bgMole.getComVel()<< std::endl;
     double collisionRadius = collisionRadiusScaling*(mole.getDiameter() + diameterHe)/2.0;
-    bool trajectorySuccess = mdSim.rk4InternAdaptiveStep(moleculesPtr, 1.001e-16, 1e-10, 4*collisionRadius);
+    bool trajectorySuccess = mdSim.rk4InternAdaptiveStep(moleculesPtr, dt, 1e-10, 4*collisionRadius);
     std::cout << bgMole.getComVel()<< std::endl;
     // CHECK(Approx(bgMole.getComVel().magnitude()) == 3269.8644041702);
     CHECK(trajectorySuccess);
+}
 
+TEST_CASE("Reproduce wrong collision", "[CollisionModels][MDInteractionsModel]") {
+
+    runMalfunctioningCollision("MD_collisions_faulty_collision_1.txt", 1.0e-16);
+    runMalfunctioningCollision("MD_collisions_faulty_collision_2.txt", 1.1e-16);
+    runMalfunctioningCollision("MD_collisions_faulty_collision_3.txt", 1.001e-16);
+    runMalfunctioningCollision("MD_collisions_faulty_collision_4.txt", 1.0001e-16);
+    runMalfunctioningCollision("MD_collisions_faulty_collision_5.txt", 1.002e-16);
 }

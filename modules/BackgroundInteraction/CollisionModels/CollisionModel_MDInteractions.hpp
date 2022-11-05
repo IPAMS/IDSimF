@@ -120,6 +120,7 @@ namespace CollisionModel{
         void writeTrajectoryFull(double distance,
                                  Core::Vector positionBgMolecule,
                                  Core::Vector velocityBgMolecule,
+                                 Core::Vector forceMolecule,
                                  //Core::Vector positionMolecule,
                                  //Core::Vector velocityMolecule,
                                  bool endOfTrajectory, std::ofstream* file, double time);
