@@ -47,6 +47,7 @@
 #include "CollisionModel_MathFunctions.hpp"
 #include "CollisionModel_Molecule.hpp"
 #include "RS_AbstractReaction.hpp"
+#include "appUtils_logging.hpp"
 #include <cstdio>
 #include <functional>
 #include <string>
@@ -73,7 +74,8 @@ namespace CollisionModel{
             double collisionRadiusScaling,
             double angleThetaScaling, 
             double spawnRadius,
-            std::unordered_map<std::string,  std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection);
+            std::unordered_map<std::string,
+            std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection);
 
         MDInteractionsModel(
             std::function<double(Core::Vector& location)> pressureFunction,
@@ -88,7 +90,7 @@ namespace CollisionModel{
             double collisionRadiusScaling,
             double angleThetaScaling,
             double spawnRadius,
-            std::unordered_map<std::string,  std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection);
+            std::unordered_map<std::string, std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection);
 
         MDInteractionsModel(
             std::function<double(Core::Vector& location)> pressureFunction,
@@ -103,7 +105,7 @@ namespace CollisionModel{
             double collisionRadiusScaling,
             double angleThetaScaling,
             double spawnRadius,
-            std::unordered_map<std::string,  std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection);
+            std::unordered_map<std::string, std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection);
 
         void setTrajectoryWriter(const std::string& trajectoryFileName,
                                  double trajectoryDistance,

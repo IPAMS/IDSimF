@@ -30,4 +30,4 @@ set(SOURCE_FILES
 
 add_library(collisionmodels STATIC ${SOURCE_FILES})
 target_include_directories(collisionmodels PUBLIC .)
-target_link_libraries(collisionmodels core spacecharge rs)
+target_link_libraries(collisionmodels core spacecharge rs apputils)

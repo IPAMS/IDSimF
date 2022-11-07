@@ -125,6 +125,4 @@ TEST_CASE("Basic test MD Interactions model", "[CollisionModels][MDInteractionsM
         }
     }
     CHECK(i > 5000);
-
-
 }

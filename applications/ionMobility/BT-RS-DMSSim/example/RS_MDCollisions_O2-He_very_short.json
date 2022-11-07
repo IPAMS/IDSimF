@@ -1,6 +1,6 @@
 {
   "random_seed": 1234,
-  "sim_time_steps":2500,
+  "sim_time_steps":1000,
   "sim_time_steps_per_sv_oscillation":450000,
   "concentrations_write_interval":10,
   "trajectory_write_interval":250,
@@ -36,5 +36,7 @@
   "collision_radius_scaling":2,
   "angle_theta_scaling":1,
   "spawn_radius_m":25e-10,
-  "save_trajectory":"false"
+  "save_trajectory":"true",
+  "trajectory_distance_m": 10e-9,
+  "trajectory_start_time_step":980
 }

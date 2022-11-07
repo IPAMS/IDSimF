@@ -114,12 +114,56 @@ template<class GeneratorPoolType> void testUniformCustomDistribution(int nSample
 
 TEST_CASE("Test random bit sources") {
     SECTION("Test Mersenne Bit Source"){
-        Core::MersenneBitSource mersenneSource;
-        std::vector<int> testVector = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20};
-        std::shuffle(testVector.begin(), testVector.end(), mersenneSource);
+        std::vector<int> testVector1 = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20};
+        std::vector<int> testVector2 = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20};
 
-        CHECK( (testVector[0] != 1 && testVector[1] != 2) );
+        SECTION("Test with random seed"){
+
+            Core::MersenneBitSource mersenneSource1;
+            Core::MersenneBitSource mersenneSource2;
+
+            std::shuffle(testVector1.begin(), testVector1.end(), mersenneSource1);
+            std::shuffle(testVector2.begin(), testVector2.end(), mersenneSource2);
+            CHECK( (testVector1[0] != 1 && testVector1[1] != 2) );
+            CHECK( testVector1[0] != testVector2[0]);
+            CHECK( testVector1[1] != testVector2[1]);
+        }
+
+        SECTION("Test reproductivity with constant seed"){
+
+            Core::MersenneBitSource mersenneSource1;
+            Core::MersenneBitSource mersenneSource2;
+
+            mersenneSource1.seed(200);
+            mersenneSource2.seed(200);
+
+            std::shuffle(testVector1.begin(), testVector1.end(), mersenneSource1);
+            std::shuffle(testVector2.begin(), testVector2.end(), mersenneSource2);
+            CHECK( (testVector1[0] != 1 && testVector1[1] != 2) );
+            CHECK( testVector1[0] == testVector2[0]);
+            CHECK( testVector1[1] == testVector2[1]);
+            CHECK( testVector1[3] == testVector2[3]);
+
+        }
+
+        SECTION("Test different constant seed"){
+
+            Core::MersenneBitSource mersenneSource1;
+            Core::MersenneBitSource mersenneSource2;
+
+            mersenneSource1.seed(200);
+            mersenneSource2.seed(300);
+
+            std::shuffle(testVector1.begin(), testVector1.end(), mersenneSource1);
+            std::shuffle(testVector2.begin(), testVector2.end(), mersenneSource2);
+            CHECK( (testVector1[0] != 1 && testVector1[1] != 2) );
+            CHECK( testVector1[0] != testVector2[0]);
+            CHECK( testVector1[1] != testVector2[1]);
+            CHECK( testVector1[3] != testVector2[3]);
+
+        }
     }
+
 
     SECTION("Test Test Bit Source"){
         Core::TestBitSource testSource1;
@@ -127,6 +171,7 @@ TEST_CASE("Test random bit sources") {
 
         std::vector<int> testVector1 = {1,2,3,4,5,6,7,8};
         std::vector<int> testVector2 = {1,2,3,4,5,6,7,8};
+
         std::shuffle(testVector1.begin(), testVector1.end(), testSource1);
         std::shuffle(testVector2.begin(), testVector2.end(), testSource2);
 
@@ -190,6 +235,25 @@ TEST_CASE( "Test productive random distributions", "[Core][random]") {
 
         testGeneratorSample<Core::RandomGeneratorPool>(nSamples, expectedNorm, expectedUni, 0.02);
         testUniformCustomDistribution<Core::RandomGeneratorPool>(1000, 2.0, 6.0);
+    }
+
+    SECTION("Constant seeding of productive random generator pool elements should be possible") {
+        Core::RandomGeneratorPool rngPool1;
+        Core::RandomGeneratorPool rngPool2;
+
+        int nSamples = 10;
+
+        for (int i=0; i<nSamples; ++i){
+            CHECK(rngPool1.getThreadRandomSource()->uniformRealRndValue() != Approx(rngPool2.getThreadRandomSource()->uniformRealRndValue()));
+        }
+
+        rngPool1.setSeedForElements(100);
+        rngPool2.setSeedForElements(100);
+
+        for (int i=0; i<nSamples; ++i){
+            CHECK(rngPool1.getThreadRandomSource()->uniformRealRndValue() == Approx(rngPool2.getThreadRandomSource()->uniformRealRndValue()));
+        }
+
     }
 }
 

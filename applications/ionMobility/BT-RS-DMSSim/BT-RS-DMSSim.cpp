@@ -27,6 +27,7 @@
  ****************************/
 
 #include "Core_utils.hpp"
+#include "Core_randomGenerators.hpp"
 #include "RS_Simulation.hpp"
 #include "RS_SimulationConfiguration.hpp"
 #include "RS_ConfigFileParser.hpp"
@@ -65,6 +66,13 @@ int main(int argc, const char * argv[]) {
 
         std::string confFileName = cmdLineParser.confFileName();
         AppUtils::simConf_ptr simConf = cmdLineParser.simulationConfiguration();
+
+        // optionally setting random generator seed manually (for debugging / reproduction purposes):
+        if (simConf->isParameter("random_seed")) {
+            unsigned int randomSeed = simConf->unsignedIntParameter("random_seed");
+            Core::globalRandomGeneratorPool->setSeedForElements(randomSeed);
+        }
+
 
         std::vector<unsigned int> nParticles = simConf->unsignedIntVectorParameter("n_particles");
         unsigned int nSteps = simConf->unsignedIntParameter("sim_time_steps");
@@ -248,6 +256,7 @@ int main(int argc, const char * argv[]) {
 
                 particle->setLocation(initialPositions[k]);
                 particle->setIntegerAttribute(key_ChemicalIndex, substIndex);
+                particle->setIndex(nParticlesTotal);
 
                 particlesPtrs.push_back(particle.get());
                 rsSim.addParticle(particle.get(), nParticlesTotal);
@@ -405,6 +414,16 @@ int main(int argc, const char * argv[]) {
                             angleThetaScaling,
                             spawnRadius_m,
                             molecularStructureCollection);
+
+                // Set trajectory writing options:
+                bool saveTrajectory = simConf->boolParameter("save_trajectory");
+
+                if (saveTrajectory){
+                    int saveTrajectoryStartTimeStep = simConf->intParameter("trajectory_start_time_step");
+                    double trajectoryDistance_m = simConf->doubleParameter("trajectory_distance_m");
+                    collisionModel->setTrajectoryWriter(projectName+"_md_trajectories.txt",
+                            trajectoryDistance_m, saveTrajectoryStartTimeStep);
+                }
 
 
                 // Init particles with MD parameters:
