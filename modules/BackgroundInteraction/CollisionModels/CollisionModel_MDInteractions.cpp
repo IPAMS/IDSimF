@@ -312,6 +312,16 @@ void CollisionModel::MDInteractionsModel::modifyVelocity(Core::Particle& particl
         Core::Vector mole_originalComVel = mole.getComVel();
 
         trajectorySuccess = rk4InternAdaptiveStep(moleculesPtr, timeStep, finalTime, collisionRadius);
+       
+        double endEnergy = 0;
+        for(auto* molecule : moleculesPtr){
+            endEnergy += 0.5 * molecule->getMass() * molecule->getComVel().magnitudeSquared();
+        }
+        std::cout << startEnergy << " " << endEnergy << std::endl;
+        if(endEnergy*0.90 >= startEnergy){
+            trajectorySuccess = false;
+            dt = dt*0.98;
+        }
         if(trajectorySuccess){
             particle.setVelocity(mole.getComVel() + particle.getVelocity());
         }
