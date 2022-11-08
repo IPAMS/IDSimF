@@ -317,7 +317,7 @@ void CollisionModel::MDInteractionsModel::modifyVelocity(Core::Particle& particl
         for(auto* molecule : moleculesPtr){
             endEnergy += 0.5 * molecule->getMass() * molecule->getComVel().magnitudeSquared();
         }
-        std::cout << startEnergy << " " << endEnergy << std::endl;
+        // std::cout << startEnergy << " " << endEnergy << std::endl;
         if(endEnergy*0.90 >= startEnergy){
             trajectorySuccess = false;
             dt = dt*0.98;
