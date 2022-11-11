@@ -671,6 +671,11 @@ void CollisionModel::MDInteractionsModel::forceFieldMD(std::vector<CollisionMode
     CollisionModel::Molecule* bgGas = moleculesPtr[1];
     forceMolecules[0] = Core::Vector(0.0, 0.0, 0.0);
     forceMolecules[1] = Core::Vector(0.0, 0.0, 0.0);
+    bool isN2 = false;
+
+    if(bgGas->getMolecularStructureName()=="N2"){
+        isN2 = true;
+    }
 
     // construct E-field acting on the molecule
     std::array<double, 3> eField = {0., 0., 0.};
@@ -794,6 +799,30 @@ void CollisionModel::MDInteractionsModel::forceFieldMD(std::vector<CollisionMode
                                 3 * dipoleDistanceScalar * 1./(distanceCubed*distanceSquared) * distance.z()) );
             forceMolecules[0] += ionDipoleForce;
             forceMolecules[1] += ionDipoleForce * (-1);
+
+            // Fourth contribution: quadrupole moment if background gas is N2 
+            // This requires an ion and N2 to be present 
+            double partialChargeN2 = 0;
+            if(int(atomI->getCharge()/Core::ELEMENTARY_CHARGE) != 0 && 
+                isN2 == true){
+
+                currentCharge = atomI->getCharge();
+                partialChargeN2 = atomJ->getPartCharge();
+
+            }else if (isN2 == true && 
+                        int(atomJ->getCharge()/Core::ELEMENTARY_CHARGE) != 0){
+
+                currentCharge = atomJ->getCharge();
+                partialChargeN2 = atomI->getPartCharge();
+        
+            }
+            Core::Vector quadrupoleForce;
+            quadrupoleForce.x(-currentCharge * partialChargeN2 * 1./Core::ELECTRIC_CONSTANT * distance.x() / distanceCubed );
+            quadrupoleForce.y(-currentCharge * partialChargeN2 * 1./Core::ELECTRIC_CONSTANT * distance.y() / distanceCubed );
+            quadrupoleForce.z(-currentCharge * partialChargeN2 * 1./Core::ELECTRIC_CONSTANT * distance.z() / distanceCubed );
+            forceMolecules[0] += quadrupoleForce;
+            forceMolecules[1] += quadrupoleForce * (-1);
+
         }
     }
 
