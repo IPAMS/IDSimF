@@ -152,7 +152,7 @@ TEST_CASE("Test random bit sources") {
             Core::MersenneBitSource mersenneSource2;
 
             mersenneSource1.seed(200);
-            mersenneSource2.seed(300);
+            mersenneSource2.seed(400);
 
             std::shuffle(testVector1.begin(), testVector1.end(), mersenneSource1);
             std::shuffle(testVector2.begin(), testVector2.end(), mersenneSource2);
