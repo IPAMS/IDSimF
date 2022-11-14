@@ -1,8 +1,8 @@
-.. _application-BT-generalQuadSim:
+.. _application-generalQuadSim:
 
-=================
-BT-generalQuadSim
-=================
+==============
+generalQuadSim
+==============
 
 Simulates ion trajectories in an RF only quadrupole device with arbitrary electrode geometry considering space charge and interaction with a flowing background gas. The electrode geometry and resulting electric field is defined by a set of SIMION potential arrays. The pressure / density and flow velocity of the background gas can be defined by spatially resolved fields, e.g. from an CFD simulation of the simulated device. 
 

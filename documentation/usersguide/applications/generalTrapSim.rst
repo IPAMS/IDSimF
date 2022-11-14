@@ -1,8 +1,8 @@
-.. _application-BT-generalTrapSim:
+.. _application-generalTrapSim:
 
-=================
-BT-generalTrapSim
-=================
+==============
+generalTrapSim
+==============
 
 Ion trajectory simulation in an RF ion trap device with arbitrary geometry considering space charge and hard sphere collisions with neutral background gas particles. The electrode geometry is defined by SIMION potential arrays. 
 

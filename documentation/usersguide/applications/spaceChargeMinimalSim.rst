@@ -1,8 +1,8 @@
-.. _application-BT-spaceChargeMinimalSim:
+.. _application-spaceChargeMinimalSim:
 
-========================
-BT-spaceChargeMinimalSim
-========================
+=====================
+spaceChargeMinimalSim
+=====================
 
 Simulates the electric particle-particle interactions (space-charge) in an defined ensemble of charged particles. The particle ensemble is predefined by an input file which contains the initial positions, initial velocities, charge and mass of the particles in the simulated particle ensemble. Space charge is calculated with a serial version of a Barnes-Hut tree. 
 

@@ -1,7 +1,7 @@
-.. _application-BT-spaceChargeSimpleSim:
+.. _application-spaceChargeSimpleSim:
 
 =======================
-BT-spaceChargeSimpleSim
+spaceChargeSimpleSim
 =======================
 
 Simple simulation of an random ensemble of charged particles interacting by space charge. The particle ensemble is defined by a random cube with edge length of 3 mm around the origin of the world coordinate system. The cube consists of a set of ions with configurable masses. 

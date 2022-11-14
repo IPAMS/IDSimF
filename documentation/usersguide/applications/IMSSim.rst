@@ -1,8 +1,8 @@
-.. _application-BT-RS-IMSSim:
+.. _application-IMSSim:
 
-============
-BT-RS-IMSSim
-============
+======
+IMSSim
+======
 
 Simulates the trajectories of charged particles in a drift tube Ion Mobility Spectrometry (IMS) Device, including background gas interaction, ion chemistry and space charge. 
 A drift tube IMS consists of a gas filled drift region with a uniform electric field present. Short pulses of ions are gated into this drift region and drift through the drift region due to the electric field. Since different ions have different electric mobilities, ions separate during the drift through the drift region. The drift times are measured to get a Mobility Spectrum. 

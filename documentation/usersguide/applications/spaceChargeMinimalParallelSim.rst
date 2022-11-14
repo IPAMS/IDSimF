@@ -1,8 +1,8 @@
-.. _application-BT-spaceChargeMinimalParallelSim:
+.. _application-spaceChargeMinimalParallelSim:
 
-================================
-BT-spaceChargeMinimalParallelSim
-================================
+=============================
+spaceChargeMinimalParallelSim
+=============================
 
 Minimal parallelized simulation of an ensemble of charged particles interacting by space charge. The particle ensemble can be defined by two ways: 
 * The particle ensemble is predefined by an input file which contains the initial positions, initial velocities, charge and mass of the particles in the simulated particle ensemble or

@@ -1,8 +1,8 @@
-.. _application-RS-idealIsothermReactorSim:
+.. _application-idealIsothermReactorSim:
 
-==========================
-RS-idealIsothermReactorSim
-==========================
+=======================
+idealIsothermReactorSim
+=======================
 
 Particle based kinetics simulation of the reaction of an ensemble of reactive particles with reaction partners in a background gas in an ideally mixed isotherm reactor. 
 

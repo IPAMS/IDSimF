@@ -1,8 +1,8 @@
-.. _application-BT-staticSimionPASim:
+.. _application-staticSimionPASim:
 
-====================
-BT-staticSimionPASim
-====================
+=================
+staticSimionPASim
+=================
 
 Simulates the particle trajectories of an ensemble of charged particles in an arbitrary electric potential distribution and electrode geometry, defined by a SIMION potential array. The particles interact by electric particle-particle force (space charge) which is calculated by an serial version of a Barnes-Hut tree. 
 

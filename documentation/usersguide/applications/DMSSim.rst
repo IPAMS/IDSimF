@@ -1,8 +1,8 @@
-.. _application-BT-RS-DMSSim:
+.. _application-DMSSim:
 
-============
-BT-RS-DMSSim
-============
+======
+DMSSim
+======
 
 Simulation of ion motion and chemical induced differential mobility in a Differential Ion Mobility (DMS) separation device with idealized planar electrodes, including background gas interaction, ion chemistry and space charge: Ions are drifting in a gap between two planar electrodes on which an asymmetric RF high voltage waveform, the Separation Voltage (SV) is applied. Due to different ion mobilities in the high field phase and the low field phase of the SV, ions are drifting in the direction perpendicular to the electrodes. This drift is countered by an DC Compensation Voltage (CV), which is scanned to get an differential mobility spectrum. 
 

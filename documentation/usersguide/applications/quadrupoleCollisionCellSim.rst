@@ -1,8 +1,8 @@
-.. _application-BT-quadrupoleCollisionCellSim:
+.. _application-quadrupoleCollisionCellSim:
 
-=============================
-BT-quadrupoleCollisionCellSim
-=============================
+==========================
+quadrupoleCollisionCellSim
+==========================
 
 Simulates a quadrupolar collision cell with hard sphere collisions between ions and background gas, space charge and variable electrode geometry given by SIMION potential arrays. The ions are accelerated into the collision cell which is filled with a collision gas. The ions are confined radially in a quadrupolar RF field. 
 

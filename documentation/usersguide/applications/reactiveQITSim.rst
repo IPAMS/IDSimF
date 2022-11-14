@@ -1,13 +1,13 @@
-.. _application-BT-RS-reactiveQITSim:
+.. _application-reactiveQITSim:
 
-====================
-BT-RS-reactiveQITSim
-====================
+==============
+reactiveQITSim
+==============
 
 Ion trajectory simulation in an ideal Quadrupole Ion Trap (QIT) considering chemical reactions of the simulated ions. 
 
 The field definition and basic theory is the same as in 
-:doc:`BT_QITSim`. In addition to the trajectory integration considering space charge and hard sphere background gas collisions, chemical reactions are simulated with :doc:`RS <../rs>`. Since the simulation is coupled to RS, most of the particle parameters are defined in the RS reaction system file referenced in ``reaction_configuration``. 
+:doc:`QITSim`. In addition to the trajectory integration considering space charge and hard sphere background gas collisions, chemical reactions are simulated with :doc:`RS <../rs>`. Since the simulation is coupled to RS, most of the particle parameters are defined in the RS reaction system file referenced in ``reaction_configuration``. 
 
 The application allows different reaction types (static, temperature dependent, etc.) in the chemical kinetics simulation. Particularly, *collision* based reactions can be simulated: For this reaction type, possible reaction events takes place, when ions collide with neutral background gas particles in the hard sphere collision simulation. 
 
