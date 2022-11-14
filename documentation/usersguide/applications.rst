@@ -61,98 +61,98 @@ This section gives an overview of the simulation application categories and the 
 ``basic``: Basic / Idealized Ion interaction 
 --------------------------------------------
 
-:doc:`BT-spaceChargeMinimalSim <applications/BT_spaceChargeMinimalSim>`: Particle cloud interacting by space charge (serial version)
+:doc:`spaceChargeMinimalSim <applications/spaceChargeMinimalSim>`: Particle cloud interacting by space charge (serial version)
     Minimal serial (non parallelized) simulation of an ensemble of charged particles interacting by space charge. Particle ensemble is predefined by an input file. Space charge is calculated with a Barnes-Hut tree. 
-:doc:`BT-spaceChargeMinimalParallelSim <applications/BT_spaceChargeMinimalParallelSim>`: Particles interacting by space charge (parallel version)
+:doc:`spaceChargeMinimalParallelSim <applications/spaceChargeMinimalParallelSim>`: Particles interacting by space charge (parallel version)
     Minimal parallelized simulation of an ensemble of charged particles interacting by space charge. Particle ensemble is predefined by an input file or a random box of particles is used as start condition. Space charge is calculated with a parallelized Barnes-Hut tree. 
-:doc:`BT-spaceChargeSimpleSim <applications/BT_spaceChargeSimpleSim>`: Random particle particles interacting by space charge (serial version)
+:doc:`spaceChargeSimpleSim <applications/spaceChargeSimpleSim>`: Random particle particles interacting by space charge (serial version)
     Minimal serial (non parallelized) simulation of a random ensemble of charged particles interacting by space charge. Particle ensemble initialized as a random box. Space charge is calculated with a serial version of a Barnes-Hut tree. 
-:doc:`BT-staticSimionPASim <applications/BT_staticSimionPASim>`: Particle cloud interacting by space charge in an arbitrary electrode geometry
+:doc:`staticSimionPASim <applications/staticSimionPASim>`: Particle cloud interacting by space charge in an arbitrary electrode geometry
     A random ensemble of charged particles in an arbitrary electric potential distribution / electrode geometry defined by SIMION potential arrays, interacting by electric particle-particle force (space charge). 
 
 .. toctree::
     :maxdepth: 1
     :hidden:
 
-    applications/BT_spaceChargeMinimalSim
-    applications/BT_spaceChargeMinimalParallelSim
-    applications/BT_spaceChargeSimpleSim
-    applications/BT_staticSimionPASim
+    applications/spaceChargeMinimalSim
+    applications/spaceChargeMinimalParallelSim
+    applications/spaceChargeSimpleSim
+    applications/staticSimionPASim
 
 -------------------------------------
 ``ionMobility``: Ion mobility devices
 -------------------------------------
 
-:doc:`BT-RS-IMSSim <applications/BT_RS_IMSSim>`: Simulation of drift tube Ion Mobility Spectrometry
+:doc:`IMSSim <applications/IMSSim>`: Simulation of drift tube Ion Mobility Spectrometry
     Simulation of a drift tube Ion Mobility Spectrometry Device, including background gas interaction, ion chemistry and space charge. 
 
-:doc:`BT-RS-DMSSim <applications/BT_RS_DMSSim>` Simulation of planar Differential Ion Mobility 
+:doc:`DMSSim <applications/DMSSim>` Simulation of planar Differential Ion Mobility 
     Simulation of a Differential Ion Mobility (DMS) separation device with idealized planar electrodes, including background gas interaction, ion chemistry and space charge. 
 
-:doc:`RS-DMSSimplifiedSim <applications/RS_DMSSimplifiedSim>`: Simplified / idealized simulation of planar Differential Ion Mobility
+:doc:`DMSSimplifiedSim <applications/DMSSimplifiedSim>`: Simplified / idealized simulation of planar Differential Ion Mobility
     Simplified simulation of a planar electrode Differential Ion Mobility (DMS) separation device: Search for simulated compensation voltage (CV) of a chemically active ion ensemble in DMS. 
 
 .. toctree::
     :maxdepth: 1
     :hidden:
 
-    applications/BT_RS_IMSSim
-    applications/BT_RS_DMSSim
-    applications/RS_DMSSimplifiedSim
+    applications/IMSSim
+    applications/DMSSim
+    applications/DMSSimplifiedSim
 
 
 ------------------------------------------------------
 ``ionTransfer``: Ion transfer devices / ion guides 
 ------------------------------------------------------
 
-:doc:`BT-generalQuadSim <applications/BT_generalQuadSim>`: Transfer (RF-only) quadrupole with arbitrary electrode geometry
+:doc:`generalQuadSim <applications/generalQuadSim>`: Transfer (RF-only) quadrupole with arbitrary electrode geometry
     Ion trajectories in an RF only quadrupole device with arbitrary electrode geometry considering space charge and background gas collisions. The electrode geometry is defined by SIMION potential arrays.
 
 .. toctree::
     :maxdepth: 1
     :hidden:
 
-    applications/BT_generalQuadSim
+    applications/generalQuadSim
 
 --------------------------------------------------------
 ``ionCollision``: Ion activation / ion collision devices
 --------------------------------------------------------
 
-:doc:`BT-quadrupoleCollisionCellSim <applications/BT_quadrupoleCollisionCellSim>`: Quadrupolar collsion cell 
+:doc:`quadrupoleCollisionCellSim <applications/quadrupoleCollisionCellSim>`: Quadrupolar collsion cell 
     A quadrupolar collision cell with hard sphere collisions between ions and background gas, space charge and variable electrode geometry given by SIMION potential arrays. 
 
 .. toctree::
     :maxdepth: 1
     :hidden:
 
-    applications/BT_quadrupoleCollisionCellSim
+    applications/quadrupoleCollisionCellSim
 
 ------------------------------
 ``ionTraps``: Ion trap devices
 ------------------------------
 
-:doc:`BT-QITSim <applications/BT_QITSim>`: Idealized Quadrupole Ion Trap (QIT) with space charge and background gas collisions
+:doc:`QITSim <applications/QITSim>`: Idealized Quadrupole Ion Trap (QIT) with space charge and background gas collisions
     Ion trajectory simulation of an idealized quadrupole ion trap (QIT) considering space charge effects and hard sphere collisions with neutral background gas particles. The electric field of the ion trap is defined by idealized, analytical equations and FFT detection by determining the mirror charge on the cap electrodes is supported.
 
-:doc:`BT-RS-reactiveQITSim <applications/BT_RS_reactiveQITSim>`: Idealized Quadrupole Ion Trap (QIT) with space charge, background gas collisions and reactive ions
+:doc:`reactiveQITSim <applications/reactiveQITSim>`: Idealized Quadrupole Ion Trap (QIT) with space charge, background gas collisions and reactive ions
     Ion trajectory simulation of an idealized quadrupole ion trap (QIT) considering space charge effects, neutral background particle collisions and chemical reactions of the trapped ions. The electric field of the ion trap is defined by idealized, analytical equations. 
 
-:doc:`BT-generalTrapSim <applications/BT_generalTrapSim>`: RF ion trap with arbitrary ion geometry, space charge and background gas collisions
+:doc:`generalTrapSim <applications/generalTrapSim>`: RF ion trap with arbitrary ion geometry, space charge and background gas collisions
     Simulation of ion trajectories in an RF ion trap device with arbitrary geometry considering space charge and hard sphere collisions with neutral background gas particles. The electrode geometry is defined by SIMION potential arrays.
 
 .. toctree::
     :maxdepth: 1
     :hidden:
 
-    applications/BT_QITSim
-    applications/BT_RS_reactiveQITSim
-    applications/BT_generalTrapSim
+    applications/QITSim
+    applications/reactiveQITSim
+    applications/generalTrapSim
 
 --------------------------------
 ``chemistry``: Chemical Kinetics
 --------------------------------
 
-:doc:`RS-idealIsothermReactorSim <applications/RS_idealIsothermReactorSim>`: Chemical kinetics in ideally mixed isotherm chemical reactor 
+:doc:`idealIsothermReactorSim <applications/idealIsothermReactorSim>`: Chemical kinetics in ideally mixed isotherm chemical reactor 
     Particle based kinetics simulation of the reaction of an ensemble of reactive particles with reaction partners in a background gas in an ideally mixed isotherm reactor. 
 
 
@@ -160,7 +160,7 @@ This section gives an overview of the simulation application categories and the 
     :maxdepth: 1
     :hidden:
 
-    applications/RS_idealIsothermReactorSim
+    applications/idealIsothermReactorSim
 
 
 Guide: How to build an IDSimF Application?
