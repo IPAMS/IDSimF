@@ -611,13 +611,22 @@ bool CollisionModel::MDInteractionsModel::rk4InternAdaptiveStep(std::vector<Coll
             Core::Vector newComVelOrder4 = initialVelocityMolecules[i] + (k[0][i] * 25./216 + k[2][i] * 1405./2565 + k[3][i] * 2197./4104 + k[4][i] * (-1./5));
 
             double deltaX = fabs(newComVelOrder4.x() - newComVelOrder5.x())/ fabs(newComVelOrder5.x());
+            if(fabs(newComVelOrder4.x() - newComVelOrder5.x()) == 0 && fabs(newComVelOrder5.x())){
+                deltaX = 0; // 0 is exactly integrated and thus the error should be 0 
+            }
             double deltaY = fabs(newComVelOrder4.y() - newComVelOrder5.y())/ fabs(newComVelOrder5.y());
+            if(fabs(newComVelOrder4.y() - newComVelOrder5.y()) == 0 && fabs(newComVelOrder5.y())){
+                deltaY = 0; // 0 is exactly integrated and thus the error should be 0
+            }
             double deltaZ = fabs(newComVelOrder4.z() - newComVelOrder5.z())/ fabs(newComVelOrder5.z());
+            if(fabs(newComVelOrder4.z() - newComVelOrder5.z()) == 0 && fabs(newComVelOrder5.z())){
+                deltaZ = 0; // 0 is exactly integrated and thus the error should be 0
+            }
             double globalDelta = std::max({deltaX, deltaY, deltaZ});
             integrationTimeSum += dt;
 
-            double tolerance = 1e-5;
-            double newdt = dt * std::pow((1e-5/globalDelta), 1./5) * 0.9;
+            double tolerance = 6e-6;
+            double newdt = dt * std::pow((tolerance/globalDelta), 1./5) * 0.9;
 
             // limit the possible range of time steps that can be chosen 
             // if step size too small integartion take too long
@@ -625,10 +634,10 @@ bool CollisionModel::MDInteractionsModel::rk4InternAdaptiveStep(std::vector<Coll
            
             double testdist = 3.2e-10;
             if(distance < testdist){
-                newdt = dt * std::pow((1e-5/globalDelta), 1./5) * 0.85;
+                newdt = dt * std::pow((tolerance/globalDelta), 1./5) * 0.85;
             }
-           
-            if(newdt >= 1e-19 && !std::isinf(newdt) && newdt <= 1e-13 ){
+            // std::cout << dt << " " << newdt << std::endl;
+            if(newdt >= 1e-21 && !std::isinf(newdt) && newdt <= 1e-13 ){
                 dt = newdt;
             }
 
