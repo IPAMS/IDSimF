@@ -30,6 +30,7 @@
 #include <algorithm>
 #include <functional>
 #include <initializer_list>
+#include <limits>
 
 CollisionModel::MDInteractionsModelPreconstructed::MDInteractionsModelPreconstructed(double staticPressure,
                                                         double staticTemperature,
@@ -149,12 +150,13 @@ double CollisionModel::MDInteractionsModelPreconstructed::calcSign(double value)
 }
 
 void CollisionModel::MDInteractionsModelPreconstructed::writeTrajectory(double distance, Core::Vector positionBgMolecule, Core::Vector velocityBgMolecule, 
-                        std::vector<Core::Vector> forceMolecules, bool endOfTrajectory, std::ofstream* file, double time){
+                        std::vector<Core::Vector> forceMolecules, bool endOfTrajectory, std::ofstream* file, double time, double dt){
     if(distance < trajectoryDistance_){
         *file << positionBgMolecule.x() << ", " << positionBgMolecule.y() << ", " << positionBgMolecule.z() << 
         ", " << distance << ", " << time <<
         ", " << velocityBgMolecule.x() << ", " << velocityBgMolecule.y() << ", " << velocityBgMolecule.z() << 
         ", " << forceMolecules[1].x() << ", " << forceMolecules[1].y() << ", " << forceMolecules[1].z() <<
+        ", " << dt << 
         std::endl;
     }
     if(endOfTrajectory == true){
@@ -380,7 +382,6 @@ bool CollisionModel::MDInteractionsModelPreconstructed::leapfrogIntern(std::vect
 
     // start the actual leapfrog iteration
     for (int j = 0; j < nSteps; j++){
-
         // time step for the new position
         i = 0;
         double energyEnd = 0;
@@ -537,17 +538,20 @@ bool CollisionModel::MDInteractionsModelPreconstructed::rk4InternAdaptiveStep(st
     std::vector<Core::Vector> positionMolecules(nMolecules);
     std::vector<Core::Vector> initialPositionMolecules(nMolecules);
     std::vector<Core::Vector> initialVelocityMolecules(nMolecules);
-    double weight[6][5] = { {1./4, 0, 0, 0, 0},
-                            {3./32, 9./32, 0, 0, 0},
-                            {1932./2197, -7200./2197, 7296./2197, 0, 0},
-                            {439./216, -8, 3680./513, -645./4104, 0},
-                            {-8./27, 2, -3544./2565, 1859./4104, -11./40}};
-    double mass[nMolecules];
+    // double weight[6][5] = { {0, 0, 0, 0, 0},
+    double weight[5][6] = { 
+                            {1./4, 0, 0, 0, 0, 0},
+                            {3./32, 9./32, 0, 0, 0, 0},
+                            {1932./2197, -7200./2197, 7296./2197, 0, 0, 0},
+                            {439./216, -8, 3680./513, -845./4104, 0, 0},
+                            {-8./27, 2, -3544./2565, 1859./4104, -11./40, 0}};
+    double mass[2];
     std::array<std::array<Core::Vector, 2>, 6> k;
     std::array<std::array<Core::Vector, 2>, 6> l;
 
     while(integrationTimeSum < finalTime){
-        steps++;
+        // std::cout << integrationTimeSum << " "<<finalTime << std::endl;
+        
 
         i = 0;
         for(auto* molecule : moleculesPtr){
@@ -579,13 +583,13 @@ bool CollisionModel::MDInteractionsModelPreconstructed::rk4InternAdaptiveStep(st
             i = 0;
             for(auto* molecule : moleculesPtr){
                 positionMolecules[i] = initialPositionMolecules[i];
-                molecule->setComPos(positionMolecules[i]);
+                // molecule->setComPos(positionMolecules[i]);
                 i++;
             }
-            for(size_t m = 0; m < 5; m++){
+            for(size_t m = 0; m < 6; m++){
                 i = 0;
                 for(auto* molecule : moleculesPtr){
-                    positionMolecules[i] += l[n-1][i]*weight[n-1][m];
+                    positionMolecules[i] += l[m][i]*weight[n-1][m];
                     molecule->setComPos(positionMolecules[i]);
                     i++;
                 }
@@ -593,11 +597,14 @@ bool CollisionModel::MDInteractionsModelPreconstructed::rk4InternAdaptiveStep(st
 
             forceFieldMD(moleculesPtr, forceMolecules);
             
-            for(size_t m = 0; m < 5; m++){
-                for(i = 0; i < nMolecules; i++){
-                    k[n][i] = forceMolecules[i] * dt / mass[i];
-                    l[n][i] = (velocityMolecules[i] + k[n-1][i]*weight[n-1][m])*dt;
+            
+            for(i = 0; i < nMolecules; i++){
+                k[n][i] = forceMolecules[i] * dt / mass[i];
+                l[n][i] = velocityMolecules[i];
+                for(size_t m = 0; m < 6; m++){
+                    l[n][i] += k[m][i]*weight[n-1][m];
                 }
+                l[n][i] = l[n][i]*dt;
             }
 
         }
@@ -609,53 +616,74 @@ bool CollisionModel::MDInteractionsModelPreconstructed::rk4InternAdaptiveStep(st
         }
 
         i = 0;
-        for(auto* molecule : moleculesPtr){
-            if(trajectoryRecordingActive_ == true && molecule->getMolecularStructureName() == collisionMolecule_){
-                writeTrajectory(distance, molecule->getComPos(), molecule->getComVel(),forceMolecules, false, trajectoryOutputStream_.get(), integrationTimeSum);
-            }
-
-
+        std::array<Core::Vector, 2> newComVelOrder5;
+        std::array<Core::Vector, 2> newComPosOrder4; 
+        std::array<Core::Vector, 2> newComVelOrder4;
+        for(i = 0; i < 2; i++){
             //Core::Vector newComPosOrder5 = initialPositionMolecules[i] + (l[0][i] * 16./135 + l[2][i] * 6656./12825 + l[3][i] * 28561./56430 + l[4][i] * (-9./50) + l[5][i] * 2./55);
-            Core::Vector newComVelOrder5 = initialVelocityMolecules[i] + (k[0][i] * 16./135 + k[2][i] * 6656./12825 + k[3][i] * 28561./56430 + k[4][i] * (-9./50) + k[5][i] * 2./55);
-            Core::Vector newComPosOrder4 = initialPositionMolecules[i] + (l[0][i] * 25./216 + l[2][i] * 1405./2565 + l[3][i] * 2197./4104 + l[4][i] * (-1./5));
-            Core::Vector newComVelOrder4 = initialVelocityMolecules[i] + (k[0][i] * 25./216 + k[2][i] * 1405./2565 + k[3][i] * 2197./4104 + k[4][i] * (-1./5));
-
-            double deltaX = fabs(newComVelOrder4.x() - newComVelOrder5.x())/ fabs(newComVelOrder5.x());
-            if(fabs(newComVelOrder4.x() - newComVelOrder5.x()) == 0 && fabs(newComVelOrder5.x() == 0)){
-                deltaX = 0; // 0 is integrated exactly and thus should give error as 0 
-            }
-            double deltaY = fabs(newComVelOrder4.y() - newComVelOrder5.y())/ fabs(newComVelOrder5.y());
-            if(fabs(newComVelOrder4.y() - newComVelOrder5.y()) == 0 && fabs(newComVelOrder5.y() == 0)){
-                deltaY = 0; // 0 is integrated exactly and thus should give error as 0 
-            }
-            double deltaZ = fabs(newComVelOrder4.z() - newComVelOrder5.z())/ fabs(newComVelOrder5.z());
-            if(fabs(newComVelOrder4.z() - newComVelOrder5.z()) == 0 && fabs(newComVelOrder5.z() == 0)){
-                deltaZ = 0; // 0 is integrated exactly and thus should give error as 0 
-            }
-            double globalDelta = std::max({deltaX, deltaY, deltaZ});
-            integrationTimeSum += dt;
-
-            double tolerance = 4e-7;
-            double newdt = dt * std::pow((tolerance/globalDelta), 1./5) * 0.9;
-
-            // limit the possible range of time steps that can be chosen 
-            // if step size too small integartion take too long
-            // if step size is too big integration errors start to occur 
-           
-            double testdist = 3.2e-10;
-            if(distance < testdist){
-                newdt = dt * std::pow((tolerance/globalDelta), 1./5) * 0.85;
-            }
-            // std::cout << newdt << std::endl;
-            if(newdt >= 1e-22 && !std::isinf(newdt) && newdt <= 2e-13 ){
-                dt = newdt;
-            }
-            
-            molecule->setComPos(newComPosOrder4);
-            molecule->setComVel(newComVelOrder4);
-
-            i++;
+            newComVelOrder5[i] = initialVelocityMolecules[i] + (k[0][i] * 16./135 + k[2][i] * 6656./12825 + k[3][i] * 28561./56430 + k[4][i] * (-9./50) + k[5][i] * 2./55);
+            newComPosOrder4[i] = initialPositionMolecules[i] + (l[0][i] * 25./216 + l[2][i] * 1408./2565 + l[3][i] * 2197./4104 + l[4][i] * (-1./5));
+            newComVelOrder4[i] = initialVelocityMolecules[i] + (k[0][i] * 25./216 + k[2][i] * 1408./2565 + k[3][i] * 2197./4104 + k[4][i] * (-1./5));
         }
+
+        std::array<double,2> RX;
+        std::array<double,2> RY;
+        std::array<double,2> RZ;
+        for(int p = 0; p < 2; p++){
+            RX[p] = fabs(newComVelOrder4[p].x() - newComVelOrder5[p].x())/ dt;
+            RY[p] = fabs(newComVelOrder4[p].y() - newComVelOrder5[p].y())/ dt;
+            RZ[p] = fabs(newComVelOrder4[p].z() - newComVelOrder5[p].z())/ dt;
+            
+        }
+        double globalX = std::max({RX[0], RX[1]});
+        double globalY = std::max({RY[0], RY[1]});
+        double globalZ = std::max({RZ[0], RZ[1]});
+        
+        double tolerance = 1e-1;
+        double globalR = std::max({globalX, globalY, globalZ});
+        double globalDelta = 0.84 * std::pow((tolerance/globalR), 0.25);
+
+        if(globalR <= tolerance){
+            integrationTimeSum += dt;
+            i = 0;
+            for(auto* molecule : moleculesPtr){
+                if(trajectoryRecordingActive_ == true && molecule->getMolecularStructureName() == collisionMolecule_){
+                    writeTrajectory(distance, molecule->getComPos(), molecule->getComVel(),forceMolecules, false, trajectoryOutputStream_.get(), integrationTimeSum, dt);
+                }
+                molecule->setComPos(newComPosOrder4[i]);
+                molecule->setComVel(newComVelOrder4[i]);
+                i++;
+            }
+            steps++;
+            dt = dt * globalDelta;
+        }else{
+            i = 0;
+            for(auto* molecule : moleculesPtr){
+                molecule->setComPos(initialPositionMolecules[i]);
+                i++;
+            }
+            dt = dt * globalDelta;
+        }
+        // std::cout << globalDelta << std::endl;
+        
+
+        
+
+        // std::cout<< "DT: " << dt << std::endl;
+        // double newdt = dt * std::pow((tolerance/globalDelta), 1./5) * 0.8;
+
+        // limit the possible range of time steps that can be chosen 
+        // if step size too small integartion take too long
+        // if step size is too big integration errors start to occur 
+        
+        // double testdist = 3.2e-10;
+        // if(distance < testdist){
+        //     newdt = dt * std::pow((tolerance/globalDelta), 1./5) * 0.85;
+        // }
+        
+        // if(newdt <= 1e-11 && !std::isinf(newdt)){
+        //     dt = newdt;
+        // }
 
         size_t index = 0;
         for(size_t k = 0; k < nMolecules; ++k){
@@ -663,11 +691,13 @@ bool CollisionModel::MDInteractionsModelPreconstructed::rk4InternAdaptiveStep(st
                 if((moleculesPtr[l]->getComPos() - moleculesPtr[k]->getComPos()).magnitude() > startDistances[index++]){
                     if(trajectoryRecordingActive_ == true && moleculesPtr[l]->getMolecularStructureName() == collisionMolecule_ && wasHit == true){
                         writeTrajectory((moleculesPtr[l]->getComPos() - moleculesPtr[k]->getComPos()).magnitude(),
-                                        moleculesPtr[l]->getComPos(), moleculesPtr[l]->getComVel(), forceMolecules, true, trajectoryOutputStream_.get(), integrationTimeSum);
+                                        moleculesPtr[l]->getComPos(), moleculesPtr[l]->getComVel(), forceMolecules, true, trajectoryOutputStream_.get(), integrationTimeSum, dt);
                     }
+                    // std::cout << wasHit << std::endl;
                     return wasHit;
                 }
                 if((moleculesPtr[l]->getComPos() - moleculesPtr[k]->getComPos()).magnitude() <= requiredRad){
+                    // std::cout << "Was hit" << std::endl;
                     wasHit=true;
                 }
             }
@@ -752,7 +782,7 @@ void CollisionModel::MDInteractionsModelPreconstructed::forceFieldMD(std::vector
                 currentCharge = atomJ->getCharge();
             }
             
-            if(distance.magnitude() <= 22e-10){
+            if(distance.magnitude() <= 30e-10){
                 eField[0] += distance.x() * currentCharge / distanceCubed; // E-field in x
                 eField[1] += distance.y() * currentCharge / distanceCubed; // E-field in y
                 eField[2] += distance.z() * currentCharge / distanceCubed; // E-field in z

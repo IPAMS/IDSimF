@@ -49,14 +49,14 @@ TEST_CASE("Basic test MD energy conservation diatomic", "[CollisionModels][MDInt
                                                                                     diameterN2,
                                                                                     1.7E-30, 
                                                                                     "N2", 
-                                                                                    1e-10, 
-                                                                                    1E-16, 
+                                                                                    1e-9, 
+                                                                                    1E-17, 
                                                                                     2, 1, 
                                                                                     30e-10, 
                                                                                     molecularStructureCollection);
 
-    // mdSim.setTrajectoryWriter("MD_collisions_preconstructed_trajectories_N2_constSteps.txt", 30e-10, 0);
-    // mdSim.updateModelTimestepParameters(1, 0);
+    mdSim.setTrajectoryWriter("MD_collisions_preconstructed_trajectories_newImplementation.txt", 30e-10, 0);
+    mdSim.updateModelTimestepParameters(1, 0);
     double dt = 2e-11;
     mdSim.modifyVelocity(ion, dt);
 
