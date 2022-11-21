@@ -7,7 +7,7 @@ enable_testing()
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-add_compile_options(-Wdelete-non-virtual-dtor -Wall -Wextra -Wsign-conversion -Wfloat-equal -Wfloat-conversion -Wimplicit-fallthrough -Wpedantic -Wshadow)
+add_compile_options(-Wdelete-non-virtual-dtor -Wall -Wextra -Wsign-conversion -Wfloat-equal -Wfloat-conversion -Wimplicit-fallthrough -Wpedantic)
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     add_compile_options(-Wshorten-64-to-32 -stdlib=libc++) #-Wzero-as-null-pointer-constant)
