@@ -312,11 +312,6 @@ void CollisionModel::MDInteractionsModel::modifyVelocity(Core::Particle& particl
         double finalTime = integrationTime_; //  final integration time in seconds
         double timeStep = subTimeStep_; // step size in seconds
 
-        Core::Vector bgMole_originalComPos = bgMole.getComPos();
-        Core::Vector bgMole_originalComVel = bgMole.getComVel();
-        Core::Vector mole_originalComPos = mole.getComPos();
-        Core::Vector mole_originalComVel = mole.getComVel();
-
         trajectorySuccess = rk4InternAdaptiveStep(moleculesPtr, timeStep, finalTime, collisionRadius);
        
         double endEnergy = 0;
@@ -447,7 +442,7 @@ bool CollisionModel::MDInteractionsModel::rk4Intern(std::vector<CollisionModel::
         }
         
         double length[3] = {1./2, 1./2, 1};
-        double mass[nMolecules];
+        double mass[2];
         i = 0;
         for(auto* molecule : moleculesPtr){
             mass[i] = molecule->getMass();
@@ -522,7 +517,7 @@ bool CollisionModel::MDInteractionsModel::rk4InternAdaptiveStep(std::vector<Coll
     // the domain of interest 
     bool wasHit = false;
     std::vector<double> startDistances;
-    for(size_t i = 0; i < nMolecules; ++i){
+    for(i = 0; i < nMolecules; ++i){
         for(size_t j = i+1; j < nMolecules; ++j){
             startDistances.push_back((moleculesPtr[i]->getComPos() - moleculesPtr[j]->getComPos()).magnitude());
         }
@@ -552,9 +547,9 @@ bool CollisionModel::MDInteractionsModel::rk4InternAdaptiveStep(std::vector<Coll
             i++;
         }
 
-        for(size_t k = 0; k < nMolecules; k++){
-            initialPositionMolecules[k] = Core::Vector( positionMolecules[k].x(), positionMolecules[k].y(),positionMolecules[k].z() );
-            initialVelocityMolecules[k] = Core::Vector( velocityMolecules[k].x(), velocityMolecules[k].y(), velocityMolecules[k].z() );
+        for(size_t z = 0; z < nMolecules; z++){
+            initialPositionMolecules[z] = Core::Vector( positionMolecules[z].x(), positionMolecules[z].y(),positionMolecules[z].z() );
+            initialVelocityMolecules[z] = Core::Vector( velocityMolecules[z].x(), velocityMolecules[z].y(), velocityMolecules[z].z() );
         }
 
         i = 0;
@@ -571,10 +566,9 @@ bool CollisionModel::MDInteractionsModel::rk4InternAdaptiveStep(std::vector<Coll
         }
 
         for(size_t n = 1; n < 6; n++){
-            i = 0;
-            for(auto* molecule : moleculesPtr){
+            for(i = 0; i < nMolecules; i++){
                 positionMolecules[i] = initialPositionMolecules[i];
-                i++;
+                
             }
             for(size_t m = 0; m < 6; m++){
                 i = 0;
@@ -599,12 +593,11 @@ bool CollisionModel::MDInteractionsModel::rk4InternAdaptiveStep(std::vector<Coll
         }
 
         for(size_t b = 0; b < nMolecules; ++b){
-            for(size_t l = b+1; l < nMolecules; ++l){
-                distance = (moleculesPtr[l]->getComPos() - moleculesPtr[b]->getComPos()).magnitude();
+            for(size_t z = b+1; z < nMolecules; ++z){
+                distance = (moleculesPtr[z]->getComPos() - moleculesPtr[b]->getComPos()).magnitude();
             }
         }
 
-        i = 0;
         std::array<Core::Vector, 2> newComVelOrder5;
         std::array<Core::Vector, 2> newComPosOrder4; 
         std::array<Core::Vector, 2> newComVelOrder4;
@@ -656,16 +649,16 @@ bool CollisionModel::MDInteractionsModel::rk4InternAdaptiveStep(std::vector<Coll
         dt = dt * globalDelta;
 
         size_t index = 0;
-        for(size_t k = 0; k < nMolecules; ++k){
-            for(size_t l = k+1; l < nMolecules; ++l){
-                if((moleculesPtr[l]->getComPos() - moleculesPtr[k]->getComPos()).magnitude() > startDistances[index++]){
-                    if(trajectoryRecordingActive_ == true && moleculesPtr[l]->getMolecularStructureName() == collisionMolecule_ && wasHit == true){
-                        writeTrajectory((moleculesPtr[l]->getComPos() - moleculesPtr[k]->getComPos()).magnitude(),
-                                        moleculesPtr[l]->getComPos(), moleculesPtr[l]->getComVel(), forceMolecules, true, trajectoryOutputStream_.get(), integrationTimeSum, dt);
+        for(size_t b = 0; b < nMolecules; ++b){
+            for(size_t z = b+1; z < nMolecules; ++z){
+                if((moleculesPtr[z]->getComPos() - moleculesPtr[b]->getComPos()).magnitude() > startDistances[index++]){
+                    if(trajectoryRecordingActive_ == true && moleculesPtr[z]->getMolecularStructureName() == collisionMolecule_ && wasHit == true){
+                        writeTrajectory((moleculesPtr[z]->getComPos() - moleculesPtr[b]->getComPos()).magnitude(),
+                                        moleculesPtr[z]->getComPos(), moleculesPtr[z]->getComVel(), forceMolecules, true, trajectoryOutputStream_.get(), integrationTimeSum, dt);
                     }
                     return wasHit;
                 }
-                if((moleculesPtr[l]->getComPos() - moleculesPtr[k]->getComPos()).magnitude() <= requiredRad){
+                if((moleculesPtr[z]->getComPos() - moleculesPtr[b]->getComPos()).magnitude() <= requiredRad){
                     wasHit=true;
                 }
             }
