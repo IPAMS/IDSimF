@@ -50,13 +50,13 @@ TEST_CASE("Basic test MD Interactions model", "[CollisionModels][MDInteractionsM
     std::unordered_map<std::string,  std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection = reader.readMolecularStructure("test_molecularstructure_reader.csv");
     Core::Particle ion;
     ion.setMolecularStructure(molecularStructureCollection.at("Ar+"));
-    ion.setVelocity(Core::Vector(600.0, 0.0, 0.0));
+    ion.setVelocity(Core::Vector(600.0, 50.0, 0.0));
     CollisionModel::MDInteractionsModel mdSim = CollisionModel::MDInteractionsModel(2000000, 298, 4.003, 
                                                                                     3*diameterHe,
                                                                                     0.205E-30, 
                                                                                     "He", 
                                                                                     1e-10, 
-                                                                                    1E-16, 
+                                                                                    1E-17, 
                                                                                     1, 4, 
                                                                                     35e-10, 
                                                                                     molecularStructureCollection);
@@ -65,9 +65,10 @@ TEST_CASE("Basic test MD Interactions model", "[CollisionModels][MDInteractionsM
     mdSim.setTrajectoryWriter("MD_collisions_microscopic_trajectories_test.txt", 2e-8, 5);
     mdSim.modifyVelocity(ion, dt);
 
-    CHECK(Approx(ion.getVelocity().x()).margin(0.2) ==  616.7784099091);
-    CHECK(Approx(ion.getVelocity().y()).margin(0.2) ==  9.9825566288);
-    CHECK(Approx(ion.getVelocity().z()).margin(0.2) ==  -19.0017715144);
+
+    CHECK(Approx(ion.getVelocity().x()).margin(0.2) ==  542.9474708306);
+    CHECK(Approx(ion.getVelocity().y()).margin(0.2) ==  122.734352068);
+    CHECK(Approx(ion.getVelocity().z()).margin(0.2) ==  30.6867665587);
 
 
     int timestep = 0;
@@ -79,9 +80,9 @@ TEST_CASE("Basic test MD Interactions model", "[CollisionModels][MDInteractionsM
         time += dt;
     }
 
-    CHECK(Approx(ion.getVelocity().x()).margin(0.2) ==  480.5157390518);
-    CHECK(Approx(ion.getVelocity().y()).margin(0.2) ==  -47.5997527738);
-    CHECK(Approx(ion.getVelocity().z()).margin(0.4) ==  152.0755591014);
+    CHECK(Approx(ion.getVelocity().x()).margin(0.2) ==  581.7963212923);
+    CHECK(Approx(ion.getVelocity().y()).margin(0.2) ==  94.9018795506);
+    CHECK(Approx(ion.getVelocity().z()).margin(0.4) ==  -41.7490856531);
 
     std::string readBack_early = readTextFile("MD_collisions_microscopic_trajectories_test.txt");
     CHECK(readBack_early == "");
@@ -104,13 +105,17 @@ TEST_CASE("Basic test MD Interactions model", "[CollisionModels][MDInteractionsM
             size_t pos = 0;
             std::string token;
             std::vector<double> values;
-            do{
+             while ((pos = line.find(delimiter)) != std::string::npos){
                 token = line.substr(0, pos);
                 line.erase(0, pos + delimiter.length());
                 values.push_back(std::strtod(token.c_str(), nullptr));
-            }  while ((pos = line.find(delimiter)) != std::string::npos);
-
-            std::vector<double> compareValues = {1.97047e-10, 1.58704e-09, 2.41647e-11, -1.29948e-09, 3.30249e-12};
+            }  
+            // for(auto j : values){
+            //     std::cout << j << std::endl;
+            // }
+            std::vector<double> compareValues = {-3.10337e-10, 2.95449e-09, 9.44405e-10, 
+                                                3.11725e-09, 3.50606e-13, -342.899, -1135.13, -374.144, 
+                                                2.76963e-19, -2.63676e-18, -8.42841e-19};
             std::vector<double> compareMargins = {2e-10, 2e-9, 2e-9, 2e-9, 2e-7};
 
             CHECK(values.size() == compareValues.size());
@@ -124,5 +129,5 @@ TEST_CASE("Basic test MD Interactions model", "[CollisionModels][MDInteractionsM
             //compare individual values
         }
     }
-    CHECK(i > 5000);
+    CHECK(i > 1266);
 }

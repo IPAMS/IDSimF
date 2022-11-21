@@ -20,6 +20,8 @@ set(SOURCE_FILES
         CollisionModel_SoftSphere.cpp 
         CollisionModel_SoftSphere.hpp
         CollisionModel_MDInteractions.cpp
+        CollisionModel_MDInteractionsPreconstructed.cpp
+        CollisionModel_MDInteractionsPreconstructed.hpp
         CollisionModel_MDInteractions.hpp
         CollisionModel_Atom.cpp
         CollisionModel_Atom.hpp
