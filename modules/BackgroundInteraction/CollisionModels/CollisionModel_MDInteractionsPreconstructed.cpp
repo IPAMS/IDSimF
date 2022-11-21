@@ -233,15 +233,6 @@ void CollisionModel::MDInteractionsModelPreconstructed::modifyVelocity(Core::Par
 
     // Always let collision happen  
 
-    // // FIXME: The time step length dt is unrestricted
-    // // Possible mitigation: Throw warning / exception if collision probability becomes too high
-    // if(collisionProb > 0.20)
-    //     std::cout << "collisionProb " << collisionProb << '\n';
-    // // Decide if a collision actually happens:
-    // if (rndSource->uniformRealRndValue() > collisionProb){
-    //     return; // no collision takes place
-    // }
-
     bool trajectorySuccess = false;
     int iterations = 0;
     double spawnRad = spawnRadius_;
@@ -417,7 +408,7 @@ bool CollisionModel::MDInteractionsModelPreconstructed::leapfrogIntern(std::vect
             molecule->setComVel(newComVel);
             i++;
         }
-        i = 0;
+        // i = 0;
         // for(auto* molecule : moleculesPtr){
         //     myfile << molecule->getComVel() << " ";
         //     i++;
@@ -532,11 +523,6 @@ bool CollisionModel::MDInteractionsModelPreconstructed::rk4InternAdaptiveStep(st
     size_t nMolecules = moleculesPtr.size();
     std::vector<Core::Vector> forceMolecules(nMolecules);
 
-    // static std::ofstream myfile;
-    // if(!myfile.is_open()){
-    //     myfile.open("example.txt");
-    // }
-
     size_t i = 0;
     int steps = 0;
     double distance = 0.0;
@@ -554,7 +540,7 @@ bool CollisionModel::MDInteractionsModelPreconstructed::rk4InternAdaptiveStep(st
     std::vector<Core::Vector> positionMolecules(nMolecules);
     std::vector<Core::Vector> initialPositionMolecules(nMolecules);
     std::vector<Core::Vector> initialVelocityMolecules(nMolecules);
-    // double weight[6][5] = { {0, 0, 0, 0, 0},
+
     double weight[5][6] = { 
                             {1./4, 0, 0, 0, 0, 0},
                             {3./32, 9./32, 0, 0, 0, 0},
@@ -566,9 +552,7 @@ bool CollisionModel::MDInteractionsModelPreconstructed::rk4InternAdaptiveStep(st
     std::array<std::array<Core::Vector, 2>, 6> l;
 
     while(integrationTimeSum < finalTime){
-        // std::cout << integrationTimeSum << " "<<finalTime << std::endl;
         
-
         i = 0;
         for(auto* molecule : moleculesPtr){
             velocityMolecules[i] = molecule->getComVel();
@@ -636,7 +620,6 @@ bool CollisionModel::MDInteractionsModelPreconstructed::rk4InternAdaptiveStep(st
         std::array<Core::Vector, 2> newComPosOrder4; 
         std::array<Core::Vector, 2> newComVelOrder4;
         for(i = 0; i < 2; i++){
-            //Core::Vector newComPosOrder5 = initialPositionMolecules[i] + (l[0][i] * 16./135 + l[2][i] * 6656./12825 + l[3][i] * 28561./56430 + l[4][i] * (-9./50) + l[5][i] * 2./55);
             newComVelOrder5[i] = initialVelocityMolecules[i] + (k[0][i] * 16./135 + k[2][i] * 6656./12825 + k[3][i] * 28561./56430 + k[4][i] * (-9./50) + k[5][i] * 2./55);
             newComPosOrder4[i] = initialPositionMolecules[i] + (l[0][i] * 25./216 + l[2][i] * 1408./2565 + l[3][i] * 2197./4104 + l[4][i] * (-1./5));
             newComVelOrder4[i] = initialVelocityMolecules[i] + (k[0][i] * 25./216 + k[2][i] * 1408./2565 + k[3][i] * 2197./4104 + k[4][i] * (-1./5));
@@ -645,7 +628,7 @@ bool CollisionModel::MDInteractionsModelPreconstructed::rk4InternAdaptiveStep(st
         std::array<double,2> RX;
         std::array<double,2> RY;
         std::array<double,2> RZ;
-        for(int p = 0; p < 2; p++){
+        for(size_t p = 0; p < 2; p++){
             if(fabs(newComVelOrder5[p].x()) != 0)
                 RX[p] = fabs(newComVelOrder4[p].x() - newComVelOrder5[p].x()) / fabs(newComVelOrder5[p].x());
             else
@@ -657,10 +640,9 @@ bool CollisionModel::MDInteractionsModelPreconstructed::rk4InternAdaptiveStep(st
             if(fabs(newComVelOrder5[p].z()) != 0)
                 RZ[p] = fabs(newComVelOrder4[p].z() - newComVelOrder5[p].z()) / fabs(newComVelOrder5[p].z());
             else
-                RZ[p] = 0;
-            // myfile << newComVelOrder4[p] << " " << newComVelOrder5[p] << " ::: ";
-            
+                RZ[p] = 0;            
         }
+
         double globalX = std::max({RX[0],RX[1]});
         double globalY = std::max({RY[0],RY[1]});
         double globalZ = std::max({RZ[0],RZ[1]});
@@ -672,55 +654,18 @@ bool CollisionModel::MDInteractionsModelPreconstructed::rk4InternAdaptiveStep(st
         }
         
         double globalDelta = 0.84 * std::pow((tolerance/globalR), 1./4);
-        // myfile << globalDelta << " " << globalR << " "<< globalX << " "<< globalY << " "<< globalZ << " " << dt << "->";
-        // // myfile << integrationTimeSum << " " << dt;
-        // i = 0;
-        // for(auto* molecule : moleculesPtr){
-        //     myfile << newComVelOrder4[i] << " ";
-        //     i++;
-        // }
-        // myfile << std::endl;
-        // if(globalR <= tolerance){
-            integrationTimeSum += dt;
-            i = 0;
-            for(auto* molecule : moleculesPtr){
-                if(trajectoryRecordingActive_ == true && molecule->getMolecularStructureName() == collisionMolecule_){
-                    writeTrajectory(distance, molecule->getComPos(), molecule->getComVel(),forceMolecules, false, trajectoryOutputStream_.get(), integrationTimeSum, dt);
-                }
-                molecule->setComPos(newComPosOrder4[i]);
-                molecule->setComVel(newComVelOrder4[i]);
-                i++;
+        integrationTimeSum += dt;
+        i = 0;
+        for(auto* molecule : moleculesPtr){
+            if(trajectoryRecordingActive_ == true && molecule->getMolecularStructureName() == collisionMolecule_){
+                writeTrajectory(distance, molecule->getComPos(), molecule->getComVel(),forceMolecules, false, trajectoryOutputStream_.get(), integrationTimeSum, dt);
             }
-            steps++;
-            dt = dt * globalDelta;
-        // }else{
-        //     i = 0;
-        //     for(auto* molecule : moleculesPtr){
-        //         molecule->setComPos(initialPositionMolecules[i]);
-        //         i++;
-        //     }
-        //     dt = dt * globalDelta;
-        // }
-        // std::cout << globalDelta << std::endl;
-        
-
-        
-
-        // std::cout<< "DT: " << dt << std::endl;
-        // double newdt = dt * std::pow((tolerance/globalDelta), 1./5) * 0.8;
-
-        // limit the possible range of time steps that can be chosen 
-        // if step size too small integartion take too long
-        // if step size is too big integration errors start to occur 
-        
-        // double testdist = 3.2e-10;
-        // if(distance < testdist){
-        //     newdt = dt * std::pow((tolerance/globalDelta), 1./5) * 0.85;
-        // }
-        
-        // if(newdt <= 1e-11 && !std::isinf(newdt)){
-        //     dt = newdt;
-        // }
+            molecule->setComPos(newComPosOrder4[i]);
+            molecule->setComVel(newComVelOrder4[i]);
+            i++;
+        }
+        steps++;
+        dt = dt * globalDelta;
 
         size_t index = 0;
         for(size_t k = 0; k < nMolecules; ++k){
@@ -730,11 +675,9 @@ bool CollisionModel::MDInteractionsModelPreconstructed::rk4InternAdaptiveStep(st
                         writeTrajectory((moleculesPtr[l]->getComPos() - moleculesPtr[k]->getComPos()).magnitude(),
                                         moleculesPtr[l]->getComPos(), moleculesPtr[l]->getComVel(), forceMolecules, true, trajectoryOutputStream_.get(), integrationTimeSum, dt);
                     }
-                    // std::cout << wasHit << std::endl;
                     return wasHit;
                 }
                 if((moleculesPtr[l]->getComPos() - moleculesPtr[k]->getComPos()).magnitude() <= requiredRad){
-                    // std::cout << "Was hit" << std::endl;
                     wasHit=true;
                 }
             }
