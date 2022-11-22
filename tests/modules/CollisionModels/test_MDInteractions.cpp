@@ -113,7 +113,7 @@ TEST_CASE("Basic test MD Interactions model", "[CollisionModels][MDInteractionsM
             // for(auto j : values){
             //     std::cout << j << std::endl;
             // }
-            std::vector<double> compareValues = {-3.10337e-10, 2.95449e-09, 9.44405e-10, 
+            std::vector<double> compareValues = {-3.10337e-10, 2.95449e-09, 9.44405e-10,
                                                 3.11725e-09, 3.50606e-13, -342.899, -1135.13, -374.144, 
                                                 2.76963e-19, -2.63676e-18, -8.42841e-19};
             std::vector<double> compareMargins = {2e-10, 2e-9, 2e-9, 2e-9, 2e-7};
@@ -129,5 +129,5 @@ TEST_CASE("Basic test MD Interactions model", "[CollisionModels][MDInteractionsM
             //compare individual values
         }
     }
-    CHECK(i > 1266);
+    CHECK(i > 1263);
 }
