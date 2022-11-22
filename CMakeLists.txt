@@ -7,7 +7,7 @@ enable_testing()
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-add_compile_options(-Wdelete-non-virtual-dtor -Wall -Wextra -Wsign-conversion -Wfloat-equal -Wfloat-conversion -Wimplicit-fallthrough)
+add_compile_options(-Wdelete-non-virtual-dtor -Wall -Wextra -Wsign-conversion -Wfloat-equal -Wfloat-conversion -Wimplicit-fallthrough -Wpedantic)
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     add_compile_options(-Wshorten-64-to-32 -stdlib=libc++) #-Wzero-as-null-pointer-constant)
@@ -27,7 +27,7 @@ endif()
 #endif()
 
 # set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG}") #-fsanitize=address -fno-omit-frame-pointer -O1")
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Ofast")
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3")
 
 option (USE_OpenMP "Use OpenMP" ON)
 if(USE_OpenMP)
