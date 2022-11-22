@@ -38,8 +38,8 @@
 
  ****************************/
 
-#ifndef IDSIMF_COLLISIONMODEL_MDINTERACTIONS_H
-#define IDSIMF_COLLISIONMODEL_MDINTERACTIONS_H
+#ifndef IDSIMF_COLLISIONMODEL_MDINTERACTIONS_PRECONSTRUCTED_H
+#define IDSIMF_COLLISIONMODEL_MDINTERACTIONS_PRECONSTRUCTED_H
 
 #include "Core_constants.hpp"
 #include "CollisionModel_AbstractCollisionModel.hpp"
@@ -54,15 +54,15 @@
 
 namespace CollisionModel{
 
-    class MDInteractionsModel : public AbstractCollisionModel {
+    class MDInteractionsModelPreconstructed : public AbstractCollisionModel {
 
     public:
         constexpr static double DIAMETER_N2 = 3.64e-10;
         constexpr static double DIAMETER_HE = 2.80e-10;
 
-        MDInteractionsModel() = default;
+        MDInteractionsModelPreconstructed() = default;
         
-        MDInteractionsModel(
+        MDInteractionsModelPreconstructed(
             double staticPressure,
             double staticTemperature,
             double collisionGasMassAmu,
@@ -77,7 +77,7 @@ namespace CollisionModel{
             std::unordered_map<std::string,
             std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection);
 
-        MDInteractionsModel(
+        MDInteractionsModelPreconstructed(
             std::function<double(Core::Vector& location)> pressureFunction,
             std::function<Core::Vector(Core::Vector& location)> velocityFunction,
             double StaticTemperature,
@@ -92,7 +92,7 @@ namespace CollisionModel{
             double spawnRadius,
             std::unordered_map<std::string, std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection);
 
-        MDInteractionsModel(
+        MDInteractionsModelPreconstructed(
             std::function<double(Core::Vector& location)> pressureFunction,
             std::function<Core::Vector(Core::Vector& location)> velocityFunction,
             std::function<double(const Core::Vector&)> temperatureFunction,
@@ -167,4 +167,4 @@ namespace CollisionModel{
 
 }
 
-#endif //IDSIMF_COLLISIONMODEL_MDINTERACTIONS_H
+#endif //IDSIMF_COLLISIONMODEL_MDINTERACTIONS_PRECONSTRUCTED_H

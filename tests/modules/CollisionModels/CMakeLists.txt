@@ -5,6 +5,7 @@ set(SOURCE_FILES
         test_main.cpp
         test_MathFunctions.cpp
         test_CollisionStatistics.cpp
+        test_energyDiatomicMD.cpp
         test_StatisticalDiffusion.cpp
         test_util.cpp
         test_MultiCollisionModel.cpp 
