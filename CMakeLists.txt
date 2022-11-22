@@ -27,7 +27,15 @@ endif()
 #endif()
 
 # set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG}") #-fsanitize=address -fno-omit-frame-pointer -O1")
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Ofast")
+option(USE_AGGRESSIVE_OPTIMIZATION "Use agressive math optimization" OFF)
+if (USE_AGGRESSIVE_OPTIMIZATION)
+    set(CXX_OPTIMIZATION_FLAG "-Ofast")
+else()
+    set(CXX_OPTIMIZATION_FLAG "-O3")
+endif()
+message(STATUS "CXX optimization flag ${CXX_OPTIMIZATION_FLAG}")
+
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} ${CXX_OPTIMIZATION_FLAG}")
 
 option (USE_OpenMP "Use OpenMP" ON)
 if(USE_OpenMP)
