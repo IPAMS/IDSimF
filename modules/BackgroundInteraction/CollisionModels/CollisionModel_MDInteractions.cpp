@@ -537,6 +537,11 @@ bool CollisionModel::MDInteractionsModel::rk4InternAdaptiveStep(std::vector<Coll
     double mass[2];
     std::array<std::array<Core::Vector, 2>, 6> k;
     std::array<std::array<Core::Vector, 2>, 6> l;
+    std::array<Core::Vector, 2> newComVelOrder5;
+    std::array<Core::Vector, 2> newComPosOrder4; 
+    std::array<Core::Vector, 2> newComVelOrder4;
+    std::array<double, 2> RX, RY, RZ;
+    double globalX, globalY, globalZ, globalR, globalDelta, tolerance = 1e-8;
 
     while(integrationTimeSum < finalTime){
         
@@ -544,16 +549,8 @@ bool CollisionModel::MDInteractionsModel::rk4InternAdaptiveStep(std::vector<Coll
         for(auto* molecule : moleculesPtr){
             velocityMolecules[i] = molecule->getComVel();
             positionMolecules[i] = molecule->getComPos();
-            i++;
-        }
-
-        for(size_t z = 0; z < nMolecules; z++){
-            initialPositionMolecules[z] = Core::Vector( positionMolecules[z].x(), positionMolecules[z].y(),positionMolecules[z].z() );
-            initialVelocityMolecules[z] = Core::Vector( velocityMolecules[z].x(), velocityMolecules[z].y(), velocityMolecules[z].z() );
-        }
-
-        i = 0;
-        for(auto* molecule : moleculesPtr){
+            initialPositionMolecules[i] = molecule->getComPos();
+            initialVelocityMolecules[i] = molecule->getComVel();
             mass[i] = molecule->getMass();
             i++;
         }
@@ -598,18 +595,14 @@ bool CollisionModel::MDInteractionsModel::rk4InternAdaptiveStep(std::vector<Coll
             }
         }
 
-        std::array<Core::Vector, 2> newComVelOrder5;
-        std::array<Core::Vector, 2> newComPosOrder4; 
-        std::array<Core::Vector, 2> newComVelOrder4;
+        
         for(i = 0; i < 2; i++){
             newComVelOrder5[i] = initialVelocityMolecules[i] + (k[0][i] * 16./135 + k[2][i] * 6656./12825 + k[3][i] * 28561./56430 + k[4][i] * (-9./50) + k[5][i] * 2./55);
             newComPosOrder4[i] = initialPositionMolecules[i] + (l[0][i] * 25./216 + l[2][i] * 1408./2565 + l[3][i] * 2197./4104 + l[4][i] * (-1./5));
             newComVelOrder4[i] = initialVelocityMolecules[i] + (k[0][i] * 25./216 + k[2][i] * 1408./2565 + k[3][i] * 2197./4104 + k[4][i] * (-1./5));
         }
 
-        std::array<double,2> RX;
-        std::array<double,2> RY;
-        std::array<double,2> RZ;
+        
         for(size_t p = 0; p < 2; p++){
             if(fabs(newComVelOrder5[p].x()) != 0)
                 RX[p] = fabs(newComVelOrder4[p].x() - newComVelOrder5[p].x()) / fabs(newComVelOrder5[p].x());
@@ -624,17 +617,17 @@ bool CollisionModel::MDInteractionsModel::rk4InternAdaptiveStep(std::vector<Coll
             else
                 RZ[p] = 0; 
         }
-        double globalX = std::max({RX[0],RX[1]});
-        double globalY = std::max({RY[0],RY[1]});
-        double globalZ = std::max({RZ[0],RZ[1]});
+        globalX = std::max({RX[0],RX[1]});
+        globalY = std::max({RY[0],RY[1]});
+        globalZ = std::max({RZ[0],RZ[1]});
         
-        double tolerance = 1e-8;
-        double globalR = std::max({globalX, globalY, globalZ});
+        
+        globalR = std::max({globalX, globalY, globalZ});
         if (globalR == 0){
             globalR = 1e-15;
         }
         
-        double globalDelta = 0.84 * std::pow((tolerance/globalR), 1./4);
+        globalDelta = 0.84 * std::pow((tolerance/globalR), 1./4);
         integrationTimeSum += dt;
         i = 0;
         for(auto* molecule : moleculesPtr){
@@ -708,7 +701,7 @@ void CollisionModel::MDInteractionsModel::forceFieldMD(std::vector<CollisionMode
                 break;
             }
             // cut-off
-            if(distance.magnitude() > 1E20){
+            if(distance.magnitude() > 100e-10){
                 return;
             }
             double distanceSquared = distance.magnitudeSquared();
