@@ -12,6 +12,9 @@ add_test(NAME app_ionMobility_DMSSimplifiedSim_waterCluster_staticRun COMMAND ${
 add_test(NAME app_ionMobility_DMSSimplifiedSim_waterCluster_tempDependentRun COMMAND ${PROJECT_NAME}
         "example/DMS_waterCluster_tempDependent.json" "run_app_ionMobility_waterCluster_tempDependent" -n ${N_THREADS})
 
+add_test(NAME app_ionMobility_DMSSimplifiedSim_waterCluster_mobilityScaled COMMAND ${PROJECT_NAME}
+        "example/DMS_waterCluster_tempDependent_mobilityScaled.json" "run_app_ionMobility_waterCluster_mobilityScaled" -n ${N_THREADS})
+
 add_custom_command(TARGET ${PROJECT_NAME} PRE_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${CMAKE_CURRENT_SOURCE_DIR}/example/ $<TARGET_FILE_DIR:${PROJECT_NAME}>/example/)

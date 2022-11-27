@@ -16,5 +16,15 @@
   "cv_mode":"auto",
   "background_temperature_K":413.15,
   "background_pressure_Pa":101325,
-  "mobility_scaling_function": "ACE-H_low.csv"
+  "mobility_scaling_function": [
+    "fscale_ACE-H_low.csv",
+    "fscale_zero.csv",
+    "fscale_ACE-H_low.csv",
+    "fscale_ACE-H_low.csv",
+    "fscale_ACE-H_low.csv",
+    "fscale_ACE-H_low.csv",
+    "fscale_ACE-H_low.csv",
+    "fscale_ACE-H_low.csv",
+    "fscale_ACE-H_low.csv"
+  ]
 }

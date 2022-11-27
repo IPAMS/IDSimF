@@ -111,22 +111,33 @@ int main(int argc, const char * argv[]) {
 
         //read ion mobility scaling configuration ==============================================
         MobilityScalingMode mobilitScalingMode;
-        std::unique_ptr<ParticleSimulation::SampledFunction> mobilityScalingFct= nullptr;
-        ParticleSimulation::SampledFunction* mobilityScalingFctPtr = nullptr;
+        std::vector<std::unique_ptr<ParticleSimulation::SampledFunction>> mobScalingFunctions;
+        std::unordered_map<RS::Substance*, ParticleSimulation::SampledFunction*> mobScalingFunctionsMap;
         if (simConf->isParameter("mobility_scaling_function")){
-            std::string  scalingFunctionFilename = simConf->pathRelativeToConfFile(
-                    simConf->stringParameter("mobility_scaling_function"));
-            mobilityScalingFct = std::make_unique<ParticleSimulation::SampledFunction>(scalingFunctionFilename);
-            mobilityScalingFctPtr = mobilityScalingFct.get();
-            mobilitScalingMode = FIELD_SCALING_FUNCTION;
-            if(!mobilityScalingFct->good()){
-                throw(std::invalid_argument("Mobility function data not good"));
+            //read one mobility scaling function per simulated species
+            auto mobScaleFctsFilenames = simConf->stringVectorParameter("mobility_scaling_function");
+            auto substances = rsSim.simulationConfiguration()->getAllDiscreteSubstances();
+
+            if (mobScaleFctsFilenames.size() != substances.size()){
+                throw(std::invalid_argument("Number of discrete chemical substances and provided mobility scaling functions differ"));
             }
+
+            for(std::size_t i=0; i<mobScaleFctsFilenames.size(); ++i){
+                std::string mobScaleFctFn = mobScaleFctsFilenames[i];
+                std::string  scalingFunctionFilename = simConf->pathRelativeToConfFile(mobScaleFctFn);
+
+                auto mobilityScalingFct = std::make_unique<ParticleSimulation::SampledFunction>(scalingFunctionFilename);
+                if(!mobilityScalingFct->good()){
+                    throw(std::invalid_argument("Mobility function data not good"));
+                }
+                mobScalingFunctionsMap[substances[i]] = mobilityScalingFct.get();
+                mobScalingFunctions.push_back(std::move(mobilityScalingFct));
+            }
+            mobilitScalingMode = FIELD_SCALING_FUNCTION;
         }
         else{
             mobilitScalingMode = STATIC_MOBILITY;
         }
-
 
         // prepare file writer  =================================================================
         RS::ConcentrationFileWriter resultFilewriter(projectName+"_conc.csv");
@@ -262,14 +273,18 @@ int main(int argc, const char * argv[]) {
             reactionConditions.electricField = fieldMagnitude;
             rsSim.performTimestep(reactionConditions, dt_s, particlesReactedFct);
 
-            #pragma omp parallel default(none) shared(particles, mobilityScalingFctPtr) firstprivate(mobilitScalingMode, nParticlesTotal, reducedPressure, fieldMagnitude, dt_s)
+            #pragma omp parallel default(none) shared(particles, mobScalingFunctionsMap, rsSim, std::cout) firstprivate(mobilitScalingMode, nParticlesTotal, reducedPressure, fieldMagnitude, dt_s)
             {
                 // 1 Td: = 10e-17 V*cm^2 = 10e-17 V*cm^2 = 10e-21 V*m^2
-                // 2.688e19 molek/cm^3 at atmospheric pressure,
-                double mobilityScalingFactor = 0.0;
+                // 2.688e19 molek/cm^
+
+                //prepare mobility scaling factors for the current conditions for the individual species:
+                std::map<RS::Substance*, double> mobilityScalingFactor;
                 if (mobilitScalingMode == FIELD_SCALING_FUNCTION) {
                     double reducedField = (fieldMagnitude/100.0)/(reducedPressure*2.688e2);
-                    mobilityScalingFactor = mobilityScalingFctPtr->getInterpolatedValue(fabs(reducedField));
+                    for(const auto &substance: rsSim.simulationConfiguration()->getAllDiscreteSubstances()){
+                        mobilityScalingFactor[substance] = mobScalingFunctionsMap[substance]->getInterpolatedValue(fabs(reducedField));
+                    }
                 }
 
                 #pragma omp for
@@ -277,13 +292,14 @@ int main(int argc, const char * argv[]) {
                     // move particle in z axis according to particle mobility:
                     RS::ReactiveParticle* particle = particles[i].get();
 
+                    //if we use field scaling: Set scaling to the scaled mobility cached before
                     if (mobilitScalingMode == FIELD_SCALING_FUNCTION){
-                        particle->setMobility(particle->getLowFieldMobility()*mobilityScalingFactor);
+                        particle->setMobility(particle->getLowFieldMobility()*mobilityScalingFactor[particle->getSpecies()]);
                     }
 
                     double particleShift = particle->getMobility()*reducedPressure*fieldMagnitude*dt_s;
                     Core::Vector particleLocation = particle->getLocation();
-                    particleLocation.z(particleLocation.z()+particleShift);
+                    particleLocation.z(particleLocation.z() + particleShift);
                     particle->setLocation(particleLocation);
                 }
             }
