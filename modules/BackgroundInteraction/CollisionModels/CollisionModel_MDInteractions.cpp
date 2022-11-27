@@ -148,6 +148,12 @@ double CollisionModel::MDInteractionsModel::calcSign(double value){
     }
 }
 
+/**
+ * Writes trajectory data to a predefined file 
+ * Ouput includes: position of background gas, distance between the two molecules, 
+ * integration time, velocity of the background gas, force acting on the background gas and 
+ * timestep length
+ */
 void CollisionModel::MDInteractionsModel::writeTrajectory(double distance, Core::Vector positionBgMolecule, Core::Vector velocityBgMolecule, 
                         std::vector<Core::Vector> forceMolecules, bool endOfTrajectory, std::ofstream* file, double time, double dt){
     if(distance < trajectoryDistance_){
@@ -182,6 +188,14 @@ void CollisionModel::MDInteractionsModel::modifyAcceleration(Core::Vector& /*acc
 
 }
 
+/**
+ * Modifies the velocity of the particle based on a molecular dynamics approach
+ * Collision probability is estimated by a hard-sphere model
+ * Trajectory is checked for energy conservation of 10 % and if necessary is repeated for up to 
+ * 100 times under modification of the starting timestep length 
+ * @param particle particle whose velocity is to be modified 
+ * @param dt timestep length of overarching ion simulation 
+ */
 void CollisionModel::MDInteractionsModel::modifyVelocity(Core::Particle& particle, double dt) {
     Core::RandomSource* rndSource = Core::globalRandomGeneratorPool->getThreadRandomSource();
 
@@ -318,10 +332,13 @@ void CollisionModel::MDInteractionsModel::modifyVelocity(Core::Particle& particl
         for(auto* molecule : moleculesPtr){
             endEnergy += 0.5 * molecule->getMass() * molecule->getComVel().magnitudeSquared();
         }
+        // check if energy is conserved up to 10% 
+        // if not halve the starting timestep length 
         if(endEnergy*0.90 >= startEnergy){
             trajectorySuccess = false;
             dt = dt/2;
         }
+
         if(trajectorySuccess){
             particle.setVelocity(mole.getComVel() + particle.getVelocity());
         }
@@ -337,6 +354,15 @@ void CollisionModel::MDInteractionsModel::modifyPosition(Core::Vector& /*positio
 
 }
 
+/**
+ * Leapfrog method to integrate trajectories of particles involved in a collision 
+ * The leapfrog method is of second order and symplectic 
+ * @param moleculesPtr collection of molecule pointer  
+ * @param dt timestep length 
+ * @param finalTime maximum integration time 
+ * @param requiredRad radius defining the collision sphere, i.e. the distance that needs to be undercut for 
+ * a collision to be considered (same radius which is used to estimate the collision probability)
+ */
 bool CollisionModel::MDInteractionsModel::leapfrogIntern(std::vector<CollisionModel::Molecule*> moleculesPtr, double dt, double finalTime, double requiredRad){
 
     bool wasHit = false;
@@ -405,6 +431,16 @@ bool CollisionModel::MDInteractionsModel::leapfrogIntern(std::vector<CollisionMo
 
 }
 
+/**
+ * Runge-Kutta 4 method to integrate trajectories of particles involved in a collision 
+ * The RK4 is of fourth order
+ * This integrator should NOT be used as the adaptive step size method is faster 
+ * @param moleculesPtr collection of molecule pointer 
+ * @param dt timestep length 
+ * @param finalTime maximum integration time 
+ * @param requiredRad radius defining the collision sphere, i.e. the distance that needs to be undercut for 
+ * a collision to be considered (same radius which is used to estimate the collision probability)
+ */
 bool CollisionModel::MDInteractionsModel::rk4Intern(std::vector<CollisionModel::Molecule*> moleculesPtr, double dt, double finalTime,
                                                                     double requiredRad){
 
@@ -501,7 +537,16 @@ bool CollisionModel::MDInteractionsModel::rk4Intern(std::vector<CollisionModel::
     return false;
 }
 
-
+/**
+ * Adaptive step size Runge-Kutta-Fehlberg 45 method to integrate trajectories of particles involved in a collision 
+ * This method is of fourth order and uses error control of fifth order on the velocity to adaptively 
+ * increase or decrease the timestep length reducing the overall computation time 
+ * @param moleculesPtr collection of molecule pointer 
+ * @param dt timestep length 
+ * @param finalTime maximum integration time 
+ * @param requiredRad radius defining the collision sphere, i.e. the distance that needs to be undercut for 
+ * a collision to be considered (same radius which is used to estimate the collision probability)
+ */
 bool CollisionModel::MDInteractionsModel::rk4InternAdaptiveStep(std::vector<CollisionModel::Molecule*> moleculesPtr, double dt, double finalTime,
                                                                     double requiredRad){
 
@@ -537,6 +582,11 @@ bool CollisionModel::MDInteractionsModel::rk4InternAdaptiveStep(std::vector<Coll
     double mass[2];
     std::array<std::array<Core::Vector, 2>, 6> k;
     std::array<std::array<Core::Vector, 2>, 6> l;
+    std::array<Core::Vector, 2> newComVelOrder5;
+    std::array<Core::Vector, 2> newComPosOrder4; 
+    std::array<Core::Vector, 2> newComVelOrder4;
+    std::array<double, 2> RX, RY, RZ;
+    double globalX, globalY, globalZ, globalR, globalDelta, tolerance = 1e-8;
 
     while(integrationTimeSum < finalTime){
         
@@ -544,16 +594,8 @@ bool CollisionModel::MDInteractionsModel::rk4InternAdaptiveStep(std::vector<Coll
         for(auto* molecule : moleculesPtr){
             velocityMolecules[i] = molecule->getComVel();
             positionMolecules[i] = molecule->getComPos();
-            i++;
-        }
-
-        for(size_t z = 0; z < nMolecules; z++){
-            initialPositionMolecules[z] = Core::Vector( positionMolecules[z].x(), positionMolecules[z].y(),positionMolecules[z].z() );
-            initialVelocityMolecules[z] = Core::Vector( velocityMolecules[z].x(), velocityMolecules[z].y(), velocityMolecules[z].z() );
-        }
-
-        i = 0;
-        for(auto* molecule : moleculesPtr){
+            initialPositionMolecules[i] = molecule->getComPos();
+            initialVelocityMolecules[i] = molecule->getComVel();
             mass[i] = molecule->getMass();
             i++;
         }
@@ -598,18 +640,14 @@ bool CollisionModel::MDInteractionsModel::rk4InternAdaptiveStep(std::vector<Coll
             }
         }
 
-        std::array<Core::Vector, 2> newComVelOrder5;
-        std::array<Core::Vector, 2> newComPosOrder4; 
-        std::array<Core::Vector, 2> newComVelOrder4;
+        
         for(i = 0; i < 2; i++){
             newComVelOrder5[i] = initialVelocityMolecules[i] + (k[0][i] * 16./135 + k[2][i] * 6656./12825 + k[3][i] * 28561./56430 + k[4][i] * (-9./50) + k[5][i] * 2./55);
             newComPosOrder4[i] = initialPositionMolecules[i] + (l[0][i] * 25./216 + l[2][i] * 1408./2565 + l[3][i] * 2197./4104 + l[4][i] * (-1./5));
             newComVelOrder4[i] = initialVelocityMolecules[i] + (k[0][i] * 25./216 + k[2][i] * 1408./2565 + k[3][i] * 2197./4104 + k[4][i] * (-1./5));
         }
 
-        std::array<double,2> RX;
-        std::array<double,2> RY;
-        std::array<double,2> RZ;
+        
         for(size_t p = 0; p < 2; p++){
             if(fabs(newComVelOrder5[p].x()) != 0)
                 RX[p] = fabs(newComVelOrder4[p].x() - newComVelOrder5[p].x()) / fabs(newComVelOrder5[p].x());
@@ -624,17 +662,17 @@ bool CollisionModel::MDInteractionsModel::rk4InternAdaptiveStep(std::vector<Coll
             else
                 RZ[p] = 0; 
         }
-        double globalX = std::max({RX[0],RX[1]});
-        double globalY = std::max({RY[0],RY[1]});
-        double globalZ = std::max({RZ[0],RZ[1]});
+        globalX = std::max({RX[0],RX[1]});
+        globalY = std::max({RY[0],RY[1]});
+        globalZ = std::max({RZ[0],RZ[1]});
         
-        double tolerance = 1e-8;
-        double globalR = std::max({globalX, globalY, globalZ});
+        
+        globalR = std::max({globalX, globalY, globalZ});
         if (globalR == 0){
             globalR = 1e-15;
         }
         
-        double globalDelta = 0.84 * std::pow((tolerance/globalR), 1./4);
+        globalDelta = 0.84 * std::pow((tolerance/globalR), 1./4);
         integrationTimeSum += dt;
         i = 0;
         for(auto* molecule : moleculesPtr){
@@ -668,7 +706,12 @@ bool CollisionModel::MDInteractionsModel::rk4InternAdaptiveStep(std::vector<Coll
     return false;
 }
 
-
+/**
+ * Force field contains:
+ * 12-6 Lennard-Jones potential (short range repulsion)
+ * ion-induced dipole moment potential (long range attraction)
+ * quadrupole moment if N2 is the background gas 
+ */
 void CollisionModel::MDInteractionsModel::forceFieldMD(std::vector<CollisionModel::Molecule*>& moleculesPtr, std::vector<Core::Vector>& forceMolecules){
 
     // save all the forces acting on each molecule
@@ -708,7 +751,7 @@ void CollisionModel::MDInteractionsModel::forceFieldMD(std::vector<CollisionMode
                 break;
             }
             // cut-off
-            if(distance.magnitude() > 1E20){
+            if(distance.magnitude() > 100e-10){
                 return;
             }
             double distanceSquared = distance.magnitudeSquared();
@@ -742,27 +785,27 @@ void CollisionModel::MDInteractionsModel::forceFieldMD(std::vector<CollisionMode
                 currentCharge = atomJ->getCharge();
             }
             
-            if(distance.magnitude() <= 22e-10){
-                eField[0] += distance.x() * currentCharge / distanceCubed; // E-field in x
-                eField[1] += distance.y() * currentCharge / distanceCubed; // E-field in y
-                eField[2] += distance.z() * currentCharge / distanceCubed; // E-field in z
-                
-                // derivative x to x
-                eFieldDerivative[0] += currentCharge / distanceCubed - 
-                                        3 * currentCharge * distance.x() * distance.x() / (distanceCubed * distanceSquared); 
-                // derivative x to y
-                eFieldDerivative[1] += -3 * currentCharge * distance.x() * distance.y() / (distanceCubed * distanceSquared);
-                // derivative y to y
-                eFieldDerivative[2] += currentCharge / distanceCubed - 
-                                        3 * currentCharge * distance.y() * distance.y() / (distanceCubed * distanceSquared);
-                // derivative y to z
-                eFieldDerivative[3] += -3 * currentCharge * distance.y() * distance.z() / (distanceCubed * distanceSquared);
-                // derivative z to z
-                eFieldDerivative[4] += currentCharge / distanceCubed - 
-                                        3 * currentCharge * distance.z() * distance.z() / (distanceCubed * distanceSquared);
-                // derivative x to z
-                eFieldDerivative[5] += -3 * currentCharge * distance.x() * distance.z() / (distanceCubed * distanceSquared);
-            }
+            
+            eField[0] += distance.x() * currentCharge / distanceCubed; // E-field in x
+            eField[1] += distance.y() * currentCharge / distanceCubed; // E-field in y
+            eField[2] += distance.z() * currentCharge / distanceCubed; // E-field in z
+            
+            // derivative x to x
+            eFieldDerivative[0] += currentCharge / distanceCubed - 
+                                    3 * currentCharge * distance.x() * distance.x() / (distanceCubed * distanceSquared); 
+            // derivative x to y
+            eFieldDerivative[1] += -3 * currentCharge * distance.x() * distance.y() / (distanceCubed * distanceSquared);
+            // derivative y to y
+            eFieldDerivative[2] += currentCharge / distanceCubed - 
+                                    3 * currentCharge * distance.y() * distance.y() / (distanceCubed * distanceSquared);
+            // derivative y to z
+            eFieldDerivative[3] += -3 * currentCharge * distance.y() * distance.z() / (distanceCubed * distanceSquared);
+            // derivative z to z
+            eFieldDerivative[4] += currentCharge / distanceCubed - 
+                                    3 * currentCharge * distance.z() * distance.z() / (distanceCubed * distanceSquared);
+            // derivative x to z
+            eFieldDerivative[5] += -3 * currentCharge * distance.x() * distance.z() / (distanceCubed * distanceSquared);
+            
             
 
             // Third contribution: ion <-> permanent dipole potential
