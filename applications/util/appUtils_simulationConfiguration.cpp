@@ -17,6 +17,11 @@ bool AppUtils::SimulationConfiguration::isParameter(const std::string& keyName) 
     return confRoot_.isMember(keyName);
 }
 
+bool AppUtils::SimulationConfiguration::isVectorParameter(const std::string& keyName) const {
+    Json::Value value = confRoot_.get(keyName, 0);
+    return value.isArray();
+}
+
 int AppUtils::SimulationConfiguration::intParameter(const std::string& jsonName) const {
     if (isParameter(jsonName)) {
         int result = confRoot_.get(jsonName, 0).asInt();

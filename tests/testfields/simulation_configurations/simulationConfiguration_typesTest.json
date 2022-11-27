@@ -1,0 +1,12 @@
+{
+  //Test if line comments are working
+  /*
+  a Block comment
+  */
+  "integer_vector":[8000, 9000], //an inline comment
+  "integer_parameter": 1500,
+  "double_vector":[35.5, 100.1, 45.5],
+  "double_parameter": 500.5,
+  "string_vector": ["string_1", "string_2", "string_3"],
+  "string_parameter": "cylinder"
+}

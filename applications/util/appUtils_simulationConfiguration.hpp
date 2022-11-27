@@ -18,6 +18,7 @@ namespace AppUtils{
         SimulationConfiguration(const std::string& confFileName);
         SimulationConfiguration(const std::string& confFileName, std::shared_ptr<spdlog::logger> logger);
         bool isParameter(const std::string& keyName) const;
+        bool isVectorParameter(const std::string& keyName) const;
         int intParameter(const std::string& jsonName) const;
         unsigned int unsignedIntParameter(const std::string& jsonName) const;
         std::vector<int> intVectorParameter(const std::string& jsonName) const;
