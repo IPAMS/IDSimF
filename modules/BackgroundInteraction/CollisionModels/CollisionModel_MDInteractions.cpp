@@ -585,8 +585,9 @@ bool CollisionModel::MDInteractionsModel::rk4InternAdaptiveStep(std::vector<Coll
     std::array<Core::Vector, 2> newComVelOrder5;
     std::array<Core::Vector, 2> newComPosOrder4; 
     std::array<Core::Vector, 2> newComVelOrder4;
-    std::array<double, 2> RX, RY, RZ;
-    double globalX, globalY, globalZ, globalR, globalDelta, tolerance = 1e-8;
+    std::array<double, 2> R;
+    double globalR, globalDelta;
+    double tolerance = 1e-8;
 
     while(integrationTimeSum < finalTime){
         
@@ -649,25 +650,15 @@ bool CollisionModel::MDInteractionsModel::rk4InternAdaptiveStep(std::vector<Coll
 
         
         for(size_t p = 0; p < 2; p++){
-            if(fabs(newComVelOrder5[p].x()) != 0)
-                RX[p] = fabs(newComVelOrder4[p].x() - newComVelOrder5[p].x()) / fabs(newComVelOrder5[p].x());
+            if(fabs(newComVelOrder5[p].magnitude()) != 0)
+                R[p] = fabs(newComVelOrder4[p].magnitude()-newComVelOrder5[p].magnitude())/fabs(newComVelOrder5[p].magnitude());
             else
-                RX[p] = 0;
-            if(fabs(newComVelOrder5[p].y()) != 0)
-                RY[p] = fabs(newComVelOrder4[p].y() - newComVelOrder5[p].y()) / fabs(newComVelOrder5[p].y());
-            else
-                RY[p] = 0;
-            if(fabs(newComVelOrder5[p].z()) != 0)
-                RZ[p] = fabs(newComVelOrder4[p].z() - newComVelOrder5[p].z()) / fabs(newComVelOrder5[p].z());
-            else
-                RZ[p] = 0; 
+                R[p] = 0;
+                   
         }
-        globalX = std::max({RX[0],RX[1]});
-        globalY = std::max({RY[0],RY[1]});
-        globalZ = std::max({RZ[0],RZ[1]});
-        
-        
-        globalR = std::max({globalX, globalY, globalZ});
+
+        globalR = std::max({R[0],R[1]});
+
         if (globalR == 0){
             globalR = 1e-15;
         }
@@ -869,12 +860,12 @@ void CollisionModel::MDInteractionsModel::forceFieldMD(std::vector<CollisionMode
                 partialChargeN2 = atomI->getPartCharge();
         
             }
-            // Core::Vector quadrupoleForce;
-            // quadrupoleForce.x(-currentCharge * partialChargeN2 * 1./Core::ELECTRIC_CONSTANT * distance.x() / distanceCubed );
-            // quadrupoleForce.y(-currentCharge * partialChargeN2 * 1./Core::ELECTRIC_CONSTANT * distance.y() / distanceCubed );
-            // quadrupoleForce.z(-currentCharge * partialChargeN2 * 1./Core::ELECTRIC_CONSTANT * distance.z() / distanceCubed );
-            // forceMolecules[0] += quadrupoleForce;
-            // forceMolecules[1] += quadrupoleForce * (-1);
+            Core::Vector quadrupoleForce;
+            quadrupoleForce.x(-currentCharge * partialChargeN2 * 1./Core::ELECTRIC_CONSTANT * distance.x() / distanceCubed );
+            quadrupoleForce.y(-currentCharge * partialChargeN2 * 1./Core::ELECTRIC_CONSTANT * distance.y() / distanceCubed );
+            quadrupoleForce.z(-currentCharge * partialChargeN2 * 1./Core::ELECTRIC_CONSTANT * distance.z() / distanceCubed );
+            forceMolecules[0] += quadrupoleForce;
+            forceMolecules[1] += quadrupoleForce * (-1);
 
         }
     }
