@@ -776,13 +776,18 @@ void CollisionModel::MDInteractionsModel::forceFieldMD(std::vector<CollisionMode
             // Check if one of the molecules is an ion and the other one is not
             if(int(atomI->getCharge()/Core::ELEMENTARY_CHARGE) != 0 && 
                 moleculesPtr[1]->getIsIon() == false &&
-                moleculesPtr[1]->getIsDipole() == false){
+                moleculesPtr[1]->getIsDipole() == false &&
+                atomJ->getType() != CollisionModel::Atom::AtomType::COM){
+
                 currentCharge = atomI->getCharge();
 
             }else if (moleculesPtr[0]->getIsIon() == false && 
                         int(atomJ->getCharge()/Core::ELEMENTARY_CHARGE) != 0 &&
-                        moleculesPtr[0]->getIsDipole() == false){
+                        moleculesPtr[0]->getIsDipole() == false &&
+                        atomI->getType() != CollisionModel::Atom::AtomType::COM){
+
                 currentCharge = atomJ->getCharge();
+
             }
             
             
