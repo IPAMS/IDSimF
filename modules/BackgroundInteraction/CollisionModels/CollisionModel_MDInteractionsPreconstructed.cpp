@@ -526,7 +526,10 @@ bool CollisionModel::MDInteractionsModelPreconstructed::rk4InternAdaptiveStep(st
     size_t i = 0;
     int steps = 0;
     double distance = 0.0;
-
+    // static std::ofstream globalOut;
+    // if(!globalOut.is_open()){
+    //     globalOut.open("globalOutQuadVelAbserror.txt");
+    // }
     // distances need to be saved so integration can be stopped if particles leave 
     // the domain of interest 
     bool wasHit = false;
@@ -624,31 +627,20 @@ bool CollisionModel::MDInteractionsModelPreconstructed::rk4InternAdaptiveStep(st
             newComPosOrder4[i] = initialPositionMolecules[i] + (l[0][i] * 25./216 + l[2][i] * 1408./2565 + l[3][i] * 2197./4104 + l[4][i] * (-1./5));
             newComVelOrder4[i] = initialVelocityMolecules[i] + (k[0][i] * 25./216 + k[2][i] * 1408./2565 + k[3][i] * 2197./4104 + k[4][i] * (-1./5));
         }
-
-        std::array<double,2> RX;
-        std::array<double,2> RY;
-        std::array<double,2> RZ;
+        
+        std::array<double,2> R;
+        
         for(size_t p = 0; p < 2; p++){
-            if(fabs(newComVelOrder5[p].x()) != 0)
-                RX[p] = fabs(newComVelOrder4[p].x() - newComVelOrder5[p].x()) / fabs(newComVelOrder5[p].x());
+            if(fabs(newComVelOrder5[p].magnitude()) != 0)
+                R[p] = fabs(newComVelOrder4[p].magnitude()-newComVelOrder5[p].magnitude())/fabs(newComVelOrder5[p].magnitude());
             else
-                RX[p] = 0;
-            if(fabs(newComVelOrder5[p].y()) != 0)
-                RY[p] = fabs(newComVelOrder4[p].y() - newComVelOrder5[p].y()) / fabs(newComVelOrder5[p].y());
-            else
-                RY[p] = 0;
-            if(fabs(newComVelOrder5[p].z()) != 0)
-                RZ[p] = fabs(newComVelOrder4[p].z() - newComVelOrder5[p].z()) / fabs(newComVelOrder5[p].z());
-            else
-                RZ[p] = 0;            
+                R[p] = 0;
+                   
         }
 
-        double globalX = std::max({RX[0],RX[1]});
-        double globalY = std::max({RY[0],RY[1]});
-        double globalZ = std::max({RZ[0],RZ[1]});
-        
+        double globalR = std::max({R[0],R[1]});
         double tolerance = 1e-8;
-        double globalR = std::max({globalX, globalY, globalZ});
+        
         if (globalR == 0){
             globalR = 1e-15;
         }
@@ -666,6 +658,7 @@ bool CollisionModel::MDInteractionsModelPreconstructed::rk4InternAdaptiveStep(st
         }
         steps++;
         dt = dt * globalDelta;
+        
 
         size_t index = 0;
         for(size_t k = 0; k < nMolecules; ++k){
@@ -745,6 +738,7 @@ void CollisionModel::MDInteractionsModelPreconstructed::forceFieldMD(std::vector
             atomForce.z(distance.z() * ljFactor);
             forceMolecules[0] += atomForce;
             forceMolecules[1] += atomForce * (-1);
+            
 
             // Second contribution: C4 ion-induced dipole potential
             // This requires an ion and one neutrally charged molecule to be present
@@ -753,13 +747,18 @@ void CollisionModel::MDInteractionsModelPreconstructed::forceFieldMD(std::vector
             // Check if one of the molecules is an ion and the other one is not
             if(int(atomI->getCharge()/Core::ELEMENTARY_CHARGE) != 0 && 
                 moleculesPtr[1]->getIsIon() == false &&
-                moleculesPtr[1]->getIsDipole() == false){
+                moleculesPtr[1]->getIsDipole() == false &&
+                atomJ->getType() != CollisionModel::Atom::AtomType::COM){
+
                 currentCharge = atomI->getCharge();
 
             }else if (moleculesPtr[0]->getIsIon() == false && 
                         int(atomJ->getCharge()/Core::ELEMENTARY_CHARGE) != 0 &&
-                        moleculesPtr[0]->getIsDipole() == false){
+                        moleculesPtr[0]->getIsDipole() == false &&
+                        atomI->getType() != CollisionModel::Atom::AtomType::COM){
+
                 currentCharge = atomJ->getCharge();
+
             }
             
             if(distance.magnitude() <= 30e-10){
@@ -783,7 +782,6 @@ void CollisionModel::MDInteractionsModelPreconstructed::forceFieldMD(std::vector
                 // derivative x to z
                 eFieldDerivative[5] += -3 * currentCharge * distance.x() * distance.z() / (distanceCubed * distanceSquared);
             }
-            
 
             // Third contribution: ion <-> permanent dipole potential
             // This requires an ion and a dipole to be present 
@@ -834,19 +832,19 @@ void CollisionModel::MDInteractionsModelPreconstructed::forceFieldMD(std::vector
                 currentCharge = atomI->getCharge();
                 partialChargeN2 = atomJ->getPartCharge();
 
-            }else if (isN2 == true && 
+            }else if(isN2 == true && 
                         int(atomJ->getCharge()/Core::ELEMENTARY_CHARGE) != 0){
 
                 currentCharge = atomJ->getCharge();
                 partialChargeN2 = atomI->getPartCharge();
         
             }
-            // Core::Vector quadrupoleForce;
-            // quadrupoleForce.x(-currentCharge * partialChargeN2 * 1./Core::ELECTRIC_CONSTANT * distance.x() / distanceCubed );
-            // quadrupoleForce.y(-currentCharge * partialChargeN2 * 1./Core::ELECTRIC_CONSTANT * distance.y() / distanceCubed );
-            // quadrupoleForce.z(-currentCharge * partialChargeN2 * 1./Core::ELECTRIC_CONSTANT * distance.z() / distanceCubed );
-            // forceMolecules[0] += quadrupoleForce;
-            // forceMolecules[1] += quadrupoleForce * (-1);
+            Core::Vector quadrupoleForce;
+            quadrupoleForce.x(-1 * currentCharge * partialChargeN2 * 1./Core::ELECTRIC_CONSTANT * distance.x() / distanceCubed);
+            quadrupoleForce.y(-1 * currentCharge * partialChargeN2 * 1./Core::ELECTRIC_CONSTANT * distance.y() / distanceCubed);
+            quadrupoleForce.z(-1 * currentCharge * partialChargeN2 * 1./Core::ELECTRIC_CONSTANT * distance.z() / distanceCubed);
+            forceMolecules[0] += quadrupoleForce;
+            forceMolecules[1] += quadrupoleForce * (-1);
 
         }
     }

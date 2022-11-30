@@ -43,7 +43,7 @@ TEST_CASE("Basic test MD energy conservation diatomic", "[CollisionModels][MDInt
     FileIO::MolecularStructureReader reader = FileIO::MolecularStructureReader();
     std::unordered_map<std::string,  std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection = reader.readMolecularStructure("test_molecularstructure_reader.csv");
     Core::Particle ion;
-    ion.setMolecularStructure(molecularStructureCollection.at("Hev2"));
+    ion.setMolecularStructure(molecularStructureCollection.at("Li+"));
     ion.setVelocity(Core::Vector(0.0, 0.0, 0.0));
     CollisionModel::MDInteractionsModelPreconstructed mdSim = CollisionModel::MDInteractionsModelPreconstructed(2000000, 298, 28, 
                                                                                     diameterN2,
@@ -55,7 +55,7 @@ TEST_CASE("Basic test MD energy conservation diatomic", "[CollisionModels][MDInt
                                                                                     30e-10, 
                                                                                     molecularStructureCollection);
 
-    mdSim.setTrajectoryWriter("MD_collisions_preconstructed_trajectories_newImplementation.txt", 30e-10, 0);
+    mdSim.setTrajectoryWriter("MD_collisions_preconstructed_trajectories.txt", 30e-10, 0);
     mdSim.updateModelTimestepParameters(1, 0);
     double dt = 2e-11;
     mdSim.modifyVelocity(ion, dt);
