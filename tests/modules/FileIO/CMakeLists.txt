@@ -26,7 +26,7 @@ set(TEST_FILES
         ${TEST_FILE_FOLDER}/quad_dev_pressure_3d.h5
         ${TEST_FILE_FOLDER}/capacitor_test_pa/cylinder_capacitor.pa1
         ${TEST_FILE_FOLDER}/capacitor_test_pa/cylinder_capacitor.pa2
-        ${TEST_FILE_FOLDER}/test_molecularstructure_reader.csv )
+        ${TEST_FILE_FOLDER}/test_molecularstructure_reader.json )
 file(COPY ${TEST_FILES} DESTINATION .)
 
 add_executable(test_FileIO ${SOURCE_FILES})

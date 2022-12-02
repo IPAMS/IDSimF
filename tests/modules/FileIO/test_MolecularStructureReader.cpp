@@ -37,10 +37,13 @@ TEST_CASE("Test molecular structure reader", "[ParticleSimulation][MolecularStru
     SECTION( "Molecular Structure reader: existing file should open without exception") {
         FileIO::MolecularStructureReader reader = FileIO::MolecularStructureReader();
         std::unordered_map<std::string,  std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection;
-        REQUIRE_NOTHROW(molecularStructureCollection = reader.readMolecularStructure("test_molecularstructure_reader.csv"));
+        REQUIRE_NOTHROW(molecularStructureCollection = reader.readMolecularStructure("molecularstructure.json"));
 
         auto it1 = molecularStructureCollection.find("Ar2");
         CHECK(it1 != molecularStructureCollection.end());
+        CHECK(it1->second->getAtomCount() == 2);
+        CHECK(isExactDoubleEqual(it1->second->getDiameter(), 4e-10));
+        CHECK(isExactDoubleEqual(it1->second->getAtoms().at(0)->getMass(), 39.948 * Core::AMU_TO_KG));
         auto it2 = molecularStructureCollection.find("He");
         CHECK(it2 != molecularStructureCollection.end());
     }

@@ -47,7 +47,7 @@ TEST_CASE("Basic test MD Interactions model", "[CollisionModels][MDInteractionsM
 
     double diameterHe = CollisionModel::MDInteractionsModel::DIAMETER_HE;
     FileIO::MolecularStructureReader reader = FileIO::MolecularStructureReader();
-    std::unordered_map<std::string,  std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection = reader.readMolecularStructure("test_molecularstructure_reader.csv");
+    std::unordered_map<std::string,  std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection = reader.readMolecularStructure("test_molecularstructure_reader.json");
     Core::Particle ion;
     ion.setMolecularStructure(molecularStructureCollection.at("Ar+"));
     ion.setVelocity(Core::Vector(600.0, 50.0, 0.0));

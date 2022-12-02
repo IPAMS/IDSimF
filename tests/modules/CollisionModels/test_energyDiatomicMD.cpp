@@ -41,7 +41,8 @@ TEST_CASE("Basic test MD energy conservation diatomic", "[CollisionModels][MDInt
 
     double diameterN2 = CollisionModel::MDInteractionsModelPreconstructed::DIAMETER_N2;
     FileIO::MolecularStructureReader reader = FileIO::MolecularStructureReader();
-    std::unordered_map<std::string,  std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection = reader.readMolecularStructure("test_molecularstructure_reader.csv");
+    std::unordered_map<std::string,  std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection = 
+                                                                    reader.readMolecularStructure("test_molecularstructure_reader.json");
     Core::Particle ion;
     ion.setMolecularStructure(molecularStructureCollection.at("Li+"));
     ion.setVelocity(Core::Vector(0.0, 0.0, 0.0));
