@@ -37,7 +37,7 @@ TEST_CASE("Test molecular structure reader", "[ParticleSimulation][MolecularStru
     SECTION( "Molecular Structure reader: existing file should open without exception") {
         FileIO::MolecularStructureReader reader = FileIO::MolecularStructureReader();
         std::unordered_map<std::string,  std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection;
-        REQUIRE_NOTHROW(molecularStructureCollection = reader.readMolecularStructure("molecularstructure.json"));
+        REQUIRE_NOTHROW(molecularStructureCollection = reader.readMolecularStructure("test_molecularstructure_reader.json"));
 
         auto it1 = molecularStructureCollection.find("Ar2");
         CHECK(it1 != molecularStructureCollection.end());
