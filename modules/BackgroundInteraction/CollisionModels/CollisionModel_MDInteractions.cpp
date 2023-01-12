@@ -727,7 +727,7 @@ void CollisionModel::MDInteractionsModel::forceFieldMD(std::vector<CollisionMode
     */ 
     for(auto& atomI : ion->getAtoms()){
         for(auto& atomJ : bgGas->getAtoms()){
-            
+
             // First contribution: Lennard-Jones potential 
             // This always contributes to the experienced force 
             Core::Vector absPosAtomI = ion->getComPos() + atomI->getRelativePosition();
@@ -765,21 +765,40 @@ void CollisionModel::MDInteractionsModel::forceFieldMD(std::vector<CollisionMode
             double distanceCubed = distanceSquared * sqrt(distanceSquared);
             double currentCharge = 0;
             // Check if one of the molecules is an ion and the other one is not
-            if(int(atomI->getCharge()/Core::ELEMENTARY_CHARGE) != 0 && 
+            if(isN2){
+                if(int(atomI->getCharge()/Core::ELEMENTARY_CHARGE) != 0 && 
+                moleculesPtr[1]->getIsIon() == false &&
+                moleculesPtr[1]->getIsDipole() == false &&
+                atomJ->getType() == CollisionModel::Atom::AtomType::COM){
+
+                    currentCharge = atomI->getCharge();
+
+                }else if (moleculesPtr[0]->getIsIon() == false && 
+                            int(atomJ->getCharge()/Core::ELEMENTARY_CHARGE) != 0 &&
+                            moleculesPtr[0]->getIsDipole() == false &&
+                            atomI->getType() == CollisionModel::Atom::AtomType::COM){
+
+                    currentCharge = atomJ->getCharge();
+
+                }
+            }else{
+                if(int(atomI->getCharge()/Core::ELEMENTARY_CHARGE) != 0 && 
                 moleculesPtr[1]->getIsIon() == false &&
                 moleculesPtr[1]->getIsDipole() == false &&
                 atomJ->getType() != CollisionModel::Atom::AtomType::COM){
 
-                currentCharge = atomI->getCharge();
+                    currentCharge = atomI->getCharge();
 
-            }else if (moleculesPtr[0]->getIsIon() == false && 
-                        int(atomJ->getCharge()/Core::ELEMENTARY_CHARGE) != 0 &&
-                        moleculesPtr[0]->getIsDipole() == false &&
-                        atomI->getType() != CollisionModel::Atom::AtomType::COM){
+                }else if (moleculesPtr[0]->getIsIon() == false && 
+                            int(atomJ->getCharge()/Core::ELEMENTARY_CHARGE) != 0 &&
+                            moleculesPtr[0]->getIsDipole() == false &&
+                            atomI->getType() != CollisionModel::Atom::AtomType::COM){
 
-                currentCharge = atomJ->getCharge();
+                    currentCharge = atomJ->getCharge();
 
+                }
             }
+            
             
             
             eField[0] += distance.x() * currentCharge / distanceCubed; // E-field in x
