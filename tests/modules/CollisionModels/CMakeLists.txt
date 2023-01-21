@@ -13,7 +13,8 @@ set(SOURCE_FILES
         test_MDInteractions.cpp
         test_Atom.cpp
         test_Molecule.cpp
-        test_MDVerlet.cpp)
+        test_MDVerlet.cpp
+        test_preconstructedMD.cpp)
 
 set(TEST_FILE_FOLDER ${CMAKE_SOURCE_DIR}/tests/testfields)
 set(TEST_FILES

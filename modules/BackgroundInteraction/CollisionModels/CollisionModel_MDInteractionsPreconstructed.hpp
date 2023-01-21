@@ -78,9 +78,58 @@ namespace CollisionModel{
             std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection);
 
         MDInteractionsModelPreconstructed(
+            double staticPressure,
+            double staticTemperature,
+            double collisionGasMassAmu,
+            double collisionGasDiameterM, 
+            double collisionGasPolarizabilityM3,
+            std::string collisionMolecule,
+            double integrationTime,
+            double subTimeStep,
+            double collisionRadiusScaling,
+            double angleThetaScaling, 
+            double spawnRadius,
+            std::unordered_map<std::string,
+            std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection, 
+            Core::Vector startPosition, 
+            Core::Vector startRotation);
+
+        MDInteractionsModelPreconstructed(
             std::function<double(Core::Vector& location)> pressureFunction,
             std::function<Core::Vector(Core::Vector& location)> velocityFunction,
             double StaticTemperature,
+            double collisionGasMassAmu,
+            double collisionGasDiameterM, 
+            double collisionGasPolarizabilityM3,
+            std::string collisionMolecule,
+            double integrationTime,
+            double subTimeStep,
+            double collisionRadiusScaling,
+            double angleThetaScaling,
+            double spawnRadius,
+            std::unordered_map<std::string, std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection);
+
+        MDInteractionsModelPreconstructed(
+            std::function<double(Core::Vector& location)> pressureFunction,
+            std::function<Core::Vector(Core::Vector& location)> velocityFunction,
+            double StaticTemperature,
+            double collisionGasMassAmu,
+            double collisionGasDiameterM, 
+            double collisionGasPolarizabilityM3,
+            std::string collisionMolecule,
+            double integrationTime,
+            double subTimeStep,
+            double collisionRadiusScaling,
+            double angleThetaScaling,
+            double spawnRadius,
+            std::unordered_map<std::string, std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection,
+            Core::Vector startPosition, 
+            Core::Vector startRotation);
+
+        MDInteractionsModelPreconstructed(
+            std::function<double(Core::Vector& location)> pressureFunction,
+            std::function<Core::Vector(Core::Vector& location)> velocityFunction,
+            std::function<double(const Core::Vector&)> temperatureFunction,
             double collisionGasMassAmu,
             double collisionGasDiameterM, 
             double collisionGasPolarizabilityM3,
@@ -105,13 +154,17 @@ namespace CollisionModel{
             double collisionRadiusScaling,
             double angleThetaScaling,
             double spawnRadius,
-            std::unordered_map<std::string, std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection);
+            std::unordered_map<std::string, std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection, 
+            Core::Vector startPosition, 
+            Core::Vector startRotation);
 
         void setTrajectoryWriter(const std::string& trajectoryFileName,
                                  double trajectoryDistance,
                                  int startTimeStep=0);
 
         double calcSign(double value);
+
+        Core::Vector rotate(const Core::Vector &angles, Core::Vector& position);  
 
         void writeTrajectory(double distance, Core::Vector positionBgMolecule, Core::Vector velocityBgMolecule, 
                         std::vector<Core::Vector> forceMolecules, bool endOfTrajectory, std::ofstream* file, double time, double dt);
@@ -163,6 +216,8 @@ namespace CollisionModel{
         std::function<void(RS::CollisionConditions, Core::Particle&)> afterCollisionActionFunction_ = nullptr;
         ///< Function with things to do after a collision (e.g. collision based chemical reactions)
         std::unordered_map<std::string,  std::shared_ptr<MolecularStructure>> molecularStructureCollection_; ///< collection of all available molecular structures 
+        Core::Vector startPosition_ = Core::Vector(0.0, 0.0, 0.0); 
+        Core::Vector startRotation_ = Core::Vector(0.0, 0.0, 0.0);
     };
 
 }
