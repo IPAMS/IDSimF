@@ -301,16 +301,16 @@ void CollisionModel::MDInteractionsModel::modifyVelocity(Core::Particle& particl
         }while(circleVectorMagnitude > 1 || directionAngle >  angleThetaScaling_ * collisionTheta);
 
         bgMole.setComPos(circleVector);
-
+        double pi = 3.1415; 
         // rotate it randomly
-        bgMole.setAngles(Core::Vector(rndSource->uniformRealRndValue(),
-                                    rndSource->uniformRealRndValue(),
-                                    rndSource->uniformRealRndValue()));
+        bgMole.setAngles(Core::Vector(rndSource->uniformRealRndValue()*2*pi-pi,
+                                      rndSource->uniformRealRndValue()*2*pi-pi,
+                                      rndSource->uniformRealRndValue()*2*pi-pi));
 
         // Give molecule a random orientation:
-        mole.setAngles(Core::Vector(rndSource->uniformRealRndValue(),
-                                    rndSource->uniformRealRndValue(),
-                                    rndSource->uniformRealRndValue()));
+        mole.setAngles(Core::Vector(rndSource->uniformRealRndValue()*2*pi-pi,
+                                    rndSource->uniformRealRndValue()*2*pi-pi,
+                                    rndSource->uniformRealRndValue()*2*pi-pi));
 
         std::vector<CollisionModel::Molecule*> moleculesPtr = {&mole, &bgMole};
 
@@ -883,8 +883,8 @@ void CollisionModel::MDInteractionsModel::forceFieldMD(std::vector<CollisionMode
             quadrupoleForce.x(-currentCharge * partialChargeN2 * 1./Core::ELECTRIC_CONSTANT * distance.x() / distanceCubed );
             quadrupoleForce.y(-currentCharge * partialChargeN2 * 1./Core::ELECTRIC_CONSTANT * distance.y() / distanceCubed );
             quadrupoleForce.z(-currentCharge * partialChargeN2 * 1./Core::ELECTRIC_CONSTANT * distance.z() / distanceCubed );
-            forceMolecules[0] += quadrupoleForce;
-            forceMolecules[1] += quadrupoleForce * (-1);
+            // forceMolecules[0] += quadrupoleForce;
+            // forceMolecules[1] += quadrupoleForce * (-1);
 
         }
     }
