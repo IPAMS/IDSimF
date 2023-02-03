@@ -212,7 +212,11 @@ double CollisionModel::Atom::calcLJEps(const CollisionModel::Atom &atm1, const C
  * Calculates the approximate LJ interaction parameter sigma between two atoms 
  */
 double CollisionModel::Atom::calcLJSig(const CollisionModel::Atom &atm1, const CollisionModel::Atom &atm2){
-    return (atm1.getSigma() + atm2.getSigma()) / 2;
+    if(atm1.getType() == CollisionModel::Atom::AtomType::COM || atm2.getType() == CollisionModel::Atom::AtomType::COM){
+        return 0.0; 
+    }else{
+        return (atm1.getSigma() + atm2.getSigma()) / 2;
+    }
 }
 
 CollisionModel::Atom::AtomType CollisionModel::Atom::from_string(std::string str) {
