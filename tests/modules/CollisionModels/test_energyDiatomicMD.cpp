@@ -45,18 +45,20 @@ TEST_CASE("Basic test MD energy conservation diatomic", "[CollisionModels][MDInt
                                                                     reader.readMolecularStructure("test_molecularstructure_reader.json");
     Core::Particle ion;
     ion.setMolecularStructure(molecularStructureCollection.at("Li+"));
-    ion.setVelocity(Core::Vector(0.0, 0.0, 0.0));
+    ion.setVelocity(Core::Vector(1000.0, 0.0, 0.0));
     CollisionModel::MDInteractionsModelPreconstructed mdSim = CollisionModel::MDInteractionsModelPreconstructed(2000000, 298, 28, 
                                                                                     diameterN2,
                                                                                     1.7E-30, 
                                                                                     "N2", 
                                                                                     1e-9, 
                                                                                     1E-17, 
-                                                                                    2, 1, 
+                                                                                    3, 1, 
                                                                                     30e-10, 
-                                                                                    molecularStructureCollection);
+                                                                                    molecularStructureCollection, 
+                                                                                    Core::Vector(30.0e-10, 0.0, 0.0),
+                                                                                    Core::Vector(3.1415, 0.0, 0.0));
 
-    mdSim.setTrajectoryWriter("MD_collisions_preconstructed_trajectories.txt", 30e-10, 0);
+    mdSim.setTrajectoryWriter("MD_collisions_preconstructed_energy_trajectories.txt", 30e-10, 0);
     mdSim.updateModelTimestepParameters(1, 0);
     double dt = 2e-11;
     mdSim.modifyVelocity(ion, dt);
