@@ -202,7 +202,6 @@ int main(int argc, const char * argv[]) {
         std::unique_ptr<FileIO::Scalar_writer> voltageWriter;
         voltageWriter = std::make_unique<FileIO::Scalar_writer>(projectName+"_voltages.csv");
 
-
         // init simulation  =====================================================================
 
         // create and add simulation particles:
@@ -254,20 +253,33 @@ int main(int argc, const char * argv[]) {
         };
 
         auto accelerationFct =
-                [&potentialArrays, &totalFieldNow, potentialScale]
+                [&potentialArrays, &totalFieldNow, potentialScale, concentrationWriteInterval, paBounds]
                         (Core::Particle* particle, int /*particleIndex*/, SpaceCharge::FieldCalculator &fieldCalculator,
-                                double /*time*/, int /*timestep*/){
+                                double /*time*/, int timestep){
                     Core::Vector fEfield(0, 0, 0);
                     Core::Vector pos = particle->getLocation();
                     double particleCharge = particle->getCharge();
 
                     for(size_t i=0; i<potentialArrays.size(); i++) {
+                        /*if (potentialArrays[i]->isElectrode(pos.x(), pos.y(), pos.z())) {
+                            std::cout << "is electrode" << " , " << std::endl;
+                        }*/
                         Core::Vector paField = potentialArrays[i]->getField(pos.x(), pos.y(), pos.z());
                         Core::Vector paEffectiveField = paField * totalFieldNow[i] * potentialScale;
+                        /*if (timestep%1000 == 0) {
+                            std::cout << "tot field i:"<<i<< ": " <<totalFieldNow[i] <<" , ";
+                            std::cout << "effective field i:"<<i<< ": " << paEffectiveField << " , ";
+                            std::cout << "pa field i:"<<i<< ": " <<paField << std::endl;
+                            //std::cout << "pa bounds:" << paBounds[3] << std::endl;
+                        }*/
 
                         fEfield = fEfield+paEffectiveField;
                     }
                     particle->setFloatAttribute("effectiveField", fEfield.magnitude());
+                    if (timestep%50000==0){
+                        std::cout << "particle effective Field: " <<particle->getFloatAttribute("effectiveField") << " , ";
+                        std::cout << "pa Field: " <<potentialArrays[0]->getField(2.5/1000, 0, 0) << std::endl;
+                    }
                     return (fEfield*particleCharge/particle->getMass());
                 };
 
