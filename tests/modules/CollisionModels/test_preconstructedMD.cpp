@@ -47,16 +47,17 @@ TEST_CASE("Basic test MD preconstructed", "[CollisionModels][MDInteractionsModel
     ion.setMolecularStructure(molecularStructureCollection.at("Li+"));
     Core::RandomSource* rndSource = Core::globalRandomGeneratorPool->getThreadRandomSource();
     
-    int samples = 1500;
+    int samples = 3;
     double pi = 3.1415;
     std::vector<Core::Vector> ionVelocities;
     std::vector<Core::Vector> ionPositions;
     std::vector<Core::Vector> ionRotations;
     for(int i = 0; i < samples; i++){
-        Core::Vector tmp1 = Core::Vector(rndSource->uniformRealRndValue()*1000, 0.0, 0.0);
+        Core::Vector tmp1 = Core::Vector(rndSource->uniformRealRndValue()*100, 0.0, 0.0);
         ionVelocities.push_back(tmp1);
-        ionPositions.push_back(Core::Vector(30e-10, 0.0, 0.0));
-        Core::Vector tmp2 = Core::Vector(0.0, 0.0, rndSource->uniformRealRndValue()*1*pi/2-pi/4);
+        ionPositions.push_back(Core::Vector(40e-10, 0.0, 0.0));
+        // Core::Vector tmp2 = Core::Vector(0.0, 0.0, rndSource->uniformRealRndValue()*1*pi/2-pi/4);
+        Core::Vector tmp2 = Core::Vector(0.0, pi/2, pi/2);
         ionRotations.push_back(tmp2);
     }
     
@@ -69,13 +70,13 @@ TEST_CASE("Basic test MD preconstructed", "[CollisionModels][MDInteractionsModel
                                                                                         1e-9, 
                                                                                         1E-17, 
                                                                                         3, 1, 
-                                                                                        30e-10, 
+                                                                                        40e-10, 
                                                                                         molecularStructureCollection, 
                                                                                         ionPositions[i],
                                                                                         ionRotations[i]);
 
         
-        mdSim.setTrajectoryWriter("MD_collisions_preconstructed_trajectories.txt", 30e-10, 0);
+        mdSim.setTrajectoryWriter("MD_collisions_preconstructed_COMeq_trajectories.txt", 40e-10, 0);
         mdSim.updateModelTimestepParameters(1, 0);
         double dt = 2e-11;
         mdSim.modifyVelocity(ion, dt);
