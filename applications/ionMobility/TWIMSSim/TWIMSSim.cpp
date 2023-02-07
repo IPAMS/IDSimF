@@ -247,7 +247,7 @@ int main(int argc, const char * argv[]) {
         std::vector<double> totalFieldNow(potentialArrays.size(), 0.0);
 
         auto paVoltageFct = [&potentialArrays, &WaveForm, phaseShift,
-                             wavePeriod, waveAmplitude, omega, V_rf, &totalFieldNow](double time)->std::vector<double> {
+                             wavePeriod, waveAmplitude, omega, V_rf, &totalFieldNow](double time){
             for(size_t i=0; i<potentialArrays.size()-2; i++) {
                 double period = std::fmod(time, wavePeriod) / wavePeriod;
                 double shiftedPeriod = std::fmod(period + phaseShift[i], 1.0);
