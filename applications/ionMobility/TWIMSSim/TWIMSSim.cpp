@@ -56,19 +56,6 @@
 const std::string key_ChemicalIndex = "keyChemicalIndex";
 enum CollisionType {SDS, HS, MD, NO_COLLISION};
 
-/*std::vector<double> &paVoltageFct (std::vector<std::unique_ptr<ParticleSimulation::SimionPotentialArray>> potentialArrays,
-                                   std::string WaveformFilename,
-                                std::vector<double> phaseShift, double wavePeriod, double waveAmplitude, double time) {
-    auto WaveForm = ParticleSimulation::SampledWaveform(WaveformFilename);
-    std::vector<double> currentVoltages;
-    for(size_t i=0; i<potentialArrays.size(); i++) {
-        double period = std::fmod(time, wavePeriod) / wavePeriod;
-        double shiftedPeriod = std::fmod(period + phaseShift[i], 1.0);
-        currentVoltages.push_back(WaveForm.getInterpolatedValue(shiftedPeriod) * waveAmplitude);
-    }
-    return currentVoltages;
-} */
-
 int main(int argc, const char * argv[]) {
 
     try {
