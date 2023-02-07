@@ -308,7 +308,7 @@ void CollisionModel::MDInteractionsModelPreconstructed::modifyAcceleration(Core:
 }
 
 void CollisionModel::MDInteractionsModelPreconstructed::modifyVelocity(Core::Particle& particle, double dt) {
-    Core::RandomSource* rndSource = Core::globalRandomGeneratorPool->getThreadRandomSource();
+    // Core::RandomSource* rndSource = Core::globalRandomGeneratorPool->getThreadRandomSource();
 
     // Calculate collision cross section between particle and collision gas:
     double collisionRadius = collisionRadiusScaling_*(particle.getDiameter() + collisionGasDiameter_m_)/2.0;
@@ -382,11 +382,11 @@ void CollisionModel::MDInteractionsModelPreconstructed::modifyVelocity(Core::Par
         double  vrStdevBgMolecule = std::sqrt( Core::K_BOLTZMANN * temperature_K / (collisionGasMass_kg_) );
     
         Core::Vector velocityBgMolecule = { (mole.getComPos().x()-bgMole.getComPos().x())/fabs(mole.getComPos().x()-bgMole.getComPos().x()) * 
-                                            rndSource->normalRealRndValue() * vrStdevBgMolecule - particle.getVelocity().x(),
+                                            0.75 * vrStdevBgMolecule - particle.getVelocity().x(),
                                             (mole.getComPos().y()-bgMole.getComPos().y())/fabs(mole.getComPos().y()-bgMole.getComPos().y()) * 
-                                            rndSource->normalRealRndValue() * vrStdevBgMolecule - particle.getVelocity().y(),
+                                            0.75 * vrStdevBgMolecule - particle.getVelocity().y(),
                                             (mole.getComPos().z()-bgMole.getComPos().z())/fabs(mole.getComPos().z()-bgMole.getComPos().z()) * 
-                                            rndSource->normalRealRndValue() * vrStdevBgMolecule - particle.getVelocity().z()};
+                                            0.75 * vrStdevBgMolecule - particle.getVelocity().z()};
         if(bgMole.getComPos().x() == 0){
             velocityBgMolecule.x(0);
         }
@@ -434,6 +434,8 @@ void CollisionModel::MDInteractionsModelPreconstructed::modifyVelocity(Core::Par
         //                             rndSource->uniformRealRndValue(),
         //                             rndSource->uniformRealRndValue()));
 
+
+
         std::vector<CollisionModel::Molecule*> moleculesPtr = {&mole, &bgMole};
 
         // possible check for energy conservation
@@ -454,9 +456,8 @@ void CollisionModel::MDInteractionsModelPreconstructed::modifyVelocity(Core::Par
         // Core::Vector mole_originalComVel = mole.getComVel();
 
         // trajectorySuccess = leapfrogIntern(moleculesPtr, timeStep, finalTime, collisionRadius);
-        std::cout << "Before Integration" << std::endl;
         trajectorySuccess = rk4InternAdaptiveStep(moleculesPtr, timeStep, finalTime, collisionRadius);
-        std::cout << "After Integration" << std::endl;
+
 
         double endEnergy = 0;
         for(auto* molecule : moleculesPtr){
@@ -471,7 +472,7 @@ void CollisionModel::MDInteractionsModelPreconstructed::modifyVelocity(Core::Par
             particle.setVelocity(mole.getComVel() + particle.getVelocity());
         }
         ++iterations;
-        std::cout << "TEST" << std::endl;
+
     }while(!trajectorySuccess && iterations < 1);
 
     if(trajectorySuccess == false){
@@ -933,7 +934,7 @@ void CollisionModel::MDInteractionsModelPreconstructed::forceFieldMD(std::vector
             }
 
 
-            if(distance.magnitude() > 0.2e-10){
+            if(distance.magnitude() > 0e-10){
                 damping = false;
                 eField[0] += distance.x() * currentCharge / distanceCubed; // E-field in x
                 eField[1] += distance.y() * currentCharge / distanceCubed; // E-field in y

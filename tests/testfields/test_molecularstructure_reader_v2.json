@@ -410,7 +410,7 @@
 		{
 			"type":"COM", 
 			"posx":0, 
-			"posy":0, 
+			"posy":0.000000000001, 
 			"posz":0, 
 			"mass":0, 
 			"charge":0, 
