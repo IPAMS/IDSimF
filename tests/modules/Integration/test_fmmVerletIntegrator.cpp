@@ -46,7 +46,7 @@
 template<class solverType>
         void runTestSimulation(std::vector<Core::uniquePartPtr> &particles,
                                std::vector<Core::Particle*> &particlesPtrs,
-                               std::size_t nParticles, int timeSteps, double dt
+                               std::size_t nParticles, unsigned int timeSteps, double dt
         ){
             double ionAcceleration = 10.0; //((1000V / 100mm) * elementary charge) / 100 amu = 9.64e9 m/s^2
 
