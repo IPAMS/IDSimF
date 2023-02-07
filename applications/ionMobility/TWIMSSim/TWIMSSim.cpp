@@ -97,6 +97,10 @@ int main(int argc, const char * argv[]) {
         double waveFrequency = simConf->doubleParameter("wave_frequency_hz");
         //double waveSpeed = simConf->doubleParameter("wave_Speed_m/s");
 
+        double f_rf = simConf->doubleParameter("confining_RF_frequency_Hz");
+        double omega = f_rf*2.0*M_PI;
+        double V_rf = simConf->doubleParameter("confining_RF_amplitude_V");
+
         //geometric parameters:
         double startWidthX_m = simConf->doubleParameter("start_width_x_mm")/1000.0;
         double startWidthY_m = simConf->doubleParameter("start_width_y_mm")/1000.0;
@@ -210,7 +214,7 @@ int main(int argc, const char * argv[]) {
         std::vector<Core::Particle*> particlesPtrs;
         std::vector<std::vector<double>> trajectoryAdditionalParams;
 
-        Core::Vector initCorner(2.5e-04, -startWidthY_m/2.0, -startWidthZ_m/2.0);
+        Core::Vector initCorner(5.0e-03, -startWidthY_m/2.0, -startWidthZ_m/2.0);
         Core::Vector initBoxSize(startWidthX_m, startWidthY_m, startWidthZ_m);
 
         for (std::size_t i = 0; i<nParticles.size(); i++) {
@@ -243,13 +247,15 @@ int main(int argc, const char * argv[]) {
         std::vector<double> totalFieldNow(potentialArrays.size(), 0.0);
 
         auto paVoltageFct = [&potentialArrays, &WaveForm, phaseShift,
-                             wavePeriod, waveAmplitude, &totalFieldNow](double time)->std::vector<double> {
-            //std::vector<double> currentVoltages;
-            for(size_t i=0; i<potentialArrays.size(); i++) {
+                             wavePeriod, waveAmplitude, omega, V_rf, &totalFieldNow](double time)->std::vector<double> {
+            for(size_t i=0; i<potentialArrays.size()-2; i++) {
                 double period = std::fmod(time, wavePeriod) / wavePeriod;
                 double shiftedPeriod = std::fmod(period + phaseShift[i], 1.0);
                 totalFieldNow[i]=(WaveForm.getInterpolatedValue(shiftedPeriod) * waveAmplitude);
             }
+
+            totalFieldNow[potentialArrays.size()-2] = sin(time*omega) * V_rf;
+            totalFieldNow[potentialArrays.size()-1] = -totalFieldNow[potentialArrays.size()-2];
         };
 
         auto accelerationFct =
@@ -257,29 +263,20 @@ int main(int argc, const char * argv[]) {
                         (Core::Particle* particle, int /*particleIndex*/, SpaceCharge::FieldCalculator &fieldCalculator,
                                 double /*time*/, int timestep){
                     Core::Vector fEfield(0, 0, 0);
-                    Core::Vector pos = particle->getLocation();
+                     Core::Vector pos = particle->getLocation();
                     double particleCharge = particle->getCharge();
 
                     for(size_t i=0; i<potentialArrays.size(); i++) {
-                        /*if (potentialArrays[i]->isElectrode(pos.x(), pos.y(), pos.z())) {
-                            std::cout << "is electrode" << " , " << std::endl;
-                        }*/
                         Core::Vector paField = potentialArrays[i]->getField(pos.x(), pos.y(), pos.z());
                         Core::Vector paEffectiveField = paField * totalFieldNow[i] * potentialScale;
-                        /*if (timestep%1000 == 0) {
-                            std::cout << "tot field i:"<<i<< ": " <<totalFieldNow[i] <<" , ";
-                            std::cout << "effective field i:"<<i<< ": " << paEffectiveField << " , ";
-                            std::cout << "pa field i:"<<i<< ": " <<paField << std::endl;
-                            //std::cout << "pa bounds:" << paBounds[3] << std::endl;
-                        }*/
 
                         fEfield = fEfield+paEffectiveField;
                     }
                     particle->setFloatAttribute("effectiveField", fEfield.magnitude());
-                    if (timestep%50000==0){
+                    /*if (timestep%50000==0){
                         std::cout << "particle effective Field: " <<particle->getFloatAttribute("effectiveField") << " , ";
                         std::cout << "pa Field: " <<potentialArrays[0]->getField(2.5/1000, 0, 0) << std::endl;
-                    }
+                    }*/
                     return (fEfield*particleCharge/particle->getMass());
                 };
 
@@ -314,13 +311,13 @@ int main(int argc, const char * argv[]) {
         };
 
         auto otherActionsFct = [&ionsInactive, &startSplatTracker](
-                Core::Vector& /*newPartPos*/, Core::Particle* particle,
+                Core::Vector& newPartPos, Core::Particle* particle,
                 int /*particleIndex*/,  double time, int /*timestep*/) {
-            Core::Vector pos = particle->getLocation();
-            if (pos.x() == 0) {
+            //Core::Vector pos = particle->getLocation();
+            if (newPartPos.x() < 0) {
                 particle->setActive(false);
-                particle->setSplatTime(time);
-                startSplatTracker.particleSplat(particle, time);
+                /*particle->setSplatTime(time);
+                startSplatTracker.particleSplat(particle, time);*/
                 ionsInactive++;
             }
         };
