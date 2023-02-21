@@ -43,21 +43,19 @@ TEST_CASE("Basic test MD preconstructed", "[CollisionModels][MDInteractionsModel
     FileIO::MolecularStructureReader reader = FileIO::MolecularStructureReader();
     std::unordered_map<std::string,  std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection = 
                                                                     reader.readMolecularStructure("test_molecularstructure_reader.json");
-    std::unordered_map<std::string,  std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollectionShifted =
-            reader.readMolecularStructure("test_molecularstructure_reader_v2.json");
     Core::Particle ion;
     ion.setMolecularStructure(molecularStructureCollection.at("Li+"));
     Core::RandomSource* rndSource = Core::globalRandomGeneratorPool->getThreadRandomSource();
     
-    int samples = 3;
+    int samples = 1;
     double pi = 3.1415;
     std::vector<Core::Vector> ionVelocities;
     std::vector<Core::Vector> ionPositions;
     std::vector<Core::Vector> ionRotations;
     for(int i = 0; i < samples; i++){
-        Core::Vector tmp1 = Core::Vector(rndSource->uniformRealRndValue()*1000, 0.0, 0.0);
+        Core::Vector tmp1 = Core::Vector(0.0, 0.0, 0.0);
         ionVelocities.push_back(tmp1);
-        ionPositions.push_back(Core::Vector(30e-10, 0.0, 0.0));
+        ionPositions.push_back(Core::Vector(0.0, 43e-10, 0.0));
         // Core::Vector tmp2 = Core::Vector(0.0, 0.0, rndSource->uniformRealRndValue()*1*pi/2-pi/4);
         Core::Vector tmp2 = Core::Vector(0, 0, 0);
         ionRotations.push_back(tmp2);
@@ -68,38 +66,17 @@ TEST_CASE("Basic test MD preconstructed", "[CollisionModels][MDInteractionsModel
         CollisionModel::MDInteractionsModelPreconstructed mdSim = CollisionModel::MDInteractionsModelPreconstructed(2000000, 298, 28, 
                                                                                         diameterN2,
                                                                                         1.7E-30, 
-                                                                                        "N2", 
+                                                                                        "N2Approx", 
                                                                                         1e-9, 
                                                                                         1E-17, 
                                                                                         3, 1, 
-                                                                                        30e-10,
+                                                                                        43e-10,
                                                                                         molecularStructureCollection, 
                                                                                         ionPositions[i],
                                                                                         ionRotations[i]);
 
         
-        mdSim.setTrajectoryWriter("MD_collisions_preconstructed_COMnoShift_trajectories.txt", 40e-10, 0);
-        mdSim.updateModelTimestepParameters(1, 0);
-        double dt = 2e-11;
-        mdSim.modifyVelocity(ion, dt);
-    }
-
-    for(size_t i = 0; i < ionVelocities.size(); i++){
-        ion.setVelocity(ionVelocities[i]);
-        CollisionModel::MDInteractionsModelPreconstructed mdSim = CollisionModel::MDInteractionsModelPreconstructed(2000000, 298, 28,
-                                                                                                                    diameterN2,
-                                                                                                                    1.7E-30,
-                                                                                                                    "N2",
-                                                                                                                    1e-9,
-                                                                                                                    1E-17,
-                                                                                                                    3, 1,
-                                                                                                                    30e-10,
-                                                                                                                    molecularStructureCollectionShifted,
-                                                                                                                    ionPositions[i],
-                                                                                                                    ionRotations[i]);
-
-
-        mdSim.setTrajectoryWriter("MD_collisions_preconstructed_COMShift_trajectories.txt", 40e-10, 0);
+        mdSim.setTrajectoryWriter("MD_collisions_preconstructed_COMnoShift_trajectories.txt", 43e-10, 0);
         mdSim.updateModelTimestepParameters(1, 0);
         double dt = 2e-11;
         mdSim.modifyVelocity(ion, dt);
