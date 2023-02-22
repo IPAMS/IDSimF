@@ -525,5 +525,46 @@
 
 	]
 
+},
+{
+	"name":"CO2+",
+	"diameter":2.4,
+	"atoms":[
+		{
+			"type":"C", 
+			"posx":0, 
+			"posy":0, 
+			"posz":0, 
+			"mass":12.011, 
+			"charge":0.545, 
+			"partCharge":0, 
+			"LJsigma":1.35417, 
+			"LJeps":0.2895328
+		}, 
+		{
+			"type":"O", 
+			"posx":0, 
+			"posy":0, 
+			"posz":1.2674, 
+			"mass":15.999, 
+			"charge":0.228, 
+			"partCharge":0, 
+			"LJsigma":2.3, 
+			"LJeps":0.12
+		},
+		{
+			"type":"O", 
+			"posx":0, 
+			"posy":0, 
+			"posz":-1.2674, 
+			"mass":15.999, 
+			"charge":0.228, 
+			"partCharge":0, 
+			"LJsigma":2.3, 
+			"LJeps":0.12
+		}
+
+	]
+
 }
 ]
