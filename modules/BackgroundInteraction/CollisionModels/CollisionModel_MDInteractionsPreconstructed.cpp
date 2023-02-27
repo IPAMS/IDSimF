@@ -398,7 +398,7 @@ void CollisionModel::MDInteractionsModelPreconstructed::modifyVelocity(Core::Par
         }
 
         rotate(startRotation_, velocityBgMolecule);
-        velocityBgMolecule = Core::Vector(0.0, -1543.5119213384821, 0.0);
+        velocityBgMolecule = Core::Vector(-8.9232907224423748e-5, -879.91866989450602, 0.0);
         bgMole.setComVel(velocityBgMolecule);
 
         // // calculate random point on sphere
@@ -821,14 +821,18 @@ bool CollisionModel::MDInteractionsModelPreconstructed::rk4InternAdaptiveStep(st
                 writeTrajectory(distance, molecule->getComPos(), molecule->getComVel(),forceMolecules, false, trajectoryOutputStream_.get(), integrationTimeSum, dt,
                 moleculesPtr[0]->getComPos(), moleculesPtr[1]->getAtoms().at(0)->getRelativePosition(), moleculesPtr[1]->getAtoms().at(1)->getRelativePosition());
             }
+            if(molecule->getMolecularStructureName() == collisionMolecule_){
+                molecule->setComPos(newComPosOrder4[i]);
+                molecule->setComVel(newComVelOrder4[i]); 
+            }else{
+                molecule->setComPos(Core::Vector(0.0, 0.0, 0.0));
+                molecule->setComVel(Core::Vector(0.0, 0.0, 0.0)); 
+            }
             
-            molecule->setComPos(newComPosOrder4[i]);
-            molecule->setComVel(newComVelOrder4[i]); 
             i++;
         }
         steps++;
         dt = dt * globalDelta;
-        std::cout << dt << std::endl;
         
 
         size_t index = 0;
@@ -916,23 +920,24 @@ void CollisionModel::MDInteractionsModelPreconstructed::forceFieldMD(std::vector
             double currentCharge = 0;
             // Check if one of the molecules is an ion and the other one is not
             if(isN2){
-                if(int(atomI->getCharge()/Core::ELEMENTARY_CHARGE) != 0 &&
+                if(ceil(fabs(atomI->getCharge()/Core::ELEMENTARY_CHARGE)) != 0 &&
                    atomJ->getType() == CollisionModel::Atom::AtomType::COM){
 
                     currentCharge = atomI->getCharge();
 
-                }else if (int(atomJ->getCharge()/Core::ELEMENTARY_CHARGE) != 0 &&
+                }else if (ceil(fabs(atomJ->getCharge()/Core::ELEMENTARY_CHARGE)) != 0 &&
                           atomI->getType() == CollisionModel::Atom::AtomType::COM){
 
                     currentCharge = atomJ->getCharge();
+
                 }
             }else{
-                if(int(atomI->getCharge()/Core::ELEMENTARY_CHARGE) != 0 &&
+                if(ceil(fabs(atomI->getCharge()/Core::ELEMENTARY_CHARGE)) != 0 &&
                    atomJ->getType() != CollisionModel::Atom::AtomType::COM){
 
                     currentCharge = atomI->getCharge();
 
-                }else if (int(atomJ->getCharge()/Core::ELEMENTARY_CHARGE) != 0 &&
+                }else if (ceil(fabs(atomJ->getCharge()/Core::ELEMENTARY_CHARGE)) != 0 &&
                           atomI->getType() != CollisionModel::Atom::AtomType::COM){
 
                     currentCharge = atomJ->getCharge();
@@ -940,27 +945,27 @@ void CollisionModel::MDInteractionsModelPreconstructed::forceFieldMD(std::vector
                 }
             }
             
-            if(distance.magnitudeSquared() > 1e-12){
-                eField[0] += distance.x() * currentCharge / distanceCubed; // E-field in x
-                eField[1] += distance.y() * currentCharge / distanceCubed; // E-field in y
-                eField[2] += distance.z() * currentCharge / distanceCubed; // E-field in z
+            // if(distance.magnitudeSquared() > 1e-12){
+            eField[0] += distance.x() * currentCharge / distanceCubed; // E-field in x
+            eField[1] += distance.y() * currentCharge / distanceCubed; // E-field in y
+            eField[2] += distance.z() * currentCharge / distanceCubed; // E-field in z
 
-                // derivative x to x
-                eFieldDerivative[0] += currentCharge / distanceCubed -
-                                        3 * currentCharge * distance.x() * distance.x() / (distanceCubed * distanceSquared);
-                // derivative x to y
-                eFieldDerivative[1] += -3 * currentCharge * distance.x() * distance.y() / (distanceCubed * distanceSquared);
-                // derivative y to y
-                eFieldDerivative[2] += currentCharge / distanceCubed -
-                                        3 * currentCharge * distance.y() * distance.y() / (distanceCubed * distanceSquared);
-                // derivative y to z
-                eFieldDerivative[3] += -3 * currentCharge * distance.y() * distance.z() / (distanceCubed * distanceSquared);
-                // derivative z to z
-                eFieldDerivative[4] += currentCharge / distanceCubed -
-                                        3 * currentCharge * distance.z() * distance.z() / (distanceCubed * distanceSquared);
-                // derivative x to z
-                eFieldDerivative[5] += -3 * currentCharge * distance.x() * distance.z() / (distanceCubed * distanceSquared);
-            }
+            // derivative x to x
+            eFieldDerivative[0] += currentCharge / distanceCubed -
+                                    3 * currentCharge * distance.x() * distance.x() / (distanceCubed * distanceSquared);
+            // derivative x to y
+            eFieldDerivative[1] += -3 * currentCharge * distance.x() * distance.y() / (distanceCubed * distanceSquared);
+            // derivative y to y
+            eFieldDerivative[2] += currentCharge / distanceCubed -
+                                    3 * currentCharge * distance.y() * distance.y() / (distanceCubed * distanceSquared);
+            // derivative y to z
+            eFieldDerivative[3] += -3 * currentCharge * distance.y() * distance.z() / (distanceCubed * distanceSquared);
+            // derivative z to z
+            eFieldDerivative[4] += currentCharge / distanceCubed -
+                                    3 * currentCharge * distance.z() * distance.z() / (distanceCubed * distanceSquared);
+            // derivative x to z
+            eFieldDerivative[5] += -3 * currentCharge * distance.x() * distance.z() / (distanceCubed * distanceSquared);
+            // }
             
             
 
@@ -1008,14 +1013,14 @@ void CollisionModel::MDInteractionsModelPreconstructed::forceFieldMD(std::vector
             // Fourth contribution: quadrupole moment if background gas is N2
             // This requires an ion and N2 to be present
             double partialChargeN2 = 0;
-            if(int(atomI->getCharge()/Core::ELEMENTARY_CHARGE) != 0 && 
+            if(ceil(fabs(atomI->getCharge()/Core::ELEMENTARY_CHARGE)) != 0 && 
                 (isN2 == true || isN2Approx == true)){
 
                 currentCharge = atomI->getCharge();
                 partialChargeN2 = atomJ->getPartCharge();
 
             }else if ((isN2 == true || isN2Approx == true) && 
-                        int(atomJ->getCharge()/Core::ELEMENTARY_CHARGE) != 0){
+                        ceil(fabs(atomJ->getCharge()/Core::ELEMENTARY_CHARGE)) != 0){
 
                 currentCharge = atomJ->getCharge();
                 partialChargeN2 = atomI->getPartCharge();

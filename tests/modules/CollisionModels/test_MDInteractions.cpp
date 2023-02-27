@@ -66,9 +66,9 @@ TEST_CASE("Basic test MD Interactions model", "[CollisionModels][MDInteractionsM
     mdSim.modifyVelocity(ion, dt);
 
 
-    CHECK(Approx(ion.getVelocity().x()).margin(0.2) ==  593.6795287298);
-    CHECK(Approx(ion.getVelocity().y()).margin(0.2) ==  53.8155062733);
-    CHECK(Approx(ion.getVelocity().z()).margin(0.2) ==  5.469814864);
+    CHECK(Approx(ion.getVelocity().x()).margin(0.2) ==  571.6061131884);
+    CHECK(Approx(ion.getVelocity().y()).margin(0.2) ==  69.5379461517);
+    CHECK(Approx(ion.getVelocity().z()).margin(0.2) ==  23.4734450087);
 
 
     int timestep = 0;
@@ -80,9 +80,9 @@ TEST_CASE("Basic test MD Interactions model", "[CollisionModels][MDInteractionsM
         time += dt;
     }
 
-    CHECK(Approx(ion.getVelocity().x()).margin(0.8) ==  590.3496961893);
-    CHECK(Approx(ion.getVelocity().y()).margin(0.8) ==  43.6386759824);
-    CHECK(Approx(ion.getVelocity().z()).margin(0.2) ==  5.1753414786);
+    CHECK(Approx(ion.getVelocity().x()).margin(0.8) ==  508.9838391721);
+    CHECK(Approx(ion.getVelocity().y()).margin(0.8) ==  88.200298229);
+    CHECK(Approx(ion.getVelocity().z()).margin(0.2) ==  9.8095356137);
 
     std::string readBack_early = readTextFile("MD_collisions_microscopic_trajectories_test.txt");
     CHECK(readBack_early == "");
@@ -113,7 +113,7 @@ TEST_CASE("Basic test MD Interactions model", "[CollisionModels][MDInteractionsM
             // for(auto j : values){
             //     std::cout << j << std::endl;
             // }
-            std::vector<double> compareValues = {-0.40036e-9, 0.62538e-09, -2.34314e-10, 2.78511e-09, 
+            std::vector<double> compareValues = {0.28036e-8, 0.62538e-09, -2.34314e-10, 2.78511e-09, 
                                                 6.47741e-13, -342.483, -1132.27, -375.806, 8.4005e-17, 
                                                 -5.37867e-16, -1.70928e-16};
             std::vector<double> compareMargins = {2e-10, 2e-9, 2e-9, 2e-9, 2e-7};

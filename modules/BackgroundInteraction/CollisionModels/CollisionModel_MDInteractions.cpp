@@ -796,27 +796,25 @@ void CollisionModel::MDInteractionsModel::forceFieldMD(std::vector<CollisionMode
             double currentCharge = 0;
             // Check if one of the molecules is an ion and the other one is not
             if(isN2){
-                if(int(atomI->getCharge()/Core::ELEMENTARY_CHARGE) != 0 && 
-                atomJ->getType() == CollisionModel::Atom::AtomType::COM){
+                if(ceil(fabs(atomI->getCharge()/Core::ELEMENTARY_CHARGE)) != 0 &&
+                   atomJ->getType() == CollisionModel::Atom::AtomType::COM){
 
                     currentCharge = atomI->getCharge();
 
-
-                }else if (int(atomJ->getCharge()/Core::ELEMENTARY_CHARGE) != 0 &&
-                            atomI->getType() == CollisionModel::Atom::AtomType::COM){
+                }else if (ceil(fabs(atomJ->getCharge()/Core::ELEMENTARY_CHARGE)) != 0 &&
+                          atomI->getType() == CollisionModel::Atom::AtomType::COM){
 
                     currentCharge = atomJ->getCharge();
 
-
                 }
             }else{
-                if(int(atomI->getCharge()/Core::ELEMENTARY_CHARGE) != 0 &&
-                atomJ->getType() != CollisionModel::Atom::AtomType::COM){
+                if(ceil(fabs(atomI->getCharge()/Core::ELEMENTARY_CHARGE)) != 0 &&
+                   atomJ->getType() != CollisionModel::Atom::AtomType::COM){
 
                     currentCharge = atomI->getCharge();
 
-                }else if (int(atomJ->getCharge()/Core::ELEMENTARY_CHARGE) != 0 &&
-                            atomI->getType() != CollisionModel::Atom::AtomType::COM){
+                }else if (ceil(fabs(atomJ->getCharge()/Core::ELEMENTARY_CHARGE)) != 0 &&
+                          atomI->getType() != CollisionModel::Atom::AtomType::COM){
 
                     currentCharge = atomJ->getCharge();
 
@@ -889,19 +887,17 @@ void CollisionModel::MDInteractionsModel::forceFieldMD(std::vector<CollisionMode
             // Fourth contribution: quadrupole moment if background gas is N2 
             // This requires an ion and N2 to be present 
             double partialChargeN2 = 0; 
-            if(int(atomI->getCharge()/Core::ELEMENTARY_CHARGE) != 0 && 
+            if(ceil(fabs(atomI->getCharge()/Core::ELEMENTARY_CHARGE)) != 0 && 
                 (isN2 == true || isN2Approx == true)){
 
                 currentCharge = atomI->getCharge();
                 partialChargeN2 = atomJ->getPartCharge();
 
             }else if ((isN2 == true || isN2Approx == true) && 
-                        int(atomJ->getCharge()/Core::ELEMENTARY_CHARGE) != 0){
+                        ceil(fabs(atomJ->getCharge()/Core::ELEMENTARY_CHARGE)) != 0){
 
                 currentCharge = atomJ->getCharge();
                 partialChargeN2 = atomI->getPartCharge();
-
-        
             }
             Core::Vector quadrupoleForce;
             quadrupoleForce.x(-currentCharge * partialChargeN2 * 1./Core::ELECTRIC_CONSTANT * distance.x() / distanceCubed );
@@ -914,7 +910,6 @@ void CollisionModel::MDInteractionsModel::forceFieldMD(std::vector<CollisionMode
     }
 
     // add the C4 ion-induced dipole force contribution 
-    
     Core::Vector ionInducedForce;
     if(isN2Approx){
         ionInducedForce.x(1./(Core::ELECTRIC_CONSTANT) * collisionGasPolarizability_m3_/2 * 
