@@ -387,25 +387,25 @@
 	"atoms":[
 		{
 			"type":"N", 
-			"posx":0, 
-			"posy":0.54, 
+			"posx":0.54, 
+			"posy":0, 
 			"posz":0, 
 			"mass":14.0067, 
 			"charge":0, 
 			"partCharge":-0.4825, 
-			"LJsigma":1.1, 
-			"LJeps":0.711
+			"LJsigma":2.5, 
+			"LJeps":2.711
 		}, 
 		{
 			"type":"N", 
-			"posx":0, 
-			"posy":-0.54, 
+			"posx":-0.54, 
+			"posy":0, 
 			"posz":0, 
 			"mass":14.0067, 
 			"charge":0, 
 			"partCharge":-0.4825, 
-			"LJsigma":1.1, 
-			"LJeps":0.711
+			"LJsigma":2.5, 
+			"LJeps":2.711
 		},
 		{
 			"type":"COM", 
@@ -543,25 +543,25 @@
 		}, 
 		{
 			"type":"O", 
-			"posx":0, 
+			"posx":1.2674, 
 			"posy":0, 
-			"posz":1.2674, 
+			"posz":0, 
 			"mass":15.999, 
 			"charge":0.228, 
 			"partCharge":0, 
 			"LJsigma":2.3, 
-			"LJeps":0.12
+			"LJeps":1.12
 		},
 		{
 			"type":"O", 
-			"posx":0, 
+			"posx":-1.2674, 
 			"posy":0, 
-			"posz":-1.2674, 
+			"posz":0, 
 			"mass":15.999, 
 			"charge":0.228, 
 			"partCharge":0, 
 			"LJsigma":2.3, 
-			"LJeps":0.12
+			"LJeps":1.12
 		}
 
 	]
