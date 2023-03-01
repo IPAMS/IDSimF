@@ -37,46 +37,44 @@
 
 TEST_CASE("Basic test MD preconstructed", "[CollisionModels][MDInteractionsModel]") {
 
-    Core::globalRandomGeneratorPool = std::make_unique<Core::TestRandomGeneratorPool>();
+    Core::globalRandomGeneratorPool = std::make_unique<Core::RandomGeneratorPool>();
 
     double diameterN2 = CollisionModel::MDInteractionsModelPreconstructed::DIAMETER_N2;
     FileIO::MolecularStructureReader reader = FileIO::MolecularStructureReader();
     std::unordered_map<std::string,  std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection = 
-                                                                    reader.readMolecularStructure("test_molecularstructure_reader.json");
+                                                                    reader.readMolecularStructure("test_molecularstructure_reader_set1.json");
     Core::Particle ion;
     ion.setMolecularStructure(molecularStructureCollection.at("CO2+"));
     Core::RandomSource* rndSource = Core::globalRandomGeneratorPool->getThreadRandomSource();
     
-    int samples = 1;
+    size_t samples = 50;
     double pi = 3.1415;
-    std::vector<Core::Vector> ionVelocities;
-    std::vector<Core::Vector> ionPositions;
-    std::vector<Core::Vector> ionRotations;
-    for(int i = 0; i < samples; i++){
-        Core::Vector tmp1 = Core::Vector(0.0, 0.0, 0.0);
-        ionVelocities.push_back(tmp1);
-        ionPositions.push_back(Core::Vector(3.99e-10, 42.5e-10, 0.0));
-        // Core::Vector tmp2 = Core::Vector(0.0, 0.0, rndSource->uniformRealRndValue()*1*pi/2-pi/4);
-        Core::Vector tmp2 = Core::Vector(0, 0, 0);
-        ionRotations.push_back(tmp2);
-    }
-    
-    for(size_t i = 0; i < ionVelocities.size(); i++){
-        ion.setVelocity(ionVelocities[i]);
+    // std::vector<Core::Vector> ionVelocities;
+    // std::vector<Core::Vector> ionPositions;
+    // std::vector<Core::Vector> ionRotations;
+    // for(int i = 0; i < samples; i++){
+    //     Core::Vector tmp1 = Core::Vector(0.0, 0.0, 0.0);
+    //     ionVelocities.push_back(tmp1);
+    //     ionPositions.push_back(Core::Vector(3.99e-10, 42.5e-10, 0.0));
+    //     // Core::Vector tmp2 = Core::Vector(0.0, 0.0, rndSource->uniformRealRndValue()*1*pi/2-pi/4);
+    //     Core::Vector tmp2 = Core::Vector(0, 0, 0);
+    //     ionRotations.push_back(tmp2);
+    // }
+    Core::Vector ionVelocities = {0, 0, 0};
+    for(size_t i = 0; i < samples; i++){
+        ion.setVelocity(ionVelocities);
         CollisionModel::MDInteractionsModelPreconstructed mdSim = CollisionModel::MDInteractionsModelPreconstructed(2000000, 298, 28, 
                                                                                         diameterN2,
                                                                                         1.7E-30, 
                                                                                         "N2", 
                                                                                         1e-9, 
                                                                                         1E-17, 
-                                                                                        3, 1, 
+                                                                                        6, 1, 
                                                                                         43e-10,
-                                                                                        molecularStructureCollection, 
-                                                                                        ionPositions[i],
-                                                                                        ionRotations[i]);
+                                                                                        molecularStructureCollection);
 
         
-        mdSim.setTrajectoryWriter("MD_collisions_preconstructed_COMnoShift_trajectories.txt", 49e-10, 0);
+        mdSim.setTrajectoryWriter("MD_collisions_preconstructed_trajectories_CO2+N2_LJvariation_switchedVZ_oQP-.txt", 43e-10, 0);
         mdSim.updateModelTimestepParameters(1, 0);
         double dt = 2e-11;
         mdSim.modifyVelocity(ion, dt);
