@@ -117,7 +117,7 @@ TEST_CASE("Test random bit sources") {
         std::vector<int> testVector1 = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20};
         std::vector<int> testVector2 = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20};
 
-        SECTION("Test with random seed"){
+        SECTION("Test with truly random seed"){
 
             Core::MersenneBitSource mersenneSource1;
             Core::MersenneBitSource mersenneSource2;
