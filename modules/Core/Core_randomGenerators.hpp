@@ -40,7 +40,12 @@
 namespace Core{
 
     using rndBit_type = std::mt19937::result_type; ///< Result type of random bit generators
-    using xoshiro256pRndBit_type = uint_fast64_t; ///< Result type of random bit generator for xoshiro256+ PRNG
+
+    namespace XoshiroPRNG{
+        using rndBit_type = uint_fast64_t; ///< Result type of random bit generator for xoshiro256+ PRNG
+        inline constexpr rndBit_type defaultSeed = 1234567890ULL; ///< Default seed
+    }
+    
 
     extern std::random_device rdSeed; ///< global seed generator
 
@@ -74,6 +79,7 @@ namespace Core{
 
     /**
      * SplitMix64 algorithm, which can be used as random bit source for random distributions
+     * Reference: https://prng.di.unimi.it/splitmix64.c
      *
      * Note: Since min and max has to be constexpr, min and max are fixed for all implmementations of this
      * interface class.
@@ -87,15 +93,15 @@ namespace Core{
         /**
          * Note: Min is fixed to xoshiro datatype min
          */
-        constexpr static xoshiro256pRndBit_type min(){
-            return xoshiro256pRndBit_type(0);
+        constexpr static XoshiroPRNG::rndBit_type min(){
+            return XoshiroPRNG::rndBit_type(0);
         };
 
         /**
          * Note: Max is fixed to xoshiro datatype max
          */
-        constexpr static xoshiro256pRndBit_type max(){
-            return xoshiro256pRndBit_type(-1);
+        constexpr static XoshiroPRNG::rndBit_type max(){
+            return XoshiroPRNG::rndBit_type(-1);
         };
         virtual result_T operator()() =0;
     };
@@ -123,6 +129,19 @@ namespace Core{
 
     private:
         std::size_t sampleIndex_;
+    };
+
+    /**
+     * Random test bit source based on SplitMix64, generating a large set of deterministic numbers based on 
+     * predefined seed
+     */
+    class SplitMix64TestBitSource: public SplitMix64<XoshiroPRNG::rndBit_type>{
+    public:
+        SplitMix64TestBitSource();
+        XoshiroPRNG::rndBit_type operator()() override;
+
+    private:
+        XoshiroPRNG::rndBit_type state_;
     };
 
     /**
