@@ -21,6 +21,7 @@
 
 #include "Core_randomGenerators.hpp"
 #include <omp.h>
+#include <iostream>
 
 std::random_device Core::rdSeed; //seed generator
 
@@ -59,6 +60,7 @@ void Core::MersenneBitSource::seed(Core::rndBit_type seed) {
  * Gets a random bit value
  */
 Core::rndBit_type Core::MersenneBitSource::operator()() {
+    std::cout <<internalRandomSource()<<std::endl; 
     return internalRandomSource();
 }
 
@@ -301,3 +303,69 @@ Core::TestRandomGeneratorPool::TestRNGPoolElement* Core::TestRandomGeneratorPool
 Core::TestRandomGeneratorPool::TestRNGPoolElement* Core::TestRandomGeneratorPool::getRandomSource(std::size_t) {
     return &element_;
 }
+
+
+
+
+
+
+
+
+// /**
+// * Get uniformly distributed test value from a short list of predefined, uniformly distributed values
+// * @return test value, uniformly distributed in the interval [0, 1]
+// */
+// double Core::TestRandomGeneratorPoolXoshiro::TestRNGPoolElementXoshiro::uniformRealRndValue() {
+//     return uniformDist_.rndValue();
+// }
+
+// /**
+//  * Get normal distributed test value from a short list of predefined, normally distrbuted values
+//  *
+//  * @return test value, normally distributed
+//  */
+// double Core::TestRandomGeneratorPoolXoshiro::TestRNGPoolElementXoshiro::normalRealRndValue() {
+//     return normalDist_.rndValue();
+// }
+
+// /**
+//  * Gets the test bit source of this test random source
+//  * @return A random bit source, based on the mersenne twister
+//  */
+// Core::SplitMix64TestBitSource* Core::TestRandomGeneratorPoolXoshiro::TestRNGPoolElementXoshiro::getRandomBitSource() {
+//     return &rngGenerator_;
+// }
+
+// /**
+//  * Sets new random seed (currently not implemented, does nothing!)
+//  */
+// void Core::TestRandomGeneratorPoolXoshiro::setSeedForElements(Core::XoshiroPRNG::rndBit_type newSeed) {
+
+// }
+
+// /**
+//  * Get a new uniform test distribution in the interval [min, max].
+//  *
+//  * @param min Lower boundary of the interval of the random values
+//  * @param max Upper boundary of the interval of the random values
+//  * @return A new uniform test distribution in the interval [min, max]
+//  */
+// Core::RndDistPtr Core::TestRandomGeneratorPoolXoshiro::getUniformDistribution(double min, double max) {
+//     return std::make_unique<Core::UniformTestDistributionXoshiro>(min, max);
+// }
+
+// /**
+//  * Gets a test random source for the current thread
+//  * @return Test random source
+//  */
+// Core::TestRandomGeneratorPoolXoshiro::TestRNGPoolElementXoshiro* Core::TestRandomGeneratorPoolXoshiro::getThreadRandomSource() {
+//     return &element_;
+// }
+
+// /**
+//  * Gets a test random source for a specified thread
+//  * @return Test random source
+//  */
+// Core::TestRandomGeneratorPoolXoshiro::TestRNGPoolElementXoshiro* Core::TestRandomGeneratorPoolXoshiro::getRandomSource(std::size_t) {
+//     return &element_;
+// }
