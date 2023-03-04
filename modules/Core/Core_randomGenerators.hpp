@@ -40,6 +40,7 @@
 namespace Core{
 
     using rndBit_type = std::mt19937::result_type; ///< Result type of random bit generators
+    using xoshiro256pRndBit_type = uint_fast64_t; ///< Result type of random bit generator for xoshiro256+ PRNG
 
     extern std::random_device rdSeed; ///< global seed generator
 
@@ -67,6 +68,34 @@ namespace Core{
          */
         constexpr static rndBit_type max(){
             return std::mt19937::max();
+        };
+        virtual result_T operator()() =0;
+    };
+
+    /**
+     * SplitMix64 algorithm, which can be used as random bit source for random distributions
+     *
+     * Note: Since min and max has to be constexpr, min and max are fixed for all implmementations of this
+     * interface class.
+     */
+    template <class result_T>
+    class SplitMix64{
+    public:
+        typedef result_T result_type;
+        virtual ~SplitMix64() =default;
+
+        /**
+         * Note: Min is fixed to xoshiro datatype min
+         */
+        constexpr static xoshiro256pRndBit_type min(){
+            return xoshiro256pRndBit_type(0);
+        };
+
+        /**
+         * Note: Max is fixed to xoshiro datatype max
+         */
+        constexpr static xoshiro256pRndBit_type max(){
+            return xoshiro256pRndBit_type(-1);
         };
         virtual result_T operator()() =0;
     };
