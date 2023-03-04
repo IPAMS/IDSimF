@@ -60,7 +60,6 @@ void Core::MersenneBitSource::seed(Core::rndBit_type seed) {
  * Gets a random bit value
  */
 Core::rndBit_type Core::MersenneBitSource::operator()() {
-    std::cout <<internalRandomSource()<<std::endl; 
     return internalRandomSource();
 }
 

@@ -39,7 +39,7 @@
 
 namespace Core{
 
-    using rndBit_type = std::mt19937::result_type; ///< Result type of random bit generators
+    using rndBit_type = std::mt19937_64::result_type; ///< Result type of random bit generators
 
     namespace XoshiroPRNG{
         using rndBit_type = uint_fast64_t; ///< Result type of random bit generator for xoshiro256+ PRNG
@@ -65,14 +65,14 @@ namespace Core{
          * Note: Min is fixed to mersenne twister min
          */
         constexpr static rndBit_type min(){
-            return std::mt19937::min();
+            return std::mt19937_64::min();
         };
 
         /**
          * Note: Max is fixed to mersenne twister max
          */
         constexpr static rndBit_type max(){
-            return std::mt19937::max();
+            return std::mt19937_64::max();
         };
         virtual result_T operator()() =0;
     };
@@ -115,7 +115,7 @@ namespace Core{
         void seed(rndBit_type seed);
         rndBit_type operator()() override;
 
-        std::mt19937 internalRandomSource;
+        std::mt19937_64 internalRandomSource;
     };
 
     /**
@@ -359,38 +359,38 @@ namespace Core{
     // };
 
 
-    class Xoshiro256p{
-	    public:
-            using state_type = std::array<XoshiroPRNG::rndBit_type, 4>;
+    // class Xoshiro256p{
+	//     public:
+    //         using state_type = std::array<XoshiroPRNG::rndBit_type, 4>;
 
-            explicit constexpr Xoshiro256p(XoshiroPRNG::rndBit_type seed = XoshiroPRNG::defaultSeed);
+    //         explicit constexpr Xoshiro256p(XoshiroPRNG::rndBit_type seed = XoshiroPRNG::defaultSeed);
 
-            explicit constexpr Xoshiro256p(state_type state);
+    //         explicit constexpr Xoshiro256p(state_type state);
 
-            constexpr XoshiroPRNG::rndBit_type operator()();
+    //         constexpr XoshiroPRNG::rndBit_type operator()();
 
-            static constexpr XoshiroPRNG::rndBit_type min();
+    //         static constexpr XoshiroPRNG::rndBit_type min();
 
-            static constexpr XoshiroPRNG::rndBit_type max();
+    //         static constexpr XoshiroPRNG::rndBit_type max();
 
-            constexpr state_type serialize() const;
+    //         constexpr state_type serialize() const;
 
-            constexpr void deserialize(state_type state);
+    //         constexpr void deserialize(state_type state);
 
-            friend bool operator ==(const Xoshiro256p& lhs, const Xoshiro256p& rhs)
-            {
-                return (lhs.internalState_ == rhs.internalState_);
-            }
+    //         friend bool operator ==(const Xoshiro256p& lhs, const Xoshiro256p& rhs)
+    //         {
+    //             return (lhs.internalState_ == rhs.internalState_);
+    //         }
 
-            friend bool operator !=(const Xoshiro256p& lhs, const Xoshiro256p& rhs)
-            {
-                return (lhs.internalState_ != rhs.internalState_);
-            }
+    //         friend bool operator !=(const Xoshiro256p& lhs, const Xoshiro256p& rhs)
+    //         {
+    //             return (lhs.internalState_ != rhs.internalState_);
+    //         }
 
-        private:
+    //     private:
 
-		    state_type internalState_;
-	};
+	// 	    state_type internalState_;
+	// };
 
     extern std::unique_ptr<AbstractRandomGeneratorPool> globalRandomGeneratorPool; ///< global random pool / randomness provider
 }
