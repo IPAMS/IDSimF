@@ -95,13 +95,13 @@ Core::rndBit_type Core::TestBitSource::operator()() {
 /**
  * Creates a test bit source with a predefined seed (not random!) based on the SplitMix64 algorithm
  */
-Core::SplitMix64TestBitSource::SplitMix64TestBitSource() : state_(Core::XoshiroPRNG::defaultSeed) {}
+Core::SplitMix64TestBitSource::SplitMix64TestBitSource() : state_(Core::defaultSeed) {}
 
 /**
  * Generates next value from the state of the SplitMix64 algorithm (predefined sequence)
  */
-Core::XoshiroPRNG::rndBit_type Core::SplitMix64TestBitSource::operator()() {
-    Core::XoshiroPRNG::rndBit_type randomSource = (state_ += 0x9e3779b97f4a7c15uLL);
+Core::rndBit_type Core::SplitMix64TestBitSource::operator()() {
+    Core::rndBit_type randomSource = (state_ += 0x9e3779b97f4a7c15uLL);
     randomSource = (randomSource ^ (randomSource >> 30)) * 0xbf58476d1ce4e5b9uLL;
     randomSource = (randomSource ^ (randomSource >> 27)) * 0x94d049bb133111ebuLL;
     return randomSource ^ (randomSource >> 31);

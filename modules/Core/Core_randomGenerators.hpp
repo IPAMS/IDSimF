@@ -40,12 +40,7 @@
 namespace Core{
 
     using rndBit_type = std::mt19937_64::result_type; ///< Result type of random bit generators
-
-    namespace XoshiroPRNG{
-        using rndBit_type = uint_fast64_t; ///< Result type of random bit generator for xoshiro256+ PRNG
-        inline constexpr rndBit_type defaultSeed = 1234567890ULL; ///< Default seed
-    }
-    
+    inline constexpr rndBit_type defaultSeed = 1234567890ULL; ///< Default seed
 
     extern std::random_device rdSeed; ///< global seed generator
 
@@ -77,34 +72,34 @@ namespace Core{
         virtual result_T operator()() =0;
     };
 
-    /**
-     * SplitMix64 algorithm, which can be used as random bit source for random distributions
-     * Reference: https://prng.di.unimi.it/splitmix64.c
-     *
-     * Note: Since min and max has to be constexpr, min and max are fixed for all implmementations of this
-     * interface class.
-     */
-    template <class result_T>
-    class SplitMix64{
-    public:
-        typedef result_T result_type;
-        virtual ~SplitMix64() =default;
+    // /**
+    //  * SplitMix64 algorithm, which can be used as random bit source for random distributions
+    //  * Reference: https://prng.di.unimi.it/splitmix64.c
+    //  *
+    //  * Note: Since min and max has to be constexpr, min and max are fixed for all implmementations of this
+    //  * interface class.
+    //  */
+    // template <class result_T>
+    // class SplitMix64{
+    // public:
+    //     typedef result_T result_type;
+    //     virtual ~SplitMix64() =default;
 
-        /**
-         * Note: Min is fixed to xoshiro datatype min
-         */
-        constexpr static XoshiroPRNG::rndBit_type min(){
-            return XoshiroPRNG::rndBit_type(0);
-        };
+    //     /**
+    //      * Note: Min is fixed to xoshiro datatype min
+    //      */
+    //     constexpr static XoshiroPRNG::rndBit_type min(){
+    //         return XoshiroPRNG::rndBit_type(0);
+    //     };
 
-        /**
-         * Note: Max is fixed to xoshiro datatype max
-         */
-        constexpr static XoshiroPRNG::rndBit_type max(){
-            return XoshiroPRNG::rndBit_type(-1);
-        };
-        virtual result_T operator()() =0;
-    };
+    //     /**
+    //      * Note: Max is fixed to xoshiro datatype max
+    //      */
+    //     constexpr static XoshiroPRNG::rndBit_type max(){
+    //         return XoshiroPRNG::rndBit_type(-1);
+    //     };
+    //     virtual result_T operator()() =0;
+    // };
 
     /**
      * Random bit source based on mersenne twister
@@ -135,13 +130,13 @@ namespace Core{
      * Random test bit source based on SplitMix64, generating a large set of deterministic numbers based on 
      * predefined seed
      */
-    class SplitMix64TestBitSource: public SplitMix64<XoshiroPRNG::rndBit_type>{
+    class SplitMix64TestBitSource: public RandomBitSource<rndBit_type>{
     public:
         SplitMix64TestBitSource();
-        XoshiroPRNG::rndBit_type operator()() override;
+        rndBit_type operator()() override;
 
     private:
-        XoshiroPRNG::rndBit_type state_;
+        rndBit_type state_;
     };
 
     /**
