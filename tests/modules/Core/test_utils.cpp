@@ -162,6 +162,20 @@ TEST_CASE("Test random bit sources") {
             CHECK( testVector1[3] != testVector2[3]);
 
         }
+
+        SECTION("Test SplitMix64 reproductivity with constant seed"){
+
+            Core::SplitMix64TestBitSource splitMix64Source1 = Core::SplitMix64TestBitSource();
+            Core::SplitMix64TestBitSource splitMix64Source2 = Core::SplitMix64TestBitSource();
+
+            std::shuffle(testVector1.begin(), testVector1.end(), splitMix64Source1);
+            std::shuffle(testVector2.begin(), testVector2.end(), splitMix64Source2);
+            CHECK( (testVector1[0] != 1 && testVector1[1] != 2) );
+            CHECK( testVector1[0] == testVector2[0]);
+            CHECK( testVector1[1] == testVector2[1]);
+            CHECK( testVector1[3] == testVector2[3]);
+
+        }
     }
 
 
