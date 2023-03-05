@@ -93,6 +93,28 @@ Core::rndBit_type Core::TestBitSource::operator()() {
 }
 
 /**
+ * Creates a bit source based on the SplitMix64 algorithm
+ */
+Core::SplitMix64BitSource::SplitMix64BitSource() : state_(Core::rdSeed()) {}
+
+/**
+ * Sets the random seed of the bit source for SplitMix64
+ */
+void Core::SplitMix64BitSource::seed(Core::rndBit_type seed) {
+    state_ = seed;
+}
+
+/**
+ * Generates next value from the state of the SplitMix64 algorithm
+ */
+Core::rndBit_type Core::SplitMix64BitSource::operator()() {
+    Core::rndBit_type randomSource = (state_ += 0x9e3779b97f4a7c15uLL);
+    randomSource = (randomSource ^ (randomSource >> 30)) * 0xbf58476d1ce4e5b9uLL;
+    randomSource = (randomSource ^ (randomSource >> 27)) * 0x94d049bb133111ebuLL;
+    return randomSource ^ (randomSource >> 31);
+}
+
+/**
  * Creates a test bit source with a predefined seed (not random!) based on the SplitMix64 algorithm
  */
 Core::SplitMix64TestBitSource::SplitMix64TestBitSource() : state_(Core::defaultSeed) {}
@@ -106,6 +128,25 @@ Core::rndBit_type Core::SplitMix64TestBitSource::operator()() {
     randomSource = (randomSource ^ (randomSource >> 27)) * 0x94d049bb133111ebuLL;
     return randomSource ^ (randomSource >> 31);
 }
+
+/**
+ * Creates a test bit source with a predefined seed (not random!) based on the Xoshiro256+ algorithm 
+ * with SplitMix64 seeding as recommended 
+ */
+Core::Xoshiro256pTestBitSource::Xoshiro256pTestBitSource() {
+    SplitMix64TestBitSource splitmix64 = SplitMix64TestBitSource();
+    std::array<rndBit_type, 4> s = {splitmix64(), splitmix64(), splitmix64(), splitmix64()};
+    internalRandomSource = Core::Xoshiro256p(s);
+}
+
+/**
+ * Generates next value from the state of the Xoshiro256+ algorithm (predefined sequence)
+ */
+Core::rndBit_type Core::Xoshiro256pTestBitSource::operator()() {
+    return internalRandomSource();
+}
+
+
 
 /**
  * Construct a custom uniform random distribution with a custom interval
@@ -304,67 +345,42 @@ Core::TestRandomGeneratorPool::TestRNGPoolElement* Core::TestRandomGeneratorPool
 }
 
 
+static inline Core::rndBit_type rotl(const Core::rndBit_type x, int k) {
+	return (x << k) | (x >> (64 - k));
+}
 
+Core::Xoshiro256p::Xoshiro256p(Core::rndBit_type seed){
+    SplitMix64BitSource splitmix64 = SplitMix64BitSource();
+    splitmix64.seed(seed);
+    std::array<Core::rndBit_type, 4> s = {splitmix64(), splitmix64(), splitmix64(), splitmix64()};
+    internalState_ = s; 
+}
 
+Core::Xoshiro256p::Xoshiro256p(std::array<Core::rndBit_type, 4> state){
+    internalState_ = state; 
+}
 
+Core::rndBit_type Core::Xoshiro256p::operator()(){
+    const Core::rndBit_type result = internalState_[0] + internalState_[3];
 
+	const Core::rndBit_type t = internalState_[1] << 17;
 
+	internalState_[2] ^= internalState_[0];
+	internalState_[3] ^= internalState_[1];
+	internalState_[1] ^= internalState_[2];
+	internalState_[0] ^= internalState_[3];
 
-// /**
-// * Get uniformly distributed test value from a short list of predefined, uniformly distributed values
-// * @return test value, uniformly distributed in the interval [0, 1]
-// */
-// double Core::TestRandomGeneratorPoolXoshiro::TestRNGPoolElementXoshiro::uniformRealRndValue() {
-//     return uniformDist_.rndValue();
-// }
+	internalState_[2] ^= t;
 
-// /**
-//  * Get normal distributed test value from a short list of predefined, normally distrbuted values
-//  *
-//  * @return test value, normally distributed
-//  */
-// double Core::TestRandomGeneratorPoolXoshiro::TestRNGPoolElementXoshiro::normalRealRndValue() {
-//     return normalDist_.rndValue();
-// }
+	internalState_[3] = rotl(internalState_[3], 45);
 
-// /**
-//  * Gets the test bit source of this test random source
-//  * @return A random bit source, based on the mersenne twister
-//  */
-// Core::SplitMix64TestBitSource* Core::TestRandomGeneratorPoolXoshiro::TestRNGPoolElementXoshiro::getRandomBitSource() {
-//     return &rngGenerator_;
-// }
+	return result;
+}
 
-// /**
-//  * Sets new random seed (currently not implemented, does nothing!)
-//  */
-// void Core::TestRandomGeneratorPoolXoshiro::setSeedForElements(Core::XoshiroPRNG::rndBit_type newSeed) {
+constexpr Core::rndBit_type Core::Xoshiro256p::min(){
+    return Core::rndBit_type(0);
+}
 
-// }
-
-// /**
-//  * Get a new uniform test distribution in the interval [min, max].
-//  *
-//  * @param min Lower boundary of the interval of the random values
-//  * @param max Upper boundary of the interval of the random values
-//  * @return A new uniform test distribution in the interval [min, max]
-//  */
-// Core::RndDistPtr Core::TestRandomGeneratorPoolXoshiro::getUniformDistribution(double min, double max) {
-//     return std::make_unique<Core::UniformTestDistributionXoshiro>(min, max);
-// }
-
-// /**
-//  * Gets a test random source for the current thread
-//  * @return Test random source
-//  */
-// Core::TestRandomGeneratorPoolXoshiro::TestRNGPoolElementXoshiro* Core::TestRandomGeneratorPoolXoshiro::getThreadRandomSource() {
-//     return &element_;
-// }
-
-// /**
-//  * Gets a test random source for a specified thread
-//  * @return Test random source
-//  */
-// Core::TestRandomGeneratorPoolXoshiro::TestRNGPoolElementXoshiro* Core::TestRandomGeneratorPoolXoshiro::getRandomSource(std::size_t) {
-//     return &element_;
-// }
+constexpr Core::rndBit_type Core::Xoshiro256p::max(){
+    return Core::rndBit_type(-1);
+}

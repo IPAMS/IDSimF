@@ -44,6 +44,25 @@ namespace Core{
 
     extern std::random_device rdSeed; ///< global seed generator
 
+    class Xoshiro256p{
+
+	    public:
+
+            Xoshiro256p(rndBit_type seed = defaultSeed);
+
+            Xoshiro256p(std::array<rndBit_type, 4> state);
+
+            rndBit_type operator()();
+
+            static constexpr rndBit_type min();
+
+            static constexpr rndBit_type max();
+
+        private:
+
+		    std::array<rndBit_type, 4> internalState_;
+	};
+
     /**
      * Generalized source for random bits, which can be used as random bit source for random distributions
      *
@@ -130,6 +149,20 @@ namespace Core{
      * Random test bit source based on SplitMix64, generating a large set of deterministic numbers based on 
      * predefined seed
      */
+    class SplitMix64BitSource: public RandomBitSource<rndBit_type>{
+    public:
+        SplitMix64BitSource();
+        void seed(rndBit_type seed);
+        rndBit_type operator()() override;
+
+    private:
+        rndBit_type state_;
+    };
+
+    /**
+     * Random test bit source based on SplitMix64, generating a large set of deterministic numbers based on 
+     * predefined seed
+     */
     class SplitMix64TestBitSource: public RandomBitSource<rndBit_type>{
     public:
         SplitMix64TestBitSource();
@@ -137,6 +170,18 @@ namespace Core{
 
     private:
         rndBit_type state_;
+    };
+
+    /**
+     * Random test bit source based on Xoshiro256+, generating a large set of deterministic numbers based on 
+     * predefined seed
+     */
+    class Xoshiro256pTestBitSource: public RandomBitSource<rndBit_type>{
+    public:
+        Xoshiro256pTestBitSource();
+        rndBit_type operator()() override;
+
+        Xoshiro256p internalRandomSource;
     };
 
     /**
@@ -354,38 +399,7 @@ namespace Core{
     // };
 
 
-    // class Xoshiro256p{
-	//     public:
-    //         using state_type = std::array<XoshiroPRNG::rndBit_type, 4>;
-
-    //         explicit constexpr Xoshiro256p(XoshiroPRNG::rndBit_type seed = XoshiroPRNG::defaultSeed);
-
-    //         explicit constexpr Xoshiro256p(state_type state);
-
-    //         constexpr XoshiroPRNG::rndBit_type operator()();
-
-    //         static constexpr XoshiroPRNG::rndBit_type min();
-
-    //         static constexpr XoshiroPRNG::rndBit_type max();
-
-    //         constexpr state_type serialize() const;
-
-    //         constexpr void deserialize(state_type state);
-
-    //         friend bool operator ==(const Xoshiro256p& lhs, const Xoshiro256p& rhs)
-    //         {
-    //             return (lhs.internalState_ == rhs.internalState_);
-    //         }
-
-    //         friend bool operator !=(const Xoshiro256p& lhs, const Xoshiro256p& rhs)
-    //         {
-    //             return (lhs.internalState_ != rhs.internalState_);
-    //         }
-
-    //     private:
-
-	// 	    state_type internalState_;
-	// };
+    
 
     extern std::unique_ptr<AbstractRandomGeneratorPool> globalRandomGeneratorPool; ///< global random pool / randomness provider
 }
