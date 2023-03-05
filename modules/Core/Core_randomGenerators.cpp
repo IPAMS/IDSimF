@@ -205,6 +205,13 @@ double Core::NormalTestDistribution::rndValue() {
 }
 
 
+/**
+ * Construct uniform test distribution
+ */
+Core::UniformTestDistributionXoshiro::UniformTestDistributionXoshiro(){
+    Xoshiro256pTestBitSource randomSource = Xoshiro256pTestBitSource();
+    randomSource_ = &randomSource;
+}
 
 /**
  * Construct a custom test distribution with a custom interval
@@ -227,6 +234,14 @@ double Core::UniformTestDistributionXoshiro::rndValue() {
     return (u.d - 1.0) * interval_ + min_;
 }
 
+/**
+ * Construct normal test distribution
+ */
+Core::NormalTestDistributionXoshiro::NormalTestDistributionXoshiro(){
+    Xoshiro256pTestBitSource randomSource = Xoshiro256pTestBitSource();
+    randomSource_ = &randomSource;
+}
+
 
 /**
  * Construct normal test distribution
@@ -241,13 +256,11 @@ Core::NormalTestDistributionXoshiro::NormalTestDistributionXoshiro(Xoshiro256pTe
 double Core::NormalTestDistributionXoshiro::rndValue() {
     rndBit_type x = randomSource_->internalRandomSource();
     rndBit_type y = randomSource_->internalRandomSource();
-    const union { rndBit_type i; double d; } u = { .i = UINT64_C(0x3FF) << 52 | x >> 12 };
-    const union { rndBit_type i; double d; } v = { .i = UINT64_C(0x3FF) << 52 | y >> 12 };
+    double u1 = (x >> 11) * 0x1.0p-52;
+    double v1 = (y >> 11) * 0x1.0p-52;
 
-    double u1 = u.d-1.0;
-    double v1 = v.d-1.0;
     double a = sqrt(-2 * log(u1)) * cos(2 * 3.141592653 * v1);
-    // double b = sqrt(-2 * log(u1)) * sin(2 * 3.141592653 * v1);
+    double b = sqrt(-2 * log(u1)) * sin(2 * 3.141592653 * v1);
 
     return a; // return either a or b 
 }
@@ -491,7 +504,6 @@ Core::rndBit_type Core::Xoshiro256p::operator()(){
 	internalState_[2] ^= t;
 
 	internalState_[3] = rotl(internalState_[3], 45);
-
 	return result;
 }
 
