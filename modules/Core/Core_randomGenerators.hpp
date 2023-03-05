@@ -260,29 +260,29 @@ namespace Core{
     };
 
 
-    // /**
-    //  * A uniform distribution, which generates *non* random test samples in a specified interval.
-    //  * The samples are sequentially chosen from a small set of predetermined test values
-    //  */
-    // class UniformTestDistributionXoshiro: public RandomDistribution{
-    // public:
-    //     UniformTestDistributionXoshiro() = default;
-    //     double rndValue() override;
-    // private:
-    //     XoshiroPRNG::rndBit_type state_;
-    // };
+    /**
+     * A uniform distribution, which generates *non* random test samples in a specified interval.
+     * The samples are sequentially chosen from a small set of predetermined test values
+     */
+    class UniformTestDistributionXoshiro: public RandomDistribution{
+    public:
+        UniformTestDistributionXoshiro(double min, double max, RandomBitSource<rndBit_type>* randomSource);
+        double rndValue() override;
+    private:
+        RandomBitSource<rndBit_type>* randomSource_;
+    };
 
-    // /**
-    //  * Test random distribution which *non* random samples which are gaussian normal distributed (with mu=0.0 and sigma=1.0).
-    //  * The samples are sequentially chosen from a small set of predetermined test values
-    //  */
-    // class NormalTestDistributionXoshiro: public RandomDistribution{
-    // public:
-    //     NormalTestDistributionXoshiro();
-    //     double rndValue() override;
-    // private:
-    //     XoshiroPRNG::rndBit_type state_;
-    // };
+    /**
+     * Test random distribution which *non* random samples which are gaussian normal distributed (with mu=0.0 and sigma=1.0).
+     * The samples are sequentially chosen from a small set of predetermined test values
+     */
+    class NormalTestDistributionXoshiro: public RandomDistribution{
+    public:
+        NormalTestDistributionXoshiro(RandomBitSource<rndBit_type>* randomSource);
+        double rndValue() override;
+    private:
+        RandomBitSource<rndBit_type>* randomSource_;
+    };
 
     /**
      * Generalized pool of random sources, usually one per thread. This allows to provide individual, seperate
@@ -369,37 +369,34 @@ namespace Core{
 
     };
 
-    // /**
-    //  * Pool of "random" sources, with test random sources and test distributions based on pre-seeded xoshiro256+
-    //  */
-    // class TestRandomGeneratorPoolXoshiro: public AbstractRandomGeneratorPoolXoshiro{
-    // public:
-    //     class TestRNGPoolElementXoshiro: public RandomSourceXoshiro{
-    //     public:
-    //         TestRNGPoolElementXoshiro() = default;
-    //         double uniformRealRndValue() override;
-    //         double normalRealRndValue() override;
-    //         SplitMix64TestBitSource* getRandomBitSource() override;
+    /**
+     * Pool of test random sources, with random sources based on Xoshiro256+
+     */
+    class XoshiroTestRandomGeneratorPool: public AbstractRandomGeneratorPool{
+    public:
+        class XoshiroTestRNGPoolElement: public RandomSource{
+        public:
+            XoshiroTestRNGPoolElement() = default;
+            void seed(rndBit_type seed);
+            double uniformRealRndValue() override;
+            double normalRealRndValue() override;
+            Xoshiro256pTestBitSource* getRandomBitSource() override;
 
-    //     private:
-    //         SplitMix64TestBitSource rngGenerator_;
-    //         UniformTestDistributionXoshiro uniformDist_;
-    //         NormalTestDistributionXoshiro normalDist_;
-    //     };
+        private:
+            Xoshiro256pTestBitSource rngGenerator_;
+            UniformTestDistributionXoshiro uniformDist_;
+            NormalTestDistributionXoshiro normalDist_;
+        };
 
-    //     TestRandomGeneratorPoolXoshiro() = default;
-    //     void setSeedForElements(XoshiroPRNG::rndBit_type newSeed) override;
-    //     RndDistPtr getUniformDistribution(double min, double max) override;
-    //     TestRNGPoolElementXoshiro* getThreadRandomSource() override;
-    //     TestRNGPoolElementXoshiro* getRandomSource(std::size_t index) override;
+        XoshiroTestRandomGeneratorPool();
+        void setSeedForElements(rndBit_type newSeed) override;
+        RndDistPtr getUniformDistribution(double min, double max) override;
+        XoshiroTestRNGPoolElement* getThreadRandomSource() override;
+        XoshiroTestRNGPoolElement* getRandomSource(std::size_t index) override;
 
-    // private:
-    //     TestRNGPoolElementXoshiro element_;
-
-    // };
-
-
-    
+    private:
+        std::vector<std::unique_ptr<XoshiroTestRNGPoolElement>> elements_;
+    };
 
     extern std::unique_ptr<AbstractRandomGeneratorPool> globalRandomGeneratorPool; ///< global random pool / randomness provider
 }
