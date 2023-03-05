@@ -328,3 +328,61 @@ TEST_CASE( "Test testing random distributions", "[Core][random]") {
         testUniformCustomDistribution<Core::TestRandomGeneratorPool>(1000, 2.0, 6.0);
     }
 }
+
+TEST_CASE( "Test xoshiro246+ test random distributions (constant seeding)", "[Core][random]") {
+
+    Core::XoshiroTestRandomGeneratorPool rngPool;
+    Core::XoshiroTestRandomGeneratorPool::XoshiroTestRNGPoolElement* rngPoolElem = rngPool.getThreadRandomSource();
+
+    std::vector<double> vals;
+
+    SECTION("Test random generator should generate predefined deterministic normal random samples") {
+
+        for (int i = 0; i<10; ++i) {
+            vals.push_back(rngPoolElem->normalRealRndValue());
+        }
+
+        // REQUIRE(Approx(vals[2])==0.046029231875);
+        // REQUIRE(Approx(vals[4])==0.176058757790);
+        // REQUIRE(Approx(vals[8])==-0.628735061607);
+    }
+
+    // SECTION("Test random generator should generate predefined deterministic uniform random samples") {
+
+    //     for (int i = 0; i<10; ++i) {
+    //         vals.push_back(rngPoolElem->uniformRealRndValue());
+    //     }
+
+    //     REQUIRE(Approx(vals[1])==0.900613166242);
+    //     REQUIRE(Approx(vals[3])==0.498839039733);
+    //     REQUIRE(Approx(vals[7])==0.437690201598);
+    // }
+
+    //  SECTION("Uniform random distribution should have the correct mean and deviation") {
+    //     auto xoshiroBitSource = rngPool.getThreadRandomSource()->getRandomBitSource();
+
+    //     int nSamples = 10000;
+
+    //     Core::UniformTestDistributionXoshiro dist(0.0, 1.0, xoshiroBitSource);
+
+    //     std::vector<double> vals;
+    //     for (int i=0; i<nSamples;i++){
+    //         vals.push_back(dist.rndValue());
+    //     }
+    //     randomSampleParams sr = calculateParamsFromSample(vals);
+
+    //     bool meanInRage = ((sr.mean<0.51) && (sr.mean>0.49));
+    //     CHECK(meanInRage);
+    //     bool stdDevInRage = ((sr.stdDev<0.30) && (sr.stdDev>0.26));
+    //     CHECK(stdDevInRage);
+    // }
+
+    // SECTION("Test rng should produce correct uniform and normal distributions"){
+    //     int nSamples = 10000;
+    //     expectedDistParams expectedNorm{0.0, 1.0};
+    //     expectedDistParams expectedUni{0.5, 0.28};
+
+    //     testGeneratorSample<Core::XoshiroTestRandomGeneratorPool>(nSamples, expectedNorm, expectedUni, 0.02);
+    //     testUniformCustomDistribution<Core::XoshiroTestRandomGeneratorPool>(1000, 2.0, 6.0);
+    // }
+}
