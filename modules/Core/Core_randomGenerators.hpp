@@ -224,7 +224,8 @@ namespace Core{
      */
     class UniformTestDistributionXoshiro: public RandomDistribution{
     public:
-        UniformTestDistributionXoshiro();
+        UniformTestDistributionXoshiro() = delete;
+        UniformTestDistributionXoshiro(Xoshiro256pTestBitSource* randomSource);
         UniformTestDistributionXoshiro(double min, double max, Xoshiro256pTestBitSource* randomSource);
         double rndValue() override;
     private:
@@ -239,7 +240,7 @@ namespace Core{
      */
     class NormalTestDistributionXoshiro: public RandomDistribution{
     public:
-        NormalTestDistributionXoshiro();
+        NormalTestDistributionXoshiro() = delete;
         NormalTestDistributionXoshiro(Xoshiro256pTestBitSource* randomSource);
         double rndValue() override;
     private:
@@ -325,7 +326,7 @@ namespace Core{
     public:
         class XoshiroTestRNGPoolElement: public RandomSource{
         public:
-            XoshiroTestRNGPoolElement() = default;
+            XoshiroTestRNGPoolElement();
             double uniformRealRndValue() override;
             double normalRealRndValue() override;
             Xoshiro256pTestBitSource* getRandomBitSource() override;
