@@ -204,6 +204,55 @@ double Core::NormalTestDistribution::rndValue() {
     return Core::NORMAL_TEST_SAMPLES[sampleIndex_];
 }
 
+
+
+/**
+ * Construct a custom test distribution with a custom interval
+ * @param min lower boundary of the interval
+ * @param max upper boundary of the interval
+ */
+Core::UniformTestDistributionXoshiro::UniformTestDistributionXoshiro(double min, double max, Xoshiro256pTestBitSource randomSource):
+randomSource_(randomSource),
+min_(min),
+interval_(max-min)
+{}
+
+/**
+ * Generate non random test value in the uniform distribution from the Xoshiro256+ algorithm 
+ * @return uniformly distributed test value
+ */
+double Core::UniformTestDistributionXoshiro::rndValue() {
+    rndBit_type x = randomSource_.internalRandomSource();
+    const union { rndBit_type i; double d; } u = { .i = UINT64_C(0x3FF) << 52 | x >> 12 };
+    return (u.d - 1.0) * interval_ + min_;
+}
+
+
+/**
+ * Construct normal test distribution
+ */
+Core::NormalTestDistributionXoshiro::NormalTestDistributionXoshiro(Xoshiro256pTestBitSource randomSource): randomSource_(randomSource)
+{}
+
+/**
+ * Generate normal test value by Box-Muller transform from Xoshiro256+ generated uniform numbers
+ * @return non random normal distributed test value
+ */
+double Core::NormalTestDistributionXoshiro::rndValue() {
+    rndBit_type x = randomSource_.internalRandomSource();
+    rndBit_type y = randomSource_.internalRandomSource();
+    const union { rndBit_type i; double d; } u = { .i = UINT64_C(0x3FF) << 52 | x >> 12 };
+    const union { rndBit_type i; double d; } v = { .i = UINT64_C(0x3FF) << 52 | y >> 12 };
+
+    double u1 = u.d-1.0;
+    double v1 = v.d-1.0;
+    double a = sqrt(-2 * log(u1)) * cos(2 * 3.141592653 * v1);
+    // double b = sqrt(-2 * log(u1)) * sin(2 * 3.141592653 * v1);
+
+    return a; // return either a or b 
+}
+
+
 /**
  * Sets the random seed of the random generator pool element
  */

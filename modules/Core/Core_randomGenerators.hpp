@@ -266,10 +266,12 @@ namespace Core{
      */
     class UniformTestDistributionXoshiro: public RandomDistribution{
     public:
-        UniformTestDistributionXoshiro(double min, double max, RandomBitSource<rndBit_type>* randomSource);
+        UniformTestDistributionXoshiro(double min, double max, Xoshiro256pTestBitSource randomSource);
         double rndValue() override;
     private:
-        RandomBitSource<rndBit_type>* randomSource_;
+        Xoshiro256pTestBitSource randomSource_;
+        double min_ = 0.0;
+        double interval_ = 1.0;
     };
 
     /**
@@ -278,10 +280,10 @@ namespace Core{
      */
     class NormalTestDistributionXoshiro: public RandomDistribution{
     public:
-        NormalTestDistributionXoshiro(RandomBitSource<rndBit_type>* randomSource);
+        NormalTestDistributionXoshiro(Xoshiro256pTestBitSource randomSource);
         double rndValue() override;
     private:
-        RandomBitSource<rndBit_type>* randomSource_;
+        Xoshiro256pTestBitSource randomSource_;
     };
 
     /**
