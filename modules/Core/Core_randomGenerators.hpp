@@ -91,35 +91,6 @@ namespace Core{
         virtual result_T operator()() =0;
     };
 
-    // /**
-    //  * SplitMix64 algorithm, which can be used as random bit source for random distributions
-    //  * Reference: https://prng.di.unimi.it/splitmix64.c
-    //  *
-    //  * Note: Since min and max has to be constexpr, min and max are fixed for all implmementations of this
-    //  * interface class.
-    //  */
-    // template <class result_T>
-    // class SplitMix64{
-    // public:
-    //     typedef result_T result_type;
-    //     virtual ~SplitMix64() =default;
-
-    //     /**
-    //      * Note: Min is fixed to xoshiro datatype min
-    //      */
-    //     constexpr static XoshiroPRNG::rndBit_type min(){
-    //         return XoshiroPRNG::rndBit_type(0);
-    //     };
-
-    //     /**
-    //      * Note: Max is fixed to xoshiro datatype max
-    //      */
-    //     constexpr static XoshiroPRNG::rndBit_type max(){
-    //         return XoshiroPRNG::rndBit_type(-1);
-    //     };
-    //     virtual result_T operator()() =0;
-    // };
-
     /**
      * Random bit source based on mersenne twister
      */
@@ -196,19 +167,6 @@ namespace Core{
         virtual RandomBitSource<rndBit_type>* getRandomBitSource() =0;
     };
 
-    // /**
-    //  * Xoshiro algorithm based source for randomness. Allows to produce uniformly and normal distributed random values
-    //  * and random bits
-    //  */
-    // class RandomSourceXoshiro{
-    // public:
-    //     virtual ~RandomSourceXoshiro() =default;
-    //     virtual double uniformRealRndValue() =0;
-    //     virtual double normalRealRndValue() =0;
-    //     virtual SplitMix64<XoshiroPRNG::rndBit_type>* getRandomBitSource() =0;
-    // };
-    
-
     /**
      * Random distribution which produces random samples with a specific distribution
      */
@@ -266,10 +224,10 @@ namespace Core{
      */
     class UniformTestDistributionXoshiro: public RandomDistribution{
     public:
-        UniformTestDistributionXoshiro(double min, double max, Xoshiro256pTestBitSource randomSource);
+        UniformTestDistributionXoshiro(double min, double max, Xoshiro256pTestBitSource* randomSource);
         double rndValue() override;
     private:
-        Xoshiro256pTestBitSource randomSource_;
+        Xoshiro256pTestBitSource* randomSource_;
         double min_ = 0.0;
         double interval_ = 1.0;
     };
@@ -280,10 +238,10 @@ namespace Core{
      */
     class NormalTestDistributionXoshiro: public RandomDistribution{
     public:
-        NormalTestDistributionXoshiro(Xoshiro256pTestBitSource randomSource);
+        NormalTestDistributionXoshiro(Xoshiro256pTestBitSource* randomSource);
         double rndValue() override;
     private:
-        Xoshiro256pTestBitSource randomSource_;
+        Xoshiro256pTestBitSource* randomSource_;
     };
 
     /**
@@ -298,19 +256,6 @@ namespace Core{
         virtual RandomSource* getThreadRandomSource() =0;
         virtual RandomSource* getRandomSource(std::size_t index) =0;
     };
-
-    // /**
-    //  * Xoshiro algorithm based pool of random sources, usually one per thread. This allows to provide individual, seperate
-    //  * random sources for individual threads and can produce random distribution objects.
-    //  */
-    // class AbstractRandomGeneratorPoolXoshiro{
-    // public:
-    //     virtual ~AbstractRandomGeneratorPoolXoshiro() =default;
-    //     virtual void setSeedForElements(XoshiroPRNG::rndBit_type newSeed) =0;
-    //     virtual RndDistPtr getUniformDistribution(double min, double max) =0;
-    //     virtual RandomSourceXoshiro* getThreadRandomSource() =0;
-    //     virtual RandomSourceXoshiro* getRandomSource(std::size_t index) =0;
-    // };
 
     /**
      * Pool of random sources, with random sources based on Mersenne Twister
@@ -379,7 +324,6 @@ namespace Core{
         class XoshiroTestRNGPoolElement: public RandomSource{
         public:
             XoshiroTestRNGPoolElement() = default;
-            void seed(rndBit_type seed);
             double uniformRealRndValue() override;
             double normalRealRndValue() override;
             Xoshiro256pTestBitSource* getRandomBitSource() override;
@@ -390,14 +334,14 @@ namespace Core{
             NormalTestDistributionXoshiro normalDist_;
         };
 
-        XoshiroTestRandomGeneratorPool();
+        XoshiroTestRandomGeneratorPool() = default;
         void setSeedForElements(rndBit_type newSeed) override;
         RndDistPtr getUniformDistribution(double min, double max) override;
         XoshiroTestRNGPoolElement* getThreadRandomSource() override;
         XoshiroTestRNGPoolElement* getRandomSource(std::size_t index) override;
 
     private:
-        std::vector<std::unique_ptr<XoshiroTestRNGPoolElement>> elements_;
+        XoshiroTestRNGPoolElement element_;
     };
 
     extern std::unique_ptr<AbstractRandomGeneratorPool> globalRandomGeneratorPool; ///< global random pool / randomness provider

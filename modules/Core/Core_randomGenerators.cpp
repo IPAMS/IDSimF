@@ -211,7 +211,7 @@ double Core::NormalTestDistribution::rndValue() {
  * @param min lower boundary of the interval
  * @param max upper boundary of the interval
  */
-Core::UniformTestDistributionXoshiro::UniformTestDistributionXoshiro(double min, double max, Xoshiro256pTestBitSource randomSource):
+Core::UniformTestDistributionXoshiro::UniformTestDistributionXoshiro(double min, double max, Xoshiro256pTestBitSource* randomSource):
 randomSource_(randomSource),
 min_(min),
 interval_(max-min)
@@ -222,7 +222,7 @@ interval_(max-min)
  * @return uniformly distributed test value
  */
 double Core::UniformTestDistributionXoshiro::rndValue() {
-    rndBit_type x = randomSource_.internalRandomSource();
+    rndBit_type x = randomSource_->internalRandomSource();
     const union { rndBit_type i; double d; } u = { .i = UINT64_C(0x3FF) << 52 | x >> 12 };
     return (u.d - 1.0) * interval_ + min_;
 }
@@ -231,7 +231,7 @@ double Core::UniformTestDistributionXoshiro::rndValue() {
 /**
  * Construct normal test distribution
  */
-Core::NormalTestDistributionXoshiro::NormalTestDistributionXoshiro(Xoshiro256pTestBitSource randomSource): randomSource_(randomSource)
+Core::NormalTestDistributionXoshiro::NormalTestDistributionXoshiro(Xoshiro256pTestBitSource* randomSource): randomSource_(randomSource)
 {}
 
 /**
@@ -239,8 +239,8 @@ Core::NormalTestDistributionXoshiro::NormalTestDistributionXoshiro(Xoshiro256pTe
  * @return non random normal distributed test value
  */
 double Core::NormalTestDistributionXoshiro::rndValue() {
-    rndBit_type x = randomSource_.internalRandomSource();
-    rndBit_type y = randomSource_.internalRandomSource();
+    rndBit_type x = randomSource_->internalRandomSource();
+    rndBit_type y = randomSource_->internalRandomSource();
     const union { rndBit_type i; double d; } u = { .i = UINT64_C(0x3FF) << 52 | x >> 12 };
     const union { rndBit_type i; double d; } v = { .i = UINT64_C(0x3FF) << 52 | y >> 12 };
 
@@ -393,7 +393,76 @@ Core::TestRandomGeneratorPool::TestRNGPoolElement* Core::TestRandomGeneratorPool
     return &element_;
 }
 
+// --------------------------------
 
+
+/**
+ * Get uniformly distributed random value
+ * @return random value, uniformly distrbuted in the interval [0, 1)
+ */
+double Core::XoshiroTestRandomGeneratorPool::XoshiroTestRNGPoolElement::uniformRealRndValue() {
+    return uniformDist_.rndValue();
+}
+
+/**
+ * Get normal distributed random value
+ * @return random value, normally distributed
+ */
+double Core::XoshiroTestRandomGeneratorPool::XoshiroTestRNGPoolElement::normalRealRndValue() {
+    return normalDist_.rndValue();
+}
+
+/**
+ * Gets the random bit source of this random source
+ * @return A random bit source, based on the test xoshiro256+
+ */
+Core::Xoshiro256pTestBitSource* Core::XoshiroTestRandomGeneratorPool::XoshiroTestRNGPoolElement::getRandomBitSource() {
+    return &rngGenerator_;
+}
+
+/**
+ * Sets a new random seed for all elements of the pools
+ */
+void Core::XoshiroTestRandomGeneratorPool::setSeedForElements(Core::rndBit_type newSeed) {
+    // to-do;
+}
+
+/**
+ * Get a new uniform random distribution in the interval [min, max). Note that the underlying random bit source
+ * is the random bit source associated to *the current* thread. The random bit source is NOT changed if the
+ * distribution is called from another thread.
+ *
+ * @param min Lower boundary of the interval of the random values
+ * @param max Upper boundary of the interval of the random values
+ * @return A new uniform random distribution in the interval [min, max)
+ */
+Core::RndDistPtr Core::XoshiroTestRandomGeneratorPool::getUniformDistribution(double min, double max) {
+    return std::make_unique<Core::UniformTestDistributionXoshiro>(min, max, this->getThreadRandomSource()->getRandomBitSource());
+}
+
+/**
+ * Gets a test random source for the current thread
+ * @return Test random source
+ */
+Core::XoshiroTestRandomGeneratorPool::XoshiroTestRNGPoolElement* Core::XoshiroTestRandomGeneratorPool::getThreadRandomSource() {
+    return &element_;
+}
+
+/**
+ * Gets a test random source for a specified thread
+ * @return Test random source
+ */
+Core::XoshiroTestRandomGeneratorPool::XoshiroTestRNGPoolElement* Core::XoshiroTestRandomGeneratorPool::getRandomSource(std::size_t index) {
+    return &element_;
+}
+
+/**
+ * @brief Bit rotation function for use in xoshiro256+
+ * 
+ * @param x number to rotate
+ * @param k rotation number
+ * @return rotated number  
+ */
 static inline Core::rndBit_type rotl(const Core::rndBit_type x, int k) {
 	return (x << k) | (x >> (64 - k));
 }
