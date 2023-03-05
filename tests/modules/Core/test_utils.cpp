@@ -196,6 +196,21 @@ TEST_CASE("Test random bit sources") {
             CHECK( testVector1[3] == testVector2[3]);
     }
 
+    SECTION("Test Xoshiro reproductivity with constant seed"){
+            std::vector<int> testVector1 = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20};
+            std::vector<int> testVector2 = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20};
+
+            Core::Xoshiro256pTestBitSource xoshiro256pSource1 = Core::Xoshiro256pTestBitSource();
+            Core::Xoshiro256pTestBitSource xoshiro256pSource2 = Core::Xoshiro256pTestBitSource();
+
+            std::shuffle(testVector1.begin(), testVector1.end(), xoshiro256pSource1);
+            std::shuffle(testVector2.begin(), testVector2.end(), xoshiro256pSource2);
+            CHECK( (testVector1[0] != 1 && testVector1[1] != 2) );
+            CHECK( testVector1[0] == testVector2[0]);
+            CHECK( testVector1[1] == testVector2[1]);
+            CHECK( testVector1[3] == testVector2[3]);
+    }
+
 }
 
 TEST_CASE("Test productive random generator pool") {
