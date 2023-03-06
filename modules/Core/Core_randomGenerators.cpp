@@ -229,7 +229,7 @@ interval_(max-min)
  */
 double Core::UniformTestDistributionXoshiro::rndValue() {
     rndBit_type x = randomSource_->internalRandomSource();
-    const union { rndBit_type i; double d; } u = { .i = UINT64_C(0x3FF) << 52 | x >> 12 };
+    const union { rndBit_type i; double d; } u = {UINT64_C(0x3FF) << 52 | x >> 12 };
     return (u.d - 1.0) * interval_ + min_;
 }
 
@@ -255,8 +255,8 @@ Core::NormalTestDistributionXoshiro::NormalTestDistributionXoshiro(Xoshiro256pTe
 double Core::NormalTestDistributionXoshiro::rndValue() {
     rndBit_type x = randomSource_->internalRandomSource();
     rndBit_type y = randomSource_->internalRandomSource();
-    const union { rndBit_type i; double d; } u = { .i = UINT64_C(0x3FF) << 52 | x >> 12 };
-    const union { rndBit_type i; double d; } v = { .i = UINT64_C(0x3FF) << 52 | y >> 12 };
+    const union { rndBit_type i; double d; } u = {UINT64_C(0x3FF) << 52 | x >> 12 };
+    const union { rndBit_type i; double d; } v = {UINT64_C(0x3FF) << 52 | y >> 12 };
 
     double u1 = (u.d - 1.0);
     double v1 = (v.d - 1.0);
