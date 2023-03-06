@@ -36,6 +36,7 @@
 #include <random>
 #include <vector>
 #include <memory>
+#include <array>
 
 namespace Core{
 
