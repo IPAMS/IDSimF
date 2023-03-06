@@ -196,7 +196,7 @@ void CollisionModel::MDInteractionsModel::updateModelParticleParameters(Core::Pa
  * Updates trajectory recording if timestep recording parameter is exceeded
 */
 void CollisionModel::MDInteractionsModel::updateModelTimestepParameters(int timestep, double /*time*/) {
-    if (modelRecordsTrajectories_ && timestep > recordTrajectoryStartTimeStep_){
+    if (modelRecordsTrajectories_ && timestep >= recordTrajectoryStartTimeStep_){
         trajectoryRecordingActive_ = true;
     }
 }
