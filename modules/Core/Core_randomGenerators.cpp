@@ -121,6 +121,7 @@ Core::SplitMix64TestBitSource::SplitMix64TestBitSource() : state_(Core::defaultS
 
 /**
  * Generates next value from the state of the SplitMix64 algorithm (predefined sequence)
+ * Reference: https://prng.di.unimi.it/splitmix64.c
  */
 Core::rndBit_type Core::SplitMix64TestBitSource::operator()() {
     Core::rndBit_type randomSource = (state_ += 0x9e3779b97f4a7c15uLL);
@@ -206,14 +207,14 @@ double Core::NormalTestDistribution::rndValue() {
 
 
 /**
- * Construct uniform test distribution
+ * Construct uniform test distribution based on Xoshiro256+
  */
 Core::UniformTestDistributionXoshiro::UniformTestDistributionXoshiro(Xoshiro256pTestBitSource* randomSource){
     randomSource_ = randomSource;
 }
 
 /**
- * Construct a custom test distribution with a custom interval
+ * Construct a custom test distribution with a custom interval based on Xoshiro256+
  * @param min lower boundary of the interval
  * @param max upper boundary of the interval
  */
@@ -233,23 +234,16 @@ double Core::UniformTestDistributionXoshiro::rndValue() {
     return (u.d - 1.0) * interval_ + min_;
 }
 
-// /**
-//  * Construct normal test distribution
-//  */
-// Core::NormalTestDistributionXoshiro::NormalTestDistributionXoshiro(){
-//     Xoshiro256pTestBitSource randomSource = Xoshiro256pTestBitSource();
-//     randomSource_ = &randomSource;
-// }
-
-
 /**
- * Construct normal test distribution
+ * Construct normal test distribution based on Xoshiro256+
  */
 Core::NormalTestDistributionXoshiro::NormalTestDistributionXoshiro(Xoshiro256pTestBitSource* randomSource): randomSource_(randomSource)
 {}
 
 /**
  * Generate normal test value by Box-Muller transform from Xoshiro256+ generated uniform numbers
+ * Reference 1: https://en.wikipedia.org/wiki/Box%E2%80%93Muller_transform
+ * Reference 2: https://prng.di.unimi.it/
  * @return non random normal distributed test value
  */
 double Core::NormalTestDistributionXoshiro::rndValue() {
@@ -277,7 +271,7 @@ void Core::RandomGeneratorPool::RNGPoolElement::seed(Core::rndBit_type seed) {
 
 /**
  * Get uniformly distributed random value
- * @return random value, uniformly distrbuted in the interval [0, 1]
+ * @return random value, uniformly distrbuted in the interval [0, 1)
  */
 double Core::RandomGeneratorPool::RNGPoolElement::uniformRealRndValue() {
     return uniformDist_(rngGenerator_.internalRandomSource);
@@ -325,7 +319,7 @@ void Core::RandomGeneratorPool::setSeedForElements(Core::rndBit_type newSeed) {
  *
  * @param min Lower boundary of the interval of the random values
  * @param max Upper boundary of the interval of the random values
- * @return A new uniform random distribution in the interval [min, max]
+ * @return A new uniform random distribution in the interval [min, max)
  */
 Core::RndDistPtr Core::RandomGeneratorPool::getUniformDistribution(double min, double max) {
     return std::make_unique<Core::UniformRandomDistribution>(min, max, this->getThreadRandomSource()->getRandomBitSource());
@@ -351,7 +345,7 @@ Core::RandomGeneratorPool::RNGPoolElement* Core::RandomGeneratorPool::getRandomS
 
 /**
 * Get uniformly distributed test value from a short list of predefined, uniformly distributed values
-* @return test value, uniformly distributed in the interval [0, 1]
+* @return test value, uniformly distributed in the interval [0, 1)
 */
 double Core::TestRandomGeneratorPool::TestRNGPoolElement::uniformRealRndValue() {
     return uniformDist_.rndValue();
@@ -382,11 +376,11 @@ void Core::TestRandomGeneratorPool::setSeedForElements(Core::rndBit_type newSeed
 }
 
 /**
- * Get a new uniform test distribution in the interval [min, max].
+ * Get a new uniform test distribution in the interval [min, max).
  *
  * @param min Lower boundary of the interval of the random values
  * @param max Upper boundary of the interval of the random values
- * @return A new uniform test distribution in the interval [min, max]
+ * @return A new uniform test distribution in the interval [min, max)
  */
 Core::RndDistPtr Core::TestRandomGeneratorPool::getUniformDistribution(double min, double max) {
     return std::make_unique<Core::UniformTestDistribution>(min, max);
@@ -408,11 +402,7 @@ Core::TestRandomGeneratorPool::TestRNGPoolElement* Core::TestRandomGeneratorPool
     return &element_;
 }
 
-// --------------------------------
 
-/**
- * Bla bla bla Mr. Freeman
- */
 Core::XoshiroTestRandomGeneratorPool::XoshiroTestRNGPoolElement::XoshiroTestRNGPoolElement() 
     : rngGenerator_(), uniformDist_(&rngGenerator_), normalDist_(&rngGenerator_)
 {}
@@ -488,6 +478,11 @@ static inline Core::rndBit_type rotl(const Core::rndBit_type x, int k) {
 	return (x << k) | (x >> (64 - k));
 }
 
+/**
+ * @brief Initlaizes Xoshiro256+ algorithm with seed
+ * 
+ * @param seed input seed 
+*/
 Core::Xoshiro256p::Xoshiro256p(Core::rndBit_type seed){
     SplitMix64BitSource splitmix64 = SplitMix64BitSource();
     splitmix64.seed(seed);
@@ -495,10 +490,19 @@ Core::Xoshiro256p::Xoshiro256p(Core::rndBit_type seed){
     internalState_ = s; 
 }
 
+/**
+ * @brief Initlaizes Xoshiro256+ algorithm with state
+ * 
+ * @param seed input state 
+*/
 Core::Xoshiro256p::Xoshiro256p(std::array<Core::rndBit_type, 4> state){
     internalState_ = state; 
 }
 
+/**
+ * Generates next random number from xoshiro state 
+ * reference: https://prng.di.unimi.it/xoshiro256plus.c
+*/
 Core::rndBit_type Core::Xoshiro256p::operator()(){
     const Core::rndBit_type result = internalState_[0] + internalState_[3];
 
@@ -515,10 +519,16 @@ Core::rndBit_type Core::Xoshiro256p::operator()(){
 	return result;
 }
 
+/**
+ * returns minimal bit source value 
+*/
 constexpr Core::rndBit_type Core::Xoshiro256p::min(){
     return Core::rndBit_type(0);
 }
 
+/**
+ * returns max bit source value 
+*/
 constexpr Core::rndBit_type Core::Xoshiro256p::max(){
     return Core::rndBit_type(-1);
 }

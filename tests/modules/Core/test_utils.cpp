@@ -329,7 +329,7 @@ TEST_CASE( "Test testing random distributions", "[Core][random]") {
     }
 }
 
-TEST_CASE( "Test xoshiro246+ test random distributions (constant seeding)", "[Core][random]") {
+TEST_CASE( "Test xoshiro256+ test random distributions (constant seeding)", "[Core][random]") {
 
     Core::XoshiroTestRandomGeneratorPool rngPool;
     Core::XoshiroTestRandomGeneratorPool::XoshiroTestRNGPoolElement* rngPoolElem = rngPool.getThreadRandomSource();

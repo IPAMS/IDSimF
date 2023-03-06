@@ -45,6 +45,10 @@ namespace Core{
 
     extern std::random_device rdSeed; ///< global seed generator
 
+    /**
+     * Xoshiro256+ algorithm implementation following standard library interface 
+     * The state should be initalized with the SplitMix64 algorithm 
+    */
     class Xoshiro256p{
 
 	    public:
