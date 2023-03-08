@@ -42,12 +42,12 @@ TEST_CASE("Basic test MD preconstructed", "[CollisionModels][MDInteractionsModel
     double diameterN2 = CollisionModel::MDInteractionsModelPreconstructed::DIAMETER_N2;
     FileIO::MolecularStructureReader reader = FileIO::MolecularStructureReader();
     std::unordered_map<std::string,  std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection = 
-                                                                    reader.readMolecularStructure("test_molecularstructure_reader_set1.json");
+                                                                    reader.readMolecularStructure("test_molecularstructure_reader.json");
     Core::Particle ion;
     ion.setMolecularStructure(molecularStructureCollection.at("CO2+"));
     Core::RandomSource* rndSource = Core::globalRandomGeneratorPool->getThreadRandomSource();
     
-    size_t samples = 50;
+    size_t samples = 1;
     double pi = 3.1415;
     // std::vector<Core::Vector> ionVelocities;
     // std::vector<Core::Vector> ionPositions;
@@ -69,12 +69,12 @@ TEST_CASE("Basic test MD preconstructed", "[CollisionModels][MDInteractionsModel
                                                                                         "N2", 
                                                                                         1e-9, 
                                                                                         1E-17, 
-                                                                                        6, 1, 
+                                                                                        4, 1, 
                                                                                         43e-10,
                                                                                         molecularStructureCollection);
 
         
-        mdSim.setTrajectoryWriter("MD_collisions_preconstructed_trajectories_CO2+N2_LJvariation_switchedVZ_oQP-.txt", 43e-10, 0);
+        mdSim.setTrajectoryWriter("MD_collisions_preconstructed_trajectories_CO2+N2_rotation.txt", 43e-10, 0);
         mdSim.updateModelTimestepParameters(1, 0);
         double dt = 2e-11;
         mdSim.modifyVelocity(ion, dt);
