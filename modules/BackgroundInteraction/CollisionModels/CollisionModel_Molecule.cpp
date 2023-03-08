@@ -304,3 +304,4 @@ void CollisionModel::Molecule::rotateMolecule(){
        atom->rotate(this->angles);
     }
 }
+

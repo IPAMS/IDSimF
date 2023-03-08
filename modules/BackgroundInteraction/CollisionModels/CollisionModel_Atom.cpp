@@ -201,6 +201,13 @@ void CollisionModel::Atom::rotate(const Core::Vector &angles){
     this->relativePosition.z(new_rel_z);
 }       
 
+void CollisionModel::Atom::rotate2D(double angle, Core::Vector& relPos){
+    double xNew = relPos.x() * cos(angle) - relPos.y() * sin(angle);
+    double yNew = relPos.x() * sin(angle) + relPos.y() * cos(angle);
+    relPos.x(xNew);
+    relPos.y(yNew);
+} 
+
 /**
  * Calculates the approximate LJ interaction parameter epsilon between two atoms 
  */

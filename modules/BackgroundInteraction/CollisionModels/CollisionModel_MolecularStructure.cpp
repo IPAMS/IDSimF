@@ -114,13 +114,25 @@ std::string CollisionModel::MolecularStructure::getName() const{
     return structureName;
 }
 
+double CollisionModel::MolecularStructure::getMomentOfInertia(double x1, double x2, double m1, double m2){
+    return m1 * x1 * x1 + m2 * x2 * x2;
+}
+
+double CollisionModel::MolecularStructure::getAngularVelocity(double T, double I){
+    if(I == 0){
+        return 0;
+    }else{
+        return sqrt(2 * Core::K_BOLTZMANN * T/I);
+    }
+        
+}
+
 /**
  * Calculates the current mass of the MolecularStructure
  */
 void CollisionModel::MolecularStructure::calcMass(){
     this->mass = 0;
     for(auto& atom : atoms){
-        //std::cout << atom->getMass() << " " << (int)atom->getType() << std::endl;
         this->mass += atom->getMass();
     }
     
@@ -197,6 +209,14 @@ void CollisionModel::MolecularStructure::setIsIon(){
     }
     
 }
+
+
+// void CollisionModel::MolecularStructure::rotateMolecule2D(double angle){
+//     for(auto& atom : atoms){
+//        atom->rotate2D(angle);
+//     }
+// }
+
 
 // create an empty static collection of molecular structures
 // std::unordered_map<std::string, std::shared_ptr<CollisionModel::MolecularStructure> > CollisionModel::MolecularStructure::createCollection(){

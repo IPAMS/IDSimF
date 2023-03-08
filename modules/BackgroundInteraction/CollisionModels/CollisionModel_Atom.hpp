@@ -76,6 +76,7 @@ namespace CollisionModel{
 
         static double calcLJEps(const Atom &atm1, const Atom &atm2);
         static double calcLJSig(const Atom &atm1, const Atom &atm2);
+        static void rotate2D(double angle, Core::Vector& relPos); 
 
     private:
 
