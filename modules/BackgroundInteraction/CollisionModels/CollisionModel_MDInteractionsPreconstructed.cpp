@@ -434,9 +434,7 @@ void CollisionModel::MDInteractionsModelPreconstructed::modifyVelocity(Core::Par
 
         double pi = 3.1415; 
         // rotate it randomly
-        bgMole.setAngles(Core::Vector(rndSource->uniformRealRndValue()*2*pi-pi,
-                                      rndSource->uniformRealRndValue()*2*pi-pi,
-                                      rndSource->uniformRealRndValue()*2*pi-pi));
+        
 
         // Give molecule a random orientation:
         mole.setAngles(Core::Vector(rndSource->uniformRealRndValue()*2*pi-pi,
@@ -472,7 +470,7 @@ void CollisionModel::MDInteractionsModelPreconstructed::modifyVelocity(Core::Par
         for(auto* molecule : moleculesPtr){
             endEnergy += 0.5 * molecule->getMass() * molecule->getComVel().magnitudeSquared();
         }
-        // std::cout << startEnergy << " " << endEnergy << std::endl;
+        std::cout << startEnergy << " " << endEnergy << std::endl;
         if(endEnergy*0.90 >= startEnergy){
             std::cout << "Not energy conserving." << std::endl;
             trajectorySuccess = false;
@@ -733,6 +731,24 @@ bool CollisionModel::MDInteractionsModelPreconstructed::rk4InternAdaptiveStep(st
     std::array<std::array<Core::Vector, 2>, 6> l;
     double minDistance = 100;
     Core::Vector startingVel = moleculesPtr[1]->getComVel();
+    double pi = 3.14159;
+    Core::RandomSource* rndSource = Core::globalRandomGeneratorPool->getThreadRandomSource();
+    Core::Vector nitrogenOne;
+    Core::Vector nitrogenTwo; 
+    Core::Vector nitrogenAngles = {rndSource->uniformRealRndValue()*2*pi-pi, 
+                                rndSource->uniformRealRndValue()*2*pi-pi, 
+                                rndSource->uniformRealRndValue()*2*pi-pi};
+    double I;
+    double angularVelocity;
+    if(moleculesPtr[1]->getMolecularStructureName()=="N2"){
+        nitrogenOne = molecularStructureCollection_.at(moleculesPtr[1]->getMolecularStructureName())->getAtoms().at(0)->getRelativePosition();
+        nitrogenTwo = molecularStructureCollection_.at(moleculesPtr[1]->getMolecularStructureName())->getAtoms().at(1)->getRelativePosition();
+        I = CollisionModel::MolecularStructure::getMomentOfInertia(nitrogenOne.x(), nitrogenTwo.x(), 
+                                                                    moleculesPtr[1]->getMass()/2, moleculesPtr[1]->getMass()/2);
+        angularVelocity = CollisionModel::MolecularStructure::getAngularVelocity(temperatureFunction_(moleculesPtr[1]->getComPos()), I);
+    }
+    moleculesPtr[1]->setAngles(nitrogenAngles);
+    std::cout << "angVel: " << angularVelocity << std::endl; 
 
     while(integrationTimeSum < finalTime){
         
@@ -829,9 +845,6 @@ bool CollisionModel::MDInteractionsModelPreconstructed::rk4InternAdaptiveStep(st
         i = 0;
         for(auto* molecule : moleculesPtr){
             if(trajectoryRecordingActive_ == true && molecule->getMolecularStructureName() == collisionMolecule_){
-                // if(steps == 0){
-                //     std::cout << molecule->getComVel() << std::endl;
-                // }
                 writeTrajectory(distance, molecule->getComPos(), molecule->getComVel(),forceMolecules, false, trajectoryOutputStream_.get(), integrationTimeSum, dt,
                 moleculesPtr[0]->getComPos(), moleculesPtr[1]->getAtoms().at(0)->getRelativePosition(), moleculesPtr[1]->getAtoms().at(1)->getRelativePosition());
             }
@@ -839,6 +852,13 @@ bool CollisionModel::MDInteractionsModelPreconstructed::rk4InternAdaptiveStep(st
             molecule->setComPos(newComPosOrder4[i]);
             molecule->setComVel(newComVelOrder4[i]); 
             
+            if(molecule->getMolecularStructureName()=="N2"){
+                CollisionModel::Atom::rotate2D(angularVelocity*dt, nitrogenOne);
+                CollisionModel::Atom::rotate2D(angularVelocity*dt, nitrogenTwo);
+                molecule->getAtoms().at(0)->setRelativePosition(nitrogenOne);
+                molecule->getAtoms().at(1)->setRelativePosition(nitrogenTwo);
+                molecule->setAngles(nitrogenAngles);
+            }
             
             i++;
         }
@@ -861,8 +881,8 @@ bool CollisionModel::MDInteractionsModelPreconstructed::rk4InternAdaptiveStep(st
                     }
                     // std::cout << wasHit << std::endl;
                     Core::Vector endVel = moleculesPtr[1]->getComVel();
-                    globalOut << startingVel.x() << ", " << startingVel.y() << ", " << startingVel.z() << ", " 
-                        << endVel.x() << ", " << endVel.y() << ", " << endVel.z() << ", " << minDistance << std::endl;
+                    // globalOut << startingVel.x() << ", " << startingVel.y() << ", " << startingVel.z() << ", " 
+                    //     << endVel.x() << ", " << endVel.y() << ", " << endVel.z() << ", " << minDistance << std::endl;
                     return wasHit;
                 }
                 if((moleculesPtr[z]->getComPos() - moleculesPtr[b]->getComPos()).magnitude() <= requiredRad){
@@ -909,8 +929,6 @@ void CollisionModel::MDInteractionsModelPreconstructed::forceFieldMD(std::vector
             // This always contributes to the experienced force
             Core::Vector absPosAtomI = ion->getComPos() + atomI->getRelativePosition();
             Core::Vector absPosAtomJ = bgGas->getComPos() + atomJ->getRelativePosition();
-            // std::cout << atomJ->getRelativePosition() << std::endl;
-
 
             Core::Vector distance = absPosAtomI - absPosAtomJ;
             
@@ -931,8 +949,8 @@ void CollisionModel::MDInteractionsModelPreconstructed::forceFieldMD(std::vector
             atomForce.x(distance.x() * ljFactor);
             atomForce.y(distance.y() * ljFactor);
             atomForce.z(distance.z() * ljFactor);
-            // forceMolecules[0] += atomForce;
-            // forceMolecules[1] += atomForce * (-1);
+            forceMolecules[0] += atomForce;
+            forceMolecules[1] += atomForce * (-1);
 
             // Second contribution: C4 ion-induced dipole potential
             // This requires an ion and one neutrally charged molecule to be present
@@ -1073,6 +1091,6 @@ void CollisionModel::MDInteractionsModelPreconstructed::forceFieldMD(std::vector
         ionInducedForce.z(1./(Core::ELECTRIC_CONSTANT) * collisionGasPolarizability_m3_ * 
                     (eField[0]*eFieldDerivative[5] + eField[1]*eFieldDerivative[3] + eField[2]*eFieldDerivative[4]));
     }
-    // forceMolecules[0] += ionInducedForce;
-    // forceMolecules[1] += ionInducedForce * (-1);
+    forceMolecules[0] += ionInducedForce;
+    forceMolecules[1] += ionInducedForce * (-1);
 }
