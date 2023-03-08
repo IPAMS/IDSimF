@@ -322,10 +322,10 @@ void CollisionModel::MDInteractionsModel::modifyVelocity(Core::Particle& particl
         bgMole.setComPos(circleVector);
 
         double pi = 3.1415; 
-        // rotate it randomly
-        bgMole.setAngles(Core::Vector(rndSource->uniformRealRndValue()*2*pi-pi,
-                                      rndSource->uniformRealRndValue()*2*pi-pi,
-                                      rndSource->uniformRealRndValue()*2*pi-pi));
+        // // rotate it randomly
+        // bgMole.setAngles(Core::Vector(rndSource->uniformRealRndValue()*2*pi-pi,
+        //                               rndSource->uniformRealRndValue()*2*pi-pi,
+        //                               rndSource->uniformRealRndValue()*2*pi-pi));
 
         // Give molecule a random orientation:
         mole.setAngles(Core::Vector(rndSource->uniformRealRndValue()*2*pi-pi,
@@ -612,6 +612,23 @@ bool CollisionModel::MDInteractionsModel::rk4InternAdaptiveStep(std::vector<Coll
     std::array<double, 2> R;
     double globalR, globalDelta;
     // double tolerance = 1e-8;
+    double pi = 3.14159;
+    Core::RandomSource* rndSource = Core::globalRandomGeneratorPool->getThreadRandomSource();
+    Core::Vector nitrogenOne;
+    Core::Vector nitrogenTwo; 
+    Core::Vector nitrogenAngles = {rndSource->uniformRealRndValue()*2*pi-pi, 
+                                rndSource->uniformRealRndValue()*2*pi-pi, 
+                                rndSource->uniformRealRndValue()*2*pi-pi};
+    double I;
+    double angularVelocity;
+    if(moleculesPtr[1]->getMolecularStructureName()=="N2"){
+        nitrogenOne = molecularStructureCollection_.at(moleculesPtr[1]->getMolecularStructureName())->getAtoms().at(0)->getRelativePosition();
+        nitrogenTwo = molecularStructureCollection_.at(moleculesPtr[1]->getMolecularStructureName())->getAtoms().at(1)->getRelativePosition();
+        I = CollisionModel::MolecularStructure::getMomentOfInertia(nitrogenOne.x(), nitrogenTwo.x(), 
+                                                                    moleculesPtr[1]->getMass()/2, moleculesPtr[1]->getMass()/2);
+        angularVelocity = CollisionModel::MolecularStructure::getAngularVelocity(temperatureFunction_(moleculesPtr[1]->getComPos()), I);
+    }
+    moleculesPtr[1]->setAngles(nitrogenAngles);
 
     while(integrationTimeSum < finalTime){
         
@@ -697,6 +714,14 @@ bool CollisionModel::MDInteractionsModel::rk4InternAdaptiveStep(std::vector<Coll
             
             molecule->setComPos(newComPosOrder4[i]);
             molecule->setComVel(newComVelOrder4[i]);
+
+            if(molecule->getMolecularStructureName()=="N2"){
+                CollisionModel::Atom::rotate2D(angularVelocity*dt, nitrogenOne);
+                CollisionModel::Atom::rotate2D(angularVelocity*dt, nitrogenTwo);
+                molecule->getAtoms().at(0)->setRelativePosition(nitrogenOne);
+                molecule->getAtoms().at(1)->setRelativePosition(nitrogenTwo);
+                molecule->setAngles(nitrogenAngles);
+            }
             i++;
         }
 
