@@ -30,6 +30,24 @@
 
 },
 {
+	"name":"Ar",
+	"diameter":3.4,
+	"atoms":[
+		{
+			"type":"Ar", 
+			"posx":0, 
+			"posy":0, 
+			"posz":0, 
+			"mass":39.948, 
+			"charge":0, 
+			"partCharge":0, 
+			"LJsigma":3.401, 
+			"LJeps":0.9777
+		}
+	]
+
+},
+{
 	"name":"He",
 	"diameter":2.8,
 	"atoms":[
