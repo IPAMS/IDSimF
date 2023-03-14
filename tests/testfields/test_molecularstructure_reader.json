@@ -66,6 +66,24 @@
 
 },
 {
+	"name":"Ar",
+	"diameter":3.4,
+	"atoms":[
+		{
+			"type":"Ar", 
+			"posx":0, 
+			"posy":0, 
+			"posz":0, 
+			"mass":39.948, 
+			"charge":0, 
+			"partCharge":0, 
+			"LJsigma":3.401, 
+			"LJeps":0.9777
+		}
+	]
+
+},
+{
 	"name":"H2+",
 	"diameter":2.89,
 	"atoms":[
@@ -559,6 +577,47 @@
 			"posz":0, 
 			"mass":15.999, 
 			"charge":0.228, 
+			"partCharge":0, 
+			"LJsigma":2.3, 
+			"LJeps":1.12
+		}
+
+	]
+
+},
+{
+	"name":"CO2",
+	"diameter":2.4,
+	"atoms":[
+		{
+			"type":"COM", 
+			"posx":0, 
+			"posy":0, 
+			"posz":0, 
+			"mass":12.011, 
+			"charge":0, 
+			"partCharge":0, 
+			"LJsigma":1.35417, 
+			"LJeps":0.2895328
+		}, 
+		{
+			"type":"O", 
+			"posx":1.2674, 
+			"posy":0, 
+			"posz":0, 
+			"mass":15.999, 
+			"charge":0, 
+			"partCharge":0, 
+			"LJsigma":2.3, 
+			"LJeps":1.12
+		},
+		{
+			"type":"O", 
+			"posx":-1.2674, 
+			"posy":0, 
+			"posz":0, 
+			"mass":15.999, 
+			"charge":0, 
 			"partCharge":0, 
 			"LJsigma":2.3, 
 			"LJeps":1.12
