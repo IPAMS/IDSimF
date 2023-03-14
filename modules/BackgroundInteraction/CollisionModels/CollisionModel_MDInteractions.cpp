@@ -768,11 +768,14 @@ void CollisionModel::MDInteractionsModel::forceFieldMD(std::vector<CollisionMode
     forceMolecules[1] = Core::Vector(0.0, 0.0, 0.0);
     bool isN2 = false;
     bool isN2Approx = false;
+    bool isCO2 = false;
 
     if(bgGas->getMolecularStructureName()=="N2"){
         isN2 = true;
     }else if(bgGas->getMolecularStructureName()=="N2Approx"){
         isN2Approx = true;
+    }else if(bgGas->getMolecularStructureName()=="CO2"){
+        isCO2 = true;
     }
 
     // construct E-field acting on the molecule
@@ -820,7 +823,7 @@ void CollisionModel::MDInteractionsModel::forceFieldMD(std::vector<CollisionMode
             double distanceCubed = distanceSquared * sqrt(distanceSquared);
             double currentCharge = 0;
             // Check if one of the molecules is an ion and the other one is not
-            if(isN2){
+            if(isN2 || isCO2){
                 if(ceil(fabs(atomI->getCharge()/Core::ELEMENTARY_CHARGE)) != 0 &&
                    atomJ->getType() == CollisionModel::Atom::AtomType::COM){
 
