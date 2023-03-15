@@ -172,17 +172,31 @@ int main(int argc, const char * argv[]) {
         // prepare file writer  =================================================================
         RS::ConcentrationFileWriter resultFilewriter(projectName+"_conc.csv");
 
-        std::vector<std::string> auxParamNames = {"chemical id"};
-        auto additionalParamTFct = [](Core::Particle* particle) -> std::vector<int> {
+        std::vector<std::string> integerParticleAttributesNames = {"chemical id"};
+        auto additionalIntegerParamTFct = [](Core::Particle* particle) -> std::vector<int> {
             std::vector<int> result = {
                     particle->getIntegerAttribute(key_ChemicalIndex)
             };
             return result;
         };
 
+        std::vector<std::string> auxParamNames = {"velocity x", "velocity y", "velocity z", "kinetic energy (eV)"};
+        auto auxParamFct = [](Core::Particle* particle) -> std::vector<double> {
+            double ionVelocity = particle->getVelocity().magnitude();
+            double kineticEnergy_eV = 0.5*particle->getMass()*ionVelocity*ionVelocity*Core::JOULE_TO_EV;
+            std::vector<double> result = {
+                    particle->getVelocity().x(),
+                    particle->getVelocity().y(),
+                    particle->getVelocity().z(),
+                    kineticEnergy_eV
+            };
+            return result;
+        };
+
         std::string hdf5Filename = projectName+"_trajectories.hd5";
         FileIO::TrajectoryHDF5Writer trajectoryWriter(hdf5Filename);
-        trajectoryWriter.setParticleAttributes(auxParamNames, additionalParamTFct);
+        trajectoryWriter.setParticleAttributes(integerParticleAttributesNames, additionalIntegerParamTFct);
+        trajectoryWriter.setParticleAttributes(auxParamNames, auxParamFct);
 
         unsigned int ionsInactive = 0;
         unsigned int nAllParticles = 0;
@@ -192,6 +206,10 @@ int main(int argc, const char * argv[]) {
 
         std::unique_ptr<FileIO::Scalar_writer> voltageWriter;
         voltageWriter = std::make_unique<FileIO::Scalar_writer>(projectName+"_voltages.csv");
+
+        std::unique_ptr<FileIO::Scalar_writer> intensityWriter;
+        intensityWriter = std::make_unique<FileIO::Scalar_writer>(projectName+"intensities.csv");
+        unsigned int totalIntensity = 0;
 
         // init simulation  =====================================================================
 
@@ -243,6 +261,7 @@ int main(int argc, const char * argv[]) {
 
             totalFieldNow[potentialArrays.size()-2] = sin(time*omega) * V_rf;
             totalFieldNow[potentialArrays.size()-1] = -totalFieldNow[potentialArrays.size()-2];
+
         };
 
         auto accelerationFct =
@@ -260,17 +279,14 @@ int main(int argc, const char * argv[]) {
                         fEfield = fEfield+paEffectiveField;
                     }
                     particle->setFloatAttribute("effectiveField", fEfield.magnitude());
-                    /*if (timestep%50000==0){
-                        std::cout << "particle effective Field: " <<particle->getFloatAttribute("effectiveField") << " , ";
-                        std::cout << "pa Field: " <<potentialArrays[0]->getField(2.5/1000, 0, 0) << std::endl;
-                    }*/
+
                     return (fEfield*particleCharge/particle->getMass());
                 };
 
 
         auto timestepWriteFct =
                 [&trajectoryWriter, &voltageWriter, trajectoryWriteInterval, &rsSim, &resultFilewriter, concentrationWriteInterval,
-                 &totalFieldNow, &logger]
+                 &totalFieldNow, &logger, &intensityWriter, &totalIntensity]
                         (std::vector<Core::Particle*>& particles, double time, int timestep,
                          bool lastTimestep) {
 
@@ -290,6 +306,9 @@ int main(int argc, const char * argv[]) {
                         rsSim.logConcentrations(logger);
                         trajectoryWriter.writeTimestep(particles, time);
                     }
+                    if (timestep%10==0) {
+                        intensityWriter->writeTimestep(totalIntensity, time);
+                    }
                 };
 
         ParticleSimulation::ParticleStartSplatTracker startSplatTracker;
@@ -297,7 +316,7 @@ int main(int argc, const char * argv[]) {
             startSplatTracker.particleStart(particle, time);
         };
 
-        auto otherActionsFct = [&ionsInactive, &startSplatTracker](
+        auto otherActionsFct = [&ionsInactive, &startSplatTracker, &potentialArrays, &totalIntensity](
                 Core::Vector& newPartPos, Core::Particle* particle,
                 int /*particleIndex*/,  double time, int /*timestep*/) {
             //Core::Vector pos = particle->getLocation();
@@ -305,6 +324,15 @@ int main(int argc, const char * argv[]) {
                 particle->setActive(false);
                 /*particle->setSplatTime(time);
                 startSplatTracker.particleSplat(particle, time);*/
+                ionsInactive++;
+            }
+            if (newPartPos.x() > 0.1189) {
+                particle->setActive(false);
+                ionsInactive++;
+                totalIntensity++;
+            }
+            if (potentialArrays[0]->isElectrode(newPartPos.x(), newPartPos.y(), newPartPos.z())) {
+                particle->setActive(false);
                 ionsInactive++;
             }
         };
@@ -413,7 +441,7 @@ int main(int argc, const char * argv[]) {
             RS::ReactionConditions reactionConditions = RS::ReactionConditions();
 
             reactionConditions.temperature = backgroundTemperature_K;
-            //reactionConditions.electricField = totalFieldNow_VPerM;
+            reactionConditions.electricField = particle->getFloatAttribute("effectiveField");
             reactionConditions.pressure = backgroundPressure_Pa;
             return reactionConditions;
         };
