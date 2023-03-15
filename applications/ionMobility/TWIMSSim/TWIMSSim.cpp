@@ -207,9 +207,6 @@ int main(int argc, const char * argv[]) {
         std::unique_ptr<FileIO::Scalar_writer> voltageWriter;
         voltageWriter = std::make_unique<FileIO::Scalar_writer>(projectName+"_voltages.csv");
 
-        std::unique_ptr<FileIO::Scalar_writer> intensityWriter;
-        intensityWriter = std::make_unique<FileIO::Scalar_writer>(projectName+"intensities.csv");
-        unsigned int totalIntensity = 0;
 
         // init simulation  =====================================================================
 
@@ -219,7 +216,7 @@ int main(int argc, const char * argv[]) {
         std::vector<Core::Particle*> particlesPtrs;
         std::vector<std::vector<double>> trajectoryAdditionalParams;
 
-        Core::Vector initCorner(5.0e-03, -startWidthY_m/2.0, -startWidthZ_m/2.0);
+        Core::Vector initCorner(7.5e-04, -startWidthY_m/2.0, -startWidthZ_m/2.0);
         Core::Vector initBoxSize(startWidthX_m, startWidthY_m, startWidthZ_m);
 
         for (std::size_t i = 0; i<nParticles.size(); i++) {
@@ -252,7 +249,7 @@ int main(int argc, const char * argv[]) {
         std::vector<double> totalFieldNow(potentialArrays.size(), 0.0);
 
         auto paVoltageFct = [&potentialArrays, &WaveForm, phaseShift,
-                             wavePeriod, waveAmplitude, omega, V_rf, &totalFieldNow](double time){
+                wavePeriod, waveAmplitude, omega, V_rf, &totalFieldNow](double time){
             for(size_t i=0; i<potentialArrays.size()-2; i++) {
                 double period = std::fmod(time, wavePeriod) / wavePeriod;
                 double shiftedPeriod = std::fmod(period + phaseShift[i], 1.0);
@@ -261,15 +258,14 @@ int main(int argc, const char * argv[]) {
 
             totalFieldNow[potentialArrays.size()-2] = sin(time*omega) * V_rf;
             totalFieldNow[potentialArrays.size()-1] = -totalFieldNow[potentialArrays.size()-2];
-
         };
 
         auto accelerationFct =
                 [&potentialArrays, &totalFieldNow, potentialScale, concentrationWriteInterval, paBounds]
                         (Core::Particle* particle, int /*particleIndex*/, SpaceCharge::FieldCalculator &fieldCalculator,
-                                double /*time*/, int timestep){
+                         double /*time*/, int timestep){
                     Core::Vector fEfield(0, 0, 0);
-                     Core::Vector pos = particle->getLocation();
+                    Core::Vector pos = particle->getLocation();
                     double particleCharge = particle->getCharge();
 
                     for(size_t i=0; i<potentialArrays.size(); i++) {
@@ -279,14 +275,13 @@ int main(int argc, const char * argv[]) {
                         fEfield = fEfield+paEffectiveField;
                     }
                     particle->setFloatAttribute("effectiveField", fEfield.magnitude());
-
                     return (fEfield*particleCharge/particle->getMass());
                 };
 
 
         auto timestepWriteFct =
                 [&trajectoryWriter, &voltageWriter, trajectoryWriteInterval, &rsSim, &resultFilewriter, concentrationWriteInterval,
-                 &totalFieldNow, &logger, &intensityWriter, &totalIntensity]
+                        &totalFieldNow, &logger]
                         (std::vector<Core::Particle*>& particles, double time, int timestep,
                          bool lastTimestep) {
 
@@ -302,34 +297,24 @@ int main(int argc, const char * argv[]) {
                     }
                     else if (timestep%trajectoryWriteInterval==0) {
                         logger->info("ts:{}  time:{:.2e}",
-                                timestep, time);
+                                     timestep, time);
                         rsSim.logConcentrations(logger);
                         trajectoryWriter.writeTimestep(particles, time);
                     }
-                    if (timestep%10==0) {
-                        intensityWriter->writeTimestep(totalIntensity, time);
-                    }
                 };
 
-        ParticleSimulation::ParticleStartSplatTracker startSplatTracker;
-        auto particleStartMonitoringFct = [&startSplatTracker](Core::Particle* particle, double time) {
-            startSplatTracker.particleStart(particle, time);
-        };
 
-        auto otherActionsFct = [&ionsInactive, &startSplatTracker, &potentialArrays, &totalIntensity](
+        auto otherActionsFct = [&ionsInactive, &potentialArrays, paBounds](
                 Core::Vector& newPartPos, Core::Particle* particle,
                 int /*particleIndex*/,  double time, int /*timestep*/) {
             //Core::Vector pos = particle->getLocation();
-            if (newPartPos.x() < 0) {
+            if (newPartPos.x() < 0.00001) {
                 particle->setActive(false);
-                /*particle->setSplatTime(time);
-                startSplatTracker.particleSplat(particle, time);*/
                 ionsInactive++;
             }
-            if (newPartPos.x() > 0.1189) {
+            if (newPartPos.x() > 0.11897) {
                 particle->setActive(false);
                 ionsInactive++;
-                totalIntensity++;
             }
             if (potentialArrays[0]->isElectrode(newPartPos.x(), newPartPos.y(), newPartPos.z())) {
                 particle->setActive(false);
@@ -354,7 +339,7 @@ int main(int argc, const char * argv[]) {
                     particle->setDiameter(
                             CollisionModel::util::estimateCollisionDiameterFromMass(
                                     particle->getMass()/Core::AMU_TO_KG
-                                    )*1e-9);
+                            )*1e-9);
                     collisionModel->setSTPParameters(*particle);
                 }
                 collisionModelPtr = std::move(collisionModel);
@@ -384,18 +369,18 @@ int main(int argc, const char * argv[]) {
                 //construct MD model:
                 std::unique_ptr<CollisionModel::MDInteractionsModel> collisionModel =
                         std::make_unique<CollisionModel::MDInteractionsModel>(
-                            backgroundPressure_Pa,
-                            backgroundTemperature_K,
-                            collisionGasMass_Amu,
-                            collisionGasDiameter_nm*1e-9,
-                            collisionGasPolarizability_m3,
-                            collisionGasIdentifier,
-                            subIntegratorIntegrationTime_s,
-                            subIntegratorStepSize_s,
-                            collisionRadiusScaling,
-                            angleThetaScaling,
-                            spawnRadius_m,
-                            molecularStructureCollection);
+                                backgroundPressure_Pa,
+                                backgroundTemperature_K,
+                                collisionGasMass_Amu,
+                                collisionGasDiameter_nm*1e-9,
+                                collisionGasPolarizability_m3,
+                                collisionGasIdentifier,
+                                subIntegratorIntegrationTime_s,
+                                subIntegratorStepSize_s,
+                                collisionRadiusScaling,
+                                angleThetaScaling,
+                                spawnRadius_m,
+                                molecularStructureCollection);
 
                 // Set trajectory writing options:
                 bool saveTrajectory = simConf->boolParameter("save_trajectory");
@@ -404,7 +389,7 @@ int main(int argc, const char * argv[]) {
                     int saveTrajectoryStartTimeStep = simConf->intParameter("trajectory_start_time_step");
                     double trajectoryDistance_m = simConf->doubleParameter("trajectory_distance_m");
                     collisionModel->setTrajectoryWriter(projectName+"_md_trajectories.txt",
-                            trajectoryDistance_m, saveTrajectoryStartTimeStep);
+                                                        trajectoryDistance_m, saveTrajectoryStartTimeStep);
                 }
 
 
@@ -441,7 +426,7 @@ int main(int argc, const char * argv[]) {
             RS::ReactionConditions reactionConditions = RS::ReactionConditions();
 
             reactionConditions.temperature = backgroundTemperature_K;
-            reactionConditions.electricField = particle->getFloatAttribute("effectiveField");
+            //reactionConditions.electricField = totalFieldNow_VPerM;
             reactionConditions.pressure = backgroundPressure_Pa;
             return reactionConditions;
         };
@@ -469,7 +454,7 @@ int main(int argc, const char * argv[]) {
             //terminate simulation loops if all particles are terminated or termination of the integrator was requested
             //from somewhere (e.g. signal from outside)
             if (ionsInactive>=nAllParticles ||
-                    verletIntegrator.runState()==Integration::AbstractTimeIntegrator::IN_TERMINATION)
+                verletIntegrator.runState()==Integration::AbstractTimeIntegrator::IN_TERMINATION)
             {
                 break;
             }
