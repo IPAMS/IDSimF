@@ -50,11 +50,12 @@
 #include "dmsSim_dmsFields.hpp"
 #include "PSim_simionPotentialArray.hpp"
 #include "PSim_particleStartSplatTracker.hpp"
+#include "CollisionModel_MultiCollisionModel.hpp"
 #include <iostream>
 #include <cmath>
 
 const std::string key_ChemicalIndex = "keyChemicalIndex";
-enum CollisionType {SDS, HS, MD, NO_COLLISION};
+enum CollisionType {SDS, HS, MD, MULTI_HS, MULTI_MD, NO_COLLISION};
 
 int main(int argc, const char * argv[]) {
 
@@ -106,6 +107,12 @@ int main(int argc, const char * argv[]) {
         else if (collisionTypeStr=="MD"){
             collisionType = MD;
         }
+        else if (collisionTypeStr=="multi_HS") {
+            collisionType = MULTI_HS;
+        }
+        else if (collisionTypeStr=="multi_MD") {
+            collisionType = MULTI_MD;
+        }
         else if (collisionTypeStr=="none") {
             collisionType = NO_COLLISION;
         }
@@ -113,10 +120,29 @@ int main(int argc, const char * argv[]) {
             throw std::invalid_argument("wrong configuration value: collision_model_type");
         }
 
-        double backgroundPressure_Pa = simConf->doubleParameter("background_pressure_Pa");
-        double collisionGasMass_Amu = simConf->doubleParameter("collision_gas_mass_amu");
-        double collisionGasDiameter_nm = simConf->doubleParameter("collision_gas_diameter_nm");
+        std::vector<double> backgroundPartialPressures_Pa = simConf->doubleVectorParameter(
+                "background_partial_pressures_Pa");
+        std::vector<double> collisionGasMasses_Amu = simConf->doubleVectorParameter("collision_gas_masses_amu");
+        std::vector<double> collisionGasDiameters_angstrom = simConf->doubleVectorParameter(
+                "collision_gas_diameters_angstrom");
         double backgroundTemperature_K = simConf->doubleParameter("background_temperature_K");
+
+        std::size_t nBackgroundGases = backgroundPartialPressures_Pa.size();
+        if (collisionGasMasses_Amu.size()!=nBackgroundGases || collisionGasDiameters_angstrom.size()!=nBackgroundGases) {
+            throw std::invalid_argument("Inconsistent background gas configuration");
+        }
+
+        //compute additional gas parameters:
+        double totalBackgroundPressure_Pa = std::accumulate(
+                backgroundPartialPressures_Pa.begin(),
+                backgroundPartialPressures_Pa.end(), 0.0);
+
+        std::vector<double> collisionGasDiameters_m;
+        std::transform(
+                collisionGasDiameters_angstrom.begin(),
+                collisionGasDiameters_angstrom.end(),
+                std::back_inserter(collisionGasDiameters_m),
+                [](double cgd) -> double { return cgd*1e-10; });
 
         // ======================================================================================
 
@@ -216,7 +242,7 @@ int main(int argc, const char * argv[]) {
         std::vector<Core::Particle*> particlesPtrs;
         std::vector<std::vector<double>> trajectoryAdditionalParams;
 
-        Core::Vector initCorner(7.5e-04, -startWidthY_m/2.0, -startWidthZ_m/2.0);
+        Core::Vector initCorner(1.0e-03, -startWidthY_m/2.0, -startWidthZ_m/2.0);
         Core::Vector initBoxSize(startWidthX_m, startWidthY_m, startWidthZ_m);
 
         for (std::size_t i = 0; i<nParticles.size(); i++) {
@@ -312,7 +338,7 @@ int main(int argc, const char * argv[]) {
                 particle->setActive(false);
                 ionsInactive++;
             }
-            if (newPartPos.x() > 0.11897) {
+            if (newPartPos.x() > 0.13000) {
                 particle->setActive(false);
                 ionsInactive++;
             }
@@ -324,16 +350,16 @@ int main(int argc, const char * argv[]) {
 
         //define / gas interaction /  collision model:
         std::unique_ptr<CollisionModel::AbstractCollisionModel> collisionModelPtr;
-        if (collisionType==SDS || collisionType==HS || collisionType==MD) {
+        if (collisionType==SDS || collisionType==HS || collisionType==MD || collisionType==MULTI_HS || collisionType==MULTI_MD) {
             // prepare static pressure and temperature functions
 
             if (collisionType==SDS){
                 std::unique_ptr<CollisionModel::StatisticalDiffusionModel> collisionModel =
                         std::make_unique<CollisionModel::StatisticalDiffusionModel>(
-                                backgroundPressure_Pa,
+                                backgroundPartialPressures_Pa[0],
                                 backgroundTemperature_K,
-                                collisionGasMass_Amu,
-                                collisionGasDiameter_nm*1e-9);
+                                collisionGasMasses_Amu[0],
+                                collisionGasDiameters_m[0]);
 
                 for (const auto& particle: particlesPtrs) {
                     particle->setDiameter(
@@ -347,10 +373,10 @@ int main(int argc, const char * argv[]) {
             else if (collisionType==HS){
                 std::unique_ptr<CollisionModel::HardSphereModel> collisionModel =
                         std::make_unique<CollisionModel::HardSphereModel>(
-                                backgroundPressure_Pa,
+                                backgroundPartialPressures_Pa[0],
                                 backgroundTemperature_K,
-                                collisionGasMass_Amu,
-                                collisionGasDiameter_nm*1e-9,
+                                collisionGasMasses_Amu[0],
+                                collisionGasDiameters_m[0],
                                 nullptr);
                 collisionModelPtr = std::move(collisionModel);
             }
@@ -369,10 +395,10 @@ int main(int argc, const char * argv[]) {
                 //construct MD model:
                 std::unique_ptr<CollisionModel::MDInteractionsModel> collisionModel =
                         std::make_unique<CollisionModel::MDInteractionsModel>(
-                                backgroundPressure_Pa,
+                                backgroundPartialPressures_Pa[0],
                                 backgroundTemperature_K,
-                                collisionGasMass_Amu,
-                                collisionGasDiameter_nm*1e-9,
+                                collisionGasMasses_Amu[0],
+                                collisionGasDiameters_m[0],
                                 collisionGasPolarizability_m3,
                                 collisionGasIdentifier,
                                 subIntegratorIntegrationTime_s,
@@ -406,6 +432,23 @@ int main(int argc, const char * argv[]) {
 
                 collisionModelPtr = std::move(collisionModel);
             }
+            else if (collisionType==MULTI_HS) {
+                //prepare multimodel with multiple Hard Sphere models (one per collision gas)
+                std::vector<std::unique_ptr<CollisionModel::AbstractCollisionModel>> hsModels;
+                for (std::size_t i = 0; i<nBackgroundGases; ++i) {
+                    auto hsModel = std::make_unique<CollisionModel::HardSphereModel>(
+                            backgroundPartialPressures_Pa[i],
+                            backgroundTemperature_K,
+                            collisionGasMasses_Amu[i],
+                            collisionGasDiameters_m[i]);
+                    hsModels.emplace_back(std::move(hsModel));
+                }
+
+                std::unique_ptr<CollisionModel::MultiCollisionModel> collisionModel =
+                        std::make_unique<CollisionModel::MultiCollisionModel>(std::move(hsModels));
+
+                collisionModelPtr = std::move(collisionModel);
+            }
         }
         else if (collisionType==NO_COLLISION) {
             collisionModelPtr = nullptr;
@@ -421,13 +464,13 @@ int main(int argc, const char * argv[]) {
             particle->setIntegerAttribute(key_ChemicalIndex, substIndex);
         };
 
-        auto reactionConditionsFct = [&totalFieldNow, backgroundTemperature_K, backgroundPressure_Pa]
+        auto reactionConditionsFct = [&totalFieldNow, backgroundTemperature_K, backgroundPartialPressures_Pa]
                 (RS::ReactiveParticle* particle, double /*time*/)->RS::ReactionConditions{
             RS::ReactionConditions reactionConditions = RS::ReactionConditions();
 
             reactionConditions.temperature = backgroundTemperature_K;
             //reactionConditions.electricField = totalFieldNow_VPerM;
-            reactionConditions.pressure = backgroundPressure_Pa;
+            reactionConditions.pressure = backgroundPartialPressures_Pa[0];
             return reactionConditions;
         };
 
