@@ -30,6 +30,24 @@
 
 },
 {
+	"name":"Ar",
+	"diameter":3.4,
+	"atoms":[
+		{
+			"type":"Ar", 
+			"posx":0, 
+			"posy":0, 
+			"posz":0, 
+			"mass":39.948, 
+			"charge":0, 
+			"partCharge":0, 
+			"LJsigma":3.401, 
+			"LJeps":0.9777
+		}
+	]
+
+},
+{
 	"name":"He",
 	"diameter":2.8,
 	"atoms":[
@@ -387,6 +405,47 @@
 	"atoms":[
 		{
 			"type":"N", 
+			"posx":0.54, 
+			"posy":0, 
+			"posz":0, 
+			"mass":14.0067, 
+			"charge":0, 
+			"partCharge":-0.4825, 
+			"LJsigma":2.5, 
+			"LJeps":2.711
+		}, 
+		{
+			"type":"N", 
+			"posx":-0.54, 
+			"posy":0, 
+			"posz":0, 
+			"mass":14.0067, 
+			"charge":0, 
+			"partCharge":-0.4825, 
+			"LJsigma":2.5, 
+			"LJeps":2.711
+		},
+		{
+			"type":"COM", 
+			"posx":0, 
+			"posy":0, 
+			"posz":0, 
+			"mass":0, 
+			"charge":0, 
+			"partCharge":0.965, 
+			"LJsigma":0, 
+			"LJeps":0
+		}
+
+	]
+
+},
+{
+	"name":"N2Approx",
+	"diameter":3.65,
+	"atoms":[
+		{
+			"type":"N", 
 			"posx":0, 
 			"posy":0.54, 
 			"posz":0, 
@@ -417,6 +476,151 @@
 			"partCharge":0.965, 
 			"LJsigma":0, 
 			"LJeps":0
+		}
+
+	]
+
+},
+{
+	"name":"NH4+",
+	"diameter":3,
+	"atoms":[
+		{
+			"type":"N", 
+			"posx":0, 
+			"posy":0, 
+			"posz":0, 
+			"mass":14.0067, 
+			"charge":-0.402, 
+			"partCharge":0, 
+			"LJsigma":1.1, 
+			"LJeps":0.711
+		}, 
+		{
+			"type":"H", 
+			"posx":0.5944, 
+			"posy":0.5944, 
+			"posz":0.5944, 
+			"mass":1.007, 
+			"charge":0.350, 
+			"partCharge":0, 
+			"LJsigma":0.55, 
+			"LJeps":0.431
+		},
+		{
+			"type":"H", 
+			"posx":-0.5944, 
+			"posy":-0.5944, 
+			"posz":0.5944, 
+			"mass":1.007, 
+			"charge":0.350, 
+			"partCharge":0, 
+			"LJsigma":0.55, 
+			"LJeps":0.431
+		},
+        {
+			"type":"H", 
+			"posx":-0.5944, 
+			"posy":0.5944, 
+			"posz":-0.5944, 
+			"mass":1.007, 
+			"charge":0.350, 
+			"partCharge":0, 
+			"LJsigma":0.55, 
+			"LJeps":0.431
+		},
+        {
+			"type":"H", 
+			"posx":0.5944, 
+			"posy":-0.5944, 
+			"posz":-0.5944, 
+			"mass":1.007, 
+			"charge":0.350, 
+			"partCharge":0, 
+			"LJsigma":0.55, 
+			"LJeps":0.431
+		}
+
+	]
+
+},
+{
+	"name":"CO2+",
+	"diameter":2.4,
+	"atoms":[
+		{
+			"type":"C", 
+			"posx":0, 
+			"posy":0, 
+			"posz":0, 
+			"mass":12.011, 
+			"charge":0.545, 
+			"partCharge":0, 
+			"LJsigma":1.35417, 
+			"LJeps":0.2895328
+		}, 
+		{
+			"type":"O", 
+			"posx":1.2674, 
+			"posy":0, 
+			"posz":0, 
+			"mass":15.999, 
+			"charge":0.228, 
+			"partCharge":0, 
+			"LJsigma":2.3, 
+			"LJeps":1.12
+		},
+		{
+			"type":"O", 
+			"posx":-1.2674, 
+			"posy":0, 
+			"posz":0, 
+			"mass":15.999, 
+			"charge":0.228, 
+			"partCharge":0, 
+			"LJsigma":2.3, 
+			"LJeps":1.12
+		}
+
+	]
+
+},
+{
+	"name":"CO2",
+	"diameter":2.4,
+	"atoms":[
+		{
+			"type":"COM", 
+			"posx":0, 
+			"posy":0, 
+			"posz":0, 
+			"mass":12.011, 
+			"charge":0, 
+			"partCharge":0, 
+			"LJsigma":1.35417, 
+			"LJeps":0.2895328
+		}, 
+		{
+			"type":"O", 
+			"posx":1.2674, 
+			"posy":0, 
+			"posz":0, 
+			"mass":15.999, 
+			"charge":0, 
+			"partCharge":0, 
+			"LJsigma":2.3, 
+			"LJeps":1.12
+		},
+		{
+			"type":"O", 
+			"posx":-1.2674, 
+			"posy":0, 
+			"posz":0, 
+			"mass":15.999, 
+			"charge":0, 
+			"partCharge":0, 
+			"LJsigma":2.3, 
+			"LJeps":1.12
 		}
 
 	]

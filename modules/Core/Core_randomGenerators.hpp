@@ -36,12 +36,37 @@
 #include <random>
 #include <vector>
 #include <memory>
+#include <array>
 
 namespace Core{
 
-    using rndBit_type = std::mt19937::result_type; ///< Result type of random bit generators
+    using rndBit_type = std::mt19937_64::result_type; ///< Result type of random bit generators
+    inline constexpr rndBit_type defaultSeed = 1234567890ULL; ///< Default seed
 
     extern std::random_device rdSeed; ///< global seed generator
+
+    /**
+     * Xoshiro256+ algorithm implementation following standard library interface 
+     * The state should be initalized with the SplitMix64 algorithm 
+    */
+    class Xoshiro256p{
+
+	    public:
+
+            Xoshiro256p(rndBit_type seed = defaultSeed);
+
+            Xoshiro256p(std::array<rndBit_type, 4> state);
+
+            rndBit_type operator()();
+
+            static constexpr rndBit_type min();
+
+            static constexpr rndBit_type max();
+
+        private:
+
+		    std::array<rndBit_type, 4> internalState_;
+	};
 
     /**
      * Generalized source for random bits, which can be used as random bit source for random distributions
@@ -59,14 +84,14 @@ namespace Core{
          * Note: Min is fixed to mersenne twister min
          */
         constexpr static rndBit_type min(){
-            return std::mt19937::min();
+            return std::mt19937_64::min();
         };
 
         /**
          * Note: Max is fixed to mersenne twister max
          */
         constexpr static rndBit_type max(){
-            return std::mt19937::max();
+            return std::mt19937_64::max();
         };
         virtual result_T operator()() =0;
     };
@@ -80,7 +105,7 @@ namespace Core{
         void seed(rndBit_type seed);
         rndBit_type operator()() override;
 
-        std::mt19937 internalRandomSource;
+        std::mt19937_64 internalRandomSource;
     };
 
     /**
@@ -94,6 +119,45 @@ namespace Core{
 
     private:
         std::size_t sampleIndex_;
+    };
+
+    /**
+     * Random test bit source based on SplitMix64, generating a large set of deterministic numbers based on 
+     * predefined seed
+     */
+    class SplitMix64BitSource: public RandomBitSource<rndBit_type>{
+    public:
+        SplitMix64BitSource();
+        void seed(rndBit_type seed);
+        rndBit_type operator()() override;
+
+    private:
+        rndBit_type state_;
+    };
+
+    /**
+     * Random test bit source based on SplitMix64, generating a large set of deterministic numbers based on 
+     * predefined seed
+     */
+    class SplitMix64TestBitSource: public RandomBitSource<rndBit_type>{
+    public:
+        SplitMix64TestBitSource();
+        rndBit_type operator()() override;
+
+    private:
+        rndBit_type state_;
+    };
+
+    /**
+     * Random test bit source based on Xoshiro256+, generating a large set of deterministic numbers based on 
+     * predefined seed
+     */
+    class Xoshiro256pTestBitSource: public RandomBitSource<rndBit_type>{
+    public:
+        Xoshiro256pTestBitSource();
+        rndBit_type operator()() override;
+
+        Xoshiro256p internalRandomSource;
     };
 
     /**
@@ -156,6 +220,36 @@ namespace Core{
         double rndValue() override;
     private:
         std::size_t sampleIndex_;
+    };
+
+
+    /**
+     * A uniform distribution, which generates *non* random test samples in a specified interval.
+     * The samples are sequentially chosen from a small set of predetermined test values
+     */
+    class UniformTestDistributionXoshiro: public RandomDistribution{
+    public:
+        UniformTestDistributionXoshiro() = delete;
+        UniformTestDistributionXoshiro(Xoshiro256pTestBitSource* randomSource);
+        UniformTestDistributionXoshiro(double min, double max, Xoshiro256pTestBitSource* randomSource);
+        double rndValue() override;
+    private:
+        Xoshiro256pTestBitSource* randomSource_;
+        double min_ = 0.0;
+        double interval_ = 1.0;
+    };
+
+    /**
+     * Test random distribution which *non* random samples which are gaussian normal distributed (with mu=0.0 and sigma=1.0).
+     * The samples are sequentially chosen from a small set of predetermined test values
+     */
+    class NormalTestDistributionXoshiro: public RandomDistribution{
+    public:
+        NormalTestDistributionXoshiro() = delete;
+        NormalTestDistributionXoshiro(Xoshiro256pTestBitSource* randomSource);
+        double rndValue() override;
+    private:
+        Xoshiro256pTestBitSource* randomSource_;
     };
 
     /**
@@ -228,6 +322,34 @@ namespace Core{
     private:
         TestRNGPoolElement element_;
 
+    };
+
+    /**
+     * Pool of test random sources, with random sources based on Xoshiro256+
+     */
+    class XoshiroTestRandomGeneratorPool: public AbstractRandomGeneratorPool{
+    public:
+        class XoshiroTestRNGPoolElement: public RandomSource{
+        public:
+            XoshiroTestRNGPoolElement();
+            double uniformRealRndValue() override;
+            double normalRealRndValue() override;
+            Xoshiro256pTestBitSource* getRandomBitSource() override;
+
+        private:
+            Xoshiro256pTestBitSource rngGenerator_;
+            UniformTestDistributionXoshiro uniformDist_;
+            NormalTestDistributionXoshiro normalDist_;
+        };
+
+        XoshiroTestRandomGeneratorPool() = default;
+        void setSeedForElements(rndBit_type newSeed) override;
+        RndDistPtr getUniformDistribution(double min, double max) override;
+        XoshiroTestRNGPoolElement* getThreadRandomSource() override;
+        XoshiroTestRNGPoolElement* getRandomSource(std::size_t index) override;
+
+    private:
+        XoshiroTestRNGPoolElement element_;
     };
 
     extern std::unique_ptr<AbstractRandomGeneratorPool> globalRandomGeneratorPool; ///< global random pool / randomness provider

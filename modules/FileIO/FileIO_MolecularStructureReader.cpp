@@ -71,6 +71,19 @@ std::unordered_map<std::string,  std::shared_ptr<CollisionModel::MolecularStruct
                     it->second->addAtom(atm);
                 }
             }
+
+            if(name == "N2"){
+                Core::Vector bondVector = molstrPtr->getAtoms().at(0)->getRelativePosition() - molstrPtr->getAtoms().at(1)->getRelativePosition();
+                double bondLength = sqrt(bondVector.x()*bondVector.x() + bondVector.y()*bondVector.y() + bondVector.z()*bondVector.z());
+
+                // this assumes the first two atoms are the nitrogen atoms!! 
+                molstrPtr->getAtoms().at(0)->getRelativePosition().x(bondLength/2);
+                molstrPtr->getAtoms().at(0)->getRelativePosition().y(0);
+                molstrPtr->getAtoms().at(0)->getRelativePosition().z(0);
+                molstrPtr->getAtoms().at(1)->getRelativePosition().x(-bondLength/2);
+                molstrPtr->getAtoms().at(1)->getRelativePosition().y(0);
+                molstrPtr->getAtoms().at(1)->getRelativePosition().z(0);
+            }
         }
         
         return molecularStructureCollection;
