@@ -363,7 +363,7 @@ void CollisionModel::MDInteractionsModel::modifyVelocity(Core::Particle& particl
         }
 
         if(trajectorySuccess){
-            particle.setVelocity(mole.getComVel() + particle.getVelocity());
+            particle.setVelocity(mole.getComVel() + particle.getVelocity() + vGasMean);
         }
         ++iterations;
     }while(!trajectorySuccess && iterations < 100);
