@@ -338,7 +338,7 @@ int main(int argc, const char * argv[]) {
                 particle->setActive(false);
                 ionsInactive++;
             }
-            if (newPartPos.x() > 0.13000) {
+            if (newPartPos.x() > 0.11300) {
                 particle->setActive(false);
                 ionsInactive++;
             }
