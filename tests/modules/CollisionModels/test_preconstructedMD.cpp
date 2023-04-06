@@ -45,10 +45,10 @@ TEST_CASE("Basic test MD preconstructed", "[CollisionModels][MDInteractionsModel
                                                                     reader.readMolecularStructure("test_molecularstructure_reader.json");
     Core::Particle ion;
     ion.setMolecularStructure(molecularStructureCollection.at("CO2+"));
-    Core::RandomSource* rndSource = Core::globalRandomGeneratorPool->getThreadRandomSource();
+    // Core::RandomSource* rndSource = Core::globalRandomGeneratorPool->getThreadRandomSource();
     
     size_t samples = 1;
-    double pi = 3.1415;
+    // double pi = 3.1415;
     // std::vector<Core::Vector> ionVelocities;
     // std::vector<Core::Vector> ionPositions;
     // std::vector<Core::Vector> ionRotations;

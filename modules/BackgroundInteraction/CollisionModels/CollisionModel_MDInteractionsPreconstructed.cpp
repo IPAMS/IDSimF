@@ -825,6 +825,8 @@ bool CollisionModel::MDInteractionsModelPreconstructed::rk4InternAdaptiveStep(st
         }
         std::array<double,2> R;
         
+        #pragma GCC diagnostic push
+        #pragma GCC diagnostic ignored "-Wfloat-equal"
         for(size_t p = 0; p < 2; p++){
             if(fabs(newComVelOrder5[p].magnitude()) != 0)
                 R[p] = fabs(newComVelOrder4[p].magnitude()-newComVelOrder5[p].magnitude())/fabs(newComVelOrder5[p].magnitude());
@@ -839,7 +841,7 @@ bool CollisionModel::MDInteractionsModelPreconstructed::rk4InternAdaptiveStep(st
         if (globalR == 0){
             globalR = 1e-15;
         }
-        
+        #pragma GCC diagnostic pop
         double globalDelta = 0.84 * std::pow((tolerance/globalR), 1./4);
         integrationTimeSum += dt;
         i = 0;
@@ -958,24 +960,24 @@ void CollisionModel::MDInteractionsModelPreconstructed::forceFieldMD(std::vector
             double currentCharge = 0;
             // Check if one of the molecules is an ion and the other one is not
             if(isN2){
-                if(ceil(fabs(atomI->getCharge()/Core::ELEMENTARY_CHARGE)) != 0 &&
+                if(int(ceil(fabs(atomI->getCharge()/Core::ELEMENTARY_CHARGE))) != 0 &&
                    atomJ->getType() == CollisionModel::Atom::AtomType::COM){
 
                     currentCharge = atomI->getCharge();
 
-                }else if (ceil(fabs(atomJ->getCharge()/Core::ELEMENTARY_CHARGE)) != 0 &&
+                }else if (int(ceil(fabs(atomJ->getCharge()/Core::ELEMENTARY_CHARGE))) != 0 &&
                           atomI->getType() == CollisionModel::Atom::AtomType::COM){
 
                     currentCharge = atomJ->getCharge();
 
                 }
             }else{
-                if(ceil(fabs(atomI->getCharge()/Core::ELEMENTARY_CHARGE)) != 0 &&
+                if(int(ceil(fabs(atomI->getCharge()/Core::ELEMENTARY_CHARGE))) != 0 &&
                    atomJ->getType() != CollisionModel::Atom::AtomType::COM){
 
                     currentCharge = atomI->getCharge();
 
-                }else if (ceil(fabs(atomJ->getCharge()/Core::ELEMENTARY_CHARGE)) != 0 &&
+                }else if (int(ceil(fabs(atomJ->getCharge()/Core::ELEMENTARY_CHARGE))) != 0 &&
                           atomI->getType() != CollisionModel::Atom::AtomType::COM){
 
                     currentCharge = atomJ->getCharge();
@@ -1051,14 +1053,14 @@ void CollisionModel::MDInteractionsModelPreconstructed::forceFieldMD(std::vector
             // Fourth contribution: quadrupole moment if background gas is N2
             // This requires an ion and N2 to be present
             double partialChargeN2 = 0;
-            if(ceil(fabs(atomI->getCharge()/Core::ELEMENTARY_CHARGE)) != 0 && 
+            if(int(ceil(fabs(atomI->getCharge()/Core::ELEMENTARY_CHARGE))) != 0 && 
                 (isN2 == true || isN2Approx == true)){
 
                 currentCharge = atomI->getCharge();
                 partialChargeN2 = atomJ->getPartCharge();
 
             }else if ((isN2 == true || isN2Approx == true) && 
-                        ceil(fabs(atomJ->getCharge()/Core::ELEMENTARY_CHARGE)) != 0){
+                        int(ceil(fabs(atomJ->getCharge()/Core::ELEMENTARY_CHARGE))) != 0){
 
                 currentCharge = atomJ->getCharge();
                 partialChargeN2 = atomI->getPartCharge();

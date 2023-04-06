@@ -619,8 +619,8 @@ bool CollisionModel::MDInteractionsModel::rk4InternAdaptiveStep(std::vector<Coll
     Core::Vector nitrogenAngles = {rndSource->uniformRealRndValue()*2*pi-pi, 
                                 rndSource->uniformRealRndValue()*2*pi-pi, 
                                 rndSource->uniformRealRndValue()*2*pi-pi};
-    double I;
-    double angularVelocity;
+    double I = 0;
+    double angularVelocity = 0;
     if(moleculesPtr[1]->getMolecularStructureName()=="N2"){
         nitrogenOne = molecularStructureCollection_.at(moleculesPtr[1]->getMolecularStructureName())->getAtoms().at(0)->getRelativePosition();
         nitrogenTwo = molecularStructureCollection_.at(moleculesPtr[1]->getMolecularStructureName())->getAtoms().at(1)->getRelativePosition();
@@ -689,7 +689,8 @@ bool CollisionModel::MDInteractionsModel::rk4InternAdaptiveStep(std::vector<Coll
             newComVelOrder4[i] = initialVelocityMolecules[i] + (k[0][i] * 25./216 + k[2][i] * 1408./2565 + k[3][i] * 2197./4104 + k[4][i] * (-1./5));
         }
 
-        
+        #pragma GCC diagnostic push
+        #pragma GCC diagnostic ignored "-Wfloat-equal"
         for(size_t p = 0; p < 2; p++){
             if(fabs(newComVelOrder5[p].magnitude()) != 0)
                 R[p] = fabs(newComVelOrder4[p].magnitude()-newComVelOrder5[p].magnitude())/fabs(newComVelOrder5[p].magnitude());
@@ -703,7 +704,8 @@ bool CollisionModel::MDInteractionsModel::rk4InternAdaptiveStep(std::vector<Coll
         if (globalR == 0){
             globalR = 1e-15;
         }
-        
+        #pragma GCC diagnostic pop
+
         globalDelta = 0.84 * std::pow((tolerance/globalR), 1./4);
         integrationTimeSum += dt;
         i = 0;
@@ -715,13 +717,13 @@ bool CollisionModel::MDInteractionsModel::rk4InternAdaptiveStep(std::vector<Coll
             molecule->setComPos(newComPosOrder4[i]);
             molecule->setComVel(newComVelOrder4[i]);
 
-            if(molecule->getMolecularStructureName()=="N2"){
-                CollisionModel::Atom::rotate2D(angularVelocity*dt, nitrogenOne);
-                CollisionModel::Atom::rotate2D(angularVelocity*dt, nitrogenTwo);
-                molecule->getAtoms().at(0)->setRelativePosition(nitrogenOne);
-                molecule->getAtoms().at(1)->setRelativePosition(nitrogenTwo);
-                molecule->setAngles(nitrogenAngles);
-            }
+            // if(molecule->getMolecularStructureName()=="N2"){
+            //     CollisionModel::Atom::rotate2D(angularVelocity*dt, nitrogenOne);
+            //     CollisionModel::Atom::rotate2D(angularVelocity*dt, nitrogenTwo);
+            //     molecule->getAtoms().at(0)->setRelativePosition(nitrogenOne);
+            //     molecule->getAtoms().at(1)->setRelativePosition(nitrogenTwo);
+            //     molecule->setAngles(nitrogenAngles);
+            // }
             i++;
         }
 
@@ -824,24 +826,24 @@ void CollisionModel::MDInteractionsModel::forceFieldMD(std::vector<CollisionMode
             double currentCharge = 0;
             // Check if one of the molecules is an ion and the other one is not
             if(isN2 || isCO2){
-                if(ceil(fabs(atomI->getCharge()/Core::ELEMENTARY_CHARGE)) != 0 &&
+                if(int(ceil(fabs(atomI->getCharge()/Core::ELEMENTARY_CHARGE))) != 0 &&
                    atomJ->getType() == CollisionModel::Atom::AtomType::COM){
 
                     currentCharge = atomI->getCharge();
 
-                }else if (ceil(fabs(atomJ->getCharge()/Core::ELEMENTARY_CHARGE)) != 0 &&
+                }else if (int(ceil(fabs(atomJ->getCharge()/Core::ELEMENTARY_CHARGE))) != 0 &&
                           atomI->getType() == CollisionModel::Atom::AtomType::COM){
 
                     currentCharge = atomJ->getCharge();
 
                 }
             }else{
-                if(ceil(fabs(atomI->getCharge()/Core::ELEMENTARY_CHARGE)) != 0 &&
+                if(int(ceil(fabs(atomI->getCharge()/Core::ELEMENTARY_CHARGE))) != 0 &&
                    atomJ->getType() != CollisionModel::Atom::AtomType::COM){
 
                     currentCharge = atomI->getCharge();
 
-                }else if (ceil(fabs(atomJ->getCharge()/Core::ELEMENTARY_CHARGE)) != 0 &&
+                }else if (int(ceil(fabs(atomJ->getCharge()/Core::ELEMENTARY_CHARGE))) != 0 &&
                           atomI->getType() != CollisionModel::Atom::AtomType::COM){
 
                     currentCharge = atomJ->getCharge();
@@ -915,14 +917,14 @@ void CollisionModel::MDInteractionsModel::forceFieldMD(std::vector<CollisionMode
             // Fourth contribution: quadrupole moment if background gas is N2 
             // This requires an ion and N2 to be present 
             double partialChargeN2 = 0; 
-            if(ceil(fabs(atomI->getCharge()/Core::ELEMENTARY_CHARGE)) != 0 && 
+            if(int(ceil(fabs(atomI->getCharge()/Core::ELEMENTARY_CHARGE))) != 0 && 
                 (isN2 == true || isN2Approx == true)){
 
                 currentCharge = atomI->getCharge();
                 partialChargeN2 = atomJ->getPartCharge();
 
             }else if ((isN2 == true || isN2Approx == true) && 
-                        ceil(fabs(atomJ->getCharge()/Core::ELEMENTARY_CHARGE)) != 0){
+                        int(ceil(fabs(atomJ->getCharge()/Core::ELEMENTARY_CHARGE))) != 0){
 
                 currentCharge = atomJ->getCharge();
                 partialChargeN2 = atomI->getPartCharge();
