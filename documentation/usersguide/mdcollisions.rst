@@ -47,12 +47,18 @@ Additionally, if the background gas is diatomic nitrogen the quadrupole potentia
     V_{QP, ij}(r_{ij}) = \frac{1}{8\pi\epsilon_0} \sum_{j=1}^3 \frac{z_i z_j e^2}{r_{ij}}\quad .
 
 
-Before the particle's trajectories can be integrated, the collision itself has to be initalized. 
+Before the particle's trajectories can be integrated, the collision itself has to be initalized such that only collisions are integrated which penetrate a pre-defined collision sphere, which is the sphere with the radius that was used to
+determine the collision probability in each time step of the simulation. 
 This process requires sampling of background gas particle position and velocity and is shortly outlined in three steps:
 
 #. Construct the rigid body representation and place atoms based on their relative coordinates. The background gas velocity is estimated by the 1D Maxwell Boltzmann distribution. The system is shifted to the stationary ion frame and the ions center-of-mass is placed at the coordinate system origin.
 #. The background gas particle is placed on a randomly drawn point :math:`p` on a sphere (uniformly distributed), with radius :math:`r_{spawn}` around the coordinate origin. 
 #. The positions have to be pre-selected to save on compute time. This is done by only selecting position and velocity combinations, which would enter the collision sphere based on geometric considerations. As such, the angle :math:`\alpha` between the velocity vector :math:`v` and the vector from :math:`p` to the midpoint of the inner sphere as well as angle :math:`\theta` between the collision sphere and midpoint vector have to be compared. A position is sampled until :math:`\alpha \leq \theta`. 
+
+.. image:: Graphics/MD_collision_init.png
+  :width: 400
+  :alt: MD collision initalization
+  :align: center
 
 After the initalization, the trajectory integration starts. There are three integration methods implemented: Leapfrog, Runge-Kutta 4 and Runge-Kutta-Fehlberg 45. Both the Leapfrog and Runge-Kutta 4 method are a constant step size integration method, but are generally not used in the program itself. Instead, the adpative stepsize method 
 Runge-Kutta-Fehlberg is used, which allows for orders of magnitude faster calculation of the trajectories. 
@@ -139,7 +145,7 @@ MD collision model. The user has to provide the following information (in accord
 
 * the particle identifier for the molecular structure of the ion
 
-* the path to the molecular structure .csv file
+* the path to the molecular structure .json file
 
 * the maximum integration time for the sub-integrator of the MD collision model in seconds
 
@@ -147,7 +153,7 @@ MD collision model. The user has to provide the following information (in accord
 
 * the collision radius scaling
 
-* the scaling for angle :math:`\theta`
+* the scaling for angle :math:`\theta` (default value is 1 and should generally not be changes, as this changes which collisions are valid for integration without increase of the collision probability)
 
 * the radius of the spawn sphere in m 
 
