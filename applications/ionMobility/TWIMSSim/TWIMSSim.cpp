@@ -203,7 +203,8 @@ int main(int argc, const char * argv[]) {
             return result;
         };
 
-        std::vector<std::string> auxParamNames = {"velocity x", "velocity y", "velocity z", "kinetic energy (eV)"};
+        std::vector<std::string> auxParamNames = {"velocity x", "velocity y", "velocity z",
+                                                  "ion velocity","kinetic energy (eV)", "effective Field (V/m)"};
         auto auxParamFct = [](Core::Particle* particle) -> std::vector<double> {
             double ionVelocity = particle->getVelocity().magnitude();
             double kineticEnergy_eV = 0.5*particle->getMass()*ionVelocity*ionVelocity*Core::JOULE_TO_EV;
@@ -211,7 +212,9 @@ int main(int argc, const char * argv[]) {
                     particle->getVelocity().x(),
                     particle->getVelocity().y(),
                     particle->getVelocity().z(),
-                    kineticEnergy_eV
+                    ionVelocity,
+                    kineticEnergy_eV,
+                    particle->getFloatAttribute("effectiveField")
             };
             return result;
         };
@@ -473,7 +476,7 @@ int main(int argc, const char * argv[]) {
             RS::ReactionConditions reactionConditions = RS::ReactionConditions();
 
             reactionConditions.temperature = backgroundTemperature_K;
-            //reactionConditions.electricField = totalFieldNow_VPerM;
+            //reactionConditions.electricField = totalFieldNow;
             reactionConditions.pressure = backgroundPartialPressures_Pa[0];
             return reactionConditions;
         };
