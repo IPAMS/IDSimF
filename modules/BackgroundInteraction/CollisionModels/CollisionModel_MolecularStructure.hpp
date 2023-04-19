@@ -66,6 +66,9 @@ namespace CollisionModel{
         std::vector<std::shared_ptr<CollisionModel::Atom>> getAtoms() const;
         double getDiameter() const;
         std::string getName() const; 
+        static double getMomentOfInertia(double x1, double x2, double m1, double m2); 
+        static double getAngularVelocity(double T, double I); 
+        // static void rotateMolecule2D(double angle);
 
         // Member functions
         void addAtom(std::shared_ptr<CollisionModel::Atom> atm);

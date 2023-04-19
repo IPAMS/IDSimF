@@ -50,7 +50,7 @@ TEST_CASE( "Test MD and integrator", "[ParticleSimulation][VelocityIntegrator][t
 
     SECTION( "Integrate") {
         
-        std::string mdCollisionConfFile = "test_molecularstructure_reader.csv";
+        std::string mdCollisionConfFile = "test_molecularstructure_reader.json";
         FileIO::MolecularStructureReader mdConfReader = FileIO::MolecularStructureReader();
         std::unordered_map<std::string,  std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection = mdConfReader.readMolecularStructure(mdCollisionConfFile);
 

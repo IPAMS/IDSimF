@@ -201,6 +201,13 @@ void CollisionModel::Atom::rotate(const Core::Vector &angles){
     this->relativePosition.z(new_rel_z);
 }       
 
+void CollisionModel::Atom::rotate2D(double angle, Core::Vector& relPos){
+    double xNew = relPos.x() * cos(angle) - relPos.y() * sin(angle);
+    double yNew = relPos.x() * sin(angle) + relPos.y() * cos(angle);
+    relPos.x(xNew);
+    relPos.y(yNew);
+} 
+
 /**
  * Calculates the approximate LJ interaction parameter epsilon between two atoms 
  */
@@ -212,7 +219,11 @@ double CollisionModel::Atom::calcLJEps(const CollisionModel::Atom &atm1, const C
  * Calculates the approximate LJ interaction parameter sigma between two atoms 
  */
 double CollisionModel::Atom::calcLJSig(const CollisionModel::Atom &atm1, const CollisionModel::Atom &atm2){
+    // if(atm1.getType() == CollisionModel::Atom::AtomType::COM || atm2.getType() == CollisionModel::Atom::AtomType::COM){
+    //     return 0.0; 
+    // }else{
     return (atm1.getSigma() + atm2.getSigma()) / 2;
+    // }
 }
 
 CollisionModel::Atom::AtomType CollisionModel::Atom::from_string(std::string str) {

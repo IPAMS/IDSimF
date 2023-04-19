@@ -13,7 +13,7 @@ include_directories(${CMAKE_SOURCE_DIR}/modules/FileIO)
 
 set(TEST_FILE_FOLDER ${CMAKE_SOURCE_DIR}/tests/testfields)
 set(TEST_FILES
-        ${TEST_FILE_FOLDER}/test_molecularstructure_reader.csv )
+        ${TEST_FILE_FOLDER}/test_molecularstructure_reader.json )
 file(COPY ${TEST_FILES} DESTINATION .)
 
 add_executable(benchmark_collision_md_runtime ${SOURCE_FILES})

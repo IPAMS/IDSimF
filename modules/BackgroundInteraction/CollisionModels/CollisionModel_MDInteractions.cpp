@@ -31,6 +31,18 @@
 #include <functional>
 #include <initializer_list>
 
+/**
+ * Constructor for static pressure and temperatur.
+ * 
+ * @param collisionGasPolarizabilityM3 Polarizability of the background gas in m³
+ * @param collisionMolecule String identifier of the background gas particle (needs to be contained in the structure map)
+ * @param integrationTime Maximum integration time for each collision 
+ * @param subTimeStep Timstep length for the trajectory intgeration (leapfrog) or length of first timestep in RKF45
+ * @param collisionRadiusScaling Scaling parameter for the collision cross section used for collision probability estimation and defintion of an "actual" collision 
+ * @param angleThetaScaling Scaling parameter for the maximum angle under which a collision is still taken as "hit", scaling independently of the collision probability
+ * @param spawnRadius Radius of the spawn sphere for the background gas particle 
+ * @param molecularStructureCollection Key-value map for all read-in molecular structures which can be used to construct ions and background gas particles
+*/
 CollisionModel::MDInteractionsModel::MDInteractionsModel(double staticPressure,
                                                         double staticTemperature,
                                                         double collisionGasMassAmu,
@@ -118,8 +130,8 @@ CollisionModel::MDInteractionsModel::MDInteractionsModel(std::function<double(Co
 
 /**
  * Activates trajectory writing and sets trajectory writer configuration
- * @param trajectoryFileName
- * @param trajectoryDistance
+ * @param trajectoryFileName Trajectory Output filename
+ * @param trajectoryDistance Distance between ion and background gas in m after which trajectory gets recorded
  */
 void CollisionModel::MDInteractionsModel::setTrajectoryWriter(const std::string& trajectoryFileName,
                                                               double trajectoryDistance,
@@ -137,7 +149,9 @@ void CollisionModel::MDInteractionsModel::setTrajectoryWriter(const std::string&
         throw (std::runtime_error("Trajectory Output Stream failed to open"));
     }
 }
-
+/**
+ * Returns sign of a number (+1, -1) or 0.
+*/
 double CollisionModel::MDInteractionsModel::calcSign(double value){
     if(value > 0){
         return 1.;
@@ -149,7 +163,8 @@ double CollisionModel::MDInteractionsModel::calcSign(double value){
 }
 
 /**
- * Writes trajectory data to a predefined file 
+ * Writes trajectory data to a predefined file. Individual collisions are separated by a line containing '###'. 
+ * 
  * Ouput includes: position of background gas, distance between the two molecules, 
  * integration time, velocity of the background gas, force acting on the background gas and 
  * timestep length
@@ -177,8 +192,11 @@ void CollisionModel::MDInteractionsModel::updateModelParticleParameters(Core::Pa
 
 }
 
+/**
+ * Updates trajectory recording if timestep recording parameter is exceeded
+*/
 void CollisionModel::MDInteractionsModel::updateModelTimestepParameters(int timestep, double /*time*/) {
-    if (modelRecordsTrajectories_ && timestep > recordTrajectoryStartTimeStep_){
+    if (modelRecordsTrajectories_ && timestep >= recordTrajectoryStartTimeStep_){
         trajectoryRecordingActive_ = true;
     }
 }
@@ -189,10 +207,10 @@ void CollisionModel::MDInteractionsModel::modifyAcceleration(Core::Vector& /*acc
 }
 
 /**
- * Modifies the velocity of the particle based on a molecular dynamics approach
- * Collision probability is estimated by a hard-sphere model
+ * Modifies the velocity of the particle based on a molecular dynamics approach.
+ * Collision probability is estimated by a hard-sphere model.
  * Trajectory is checked for energy conservation of 10 % and if necessary is repeated for up to 
- * 100 times under modification of the starting timestep length 
+ * 100 times under modification of the starting timestep length. 
  * @param particle particle whose velocity is to be modified 
  * @param dt timestep length of overarching ion simulation 
  */
@@ -257,6 +275,7 @@ void CollisionModel::MDInteractionsModel::modifyVelocity(Core::Particle& particl
     int iterations = 0;
     double spawnRad = spawnRadius_;
     double collisionTheta = std::asin(collisionRadius / spawnRad);
+    double tolerance = 1e-8;
 
 
     do{
@@ -302,15 +321,16 @@ void CollisionModel::MDInteractionsModel::modifyVelocity(Core::Particle& particl
 
         bgMole.setComPos(circleVector);
 
-        // rotate it randomly
-        bgMole.setAngles(Core::Vector(rndSource->uniformRealRndValue(),
-                                    rndSource->uniformRealRndValue(),
-                                    rndSource->uniformRealRndValue()));
+        double pi = 3.1415; 
+        // // rotate it randomly
+        // bgMole.setAngles(Core::Vector(rndSource->uniformRealRndValue()*2*pi-pi,
+        //                               rndSource->uniformRealRndValue()*2*pi-pi,
+        //                               rndSource->uniformRealRndValue()*2*pi-pi));
 
         // Give molecule a random orientation:
-        mole.setAngles(Core::Vector(rndSource->uniformRealRndValue(),
-                                    rndSource->uniformRealRndValue(),
-                                    rndSource->uniformRealRndValue()));
+        mole.setAngles(Core::Vector(rndSource->uniformRealRndValue()*2*pi-pi,
+                                    rndSource->uniformRealRndValue()*2*pi-pi,
+                                    rndSource->uniformRealRndValue()*2*pi-pi));
 
         std::vector<CollisionModel::Molecule*> moleculesPtr = {&mole, &bgMole};
 
@@ -326,7 +346,8 @@ void CollisionModel::MDInteractionsModel::modifyVelocity(Core::Particle& particl
         double finalTime = integrationTime_; //  final integration time in seconds
         double timeStep = subTimeStep_; // step size in seconds
 
-        trajectorySuccess = rk4InternAdaptiveStep(moleculesPtr, timeStep, finalTime, collisionRadius);
+        trajectorySuccess = rk4InternAdaptiveStep(moleculesPtr, timeStep, finalTime, collisionRadius, tolerance);
+        // trajectorySuccess = leapfrogIntern(moleculesPtr, timeStep, finalTime, collisionRadius);
        
         double endEnergy = 0;
         for(auto* molecule : moleculesPtr){
@@ -335,12 +356,14 @@ void CollisionModel::MDInteractionsModel::modifyVelocity(Core::Particle& particl
         // check if energy is conserved up to 10% 
         // if not halve the starting timestep length 
         if(endEnergy*0.90 >= startEnergy){
+            std::cout << "Energy not conserved: " << startEnergy << " " << endEnergy << std::endl;
             trajectorySuccess = false;
             dt = dt/2;
+            // tolerance /= 2;
         }
 
         if(trajectorySuccess){
-            particle.setVelocity(mole.getComVel() + particle.getVelocity());
+            particle.setVelocity(mole.getComVel() + particle.getVelocity() + vGasMean);
         }
         ++iterations;
     }while(!trajectorySuccess && iterations < 100);
@@ -355,8 +378,8 @@ void CollisionModel::MDInteractionsModel::modifyPosition(Core::Vector& /*positio
 }
 
 /**
- * Leapfrog method to integrate trajectories of particles involved in a collision 
- * The leapfrog method is of second order and symplectic 
+ * Leapfrog method to integrate trajectories of particles involved in a collision. 
+ * The leapfrog method is of second order and symplectic. 
  * @param moleculesPtr collection of molecule pointer  
  * @param dt timestep length 
  * @param finalTime maximum integration time 
@@ -432,9 +455,9 @@ bool CollisionModel::MDInteractionsModel::leapfrogIntern(std::vector<CollisionMo
 }
 
 /**
- * Runge-Kutta 4 method to integrate trajectories of particles involved in a collision 
- * The RK4 is of fourth order
- * This integrator should NOT be used as the adaptive step size method is faster 
+ * Runge-Kutta 4 method to integrate trajectories of particles involved in a collision.
+ * The RK4 is of fourth order.
+ * This integrator should NOT be used except for testing purposes as the adaptive step size method is faster.
  * @param moleculesPtr collection of molecule pointer 
  * @param dt timestep length 
  * @param finalTime maximum integration time 
@@ -538,17 +561,18 @@ bool CollisionModel::MDInteractionsModel::rk4Intern(std::vector<CollisionModel::
 }
 
 /**
- * Adaptive step size Runge-Kutta-Fehlberg 45 method to integrate trajectories of particles involved in a collision 
+ * Adaptive step size Runge-Kutta-Fehlberg 45 method to integrate trajectories of particles involved in a collision. 
  * This method is of fourth order and uses error control of fifth order on the velocity to adaptively 
- * increase or decrease the timestep length reducing the overall computation time 
+ * increase or decrease the timestep length reducing the overall computation time. 
  * @param moleculesPtr collection of molecule pointer 
  * @param dt timestep length 
  * @param finalTime maximum integration time 
  * @param requiredRad radius defining the collision sphere, i.e. the distance that needs to be undercut for 
  * a collision to be considered (same radius which is used to estimate the collision probability)
+ * @param tolerance defines the allowed error threshold  to control the timestep lengths 
  */
 bool CollisionModel::MDInteractionsModel::rk4InternAdaptiveStep(std::vector<CollisionModel::Molecule*> moleculesPtr, double dt, double finalTime,
-                                                                    double requiredRad){
+                                                                    double requiredRad, double tolerance){
 
     double integrationTimeSum = 0;
     size_t nMolecules = moleculesPtr.size();
@@ -585,8 +609,26 @@ bool CollisionModel::MDInteractionsModel::rk4InternAdaptiveStep(std::vector<Coll
     std::array<Core::Vector, 2> newComVelOrder5;
     std::array<Core::Vector, 2> newComPosOrder4; 
     std::array<Core::Vector, 2> newComVelOrder4;
-    std::array<double, 2> RX, RY, RZ;
-    double globalX, globalY, globalZ, globalR, globalDelta, tolerance = 1e-8;
+    std::array<double, 2> R;
+    double globalR, globalDelta;
+    // double tolerance = 1e-8;
+    double pi = 3.14159;
+    Core::RandomSource* rndSource = Core::globalRandomGeneratorPool->getThreadRandomSource();
+    Core::Vector nitrogenOne;
+    Core::Vector nitrogenTwo; 
+    Core::Vector nitrogenAngles = {rndSource->uniformRealRndValue()*2*pi-pi, 
+                                rndSource->uniformRealRndValue()*2*pi-pi, 
+                                rndSource->uniformRealRndValue()*2*pi-pi};
+    double I = 0;
+    double angularVelocity = 0;
+    if(moleculesPtr[1]->getMolecularStructureName()=="N2"){
+        nitrogenOne = molecularStructureCollection_.at(moleculesPtr[1]->getMolecularStructureName())->getAtoms().at(0)->getRelativePosition();
+        nitrogenTwo = molecularStructureCollection_.at(moleculesPtr[1]->getMolecularStructureName())->getAtoms().at(1)->getRelativePosition();
+        I = CollisionModel::MolecularStructure::getMomentOfInertia(nitrogenOne.x(), nitrogenTwo.x(), 
+                                                                    moleculesPtr[1]->getMass()/2, moleculesPtr[1]->getMass()/2);
+        angularVelocity = CollisionModel::MolecularStructure::getAngularVelocity(temperatureFunction_(moleculesPtr[1]->getComPos()), I);
+    }
+    moleculesPtr[1]->setAngles(nitrogenAngles);
 
     while(integrationTimeSum < finalTime){
         
@@ -647,31 +689,23 @@ bool CollisionModel::MDInteractionsModel::rk4InternAdaptiveStep(std::vector<Coll
             newComVelOrder4[i] = initialVelocityMolecules[i] + (k[0][i] * 25./216 + k[2][i] * 1408./2565 + k[3][i] * 2197./4104 + k[4][i] * (-1./5));
         }
 
-        
+        #pragma GCC diagnostic push
+        #pragma GCC diagnostic ignored "-Wfloat-equal"
         for(size_t p = 0; p < 2; p++){
-            if(fabs(newComVelOrder5[p].x()) != 0)
-                RX[p] = fabs(newComVelOrder4[p].x() - newComVelOrder5[p].x()) / fabs(newComVelOrder5[p].x());
+            if(fabs(newComVelOrder5[p].magnitude()) != 0)
+                R[p] = fabs(newComVelOrder4[p].magnitude()-newComVelOrder5[p].magnitude())/fabs(newComVelOrder5[p].magnitude());
             else
-                RX[p] = 0;
-            if(fabs(newComVelOrder5[p].y()) != 0)
-                RY[p] = fabs(newComVelOrder4[p].y() - newComVelOrder5[p].y()) / fabs(newComVelOrder5[p].y());
-            else
-                RY[p] = 0;
-            if(fabs(newComVelOrder5[p].z()) != 0)
-                RZ[p] = fabs(newComVelOrder4[p].z() - newComVelOrder5[p].z()) / fabs(newComVelOrder5[p].z());
-            else
-                RZ[p] = 0; 
+                R[p] = 0;
+                   
         }
-        globalX = std::max({RX[0],RX[1]});
-        globalY = std::max({RY[0],RY[1]});
-        globalZ = std::max({RZ[0],RZ[1]});
-        
-        
-        globalR = std::max({globalX, globalY, globalZ});
+
+        globalR = std::max({R[0],R[1]});
+
         if (globalR == 0){
             globalR = 1e-15;
         }
-        
+        #pragma GCC diagnostic pop
+
         globalDelta = 0.84 * std::pow((tolerance/globalR), 1./4);
         integrationTimeSum += dt;
         i = 0;
@@ -679,10 +713,22 @@ bool CollisionModel::MDInteractionsModel::rk4InternAdaptiveStep(std::vector<Coll
             if(trajectoryRecordingActive_ == true && molecule->getMolecularStructureName() == collisionMolecule_){
                 writeTrajectory(distance, molecule->getComPos(), molecule->getComVel(),forceMolecules, false, trajectoryOutputStream_.get(), integrationTimeSum, dt);
             }
+            
             molecule->setComPos(newComPosOrder4[i]);
             molecule->setComVel(newComVelOrder4[i]);
+
+            // if(molecule->getMolecularStructureName()=="N2"){
+            //     CollisionModel::Atom::rotate2D(angularVelocity*dt, nitrogenOne);
+            //     CollisionModel::Atom::rotate2D(angularVelocity*dt, nitrogenTwo);
+            //     molecule->getAtoms().at(0)->setRelativePosition(nitrogenOne);
+            //     molecule->getAtoms().at(1)->setRelativePosition(nitrogenTwo);
+            //     molecule->setAngles(nitrogenAngles);
+            // }
             i++;
         }
+
+
+
         steps++;
         dt = dt * globalDelta;
 
@@ -690,7 +736,7 @@ bool CollisionModel::MDInteractionsModel::rk4InternAdaptiveStep(std::vector<Coll
         for(size_t b = 0; b < nMolecules; ++b){
             for(size_t z = b+1; z < nMolecules; ++z){
                 if((moleculesPtr[z]->getComPos() - moleculesPtr[b]->getComPos()).magnitude() > startDistances[index++]){
-                    if(trajectoryRecordingActive_ == true && moleculesPtr[z]->getMolecularStructureName() == collisionMolecule_ && wasHit == true){
+                    if(trajectoryRecordingActive_ == true && moleculesPtr[z]->getMolecularStructureName() == collisionMolecule_){
                         writeTrajectory((moleculesPtr[z]->getComPos() - moleculesPtr[b]->getComPos()).magnitude(),
                                         moleculesPtr[z]->getComPos(), moleculesPtr[z]->getComVel(), forceMolecules, true, trajectoryOutputStream_.get(), integrationTimeSum, dt);
                     }
@@ -708,8 +754,11 @@ bool CollisionModel::MDInteractionsModel::rk4InternAdaptiveStep(std::vector<Coll
 
 /**
  * Force field contains:
+ * 
  * 12-6 Lennard-Jones potential (short range repulsion)
+ * 
  * ion-induced dipole moment potential (long range attraction)
+ * 
  * quadrupole moment if N2 is the background gas 
  */
 void CollisionModel::MDInteractionsModel::forceFieldMD(std::vector<CollisionModel::Molecule*>& moleculesPtr, std::vector<Core::Vector>& forceMolecules){
@@ -720,15 +769,21 @@ void CollisionModel::MDInteractionsModel::forceFieldMD(std::vector<CollisionMode
     forceMolecules[0] = Core::Vector(0.0, 0.0, 0.0);
     forceMolecules[1] = Core::Vector(0.0, 0.0, 0.0);
     bool isN2 = false;
+    bool isN2Approx = false;
+    bool isCO2 = false;
 
     if(bgGas->getMolecularStructureName()=="N2"){
         isN2 = true;
+    }else if(bgGas->getMolecularStructureName()=="N2Approx"){
+        isN2Approx = true;
+    }else if(bgGas->getMolecularStructureName()=="CO2"){
+        isCO2 = true;
     }
 
     // construct E-field acting on the molecule
     std::array<double, 3> eField = {0., 0., 0.};
     std::array<double, 6> eFieldDerivative = {0., 0., 0., 0., 0., 0.};
-
+    
 
     /* 
     * therefore we need the interaction between each atom of a molecule with the atoms of the
@@ -736,7 +791,7 @@ void CollisionModel::MDInteractionsModel::forceFieldMD(std::vector<CollisionMode
     */ 
     for(auto& atomI : ion->getAtoms()){
         for(auto& atomJ : bgGas->getAtoms()){
-            
+
             // First contribution: Lennard-Jones potential 
             // This always contributes to the experienced force 
             Core::Vector absPosAtomI = ion->getComPos() + atomI->getRelativePosition();
@@ -744,16 +799,11 @@ void CollisionModel::MDInteractionsModel::forceFieldMD(std::vector<CollisionMode
 
 
             Core::Vector distance = absPosAtomI - absPosAtomJ;
-            // avoid singularity at zero distance 
-            if(distance.magnitude() < 1E-25){
-                forceMolecules[0] += Core::Vector(1e-10, 1e-10, 1e-10);
-                forceMolecules[1] += Core::Vector(1e-10, 1e-10, 1e-10) * (-1);
-                break;
-            }
-            // cut-off
+            
             if(distance.magnitude() > 100e-10){
                 return;
             }
+            
             double distanceSquared = distance.magnitudeSquared();
             double distanceSquaredInverse = 1./distanceSquared;
             double sigma = CollisionModel::Atom::calcLJSig(*atomI, *atomJ);
@@ -761,6 +811,7 @@ void CollisionModel::MDInteractionsModel::forceFieldMD(std::vector<CollisionMode
             double epsilon = CollisionModel::Atom::calcLJEps(*atomI, *atomJ);
             double ljFactor = 24 * epsilon * distanceSquaredInverse*distanceSquaredInverse*distanceSquaredInverse*distanceSquaredInverse * 
                                 (2 * distanceSquaredInverse*distanceSquaredInverse*distanceSquaredInverse * sigma6 * sigma6 - sigma6);
+
             // calculate the force that acts on the atoms and add it to the overall force on the molecule
             Core::Vector atomForce;
             atomForce.x(distance.x() * ljFactor);
@@ -774,34 +825,49 @@ void CollisionModel::MDInteractionsModel::forceFieldMD(std::vector<CollisionMode
             double distanceCubed = distanceSquared * sqrt(distanceSquared);
             double currentCharge = 0;
             // Check if one of the molecules is an ion and the other one is not
-            if(int(atomI->getCharge()/Core::ELEMENTARY_CHARGE) != 0 && 
-                moleculesPtr[1]->getIsIon() == false &&
-                moleculesPtr[1]->getIsDipole() == false){
-                currentCharge = atomI->getCharge();
+            if(isN2 || isCO2){
+                if(int(ceil(fabs(atomI->getCharge()/Core::ELEMENTARY_CHARGE))) != 0 &&
+                   atomJ->getType() == CollisionModel::Atom::AtomType::COM){
 
-            }else if (moleculesPtr[0]->getIsIon() == false && 
-                        int(atomJ->getCharge()/Core::ELEMENTARY_CHARGE) != 0 &&
-                        moleculesPtr[0]->getIsDipole() == false){
-                currentCharge = atomJ->getCharge();
+                    currentCharge = atomI->getCharge();
+
+                }else if (int(ceil(fabs(atomJ->getCharge()/Core::ELEMENTARY_CHARGE))) != 0 &&
+                          atomI->getType() == CollisionModel::Atom::AtomType::COM){
+
+                    currentCharge = atomJ->getCharge();
+
+                }
+            }else{
+                if(int(ceil(fabs(atomI->getCharge()/Core::ELEMENTARY_CHARGE))) != 0 &&
+                   atomJ->getType() != CollisionModel::Atom::AtomType::COM){
+
+                    currentCharge = atomI->getCharge();
+
+                }else if (int(ceil(fabs(atomJ->getCharge()/Core::ELEMENTARY_CHARGE))) != 0 &&
+                          atomI->getType() != CollisionModel::Atom::AtomType::COM){
+
+                    currentCharge = atomJ->getCharge();
+
+                }
             }
-            
+                
             
             eField[0] += distance.x() * currentCharge / distanceCubed; // E-field in x
             eField[1] += distance.y() * currentCharge / distanceCubed; // E-field in y
             eField[2] += distance.z() * currentCharge / distanceCubed; // E-field in z
-            
+
             // derivative x to x
-            eFieldDerivative[0] += currentCharge / distanceCubed - 
-                                    3 * currentCharge * distance.x() * distance.x() / (distanceCubed * distanceSquared); 
+            eFieldDerivative[0] += currentCharge / distanceCubed -
+                                    3 * currentCharge * distance.x() * distance.x() / (distanceCubed * distanceSquared);
             // derivative x to y
             eFieldDerivative[1] += -3 * currentCharge * distance.x() * distance.y() / (distanceCubed * distanceSquared);
             // derivative y to y
-            eFieldDerivative[2] += currentCharge / distanceCubed - 
+            eFieldDerivative[2] += currentCharge / distanceCubed -
                                     3 * currentCharge * distance.y() * distance.y() / (distanceCubed * distanceSquared);
             // derivative y to z
             eFieldDerivative[3] += -3 * currentCharge * distance.y() * distance.z() / (distanceCubed * distanceSquared);
             // derivative z to z
-            eFieldDerivative[4] += currentCharge / distanceCubed - 
+            eFieldDerivative[4] += currentCharge / distanceCubed -
                                     3 * currentCharge * distance.z() * distance.z() / (distanceCubed * distanceSquared);
             // derivative x to z
             eFieldDerivative[5] += -3 * currentCharge * distance.x() * distance.z() / (distanceCubed * distanceSquared);
@@ -850,38 +916,46 @@ void CollisionModel::MDInteractionsModel::forceFieldMD(std::vector<CollisionMode
 
             // Fourth contribution: quadrupole moment if background gas is N2 
             // This requires an ion and N2 to be present 
-            double partialChargeN2 = 0;
-            if(int(atomI->getCharge()/Core::ELEMENTARY_CHARGE) != 0 && 
-                isN2 == true){
+            double partialChargeN2 = 0; 
+            if(int(ceil(fabs(atomI->getCharge()/Core::ELEMENTARY_CHARGE))) != 0 && 
+                (isN2 == true || isN2Approx == true)){
 
                 currentCharge = atomI->getCharge();
                 partialChargeN2 = atomJ->getPartCharge();
 
-            }else if (isN2 == true && 
-                        int(atomJ->getCharge()/Core::ELEMENTARY_CHARGE) != 0){
+            }else if ((isN2 == true || isN2Approx == true) && 
+                        int(ceil(fabs(atomJ->getCharge()/Core::ELEMENTARY_CHARGE))) != 0){
 
                 currentCharge = atomJ->getCharge();
                 partialChargeN2 = atomI->getPartCharge();
-        
             }
-            // Core::Vector quadrupoleForce;
-            // quadrupoleForce.x(-currentCharge * partialChargeN2 * 1./Core::ELECTRIC_CONSTANT * distance.x() / distanceCubed );
-            // quadrupoleForce.y(-currentCharge * partialChargeN2 * 1./Core::ELECTRIC_CONSTANT * distance.y() / distanceCubed );
-            // quadrupoleForce.z(-currentCharge * partialChargeN2 * 1./Core::ELECTRIC_CONSTANT * distance.z() / distanceCubed );
-            // forceMolecules[0] += quadrupoleForce;
-            // forceMolecules[1] += quadrupoleForce * (-1);
+            Core::Vector quadrupoleForce;
+            quadrupoleForce.x(currentCharge * partialChargeN2 * 1./Core::ELECTRIC_CONSTANT * distance.x() / distanceCubed );
+            quadrupoleForce.y(currentCharge * partialChargeN2 * 1./Core::ELECTRIC_CONSTANT * distance.y() / distanceCubed );
+            quadrupoleForce.z(currentCharge * partialChargeN2 * 1./Core::ELECTRIC_CONSTANT * distance.z() / distanceCubed );
+            forceMolecules[0] += quadrupoleForce;
+            forceMolecules[1] += quadrupoleForce * (-1);
 
         }
     }
 
     // add the C4 ion-induced dipole force contribution 
     Core::Vector ionInducedForce;
-    ionInducedForce.x(1./Core::ELECTRIC_CONSTANT * collisionGasPolarizability_m3_ * 
-                        (eField[0]*eFieldDerivative[0] + eField[1]*eFieldDerivative[1] + eField[2]*eFieldDerivative[5]));
-    ionInducedForce.y(1./Core::ELECTRIC_CONSTANT * collisionGasPolarizability_m3_ * 
-                        (eField[0]*eFieldDerivative[1] + eField[1]*eFieldDerivative[2] + eField[2]*eFieldDerivative[3]));
-    ionInducedForce.z(1./Core::ELECTRIC_CONSTANT * collisionGasPolarizability_m3_ * 
-                        (eField[0]*eFieldDerivative[5] + eField[1]*eFieldDerivative[3] + eField[2]*eFieldDerivative[4]));
+    if(isN2Approx){
+        ionInducedForce.x(1./(Core::ELECTRIC_CONSTANT) * collisionGasPolarizability_m3_/2 * 
+                    (eField[0]*eFieldDerivative[0] + eField[1]*eFieldDerivative[1] + eField[2]*eFieldDerivative[5]));
+        ionInducedForce.y(1./(Core::ELECTRIC_CONSTANT) * collisionGasPolarizability_m3_/2 * 
+                    (eField[0]*eFieldDerivative[1] + eField[1]*eFieldDerivative[2] + eField[2]*eFieldDerivative[3]));
+        ionInducedForce.z(1./(Core::ELECTRIC_CONSTANT) * collisionGasPolarizability_m3_/2 * 
+                    (eField[0]*eFieldDerivative[5] + eField[1]*eFieldDerivative[3] + eField[2]*eFieldDerivative[4]));
+    }else{
+        ionInducedForce.x(1./(Core::ELECTRIC_CONSTANT) * collisionGasPolarizability_m3_ * 
+                    (eField[0]*eFieldDerivative[0] + eField[1]*eFieldDerivative[1] + eField[2]*eFieldDerivative[5]));
+        ionInducedForce.y(1./(Core::ELECTRIC_CONSTANT) * collisionGasPolarizability_m3_ * 
+                    (eField[0]*eFieldDerivative[1] + eField[1]*eFieldDerivative[2] + eField[2]*eFieldDerivative[3]));
+        ionInducedForce.z(1./(Core::ELECTRIC_CONSTANT) * collisionGasPolarizability_m3_ * 
+                    (eField[0]*eFieldDerivative[5] + eField[1]*eFieldDerivative[3] + eField[2]*eFieldDerivative[4]));
+    }
     forceMolecules[0] += ionInducedForce;
     forceMolecules[1] += ionInducedForce * (-1);
     

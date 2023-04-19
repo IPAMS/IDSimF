@@ -88,6 +88,7 @@ Documentation
     usersguide/applications
     usersguide/rs
     usersguide/benchmarks
+    usersguide/mdcollisions
 
 .. toctree::
    :maxdepth: 1

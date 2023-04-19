@@ -30,7 +30,7 @@
   "collision_gas_identifier":"He",
   "after_collision_velocity_warning_threshold":200,
   "particle_identifier":["O2+"],
-  "md_configuration":"./md_configuration.csv",
+  "md_configuration":"./md_configuration.json",
   "sub_integrator_integration_time_s":1e-10,
   "sub_integrator_step_size_s":1e-16,
   "collision_radius_scaling":2,

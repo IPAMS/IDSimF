@@ -117,7 +117,7 @@ TEST_CASE("Test random bit sources") {
         std::vector<int> testVector1 = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20};
         std::vector<int> testVector2 = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20};
 
-        SECTION("Test with random seed"){
+        SECTION("Test with truly random seed"){
 
             Core::MersenneBitSource mersenneSource1;
             Core::MersenneBitSource mersenneSource2;
@@ -152,7 +152,7 @@ TEST_CASE("Test random bit sources") {
             Core::MersenneBitSource mersenneSource2;
 
             mersenneSource1.seed(200);
-            mersenneSource2.seed(400);
+            mersenneSource2.seed(300);
 
             std::shuffle(testVector1.begin(), testVector1.end(), mersenneSource1);
             std::shuffle(testVector2.begin(), testVector2.end(), mersenneSource2);
@@ -162,6 +162,7 @@ TEST_CASE("Test random bit sources") {
             CHECK( testVector1[3] != testVector2[3]);
 
         }
+
     }
 
 
@@ -178,6 +179,36 @@ TEST_CASE("Test random bit sources") {
         CHECK( (testVector1[0] != 1 && testVector1[1] != 2) );
         CHECK(testVector1 == testVector2);
         CHECK(testSource1() != testSource1());
+    }
+
+    SECTION("Test SplitMix64 reproductivity with constant seed"){
+            std::vector<int> testVector1 = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20};
+            std::vector<int> testVector2 = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20};
+
+            Core::SplitMix64TestBitSource splitMix64Source1 = Core::SplitMix64TestBitSource();
+            Core::SplitMix64TestBitSource splitMix64Source2 = Core::SplitMix64TestBitSource();
+
+            std::shuffle(testVector1.begin(), testVector1.end(), splitMix64Source1);
+            std::shuffle(testVector2.begin(), testVector2.end(), splitMix64Source2);
+            CHECK( (testVector1[0] != 1 && testVector1[1] != 2) );
+            CHECK( testVector1[0] == testVector2[0]);
+            CHECK( testVector1[1] == testVector2[1]);
+            CHECK( testVector1[3] == testVector2[3]);
+    }
+
+    SECTION("Test Xoshiro reproductivity with constant seed"){
+            std::vector<int> testVector1 = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20};
+            std::vector<int> testVector2 = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20};
+
+            Core::Xoshiro256pTestBitSource xoshiro256pSource1 = Core::Xoshiro256pTestBitSource();
+            Core::Xoshiro256pTestBitSource xoshiro256pSource2 = Core::Xoshiro256pTestBitSource();
+
+            std::shuffle(testVector1.begin(), testVector1.end(), xoshiro256pSource1);
+            std::shuffle(testVector2.begin(), testVector2.end(), xoshiro256pSource2);
+            CHECK( (testVector1[0] != 1 && testVector1[1] != 2) );
+            CHECK( testVector1[0] == testVector2[0]);
+            CHECK( testVector1[1] == testVector2[1]);
+            CHECK( testVector1[3] == testVector2[3]);
     }
 
 }
@@ -295,5 +326,63 @@ TEST_CASE( "Test testing random distributions", "[Core][random]") {
         testGeneratorSample<Core::TestRandomGeneratorPool>(nSamples, expectedNorm, expectedUni, 1e-7);
 
         testUniformCustomDistribution<Core::TestRandomGeneratorPool>(1000, 2.0, 6.0);
+    }
+}
+
+TEST_CASE( "Test xoshiro256+ test random distributions (constant seeding)", "[Core][random]") {
+
+    Core::XoshiroTestRandomGeneratorPool rngPool;
+    Core::XoshiroTestRandomGeneratorPool::XoshiroTestRNGPoolElement* rngPoolElem = rngPool.getThreadRandomSource();
+
+    std::vector<double> vals;
+
+    SECTION("Test random generator should generate predefined deterministic normal random samples") {
+
+        for (int i = 0; i<10; ++i) {
+            vals.push_back(rngPoolElem->normalRealRndValue());
+        }
+
+        REQUIRE(Approx(vals[2])==-1.4300851003);
+        REQUIRE(Approx(vals[4])==-0.8904677016);
+        REQUIRE(Approx(vals[8])==-2.7963889313);
+    }
+
+    SECTION("Test random generator should generate predefined deterministic uniform random samples") {
+
+        for (int i = 0; i<10; ++i) {
+            vals.push_back(rngPoolElem->uniformRealRndValue());
+        }
+
+        REQUIRE(Approx(vals[1])==0.9264488555);
+        REQUIRE(Approx(vals[3])==0.2340490438);
+        REQUIRE(Approx(vals[7])==0.9594879628);
+    }
+
+     SECTION("Uniform random distribution should have the correct mean and deviation") {
+        auto xoshiroBitSource = rngPool.getThreadRandomSource()->getRandomBitSource();
+
+        int nSamples = 10000;
+
+        Core::UniformTestDistributionXoshiro dist(0.0, 1.0, xoshiroBitSource);
+
+        std::vector<double> vals;
+        for (int i=0; i<nSamples;i++){
+            vals.push_back(dist.rndValue());
+        }
+        randomSampleParams sr = calculateParamsFromSample(vals);
+
+        bool meanInRage = ((sr.mean<0.51) && (sr.mean>0.49));
+        CHECK(meanInRage);
+        bool stdDevInRage = ((sr.stdDev<0.30) && (sr.stdDev>0.26));
+        CHECK(stdDevInRage);
+    }
+
+    SECTION("Test rng should produce correct uniform and normal distributions"){
+        int nSamples = 10000;
+        expectedDistParams expectedNorm{0.0, 1.0};
+        expectedDistParams expectedUni{0.5, 0.28};
+
+        testGeneratorSample<Core::XoshiroTestRandomGeneratorPool>(nSamples, expectedNorm, expectedUni, 0.02);
+        testUniformCustomDistribution<Core::XoshiroTestRandomGeneratorPool>(1000, 2.0, 6.0);
     }
 }

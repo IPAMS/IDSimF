@@ -75,7 +75,6 @@ namespace CollisionModel{
         void addAtom(std::shared_ptr<CollisionModel::Atom> atm);
         void removeAtom(std::shared_ptr<CollisionModel::Atom> atm);
         void rotateMolecule();
-        
 
     private:
 

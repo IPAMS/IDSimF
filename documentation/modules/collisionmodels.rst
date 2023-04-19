@@ -54,6 +54,17 @@ Statistical Diffusion Collision Model
     :members:
     :undoc-members:
 
+
+----------------------------------
+Molecular Dynamics Collision Model
+----------------------------------
+
+:cpp:class:`CollisionModel::MDInteractionsModel` implements a molecular dynamics collision model with resolvment of the individual collision events by full trajectory integration of both particles:
+
+.. doxygenclass:: CollisionModel::MDInteractionsModel
+    :members:
+    :undoc-members:
+
 Utilities
 =========
 
@@ -66,3 +77,25 @@ Utilities
 `CollisionModel_MathFunctions.hpp / .cpp` bundles some math functions: 
 
 .. doxygenfile:: CollisionModel_MathFunctions.hpp
+
+
+:cpp:class:`CollisionModel::Atom` provides additional functionality for use in the :cpp:class:`CollisionModel::MDInteractionsModel` class: 
+
+.. doxygenclass:: CollisionModel::Atom
+    :members:
+    :undoc-members:
+
+
+:cpp:class:`CollisionModel::Molecule` provides additional functionality for use in the :cpp:class:`CollisionModel::MDInteractionsModel` class: 
+
+.. doxygenclass:: CollisionModel::Molecule
+    :members:
+    :undoc-members:
+
+
+:cpp:class:`CollisionModel::MolecularStructure` provides the general structure for rigid body representations: 
+
+.. doxygenclass:: CollisionModel::MolecularStructure
+    :members:
+    :undoc-members:
+

@@ -40,10 +40,6 @@ namespace FileIO
         public:
             std::unordered_map<std::string,  std::shared_ptr<CollisionModel::MolecularStructure>> readMolecularStructure(std::string filename);
 
-        private:
-            const std::string delimiter = ",";
-            const std::string moleculeDelimiter = "#";
-        
     };
     
 } 
