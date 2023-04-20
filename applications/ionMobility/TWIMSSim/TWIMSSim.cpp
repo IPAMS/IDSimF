@@ -307,7 +307,7 @@ int main(int argc, const char * argv[]) {
 
         auto timestepWriteFct =
                 [&trajectoryWriter, &voltageWriter, trajectoryWriteInterval, &rsSim, &resultFilewriter, concentrationWriteInterval,
-                        &totalFieldNow, &logger]
+                        &totalFieldNow, &logger, &ionsInactive]
                         (std::vector<Core::Particle*>& particles, double time, int timestep,
                          bool lastTimestep) {
 
@@ -322,8 +322,8 @@ int main(int argc, const char * argv[]) {
                         logger->info("finished ts:{} time:{:.2e}", timestep, time);
                     }
                     else if (timestep%trajectoryWriteInterval==0) {
-                        logger->info("ts:{}  time:{:.2e}",
-                                     timestep, time);
+                        logger->info("ts:{} time:{:.2e} splatted ions:{}",
+                                     timestep, time, ionsInactive);
                         rsSim.logConcentrations(logger);
                         trajectoryWriter.writeTimestep(particles, time);
                     }
