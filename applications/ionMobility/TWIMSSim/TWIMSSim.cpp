@@ -204,7 +204,7 @@ int main(int argc, const char * argv[]) {
         };
 
         std::vector<std::string> auxParamNames = {"velocity x", "velocity y", "velocity z",
-                                                  "ion velocity","kinetic energy (eV)", "effective Field (V/m)"};
+                                                  "ion velocity","kinetic energy (eV)", "effective Field (V/m)", "splat time"};
         auto auxParamFct = [](Core::Particle* particle) -> std::vector<double> {
             double ionVelocity = particle->getVelocity().magnitude();
             double kineticEnergy_eV = 0.5*particle->getMass()*ionVelocity*ionVelocity*Core::JOULE_TO_EV;
@@ -214,7 +214,8 @@ int main(int argc, const char * argv[]) {
                     particle->getVelocity().z(),
                     ionVelocity,
                     kineticEnergy_eV,
-                    particle->getFloatAttribute("effectiveField")
+                    particle->getFloatAttribute("effectiveField"),
+                    particle->getSplatTime()
             };
             return result;
         };
@@ -287,7 +288,7 @@ int main(int argc, const char * argv[]) {
         };
 
         auto accelerationFct =
-                [&potentialArrays, &totalFieldNow, potentialScale, concentrationWriteInterval, paBounds]
+                [&potentialArrays, &totalFieldNow, potentialScale]
                         (Core::Particle* particle, int /*particleIndex*/, SpaceCharge::FieldCalculator &fieldCalculator,
                          double /*time*/, int timestep){
                     Core::Vector fEfield(0, 0, 0);
@@ -330,7 +331,7 @@ int main(int argc, const char * argv[]) {
                 };
 
 
-        auto otherActionsFct = [&ionsInactive, &potentialArrays, paBounds](
+        auto otherActionsFct = [&ionsInactive, &potentialArrays, &trajectoryWriter](
                 Core::Vector& newPartPos, Core::Particle* particle,
                 int /*particleIndex*/,  double time, int /*timestep*/) {
             //Core::Vector pos = particle->getLocation();
@@ -338,7 +339,7 @@ int main(int argc, const char * argv[]) {
                 particle->setActive(false);
                 ionsInactive++;
             }
-            if (newPartPos.x() > 0.11300) {
+            if (newPartPos.x() > 0.11300) {;
                 particle->setActive(false);
                 particle->setSplatTime(time);
                 ionsInactive++;
