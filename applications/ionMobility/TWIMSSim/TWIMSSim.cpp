@@ -215,8 +215,10 @@ int main(int argc, const char * argv[]) {
                     ionVelocity,
                     kineticEnergy_eV,
                     particle->getFloatAttribute("effectiveField"),
-                    particle->getSplatTime()
             };
+            if (particle->isActive() == false) {
+                result.push_back(particle->getSplatTime());
+            }
             return result;
         };
 
@@ -331,7 +333,7 @@ int main(int argc, const char * argv[]) {
                 };
 
 
-        auto otherActionsFct = [&ionsInactive, &potentialArrays, &trajectoryWriter](
+        auto otherActionsFct = [&ionsInactive, &potentialArrays](
                 Core::Vector& newPartPos, Core::Particle* particle,
                 int /*particleIndex*/,  double time, int /*timestep*/) {
             //Core::Vector pos = particle->getLocation();
