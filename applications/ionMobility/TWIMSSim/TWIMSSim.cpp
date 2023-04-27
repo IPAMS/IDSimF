@@ -144,18 +144,6 @@ int main(int argc, const char * argv[]) {
                 std::back_inserter(collisionGasDiameters_m),
                 [](double cgd) -> double { return cgd*1e-10; });
 
-        // collect additional config file parameters for MD model:
-        std::vector<double> collisionGasPolarizability_m3 = simConf->doubleVectorParameter("collision_gas_polarizability_m3");
-        std::vector<std::string> collisionGasIdentifier = simConf->stringVectorParameter("collision_gas_identifier");
-        std::vector<std::string> particleIdentifiers = simConf->stringVectorParameter("particle_identifier");
-        double subIntegratorIntegrationTime_s = simConf->doubleParameter("sub_integrator_integration_time_s");
-        double subIntegratorStepSize_s = simConf->doubleParameter("sub_integrator_step_size_s");
-        double collisionRadiusScaling = simConf->doubleParameter("collision_radius_scaling");
-        double angleThetaScaling = simConf->doubleParameter("angle_theta_scaling");
-        double spawnRadius_m = simConf->doubleParameter("spawn_radius_m");
-        double trajectoryDistance_m = 0;
-        int saveTrajectoryStartTimeStep = 0;
-
         // ======================================================================================
 
         //read potential array configuration of the trap =================================================
@@ -403,6 +391,18 @@ int main(int argc, const char * argv[]) {
                 collisionModelPtr = std::move(collisionModel);
             }
             else if (collisionType==MD){
+                // collect additional config file parameters for MD model:
+                std::vector<double> collisionGasPolarizability_m3 = simConf->doubleVectorParameter("collision_gas_polarizability_m3");
+                std::vector<std::string> collisionGasIdentifier = simConf->stringVectorParameter("collision_gas_identifier");
+                std::vector<std::string> particleIdentifiers = simConf->stringVectorParameter("particle_identifier");
+                double subIntegratorIntegrationTime_s = simConf->doubleParameter("sub_integrator_integration_time_s");
+                double subIntegratorStepSize_s = simConf->doubleParameter("sub_integrator_step_size_s");
+                double collisionRadiusScaling = simConf->doubleParameter("collision_radius_scaling");
+                double angleThetaScaling = simConf->doubleParameter("angle_theta_scaling");
+                double spawnRadius_m = simConf->doubleParameter("spawn_radius_m");
+                double trajectoryDistance_m = 0;
+                int saveTrajectoryStartTimeStep = 0;
+
                 //construct MD model:
                 std::vector<std::unique_ptr<CollisionModel::AbstractCollisionModel>> mdModels;
                 for (std::size_t i = 0; i<nBackgroundGases; ++i) {
@@ -463,6 +463,18 @@ int main(int argc, const char * argv[]) {
                 collisionModelPtr = std::move(collisionModel);
             }
         else if (collisionType==HS_MD) {
+            // collect additional config file parameters for MD model:
+            std::vector<double> collisionGasPolarizability_m3 = simConf->doubleVectorParameter("collision_gas_polarizability_m3");
+            std::vector<std::string> collisionGasIdentifier = simConf->stringVectorParameter("collision_gas_identifier");
+            std::vector<std::string> particleIdentifiers = simConf->stringVectorParameter("particle_identifier");
+            double subIntegratorIntegrationTime_s = simConf->doubleParameter("sub_integrator_integration_time_s");
+            double subIntegratorStepSize_s = simConf->doubleParameter("sub_integrator_step_size_s");
+            double collisionRadiusScaling = simConf->doubleParameter("collision_radius_scaling");
+            double angleThetaScaling = simConf->doubleParameter("angle_theta_scaling");
+            double spawnRadius_m = simConf->doubleParameter("spawn_radius_m");
+            double trajectoryDistance_m = 0;
+            int saveTrajectoryStartTimeStep = 0;
+
             //prepare a multi collision model featuring one Hard Sphere model and one Molecular Dynamics model
             //the first collision gas will use the HS model, the second will use the MD model
             std::vector<std::unique_ptr<CollisionModel::AbstractCollisionModel>> hsmdModels;
