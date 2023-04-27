@@ -636,7 +636,7 @@
 			"posy":-0.517983629851, 
 			"posz":0.181680038020, 
 			"mass":12.011, 
-			"charge":0, 
+			"charge":-0.32190, 
 			"partCharge":0, 
 			"LJsigma":1.35417, 
 			"LJeps":0.2895328
@@ -647,7 +647,7 @@
 			"posy":-0.354524307186, 
 			"posz":-0.229537665983, 
 			"mass":12.011, 
-			"charge":0, 
+			"charge":-0.09262, 
 			"partCharge":0, 
 			"LJsigma":1.35417, 
 			"LJeps":0.2895328
@@ -658,7 +658,7 @@
 			"posy":-0.535462089942, 
 			"posz":0.903673910491, 
 			"mass":12.011, 
-			"charge":0, 
+			"charge":-0.25705, 
 			"partCharge":0, 
 			"LJsigma":1.35417, 
 			"LJeps":0.2895328
@@ -669,7 +669,7 @@
 			"posy":-0.255376289524, 
 			"posz":0.466822741971, 
 			"mass":12.011, 
-			"charge":0, 
+			"charge":0.14108, 
 			"partCharge":0, 
 			"LJsigma":1.35417, 
 			"LJeps":0.2895328
@@ -680,7 +680,7 @@
 			"posy":1.045415150070, 
 			"posz":-0.820994590378, 
 			"mass":14.0067, 
-			"charge":0, 
+			"charge":-0.27774, 
 			"partCharge":0, 
 			"LJsigma":1.1, 
 			"LJeps":0.711
@@ -691,7 +691,7 @@
 			"posy":-1.186921715179, 
 			"posz":-0.299049879604, 
 			"mass":12.011, 
-			"charge":0, 
+			"charge":-0.18723, 
 			"partCharge":0, 
 			"LJsigma":1.35417, 
 			"LJeps":0.2895328
@@ -702,7 +702,7 @@
 			"posy":0.957878233302, 
 			"posz":0.787375342919, 
 			"mass":12.011, 
-			"charge":0, 
+			"charge":-0.28147, 
 			"partCharge":0, 
 			"LJsigma":1.35417, 
 			"LJeps":0.2895328
@@ -713,7 +713,7 @@
 			"posy":-0.909771954919, 
 			"posz":-0.735308043735, 
 			"mass":12.011, 
-			"charge":0, 
+			"charge":-0.10797, 
 			"partCharge":0, 
 			"LJsigma":1.35417, 
 			"LJeps":0.2895328
@@ -724,7 +724,7 @@
 			"posy":1.236902035908, 
 			"posz":0.347689749329, 
 			"mass":12.011, 
-			"charge":0, 
+			"charge":-0.08418, 
 			"partCharge":0, 
 			"LJsigma":1.35417, 
 			"LJeps":0.2895328
@@ -735,7 +735,7 @@
 			"posy":0.304322883552, 
 			"posz":-0.416416964052, 
 			"mass":12.011, 
-			"charge":0, 
+			"charge":-0.10570, 
 			"partCharge":0, 
 			"LJsigma":1.35417, 
 			"LJeps":0.2895328
@@ -746,7 +746,7 @@
 			"posy":-1.025072794543, 
 			"posz":-1.053215892294, 
 			"mass":1.007, 
-			"charge":0, 
+			"charge":0.16263, 
 			"partCharge":0, 
 			"LJsigma":0.55, 
 			"LJeps":0.431
@@ -757,7 +757,7 @@
 			"posy":-1.564211543740, 
 			"posz":1.254180606364, 
 			"mass":1.007, 
-			"charge":0, 
+			"charge":0.16388, 
 			"partCharge":0, 
 			"LJsigma":0.55, 
 			"LJeps":0.431
@@ -768,7 +768,7 @@
 			"posy":0.107302010717, 
 			"posz":1.744733411877, 
 			"mass":1.007, 
-			"charge":0, 
+			"charge":0.15705, 
 			"partCharge":0, 
 			"LJsigma":0.55, 
 			"LJeps":0.431
@@ -779,7 +779,7 @@
 			"posy":1.212319378104, 
 			"posz":-0.939745351160, 
 			"mass":1.007, 
-			"charge":0, 
+			"charge":0.31657, 
 			"partCharge":0, 
 			"LJsigma":0.55, 
 			"LJeps":0.431
@@ -790,7 +790,7 @@
 			"posy":1.764034890810, 
 			"posz":-0.188495970264, 
 			"mass":1.007, 
-			"charge":0, 
+			"charge":0.29750, 
 			"partCharge":0, 
 			"LJsigma":0.55, 
 			"LJeps":0.431
@@ -801,7 +801,7 @@
 			"posy":1.153768417209, 
 			"posz":-1.720840798073, 
 			"mass":1.007, 
-			"charge":0, 
+			"charge":0.30854, 
 			"partCharge":0, 
 			"LJsigma":0.55, 
 			"LJeps":0.431
@@ -812,7 +812,7 @@
 			"posy":-2.145078889527, 
 			"posz":-0.536510683932, 
 			"mass":1.007, 
-			"charge":0, 
+			"charge":0.13563, 
 			"partCharge":0, 
 			"LJsigma":0.55, 
 			"LJeps":0.431
@@ -823,7 +823,7 @@
 			"posy":1.673907845882, 
 			"posz":1.423194054980, 
 			"mass":1.007, 
-			"charge":0, 
+			"charge":0.13754, 
 			"partCharge":0, 
 			"LJsigma":0.55, 
 			"LJeps":0.431
@@ -834,7 +834,7 @@
 			"posy":-1.530392871714, 
 			"posz":0.554919452754, 
 			"mass":1.007, 
-			"charge":0, 
+			"charge":0.16314, 
 			"partCharge":0, 
 			"LJsigma":0.55, 
 			"LJeps":0.431
@@ -845,7 +845,7 @@
 			"posy":-0.372686156314, 
 			"posz":-0.656128204555, 
 			"mass":1.007, 
-			"charge":0, 
+			"charge":0.14736, 
 			"partCharge":0, 
 			"LJsigma":0.55, 
 			"LJeps":0.431
@@ -856,7 +856,7 @@
 			"posy":-1.646262610780, 
 			"posz":-1.315192590591, 
 			"mass":1.007, 
-			"charge":0, 
+			"charge":0.14756, 
 			"partCharge":0, 
 			"LJsigma":0.55, 
 			"LJeps":0.431
@@ -867,7 +867,7 @@
 			"posy":2.173299578952, 
 			"posz":0.618307509015, 
 			"mass":1.007, 
-			"charge":0, 
+			"charge":0.14755, 
 			"partCharge":0, 
 			"LJsigma":0.55, 
 			"LJeps":0.431
@@ -878,7 +878,7 @@
 			"posy":0.514598525771, 
 			"posz":-0.751104201228, 
 			"mass":1.007, 
-			"charge":0, 
+			"charge":0.14940, 
 			"partCharge":0, 
 			"LJsigma":0.55, 
 			"LJeps":0.431
@@ -889,7 +889,7 @@
 			"posy":0.172868810052, 
 			"posz":0.983751233501, 
 			"mass":1.007, 
-			"charge":0, 
+			"charge":0.14043, 
 			"partCharge":0, 
 			"LJsigma":0.55, 
 			"LJeps":0.431
