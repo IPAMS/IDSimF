@@ -206,11 +206,9 @@ int main(int argc, const char * argv[]) {
             return result;
         };
 
-        unsigned int ionsInactive = 0;
-
         std::vector<std::string> auxParamNames = {"velocity x", "velocity y", "velocity z",
                                                   "ion velocity","kinetic energy (eV)", "effective Field (V/m)", "splat time"};
-        auto auxParamFct = [&ionsInactive](Core::Particle* particle) -> std::vector<double> {
+        auto auxParamFct = [](Core::Particle* particle) -> std::vector<double> {
             double ionVelocity = particle->getVelocity().magnitude();
             double kineticEnergy_eV = 0.5*particle->getMass()*ionVelocity*ionVelocity*Core::JOULE_TO_EV;
             std::vector<double> result = {
@@ -220,10 +218,8 @@ int main(int argc, const char * argv[]) {
                     ionVelocity,
                     kineticEnergy_eV,
                     particle->getFloatAttribute("effectiveField"),
+                    particle->getSplatTime()
             };
-            if (ionsInactive >= 999) {
-                result.push_back(particle->getSplatTime());
-            }
             return result;
         };
 
@@ -232,7 +228,7 @@ int main(int argc, const char * argv[]) {
         trajectoryWriter.setParticleAttributes(integerParticleAttributesNames, additionalIntegerParamTFct);
         trajectoryWriter.setParticleAttributes(auxParamNames, auxParamFct);
 
-        //unsigned int ionsInactive = 0;
+        unsigned int ionsInactive = 0;
         unsigned int nAllParticles = 0;
         for (const auto ni: nParticles) {
             nAllParticles += ni;
@@ -392,45 +388,40 @@ int main(int argc, const char * argv[]) {
             }
             else if (collisionType==MD){
                 // collect additional config file parameters for MD model:
-                std::vector<double> collisionGasPolarizability_m3 = simConf->doubleVectorParameter("collision_gas_polarizability_m3");
-                std::vector<std::string> collisionGasIdentifier = simConf->stringVectorParameter("collision_gas_identifier");
+                double collisionGasPolarizability_m3 = simConf->doubleParameter("collision_gas_polarizability_m3");
+                std::string collisionGasIdentifier = simConf->stringParameter("collision_gas_identifier");
                 std::vector<std::string> particleIdentifiers = simConf->stringVectorParameter("particle_identifier");
                 double subIntegratorIntegrationTime_s = simConf->doubleParameter("sub_integrator_integration_time_s");
                 double subIntegratorStepSize_s = simConf->doubleParameter("sub_integrator_step_size_s");
                 double collisionRadiusScaling = simConf->doubleParameter("collision_radius_scaling");
                 double angleThetaScaling = simConf->doubleParameter("angle_theta_scaling");
                 double spawnRadius_m = simConf->doubleParameter("spawn_radius_m");
-                double trajectoryDistance_m = 0;
-                int saveTrajectoryStartTimeStep = 0;
 
-                //construct MD model:
-                std::vector<std::unique_ptr<CollisionModel::AbstractCollisionModel>> mdModels;
-                for (std::size_t i = 0; i<nBackgroundGases; ++i) {
-                    auto mdModel = std::make_unique<CollisionModel::MDInteractionsModel>(
-                            backgroundPartialPressures_Pa[i],
+                std::unique_ptr<CollisionModel::MDInteractionsModel> collisionModel = 
+                        std::make_unique<CollisionModel::MDInteractionsModel>(
+                            backgroundPartialPressures_Pa[0],
                             backgroundTemperature_K,
-                            collisionGasMasses_Amu[i],
-                            collisionGasDiameters_m[i],
-                            collisionGasPolarizability_m3[i],
-                            collisionGasIdentifier[i],
+                            collisionGasMasses_Amu[0],
+                            collisionGasDiameters_m[0],
+                            collisionGasPolarizability_m3,
+                            collisionGasIdentifier,
                             subIntegratorIntegrationTime_s,
                             subIntegratorStepSize_s,
                             collisionRadiusScaling,
                             angleThetaScaling,
                             spawnRadius_m,
-                            molecularStructureCollection);
+                            molecularStructureCollection
+                        );
 
-                    // Set trajectory writing options:
-                    bool saveTrajectory = simConf->boolParameter("save_trajectory");
+                // Set trajectory writing options:
+                bool saveTrajectory = simConf->boolParameter("save_trajectory");
 
-                    if (saveTrajectory) {
-                        mdModel->setTrajectoryWriter(projectName + "_md_trajectories.txt",
-                                                     trajectoryDistance_m, saveTrajectoryStartTimeStep);
-                    }
-                    mdModels.emplace_back(std::move(mdModel));
-                    }
-                    std::unique_ptr<CollisionModel::MultiCollisionModel> collisionModel =
-                            std::make_unique<CollisionModel::MultiCollisionModel>(std::move(mdModels));
+                if (saveTrajectory){
+                    int saveTrajectoryStartTimeStep = simConf->intParameter("trajectory_start_time_step");
+                    double trajectoryDistance_m = simConf->doubleParameter("trajectory_distance_m");
+                    collisionModel->setTrajectoryWriter(projectName+"_md_trajectories.txt",
+                            trajectoryDistance_m, saveTrajectoryStartTimeStep);
+                }
 
                 // Init particles with MD parameters:
                 unsigned int particleIndex = 0;
@@ -503,13 +494,12 @@ int main(int argc, const char * argv[]) {
             // Set trajectory writing options:
             bool saveTrajectory = simConf->boolParameter("save_trajectory");
 
-            if (saveTrajectory) {
-                mdModel->setTrajectoryWriter(projectName + "_md_trajectories.txt",
-                                                 trajectoryDistance_m, saveTrajectoryStartTimeStep);
-            }
-            hsmdModels.emplace_back(std::move(mdModel));
-            std::unique_ptr<CollisionModel::MultiCollisionModel> collisionModel =
-                    std::make_unique<CollisionModel::MultiCollisionModel>(std::move(hsmdModels));
+                if (saveTrajectory){
+                    int saveTrajectoryStartTimeStep = simConf->intParameter("trajectory_start_time_step");
+                    double trajectoryDistance_m = simConf->doubleParameter("trajectory_distance_m");
+                    mdModel->setTrajectoryWriter(projectName+"_md_trajectories.txt",
+                            trajectoryDistance_m, saveTrajectoryStartTimeStep);
+                }
 
             // Init particles with MD parameters:
             unsigned int particleIndex = 0;
@@ -521,6 +511,11 @@ int main(int argc, const char * argv[]) {
                     particleIndex++;
                 }
             }
+
+            hsmdModels.emplace_back(std::move(mdModel));
+            std::unique_ptr<CollisionModel::MultiCollisionModel> collisionModel =
+                    std::make_unique<CollisionModel::MultiCollisionModel>(std::move(hsmdModels));
+
             collisionModelPtr = std::move(collisionModel);
         }
 
