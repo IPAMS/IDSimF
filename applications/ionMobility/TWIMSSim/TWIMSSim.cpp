@@ -334,7 +334,7 @@ int main(int argc, const char * argv[]) {
                 };
 
 
-        auto otherActionsFct = [&ionsInactive, &potentialArrays](
+        auto otherActionsFct = [&ionsInactive, &potentialArrays, dt_s](
                 Core::Vector& newPartPos, Core::Particle* particle,
                 int /*particleIndex*/,  double time, int /*timestep*/) {
             //Core::Vector pos = particle->getLocation();
@@ -352,36 +352,26 @@ int main(int argc, const char * argv[]) {
                 particle->setSplatTime(time);
                 ionsInactive++;
             }
-            double temp = sqrt(pow((newPartPos.x()-newPartPos.x()),2) +
-                        pow((newPartPos.y()-0),2) +
-                        pow((newPartPos.z()-0),2));
-            if (temp > 2.5) {
-                double diff = std::abs(2.5-temp);
-                double change = sqrt(2* pow(diff,2));
-                if (newPartPos.y() > 0 && newPartPos.z() > 0) {
-                    double new_y = -(newPartPos.y()-change);
-                    double new_z = -(newPartPos.z()-change);
-                    Core::Vector location(newPartPos.x(), new_y, new_z);
-                    particle->setLocation(location);
+            Core::Vector v(particle->getVelocity().x()*dt_s, particle->getVelocity().y()*dt_s, particle->getVelocity().z()*dt_s);
+            Core::Vector nextPoint(newPartPos.x()+v.x(), newPartPos.y()*v.y(), newPartPos.z()+v.z());
+            if (pow(nextPoint.y(),2)+ pow(nextPoint.z(),2) > pow(0.001, 2)) {
+                double a = (pow(v.y(),2)+ pow(v.z(),2));
+                double b = 2*v.y()*newPartPos.y()+2*v.z()*newPartPos.z();
+                double c = pow(newPartPos.y(),2) + pow(newPartPos.z(),2) - pow(0.001,2);
+
+                double r1 = (-(b) + sqrt(pow(b,2)-4*a*c)) / 2*a;
+                double r2 = (-(b) - sqrt(pow(b,2)-4*a*c)) / 2*a;
+
+                double r = 0;
+                if (r1 > 0 && r1 < 1) {
+                    r = r1;
                 }
-                if (newPartPos.y() < 0 && newPartPos.z() < 0) {
-                    double new_y = -(newPartPos.y()+change);
-                    double new_z = -(newPartPos.z()+change);
-                    Core::Vector location(newPartPos.x(), new_y, new_z);
-                    particle->setLocation(location);
+                else {
+                    r = r2;
                 }
-                if (newPartPos.y() < 0 && newPartPos.z() > 0) {
-                    double new_y = -(newPartPos.y()+change);
-                    double new_z = -(newPartPos.z()-change);
-                    Core::Vector location(newPartPos.x(), new_y, new_z);
-                    particle->setLocation(location);
-                }
-                if (newPartPos.y() > 0 && newPartPos.z() < 0) {
-                    double new_y = -(newPartPos.y()-change);
-                    double new_z = -(newPartPos.z()+change);
-                    Core::Vector location(newPartPos.x(), new_y, new_z);
-                    particle->setLocation(location);
-                }
+                Core::Vector mirrorPoint(newPartPos.x()+r*v.x(), -(newPartPos.y()+r*v.y()), -(newPartPos.z()+r*v.z()));
+                Core::Vector finalPoint(mirrorPoint.x()+(1-r)*v.x(), mirrorPoint.y()+(1-r)*v.y(), mirrorPoint.z()+(1-r)*v.z());
+                particle->setLocation(finalPoint);
             }
         };
 
