@@ -352,6 +352,37 @@ int main(int argc, const char * argv[]) {
                 particle->setSplatTime(time);
                 ionsInactive++;
             }
+            double temp = sqrt(pow((newPartPos.x()-newPartPos.x()),2) +
+                        pow((newPartPos.y()-0),2) +
+                        pow((newPartPos.z()-0),2));
+            if (temp > 2.5) {
+                double diff = std::abs(2.5-temp);
+                double change = sqrt(2* pow(diff,2));
+                if (newPartPos.y() > 0 && newPartPos.z() > 0) {
+                    double new_y = -(newPartPos.y()-change);
+                    double new_z = -(newPartPos.z()-change);
+                    Core::Vector location(newPartPos.x(), new_y, new_z);
+                    particle->setLocation(location);
+                }
+                if (newPartPos.y() < 0 && newPartPos.z() < 0) {
+                    double new_y = -(newPartPos.y()+change);
+                    double new_z = -(newPartPos.z()+change);
+                    Core::Vector location(newPartPos.x(), new_y, new_z);
+                    particle->setLocation(location);
+                }
+                if (newPartPos.y() < 0 && newPartPos.z() > 0) {
+                    double new_y = -(newPartPos.y()+change);
+                    double new_z = -(newPartPos.z()-change);
+                    Core::Vector location(newPartPos.x(), new_y, new_z);
+                    particle->setLocation(location);
+                }
+                if (newPartPos.y() > 0 && newPartPos.z() < 0) {
+                    double new_y = -(newPartPos.y()-change);
+                    double new_z = -(newPartPos.z()+change);
+                    Core::Vector location(newPartPos.x(), new_y, new_z);
+                    particle->setLocation(location);
+                }
+            }
         };
 
         //define / gas interaction /  collision model:
