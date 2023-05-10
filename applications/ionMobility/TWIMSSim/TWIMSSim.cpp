@@ -342,7 +342,7 @@ int main(int argc, const char * argv[]) {
                 particle->setActive(false);
                 ionsInactive++;
             }
-            if (newPartPos.x() > 0.11300) {;
+            if (newPartPos.x() > 0.11300) {
                 particle->setActive(false);
                 particle->setSplatTime(time);
                 ionsInactive++;
@@ -352,12 +352,29 @@ int main(int argc, const char * argv[]) {
                 particle->setSplatTime(time);
                 ionsInactive++;
             }
+            //method 1: box method
+            /*double radius = 0.002;
+            double box_length = sqrt(2) * radius;
+
+            double new_y = newPartPos.y() + (box_length/2);
+            double new_z = newPartPos.z() + (box_length/2);
+            new_y = fmod(new_y, box_length);
+            new_z = fmod(new_z, box_length);
+
+            Core::Vector newPos(newPartPos.x(), (new_y - (box_length/2)), (new_z - (box_length/2)));
+            newPartPos = newPos;
+            */
+            //method 2: circle radius method
+            /*Core::Vector currentPoint = newPartPos;
             Core::Vector v(particle->getVelocity().x()*dt_s, particle->getVelocity().y()*dt_s, particle->getVelocity().z()*dt_s);
-            Core::Vector nextPoint(newPartPos.x()+v.x(), newPartPos.y()*v.y(), newPartPos.z()+v.z());
-            if (pow(nextPoint.y(),2)+ pow(nextPoint.z(),2) > pow(0.001, 2)) {
+            Core::Vector nextPoint(currentPoint.x()+v.x(), currentPoint.y()*v.y(), currentPoint.z()+v.z());
+            double radius = 0.001;
+
+            //if (pow(nextPoint.y(),2)+ pow(nextPoint.z(),2) > pow(0.001, 2)) {
+            while (pow(nextPoint.y(),2) + pow(nextPoint.z(),2) > pow(radius, 2)) {
                 double a = (pow(v.y(),2)+ pow(v.z(),2));
-                double b = 2*v.y()*newPartPos.y()+2*v.z()*newPartPos.z();
-                double c = pow(newPartPos.y(),2) + pow(newPartPos.z(),2) - pow(0.001,2);
+                double b = 2*v.y()*currentPoint.y()+2*v.z()*currentPoint.z();
+                double c = pow(currentPoint.y(),2) + pow(currentPoint.z(),2) - pow(radius,2);
 
                 double r1 = (-(b) + sqrt(pow(b,2)-4*a*c)) / 2*a;
                 double r2 = (-(b) - sqrt(pow(b,2)-4*a*c)) / 2*a;
@@ -369,10 +386,12 @@ int main(int argc, const char * argv[]) {
                 else {
                     r = r2;
                 }
-                Core::Vector mirrorPoint(newPartPos.x()+r*v.x(), -(newPartPos.y()+r*v.y()), -(newPartPos.z()+r*v.z()));
-                Core::Vector finalPoint(mirrorPoint.x()+(1-r)*v.x(), mirrorPoint.y()+(1-r)*v.y(), mirrorPoint.z()+(1-r)*v.z());
-                particle->setLocation(finalPoint);
+                Core::Vector mirrorPoint(currentPoint.x()+r*v.x(), -(currentPoint.y()+r*v.y()), -(currentPoint.z()+r*v.z()));
+                currentPoint = mirrorPoint;
+                Core::Vector nextPoint(mirrorPoint.x()+(1-r)*v.x(), mirrorPoint.y()+(1-r)*v.y(), mirrorPoint.z()+(1-r)*v.z());
+                v = (1-r) * v;
             }
+            newPartPos = nextPoint;*/
         };
 
         //define / gas interaction /  collision model:
