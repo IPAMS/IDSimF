@@ -579,7 +579,7 @@ int main(int argc, const char * argv[]) {
             RS::ReactionConditions reactionConditions = RS::ReactionConditions();
 
             reactionConditions.temperature = backgroundTemperature_K;
-            //reactionConditions.electricField = totalFieldNow;
+            reactionConditions.electricField = particle->getFloatAttribute("effectiveField");
             reactionConditions.pressure = backgroundPartialPressures_Pa[0];
             return reactionConditions;
         };
