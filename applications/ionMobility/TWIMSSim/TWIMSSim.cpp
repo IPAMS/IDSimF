@@ -161,8 +161,6 @@ int main(int argc, const char * argv[]) {
 
         double potentialScale = 1.0/10000.0;
 
-        std::array<double, 6> paBounds = potentialArrays[0]->getBounds();
-
         double wavePeriod = 1.0/waveFrequency;
 
         std::vector<double> phaseShift = simConf->doubleVectorParameter("phase_shift");
@@ -281,9 +279,9 @@ int main(int argc, const char * argv[]) {
         auto paVoltageFct = [&potentialArrays, &WaveForm, phaseShift,
                 wavePeriod, waveAmplitude, omega, V_rf, &totalFieldNow](double time){
             for(size_t i=0; i<potentialArrays.size()-2; i++) {
-                double period = std::fmod(time, wavePeriod) / wavePeriod;
-                double shiftedPeriod = std::fmod(period + phaseShift[i], 1.0);
-                totalFieldNow[i]=(WaveForm.getInterpolatedValue(shiftedPeriod) * waveAmplitude);
+                double phase = std::fmod(time, wavePeriod) / wavePeriod;
+                double shiftedphase = std::fmod(phase + phaseShift[i], 1.0);
+                totalFieldNow[i]=(WaveForm.getInterpolatedValue(shiftedphase) * waveAmplitude);
             }
 
             totalFieldNow[potentialArrays.size()-2] = sin(time*omega) * V_rf;
@@ -352,6 +350,32 @@ int main(int argc, const char * argv[]) {
                 particle->setSplatTime(time);
                 ionsInactive++;
             }
+            /*double radius = 0.001;
+            //double box_length = sqrt(2) * radius;
+            if (newPartPos.y() > radius) {
+                //double new_y = newPartPos.y() - box_length + 2 * (newPartPos.y()-radius);
+                double new_y = -(radius - (newPartPos.y()-radius));
+                Core::Vector newPos(newPartPos.x(), new_y, newPartPos.z());
+                newPartPos = newPos;
+            }
+            if (newPartPos.y() < -radius) {
+                double new_y = +(radius + (newPartPos.y()+radius));
+                Core::Vector newPos(newPartPos.x(), new_y, newPartPos.z());
+                newPartPos = newPos;
+            }
+            if (newPartPos.z() > radius) {
+                double new_z = -(radius - (newPartPos.z()-radius));
+                Core::Vector newPos(newPartPos.x(), newPartPos.y(), new_z);
+                newPartPos = newPos;
+            }
+            if (newPartPos.z() < -radius) {
+                double new_z = +(radius + (newPartPos.z()+radius));
+                Core::Vector newPos(newPartPos.x(), newPartPos.y(), new_z);
+                newPartPos = newPos;
+            }*/
+            
+
+
             //method 1: box method
             /*double radius = 0.002;
             double box_length = sqrt(2) * radius;
@@ -495,8 +519,8 @@ int main(int argc, const char * argv[]) {
             }
         else if (collisionType==HS_MD) {
             // collect additional config file parameters for MD model:
-            std::vector<double> collisionGasPolarizability_m3 = simConf->doubleVectorParameter("collision_gas_polarizability_m3");
-            std::vector<std::string> collisionGasIdentifier = simConf->stringVectorParameter("collision_gas_identifier");
+            double collisionGasPolarizability_m3 = simConf->doubleParameter("collision_gas_polarizability_m3");
+            std::string collisionGasIdentifier = simConf->stringParameter("collision_gas_identifier");
             std::vector<std::string> particleIdentifiers = simConf->stringVectorParameter("particle_identifier");
             double subIntegratorIntegrationTime_s = simConf->doubleParameter("sub_integrator_integration_time_s");
             double subIntegratorStepSize_s = simConf->doubleParameter("sub_integrator_step_size_s");
@@ -522,8 +546,8 @@ int main(int argc, const char * argv[]) {
                     backgroundTemperature_K,
                     collisionGasMasses_Amu[1],
                     collisionGasDiameters_m[1],
-                    collisionGasPolarizability_m3[1],
-                    collisionGasIdentifier[1],
+                    collisionGasPolarizability_m3,
+                    collisionGasIdentifier,
                     subIntegratorIntegrationTime_s,
                     subIntegratorStepSize_s,
                     collisionRadiusScaling,
