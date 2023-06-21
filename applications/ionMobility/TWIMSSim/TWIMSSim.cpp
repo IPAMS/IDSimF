@@ -541,6 +541,21 @@ int main(int argc, const char * argv[]) {
                         hsmdModels.emplace_back(std::move(cllModel));
                     }
                     else {
+                        auto cllModel = std::make_unique<CollisionModel::StatisticalDiffusionModel>(
+                                backgroundPartialPressures_Pa[i],
+                                backgroundTemperature_K,
+                                collisionGasMasses_Amu[i],
+                                collisionGasDiameters_m[i]);
+                        for (const auto& particle: particlesPtrs) {
+                            particle->setDiameter(
+                                    CollisionModel::util::estimateCollisionDiameterFromMass(
+                                            particle->getMass()/Core::AMU_TO_KG
+                                    )*1e-9);
+                            cllModel->setSTPParameters(*particle);
+                        }
+                        hsmdModels.push_back(std::move(cllModel));
+                    }
+                    /*else {
                         auto cllModel = std::make_unique<CollisionModel::MDInteractionsModel>(
                                 backgroundPartialPressures_Pa[i],
                                 backgroundTemperature_K,
@@ -559,7 +574,7 @@ int main(int argc, const char * argv[]) {
                                                          trajectoryDistance_m, saveTrajectoryStartTimeStep);
                         }
                         hsmdModels.emplace_back(std::move(cllModel));
-                    }
+                    }*/
                 }
                 std::cout << "Collision model loop finished." << std::endl;
                 std::unique_ptr<CollisionModel::MultiCollisionModel> collisionModel =
