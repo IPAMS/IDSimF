@@ -529,82 +529,86 @@ int main(int argc, const char * argv[]) {
 
                 collisionModelPtr = std::move(collisionModel);
             }
-        else if (collisionType==HS_MD) {
-            // collect additional config file parameters for MD model:
-            std::cout << "Begin reading MD parameters." << std::endl;
-            double collisionGasPolarizability_m3 = simConf->doubleParameter("collision_gas_polarizability_m3");
-            std::string collisionGasIdentifier = simConf->stringParameter("collision_gas_identifier");
-            std::vector<std::string> particleIdentifiers = simConf->stringVectorParameter("particle_identifier");
-            double subIntegratorIntegrationTime_s = simConf->doubleParameter("sub_integrator_integration_time_s");
-            double subIntegratorStepSize_s = simConf->doubleParameter("sub_integrator_step_size_s");
-            double collisionRadiusScaling = simConf->doubleParameter("collision_radius_scaling");
-            double angleThetaScaling = simConf->doubleParameter("angle_theta_scaling");
-            double spawnRadius_m = simConf->doubleParameter("spawn_radius_m");
-            double trajectoryDistance_m = 0;
-            int saveTrajectoryStartTimeStep = 0;
-            std::cout << "MD parameters have been read." << std::endl;
+            else if (collisionType==HS_MD) {
+                std::vector<std::unique_ptr<CollisionModel::AbstractCollisionModel>> hsmdModels;
+                for (std::size_t i=0; i<nBackgroundGases; ++i) {
+                    if ((i%2)==0) {
+                        auto cllModel = std::make_unique<CollisionModel::HardSphereModel>(
+                                backgroundPartialPressures_Pa[i],
+                                backgroundTemperature_K,
+                                collisionGasMasses_Amu[i],
+                                collisionGasDiameters_m[i]);
+                        hsmdModels.emplace_back(std::move(cllModel));
+                    }
+                    else {
+                        auto cllModel = std::make_unique<CollisionModel::MDInteractionsModel>(
+                                backgroundPartialPressures_Pa[i],
+                                backgroundTemperature_K,
+                                collisionGasMasses_Amu[i],
+                                collisionGasDiameters_m[i],
+                                collisionGasPolarizability_m3[i],
+                                collisionGasIdentifier[i],
+                                subIntegratorIntegrationTime_s,
+                                subIntegratorStepSize_s,
+                                collisionRadiusScaling,
+                                angleThetaScaling,
+                                spawnRadius_m,
+                                molecularStructureCollection);
+                        if (saveTrajectory){
+                            cllModel->setTrajectoryWriter(projectName+"_md_trajectories.txt",
+                                                         trajectoryDistance_m, saveTrajectoryStartTimeStep);
+                        }
+                        hsmdModels.emplace_back(std::move(cllModel));
+                    }
+                }
+                std::cout << "Collision model loop finished." << std::endl;
+                std::unique_ptr<CollisionModel::MultiCollisionModel> collisionModel =
+                        std::make_unique<CollisionModel::MultiCollisionModel>(std::move(hsmdModels));
+                std::cout << "Collision model made." << std::endl;
 
-            //prepare a multi collision model featuring one Hard Sphere model and one Molecular Dynamics model
-            //the first collision gas will use the HS model, the second will use the MD model
-            std::cout << "Create pointer for collision models." << std::endl;
-            std::vector<std::unique_ptr<CollisionModel::AbstractCollisionModel>> hsmdModels;
-            std::unique_ptr<CollisionModel::HardSphereModel> hsModel = std::make_unique<CollisionModel::HardSphereModel>(
+                collisionModelPtr = std::move(collisionModel);
+                std::cout << "Collision model done." << std::endl;
+            }
+            /*else if (collisionType==HS_MD) {
+                std::vector<std::unique_ptr<CollisionModel::AbstractCollisionModel>> hsmdModels;
+                std::unique_ptr<CollisionModel::HardSphereModel> hsModel =
+                        std::make_unique<CollisionModel::HardSphereModel>(
                                 backgroundPartialPressures_Pa[0],
                                 backgroundTemperature_K,
                                 collisionGasMasses_Amu[0],
                                 collisionGasDiameters_m[0],
                                 nullptr);
-            hsmdModels.emplace_back(std::move(hsModel));
-            std::cout << "HS model has been created and pushed back onto the vector." << std::endl;
+                hsmdModels.emplace_back(std::move(hsModel));
 
-            std::unique_ptr<CollisionModel::MDInteractionsModel> mdModel = std::make_unique<CollisionModel::MDInteractionsModel>(
-                    backgroundPartialPressures_Pa[1],
-                    backgroundTemperature_K,
-                    collisionGasMasses_Amu[1],
-                    collisionGasDiameters_m[1],
-                    collisionGasPolarizability_m3,
-                    collisionGasIdentifier,
-                    subIntegratorIntegrationTime_s,
-                    subIntegratorStepSize_s,
-                    collisionRadiusScaling,
-                    angleThetaScaling,
-                    spawnRadius_m,
-                    molecularStructureCollection
-                    );
-            std::cout << "MD model has been created." << std::endl;
-            // Set trajectory writing options:
-            bool saveTrajectory = simConf->boolParameter("save_trajectory");
+                std::unique_ptr<CollisionModel::MDInteractionsModel> mdModel =
+                        std::make_unique<CollisionModel::MDInteractionsModel>(
+                                backgroundPartialPressures_Pa[1],
+                                backgroundTemperature_K,
+                                collisionGasMasses_Amu[1],
+                                collisionGasDiameters_m[1],
+                                collisionGasPolarizability_m3[1],
+                                collisionGasIdentifier[1],
+                                subIntegratorIntegrationTime_s,
+                                subIntegratorStepSize_s,
+                                collisionRadiusScaling,
+                                angleThetaScaling,
+                                spawnRadius_m,
+                                molecularStructureCollection);
 
                 if (saveTrajectory){
-                    int saveTrajectoryStartTimeStep = simConf->intParameter("trajectory_start_time_step");
-                    double trajectoryDistance_m = simConf->doubleParameter("trajectory_distance_m");
                     mdModel->setTrajectoryWriter(projectName+"_md_trajectories.txt",
-                            trajectoryDistance_m, saveTrajectoryStartTimeStep);
+                                                  trajectoryDistance_m, saveTrajectoryStartTimeStep);
                 }
-            std::cout << "Trajectory writing options have been set." << std::endl;
-            // Init particles with MD parameters:
-            unsigned int particleIndex = 0;
-            for (std::size_t i = 0; i<nParticles.size(); i++) {
-                for (unsigned int k = 0; k<nParticles[i]; k++) {
-                    Core::Particle* particle = particlesPtrs[particleIndex];
-                    particle->setMolecularStructure(molecularStructureCollection.at(particleIdentifiers[i]));
-                    particle->setDiameter(particle->getMolecularStructure()->getDiameter());
-                    particleIndex++;
-                }
-            }
-            std::cout << "Particle is initiated with MD parameters." << std::endl;
-            hsmdModels.emplace_back(std::move(mdModel));
-            std::unique_ptr<CollisionModel::MultiCollisionModel> collisionModel =
-                    std::make_unique<CollisionModel::MultiCollisionModel>(std::move(hsmdModels));
-            std::cout << "MD model created and placed within vector." << std::endl;
-            collisionModelPtr = std::move(collisionModel);
-            std::cout << "Collision model preparation finished." << std::endl;
-        }
+                hsmdModels.emplace_back(std::move(mdModel));
+                std::unique_ptr<CollisionModel::MultiCollisionModel> collisionModel =
+                        std::make_unique<CollisionModel::MultiCollisionModel>(std::move(hsmdModels));
+                collisionModelPtr = std::move(collisionModel);
+            }*/
 
-        }
-        else if (collisionType==NO_COLLISION) {
-            collisionModelPtr = nullptr;
-        }
+            }
+            else if (collisionType==NO_COLLISION) {
+                collisionModelPtr = nullptr;
+            }
 
         //define reaction simulation functions:
         auto particlesHasReactedFct = [&collisionModelPtr, &substanceIndices](RS::ReactiveParticle* particle){
