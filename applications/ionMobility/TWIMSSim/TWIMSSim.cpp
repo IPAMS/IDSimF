@@ -541,21 +541,6 @@ int main(int argc, const char * argv[]) {
                         hsmdModels.emplace_back(std::move(cllModel));
                     }
                     else {
-                        auto cllModel = std::make_unique<CollisionModel::StatisticalDiffusionModel>(
-                                backgroundPartialPressures_Pa[i],
-                                backgroundTemperature_K,
-                                collisionGasMasses_Amu[i],
-                                collisionGasDiameters_m[i]);
-                        for (const auto& particle: particlesPtrs) {
-                            particle->setDiameter(
-                                    CollisionModel::util::estimateCollisionDiameterFromMass(
-                                            particle->getMass()/Core::AMU_TO_KG
-                                    )*1e-9);
-                            cllModel->setSTPParameters(*particle);
-                        }
-                        hsmdModels.push_back(std::move(cllModel));
-                    }
-                    /*else {
                         auto cllModel = std::make_unique<CollisionModel::MDInteractionsModel>(
                                 backgroundPartialPressures_Pa[i],
                                 backgroundTemperature_K,
@@ -574,7 +559,7 @@ int main(int argc, const char * argv[]) {
                                                          trajectoryDistance_m, saveTrajectoryStartTimeStep);
                         }
                         hsmdModels.emplace_back(std::move(cllModel));
-                    }*/
+                    }
                 }
                 std::cout << "Collision model loop finished." << std::endl;
                 std::unique_ptr<CollisionModel::MultiCollisionModel> collisionModel =
@@ -584,41 +569,6 @@ int main(int argc, const char * argv[]) {
                 collisionModelPtr = std::move(collisionModel);
                 std::cout << "Collision model done." << std::endl;
             }
-            /*else if (collisionType==HS_MD) {
-                std::vector<std::unique_ptr<CollisionModel::AbstractCollisionModel>> hsmdModels;
-                std::unique_ptr<CollisionModel::HardSphereModel> hsModel =
-                        std::make_unique<CollisionModel::HardSphereModel>(
-                                backgroundPartialPressures_Pa[0],
-                                backgroundTemperature_K,
-                                collisionGasMasses_Amu[0],
-                                collisionGasDiameters_m[0],
-                                nullptr);
-                hsmdModels.emplace_back(std::move(hsModel));
-
-                std::unique_ptr<CollisionModel::MDInteractionsModel> mdModel =
-                        std::make_unique<CollisionModel::MDInteractionsModel>(
-                                backgroundPartialPressures_Pa[1],
-                                backgroundTemperature_K,
-                                collisionGasMasses_Amu[1],
-                                collisionGasDiameters_m[1],
-                                collisionGasPolarizability_m3[1],
-                                collisionGasIdentifier[1],
-                                subIntegratorIntegrationTime_s,
-                                subIntegratorStepSize_s,
-                                collisionRadiusScaling,
-                                angleThetaScaling,
-                                spawnRadius_m,
-                                molecularStructureCollection);
-
-                if (saveTrajectory){
-                    mdModel->setTrajectoryWriter(projectName+"_md_trajectories.txt",
-                                                  trajectoryDistance_m, saveTrajectoryStartTimeStep);
-                }
-                hsmdModels.emplace_back(std::move(mdModel));
-                std::unique_ptr<CollisionModel::MultiCollisionModel> collisionModel =
-                        std::make_unique<CollisionModel::MultiCollisionModel>(std::move(hsmdModels));
-                collisionModelPtr = std::move(collisionModel);
-            }*/
 
             }
             else if (collisionType==NO_COLLISION) {
