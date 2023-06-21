@@ -6,7 +6,7 @@
   "trajectory_write_interval":10000,
   "space_charge_factor":0,
   "reaction_configuration":"../RS_ReacSys_Amphetamine_Argon.conf",
-  "potential_array_scale": 0.00002,
+  "potential_array_scale": 0.0001,
   "potential_arrays": [
     "../PotentialArrays/TWIMS_ring_stack.pa1",
     "../PotentialArrays/TWIMS_ring_stack.pa2",
