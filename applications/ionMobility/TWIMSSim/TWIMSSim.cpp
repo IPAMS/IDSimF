@@ -119,6 +119,9 @@ int main(int argc, const char * argv[]) {
             throw std::invalid_argument("wrong configuration value: collision_model_type");
         }
 
+        //sets a flag on whether a collision type includes the MD model
+        bool usesMDmodel = (collisionType==MD || collisionType==HS_MD);
+
         std::vector<double> backgroundPartialPressures_Pa = simConf->doubleVectorParameter(
                 "background_partial_pressures_Pa");
         std::vector<double> collisionGasMasses_Amu = simConf->doubleVectorParameter("collision_gas_masses_amu");
@@ -155,7 +158,7 @@ int main(int argc, const char * argv[]) {
         double trajectoryDistance_m = 0;
         bool saveTrajectory = false;
         int saveTrajectoryStartTimeStep = 0;
-        if(collisionType==MD){
+        if(usesMDmodel == true){
             collisionGasPolarizability_m3 = simConf->doubleVectorParameter("collision_gas_polarizability_m3");
             collisionGasIdentifier = simConf->stringVectorParameter("collision_gas_identifier");
             particleIdentifier = simConf->stringVectorParameter("particle_identifier");
@@ -211,7 +214,7 @@ int main(int argc, const char * argv[]) {
 
         //read molecular structure file
         std::unordered_map<std::string,  std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection;
-        if(collisionType==MD){
+        if(usesMDmodel == true){
             std::string mdCollisionConfFile = simConf->pathRelativeToConfFile(simConf->stringParameter("md_configuration"));
             FileIO::MolecularStructureReader mdConfReader = FileIO::MolecularStructureReader();
             molecularStructureCollection = mdConfReader.readMolecularStructure(mdCollisionConfFile);
@@ -288,7 +291,7 @@ int main(int argc, const char * argv[]) {
                 particle->setFloatAttribute("effectiveField", 0.0);
                 particle->setIndex(nParticlesTotal);
 
-                if(collisionType==MD){
+                if(usesMDmodel == true){
                     particle->setMolecularStructure(molecularStructureCollection.at(particleIdentifier[i]));
                     particle->setDiameter(particle->getMolecularStructure()->getDiameter());
                 }
