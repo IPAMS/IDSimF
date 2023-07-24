@@ -162,8 +162,8 @@ int main(int argc, const char * argv[]) {
 
         //read physical configuration ===================================================================
         double maxIonRadius = simConf->doubleParameter("max_ion_radius");
-        double backgroundPressure = simConf->doubleParameter("background_pressure_Pa");
-        double backgroundTemperature = simConf->doubleParameter("background_temperature_K");
+        double backgroundPressure = simConf->doubleParameter("background_gas_pressure_Pa");
+        double backgroundTemperature = simConf->doubleParameter("background_gas_temperature_K");
         double spaceChargeFactor = simConf->doubleParameter("space_charge_factor");
         double collisionGasMassAmu = simConf->doubleParameter("collision_gas_mass_amu");
         double collisionGasDiameterM = simConf->doubleParameter("collision_gas_diameter_angstrom")*1e-10;
