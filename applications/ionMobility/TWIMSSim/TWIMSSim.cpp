@@ -325,8 +325,8 @@ int main(int argc, const char * argv[]) {
         };
 
         auto accelerationFct =
-                [&potentialArrays, &totalFieldNow, potentialScale]
-                        (Core::Particle* particle, int /*particleIndex*/, SpaceCharge::FieldCalculator &fieldCalculator,
+                [&potentialArrays, &totalFieldNow, potentialScale, spaceChargeFactor]
+                        (Core::Particle* particle, int /*particleIndex*/, SpaceCharge::FieldCalculator &scFieldCalculator,
                          double /*time*/, int timestep){
                     Core::Vector fEfield(0, 0, 0);
                     Core::Vector pos = particle->getLocation();
@@ -339,7 +339,15 @@ int main(int argc, const char * argv[]) {
                         fEfield = fEfield+paEffectiveField;
                     }
                     particle->setFloatAttribute("effectiveField", fEfield.magnitude());
-                    return (fEfield*particleCharge/particle->getMass());
+
+                    if (Core::isDoubleEqual(spaceChargeFactor, 0.0)) {
+                        return (fEfield * particleCharge / particle->getMass());
+                    }
+                    else {
+                        Core::Vector spaceChargeForce =
+                                scFieldCalculator.getEFieldFromSpaceCharge(*particle)*(spaceChargeFactor);
+                        return (((fEfield+spaceChargeForce)*particleCharge)/particle->getMass());
+                    }
                 };
 
 
@@ -386,7 +394,7 @@ int main(int argc, const char * argv[]) {
                 particle->setSplatTime(time);
                 ionsInactive++;
             }
-            if (V_rf == 0) {
+            if (V_rf == 0.0) {
                 double boundary = 0.001;
                 if (newPartPos.y() > boundary) {
                     double new_y = -(boundary - (newPartPos.y() - boundary));
@@ -588,7 +596,7 @@ int main(int argc, const char * argv[]) {
             particle->setIntegerAttribute(key_ChemicalIndex, substIndex);
         };
 
-        auto reactionConditionsFct = [&totalFieldNow, backgroundTemperature_K, backgroundPartialPressures_Pa]
+        auto reactionConditionsFct = [backgroundTemperature_K, backgroundPartialPressures_Pa]
                 (RS::ReactiveParticle* particle, double /*time*/)->RS::ReactionConditions{
             RS::ReactionConditions reactionConditions = RS::ReactionConditions();
 
