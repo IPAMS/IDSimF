@@ -32,10 +32,12 @@
 #include "Integration_verletIntegrator.hpp"
 #include "Integration_parallelVerletIntegrator.hpp"
 #ifdef WITH_FMM_3d
+#include "Integration_fmmIntegrator.hpp"
 #include "FMM3D_fmmSolver.hpp"
 #endif
 
 #ifdef WITH_EXAFMMT
+#include "Integration_fmmIntegrator.hpp"
 #include "ExaFMMt_fmmSolver.hpp"
 #endif
 
@@ -54,7 +56,6 @@
 #include "appUtils_commandlineParser.hpp"
 #include <iostream>
 #include <vector>
-#include <Integration_fmmIntegrator.hpp>
 
 enum IntegratorMode {VERLET, PARALLEL_VERLET, FMM3D_VERLET, EXAFMM_VERLET};
 enum GeometryMode {DEFAULT, SCALED,VARIABLE};
