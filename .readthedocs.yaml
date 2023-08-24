@@ -13,8 +13,9 @@ build:
     python: "miniconda3-4.7"
 
 # Optionally build your docs in additional formats such as PDF
-#formats:
-#   - pdf
+formats:
+   - pdf
+   - epub
 
 python:
    install:
