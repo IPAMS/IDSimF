@@ -32,7 +32,8 @@ author = 'Institute for Pure and Applied Mass Spectrometry, University of Wupper
 # ones.
 extensions = [
     "sphinx_rtd_theme",
-    "breathe"
+    "breathe",
+    "sphinx.ext.imgconverter"
 ]
 
 
