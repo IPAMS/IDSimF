@@ -604,6 +604,13 @@ bool CollisionModel::MDInteractionsModel::rk4InternAdaptiveStep(std::vector<Coll
                             {439./216, -8, 3680./513, -845./4104, 0, 0},
                             {-8./27, 2, -3544./2565, 1859./4104, -11./40, 0}};
     double mass[2];
+
+    double reducedMass = 0; 
+    for(auto* molecule : moleculesPtr){
+        reducedMass += 1/molecule->getMass();
+    }
+    reducedMass = 1/reducedMass; 
+
     std::array<std::array<Core::Vector, 2>, 6> k;
     std::array<std::array<Core::Vector, 2>, 6> l;
     std::array<Core::Vector, 2> newComVelOrder5;
@@ -645,7 +652,7 @@ bool CollisionModel::MDInteractionsModel::rk4InternAdaptiveStep(std::vector<Coll
         forceFieldMD(moleculesPtr, forceMolecules);
 
         for(size_t q = 0; q < nMolecules; q++){
-            k[0][q] = forceMolecules[q] * dt / mass[q];
+            k[0][q] = forceMolecules[q] * dt / reducedMass;
             l[0][q] = velocityMolecules[q] * dt;
         }
 
@@ -666,7 +673,7 @@ bool CollisionModel::MDInteractionsModel::rk4InternAdaptiveStep(std::vector<Coll
             forceFieldMD(moleculesPtr, forceMolecules);
             
             for(i = 0; i < nMolecules; i++){
-                k[n][i] = forceMolecules[i] * dt / mass[i];
+                k[n][i] = forceMolecules[i] * dt / reducedMass;
                 l[n][i] = velocityMolecules[i];
                 for(size_t m = 0; m < 6; m++){
                     l[n][i] += k[m][i]*weight[n-1][m];
