@@ -267,7 +267,7 @@ There are currently 5 different reaction types, described in detail below.
 
     References: 
 
-        .. [wissdorf2013] Wissdorf, W., Seifert, L., Derpmann, V., Klee, S., Vautz, W., Benter, T.: Monte Carlo Simulation of Ion Trajectories of Reacting Chemical Systems: Mobility of Small Water Clusters in Ion Mobility Spectrometry. Journal of the American Society for Mass Spectrometry. 24, 632–641 (2013). https://doi.org/10.1007/s13361-012-0553-1
+    .. [wissdorf2013] Wissdorf, W., Seifert, L., Derpmann, V., Klee, S., Vautz, W., Benter, T.: Monte Carlo Simulation of Ion Trajectories of Reacting Chemical Systems: Mobility of Small Water Clusters in Ion Mobility Spectrometry. Journal of the American Society for Mass Spectrometry. 24, 632–641 (2013). https://doi.org/10.1007/s13361-012-0553-1
 
 
 ``vanthoff_field`` : Van't Hoff reaction with effective temperature calculated from electric field
@@ -304,9 +304,9 @@ There are currently 5 different reaction types, described in detail below.
 
     References: 
 
-        .. [mason1988] Mason, E.A., McDaniel, E.W.: Transport Properties of Ions in Gases. Wiley-Interscience, New York (1988)
-        .. [viehland2012] Viehland, L.A., Siems, W.F.: Uniform moment theory for charged particle motion in gases. Journal of the American Society for Mass Spectrometry. 23, 1841–54 (2012). https://doi.org/10.1007/s13361-012-0450-7
-        .. [shvartsburg2008] Shvartsburg, A.A.: Differential Ion Mobility Spectrometry: Nonlinear Ion Transport and Fundamentals of FAIMS. CRC Press, Boca Raton (2008)
+    .. [mason1988] Mason, E.A., McDaniel, E.W.: Transport Properties of Ions in Gases. Wiley-Interscience, New York (1988)
+    .. [viehland2012] Viehland, L.A., Siems, W.F.: Uniform moment theory for charged particle motion in gases. Journal of the American Society for Mass Spectrometry. 23, 1841–54 (2012). https://doi.org/10.1007/s13361-012-0450-7
+    .. [shvartsburg2008] Shvartsburg, A.A.: Differential Ion Mobility Spectrometry: Nonlinear Ion Transport and Fundamentals of FAIMS. CRC Press, Boca Raton (2008)
         
 
 ``simple_step`` : Collision based reaction with step like activation
