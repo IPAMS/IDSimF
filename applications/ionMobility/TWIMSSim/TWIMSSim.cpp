@@ -74,6 +74,7 @@ int main(int argc, const char * argv[]) {
             Core::globalRandomGeneratorPool->setSeedForElements(randomSeed);
         }
 
+        std::string simulationMode = simConf->stringParameter("Mode");
 
         std::vector<unsigned int> nParticles = simConf->unsignedIntVectorParameter("n_particles");
         unsigned int nSteps = simConf->unsignedIntParameter("sim_time_steps");
@@ -93,6 +94,7 @@ int main(int argc, const char * argv[]) {
         double startWidthY_m = simConf->doubleParameter("start_width_y_mm")/1000.0;
         double startWidthZ_m = simConf->doubleParameter("start_width_z_mm")/1000.0;
 
+        double guardVoltage = simConf->doubleParameter("guard_bias_V");
 
         //background gas parameters:
         std::string collisionTypeStr = simConf->stringParameter("collision_model");
@@ -158,7 +160,7 @@ int main(int argc, const char * argv[]) {
         double trajectoryDistance_m = 0;
         bool saveTrajectory = false;
         int saveTrajectoryStartTimeStep = 0;
-        if(usesMDmodel == true){
+        if(usesMDmodel== true){
             collisionGasPolarizability_m3 = simConf->doubleVectorParameter("collision_gas_polarizability_m3");
             collisionGasIdentifier = simConf->stringVectorParameter("collision_gas_identifier");
             particleIdentifier = simConf->stringVectorParameter("particle_identifier");
@@ -275,7 +277,7 @@ int main(int argc, const char * argv[]) {
         std::vector<Core::Particle*> particlesPtrs;
         std::vector<std::vector<double>> trajectoryAdditionalParams;
 
-        Core::Vector initCorner(1.0e-03, -startWidthY_m/2.0, -startWidthZ_m/2.0);
+        Core::Vector initCorner(2.0e-03, -startWidthY_m/2.0, -startWidthZ_m/2.0);
         Core::Vector initBoxSize(startWidthX_m, startWidthY_m, startWidthZ_m);
 
         for (std::size_t i = 0; i<nParticles.size(); i++) {
@@ -313,15 +315,30 @@ int main(int argc, const char * argv[]) {
         std::vector<double> totalFieldNow(potentialArrays.size(), 0.0);
 
         auto paVoltageFct = [&potentialArrays, &WaveForm, phaseShift,
-                wavePeriod, waveAmplitude, omega, V_rf, &totalFieldNow](double time){
-            for(size_t i=0; i<potentialArrays.size()-2; i++) {
-                double phase = std::fmod(time, wavePeriod) / wavePeriod;
-                double shiftedphase = std::fmod(phase + phaseShift[i], 1.0);
-                totalFieldNow[i]=(WaveForm.getInterpolatedValue(shiftedphase) * waveAmplitude);
+                wavePeriod, waveAmplitude, omega, V_rf, &totalFieldNow, simulationMode, guardVoltage](double time){
+            if (simulationMode == "TWIMS") {
+                for(size_t i=0; i<potentialArrays.size()-2; i++) {
+                    double phase = std::fmod(time, wavePeriod) / wavePeriod;
+                    double shiftedphase = std::fmod(phase + phaseShift[i], 1.0);
+                    totalFieldNow[i]=(WaveForm.getInterpolatedValue(shiftedphase) * waveAmplitude);
+                }
+
+                totalFieldNow[potentialArrays.size()-2] = sin(time*omega) * V_rf;
+                totalFieldNow[potentialArrays.size()-1] = -totalFieldNow[potentialArrays.size()-2];
             }
 
-            totalFieldNow[potentialArrays.size()-2] = sin(time*omega) * V_rf;
-            totalFieldNow[potentialArrays.size()-1] = -totalFieldNow[potentialArrays.size()-2];
+            if (simulationMode == "SLIM") {
+                for(size_t i=0; i<potentialArrays.size()-3; i++) {
+                    double phase = std::fmod(time, wavePeriod) / wavePeriod;
+                    double shiftedphase = std::fmod(phase + phaseShift[i], 1.0);
+                    totalFieldNow[i]=(WaveForm.getInterpolatedValue(shiftedphase) * waveAmplitude);
+                }
+
+                totalFieldNow[potentialArrays.size()-3] = sin(time*omega) * V_rf;
+                totalFieldNow[potentialArrays.size()-2] = -totalFieldNow[potentialArrays.size()-2];
+
+                totalFieldNow[potentialArrays.size()-1] = guardVoltage;
+            }
         };
 
         auto accelerationFct =
@@ -384,7 +401,7 @@ int main(int argc, const char * argv[]) {
                 particle->setActive(false);
                 ionsInactive++;
             }
-            if (newPartPos.x() > 0.11300) {
+            if (newPartPos.x() > 0.11200) {
                 particle->setActive(false);
                 particle->setSplatTime(time);
                 ionsInactive++;
@@ -510,7 +527,6 @@ int main(int argc, const char * argv[]) {
                             angleThetaScaling,
                             spawnRadius_m,
                             molecularStructureCollection);
-
                     if (saveTrajectory){
                         mdModel->setTrajectoryWriter(projectName+"_md_trajectories.txt",
                                                      trajectoryDistance_m, saveTrajectoryStartTimeStep);
@@ -567,7 +583,7 @@ int main(int argc, const char * argv[]) {
                                 molecularStructureCollection);
                         if (saveTrajectory){
                             cllModel->setTrajectoryWriter(projectName+"_md_trajectories.txt",
-                                                         trajectoryDistance_m, saveTrajectoryStartTimeStep);
+                                                          trajectoryDistance_m, saveTrajectoryStartTimeStep);
                         }
                         hsmdModels.emplace_back(std::move(cllModel));
                     }
@@ -581,10 +597,10 @@ int main(int argc, const char * argv[]) {
                 std::cout << "Collision model done." << std::endl;
             }
 
-            }
-            else if (collisionType==NO_COLLISION) {
-                collisionModelPtr = nullptr;
-            }
+        }
+        else if (collisionType==NO_COLLISION) {
+            collisionModelPtr = nullptr;
+        }
 
         //define reaction simulation functions:
         auto particlesHasReactedFct = [&collisionModelPtr, &substanceIndices](RS::ReactiveParticle* particle){
