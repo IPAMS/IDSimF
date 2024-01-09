@@ -20,6 +20,7 @@
  ****************************/
 
 #include "CollisionModel_MDForceField_LJ12_6.hpp"
+#include <array>
 
 CollisionModel::MDForceField_LJ12_6::MDForceField_LJ12_6(double collisionGasPolarizability_m3):
     collisionGasPolarizability_m3_(collisionGasPolarizability_m3)

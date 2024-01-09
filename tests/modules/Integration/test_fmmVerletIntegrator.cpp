@@ -77,12 +77,17 @@ template<class solverType>
             Integration::FMMVerletIntegrator<solverType> verletIntegrator(
                     particlesPtrs, accelerationFct, timestepWriteFct, otherActionsFct, particleStartMonitoringFct);
 
+#ifdef WITH_EXAFMMT
             if constexpr (std::is_same_v<solverType, ExaFMMt::FMMSolver>) {
                 verletIntegrator.getFMMSolver()->setExpansionOrder(7);
-            } else if constexpr (std::is_same_v<solverType, FMM3D::FMMSolver>) {
+            }
+#endif
+
+#ifdef WITH_FMM_3d
+            if constexpr (std::is_same_v<solverType, FMM3D::FMMSolver>) {
                 verletIntegrator.getFMMSolver()->setRequestedPrecision(0.3e-6);
             }
-
+#endif
             verletIntegrator.run(timeSteps, dt);
 
             CHECK(verletIntegrator.time()==Approx(timeSteps*dt));
