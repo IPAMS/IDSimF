@@ -1,7 +1,7 @@
 /***************************
  Ion Dynamics Simulation Framework (IDSimF)
 
- Copyright 2020 - Physical and Theoretical Chemistry /
+ Copyright 2023 - Physical and Theoretical Chemistry /
  Institute of Pure and Applied Mass Spectrometry
  of the University of Wuppertal, Germany
 
@@ -33,6 +33,17 @@
 #include "PSim_util.hpp"
 #include "Integration_verletIntegrator.hpp"
 #include "Integration_parallelVerletIntegrator.hpp"
+
+#ifdef WITH_FMM_3d
+#include "Integration_fmmIntegrator.hpp"
+#include "FMM3D_fmmSolver.hpp"
+#endif
+
+#ifdef WITH_EXAFMMT
+#include "Integration_fmmIntegrator.hpp"
+#include "ExaFMMt_fmmSolver.hpp"
+#endif
+
 #include "PSim_sampledWaveform.hpp"
 #include "PSim_particleStartSplatTracker.hpp"
 #include "PSim_math.hpp"
@@ -51,7 +62,7 @@
 #include <ctime>
 #include <filesystem>
 
-enum IntegratorMode {VERLET,PARALLEL_VERLET};
+enum IntegratorMode {VERLET, PARALLEL_VERLET, FMM3D_VERLET, EXAFMM_VERLET};
 enum RfAmplitudeMode {STATIC_RF,RAMPED_RF};
 enum ExciteMode {RECTPULSE,SWIFT};
 enum FftWriteMode {UNRESOLVED,MASS_RESOLVED};
@@ -83,6 +94,16 @@ int main(int argc, const char * argv[]) {
         else if (integratorMode_str=="parallel_verlet") {
             integratorMode = PARALLEL_VERLET;
         }
+#ifdef WITH_FMM_3d
+        else if (integratorMode_str=="FMM3D_verlet") {
+            integratorMode = FMM3D_VERLET;
+        }
+#endif
+#ifdef WITH_EXAFMMT
+            else if (integratorMode_str=="ExaFMM_verlet") {
+            integratorMode = EXAFMM_VERLET;
+        }
+#endif
         else {
             throw std::invalid_argument("wrong configuration value: integrator mode");
         }
@@ -422,6 +443,38 @@ int main(int argc, const char * argv[]) {
             AppUtils::SignalHandler::setReceiver(verletIntegrator);
             verletIntegrator.run(timeSteps, dt);
         }
+#ifdef WITH_FMM_3d
+        else if (integratorMode==FMM3D_VERLET) {
+            Integration::FMMVerletIntegrator<FMM3D::FMMSolver> integrator(
+                    particlePtrs,
+                    accelerationFunctionQIT, timestepWriteFunction,
+                    otherActionsFunctionQIT, particleStartMonitoringFct,
+                    &hsModel);
+
+            if (simConf->isParameter("FMM3D_precision")) {
+                integrator.getFMMSolver()->setRequestedPrecision(simConf->doubleParameter("FMM3D_precision"));
+            }
+
+            AppUtils::SignalHandler::setReceiver(integrator);
+            integrator.run(timeSteps, dt);
+        }
+#endif
+#ifdef WITH_EXAFMMT
+        else if (integratorMode==EXAFMM_VERLET) {
+            Integration::FMMVerletIntegrator<ExaFMMt::FMMSolver> integrator(
+                    particlePtrs,
+                    accelerationFunctionQIT, timestepWriteFunction,
+                    otherActionsFunctionQIT, particleStartMonitoringFct,
+                    &hsModel);
+
+            if (simConf->isParameter("ExaFMM_order")) {
+                integrator.getFMMSolver()->setExpansionOrder(simConf->intParameter("ExaFMM_order"));
+            }
+
+            AppUtils::SignalHandler::setReceiver(integrator);
+            integrator.run(timeSteps, dt);
+        }
+#endif
 
         if (rfMode==RAMPED_RF) {
             hdf5Writer->writeNumericListDataset("V_rf", V_rf_export);

@@ -32,10 +32,12 @@
 #include "Integration_verletIntegrator.hpp"
 #include "Integration_parallelVerletIntegrator.hpp"
 #ifdef WITH_FMM_3d
+#include "Integration_fmmIntegrator.hpp"
 #include "FMM3D_fmmSolver.hpp"
 #endif
 
 #ifdef WITH_EXAFMMT
+#include "Integration_fmmIntegrator.hpp"
 #include "ExaFMMt_fmmSolver.hpp"
 #endif
 
@@ -54,7 +56,6 @@
 #include "appUtils_commandlineParser.hpp"
 #include <iostream>
 #include <vector>
-#include <Integration_fmmIntegrator.hpp>
 
 enum IntegratorMode {VERLET, PARALLEL_VERLET, FMM3D_VERLET, EXAFMM_VERLET};
 enum GeometryMode {DEFAULT, SCALED,VARIABLE};
@@ -162,8 +163,8 @@ int main(int argc, const char * argv[]) {
 
         //read physical configuration ===================================================================
         double maxIonRadius = simConf->doubleParameter("max_ion_radius");
-        double backgroundPressure = simConf->doubleParameter("background_pressure_Pa");
-        double backgroundTemperature = simConf->doubleParameter("background_temperature_K");
+        double backgroundPressure = simConf->doubleParameter("background_gas_pressure_Pa");
+        double backgroundTemperature = simConf->doubleParameter("background_gas_temperature_K");
         double spaceChargeFactor = simConf->doubleParameter("space_charge_factor");
         double collisionGasMassAmu = simConf->doubleParameter("collision_gas_mass_amu");
         double collisionGasDiameterM = simConf->doubleParameter("collision_gas_diameter_angstrom")*1e-10;
