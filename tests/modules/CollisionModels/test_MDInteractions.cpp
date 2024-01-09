@@ -28,8 +28,8 @@
 #include "CollisionModel_MDInteractions.hpp"
 #include "CollisionModel_Molecule.hpp"
 #include "CollisionModel_Atom.hpp"
+#include "CollisionModel_MDForceField_LJ12_6.hpp"
 #include "Core_randomGenerators.hpp"
-#include "Core_constants.hpp"
 #include "catch.hpp"
 #include "FileIO_MolecularStructureReader.hpp"
 #include <iostream>
@@ -125,6 +125,20 @@ TEST_CASE("Basic test MD Interactions model", "[CollisionModels][MDInteractionsM
         }
     }
     CHECK(i > 5000);
+}
 
+TEST_CASE("Test modularized force fields", "[CollisionModels][MDInteractionsModel]") {
 
+    FileIO::MolecularStructureReader reader = FileIO::MolecularStructureReader();
+    std::unordered_map<std::string,  std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection = reader.readMolecularStructure("test_molecularstructure_reader.csv");
+    CollisionModel::Molecule ion({0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}, molecularStructureCollection.at("Ar+"));
+    CollisionModel::Molecule background({3.0e-9, 0.0, 0.0}, {0.0, 0.0, 0.0}, molecularStructureCollection.at("Ar+"));
+
+    std::vector<CollisionModel::Molecule*> molecules = {&ion, &background};
+    std::vector<Core::Vector> forces = {{0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}};
+
+    CollisionModel::MDForceField_LJ12_6 ff_lj_12_6 = CollisionModel::MDForceField_LJ12_6(0.208e-30);
+    ff_lj_12_6.calculateForceField(molecules, forces);
+
+    std::cout<<"Forces: "<<forces[0]<<" "<<forces[1]<<std::endl;
 }
