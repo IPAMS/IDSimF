@@ -11,6 +11,7 @@
  ****************************/
 
 #include "CollisionModel_MDInteractions.hpp"
+#include "CollisionModel_MDForceField_LJ12_6.hpp"
 #include "FileIO_MolecularStructureReader.hpp"
 #include "Core_particle.hpp"
 #include "appUtils_stopwatch.hpp"
@@ -66,18 +67,20 @@ void performBenchmark(size_t nSamples, size_t nParticles){
         default(none) \
         firstprivate(particlesPtrs, nParticles, nSamples,  diameterHe, molecularStructureCollection)
     {
+        CollisionModel::MDForceField_LJ12_6 forceField(0.203E-30);
+        auto forceFieldPtr = std::make_unique<CollisionModel::MDForceField_LJ12_6>(forceField);
         CollisionModel::MDInteractionsModel mdSim = CollisionModel::MDInteractionsModel(
                 10000,
                 298,
                 4.003,
                 diameterHe,
-                0.203e-30,
                 "He",
                 1e-10,
                 1e-16,
                 2,
                 1,
-                25, 
+                25,
+                std::move(forceFieldPtr),
                 molecularStructureCollection);
 
         for (size_t j = 0; j<nSamples; j++) {

@@ -138,6 +138,11 @@ namespace CollisionModel{
 
 
     private:
+
+        std::function<double(Core::Vector&)> pressureFunction_ = nullptr; ///< a spatial pressure function
+        std::function<Core::Vector(Core::Vector&)> velocityFunction_ = nullptr; ///< a spatial velocity function
+        std::function<double(const Core::Vector&)>temperatureFunction_ = nullptr;  ///< Spatial temperature function
+
         double collisionGasMass_kg_ = 0.0;    ///< mass of the neutral colliding gas particles in kg
         double collisionGasDiameter_m_ = 0.0; ///< effective collision diameter of the neutral collision gas particles in m
         //double collisionGasPolarizability_m3_ = 0.0; ///< polarizability of the collision gas in m^3
@@ -155,9 +160,6 @@ namespace CollisionModel{
         std::unique_ptr<std::ofstream> trajectoryOutputStream_;
 
         std::unique_ptr<AbstractMDForceField> forceField_; ///< The molecular force field to use
-        std::function<double(Core::Vector&)> pressureFunction_ = nullptr; ///< a spatial pressure function
-        std::function<Core::Vector(Core::Vector&)> velocityFunction_ = nullptr; ///< a spatial velocity function
-        std::function<double(const Core::Vector&)>temperatureFunction_ = nullptr;  ///< Spatial temperature function
         std::function<void(RS::CollisionConditions, Core::Particle&)> afterCollisionActionFunction_ = nullptr;
         ///< Function with things to do after a collision (e.g. collision based chemical reactions)
         std::unordered_map<std::string, std::shared_ptr<MolecularStructure>> molecularStructureCollection_;
