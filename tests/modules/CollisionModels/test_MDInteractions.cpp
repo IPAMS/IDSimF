@@ -51,14 +51,16 @@ TEST_CASE("Basic test MD Interactions model", "[CollisionModels][MDInteractionsM
     Core::Particle ion;
     ion.setMolecularStructure(molecularStructureCollection.at("Ar+"));
     ion.setVelocity(Core::Vector(600.0, 0.0, 0.0));
-    CollisionModel::MDInteractionsModel mdSim = CollisionModel::MDInteractionsModel(2000000, 298, 4.003, 
-                                                                                    3*diameterHe,
-                                                                                    0.205E-30, 
-                                                                                    "He", 
+    CollisionModel::MDForceField_LJ12_6 forceField(0.205E-30);
+    auto forceFieldPtr = std::make_unique<CollisionModel::MDForceField_LJ12_6>(forceField);
+    CollisionModel::MDInteractionsModel mdSim = CollisionModel::MDInteractionsModel(2000000, 298,
+                                                                                    4.003, 3*diameterHe,
+                                                                                    "He",
                                                                                     1e-10, 
                                                                                     1E-16, 
                                                                                     1, 4, 
-                                                                                    35e-10, 
+                                                                                    35e-10,
+                                                                                    std::move(forceFieldPtr),
                                                                                     molecularStructureCollection);
 
     double dt = 2e-11;
