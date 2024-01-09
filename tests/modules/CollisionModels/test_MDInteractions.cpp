@@ -140,5 +140,6 @@ TEST_CASE("Test modularized force fields", "[CollisionModels][MDInteractionsMode
     CollisionModel::MDForceField_LJ12_6 ff_lj_12_6 = CollisionModel::MDForceField_LJ12_6(0.208e-30);
     ff_lj_12_6.calculateForceField(molecules, forces);
 
-    std::cout<<"Forces: "<<forces[0]<<" "<<forces[1]<<std::endl;
+    CHECK(Approx(forces[0].x()).margin(1e-20) == 2.75514e-17);
+    CHECK(Approx(forces[1].x()).margin(1e-20) == -2.75514e-17);
 }
