@@ -43,6 +43,7 @@
 
 #include "Core_constants.hpp"
 #include "CollisionModel_AbstractCollisionModel.hpp"
+#include "CollisionModel_AbstractMDForceField.hpp"
 #include "CollisionModel_SpatialFieldFunctions.hpp"
 #include "CollisionModel_MathFunctions.hpp"
 #include "CollisionModel_Molecule.hpp"
@@ -66,46 +67,46 @@ namespace CollisionModel{
             double staticPressure,
             double staticTemperature,
             double collisionGasMassAmu,
-            double collisionGasDiameterM, 
-            double collisionGasPolarizabilityM3,
+            double collisionGasDiameterM,
             std::string collisionMolecule,
             double integrationTime,
             double subTimeStep,
             double collisionRadiusScaling,
             double angleThetaScaling, 
             double spawnRadius,
-            std::unordered_map<std::string,
-            std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection);
+
+            std::unique_ptr<AbstractMDForceField> forceField_,
+            std::unordered_map<std::string,  std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection);
 
         MDInteractionsModel(
             std::function<double(Core::Vector& location)> pressureFunction,
             std::function<Core::Vector(Core::Vector& location)> velocityFunction,
             double StaticTemperature,
             double collisionGasMassAmu,
-            double collisionGasDiameterM, 
-            double collisionGasPolarizabilityM3,
+            double collisionGasDiameterM,
             std::string collisionMolecule,
             double integrationTime,
             double subTimeStep,
             double collisionRadiusScaling,
             double angleThetaScaling,
             double spawnRadius,
-            std::unordered_map<std::string, std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection);
+            std::unique_ptr<AbstractMDForceField> forceField_,
+            std::unordered_map<std::string,  std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection);
 
         MDInteractionsModel(
             std::function<double(Core::Vector& location)> pressureFunction,
             std::function<Core::Vector(Core::Vector& location)> velocityFunction,
             std::function<double(const Core::Vector&)> temperatureFunction,
             double collisionGasMassAmu,
-            double collisionGasDiameterM, 
-            double collisionGasPolarizabilityM3,
+            double collisionGasDiameterM,
             std::string collisionMolecule,
             double integrationTime,
             double subTimeStep,
             double collisionRadiusScaling,
             double angleThetaScaling,
             double spawnRadius,
-            std::unordered_map<std::string, std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection);
+            std::unique_ptr<AbstractMDForceField> forceField_,
+            std::unordered_map<std::string,  std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection);
 
         void setTrajectoryWriter(const std::string& trajectoryFileName,
                                  double trajectoryDistance,
@@ -121,8 +122,6 @@ namespace CollisionModel{
         bool rk4Intern(std::vector<CollisionModel::Molecule*> moleculesPtr, double dt, double finalTime, double requiredRad);
 
         bool rk4InternAdaptiveStep(std::vector<CollisionModel::Molecule*> moleculesPtr, double dt, double finalTime, double requiredRad, double tolerance);
-
-        void forceFieldMD(std::vector<CollisionModel::Molecule*>& moleculesPtr, std::vector<Core::Vector>& forceMolecules);
 
         void initializeModelParticleParameters(Core::Particle& ion) const;
 
@@ -142,29 +141,31 @@ namespace CollisionModel{
 
 
     private:
-        double collisionGasMass_kg_ = 0.0;    ///< mass of the neutral colliding gas particles in kg
-        double collisionGasDiameter_m_ = 0.0; ///< effective collision diameter of the neutral collision gas particles in m
-        double collisionGasPolarizability_m3_ = 0.0; ///< polarizability of the collision gas in m^3
-        std::string collisionMolecule_ = ""; ///< particle identifier of the collision gas
-        double integrationTime_ = 0.0; ///< integration time of the sub-integrator 
-        double subTimeStep_ = 0.0; ///< step size of the sub-integrator 
-        double collisionRadiusScaling_ = 0.0; ///< scaling for the radius of the collision sphere 
-        double angleThetaScaling_ = 0.0; ///<  scaling for the angle theta 
-        double spawnRadius_ = 0.0; ///< radius of the spawn sphere for the background gas particle
-        double trajectoryDistance_ = 0.0; ///< distance at which the trajectory recording begins
-        bool trajectoryRecordingActive_ = false; 
-        bool modelRecordsTrajectories_ = false; ///< flag if trajectory will be recorded
-        int recordTrajectoryStartTimeStep_ = 0; ///< time step at which the trajectory recording begins
-        std::unique_ptr<std::ofstream> trajectoryOutputStream_;
 
         std::function<double(Core::Vector&)> pressureFunction_ = nullptr; ///< a spatial pressure function
         std::function<Core::Vector(Core::Vector&)> velocityFunction_ = nullptr; ///< a spatial velocity function
         std::function<double(const Core::Vector&)>temperatureFunction_ = nullptr;  ///< Spatial temperature function
+
+        double collisionGasMass_kg_ = 0.0;    ///< mass of the neutral colliding gas particles in kg
+        double collisionGasDiameter_m_ = 0.0; ///< effective collision diameter of the neutral collision gas particles in m
+        std::string collisionMolecule_ = "";
+        double integrationTime_ = 0.0;
+        double subTimeStep_ = 0.0;
+        double collisionRadiusScaling_ = 0.0;
+        double angleThetaScaling_ = 0.0;
+        double spawnRadius_ = 0.0;
+        double trajectoryDistance_ = 0.0;
+        bool trajectoryRecordingActive_ = false;
+        bool modelRecordsTrajectories_ = false;
+        int recordTrajectoryStartTimeStep_ = 0;
+
+        std::unique_ptr<std::ofstream> trajectoryOutputStream_;
+
+        std::unique_ptr<AbstractMDForceField> forceField_; ///< The molecular force field to use
         std::function<void(RS::CollisionConditions, Core::Particle&)> afterCollisionActionFunction_ = nullptr;
         ///< Function with things to do after a collision (e.g. collision based chemical reactions)
-        std::unordered_map<std::string,  std::shared_ptr<MolecularStructure>> molecularStructureCollection_; ///< collection of all available molecular structures 
+        std::unordered_map<std::string,  std::shared_ptr<MolecularStructure>> molecularStructureCollection_; ///< collection of all available molecular structures
     };
-
 }
 
 #endif //IDSIMF_COLLISIONMODEL_MDINTERACTIONS_H

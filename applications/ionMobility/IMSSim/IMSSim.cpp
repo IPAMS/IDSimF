@@ -41,12 +41,13 @@
 #include "CollisionModel_StatisticalDiffusion.hpp"
 #include "CollisionModel_MultiCollisionModel.hpp"
 #include "CollisionModel_SoftSphere.hpp"
+#include "CollisionModel_MDInteractions.hpp"
+#include "CollisionModel_MDForceField_LJ12_6.hpp"
 #include "appUtils_simulationConfiguration.hpp"
 #include "appUtils_logging.hpp"
 #include "appUtils_stopwatch.hpp"
 #include "appUtils_signalHandler.hpp"
 #include "appUtils_commandlineParser.hpp"
-#include "CollisionModel_MDInteractions.hpp"
 #include "FileIO_MolecularStructureReader.hpp"
 #include "Core_randomGenerators.hpp"
 #include "json.h"
@@ -410,18 +411,20 @@ int main(int argc, const char *argv[]){
             //prepare multimodel with multiple MD models (one per collision gas)
             std::vector<std::unique_ptr<CollisionModel::AbstractCollisionModel>> mdModels;
             for (std::size_t i = 0; i<nBackgroundGases; ++i) {
+                CollisionModel::MDForceField_LJ12_6 forceField(collisionGasPolarizability_m3[i]);
+                auto forceFieldPtr = std::make_unique<CollisionModel::MDForceField_LJ12_6>(forceField);
                 auto mdModel = std::make_unique<CollisionModel::MDInteractionsModel>(
                         backgroundPartialPressures_Pa[i],
                         backgroundTemperature_K,
                         collisionGasMasses_Amu[i],
                         collisionGasDiameters_m[i],
-                        collisionGasPolarizability_m3[i],
                         collisionGasIdentifier[i],
                         subIntegratorIntegrationTime_s, 
                         subIntegratorStepSize_s,
                         collisionRadiusScaling,
                         angleThetaScaling,
-                        spawnRadius_m, 
+                        spawnRadius_m,
+                        std::move(forceFieldPtr),
                         molecularStructureCollection);
 
                 if (saveTrajectory){

@@ -41,6 +41,7 @@
 #include "CollisionModel_StatisticalDiffusion.hpp"
 #include "CollisionModel_HardSphere.hpp"
 #include "CollisionModel_MDInteractions.hpp"
+#include "CollisionModel_MDForceField_LJ12_6.hpp"
 #include "CollisionModel_SpatialFieldFunctions.hpp"
 #include "appUtils_simulationConfiguration.hpp"
 #include "appUtils_logging.hpp"
@@ -398,7 +399,10 @@ int main(int argc, const char * argv[]) {
                 double angleThetaScaling = simConf->doubleParameter("angle_theta_scaling");
                 double spawnRadius_m = simConf->doubleParameter("spawn_radius_m");
 
-                //construct MD model:
+                //construct Force Field and MD model:
+                CollisionModel::MDForceField_LJ12_6 forceField(collisionGasPolarizability_m3);
+                auto forceFieldPtr = std::make_unique<CollisionModel::MDForceField_LJ12_6>(forceField);
+
                 std::unique_ptr<CollisionModel::MDInteractionsModel> collisionModel =
                         std::make_unique<CollisionModel::MDInteractionsModel>(
                             staticPressureFct,
@@ -406,13 +410,13 @@ int main(int argc, const char * argv[]) {
                             backgroundTemperatureFct,
                             collisionGasMass_Amu,
                             collisionGasDiameter_nm*1e-9,
-                            collisionGasPolarizability_m3,
                             collisionGasIdentifier,
                             subIntegratorIntegrationTime_s,
                             subIntegratorStepSize_s,
                             collisionRadiusScaling,
                             angleThetaScaling,
                             spawnRadius_m,
+                            std::move(forceFieldPtr),
                             molecularStructureCollection);
 
                 // Set trajectory writing options:
