@@ -334,15 +334,10 @@ void CollisionModel::MDInteractionsModel::modifyVelocity(Core::Particle& particl
 
         // possible check for energy conservation
         std::vector<Core::Vector> startVelocity;
-        double reducedMass = 0; 
-        for(auto* molecule : moleculesPtr){
-            reducedMass += 1/molecule->getMass();
-        }
-        reducedMass = 1/reducedMass; 
         double startEnergy = 0;
         for(auto* molecule : moleculesPtr){
             startVelocity.push_back(molecule->getComVel());
-            startEnergy += 0.5 * reducedMass * molecule->getComVel().magnitudeSquared();
+            startEnergy += 0.5 * molecule->getMass() * molecule->getComVel().magnitudeSquared();
         }
 
         // Call the sub-integrator
@@ -354,7 +349,7 @@ void CollisionModel::MDInteractionsModel::modifyVelocity(Core::Particle& particl
        
         double endEnergy = 0;
         for(auto* molecule : moleculesPtr){
-            endEnergy += 0.5 * reducedMass * molecule->getComVel().magnitudeSquared();
+            endEnergy += 0.5 * molecule->getMass() * molecule->getComVel().magnitudeSquared();
         }
         // check if energy is conserved up to 10% 
         // if not halve the starting timestep length 
@@ -607,13 +602,6 @@ bool CollisionModel::MDInteractionsModel::rk4InternAdaptiveStep(std::vector<Coll
                             {439./216, -8, 3680./513, -845./4104, 0, 0},
                             {-8./27, 2, -3544./2565, 1859./4104, -11./40, 0}};
     double mass[2];
-
-    double reducedMass = 0; 
-    for(auto* molecule : moleculesPtr){
-        reducedMass += 1/molecule->getMass();
-    }
-    reducedMass = 1/reducedMass; 
-
     std::array<std::array<Core::Vector, 2>, 6> k;
     std::array<std::array<Core::Vector, 2>, 6> l;
     std::array<Core::Vector, 2> newComVelOrder5;
@@ -655,7 +643,7 @@ bool CollisionModel::MDInteractionsModel::rk4InternAdaptiveStep(std::vector<Coll
         forceField_->calculateForceField(moleculesPtr, forceMolecules);
 
         for(size_t q = 0; q < nMolecules; q++){
-            k[0][q] = forceMolecules[q] * dt / reducedMass;
+            k[0][q] = forceMolecules[q] * dt / mass[q];
             l[0][q] = velocityMolecules[q] * dt;
         }
 
@@ -676,7 +664,7 @@ bool CollisionModel::MDInteractionsModel::rk4InternAdaptiveStep(std::vector<Coll
             forceField_->calculateForceField(moleculesPtr, forceMolecules);
             
             for(i = 0; i < nMolecules; i++){
-                k[n][i] = forceMolecules[i] * dt / reducedMass;
+                k[n][i] = forceMolecules[i] * dt / mass[i];
                 l[n][i] = velocityMolecules[i];
                 for(size_t m = 0; m < 6; m++){
                     l[n][i] += k[m][i]*weight[n-1][m];
