@@ -336,15 +336,10 @@ void CollisionModel::MDInteractionsModel::modifyVelocity(Core::Particle& particl
 
         // possible check for energy conservation
         std::vector<Core::Vector> startVelocity;
-        double reducedMass = 0; 
-        for(auto* molecule : moleculesPtr){
-            reducedMass += 1/molecule->getMass();
-        }
-        reducedMass = 1/reducedMass; 
         double startEnergy = 0;
         for(auto* molecule : moleculesPtr){
             startVelocity.push_back(molecule->getComVel());
-            startEnergy += 0.5 * reducedMass * molecule->getComVel().magnitudeSquared();
+            startEnergy += 0.5 * molecule->getMass() * molecule->getComVel().magnitudeSquared();
         }
 
         // Call the sub-integrator
@@ -356,7 +351,7 @@ void CollisionModel::MDInteractionsModel::modifyVelocity(Core::Particle& particl
        
         double endEnergy = 0;
         for(auto* molecule : moleculesPtr){
-            endEnergy += 0.5 * reducedMass * molecule->getComVel().magnitudeSquared();
+            endEnergy += 0.5 * molecule->getMass() * molecule->getComVel().magnitudeSquared();
         }
         // check if energy is conserved up to 10% 
         // if not halve the starting timestep length 
