@@ -50,15 +50,16 @@ TEST_CASE("Basic test MD Interactions model", "[CollisionModels][MDInteractionsM
     std::unordered_map<std::string,  std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection = reader.readMolecularStructure("test_molecularstructure_reader.json");
     Core::Particle ion;
     ion.setMolecularStructure(molecularStructureCollection.at("Ar+"));
-    ion.setVelocity(Core::Vector(600.0, 0.0, 0.0));
+    ion.setVelocity(Core::Vector(600.0, 50.0, 0.0));
     CollisionModel::MDForceField_LJ12_6 forceField(0.205E-30);
     auto forceFieldPtr = std::make_unique<CollisionModel::MDForceField_LJ12_6>(forceField);
     CollisionModel::MDInteractionsModel mdSim = CollisionModel::MDInteractionsModel(2000000, 298,
-                                                                                    4.003, 3*diameterHe,
+                                                                                    4.003,
+                                                                                    diameterHe,
                                                                                     "He",
                                                                                     1e-10, 
-                                                                                    1E-16, 
-                                                                                    1, 4, 
+                                                                                    1E-17,
+                                                                                    2, 1,
                                                                                     35e-10,
                                                                                     std::move(forceFieldPtr),
                                                                                     molecularStructureCollection);
@@ -133,7 +134,7 @@ TEST_CASE("Basic test MD Interactions model", "[CollisionModels][MDInteractionsM
 TEST_CASE("Test modularized force fields", "[CollisionModels][MDInteractionsModel]") {
 
     FileIO::MolecularStructureReader reader = FileIO::MolecularStructureReader();
-    std::unordered_map<std::string,  std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection = reader.readMolecularStructure("test_molecularstructure_reader.csv");
+    std::unordered_map<std::string,  std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection = reader.readMolecularStructure("test_molecularstructure_reader.json");
     CollisionModel::Molecule ion({0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}, molecularStructureCollection.at("Ar+"));
     CollisionModel::Molecule background({3.0e-9, 0.0, 0.0}, {0.0, 0.0, 0.0}, molecularStructureCollection.at("Ar+"));
 
@@ -143,6 +144,6 @@ TEST_CASE("Test modularized force fields", "[CollisionModels][MDInteractionsMode
     CollisionModel::MDForceField_LJ12_6 ff_lj_12_6 = CollisionModel::MDForceField_LJ12_6(0.208e-30);
     ff_lj_12_6.calculateForceField(molecules, forces);
 
-    CHECK(Approx(forces[0].x()).margin(1e-20) == 2.75514e-17);
-    CHECK(Approx(forces[1].x()).margin(1e-20) == -2.75514e-17);
+    CHECK(Approx(forces[0].x()).margin(1e-20) == 4.22513e-16);
+    CHECK(Approx(forces[1].x()).margin(1e-20) == -4.22513e-16);
 }
