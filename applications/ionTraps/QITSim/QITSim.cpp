@@ -257,6 +257,7 @@ int main(int argc, const char * argv[]) {
             particle->setFloatAttribute(key_spaceCharge_x, 0.0);
             particle->setFloatAttribute(key_spaceCharge_y, 0.0);
             particle->setFloatAttribute(key_spaceCharge_z, 0.0);
+            ionMasses.emplace_back(particle->getMass()/Core::AMU_TO_KG);
         }
 
         // define functions for the trajectory integration ==================================================
@@ -519,6 +520,8 @@ int main(int argc, const char * argv[]) {
             integrator.run(timeSteps, dt);
         }
 #endif
+
+        hdf5Writer->writeNumericListDataset("Particle Masses", ionMasses);
 
         if (rfAmplitudeMode==RAMPED_RF) {
             hdf5Writer->writeNumericListDataset("V_rf", V_rf_export);
