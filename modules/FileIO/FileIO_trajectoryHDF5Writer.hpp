@@ -84,6 +84,7 @@ namespace FileIO {
 
         std::unique_ptr<H5::H5File> h5f_;
         std::unique_ptr<H5::Group> baseGroup_;
+        std::unique_ptr<H5::Group> optionalDataSetGroup_;
         std::unique_ptr<H5::Group> timeStepGroup_;
         std::unique_ptr<H5::DataSet> dsetTimesteps_;
 

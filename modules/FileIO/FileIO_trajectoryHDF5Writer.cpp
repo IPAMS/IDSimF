@@ -36,6 +36,7 @@ FileIO::TrajectoryHDF5Writer::TrajectoryHDF5Writer(const std::string& hdf5Filena
 {
     h5f_ = std::make_unique<H5::H5File>(hdf5Filename.c_str(), H5F_ACC_TRUNC);
     baseGroup_ = std::make_unique<H5::Group>(h5f_->createGroup("particle_trajectory"));
+    optionalDataSetGroup_ = std::make_unique<H5::Group>(baseGroup_->createGroup("optional_datasets"));
     h5f_->createGroup("/particle_trajectory/timesteps");
 
     //write version number
@@ -185,6 +186,10 @@ void FileIO::TrajectoryHDF5Writer::writeNumericListDataset(std::string dsName, c
         std::array<DT,1> ar = {val};
         valuesPacked.emplace_back(ar);
     }
+    if (group == nullptr){
+        group = optionalDataSetGroup_.get();
+    }
+
     writeArrayDataSet<DT, 1>(dsName, valuesPacked, group);
 };
 
@@ -195,6 +200,11 @@ void FileIO::TrajectoryHDF5Writer::write3DVectorListDataset(std::string dsName, 
         std::array<double,3> ar = {val.x(), val.y(), val.z()};
         valuesPacked.emplace_back(ar);
     }
+
+    if (group == nullptr){
+        group = optionalDataSetGroup_.get();
+    }
+
     writeArrayDataSet<double, 3>(dsName, valuesPacked, group);
 };
 

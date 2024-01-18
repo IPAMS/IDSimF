@@ -396,7 +396,8 @@ TEST_CASE( "Test HDF5 trajectory file writer", "[ParticleSimulation][file writer
             }
         }
 
-        H5::DataSet dsAdditional= auxFile.openDataSet("particle_trajectory/additional_vector_data_set");
+        // read from aux data
+        H5::DataSet dsAdditional= auxFile.openDataSet("particle_trajectory/optional_datasets/additional_vector_data_set");
         auto dFieldAdditional = readDataset<2>(dsAdditional);
         REQUIRE(dFieldAdditional.rank == 2);
         hsize_t nAdditional = dFieldAdditional.dims[0];
