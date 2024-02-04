@@ -19,7 +19,7 @@
  along with IDSimF.  If not, see <https://www.gnu.org/licenses/>.
 
  ------------
- DMSSim.cpp
+ TWIMSSim.cpp
 
  Idealized plane electrode type differential ion mobility spectrometry (DMS) transport and chemistry simulation,
  including space chage and gas collision effects
@@ -55,7 +55,7 @@
 #include <cmath>
 
 const std::string key_ChemicalIndex = "keyChemicalIndex";
-enum CollisionType {SDS, HS, MD, MULTI_HS, HS_MD, NO_COLLISION};
+enum CollisionType {SDS, HS, MD, HS_MD, NO_COLLISION};
 
 int main(int argc, const char * argv[]) {
 
@@ -74,7 +74,7 @@ int main(int argc, const char * argv[]) {
             Core::globalRandomGeneratorPool->setSeedForElements(randomSeed);
         }
 
-        std::string simulationMode = simConf->stringParameter("Mode");
+        //std::string simulationMode = simConf->stringParameter("Mode");
 
         std::vector<unsigned int> nParticles = simConf->unsignedIntVectorParameter("n_particles");
         unsigned int nSteps = simConf->unsignedIntParameter("sim_time_steps");
@@ -82,19 +82,21 @@ int main(int argc, const char * argv[]) {
         int concentrationWriteInterval = simConf->intParameter("concentrations_write_interval");
         int trajectoryWriteInterval = simConf->intParameter("trajectory_write_interval");
         double spaceChargeFactor = simConf->doubleParameter("space_charge_factor");
-        double waveAmplitude = simConf->doubleParameter("wave_amplitude_V");
+        [[maybe_unused]] double waveAmplitude = simConf->doubleParameter("wave_amplitude_V");
         double waveFrequency = simConf->doubleParameter("wave_frequency_hz");
 
         double f_rf = simConf->doubleParameter("confining_RF_frequency_Hz");
-        double omega = f_rf*2.0*M_PI;
+        [[maybe_unused]] double omega = f_rf*2.0*M_PI;
         double V_rf = simConf->doubleParameter("confining_RF_amplitude_V");
 
         //geometric parameters:
-        double startWidthX_m = simConf->doubleParameter("start_width_x_mm")/1000.0;
-        double startWidthY_m = simConf->doubleParameter("start_width_y_mm")/1000.0;
-        double startWidthZ_m = simConf->doubleParameter("start_width_z_mm")/1000.0;
+        std::vector<double> startWidth_mm = simConf->doubleVectorParameter("start_box_dimensions_mm");
 
-        double guardVoltage = simConf->doubleParameter("guard_bias_V");
+        double startWidthX_m = startWidth_mm[0]/1000.0;
+        double startWidthY_m = startWidth_mm[1]/1000.0;
+        double startWidthZ_m = startWidth_mm[2]/1000.0;
+
+        //double guardVoltage = simConf->doubleParameter("guard_bias_V");
 
         //background gas parameters:
         std::string collisionTypeStr = simConf->stringParameter("collision_model");
@@ -107,9 +109,6 @@ int main(int argc, const char * argv[]) {
         }
         else if (collisionTypeStr=="MD"){
             collisionType = MD;
-        }
-        else if (collisionTypeStr=="multi_HS") {
-            collisionType = MULTI_HS;
         }
         else if (collisionTypeStr=="HS_MD") {
             collisionType = HS_MD;
@@ -160,7 +159,7 @@ int main(int argc, const char * argv[]) {
         double trajectoryDistance_m = 0;
         bool saveTrajectory = false;
         int saveTrajectoryStartTimeStep = 0;
-        if(usesMDmodel== true){
+        if(usesMDmodel){
             collisionGasPolarizability_m3 = simConf->doubleVectorParameter("collision_gas_polarizability_m3");
             collisionGasIdentifier = simConf->stringVectorParameter("collision_gas_identifier");
             particleIdentifier = simConf->stringVectorParameter("particle_identifier");
@@ -180,18 +179,27 @@ int main(int argc, const char * argv[]) {
         std::filesystem::path confBasePath = simConf->confBasePath();
 
         double paSpatialScale = simConf->doubleParameter("potential_array_scale");
-        std::vector<std::unique_ptr<ParticleSimulation::SimionPotentialArray>> potentialArrays;
-        std::vector<std::string> potentialArraysNames = simConf->stringVectorParameter("potential_arrays");
-        for (const auto& paName: potentialArraysNames) {
+        std::vector<std::unique_ptr<ParticleSimulation::SimionPotentialArray>> WavePotentialArrays;
+        std::vector<std::string> WavePotentialArraysNames = simConf->stringVectorParameter("wave_potential_arrays");
+        for (const auto& paName: WavePotentialArraysNames) {
             std::filesystem::path paPath = confBasePath/paName;
             std::unique_ptr<ParticleSimulation::SimionPotentialArray> pa_pt =
                     std::make_unique<ParticleSimulation::SimionPotentialArray>(paPath, paSpatialScale);
-            potentialArrays.push_back(std::move(pa_pt));
+            WavePotentialArrays.push_back(std::move(pa_pt));
+        }
+
+        std::vector<std::unique_ptr<ParticleSimulation::SimionPotentialArray>> RFPotentialArrays;
+        std::vector<std::string> RFPotentialArraysNames = simConf->stringVectorParameter("RF_potential_arrays");
+        for (const auto& paName: RFPotentialArraysNames) {
+            std::filesystem::path paPath = confBasePath/paName;
+            std::unique_ptr<ParticleSimulation::SimionPotentialArray> pa_pt =
+                    std::make_unique<ParticleSimulation::SimionPotentialArray>(paPath, paSpatialScale);
+            RFPotentialArrays.push_back(std::move(pa_pt));
         }
 
         double potentialScale = 1.0/10000.0;
 
-        double wavePeriod = 1.0/waveFrequency;
+        [[maybe_unused]] double wavePeriod = 1.0/waveFrequency;
 
         std::vector<double> phaseShift = simConf->doubleVectorParameter("phase_shift");
         std::string WaveformFilename = simConf->pathRelativeToConfFile(simConf->stringParameter("waveform"));
@@ -216,7 +224,7 @@ int main(int argc, const char * argv[]) {
 
         //read molecular structure file
         std::unordered_map<std::string,  std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection;
-        if(usesMDmodel == true){
+        if(usesMDmodel){
             std::string mdCollisionConfFile = simConf->pathRelativeToConfFile(simConf->stringParameter("md_configuration"));
             FileIO::MolecularStructureReader mdConfReader = FileIO::MolecularStructureReader();
             molecularStructureCollection = mdConfReader.readMolecularStructure(mdCollisionConfFile);
@@ -293,7 +301,7 @@ int main(int argc, const char * argv[]) {
                 particle->setFloatAttribute("effectiveField", 0.0);
                 particle->setIndex(nParticlesTotal);
 
-                if(usesMDmodel == true){
+                if(usesMDmodel){
                     particle->setMolecularStructure(molecularStructureCollection.at(particleIdentifier[i]));
                     particle->setDiameter(particle->getMolecularStructure()->getDiameter());
                 }
@@ -301,7 +309,7 @@ int main(int argc, const char * argv[]) {
                 particlesPtrs.push_back(particle.get());
                 rsSim.addParticle(particle.get(), nParticlesTotal);
                 particles.push_back(std::move(particle));
-                trajectoryAdditionalParams.push_back(std::vector<double>(1));
+                trajectoryAdditionalParams.emplace_back(1);
                 nParticlesTotal++;
             }
         }
@@ -312,49 +320,50 @@ int main(int argc, const char * argv[]) {
 
 
         // define trajectory integration parameters / functions =================================
-        std::vector<double> totalFieldNow(potentialArrays.size(), 0.0);
+        std::vector<double> totalFieldNow(WavePotentialArrays.size()+RFPotentialArrays.size(), 0.0);
 
-        auto paVoltageFct = [&potentialArrays, &WaveForm, phaseShift,
-                wavePeriod, waveAmplitude, omega, V_rf, &totalFieldNow, simulationMode, guardVoltage](double time){
-            if (simulationMode == "TWIMS") {
-                for(size_t i=0; i<potentialArrays.size()-2; i++) {
+        auto paVoltageFct = [&WavePotentialArrays, &RFPotentialArrays, &WaveForm, phaseShift,
+                wavePeriod, waveAmplitude, omega, V_rf, &totalFieldNow](double time){
+                for(size_t i=0; i<WavePotentialArrays.size(); i++) {
                     double phase = std::fmod(time, wavePeriod) / wavePeriod;
                     double shiftedphase = std::fmod(phase + phaseShift[i], 1.0);
                     totalFieldNow[i]=(WaveForm.getInterpolatedValue(shiftedphase) * waveAmplitude);
                 }
 
-                totalFieldNow[potentialArrays.size()-2] = sin(time*omega) * V_rf;
-                totalFieldNow[potentialArrays.size()-1] = -totalFieldNow[potentialArrays.size()-2];
-            }
-
-            if (simulationMode == "SLIM") {
-                for(size_t i=0; i<potentialArrays.size()-3; i++) {
-                    double phase = std::fmod(time, wavePeriod) / wavePeriod;
-                    double shiftedphase = std::fmod(phase + phaseShift[i], 1.0);
-                    totalFieldNow[i]=(WaveForm.getInterpolatedValue(shiftedphase) * waveAmplitude);
+                for(size_t i=0; i<RFPotentialArrays.size(); i++) {
+                    if (i%2 == 0) {
+                        totalFieldNow[WavePotentialArrays.size()+i] = sin(time*omega) * V_rf;
+                    }
+                    else {
+                        totalFieldNow[WavePotentialArrays.size()+i] = -1 * sin(time*omega) * V_rf;
+                    }
                 }
 
-                totalFieldNow[potentialArrays.size()-3] = sin(time*omega) * V_rf;
-                totalFieldNow[potentialArrays.size()-2] = -totalFieldNow[potentialArrays.size()-2];
 
-                totalFieldNow[potentialArrays.size()-1] = guardVoltage;
-            }
         };
 
         auto accelerationFct =
-                [&potentialArrays, &totalFieldNow, potentialScale, spaceChargeFactor]
+                [&WavePotentialArrays, &RFPotentialArrays, &totalFieldNow, potentialScale, spaceChargeFactor]
                         (Core::Particle* particle, int /*particleIndex*/, SpaceCharge::FieldCalculator &scFieldCalculator,
                          double /*time*/, int timestep){
                     Core::Vector fEfield(0, 0, 0);
                     Core::Vector pos = particle->getLocation();
                     double particleCharge = particle->getCharge();
 
-                    for(size_t i=0; i<potentialArrays.size(); i++) {
-                        Core::Vector paField = potentialArrays[i]->getField(pos.x(), pos.y(), pos.z());
+                    for(size_t i=0; i<WavePotentialArrays.size(); i++) {
+                        Core::Vector paField = WavePotentialArrays[i]->getField(pos.x(), pos.y(), pos.z());
                         Core::Vector paEffectiveField = paField * totalFieldNow[i] * potentialScale;
 
                         fEfield = fEfield+paEffectiveField;
                     }
+
+                    for(size_t i=0; i<RFPotentialArrays.size(); i++) {
+                        Core::Vector paField = RFPotentialArrays[i]->getField(pos.x(), pos.y(), pos.z());
+                        Core::Vector paEffectiveField = paField * totalFieldNow[WavePotentialArrays.size()+i] * potentialScale;
+
+                        fEfield = fEfield+paEffectiveField;
+                    }
+
                     particle->setFloatAttribute("effectiveField", fEfield.magnitude());
 
                     if (Core::isDoubleEqual(spaceChargeFactor, 0.0)) {
@@ -393,7 +402,7 @@ int main(int argc, const char * argv[]) {
                 };
 
 
-        auto otherActionsFct = [&ionsInactive, &potentialArrays, &V_rf](
+        auto otherActionsFct = [&ionsInactive, &WavePotentialArrays, &V_rf](
                 Core::Vector& newPartPos, Core::Particle* particle,
                 int /*particleIndex*/,  double time, int /*timestep*/) {
             //Core::Vector pos = particle->getLocation();
@@ -406,7 +415,7 @@ int main(int argc, const char * argv[]) {
                 particle->setSplatTime(time);
                 ionsInactive++;
             }
-            if (potentialArrays[0]->isElectrode(newPartPos.x(), newPartPos.y(), newPartPos.z())) {
+            if (WavePotentialArrays[0]->isElectrode(newPartPos.x(), newPartPos.y(), newPartPos.z())) {
                 particle->setActive(false);
                 particle->setSplatTime(time);
                 ionsInactive++;
@@ -480,7 +489,7 @@ int main(int argc, const char * argv[]) {
 
         //define / gas interaction /  collision model:
         std::unique_ptr<CollisionModel::AbstractCollisionModel> collisionModelPtr;
-        if (collisionType==SDS || collisionType==HS || collisionType==MD || collisionType==MULTI_HS || collisionType==HS_MD) {
+        if (collisionType==SDS || collisionType==HS || collisionType==MD || collisionType==HS_MD) {
             // prepare static pressure and temperature functions
 
             if (collisionType==SDS){
@@ -498,16 +507,6 @@ int main(int argc, const char * argv[]) {
                             )*1e-9);
                     collisionModel->setSTPParameters(*particle);
                 }
-                collisionModelPtr = std::move(collisionModel);
-            }
-            else if (collisionType==HS){
-                std::unique_ptr<CollisionModel::HardSphereModel> collisionModel =
-                        std::make_unique<CollisionModel::HardSphereModel>(
-                                backgroundPartialPressures_Pa[0],
-                                backgroundTemperature_K,
-                                collisionGasMasses_Amu[0],
-                                collisionGasDiameters_m[0],
-                                nullptr);
                 collisionModelPtr = std::move(collisionModel);
             }
             else if (collisionType==MD){
@@ -539,7 +538,7 @@ int main(int argc, const char * argv[]) {
 
                 collisionModelPtr = std::move(collisionModel);
             }
-            else if (collisionType==MULTI_HS) {
+            else if (collisionType==HS) {
                 //prepare multiple Hard Sphere models (one per collision gas)
                 std::vector<std::unique_ptr<CollisionModel::AbstractCollisionModel>> hsModels;
                 for (std::size_t i = 0; i<nBackgroundGases; ++i) {
