@@ -90,11 +90,13 @@ int main(int argc, const char * argv[]) {
         double V_rf = simConf->doubleParameter("confining_RF_amplitude_V");
 
         //geometric parameters:
+        std::vector<double> startPosition_mm = simConf->doubleVectorParameter("start_box_position_mm");
         std::vector<double> startWidth_mm = simConf->doubleVectorParameter("start_box_dimensions_mm");
 
         double startWidthX_m = startWidth_mm[0]/1000.0;
         double startWidthY_m = startWidth_mm[1]/1000.0;
         double startWidthZ_m = startWidth_mm[2]/1000.0;
+
 
         //double guardVoltage = simConf->doubleParameter("guard_bias_V");
 
@@ -205,6 +207,31 @@ int main(int argc, const char * argv[]) {
         std::string WaveformFilename = simConf->pathRelativeToConfFile(simConf->stringParameter("waveform"));
         auto WaveForm = ParticleSimulation::SampledWaveform(WaveformFilename);
 
+        // defining simulation domain box (used for ion termination):
+        std::array<std::array<double, 2>, 3> simulationDomainBoundaries{};
+        if (simConf->isParameter("simulation_domain_boundaries_m")) {
+            // get manual simulation domain boundaries from config file
+            simulationDomainBoundaries = simConf->double3dBox("simulation_domain_boundaries_m");
+        }
+        else {
+            // use minimum PA extent box as domain boundaries
+            std::array<double, 6> minExtent = WavePotentialArrays[0]->getBounds();
+            for (const auto& pa: WavePotentialArrays) {
+                std::array<double, 6> paBounds = pa->getBounds();
+                for (size_t i = 0; i<6; ++i) {
+                    if (minExtent[i]<paBounds[i]) {
+                        minExtent[i] = paBounds[i];
+                    }
+                }
+            }
+            simulationDomainBoundaries[0][0] = minExtent[0];
+            simulationDomainBoundaries[0][1] = minExtent[1];
+            simulationDomainBoundaries[1][0] = minExtent[2];
+            simulationDomainBoundaries[1][1] = minExtent[3];
+            simulationDomainBoundaries[2][0] = minExtent[4];
+            simulationDomainBoundaries[2][1] = minExtent[5];
+        }
+
         // ======================================================================================
 
         //read and prepare chemical configuration ===============================================
@@ -229,6 +256,7 @@ int main(int argc, const char * argv[]) {
             FileIO::MolecularStructureReader mdConfReader = FileIO::MolecularStructureReader();
             molecularStructureCollection = mdConfReader.readMolecularStructure(mdCollisionConfFile);
         }
+
 
 
         // prepare file writer  =================================================================
@@ -285,7 +313,7 @@ int main(int argc, const char * argv[]) {
         std::vector<Core::Particle*> particlesPtrs;
         std::vector<std::vector<double>> trajectoryAdditionalParams;
 
-        Core::Vector initCorner(2.0e-03, -startWidthY_m/2.0, -startWidthZ_m/2.0);
+        Core::Vector initCorner(startPosition_mm[0]/1000, startPosition_mm[1]/1000, startPosition_mm[2]/1000);
         Core::Vector initBoxSize(startWidthX_m, startWidthY_m, startWidthZ_m);
 
         for (std::size_t i = 0; i<nParticles.size(); i++) {
@@ -401,23 +429,31 @@ int main(int argc, const char * argv[]) {
                     }
                 };
 
+        // Prepare ion start / stop tracker and ion start monitoring / ion termination functions
+        ParticleSimulation::ParticleStartSplatTracker startSplatTracker;
+        auto particleStartMonitoringFct = [&startSplatTracker](Core::Particle* particle, double time) {
+            startSplatTracker.particleStart(particle, time);
+        };
 
-        auto otherActionsFct = [&ionsInactive, &WavePotentialArrays, &V_rf](
+        auto otherActionsFct = [&simulationDomainBoundaries, &ionsInactive, &WavePotentialArrays, &V_rf, &startSplatTracker](
                 Core::Vector& newPartPos, Core::Particle* particle,
                 int /*particleIndex*/,  double time, int /*timestep*/) {
             //Core::Vector pos = particle->getLocation();
-            if (newPartPos.x() < 0.00001) {
-                particle->setActive(false);
-                ionsInactive++;
-            }
-            if (newPartPos.x() > 0.11200) {
+            if (newPartPos.x()<=simulationDomainBoundaries[0][0] ||
+                newPartPos.x()>=simulationDomainBoundaries[0][1] ||
+                newPartPos.y()<=simulationDomainBoundaries[1][0] ||
+                newPartPos.y()>=simulationDomainBoundaries[1][1] ||
+                newPartPos.z()<=simulationDomainBoundaries[2][0] ||
+                newPartPos.z()>=simulationDomainBoundaries[2][1] ) {
                 particle->setActive(false);
                 particle->setSplatTime(time);
+                startSplatTracker.particleSplat(particle, time);
                 ionsInactive++;
             }
             if (WavePotentialArrays[0]->isElectrode(newPartPos.x(), newPartPos.y(), newPartPos.z())) {
                 particle->setActive(false);
                 particle->setSplatTime(time);
+                startSplatTracker.particleSplat(particle, time);
                 ionsInactive++;
             }
             if (V_rf == 0.0) {
@@ -611,20 +647,20 @@ int main(int argc, const char * argv[]) {
             particle->setIntegerAttribute(key_ChemicalIndex, substIndex);
         };
 
-        auto reactionConditionsFct = [backgroundTemperature_K, backgroundPartialPressures_Pa]
+        auto reactionConditionsFct = [backgroundTemperature_K, totalBackgroundPressure_Pa]
                 (RS::ReactiveParticle* particle, double /*time*/)->RS::ReactionConditions{
             RS::ReactionConditions reactionConditions = RS::ReactionConditions();
 
             reactionConditions.temperature = backgroundTemperature_K;
             reactionConditions.electricField = particle->getFloatAttribute("effectiveField");
-            reactionConditions.pressure = backgroundPartialPressures_Pa[0];
+            reactionConditions.pressure = totalBackgroundPressure_Pa;
             return reactionConditions;
         };
 
         //init trajectory simulation object:
         Integration::ParallelVerletIntegrator verletIntegrator(
                 particlesPtrs,
-                accelerationFct, timestepWriteFct, otherActionsFct, ParticleSimulation::noFunction,
+                accelerationFct, timestepWriteFct, otherActionsFct, particleStartMonitoringFct,
                 collisionModelPtr.get());
         // ======================================================================================
 
