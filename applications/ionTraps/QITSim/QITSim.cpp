@@ -295,7 +295,7 @@ int main(int argc, const char * argv[]) {
                         double z = pos.z();
                         double phi = std::atan2(pos.x(), pos.y());
 
-                        double ponderomotiveForceFactor = -(particleCharge*particleCharge) / (4.0 * particle->getMass() * omega * omega);
+                        double ponderomotiveForceFactor = -(particleCharge*particleCharge) / (2.0 * particle->getMass() * omega * omega);
 
                         double rz_0Factor = r_0*r_0 + 2*z_0*z_0;
                         double a_2_avg = V_0 * V_0 / (2*rz_0Factor*rz_0Factor);
