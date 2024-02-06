@@ -61,7 +61,7 @@ enum IntegratorMode {VERLET, PARALLEL_VERLET, FMM3D_VERLET, EXAFMM_VERLET};
 enum GeometryMode {DEFAULT, SCALED,VARIABLE};
 enum RfAmplitudeMode {STATIC_RF, RAMPED_RF};
 enum RfWaveMode {SINE, SAMPLED};
-enum FieldMode {BASIC, HIGHER_ORDERS};
+enum FieldMode {BASIC, HIGHER_ORDERS, AVERAGED};
 enum ExciteMode {RECTPULSE, SWIFT};
 enum FftWriteMode {UNRESOLVED, MASS_RESOLVED};
 
@@ -181,6 +181,9 @@ int main(int argc, const char * argv[]) {
             fieldMode = HIGHER_ORDERS;
             higherFieldOrdersCoefficients = simConf->doubleVectorParameter("field_higher_orders_coeffs");
         }
+        else if (fieldMode_str=="averaged") {
+            fieldMode = AVERAGED;
+        }
         else {
             throw std::invalid_argument("wrong configuration value: field_mode");
         }
@@ -263,10 +266,11 @@ int main(int argc, const char * argv[]) {
         // define functions for the trajectory integration ==================================================
         auto trapFieldFunction =
                 [exciteMode, rfWaveMode, rfAmplitudeMode, fieldMode, excitePulseLength, excitePulsePotential,
-                        omega, z_0, U_0, d_square_2,
+                        omega, z_0, r_0, U_0, d_square_2,
                         &rfSampledWaveForm, &higherFieldOrdersCoefficients, &swiftWaveForm, &V_0, &V_0_ramp](
-                        Core::Particle* particle, int /*particleIndex*/,
-                        double time, unsigned int timestep) -> Core::Vector {
+                            Core::Particle* particle, int /*particleIndex*/,
+                            double time, unsigned int timestep) -> Core::Vector
+                {
 
                     Core::Vector pos = particle->getLocation();
                     double particleCharge = particle->getCharge();
@@ -283,64 +287,92 @@ int main(int argc, const char * argv[]) {
                     if (rfAmplitudeMode==RAMPED_RF) {
                         V_0 = V_0_ramp[timestep];
                     }
-
-                    double V_rf = 0.0;
-                    if (rfWaveMode==SINE) {
-                        V_rf = V_0*cos(omega*time);
-                    }
-                    else if (rfWaveMode==SAMPLED) {
-                        V_rf = V_0*rfSampledWaveForm->getValueLooped(timestep);
-                    }
-
                     double a_ex = excitePotential/z_0*particleCharge;
 
-                    Core::Vector rfForce(0, 0, 0);
-                    if (fieldMode==BASIC) {
-                        double a = (U_0+V_rf)/d_square_2*particleCharge;
-
-                        rfForce = Core::Vector(
-                                a*pos.x(),
-                                a*pos.y(),
-                                -2*a*pos.z()+a_ex);
-                    }
-                    else if (fieldMode==HIGHER_ORDERS) {
+                    if (fieldMode==AVERAGED){
                         // transform to z-r space, calculate higher orders and transform force back to cartesian space
                         double r = std::sqrt(pos.x()*pos.x()+pos.y()*pos.y());
                         double z = pos.z();
                         double phi = std::atan2(pos.x(), pos.y());
 
-                        //d_square_2 == r_0^2 for ideal electrode geometry
-                        double phi_0 = (U_0+V_rf)/2.0*particleCharge;
+                        double ponderomotiveForceFactor = -(particleCharge*particleCharge) / (4.0 * particle->getMass() * omega * omega);
 
-                        // ideal quadropole field:
-                        double E_2_r = 2.0*r/d_square_2;
-                        double E_2_z = -4.0*z/d_square_2;
+                        double rz_0Factor = r_0*r_0 + 2*z_0*z_0;
+                        double a_2_avg = V_0 * V_0 / (2*rz_0Factor*rz_0Factor);
 
-                        //hexapole field:
-                        double r_0_3 = std::pow(d_square_2, 3.0/2.0);
-                        double E_3_r = -6*r*z/r_0_3;
-                        double E_3_z = -3*(r*r-2*z*z)/r_0_3;
-
-                        //octapole field:
-                        double r_0_4 = d_square_2*d_square_2;
-                        double E_4_r = 12*(r*r*r-4*r*z*z)/r_0_4;
-                        double E_4_z = (32*z*z*z-48*r*r*z)/r_0_4;
-
-                        double E_r = phi_0*(E_2_r
-                                +higherFieldOrdersCoefficients[0]*E_3_r
-                                +higherFieldOrdersCoefficients[1]*E_4_r);
-
-                        double E_z = phi_0*(E_2_z
-                                +higherFieldOrdersCoefficients[0]*E_3_z
-                                +higherFieldOrdersCoefficients[1]*E_4_z);
+                        double F_r = 8 * a_2_avg * r;
+                        double F_z = 32 * a_2_avg * z;
 
                         // transform back to cartesian space:
-                        rfForce = Core::Vector(
-                                E_r*std::sin(phi),
-                                E_r*std::cos(phi),
-                                E_z+a_ex);
+                        Core::Vector averagedRFForce{
+                                ponderomotiveForceFactor*F_r*std::sin(phi),
+                                ponderomotiveForceFactor*F_r*std::cos(phi),
+                                ponderomotiveForceFactor*F_z+a_ex};
+                        //std::cout <<"V0 "<< V_0 << " forceFactor " << forceFactor<< "  ffRad "<< fieldFactorRadial <<"  xField: "<<xField<< "  zField: "<<zField<<std::endl;
+
+                        return averagedRFForce;
                     }
-                    return rfForce;
+                    else {
+                        double V_rf = 0.0;
+                        if (rfWaveMode==SINE) {
+                            V_rf = V_0*cos(omega*time);
+                        }
+                        else if (rfWaveMode==SAMPLED) {
+                            V_rf = V_0*rfSampledWaveForm->getValueLooped(timestep);
+                        }
+
+                        Core::Vector rfForce(0, 0, 0);
+                        if (fieldMode==BASIC) {
+                            double a = (U_0+V_rf)/d_square_2*particleCharge;
+
+                            rfForce = Core::Vector(
+                                    a*pos.x(),
+                                    a*pos.y(),
+                                    -2*a*pos.z()+a_ex);
+                        }
+                        else if (fieldMode==HIGHER_ORDERS) {
+                            // Source for this derivation of the field components:
+                            // https://doi.org/10.1016/1044-0305(93)80017-S
+                            // Nonlinear Resonance Effects During Ion Storage in a Quadrupole Ion Trap, Eades et.al.
+
+                            // transform to z-r space, calculate higher orders and transform force back to cartesian space
+                            double r = std::sqrt(pos.x()*pos.x()+pos.y()*pos.y());
+                            double z = pos.z();
+                            double phi = std::atan2(pos.x(), pos.y());
+
+                            //d_square_2 == r_0^2 for ideal electrode geometry
+                            double phi_0 = (U_0+V_rf)/2.0*particleCharge;
+
+                            // ideal quadropole field:
+                            double E_2_r = 2.0*r/d_square_2;
+                            double E_2_z = -4.0*z/d_square_2;
+
+                            //hexapole field:
+                            double r_0_3 = std::pow(d_square_2, 3.0/2.0);
+                            double E_3_r = -6*r*z/r_0_3;
+                            double E_3_z = -3*(r*r-2*z*z)/r_0_3;
+
+                            //octapole field:
+                            double r_0_4 = d_square_2*d_square_2;
+                            double E_4_r = 12*(r*r*r-4*r*z*z)/r_0_4;
+                            double E_4_z = (32*z*z*z-48*r*r*z)/r_0_4;
+
+                            double E_r = phi_0*(E_2_r
+                                    +higherFieldOrdersCoefficients[0]*E_3_r
+                                    +higherFieldOrdersCoefficients[1]*E_4_r);
+
+                            double E_z = phi_0*(E_2_z
+                                    +higherFieldOrdersCoefficients[0]*E_3_z
+                                    +higherFieldOrdersCoefficients[1]*E_4_z);
+
+                            // transform back to cartesian space:
+                            rfForce = Core::Vector(
+                                    E_r*std::sin(phi),
+                                    E_r*std::cos(phi),
+                                    E_z+a_ex);
+                        }
+                        return rfForce;
+                    }
                 };
 
         auto accelerationFunctionQIT =
