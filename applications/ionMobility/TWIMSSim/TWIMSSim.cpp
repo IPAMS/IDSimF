@@ -41,6 +41,7 @@
 #include "CollisionModel_StatisticalDiffusion.hpp"
 #include "CollisionModel_HardSphere.hpp"
 #include "CollisionModel_MDInteractions.hpp"
+#include "CollisionModel_MDForceField_LJ12_6.hpp"
 #include "CollisionModel_SpatialFieldFunctions.hpp"
 #include "appUtils_simulationConfiguration.hpp"
 #include "appUtils_logging.hpp"
@@ -373,7 +374,7 @@ int main(int argc, const char * argv[]) {
         auto accelerationFct =
                 [&WavePotentialArrays, &RFPotentialArrays, &totalFieldNow, potentialScale, spaceChargeFactor]
                         (Core::Particle* particle, int /*particleIndex*/, SpaceCharge::FieldCalculator &scFieldCalculator,
-                         double /*time*/, int timestep){
+                         double /*time*/, int /*timestep*/){
                     Core::Vector fEfield(0, 0, 0);
                     Core::Vector pos = particle->getLocation();
                     double particleCharge = particle->getCharge();
@@ -549,18 +550,20 @@ int main(int argc, const char * argv[]) {
                 //prepare multimodel with multiple MD models (one per collision gas)
                 std::vector<std::unique_ptr<CollisionModel::AbstractCollisionModel>> mdModels;
                 for (std::size_t i = 0; i<nBackgroundGases; ++i) {
+                    CollisionModel::MDForceField_LJ12_6 forceField(collisionGasPolarizability_m3[i]);
+                    auto forceFieldPtr = std::make_unique<CollisionModel::MDForceField_LJ12_6>(forceField);
                     auto mdModel = std::make_unique<CollisionModel::MDInteractionsModel>(
                             backgroundPartialPressures_Pa[i],
                             backgroundTemperature_K,
                             collisionGasMasses_Amu[i],
                             collisionGasDiameters_m[i],
-                            collisionGasPolarizability_m3[i],
                             collisionGasIdentifier[i],
                             subIntegratorIntegrationTime_s,
                             subIntegratorStepSize_s,
                             collisionRadiusScaling,
                             angleThetaScaling,
                             spawnRadius_m,
+                            std::move(forceFieldPtr),
                             molecularStructureCollection);
                     if (saveTrajectory){
                         mdModel->setTrajectoryWriter(projectName+"_md_trajectories.txt",
@@ -603,18 +606,20 @@ int main(int argc, const char * argv[]) {
                         hsmdModels.emplace_back(std::move(cllModel));
                     }
                     else {
+                        CollisionModel::MDForceField_LJ12_6 forceField(collisionGasPolarizability_m3[i]);
+                        auto forceFieldPtr = std::make_unique<CollisionModel::MDForceField_LJ12_6>(forceField);
                         auto cllModel = std::make_unique<CollisionModel::MDInteractionsModel>(
                                 backgroundPartialPressures_Pa[i],
                                 backgroundTemperature_K,
                                 collisionGasMasses_Amu[i],
                                 collisionGasDiameters_m[i],
-                                collisionGasPolarizability_m3[i],
                                 collisionGasIdentifier[i],
                                 subIntegratorIntegrationTime_s,
                                 subIntegratorStepSize_s,
                                 collisionRadiusScaling,
                                 angleThetaScaling,
                                 spawnRadius_m,
+                                std::move(forceFieldPtr),
                                 molecularStructureCollection);
                         if (saveTrajectory){
                             cllModel->setTrajectoryWriter(projectName+"_md_trajectories.txt",
