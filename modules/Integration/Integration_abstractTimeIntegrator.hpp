@@ -73,7 +73,7 @@ namespace Integration{
     protected:
         RunState runState_ = STOPPED; ///< the current state the integrator is in
         double time_ = 0.0; ///< the current time in the simulation
-        int timestep_ = 0; ///< the current time step
+        unsigned int timestep_ = 0; ///< the current time step
         std::vector<Core::Particle*> particles_; ///< links to the simulated particles
         std::size_t nParticles_ = 0; ///< number of particles
         std::vector<pTobPair_t> particleTOBs_; ///< Time of births of the individual particles

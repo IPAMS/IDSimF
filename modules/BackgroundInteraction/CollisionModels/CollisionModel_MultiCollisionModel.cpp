@@ -53,7 +53,7 @@ void CollisionModel::MultiCollisionModel::initializeModelParticleParameters(Core
 /**
  * Calls updateModelTimestepParameters for all combined sub models
  */
-void CollisionModel::MultiCollisionModel::updateModelTimestepParameters(int timestep, double time) {
+void CollisionModel::MultiCollisionModel::updateModelTimestepParameters(unsigned int timestep, double time) {
     for(const auto &model: models_){
         model->updateModelTimestepParameters(timestep, time);
     }

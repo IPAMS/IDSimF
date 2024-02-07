@@ -133,7 +133,7 @@ CollisionModel::MDInteractionsModel::MDInteractionsModel(std::function<double(Co
  */
 void CollisionModel::MDInteractionsModel::setTrajectoryWriter(const std::string& trajectoryFileName,
                                                               double trajectoryDistance,
-                                                              int recordTrajectoryStartTimestep) {
+                                                              unsigned int recordTrajectoryStartTimestep) {
 
     trajectoryOutputStream_ = std::make_unique<std::ofstream>();
     trajectoryOutputStream_->open(trajectoryFileName);
@@ -193,7 +193,7 @@ void CollisionModel::MDInteractionsModel::updateModelParticleParameters(Core::Pa
 /**
  * Updates trajectory recording if timestep recording parameter is exceeded
 */
-void CollisionModel::MDInteractionsModel::updateModelTimestepParameters(int timestep, double /*time*/) {
+void CollisionModel::MDInteractionsModel::updateModelTimestepParameters(unsigned int timestep, double /*time*/) {
     if (modelRecordsTrajectories_ && timestep >= recordTrajectoryStartTimeStep_){
         trajectoryRecordingActive_ = true;
     }

@@ -117,7 +117,7 @@ void CollisionModel::SoftSphereModel::updateModelParticleParameters(Core::Partic
 
 void CollisionModel::SoftSphereModel::initializeModelParticleParameters(Core::Particle& /*ion*/) const {}
 
-void CollisionModel::SoftSphereModel::updateModelTimestepParameters(int /*timestep*/, double /*time*/) {}
+void CollisionModel::SoftSphereModel::updateModelTimestepParameters(unsigned int /*timestep*/, double /*time*/) {}
 
 void CollisionModel::SoftSphereModel::modifyAcceleration(Core::Vector& /*acceleration*/, Core::Particle& /*ion*/,
                                                          double /*dt*/) {}
@@ -330,7 +330,8 @@ void CollisionModel::SoftSphereModel::modifyVelocity(Core::Particle &ion, double
         double reducedMass = (m1 * m2) / (m1 + m2);
         double vRelativeMagnitude = vFrameCollidingBackRest.magnitude();
         double KEcollision = 0.5 * reducedMass * vRelativeMagnitude * vRelativeMagnitude;
-        RS::CollisionConditions collisionConditions = {.totalCollisionEnergy = KEcollision};
+        RS::CollisionConditions collisionConditions;
+        collisionConditions.totalCollisionEnergy = KEcollision;
         afterCollisionActionFunction_(collisionConditions, ion);
     }
 }

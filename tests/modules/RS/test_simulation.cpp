@@ -317,7 +317,8 @@ TEST_CASE( "Test RS simulations", "[RS][Simulation]") {
             particles.push_back(std::move(particle));
         }
 
-        RS::CollisionConditions collisionConditions = {.totalCollisionEnergy = 0.0};
+        RS::CollisionConditions collisionConditions;
+        collisionConditions.totalCollisionEnergy = 0.0;
 
         bool hasReacted = sim.collisionReact(0,N2,collisionConditions);
         CHECK(hasReacted == false);

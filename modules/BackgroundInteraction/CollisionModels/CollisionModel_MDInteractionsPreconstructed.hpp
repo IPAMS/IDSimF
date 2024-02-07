@@ -160,7 +160,7 @@ namespace CollisionModel{
 
         void setTrajectoryWriter(const std::string& trajectoryFileName,
                                  double trajectoryDistance,
-                                 int startTimeStep=0);
+                                 unsigned int startTimeStep=0);
 
         double calcSign(double value);
 
@@ -182,7 +182,7 @@ namespace CollisionModel{
 
         void updateModelParticleParameters(Core::Particle& ion) const;
 
-        void updateModelTimestepParameters(int timestep, double time);
+        void updateModelTimestepParameters(unsigned int timestep, double time);
 
         void modifyAcceleration(Core::Vector& acceleration,
                                         Core::Particle& particle,
@@ -208,7 +208,7 @@ namespace CollisionModel{
         double trajectoryDistance_ = 0.0; ///< distance at which the trajectory recording begins
         bool trajectoryRecordingActive_ = false; 
         bool modelRecordsTrajectories_ = false; ///< flag if trajectory will be recorded
-        int recordTrajectoryStartTimeStep_ = 0; ///< time step at which the trajectory recording begins
+        unsigned int recordTrajectoryStartTimeStep_ = 0; ///< time step at which the trajectory recording begins
         std::unique_ptr<std::ofstream> trajectoryOutputStream_;
 
         std::function<double(Core::Vector&)> pressureFunction_ = nullptr; ///< a spatial pressure function

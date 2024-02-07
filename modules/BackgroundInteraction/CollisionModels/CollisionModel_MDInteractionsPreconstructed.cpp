@@ -224,7 +224,7 @@ CollisionModel::MDInteractionsModelPreconstructed::MDInteractionsModelPreconstru
  */
 void CollisionModel::MDInteractionsModelPreconstructed::setTrajectoryWriter(const std::string& trajectoryFileName,
                                                               double trajectoryDistance,
-                                                              int recordTrajectoryStartTimestep) {
+                                                              unsigned int recordTrajectoryStartTimestep) {
 
     trajectoryOutputStream_ = std::make_unique<std::ofstream>();
     trajectoryOutputStream_->open(trajectoryFileName, std::ofstream::app);
@@ -296,7 +296,7 @@ void CollisionModel::MDInteractionsModelPreconstructed::updateModelParticleParam
 
 }
 
-void CollisionModel::MDInteractionsModelPreconstructed::updateModelTimestepParameters(int timestep, double /*time*/) {
+void CollisionModel::MDInteractionsModelPreconstructed::updateModelTimestepParameters(unsigned int timestep, double /*time*/) {
     
     if (modelRecordsTrajectories_ && timestep > recordTrajectoryStartTimeStep_){
         trajectoryRecordingActive_ = true;

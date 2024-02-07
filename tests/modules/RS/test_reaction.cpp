@@ -222,7 +222,9 @@ TEST_CASE("Test chemical semantics of RS reaction types", "[RS][Reaction]") {
 
         //reaction below activation energy should return zero:
         double totalReactionEnergy = 1.0e-1 / Core::JOULE_TO_EV;
-        RS::CollisionConditions collisionConditions = {.totalCollisionEnergy = totalReactionEnergy};
+        RS::CollisionConditions collisionConditions;
+        collisionConditions.totalCollisionEnergy = totalReactionEnergy;
+
         double probability = reac.attemptReaction(collisionConditions,&dummyParticle).reactionProbability;
         REQUIRE(probability ==Approx(0.0));
 
