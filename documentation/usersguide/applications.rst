@@ -90,7 +90,10 @@ This section gives an overview of the simulation application categories and the 
     Simulation of a Differential Ion Mobility (DMS) separation device with idealized planar electrodes, including background gas interaction, ion chemistry and space charge. 
 
 :doc:`DMSSimplifiedSim <applications/DMSSimplifiedSim>`: Simplified / idealized simulation of planar Differential Ion Mobility
-    Simplified simulation of a planar electrode Differential Ion Mobility (DMS) separation device: Search for simulated compensation voltage (CV) of a chemically active ion ensemble in DMS. 
+    Simplified simulation of a planar electrode Differential Ion Mobility (DMS) separation device: Search for simulated compensation voltage (CV) of a chemically active ion ensemble in DMS.
+    
+:doc:`TWIMSSim <applications/TWIMSSim>`: Simulation of Traveling Wave Ion Mobility Spectrometry
+    Simulation of a Traveling Wave Ion Mobility Spectrometry Device, including background gas interaction, ion chemistry and space charge.  
 
 .. toctree::
     :maxdepth: 1
@@ -99,6 +102,7 @@ This section gives an overview of the simulation application categories and the 
     applications/IMSSim
     applications/DMSSim
     applications/DMSSimplifiedSim
+    applications/TWIMSSim
 
 
 ------------------------------------------------------

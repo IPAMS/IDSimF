@@ -21,7 +21,7 @@ set(SOURCE_FILES
         PSim_particleStartSplatTracker.hpp
         PSim_constants.hpp
         PSim_sampledFunction.cpp
-        PSim_sampledFunction.hpp)
+        PSim_sampledFunction.hpp PSim_sphereStartZone.cpp PSim_sphereStartZone.cpp)
 
 add_library(particlesimulation STATIC ${SOURCE_FILES})
 target_include_directories(particlesimulation PUBLIC .)
