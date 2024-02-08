@@ -48,7 +48,13 @@ if(USE_OpenMP)
 endif()
 
 find_package(HDF5 COMPONENTS CXX HL)
+if(HDF5_FOUND)
+    message(STATUS "HDF5 Found, Version:")
+    message(STATUS ${HDF5_VERSION})
+endif()
+
 include_directories(${HDF5_INCLUDE_DIRS})
+
 
 #optional libraries / optional features-------------
 option (USE_CPP_FSLIB "Use stdc++fs" OFF)
