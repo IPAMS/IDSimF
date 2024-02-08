@@ -155,7 +155,7 @@ void CollisionModel::SoftSphereModel::modifyVelocity(Core::Particle &ion, double
     double vss_collision_omega = ion.getFloatAttribute(VSS_OMEGA);
     double DiameterCorrectionParameter = std::sqrt(std::pow(kineticEnergy, -vss_collision_omega));
     double sigma_m2;
-    if(vss_collision_omega!=0.0){
+    if(Core::isDoubleUnequal(vss_collision_omega, 0.0)){
         double correctedMeanDiameter = ((ion.getDiameter() + collisionGasDiameter_m_) / 2.0) * DiameterCorrectionParameter;
         sigma_m2 = M_PI * std::pow(correctedMeanDiameter, 2.0);
     }

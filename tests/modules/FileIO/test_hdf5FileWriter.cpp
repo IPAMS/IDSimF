@@ -80,7 +80,8 @@ template <hsize_t NDIMS>DataField<NDIMS,double> readDataset(H5::DataSet& ds){
     DataField<NDIMS,double> dField;
     dField.rank = nDims;
     hsize_t nElements = 1;
-    hsize_t offset[nDims];
+    std::vector<hsize_t> offset(nDims);
+    //hsize_t offset[nDims];
     //hsize_t count[nDims];
 
     for (hsize_t i=0; i<NDIMS; ++i){
@@ -91,20 +92,21 @@ template <hsize_t NDIMS>DataField<NDIMS,double> readDataset(H5::DataSet& ds){
     }
 
     //define selected hyperslab:
-    dataspace.selectHyperslab(H5S_SELECT_SET, dims,offset);
+    dataspace.selectHyperslab(H5S_SELECT_SET, dims, offset.data());
 
     //define memory dataspace and hyperslab:
     H5::DataSpace memspace(static_cast<int>(NDIMS), dims);
-    memspace.selectHyperslab(H5S_SELECT_SET,dims,offset);
+    memspace.selectHyperslab(H5S_SELECT_SET, dims, offset.data());
 
     //read:
-    double datBuf[nElements];
+    std::vector<double> datBuf(nElements);
+    double* datBufArray = datBuf.data();
     const H5::PredType* nativeType;
     nativeType = &H5::PredType::NATIVE_DOUBLE;
-    ds.read(datBuf,*nativeType,memspace,dataspace);
+    ds.read(datBufArray,*nativeType,memspace,dataspace);
 
     for (hsize_t i=0; i<nElements; ++i){
-        dField.data.emplace_back(datBuf[i]);
+        dField.data.emplace_back(datBufArray[i]);
     }
 
     return dField;
@@ -137,12 +139,8 @@ std::vector<int> readIntAttribute(H5::Group& group, std::string attrName){
     hsize_t dims[1];
     int nDims = dataspace.getSimpleExtentDims(dims, nullptr);
     CHECK(nDims == 1);
-    std::vector<int> result;
-    int datBuf[dims[0]];
-    attr.read(H5::PredType::NATIVE_INT, datBuf);
-    for (hsize_t i=0; i<dims[0]; ++i){
-        result.emplace_back(datBuf[i]);
-    }
+    std::vector<int> result(dims[0]);
+    attr.read(H5::PredType::NATIVE_INT, result.data());
     return result;
 }
 
@@ -154,12 +152,8 @@ std::vector<int> readHSizetAttribute(H5::Group& group, std::string attrName){
     hsize_t dims[1];
     int nDims = dataspace.getSimpleExtentDims(dims, nullptr);
     CHECK(nDims == 1);
-    std::vector<int> result;
-    int datBuf[dims[0]];
-    attr.read(H5::PredType::NATIVE_UINT64, datBuf);
-    for (hsize_t i=0; i<dims[0]; ++i){
-        result.emplace_back(datBuf[i]);
-    }
+    std::vector<int> result(dims[0]);
+    attr.read(H5::PredType::NATIVE_UINT64, result.data());
     return result;
 }
 
@@ -171,12 +165,8 @@ std::vector<double> readDoubleAttribute(H5::Group& group, std::string attrName){
     hsize_t dims[1];
     int nDims = dataspace.getSimpleExtentDims(dims, nullptr);
     CHECK(nDims == 1);
-    std::vector<double> result;
-    double datBuf[dims[0]];
-    attr.read(H5::PredType::NATIVE_DOUBLE, datBuf);
-    for (hsize_t i=0; i<dims[0]; ++i){
-        result.emplace_back(datBuf[i]);
-    }
+    std::vector<double> result(dims[0]);
+    attr.read(H5::PredType::NATIVE_DOUBLE, result.data());
     return result;
 }
 

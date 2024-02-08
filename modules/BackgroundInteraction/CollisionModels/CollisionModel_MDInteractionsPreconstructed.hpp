@@ -202,8 +202,8 @@ namespace CollisionModel{
         std::string collisionMolecule_ = ""; ///< particle identifier of the collision gas
         double integrationTime_ = 0.0; ///< integration time of the sub-integrator 
         double subTimeStep_ = 0.0; ///< step size of the sub-integrator 
-        double collisionRadiusScaling_ = 0.0; ///< scaling for the radius of the collision sphere 
-        double angleThetaScaling_ = 0.0; ///<  scaling for the angle theta 
+        double collisionRadiusScaling_ = 0.0; ///< scaling for the radius of the collision sphere
+        double angleThetaScaling_ = 0.0; ///<  scaling for the angle theta
         double spawnRadius_ = 0.0; ///< radius of the spawn sphere for the background gas particle
         double trajectoryDistance_ = 0.0; ///< distance at which the trajectory recording begins
         bool trajectoryRecordingActive_ = false; 
