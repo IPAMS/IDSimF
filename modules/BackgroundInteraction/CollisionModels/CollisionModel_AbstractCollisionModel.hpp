@@ -41,7 +41,7 @@ namespace CollisionModel {
 
             virtual void initializeModelParticleParameters(Core::Particle& ion) const = 0;
             virtual void updateModelParticleParameters(Core::Particle& ion) const = 0;
-            virtual void updateModelTimestepParameters(int timestep, double time) = 0;
+            virtual void updateModelTimestepParameters(unsigned int timestep, double time) = 0;
 
             virtual void modifyAcceleration(Core::Vector& acceleration,
                                             Core::Particle& particle,

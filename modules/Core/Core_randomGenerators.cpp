@@ -256,7 +256,7 @@ double Core::NormalTestDistributionXoshiro::rndValue() {
     double v1 = (v.d - 1.0);
 
     double a = sqrt(-2 * log(u1)) * cos(2 * 3.141592653 * v1);
-    double b = sqrt(-2 * log(u1)) * sin(2 * 3.141592653 * v1);
+    // double b = sqrt(-2 * log(u1)) * sin(2 * 3.141592653 * v1);
 
     return a; // return either a or b 
 }
@@ -307,8 +307,8 @@ Core::RandomGeneratorPool::RandomGeneratorPool() {
  * Sets a new random seed for all elements of the pools
  */
 void Core::RandomGeneratorPool::setSeedForElements(Core::rndBit_type newSeed) {
-    for (int i=0; i<elements_.size(); ++i) {
-        elements_[i]->seed(newSeed);
+    for (const auto & element : elements_) {
+        element->seed(newSeed);
     }
 }
 
@@ -371,7 +371,7 @@ Core::TestBitSource* Core::TestRandomGeneratorPool::TestRNGPoolElement::getRando
 /**
  * Sets new random seed (currently not implemented, does nothing!)
  */
-void Core::TestRandomGeneratorPool::setSeedForElements(Core::rndBit_type newSeed) {
+void Core::TestRandomGeneratorPool::setSeedForElements(Core::rndBit_type /*newSeed*/) {
 
 }
 
@@ -434,7 +434,7 @@ Core::Xoshiro256pTestBitSource* Core::XoshiroTestRandomGeneratorPool::XoshiroTes
 /**
  * Sets a new random seed for all elements of the pools
  */
-void Core::XoshiroTestRandomGeneratorPool::setSeedForElements(Core::rndBit_type newSeed) {
+void Core::XoshiroTestRandomGeneratorPool::setSeedForElements(Core::rndBit_type /*newSeed*/) {
     // to-do;
 }
 
@@ -463,7 +463,7 @@ Core::XoshiroTestRandomGeneratorPool::XoshiroTestRNGPoolElement* Core::XoshiroTe
  * Gets a test random source for a specified thread
  * @return Test random source
  */
-Core::XoshiroTestRandomGeneratorPool::XoshiroTestRNGPoolElement* Core::XoshiroTestRandomGeneratorPool::getRandomSource(std::size_t index) {
+Core::XoshiroTestRandomGeneratorPool::XoshiroTestRNGPoolElement* Core::XoshiroTestRandomGeneratorPool::getRandomSource(std::size_t /*index*/) {
     return &element_;
 }
 

@@ -423,7 +423,7 @@ int main(int argc, const char * argv[]) {
                 bool saveTrajectory = simConf->boolParameter("save_trajectory");
 
                 if (saveTrajectory){
-                    int saveTrajectoryStartTimeStep = simConf->intParameter("trajectory_start_time_step");
+                    unsigned int saveTrajectoryStartTimeStep = simConf->unsignedIntParameter("trajectory_start_time_step");
                     double trajectoryDistance_m = simConf->doubleParameter("trajectory_distance_m");
                     collisionModel->setTrajectoryWriter(projectName+"_md_trajectories.txt",
                             trajectoryDistance_m, saveTrajectoryStartTimeStep);

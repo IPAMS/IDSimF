@@ -118,7 +118,7 @@ void CollisionModel::HardSphereModel::updateModelParticleParameters(Core::Partic
 
 void CollisionModel::HardSphereModel::initializeModelParticleParameters(Core::Particle& /*ion*/) const {}
 
-void CollisionModel::HardSphereModel::updateModelTimestepParameters(int /*timestep*/, double /*time*/) {}
+void CollisionModel::HardSphereModel::updateModelTimestepParameters(unsigned int /*timestep*/, double /*time*/) {}
 
 void CollisionModel::HardSphereModel::modifyAcceleration(Core::Vector& /*acceleration*/, Core::Particle& /*ion*/,
                                                          double /*dt*/) {}
@@ -310,7 +310,8 @@ void CollisionModel::HardSphereModel::modifyVelocity(Core::Particle &ion, double
         double reducedMass = (m1*m2)/(m1+m2);
         double vRelativeMagnitude = vFrameCollidingBackRest.magnitude();
         double KEcollision = 0.5 * reducedMass * vRelativeMagnitude * vRelativeMagnitude;
-        RS::CollisionConditions collisionConditions = {.totalCollisionEnergy = KEcollision};
+        RS::CollisionConditions collisionConditions;
+        collisionConditions.totalCollisionEnergy = KEcollision;
         afterCollisionActionFunction_(collisionConditions, ion);
     }
 }

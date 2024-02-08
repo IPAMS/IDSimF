@@ -160,7 +160,7 @@ namespace CollisionModel{
 
         void setTrajectoryWriter(const std::string& trajectoryFileName,
                                  double trajectoryDistance,
-                                 int startTimeStep=0);
+                                 unsigned int startTimeStep=0);
 
         double calcSign(double value);
 
@@ -182,7 +182,7 @@ namespace CollisionModel{
 
         void updateModelParticleParameters(Core::Particle& ion) const;
 
-        void updateModelTimestepParameters(int timestep, double time);
+        void updateModelTimestepParameters(unsigned int timestep, double time);
 
         void modifyAcceleration(Core::Vector& acceleration,
                                         Core::Particle& particle,
@@ -202,13 +202,13 @@ namespace CollisionModel{
         std::string collisionMolecule_ = ""; ///< particle identifier of the collision gas
         double integrationTime_ = 0.0; ///< integration time of the sub-integrator 
         double subTimeStep_ = 0.0; ///< step size of the sub-integrator 
-        double collisionRadiusScaling_ = 0.0; ///< scaling for the radius of the collision sphere 
-        double angleThetaScaling_ = 0.0; ///<  scaling for the angle theta 
+        double collisionRadiusScaling_ = 0.0; ///< scaling for the radius of the collision sphere
+        double angleThetaScaling_ = 0.0; ///<  scaling for the angle theta
         double spawnRadius_ = 0.0; ///< radius of the spawn sphere for the background gas particle
         double trajectoryDistance_ = 0.0; ///< distance at which the trajectory recording begins
         bool trajectoryRecordingActive_ = false; 
         bool modelRecordsTrajectories_ = false; ///< flag if trajectory will be recorded
-        int recordTrajectoryStartTimeStep_ = 0; ///< time step at which the trajectory recording begins
+        unsigned int recordTrajectoryStartTimeStep_ = 0; ///< time step at which the trajectory recording begins
         std::unique_ptr<std::ofstream> trajectoryOutputStream_;
 
         std::function<double(Core::Vector&)> pressureFunction_ = nullptr; ///< a spatial pressure function

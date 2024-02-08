@@ -110,7 +110,7 @@ namespace CollisionModel{
 
         void setTrajectoryWriter(const std::string& trajectoryFileName,
                                  double trajectoryDistance,
-                                 int startTimeStep=0);
+                                 unsigned int startTimeStep=0);
 
         double calcSign(double value);
 
@@ -127,7 +127,7 @@ namespace CollisionModel{
 
         void updateModelParticleParameters(Core::Particle& ion) const;
 
-        void updateModelTimestepParameters(int timestep, double time);
+        void updateModelTimestepParameters(unsigned int timestep, double time);
 
         void modifyAcceleration(Core::Vector& acceleration,
                                         Core::Particle& particle,
@@ -157,7 +157,7 @@ namespace CollisionModel{
         double trajectoryDistance_ = 0.0;
         bool trajectoryRecordingActive_ = false;
         bool modelRecordsTrajectories_ = false;
-        int recordTrajectoryStartTimeStep_ = 0;
+        unsigned int recordTrajectoryStartTimeStep_ = 0;
 
         std::unique_ptr<std::ofstream> trajectoryOutputStream_;
 

@@ -25,6 +25,7 @@
 #include "PSim_particleStartZone.hpp"
 #include "PSim_boxStartZone.hpp"
 #include "PSim_cylinderStartZone.hpp"
+#include "PSim_sphereStartZone.hpp"
 #include "PSim_util.hpp"
 #include "Core_vector.hpp"
 
@@ -90,6 +91,11 @@ std::unique_ptr<ParticleSimulation::ParticleStartZone> AppUtils::getStartZoneFro
         Core::Vector normal_vector = simConf.vector3dParameter("ion_start_cylinder_normal_vector");
         particleStartZone = std::make_unique<ParticleSimulation::CylinderStartZone>(
                 radius, length, normal_vector, ionsBasePos_m);
+    }
+    else if (ionStartGeom_str == "sphere"){
+        double radius = simConf.doubleParameter("ion_start_radius_m");
+        particleStartZone = std::make_unique<ParticleSimulation::SphereStartZone>(
+                radius, ionsBasePos_m);
     }
     else{
         std::stringstream ss;

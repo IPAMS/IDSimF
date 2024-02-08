@@ -142,30 +142,30 @@ void CollisionModel::MDForceField_LJ12_6::calculateForceField(std::vector<Collis
 
             // Third contribution: ion <-> permanent dipole potential
             // This requires an ion and a dipole to be present
-            double dipoleDistanceScalar = 0;
-            double dipoleX = 0, dipoleY = 0, dipoleZ = 0;
+            // double dipoleDistanceScalar = 0;
+            //double dipoleX = 0, dipoleY = 0, dipoleZ = 0;
             currentCharge = 0;
             if(int(atomI->getCharge()/Core::ELEMENTARY_CHARGE) != 0 &&
                     moleculesPtr[1]->getIsDipole() == true){
 
                 currentCharge = atomI->getCharge();
-                dipoleX = moleculesPtr[1]->getDipole().x();
+                /*dipoleX = moleculesPtr[1]->getDipole().x();
                 dipoleY = moleculesPtr[1]->getDipole().y();
                 dipoleZ = moleculesPtr[1]->getDipole().z();
                 dipoleDistanceScalar =  dipoleX * distance.x() +
                         dipoleY * distance.y() +
-                        dipoleZ * distance.z();
+                        dipoleZ * distance.z();*/
 
             }else if (moleculesPtr[0]->getIsDipole() == true &&
                     int(atomJ->getCharge()/Core::ELEMENTARY_CHARGE) != 0){
 
                 currentCharge = atomJ->getCharge();
-                dipoleX = moleculesPtr[0]->getDipole().x();
+                /*dipoleX = moleculesPtr[0]->getDipole().x();
                 dipoleY = moleculesPtr[0]->getDipole().y();
                 dipoleZ = moleculesPtr[0]->getDipole().z();
                 dipoleDistanceScalar =  dipoleX * distance.x() +
                         dipoleY * distance.y() +
-                        dipoleZ * distance.z();
+                        dipoleZ * distance.z();*/
             }
             // Core::Vector ionDipoleForce;
             // ionDipoleForce.x(-currentCharge * 1./Core::ELECTRIC_CONSTANT *

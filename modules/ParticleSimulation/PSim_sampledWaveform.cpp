@@ -22,6 +22,7 @@
 #include "PSim_sampledWaveform.hpp"
 #include <fstream>
 #include <cmath>
+#include <iostream>
 
 /**
  * Constructor: Creates a sampled waveform from a given file
@@ -33,7 +34,6 @@ ParticleSimulation::SampledWaveform::SampledWaveform(std::string filename){
 
     std::ifstream fIn(filename.c_str());
     if (fIn.good()){
-
         // fill wave table with values from csv:
         std::string line;
         while(std::getline(fIn, line)) {
@@ -111,7 +111,6 @@ double ParticleSimulation::SampledWaveform::getInterpolatedValue(double phase) c
 
     std::size_t iLower = static_cast<std::size_t>(std::floor(phase * size_));
     std::size_t iHigher = iLower+1;
-
 
     //"normal" interpolation between samples:
     if (iHigher < size_) {

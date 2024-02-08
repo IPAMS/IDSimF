@@ -112,7 +112,7 @@ int main(int argc, const char *argv[]){
         double spawnRadius_m = 0; 
         double trajectoryDistance_m = 0;
         bool saveTrajectory = false;
-        int saveTrajectoryStartTimeStep = 0;
+        unsigned int saveTrajectoryStartTimeStep = 0;
         if(transportModelType=="btree_MD"){
             collisionGasPolarizability_m3 = simConf->doubleVectorParameter("collision_gas_polarizability_m3");
             collisionGasIdentifier = simConf->stringVectorParameter("collision_gas_identifier");
@@ -124,7 +124,7 @@ int main(int argc, const char *argv[]){
             spawnRadius_m = simConf->doubleParameter("spawn_radius_m");
             saveTrajectory = simConf->boolParameter("save_trajectory");
             trajectoryDistance_m = simConf->doubleParameter("trajectory_distance_m");
-            saveTrajectoryStartTimeStep = simConf->intParameter("trajectory_start_time_step");
+            saveTrajectoryStartTimeStep = simConf->unsignedIntParameter("trajectory_start_time_step");
         }
 
         std::size_t nBackgroundGases = backgroundPartialPressures_Pa.size();

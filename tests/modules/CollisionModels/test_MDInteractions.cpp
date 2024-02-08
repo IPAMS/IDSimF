@@ -74,7 +74,7 @@ TEST_CASE("Basic test MD Interactions model", "[CollisionModels][MDInteractionsM
     CHECK(Approx(ion.getVelocity().z()).margin(0.2) ==  45.5651248115);
 
 
-    int timestep = 0;
+    unsigned int timestep = 0;
     double time = 0.0;
     for(int i = 0; i < 4; i++) {
         mdSim.updateModelTimestepParameters(timestep, time);
