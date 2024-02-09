@@ -43,8 +43,8 @@ herr_t collectDatasetNames(hid_t loc_id, const char *name, const H5L_info_t* /*l
 {
     // Open the object using its name.
     hid_t object = H5Oopen(loc_id, name, H5P_DEFAULT);
-    H5O_info1_t object_info;
-    H5Oget_info1(object, &object_info);
+    H5O_info_t object_info;
+    H5Oget_info(object, &object_info, H5O_INFO_ALL);
 
     //Write object name to vector if it is a dataset:
     if (object_info.type == H5O_TYPE_DATASET){
