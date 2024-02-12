@@ -48,7 +48,24 @@ if(USE_OpenMP)
 endif()
 
 find_package(HDF5 COMPONENTS CXX HL)
+if(HDF5_FOUND)
+    message(STATUS "HDF5 Found, Version:")
+    message(STATUS ${HDF5_VERSION})
+
+    set(USE_OLD_HDF5_API false)
+    if(${HDF5_VERSION} VERSION_LESS_EQUAL "1.14.1")
+        set(USE_OLD_HDF5_API true)
+    endif()
+
+    if(USE_OLD_HDF5_API)
+        message(STATUS "Using old HDF5 API Calls")
+        add_compile_definitions(OLD_HDF5_API)
+    endif()
+
+endif()
+
 include_directories(${HDF5_INCLUDE_DIRS})
+
 
 #optional libraries / optional features-------------
 option (USE_CPP_FSLIB "Use stdc++fs" OFF)
