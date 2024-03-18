@@ -26,6 +26,7 @@
 Integration::ParallelRK4Integrator::ParallelRK4Integrator(
         const std::vector<Core::Particle *>& particles,
         Integration::accelerationFctType accelerationFunction,
+        Integration::accelerationFctSpaceChargeType spaceChargeAccelerationFunction,
         Integration::timestepWriteFctType timestepWriteFunction,
         Integration::otherActionsFctType otherActionsFunction,
         Integration::AbstractTimeIntegrator::particleStartMonitoringFctType ionStartMonitoringFunction,
@@ -39,6 +40,7 @@ Integration::ParallelRK4Integrator::ParallelRK4Integrator(
 
 Integration::ParallelRK4Integrator::ParallelRK4Integrator(
         Integration::accelerationFctType accelerationFunction,
+        Integration::accelerationFctSpaceChargeType spaceChargeAccelerationFunction,
         Integration::timestepWriteFctType timestepWriteFunction,
         Integration::otherActionsFctType otherActionsFunction,
         Integration::AbstractTimeIntegrator::particleStartMonitoringFctType ionStartMonitoringFunction,
@@ -60,8 +62,7 @@ Integration::ParallelRK4Integrator::ParallelRK4Integrator(
 void Integration::ParallelRK4Integrator::addParticle(Core::Particle *particle){
     particles_.push_back(particle);
     newPos_.emplace_back(Core::Vector(0,0,0));
-    a_t_.emplace_back(Core::Vector(0,0,0));
-    a_tdt_.emplace_back(Core::Vector(0,0,0));
+    spaceChargeAcceleration_.emplace_back(Core::Vector(0,0,0));
 
     tree_.insertParticle(*particle, nParticles_);
     ++nParticles_;
@@ -107,29 +108,29 @@ void Integration::ParallelRK4Integrator::runSingleStep(double dt){
     }
     std::size_t i;
     #pragma omp parallel \
-            default(none) shared(newPos_, a_tdt_, a_t_, dt, particles_) \
-            private(i) //firstprivate(MyNod)
+            default(none) shared(newPos_, spaceChargeAcceleration_, dt, particles_) \
+            private(i)
     {
 
         #pragma omp for schedule(dynamic, 40)
         for (i=0; i<nParticles_; i++){
 
             if (particles_[i]->isActive()){
-
                 if (collisionModel_ != nullptr) {
                     collisionModel_->updateModelParticleParameters(*(particles_[i]));
                 }
 
-                newPos_[i] = particles_[i]->getLocation() + particles_[i]->getVelocity() * dt + a_t_[i]*(1.0/2.0*dt*dt);
-                a_tdt_[i] = accelerationFunction_(particles_[i], i, tree_, time_, timestep_);
+
+                // calculation of acceleration
+
+
+
                 //acceleration changes due to background interaction:
 
                 if (collisionModel_ != nullptr) {
                     collisionModel_->modifyAcceleration(a_tdt_[i], *(particles_[i]), dt);
                 }
 
-                particles_[i]->setVelocity( particles_[i]->getVelocity() + ((a_t_[i]+ a_tdt_[i])*1.0/2.0 *dt) );
-                a_t_[i] = a_tdt_[i];
 
                 //velocity changes due to background interaction:
                 if (collisionModel_ != nullptr) {
@@ -155,9 +156,12 @@ void Integration::ParallelRK4Integrator::runSingleStep(double dt){
             if (otherActionsFunction_ != nullptr) {
                 otherActionsFunction_(newPos_[i], particles_[i], i, time_, timestep_);
             }
+            tree_.updateParticleLocation(i, newPos_[i], &ver);
         }
     }
 
+    // Update serialized tree structure:
+    tree_.updateNodes(ver);
     time_ = time_ + dt;
     timestep_++;
     if (timestepWriteFunction_ != nullptr) {

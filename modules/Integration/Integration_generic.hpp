@@ -33,7 +33,7 @@
 
 namespace Integration{
     /**
-     * type definition for acceleration calculation functions
+     * type definition for acceleration calculation functions (single step velocity verlet typed acceleration)
      */
     typedef std::function
         <Core::Vector (
@@ -42,7 +42,33 @@ namespace Integration{
             SpaceCharge::FieldCalculator &forceCalculator,
             double time,
             unsigned int timestep)>
+    accelerationFctSingleStepType;
+
+    /**
+     * Acceleration function for arbitrary position, time and mass
+     * (typically for pure forces without space charge in multistep methods)
+     */
+    typedef std::function
+            <Core::Vector (
+                    Core::Vector position,
+                    double particleMass,
+                    double time)>
     accelerationFctType;
+
+    /**
+     * Acceleration of a particle from space charge
+     * (typically for space charge contribution in multistep integrator methods)
+     */
+    typedef std::function
+            <Core::Vector (
+                    Core::Particle* particle,
+                    std::size_t particleIndex,
+                    SpaceCharge::FieldCalculator &forceCalculator,
+                    double time,
+                    unsigned int timestep)>
+    accelerationFctSpaceChargeType;
+
+
 
     /**
      * type definition for functions exporting data in every timestep

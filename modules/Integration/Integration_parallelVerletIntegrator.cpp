@@ -25,7 +25,7 @@
 
 Integration::ParallelVerletIntegrator::ParallelVerletIntegrator(
         const std::vector<Core::Particle *>& particles,
-        Integration::accelerationFctType accelerationFunction,
+        Integration::accelerationFctSingleStepType accelerationFunction,
         Integration::timestepWriteFctType timestepWriteFunction,
         Integration::otherActionsFctType otherActionsFunction,
         Integration::AbstractTimeIntegrator::particleStartMonitoringFctType ionStartMonitoringFunction,
@@ -38,7 +38,7 @@ Integration::ParallelVerletIntegrator::ParallelVerletIntegrator(
 {}
 
 Integration::ParallelVerletIntegrator::ParallelVerletIntegrator(
-        Integration::accelerationFctType accelerationFunction,
+        Integration::accelerationFctSingleStepType accelerationFunction,
         Integration::timestepWriteFctType timestepWriteFunction,
         Integration::otherActionsFctType otherActionsFunction,
         Integration::AbstractTimeIntegrator::particleStartMonitoringFctType ionStartMonitoringFunction,

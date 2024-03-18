@@ -37,27 +37,27 @@
 
 namespace Integration{
 
-    //std::function<Core::Vector(Core::Particle* particle, int particleIndex, Core::Tree& tree, double time, int timestep)> accelerationFctType;
+    //std::function<Core::Vector(Core::Particle* particle, int particleIndex, Core::Tree& tree, double time, int timestep)> accelerationFctSingleStepType;
 
     template <class FMMSolverT>
     class FMMVerletIntegrator : public AbstractTimeIntegrator {
     public:
 
         FMMVerletIntegrator(
-            const std::vector<Core::Particle*>& particles,
-            accelerationFctType accelerationFunction,
-            timestepWriteFctType timestepWriteFunction = nullptr,
-            otherActionsFctType otherActionsFunction = nullptr,
-            AbstractTimeIntegrator::particleStartMonitoringFctType ionStartMonitoringFunction = nullptr,
-            CollisionModel::AbstractCollisionModel* collisionModel = nullptr
+                const std::vector<Core::Particle*>& particles,
+                accelerationFctSingleStepType accelerationFunction,
+                timestepWriteFctType timestepWriteFunction = nullptr,
+                otherActionsFctType otherActionsFunction = nullptr,
+                AbstractTimeIntegrator::particleStartMonitoringFctType ionStartMonitoringFunction = nullptr,
+                CollisionModel::AbstractCollisionModel* collisionModel = nullptr
         );
 
         FMMVerletIntegrator(
-            accelerationFctType accelerationFunction,
-            timestepWriteFctType timestepWriteFunction = nullptr,
-            otherActionsFctType otherActionsFunction = nullptr,
-            AbstractTimeIntegrator::particleStartMonitoringFctType ionStartMonitoringFunction = nullptr,
-            CollisionModel::AbstractCollisionModel* collisionModel = nullptr
+                accelerationFctSingleStepType accelerationFunction,
+                timestepWriteFctType timestepWriteFunction = nullptr,
+                otherActionsFctType otherActionsFunction = nullptr,
+                AbstractTimeIntegrator::particleStartMonitoringFctType ionStartMonitoringFunction = nullptr,
+                CollisionModel::AbstractCollisionModel* collisionModel = nullptr
         );
 
         void addParticle(Core::Particle* particle) override;
@@ -71,7 +71,7 @@ namespace Integration{
 
         CollisionModel::AbstractCollisionModel* collisionModel_ = nullptr; ///< the gas collision model to perform while integrating
 
-        accelerationFctType accelerationFunction_ = nullptr;   ///< function to calculate particle acceleration
+        accelerationFctSingleStepType accelerationFunction_ = nullptr;   ///< function to calculate particle acceleration
         timestepWriteFctType timestepWriteFunction_ = nullptr; ///< function to export / write time step results
         otherActionsFctType otherActionsFunction_ = nullptr;   ///< function for arbitrary other actions in the simulation
 
@@ -84,7 +84,7 @@ namespace Integration{
     template <class FMMSolverT>
     FMMVerletIntegrator<FMMSolverT>::FMMVerletIntegrator(
             const std::vector<Core::Particle*>& particles,
-            accelerationFctType accelerationFunction,
+            accelerationFctSingleStepType accelerationFunction,
             timestepWriteFctType timestepWriteFunction,
             otherActionsFctType otherActionsFunction,
             AbstractTimeIntegrator::particleStartMonitoringFctType ionStartMonitoringFunction,
@@ -98,7 +98,7 @@ namespace Integration{
 
     template <class FMMSolverT>
     FMMVerletIntegrator<FMMSolverT>::FMMVerletIntegrator(
-            accelerationFctType accelerationFunction,
+            accelerationFctSingleStepType accelerationFunction,
             timestepWriteFctType timestepWriteFunction,
             otherActionsFctType otherActionsFunction,
             AbstractTimeIntegrator::particleStartMonitoringFctType ionStartMonitoringFunction,

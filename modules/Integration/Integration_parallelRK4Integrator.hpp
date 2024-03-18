@@ -38,7 +38,7 @@
 
 namespace Integration{
 
-    //std::function<Core::Vector(Core::Particle* particle, int particleIndex, Core::Tree& tree, double time, int timestep)> accelerationFctType;
+    //std::function<Core::Vector(Core::Particle* particle, int particleIndex, Core::Tree& tree, double time, int timestep)> accelerationFctSingleStepType;
 
     class ParallelRK4Integrator: public AbstractTimeIntegrator {
 
@@ -47,6 +47,7 @@ namespace Integration{
             ParallelRK4Integrator(
                     const std::vector<Core::Particle*>& particles,
                     accelerationFctType accelerationFunction,
+                    accelerationFctSpaceChargeType spaceChargeAccelerationFunction,
                     timestepWriteFctType timestepWriteFunction = nullptr,
                     otherActionsFctType otherActionsFunction = nullptr,
                     AbstractTimeIntegrator::particleStartMonitoringFctType ionStartMonitoringFunction = nullptr,
@@ -55,6 +56,7 @@ namespace Integration{
 
             ParallelRK4Integrator(
                     accelerationFctType accelerationFunction,
+                    accelerationFctSpaceChargeType spaceChargeAccelerationFunction,
                     timestepWriteFctType timestepWriteFunction = nullptr,
                     otherActionsFctType otherActionsFunction = nullptr,
                     AbstractTimeIntegrator::particleStartMonitoringFctType ionStartMonitoringFunction = nullptr,
@@ -70,19 +72,18 @@ namespace Integration{
 
         CollisionModel::AbstractCollisionModel* collisionModel_ = nullptr; ///< the gas collision model to perform while integrating
 
-        accelerationFctType accelerationFunction_ = nullptr;   ///< function to calculate particle acceleration
+        accelerationFctType accelerationFunction_ = nullptr;   ///< function to calculate particle acceleration (without space charge)
+        accelerationFctSpaceChargeType spaceChargeAccelerationFunction_ = nullptr;   ///< function to calculate particle acceleration from space charge
         timestepWriteFctType timestepWriteFunction_ = nullptr; ///< function to export / write time step results
         otherActionsFctType otherActionsFunction_ = nullptr;   ///< function for arbitrary other actions in the simulation
 
         //internal variables for actual calculations:
         Core::Vector loc_min_ = Core::Vector(-1000,-1000,-1000); ///< currently hard coded lower corner of the sim. domain
         Core::Vector loc_max_ = Core::Vector( 1000, 1000, 1000); ///< currently hard coded upper corner of the sim. domain
-        BTree::ParallelTree tree_ = BTree::ParallelTree(loc_min_,loc_max_);
-        ///< The parallel BTree (primarily for space charge calculation)
+        BTree::ParallelTree tree_ = BTree::ParallelTree(loc_min_,loc_max_);///< The parallel BTree (primarily for space charge calculation)
 
         std::vector<Core::Vector>  newPos_;  ///< new position (after time step) for particles
-        std::vector<Core::Vector>  a_t_;     ///< last time step acceleration for particles
-        std::vector<Core::Vector>  a_tdt_;   ///< new acceleration for particles
+        std::vector<Core::Vector>  spaceChargeAcceleration_;  ///< space charge acceleration from
 
         void bearParticles_(double time);
         void initInternalState_();

@@ -40,7 +40,7 @@
 
 namespace Integration{
 
-    //std::function<Core::Vector(Core::Particle* particle, int particleIndex, Core::Tree& tree, double time, int timestep)> accelerationFctType;
+    //std::function<Core::Vector(Core::Particle* particle, int particleIndex, Core::Tree& tree, double time, int timestep)> accelerationFctSingleStepType;
 
     class ParallelVerletIntegrator: public AbstractTimeIntegrator {
 
@@ -48,7 +48,7 @@ namespace Integration{
 
             ParallelVerletIntegrator(
                     const std::vector<Core::Particle*>& particles,
-                    accelerationFctType accelerationFunction,
+                    accelerationFctSingleStepType accelerationFunction,
                     timestepWriteFctType timestepWriteFunction = nullptr,
                     otherActionsFctType otherActionsFunction = nullptr,
                     AbstractTimeIntegrator::particleStartMonitoringFctType ionStartMonitoringFunction = nullptr,
@@ -56,7 +56,7 @@ namespace Integration{
             );
 
             ParallelVerletIntegrator(
-                    accelerationFctType accelerationFunction,
+                    accelerationFctSingleStepType accelerationFunction,
                     timestepWriteFctType timestepWriteFunction = nullptr,
                     otherActionsFctType otherActionsFunction = nullptr,
                     AbstractTimeIntegrator::particleStartMonitoringFctType ionStartMonitoringFunction = nullptr,
@@ -72,7 +72,7 @@ namespace Integration{
 
         CollisionModel::AbstractCollisionModel* collisionModel_ = nullptr; ///< the gas collision model to perform while integrating
 
-        accelerationFctType accelerationFunction_ = nullptr;   ///< function to calculate particle acceleration
+        accelerationFctSingleStepType accelerationFunction_ = nullptr;   ///< function to calculate particle acceleration
         timestepWriteFctType timestepWriteFunction_ = nullptr; ///< function to export / write time step results
         otherActionsFctType otherActionsFunction_ = nullptr;   ///< function for arbitrary other actions in the simulation
 

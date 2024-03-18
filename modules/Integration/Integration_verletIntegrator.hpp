@@ -47,7 +47,7 @@ namespace CollisionModel{
 
 namespace Integration{
 
-    //std::function<Core::Vector(Core::Particle* particle, int particleIndex, Core::Tree& tree, double time, int timestep)> accelerationFctType;
+    //std::function<Core::Vector(Core::Particle* particle, int particleIndex, Core::Tree& tree, double time, int timestep)> accelerationFctSingleStepType;
 
     /**
      * Core based ion trajectory integration with a simple verlet trajectory integrator scheme including space charge.
@@ -62,7 +62,7 @@ namespace Integration{
 
         VerletIntegrator(
                 std::vector<Core::Particle*> particles,
-                accelerationFctType accelerationFunction,
+                accelerationFctSingleStepType accelerationFunction,
                 timestepWriteFctType timestepWriteFunction = nullptr,
                 otherActionsFctType otherActionsFunction = nullptr,
                 AbstractTimeIntegrator::particleStartMonitoringFctType ionStartMonitoringFunction = nullptr,
@@ -70,7 +70,7 @@ namespace Integration{
         );
 
         VerletIntegrator(
-                accelerationFctType accelerationFunction,
+                accelerationFctSingleStepType accelerationFunction,
                 timestepWriteFctType timestepWriteFunction = nullptr,
                 otherActionsFctType otherActionsFunction = nullptr,
                 AbstractTimeIntegrator::particleStartMonitoringFctType ionStartMonitoringFunction = nullptr,
@@ -85,7 +85,7 @@ namespace Integration{
     private:
         CollisionModel::AbstractCollisionModel* collisionModel_ = nullptr; ///< a gas collision model active in the simulation
 
-        accelerationFctType accelerationFunction_ = nullptr; ///< function to calculate particle acceleration
+        accelerationFctSingleStepType accelerationFunction_ = nullptr; ///< function to calculate particle acceleration
         timestepWriteFctType timestepWriteFunction_ = nullptr; ///< function to define what is exported in every time step
         otherActionsFctType otherActionsFunction_ = nullptr; ///< function with other actions done in every time step
 

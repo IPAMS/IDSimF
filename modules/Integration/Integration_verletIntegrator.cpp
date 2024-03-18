@@ -35,7 +35,7 @@
  */
 Integration::VerletIntegrator::VerletIntegrator(
         std::vector<Core::Particle *> particles,
-        Integration::accelerationFctType accelerationFunction,
+        Integration::accelerationFctSingleStepType accelerationFunction,
         Integration::timestepWriteFctType timestepWriteFunction,
         Integration::otherActionsFctType otherActionsFunction,
         Integration::AbstractTimeIntegrator::particleStartMonitoringFctType ionStartMonitoringFunction,
@@ -56,7 +56,7 @@ Integration::VerletIntegrator::VerletIntegrator(
  * @param collisionModel a collision model, modeling the interaction between charged particles and background gas
  */
 Integration::VerletIntegrator::VerletIntegrator(
-        Integration::accelerationFctType accelerationFunction,
+        Integration::accelerationFctSingleStepType accelerationFunction,
         Integration::timestepWriteFctType timestepWriteFunction,
         Integration::otherActionsFctType otherActionsFunction,
         Integration::AbstractTimeIntegrator::particleStartMonitoringFctType ionStartMonitoringFunction,
