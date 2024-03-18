@@ -456,27 +456,36 @@ int main(int argc, const char * argv[]) {
                 startSplatTracker.particleSplat(particle, time);
                 ionsInactive++;
             }
+            Core::Vector PartVelocity(particle->getVelocity());
             if (V_rf == 0.0) {
                 double boundary = 0.001;
                 if (newPartPos.y() > boundary) {
                     double new_y = -(boundary - (newPartPos.y() - boundary));
                     Core::Vector newPos(newPartPos.x(), new_y, newPartPos.z());
                     newPartPos = newPos;
+                    Core::Vector newPartVelocity(PartVelocity.x(), -PartVelocity.y(), PartVelocity.z());
+                    particle->setVelocity(newPartVelocity);
                 }
                 if (newPartPos.y() < -boundary) {
                     double new_y = +(boundary + (newPartPos.y() + boundary));
                     Core::Vector newPos(newPartPos.x(), new_y, newPartPos.z());
                     newPartPos = newPos;
+                    Core::Vector newPartVelocity(PartVelocity.x(), -PartVelocity.y(), PartVelocity.z());
+                    particle->setVelocity(newPartVelocity);
                 }
                 if (newPartPos.z() > boundary) {
                     double new_z = -(boundary - (newPartPos.z() - boundary));
                     Core::Vector newPos(newPartPos.x(), newPartPos.y(), new_z);
                     newPartPos = newPos;
+                    Core::Vector newPartVelocity(PartVelocity.x(), PartVelocity.y(), -PartVelocity.z());
+                    particle->setVelocity(newPartVelocity);
                 }
                 if (newPartPos.z() < -boundary) {
                     double new_z = +(boundary + (newPartPos.z() + boundary));
                     Core::Vector newPos(newPartPos.x(), newPartPos.y(), new_z);
                     newPartPos = newPos;
+                    Core::Vector newPartVelocity(PartVelocity.x(), PartVelocity.y(), -PartVelocity.z());
+                    particle->setVelocity(newPartVelocity);
                 }
             }
 
