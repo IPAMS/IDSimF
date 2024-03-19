@@ -50,10 +50,11 @@ namespace Integration{
      */
     typedef std::function
             <Core::Vector (
+                    Core::Particle* particle,
                     Core::Vector position,
                     Core::Vector velocity,
-                    double particleMass,
-                    double time)>
+                    double time,
+                    unsigned int timestep)>
     accelerationFctType;
 
     /**

@@ -134,7 +134,7 @@ void Integration::ParallelRK4Integrator::runSingleStep(double dt){
                 Core::Vector x_n = particle->getLocation();
                 Core::Vector v_n = particle->getVelocity();
 
-                Core::Vector k1_v = evaluateAccelerationFunction_(particle, x_n, v_n, spaceChargeAcceleration, time_, dt)*dt;
+                Core::Vector k1_v = evaluateAccelerationFunction_(particle, x_n, v_n, spaceChargeAcceleration, time_, timestep_, dt)*dt;
                 Core::Vector k1_x = v_n*dt;
 
                 Core::Vector k2_v = evaluateAccelerationFunction_(
@@ -143,6 +143,7 @@ void Integration::ParallelRK4Integrator::runSingleStep(double dt){
                         v_n + k1_v/2.0,
                         spaceChargeAcceleration,
                         time_+ dt/2.0,
+                        timestep_,
                         dt) * dt;
                 Core::Vector k2_x = (v_n + k1_v/2.0) * dt;
 
@@ -152,6 +153,7 @@ void Integration::ParallelRK4Integrator::runSingleStep(double dt){
                         v_n + k2_v/2.0,
                         spaceChargeAcceleration,
                         time_ + dt/2.0,
+                        timestep_,
                         dt) * dt;
                 Core::Vector k3_x = (v_n + k2_v/2.0) * dt;
 
@@ -161,6 +163,7 @@ void Integration::ParallelRK4Integrator::runSingleStep(double dt){
                         v_n + k3_v,
                         spaceChargeAcceleration,
                         time_ + dt,
+                        timestep_,
                         dt) * dt;
                 Core::Vector k4_x = (v_n + k3_v) * dt;
 
@@ -219,8 +222,9 @@ Core::Vector Integration::ParallelRK4Integrator::evaluateAccelerationFunction_(C
                                                                                Core::Vector velocity,
                                                                                Core::Vector spaceChargeAcceleration,
                                                                                double time,
+                                                                               unsigned int timestep,
                                                                                double dt) {
-    Core::Vector acceleration = accelerationFunction_(position, velocity, particle->getMass(), time) + spaceChargeAcceleration;
+    Core::Vector acceleration = accelerationFunction_(particle, position, velocity, time, timestep) + spaceChargeAcceleration;
     if (collisionModel_ != nullptr) {
         collisionModel_->modifyAcceleration(acceleration, *particle, dt);
     }

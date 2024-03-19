@@ -52,7 +52,8 @@ TEST_CASE( "Test parallel runge kutta 4 integrator", "[ParticleSimulation][Paral
         return (result);
     };
 
-    auto accelerationFct = [ionAcceleration](Core::Vector /*position*/, Core::Vector /*velocity*/, double /*particleMass*/, double /*time*/){
+    auto accelerationFct = [ionAcceleration](
+            Core::Particle* /*particle*/, Core::Vector /*position*/, Core::Vector /*velocity*/, double /*time*/, unsigned int /*timestep*/){
         Core::Vector result(ionAcceleration, 0, ionAcceleration * 0.5);
         return (result);
     };
