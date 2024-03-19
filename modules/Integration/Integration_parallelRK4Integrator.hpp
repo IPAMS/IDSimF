@@ -77,6 +77,13 @@ namespace Integration{
         timestepWriteFctType timestepWriteFunction_ = nullptr; ///< function to export / write time step results
         otherActionsFctType otherActionsFunction_ = nullptr;   ///< function for arbitrary other actions in the simulation
 
+        Core::Vector evaluateAccelerationFunction_(Core::Particle* particle,
+                                                   Core::Vector position,
+                                                   Core::Vector velocity,
+                                                   Core::Vector spaceChargeAcceleration,
+                                                   double time,
+                                                   double dt);
+
         //internal variables for actual calculations:
         Core::Vector loc_min_ = Core::Vector(-1000,-1000,-1000); ///< currently hard coded lower corner of the sim. domain
         Core::Vector loc_max_ = Core::Vector( 1000, 1000, 1000); ///< currently hard coded upper corner of the sim. domain

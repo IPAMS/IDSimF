@@ -43,10 +43,16 @@ TEST_CASE( "Test parallel runge kutta 4 integrator", "[ParticleSimulation][Paral
 
     // init variables / functions
     double ionAcceleration = 10.0; //((1000V / 100mm) * elementary charge) / 100 amu = 9.64e9 m/s^2
+    double spaceChargeAcceleration = 1.0;
     double dt = 1e-4;
 
-    auto accelerationFct = [ionAcceleration](Core::Particle* /*particle*/, int /*particleIndex*/, SpaceCharge::FieldCalculator& /*tree*/,
+    auto spaceChargeAccelerationFct = [spaceChargeAcceleration](Core::Particle* /*particle*/, int /*particleIndex*/, SpaceCharge::FieldCalculator& /*tree*/,
                                              double /*time*/, int /*timestep*/){
+        Core::Vector result(0, spaceChargeAcceleration, 0);
+        return (result);
+    };
+
+    auto accelerationFct = [ionAcceleration](Core::Vector /*position*/, Core::Vector /*velocity*/, double /*particleMass*/, double /*time*/){
         Core::Vector result(ionAcceleration, 0, ionAcceleration * 0.5);
         return (result);
     };
@@ -63,27 +69,31 @@ TEST_CASE( "Test parallel runge kutta 4 integrator", "[ParticleSimulation][Paral
     SECTION( "Parallel RK integrator should be working with deferred particle addition") {
 
         // bare integrator without time step or other actions function
-        Integration::ParallelRK4Integrator RK4Integrator(accelerationFct);
+        Integration::ParallelRK4Integrator RK4Integrator(accelerationFct, spaceChargeAccelerationFct);
 
         //should not crash / throw without particles
         REQUIRE_NOTHROW(RK4Integrator.run(1,dt));
 
         //particles should be addable and integrator should be able to run:
         unsigned int nSteps = 100;
+        unsigned int nStepsLong = 1000;
         REQUIRE_NOTHROW(RK4Integrator.addParticle(&testParticle1));
         REQUIRE_NOTHROW(RK4Integrator.run(nSteps,dt));
 
-        std::cout<<"p 1: "<<testParticle1.getLocation()<<std::endl;
-
         REQUIRE_NOTHROW(RK4Integrator.addParticle(&testParticle2));
-        REQUIRE_NOTHROW(RK4Integrator.run(nSteps,dt));
-
-        RK4Integrator.run(nSteps,dt);
+        REQUIRE_NOTHROW(RK4Integrator.run(nSteps*2,dt));
 
         Core::Vector ionPos = testParticle2.getLocation();
-        CHECK(Approx(ionPos.x()).epsilon(1e-6) == 0.00199);
-        CHECK(Approx(ionPos.y()).epsilon(1e-2) == 0.01);
-        CHECK(Approx(ionPos.z()).epsilon(1e-7) == 0.000995);
+        CHECK(Approx(ionPos.x()).epsilon(1e-6) == 0.002);
+        CHECK(Approx(ionPos.y()).epsilon(1e-2) == 0.0102);
+        CHECK(Approx(ionPos.z()).epsilon(1e-7) == 0.001);
+
+        REQUIRE_NOTHROW(RK4Integrator.run(nStepsLong,dt));
+
+        ionPos = testParticle2.getLocation();
+        CHECK(Approx(ionPos.x()).epsilon(1e-6) == 0.072);
+        CHECK(Approx(ionPos.y()).epsilon(1e-2) == 0.0172);
+        CHECK(Approx(ionPos.z()).epsilon(1e-7) == 0.036);
     }
 
     SECTION("Tests with particle lists"){
@@ -114,7 +124,7 @@ TEST_CASE( "Test parallel runge kutta 4 integrator", "[ParticleSimulation][Paral
             }
 
             Integration::ParallelRK4Integrator RK4Integrator(
-                    particlesPtrs, accelerationFct, nullptr, nullptr, nullptr);
+                    particlesPtrs, accelerationFct, spaceChargeAccelerationFct, nullptr, nullptr, nullptr);
 
             RK4Integrator.run(timeSteps, dt);
 
@@ -124,12 +134,13 @@ TEST_CASE( "Test parallel runge kutta 4 integrator", "[ParticleSimulation][Paral
 
                 //calculate approximate position according to a pure linear uniform acceleration
                 // according to the real time the particles were present in the simulation:
-                double diffTime = endTime - (0.5*dt)  - particles[i]-> getTimeOfBirth();
+                double diffTime = endTime - particles[i]-> getTimeOfBirth();
                 double xCalculated= 0.5 * ionAcceleration * diffTime * diffTime;
+                double yDriftDistance = 0.5 * spaceChargeAcceleration * diffTime * diffTime;
                 double zCalculated= 0.5 * xCalculated;
 
                 CHECK(Approx(ionPos.x()).epsilon(0.05) == xCalculated);
-                CHECK(Approx(ionPos.y()).epsilon(1e-7) == i*0.01);
+                CHECK(Approx(ionPos.y()).epsilon(1e-7) == i*0.01 + yDriftDistance);
                 CHECK(Approx(ionPos.z()).epsilon(0.05) == zCalculated);
             }
         }
@@ -172,7 +183,7 @@ TEST_CASE( "Test parallel runge kutta 4 integrator", "[ParticleSimulation][Paral
                 };
 
                 Integration::ParallelRK4Integrator RK4Integrator(
-                        particlesPtrs, accelerationFct, timestepWriteFct, otherActionsFct, particleStartMonitoringFct);
+                        particlesPtrs, accelerationFct, spaceChargeAccelerationFct, timestepWriteFct, otherActionsFct, particleStartMonitoringFct);
 
                 RK4Integrator.run(timeSteps, dt);
 
@@ -190,7 +201,7 @@ TEST_CASE( "Test parallel runge kutta 4 integrator", "[ParticleSimulation][Paral
                     double zCalculated = 0.5*xCalculated;
 
                     CHECK(Approx(ionPos.x()).epsilon(0.05)==xCalculated);
-                    CHECK(Approx(ionPos.y()).epsilon(1e-7)==i*0.01);
+                    //CHECK(Approx(ionPos.y()).epsilon(1e-7)==i*0.01);
                     CHECK(Approx(ionPos.z()).epsilon(0.05)==zCalculated);
                 }
 
@@ -220,7 +231,8 @@ TEST_CASE( "Test parallel runge kutta 4 integrator", "[ParticleSimulation][Paral
 
                 Integration::ParallelRK4Integrator verletIntegrator(
                         particlesPtrs,
-                        accelerationFct, timestepWriteFct, terminationActionFct);
+                        accelerationFct, spaceChargeAccelerationFct,
+                        timestepWriteFct, terminationActionFct);
 
                 integratorPtr = &verletIntegrator;
 

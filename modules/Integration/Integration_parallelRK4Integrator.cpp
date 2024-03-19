@@ -34,6 +34,7 @@ Integration::ParallelRK4Integrator::ParallelRK4Integrator(
     AbstractTimeIntegrator(particles, ionStartMonitoringFunction),
     collisionModel_(collisionModel),
     accelerationFunction_(std::move(accelerationFunction)),
+    spaceChargeAccelerationFunction_(std::move(spaceChargeAccelerationFunction)),
     timestepWriteFunction_(std::move(timestepWriteFunction)),
     otherActionsFunction_(std::move(otherActionsFunction))
 {}
@@ -48,6 +49,7 @@ Integration::ParallelRK4Integrator::ParallelRK4Integrator(
     AbstractTimeIntegrator(ionStartMonitoringFunction),
     collisionModel_(collisionModel),
     accelerationFunction_(std::move(accelerationFunction)),
+    spaceChargeAccelerationFunction_(std::move(spaceChargeAccelerationFunction)),
     timestepWriteFunction_(std::move(timestepWriteFunction)),
     otherActionsFunction_(std::move(otherActionsFunction))
 {
@@ -103,6 +105,8 @@ void Integration::ParallelRK4Integrator::runSingleStep(double dt){
     //first: Generate new particles if necessary
     bearParticles_(time_);
 
+    int ver=0;
+
     if (collisionModel_ !=nullptr){
         collisionModel_->updateModelTimestepParameters(timestep_, time_);
     }
@@ -122,16 +126,48 @@ void Integration::ParallelRK4Integrator::runSingleStep(double dt){
 
 
                 // calculation of acceleration
+                Core::Vector spaceChargeAcceleration = spaceChargeAccelerationFunction_(particles_[i], i, tree_, time_, timestep_);
 
+                // actual Runge Kutta 4 steps
+                Core::Particle* particle = particles_[i];
 
+                Core::Vector x_n = particle->getLocation();
+                Core::Vector v_n = particle->getVelocity();
 
-                //acceleration changes due to background interaction:
+                Core::Vector k1_v = evaluateAccelerationFunction_(particle, x_n, v_n, spaceChargeAcceleration, time_, dt)*dt;
+                Core::Vector k1_x = v_n*dt;
 
-                if (collisionModel_ != nullptr) {
-                    collisionModel_->modifyAcceleration(a_tdt_[i], *(particles_[i]), dt);
-                }
+                Core::Vector k2_v = evaluateAccelerationFunction_(
+                        particle,
+                        x_n + k1_x/2.0,
+                        v_n + k1_v/2.0,
+                        spaceChargeAcceleration,
+                        time_+ dt/2.0,
+                        dt) * dt;
+                Core::Vector k2_x = (v_n + k1_v/2.0) * dt;
 
+                Core::Vector k3_v = evaluateAccelerationFunction_(
+                        particle,
+                        x_n + k2_x/2.0,
+                        v_n + k2_v/2.0,
+                        spaceChargeAcceleration,
+                        time_ + dt/2.0,
+                        dt) * dt;
+                Core::Vector k3_x = (v_n + k2_v/2.0) * dt;
 
+                Core::Vector k4_v = evaluateAccelerationFunction_(
+                        particle,
+                        x_n + k3_x,
+                        v_n + k3_v,
+                        spaceChargeAcceleration,
+                        time_ + dt,
+                        dt) * dt;
+                Core::Vector k4_x = (v_n + k3_v) * dt;
+
+                Core::Vector v_new = v_n + 1.0/6.0 * (k1_v + 2.0*k2_v + 2.0*k3_v + k4_v);
+                newPos_[i] = x_n + 1.0/6.0 * (k1_x + 2.0*k2_x + 2.0*k3_x + k4_x);
+
+                particle->setVelocity(v_new);
                 //velocity changes due to background interaction:
                 if (collisionModel_ != nullptr) {
                     //std::cout << "before:" << particles_[i]->getVelocity() << std::endl;
@@ -178,4 +214,16 @@ void Integration::ParallelRK4Integrator::finalizeSimulation(){
     }
 }
 
+Core::Vector Integration::ParallelRK4Integrator::evaluateAccelerationFunction_(Core::Particle* particle,
+                                                                               Core::Vector position,
+                                                                               Core::Vector velocity,
+                                                                               Core::Vector spaceChargeAcceleration,
+                                                                               double time,
+                                                                               double dt) {
+    Core::Vector acceleration = accelerationFunction_(position, velocity, particle->getMass(), time) + spaceChargeAcceleration;
+    if (collisionModel_ != nullptr) {
+        collisionModel_->modifyAcceleration(acceleration, *particle, dt);
+    }
+    return acceleration;
+}
 

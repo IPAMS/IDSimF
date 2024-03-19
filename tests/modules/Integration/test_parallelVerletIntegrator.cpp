@@ -70,20 +70,24 @@ TEST_CASE( "Test parallel verlet integrator", "[ParticleSimulation][ParallelVerl
 
         //particles should be addable and integrator should be able to run:
         unsigned int nSteps = 100;
+        unsigned int nStepsLong = 1000;
         REQUIRE_NOTHROW(verletIntegrator.addParticle(&testParticle1));
         REQUIRE_NOTHROW(verletIntegrator.run(nSteps,dt));
 
-        std::cout<<"p 1: "<<testParticle1.getLocation()<<std::endl;
-
         REQUIRE_NOTHROW(verletIntegrator.addParticle(&testParticle2));
-        REQUIRE_NOTHROW(verletIntegrator.run(nSteps,dt));
-
-        verletIntegrator.run(nSteps,dt);
+        REQUIRE_NOTHROW(verletIntegrator.run(nSteps*2,dt));
 
         Core::Vector ionPos = testParticle2.getLocation();
         CHECK(Approx(ionPos.x()).epsilon(1e-6) == 0.00199);
         CHECK(Approx(ionPos.y()).epsilon(1e-2) == 0.01);
         CHECK(Approx(ionPos.z()).epsilon(1e-7) == 0.000995);
+
+        REQUIRE_NOTHROW(verletIntegrator.run(nStepsLong,dt));
+
+        ionPos = testParticle2.getLocation();
+        CHECK(Approx(ionPos.x()).epsilon(1e-6) == 0.07194);
+        CHECK(Approx(ionPos.y()).epsilon(1e-2) == 0.01);
+        CHECK(Approx(ionPos.z()).epsilon(1e-7) == 0.03597);
     }
 
     SECTION("Tests with particle lists"){

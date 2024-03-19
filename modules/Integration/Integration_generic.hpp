@@ -45,12 +45,13 @@ namespace Integration{
     accelerationFctSingleStepType;
 
     /**
-     * Acceleration function for arbitrary position, time and mass
+     * Acceleration function for arbitrary position, velocity, time and mass
      * (typically for pure forces without space charge in multistep methods)
      */
     typedef std::function
             <Core::Vector (
                     Core::Vector position,
+                    Core::Vector velocity,
                     double particleMass,
                     double time)>
     accelerationFctType;
