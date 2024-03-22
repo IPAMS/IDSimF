@@ -91,3 +91,19 @@ void FileIO::IdealizedQitFFTWriter::writeTimestepMassResolved(double time){
     *transientFile_<< std::endl;
 }
 
+/**
+ * Writes a time step to the file in a mass resolved way: The current state of the particles in the particle cloud is
+ * used to determine the average velocity in z direction individually for groups containing particles with the same mass.
+ * The result is written to the result file.
+ * @param time the time of the current time step
+ */
+void FileIO::IdealizedQitFFTWriter::writeTimestepAverageIonCloudPosition(double time) {
+    double avgPositionZ = 0;
+
+    for (const auto& part: particles_) {
+        avgPositionZ = avgPositionZ + part->getLocation().z();
+    }
+    avgPositionZ = avgPositionZ / particles_.size();
+    *transientFile_ << time << " " << avgPositionZ << std::endl;
+}
+

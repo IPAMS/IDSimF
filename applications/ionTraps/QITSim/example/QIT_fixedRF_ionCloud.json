@@ -3,7 +3,7 @@
  "sim_time_steps":2000,
  "trajectory_write_interval":50,
  "fft_write_interval":10,
- "fft_write_mode":"mass_resolved",
+ "fft_write_mode":"ion_cloud_position",
  "dt":1e-8,
  "geometry_mode":"scaled",
  "geometry_scale":1.0,

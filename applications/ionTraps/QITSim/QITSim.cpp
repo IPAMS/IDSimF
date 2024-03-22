@@ -64,7 +64,7 @@ enum RfAmplitudeMode {STATIC_RF, RAMPED_RF};
 enum RfWaveMode {SINE, SAMPLED};
 enum FieldMode {BASIC, HIGHER_ORDERS, AVERAGED};
 enum ExciteMode {RECTPULSE, SWIFT};
-enum FftWriteMode {UNRESOLVED, MASS_RESOLVED};
+enum FftWriteMode {UNRESOLVED, MASS_RESOLVED, ION_CLOUD_POSITION};
 
 std::string key_spaceCharge_x = "keySpaceChargeX";
 std::string key_spaceCharge_y = "keySpaceChargeY";
@@ -132,6 +132,9 @@ int main(int argc, const char * argv[]) {
         }
         else if (fftWriteMode_str=="mass_resolved") {
             fftWriteMode = MASS_RESOLVED;
+        }
+        else if (fftWriteMode_str=="ion_cloud_position") {
+            fftWriteMode = ION_CLOUD_POSITION;
         }
 
         //read geometrical configuration of the trap======================================================
@@ -441,8 +444,8 @@ int main(int argc, const char * argv[]) {
         };
 
         //prepare file writers and data writing functions ==============================================================================
-        auto avgPositionWriter = std::make_unique<FileIO::AverageChargePositionWriter>(
-                simResultBasename+"_averagePosition.txt");
+        /*auto avgPositionWriter = std::make_unique<FileIO::AverageChargePositionWriter>(
+                simResultBasename+"_averagePosition.txt");*/
         auto fftWriter = std::make_unique<FileIO::IdealizedQitFFTWriter>(particlePtrs,
                 simResultBasename+"_fft.txt");
 
@@ -495,6 +498,9 @@ int main(int argc, const char * argv[]) {
                         }
                         else if (fftWriteMode==MASS_RESOLVED) {
                             fftWriter->writeTimestepMassResolved(time);
+                        }
+                        else if (fftWriteMode==ION_CLOUD_POSITION) {
+                            fftWriter->writeTimestepAverageIonCloudPosition(time);
                         }
                     }
 
