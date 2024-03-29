@@ -33,6 +33,7 @@
 #include "PSim_util.hpp"
 #include "Integration_verletIntegrator.hpp"
 #include "Integration_parallelVerletIntegrator.hpp"
+#include "Integration_parallelRK4Integrator.hpp"
 
 #ifdef WITH_FMM_3d
 #include "Integration_fmmIntegrator.hpp"
@@ -62,7 +63,7 @@
 #include <ctime>
 #include <filesystem>
 
-enum IntegratorMode {VERLET, PARALLEL_VERLET, FMM3D_VERLET, EXAFMM_VERLET};
+enum IntegratorMode {VERLET, PARALLEL_VERLET, FMM3D_VERLET, EXAFMM_VERLET, PARALLEL_RUNGE_KUTTA4};
 enum RfAmplitudeMode {STATIC_RF,RAMPED_RF};
 enum ExciteMode {RECTPULSE,SWIFT};
 enum FftWriteMode {UNRESOLVED,MASS_RESOLVED};
@@ -93,6 +94,9 @@ int main(int argc, const char * argv[]) {
         }
         else if (integratorMode_str=="parallel_verlet") {
             integratorMode = PARALLEL_VERLET;
+        }
+        else if (integratorMode_str=="RK4") {
+            integratorMode = PARALLEL_RUNGE_KUTTA4;
         }
 #ifdef WITH_FMM_3d
         else if (integratorMode_str=="FMM3D_verlet") {
@@ -243,10 +247,9 @@ int main(int argc, const char * argv[]) {
                 [exciteMode, rfMode, excitePulseLength, excitePulsePotential,
                         omega, &swiftWaveForm, &V_0, &V_0_ramp,
                         &potentialArrays, &potentialsFactorsDc, &potentialFactorsRf, &potentialFactorsExcite]
-                        (Core::Particle* particle, int /*particleIndex*/,  double time, unsigned int timestep)
+                        (Core::Particle* particle, Core::Vector pos, double time, unsigned int timestep)
                         -> Core::Vector {
 
-                    Core::Vector pos = particle->getLocation();
                     double particleCharge = particle->getCharge();
                     double excitePotential = 0;
                     if (exciteMode==RECTPULSE) {
@@ -279,14 +282,38 @@ int main(int argc, const char * argv[]) {
                     return fEfield*particleCharge;
                 };
 
-        auto accelerationFunctionQIT =
+
+        auto spaceChargeAccelerationFct_RKIntegration =
+                [spaceChargeFactor](
+                        Core::Particle* particle, int /*particleIndex*/,
+                        SpaceCharge::FieldCalculator& scFieldCalculator, double /*time*/, unsigned int /*timestep*/) -> Core::Vector {
+
+                    Core::Vector spaceChargeForce(0, 0, 0);
+                    if (spaceChargeFactor>0) {
+                        spaceChargeForce =
+                                scFieldCalculator.getEFieldFromSpaceCharge(*particle)*(particle->getCharge()*spaceChargeFactor);
+                    }
+
+                    particle->setFloatAttribute(key_spaceCharge_x, spaceChargeForce.x());
+                    particle->setFloatAttribute(key_spaceCharge_y, spaceChargeForce.y());
+                    particle->setFloatAttribute(key_spaceCharge_z, spaceChargeForce.z());
+
+                    return (spaceChargeForce/particle->getMass());
+                };
+
+        auto accelerationFctTrapField_RKIntegration =
+                [&trapFieldFunction](Core::Particle* particle, Core::Vector position, Core::Vector /*velocity*/, double time, unsigned int timestep){
+                    return trapFieldFunction(particle, position, time, timestep)/particle->getMass();
+                };
+
+        auto accelerationFunctionQIT_verletIntegration =
                 [spaceChargeFactor, &trapFieldFunction](
                         Core::Particle* particle, int particleIndex, SpaceCharge::FieldCalculator& scFieldCalculator,
                         double time, unsigned int timestep) -> Core::Vector {
 
                     double particleCharge = particle->getCharge();
 
-                    Core::Vector trapForce = trapFieldFunction(particle, particleIndex, time, timestep);
+                    Core::Vector trapForce = trapFieldFunction(particle, particle->getLocation(), time, timestep);
 
                     Core::Vector spaceChargeForce(0, 0, 0);
                     if (spaceChargeFactor>0) {
@@ -426,7 +453,7 @@ int main(int argc, const char * argv[]) {
         if (integratorMode==VERLET) {
             Integration::VerletIntegrator verletIntegrator(
                     particlePtrs,
-                    accelerationFunctionQIT, timestepWriteFunction, otherActionsFunctionQIT, particleStartMonitoringFct,
+                    accelerationFunctionQIT_verletIntegration, timestepWriteFunction, otherActionsFunctionQIT, particleStartMonitoringFct,
                     &hsModel);
             integratorPtr = &verletIntegrator;
             AppUtils::SignalHandler::setReceiver(verletIntegrator);
@@ -435,7 +462,7 @@ int main(int argc, const char * argv[]) {
         else if (integratorMode==PARALLEL_VERLET) {
             Integration::ParallelVerletIntegrator verletIntegrator(
                     particlePtrs,
-                    accelerationFunctionQIT, timestepWriteFunction, otherActionsFunctionQIT,
+                    accelerationFunctionQIT_verletIntegration, timestepWriteFunction, otherActionsFunctionQIT,
                     particleStartMonitoringFct,
                     &hsModel);
 
@@ -443,11 +470,20 @@ int main(int argc, const char * argv[]) {
             AppUtils::SignalHandler::setReceiver(verletIntegrator);
             verletIntegrator.run(timeSteps, dt);
         }
+        else if (integratorMode==PARALLEL_RUNGE_KUTTA4) {
+            Integration::ParallelRK4Integrator rk4Integrator(
+                    particlePtrs,
+                    accelerationFctTrapField_RKIntegration, spaceChargeAccelerationFct_RKIntegration,
+                    timestepWriteFunction, otherActionsFunctionQIT, particleStartMonitoringFct,
+                    &hsModel);
+            AppUtils::SignalHandler::setReceiver(rk4Integrator);
+            rk4Integrator.run(timeSteps, dt);
+        }
 #ifdef WITH_FMM_3d
         else if (integratorMode==FMM3D_VERLET) {
             Integration::FMMVerletIntegrator<FMM3D::FMMSolver> integrator(
                     particlePtrs,
-                    accelerationFunctionQIT, timestepWriteFunction,
+                    accelerationFunctionQIT_verletIntegration, timestepWriteFunction,
                     otherActionsFunctionQIT, particleStartMonitoringFct,
                     &hsModel);
 
@@ -463,7 +499,7 @@ int main(int argc, const char * argv[]) {
         else if (integratorMode==EXAFMM_VERLET) {
             Integration::FMMVerletIntegrator<ExaFMMt::FMMSolver> integrator(
                     particlePtrs,
-                    accelerationFunctionQIT, timestepWriteFunction,
+                    accelerationFunctionQIT_verletIntegration, timestepWriteFunction,
                     otherActionsFunctionQIT, particleStartMonitoringFct,
                     &hsModel);
 

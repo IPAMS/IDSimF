@@ -196,7 +196,7 @@ int main(int argc, const char * argv[]) {
         }
 
         double f_rf = simConf->doubleParameter("f_rf"); //RF frequency 1e6;
-        double omega = f_rf*2.0*M_PI; //RF angular frequencyf_rf* 2.0 * M_PI;
+        double omega = f_rf*2.0*M_PI; //RF angular frequency_rf* 2.0 * M_PI;
 
         // read sampled RF waveform
         RfWaveMode rfWaveMode;

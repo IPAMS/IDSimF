@@ -16,6 +16,9 @@ add_test(NAME app_ionTraps_generalTrapSim_simpleCapacitor COMMAND ${PROJECT_NAME
 add_test(NAME app_ionTraps_generalTrapSim_simpleCapacitor_allSplat COMMAND ${PROJECT_NAME}
         "example/simpleCapacitor_allSplat.json" "run_app_ionTraps_generalTrapSim_simpleCapacitor_allSplat" -n ${N_THREADS})
 
+add_test(NAME app_ionTraps_generalTrapSim_simpleCapacitor_RK4 COMMAND ${PROJECT_NAME}
+        "example/simpleCapacitor_allSplat.json" "run_app_ionTraps_generalTrapSim_simpleCapacitor_RK4" -n ${N_THREADS})
+
 add_test(NAME app_ionTraps_generalTrapSim_simpleCapacitor_ionCloud COMMAND ${PROJECT_NAME}
         "example/simpleCapacitor_ionCloud.json" "run_app_ionTraps_generalTrapSim_simpleCapacitor_ionCloud" -n ${N_THREADS})
 
