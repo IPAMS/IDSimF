@@ -5,6 +5,7 @@ set(SOURCE_FILES
         test_verletIntegrator.cpp
         test_parallelVerletIntegrator.cpp
         test_parallelRK4Integrator.cpp
+        test_fullSumRK4Integrator.cpp
         test_velocityIntegrator.cpp)
 
 if(USE_FMM_3D)

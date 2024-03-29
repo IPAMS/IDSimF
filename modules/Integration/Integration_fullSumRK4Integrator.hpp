@@ -21,16 +21,17 @@
  ------------
  BTree_parallelRK4Integrator.hpp
  
- Parallel version of a Runge Kutta 4 Integrator with Barnes-Hut Tree space charge calcultation
+ Parallel version of a Runge Kutta 4 Integrator with naive full sum space charge calculation
+ (mostly for benchmarking and testing purposes)
 
  ****************************/
 
-#ifndef BTree_parallelRK4Integrator_hpp
-#define BTree_parallelRK4Integrator_hpp
+#ifndef BTree_fullSumRK4Integrator_hpp
+#define BTree_fullSumRK4Integrator_hpp
 
 #include "Core_particle.hpp"
 #include "Core_vector.hpp"
-#include "BTree_parallelTree.hpp"
+#include "SC_fullSumSolver.hpp"
 #include "Integration_abstractTimeIntegrator.hpp"
 #include "CollisionModel_AbstractCollisionModel.hpp"
 #include <vector>
@@ -39,11 +40,11 @@ namespace Integration{
 
     //std::function<Core::Vector(Core::Particle* particle, int particleIndex, Core::Tree& tree, double time, int timestep)> accelerationFctSingleStepType;
 
-    class ParallelRK4Integrator: public AbstractTimeIntegrator {
+    class FullSumRK4Integrator: public AbstractTimeIntegrator {
 
         public:
 
-            ParallelRK4Integrator(
+            FullSumRK4Integrator(
                     const std::vector<Core::Particle*>& particles,
                     accelerationFctType accelerationFunction,
                     accelerationFctSpaceChargeType spaceChargeAccelerationFunction,
@@ -53,7 +54,7 @@ namespace Integration{
                     CollisionModel::AbstractCollisionModel* collisionModel = nullptr
             );
 
-            ParallelRK4Integrator(
+            FullSumRK4Integrator(
                     accelerationFctType accelerationFunction,
                     accelerationFctSpaceChargeType spaceChargeAccelerationFunction,
                     timestepWriteFctType timestepWriteFunction = nullptr,
@@ -85,17 +86,14 @@ namespace Integration{
                                                    double dt);
 
         //internal variables for actual calculations:
-        Core::Vector loc_min_ = Core::Vector(-1000,-1000,-1000); ///< currently hard coded lower corner of the sim. domain
-        Core::Vector loc_max_ = Core::Vector( 1000, 1000, 1000); ///< currently hard coded upper corner of the sim. domain
-        BTree::ParallelTree tree_ = BTree::ParallelTree(loc_min_,loc_max_);///< The parallel BTree (primarily for space charge calculation)
 
         std::vector<Core::Vector>  newPos_;  ///< new position (after time step) for particles
         std::vector<Core::Vector>  spaceChargeAcceleration_;  ///< space charge acceleration from
 
+        SpaceCharge::FullSumSolver fullSumSolver_ = SpaceCharge::FullSumSolver();  ///< full sum space charge solver
         void bearParticles_(double time);
-        void initInternalState_();
     };
 }
 
 
-#endif /* BTree_parallelRK4Integrator_hpp */
+#endif /* BTree_fullSumRK4Integrator_hpp */

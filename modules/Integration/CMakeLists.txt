@@ -11,7 +11,9 @@ set(SOURCE_FILES
         Integration_parallelVerletIntegrator.hpp
         Integration_parallelVerletIntegrator.cpp
         Integration_parallelRK4Integrator.hpp
-        Integration_parallelRK4Integrator.cpp)
+        Integration_parallelRK4Integrator.cpp
+        Integration_fullSumRK4Integrator.hpp
+        Integration_fullSumRK4Integrator.cpp)
 
 if(USE_FMM_3D)
     set (SOURCE_FILES ${SOURCE_FILES}
