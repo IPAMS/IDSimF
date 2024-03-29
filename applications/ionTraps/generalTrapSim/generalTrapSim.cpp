@@ -308,7 +308,7 @@ int main(int argc, const char * argv[]) {
 
         auto accelerationFunctionQIT_verletIntegration =
                 [spaceChargeFactor, &trapFieldFunction](
-                        Core::Particle* particle, int particleIndex, SpaceCharge::FieldCalculator& scFieldCalculator,
+                        Core::Particle* particle, int /*particleIndex*/, SpaceCharge::FieldCalculator& scFieldCalculator,
                         double time, unsigned int timestep) -> Core::Vector {
 
                     double particleCharge = particle->getCharge();
