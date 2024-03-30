@@ -34,6 +34,7 @@
 #include "Integration_verletIntegrator.hpp"
 #include "Integration_parallelVerletIntegrator.hpp"
 #include "Integration_parallelRK4Integrator.hpp"
+#include "Integration_fullSumRK4Integrator.hpp"
 
 #ifdef WITH_FMM_3d
 #include "Integration_fmmIntegrator.hpp"
@@ -63,7 +64,7 @@
 #include <ctime>
 #include <filesystem>
 
-enum IntegratorMode {VERLET, PARALLEL_VERLET, FMM3D_VERLET, EXAFMM_VERLET, PARALLEL_RUNGE_KUTTA4};
+enum IntegratorMode {VERLET, PARALLEL_VERLET, FMM3D_VERLET, EXAFMM_VERLET, PARALLEL_RUNGE_KUTTA4, FULL_SUM_RUNGE_KUTTA4};
 enum RfAmplitudeMode {STATIC_RF,RAMPED_RF};
 enum ExciteMode {RECTPULSE,SWIFT};
 enum FftWriteMode {UNRESOLVED,MASS_RESOLVED};
@@ -97,6 +98,9 @@ int main(int argc, const char * argv[]) {
         }
         else if (integratorMode_str=="RK4") {
             integratorMode = PARALLEL_RUNGE_KUTTA4;
+        }
+        else if (integratorMode_str=="full_sum_RK4") {
+            integratorMode = FULL_SUM_RUNGE_KUTTA4;
         }
 #ifdef WITH_FMM_3d
         else if (integratorMode_str=="FMM3D_verlet") {
@@ -478,6 +482,15 @@ int main(int argc, const char * argv[]) {
                     &hsModel);
             AppUtils::SignalHandler::setReceiver(rk4Integrator);
             rk4Integrator.run(timeSteps, dt);
+        }
+        else if (integratorMode==FULL_SUM_RUNGE_KUTTA4) {
+            Integration::FullSumRK4Integrator fullSumRK4Integrator(
+                    particlePtrs,
+                    accelerationFctTrapField_RKIntegration, spaceChargeAccelerationFct_RKIntegration,
+                    timestepWriteFunction, otherActionsFunctionQIT, particleStartMonitoringFct,
+                    &hsModel);
+            AppUtils::SignalHandler::setReceiver(fullSumRK4Integrator);
+            fullSumRK4Integrator.run(timeSteps, dt);
         }
 #ifdef WITH_FMM_3d
         else if (integratorMode==FMM3D_VERLET) {

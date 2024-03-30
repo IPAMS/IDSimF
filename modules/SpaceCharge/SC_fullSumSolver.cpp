@@ -34,12 +34,14 @@ Core::Vector SpaceCharge::FullSumSolver::getEFieldFromSpaceCharge(Core::Particle
     Core::Vector sum(0.0, 0.0, 0.0);
     //#pragma omp parallel for reduction(+:sum) default(none) shared(particleLocation, nParticles, particleVector)
     for (std::size_t i=0; i<nParticles; ++i){
-        Core::Vector field = BTree::AbstractNode::calculateElectricField(
-                particleLocation,
-                particleVector[i]->particle->getLocation(),
-                particleVector[i]->particle->getCharge()
-                );
-        sum += field;
+        if(particleVector[i]->particle->isActive()) {
+            Core::Vector field = BTree::AbstractNode::calculateElectricField(
+                    particleLocation,
+                    particleVector[i]->particle->getLocation(),
+                    particleVector[i]->particle->getCharge()
+            );
+            sum += field;
+        }
     }
     return sum;
 }
