@@ -12,6 +12,8 @@ set(SOURCE_FILES
         Integration_parallelVerletIntegrator.cpp
         Integration_parallelRK4Integrator.hpp
         Integration_parallelRK4Integrator.cpp
+        Integration_fullSumVerletIntegrator.hpp
+        Integration_fullSumVerletIntegrator.cpp
         Integration_fullSumRK4Integrator.hpp
         Integration_fullSumRK4Integrator.cpp)
 
