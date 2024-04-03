@@ -28,8 +28,8 @@
 
 //FIXME: General: Establish dedicated types for time and use size_t
 
-#ifndef BTree_parallelVerletIntegrator_hpp
-#define BTree_parallelVerletIntegrator_hpp
+#ifndef BTree_fullSumVerletIntegrator_hpp
+#define BTree_fullSumVerletIntegrator_hpp
 
 #include "Core_particle.hpp"
 #include "Core_vector.hpp"
@@ -87,4 +87,4 @@ namespace Integration{
 }
 
 
-#endif /* BTree_parallelVerletIntegrator_hpp */
+#endif /* BTree_fullSumVerletIntegrator_hpp */

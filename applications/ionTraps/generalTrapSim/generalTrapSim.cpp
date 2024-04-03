@@ -33,6 +33,7 @@
 #include "PSim_util.hpp"
 #include "Integration_verletIntegrator.hpp"
 #include "Integration_parallelVerletIntegrator.hpp"
+#include "Integration_fullSumVerletIntegrator.hpp"
 #include "Integration_parallelRK4Integrator.hpp"
 #include "Integration_fullSumRK4Integrator.hpp"
 
@@ -64,7 +65,7 @@
 #include <ctime>
 #include <filesystem>
 
-enum IntegratorMode {VERLET, PARALLEL_VERLET, FMM3D_VERLET, EXAFMM_VERLET, PARALLEL_RUNGE_KUTTA4, FULL_SUM_RUNGE_KUTTA4};
+enum IntegratorMode {VERLET, PARALLEL_VERLET, FMM3D_VERLET, EXAFMM_VERLET, FULL_SUM_VERLET, PARALLEL_RUNGE_KUTTA4, FULL_SUM_RUNGE_KUTTA4};
 enum RfAmplitudeMode {STATIC_RF,RAMPED_RF};
 enum ExciteMode {RECTPULSE,SWIFT};
 enum FftWriteMode {UNRESOLVED,MASS_RESOLVED};
@@ -101,6 +102,9 @@ int main(int argc, const char * argv[]) {
         }
         else if (integratorMode_str=="full_sum_RK4") {
             integratorMode = FULL_SUM_RUNGE_KUTTA4;
+        }
+        else if (integratorMode_str=="full_sum_verlet") {
+            integratorMode = FULL_SUM_VERLET;
         }
 #ifdef WITH_FMM_3d
         else if (integratorMode_str=="FMM3D_verlet") {
@@ -465,6 +469,17 @@ int main(int argc, const char * argv[]) {
         }
         else if (integratorMode==PARALLEL_VERLET) {
             Integration::ParallelVerletIntegrator verletIntegrator(
+                    particlePtrs,
+                    accelerationFunctionQIT_verletIntegration, timestepWriteFunction, otherActionsFunctionQIT,
+                    particleStartMonitoringFct,
+                    &hsModel);
+
+            integratorPtr = &verletIntegrator;
+            AppUtils::SignalHandler::setReceiver(verletIntegrator);
+            verletIntegrator.run(timeSteps, dt);
+        }
+        else if (integratorMode==FULL_SUM_VERLET) {
+            Integration::FullSumVerletIntegrator verletIntegrator(
                     particlePtrs,
                     accelerationFunctionQIT_verletIntegration, timestepWriteFunction, otherActionsFunctionQIT,
                     particleStartMonitoringFct,

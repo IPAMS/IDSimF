@@ -1,5 +1,5 @@
 {
-  "integrator_mode":"full_sum_RK4",
+  "integrator_mode":"full_sum_verlet",
   "sim_time_steps":2000,
   "trajectory_write_interval":10,
   "fft_write_interval":10,
