@@ -228,7 +228,7 @@ int main(int argc, const char * argv[]) {
 
         //prepare file writers ==============================================================================
         auto hdf5Writer = std::make_unique<FileIO::TrajectoryHDF5Writer>(
-                simResultBasename+"_trajectories.hd5");
+                simResultBasename+"_trajectories.h5");
 
         if (ionRecordMode==FULL) {
             std::vector<std::string> particleAttributeNames = {"velocity x", "velocity y", "velocity z",

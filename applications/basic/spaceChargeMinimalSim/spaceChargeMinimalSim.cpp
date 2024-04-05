@@ -92,7 +92,7 @@ int main(int argc, const char * argv[]) {
 
         std::vector<std::string> auxParamNames = {"velocity x", "velocity y", "velocity z"};
 
-        auto hdf5Writer = std::make_unique<FileIO::TrajectoryHDF5Writer>(simResultBasename+"_trajectories.hd5");
+        auto hdf5Writer = std::make_unique<FileIO::TrajectoryHDF5Writer>(simResultBasename+"_trajectories.h5");
         hdf5Writer->setParticleAttributes(auxParamNames, additionalParameterTransformFct);
 
         /*auto jsonWriter = std::make_unique<FileIO::TrajectoryExplorerJSONwriter>(

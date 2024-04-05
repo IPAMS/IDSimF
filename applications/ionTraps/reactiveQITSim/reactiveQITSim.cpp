@@ -395,7 +395,7 @@ int main(int argc, const char * argv[]) {
         std::vector<std::string> integerParticleAttributesNames = {"global index", "total collisions", "chemical id"};
 
         auto hdf5Writer = std::make_unique<FileIO::TrajectoryHDF5Writer>(
-                simResultBasename+"_trajectories.hd5");
+                simResultBasename+"_trajectories.h5");
         hdf5Writer->setParticleAttributes(auxParamNames, additionalParameterTransformFct);
         hdf5Writer->setParticleAttributes(integerParticleAttributesNames, integerParticleAttributesTransformFct);
 

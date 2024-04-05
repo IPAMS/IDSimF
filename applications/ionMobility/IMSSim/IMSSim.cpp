@@ -206,7 +206,7 @@ int main(int argc, const char *argv[]){
         }
 
         //init hdf5 filewriter
-        std::string hdf5Filename = projectName+"_trajectories.hd5";
+        std::string hdf5Filename = projectName+"_trajectories.h5";
         FileIO::TrajectoryHDF5Writer hdf5Writer(hdf5Filename);
         hdf5Writer.setParticleAttributes(auxParamNames, additionalParamTFct);
 

@@ -66,7 +66,7 @@ TEST_CASE( "Test MD and integrator", "[ParticleSimulation][VelocityIntegrator][t
         
 
         //init hdf5 filewriter
-        std::string hdf5Filename = "test_trajectories.hd5";
+        std::string hdf5Filename = "test_trajectories.h5";
         FileIO::TrajectoryHDF5Writer hdf5Writer(hdf5Filename);
         hdf5Writer.setParticleAttributes(auxParamNames, additionalParamTFct);
 

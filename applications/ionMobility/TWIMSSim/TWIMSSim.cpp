@@ -291,7 +291,7 @@ int main(int argc, const char * argv[]) {
             return result;
         };
 
-        std::string hdf5Filename = projectName+"_trajectories.hd5";
+        std::string hdf5Filename = projectName+"_trajectories.h5";
         FileIO::TrajectoryHDF5Writer trajectoryWriter(hdf5Filename);
         trajectoryWriter.setParticleAttributes(integerParticleAttributesNames, additionalIntegerParamTFct);
         trajectoryWriter.setParticleAttributes(auxParamNames, auxParamFct);
