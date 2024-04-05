@@ -1,8 +1,0 @@
-{
-"sim_time_steps":100,
-"trajectory_write_interval":1,
-"dt":1e-6,
-"ion_cloud_init_file":"test_ion_cloud_crash_1.csv",
-"space_charge_factor":1,
-"max_ion_radius":0.005
-}

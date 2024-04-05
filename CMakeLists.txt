@@ -136,7 +136,6 @@ endif()
 
 add_subdirectory (applications/util)
 add_subdirectory (applications/basic/spaceChargeMinimalSim)
-add_subdirectory (applications/basic/spaceChargeMinimalParallelSim)
 add_subdirectory (applications/basic/spaceChargeSimpleSim)
 add_subdirectory (applications/basic/staticSimionPASim)
 add_subdirectory (applications/ionCollision/quadrupoleCollisionCellSim)

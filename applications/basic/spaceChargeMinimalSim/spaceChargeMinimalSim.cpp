@@ -21,17 +21,16 @@
  ------------
  spaceChargeMinimalSim.cpp
 
- Minimal serial simulation of pure particle / particle interaction (space charge)
+ Minimal simulation of pure particle / particle interaction (space charge)
 
  ****************************/
 
 #include "Core_particle.hpp"
 #include "BTree_tree.hpp"
-#include "FileIO_trajectoryExplorerJSONwriter.hpp"
 #include "FileIO_trajectoryHDF5Writer.hpp"
-#include "Integration_verletIntegrator.hpp"
 #include "FileIO_ionCloudReader.hpp"
 #include "appUtils_simulationConfiguration.hpp"
+#include "appUtils_integrationRunning.hpp"
 #include "appUtils_logging.hpp"
 #include "appUtils_stopwatch.hpp"
 #include "appUtils_signalHandler.hpp"
@@ -130,11 +129,11 @@ int main(int argc, const char * argv[]) {
 
                         hdf5Writer->writeSplatTimes(particles);
                         hdf5Writer->finalizeTrajectory();
-                        logger->info("finished ts:{} time:{:.2e}", timestep, time);
+                        logger->info("ts:{} time:{:.2e} n_particles:{}", timestep, time, particles.size());
                     }
 
                     else if (timestep%trajectoryWriteInterval==0) {
-                        logger->info("ts:{} time:{:.2e}", timestep, time);
+                        logger->info("ts:{} time:{:.2e} n_particles:{}", timestep, time, particles.size());
                         hdf5Writer->writeTimestep(particles, time);
                     }
                 };
@@ -142,11 +141,11 @@ int main(int argc, const char * argv[]) {
         // simulate ===============================================================================================
         AppUtils::Stopwatch stopWatch;
         stopWatch.start();
-        Integration::VerletIntegrator verletIntegrator(
+        AppUtils::runTrajectoryIntegration(
+                simConf, timeSteps, dt,
                 particlePtrs,
-                accelerationFunction, postTimestepFunction);
-        AppUtils::SignalHandler::setReceiver(verletIntegrator);
-        verletIntegrator.run(timeSteps, dt);
+                accelerationFunction,
+                postTimestepFunction);
 
         logger->info("elapsed secs (wall time) {}", stopWatch.elapsedSecondsWall());
         logger->info("elapsed secs (cpu time) {}", stopWatch.elapsedSecondsCPU());

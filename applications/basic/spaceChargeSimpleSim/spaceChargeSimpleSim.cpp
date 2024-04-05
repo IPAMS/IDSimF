@@ -31,8 +31,8 @@
 #include "FileIO_trajectoryHDF5Writer.hpp"
 #include "PSim_util.hpp"
 #include "PSim_boxStartZone.hpp"
-#include "Integration_verletIntegrator.hpp"
 #include "appUtils_simulationConfiguration.hpp"
+#include "appUtils_integrationRunning.hpp"
 #include "appUtils_logging.hpp"
 #include "appUtils_stopwatch.hpp"
 #include "appUtils_signalHandler.hpp"
@@ -152,11 +152,13 @@ int main(int argc, const char * argv[]) {
         // simulate ===============================================================================================
         AppUtils::Stopwatch stopWatch;
         stopWatch.start();
-        Integration::VerletIntegrator verletIntegrator(
+
+        AppUtils::runTrajectoryIntegration(
+                simConf, timeSteps, dt,
                 particlePtrs,
-                accelerationFunction, postTimestepFunction);
-        AppUtils::SignalHandler::setReceiver(verletIntegrator);
-        verletIntegrator.run(timeSteps, dt);
+                accelerationFunction,
+                postTimestepFunction);
+
         stopWatch.stop();
 
         logger->info("elapsed secs (wall time) {}", stopWatch.elapsedSecondsWall());

@@ -1,8 +1,0 @@
-{
-  "sim_time_steps":1500,          //number of timesteps
-  "trajectory_write_interval":50, //interval of trajectory writing
-  "dt":1e-8,                      //timestep length
-  "space_charge_factor":1e3,      //space charge factor
-  "n_ions":[300,300],             //vector of number of ions
-  "ion_masses":[35,37]            //vector of ion masses (in u)
-}
