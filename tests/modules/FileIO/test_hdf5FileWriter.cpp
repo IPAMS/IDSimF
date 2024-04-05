@@ -26,7 +26,6 @@
  ****************************/
 
 #include "FileIO_trajectoryHDF5Writer.hpp"
-#include "FileIO_trajectoryExplorerJSONwriter.hpp"
 #include "PSim_particleStartSplatTracker.hpp"
 #include "Core_vector.hpp"
 #include "Core_particle.hpp"

@@ -3,7 +3,6 @@ project(test_FileIO)
 set(SOURCE_FILES
         ${CMAKE_SOURCE_DIR}/libs/jsoncpp/jsoncpp.cpp
         test_main.cpp
-        test_jsonFileWriter.cpp
         test_vtkFileWriter.cpp
         test_ionCloudReader.cpp
         test_simpleFileWriters.cpp

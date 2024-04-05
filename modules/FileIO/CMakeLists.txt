@@ -5,8 +5,6 @@ set(SOURCE_FILES
         FileIO_averageChargePositionWriter.cpp
         FileIO_simpleVTKwriter.hpp
         FileIO_simpleVTKwriter.cpp
-        FileIO_trajectoryExplorerJSONwriter.hpp
-        FileIO_trajectoryExplorerJSONwriter.cpp
         FileIO_ionCloudReader.cpp
         FileIO_ionCloudReader.hpp
         FileIO_scalar_writer.cpp

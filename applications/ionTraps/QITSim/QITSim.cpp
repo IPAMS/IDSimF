@@ -85,7 +85,6 @@ int main(int argc, const char * argv[]) {
         unsigned int fftWriteInterval = simConf->unsignedIntParameter("fft_write_interval");
         double dt = simConf->doubleParameter("dt");
         std::vector<int> nIons = std::vector<int>();
-        std::vector<double> ionMasses = std::vector<double>();
         std::vector<double> ionCollisionDiameters_angstrom = std::vector<double>();
         std::string fftWriteMode_str = simConf->stringParameter("fft_write_mode");
         FftWriteMode fftWriteMode = UNRESOLVED;
@@ -229,7 +228,6 @@ int main(int argc, const char * argv[]) {
             particle->setFloatAttribute(key_spaceCharge_x, 0.0);
             particle->setFloatAttribute(key_spaceCharge_y, 0.0);
             particle->setFloatAttribute(key_spaceCharge_z, 0.0);
-            ionMasses.emplace_back(particle->getMass()/Core::AMU_TO_KG);
         }
 
         // define functions for the trajectory integration ==================================================
@@ -472,6 +470,11 @@ int main(int argc, const char * argv[]) {
                         V_rf_export.emplace_back(V_0);
                         hdf5Writer->writeStartSplatData(startSplatTracker);
                         hdf5Writer->writeTimestep(particles, time);
+                        std::vector<double> ionMasses = std::vector<double>();
+                        for (const auto& particle: particles) {
+                            ionMasses.emplace_back(particle->getMass()/Core::AMU_TO_KG);
+                        }
+                        hdf5Writer->writeNumericListDataset("Particle Masses", ionMasses);
                         hdf5Writer->finalizeTrajectory();
                         logger->info("finished ts:{} time:{:.2e}", timestep, time);
                     }
@@ -500,8 +503,6 @@ int main(int argc, const char * argv[]) {
                 accelerationFctTrapField_RKIntegration,
                 spaceChargeAccelerationFct_RKIntegration,
                 postTimestepFunction, otherActionsFunctionQIT, particleStartMonitoringFct, &hsModel);
-
-        hdf5Writer->writeNumericListDataset("Particle Masses", ionMasses);
 
         if (rfAmplitudeMode==RAMPED_RF) {
             hdf5Writer->writeNumericListDataset("V_rf", V_rf_export);
