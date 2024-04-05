@@ -294,12 +294,12 @@ int main(int argc, const char * argv[]) {
                     }
                 };
 
-
-        auto timestepWriteFct =
+        auto postTimestepFct =
                 [&trajectoryWriter, &voltageWriter, trajectoryWriteInterval, &rsSim, &resultFilewriter, concentrationWriteInterval,
-                 &totalFieldNow_VPerM, &logger]
-                        (std::vector<Core::Particle*>& particles, double time, int timestep,
-                         bool lastTimestep) {
+                        &totalFieldNow_VPerM, &logger](
+                        Integration::AbstractTimeIntegrator* /*integrator*/, std::vector<Core::Particle*>& particles,
+                        double time, unsigned int timestep, bool lastTimestep)
+                {
 
                     if (timestep%concentrationWriteInterval==0) {
                         resultFilewriter.writeTimestep(rsSim);
@@ -471,7 +471,7 @@ int main(int argc, const char * argv[]) {
         //init trajectory simulation object:
         Integration::ParallelVerletIntegrator verletIntegrator(
                 particlesPtrs,
-                accelerationFct, timestepWriteFct, otherActionsFct, ParticleSimulation::noFunction,
+                accelerationFct, postTimestepFct, otherActionsFct, ParticleSimulation::noFunction,
                 collisionModelPtr.get());
         // ======================================================================================
 

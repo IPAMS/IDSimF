@@ -181,9 +181,11 @@ int main(int argc, const char * argv[]) {
                     return result;
                 };
 
-        auto timestepWriteFunction = [trajectoryWriteInterval, &additionalParameterTransformFct, &jsonWriter, &logger](
+        auto postTimestepFunction = [trajectoryWriteInterval, &additionalParameterTransformFct, &jsonWriter, &logger](
+                Integration::AbstractTimeIntegrator* /*integrator*/,
                 std::vector<Core::Particle*>& particles, double time, int timestep,
-                bool lastTimestep) {
+                bool lastTimestep)
+        {
             if (timestep%trajectoryWriteInterval==0) {
                 logger->info("ts:{} time:{:.2e}", timestep, time);
                 jsonWriter->writeTimestep(particles, additionalParameterTransformFct, time, false);
@@ -217,7 +219,7 @@ int main(int argc, const char * argv[]) {
         stopWatch.start();
         Integration::VerletIntegrator verletIntegrator(
                 particlePtrs,
-                accelerationFunction, timestepWriteFunction, otherActionsFunction, ParticleSimulation::noFunction,
+                accelerationFunction, postTimestepFunction, otherActionsFunction, ParticleSimulation::noFunction,
                 &hsModel);
         AppUtils::SignalHandler::setReceiver(verletIntegrator);
         verletIntegrator.run(timeSteps, dt);

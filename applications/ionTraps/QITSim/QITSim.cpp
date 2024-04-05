@@ -29,19 +29,6 @@
 #include "Core_particle.hpp"
 #include "FileIO_trajectoryHDF5Writer.hpp"
 #include "PSim_util.hpp"
-#include "Integration_verletIntegrator.hpp"
-#include "Integration_parallelVerletIntegrator.hpp"
-#include "Integration_parallelRK4Integrator.hpp"
-#ifdef WITH_FMM_3d
-#include "Integration_fmmIntegrator.hpp"
-#include "FMM3D_fmmSolver.hpp"
-#endif
-
-#ifdef WITH_EXAFMMT
-#include "Integration_fmmIntegrator.hpp"
-#include "ExaFMMt_fmmSolver.hpp"
-#endif
-
 #include "FileIO_scalar_writer.hpp"
 #include "PSim_sampledWaveform.hpp"
 #include "PSim_math.hpp"
@@ -50,6 +37,7 @@
 #include "PSim_particleStartSplatTracker.hpp"
 #include "CollisionModel_HardSphere.hpp"
 #include "appUtils_simulationConfiguration.hpp"
+#include "appUtils_integrationRunning.hpp"
 #include "appUtils_ionDefinitionReading.hpp"
 #include "appUtils_logging.hpp"
 #include "appUtils_stopwatch.hpp"
@@ -58,7 +46,6 @@
 #include <iostream>
 #include <vector>
 
-enum IntegratorMode {VERLET, PARALLEL_VERLET, FMM3D_VERLET, EXAFMM_VERLET, PARALLEL_RUNGE_KUTTA4};
 enum GeometryMode {DEFAULT, SCALED,VARIABLE};
 enum RfAmplitudeMode {STATIC_RF, RAMPED_RF};
 enum RfWaveMode {SINE, SAMPLED};
@@ -93,31 +80,6 @@ int main(int argc, const char * argv[]) {
         std::filesystem::path confBasePath = simConf->confBasePath();
 
         // read basic simulation parameters =============================================================
-        std::string integratorMode_str = simConf->stringParameter("integrator_mode");
-        IntegratorMode integratorMode;
-        if (integratorMode_str=="verlet") {
-            integratorMode = VERLET;
-        }
-        else if (integratorMode_str=="parallel_verlet") {
-            integratorMode = PARALLEL_VERLET;
-        }
-        else if (integratorMode_str=="RK4") {
-            integratorMode = PARALLEL_RUNGE_KUTTA4;
-        }
-#ifdef WITH_FMM_3d
-        else if (integratorMode_str=="FMM3D_verlet") {
-            integratorMode = FMM3D_VERLET;
-        }
-#endif
-#ifdef WITH_EXAFMMT
-        else if (integratorMode_str=="ExaFMM_verlet") {
-            integratorMode = EXAFMM_VERLET;
-        }
-#endif
-        else {
-            throw std::invalid_argument("wrong configuration value: integrator mode");
-        }
-
         unsigned int timeSteps = simConf->unsignedIntParameter("sim_time_steps");
         unsigned int trajectoryWriteInterval = simConf->unsignedIntParameter("trajectory_write_interval");
         unsigned int fftWriteInterval = simConf->unsignedIntParameter("fft_write_interval");
@@ -484,12 +446,14 @@ int main(int argc, const char * argv[]) {
         hdf5Writer->setParticleAttributes(auxParamNames, additionalParameterTransformFct);
         hdf5Writer->setParticleAttributes(integerParticleAttributesNames, integerParticleAttributesTransformFct);
 
-        auto timestepWriteFunction =
+        auto postTimestepFunction =
                 [trajectoryWriteInterval, fftWriteInterval, fftWriteMode, &V_0, &V_rf_export, &ionsInactive,
-                        &hdf5Writer, &ionsInactiveWriter,
-                        &fftWriter, &startSplatTracker, &logger](
+                &hdf5Writer, &ionsInactiveWriter,
+                &fftWriter, &startSplatTracker, &logger](
+                        Integration::AbstractTimeIntegrator* /*integrator*/,
                         std::vector<Core::Particle*>& particles, double time, unsigned int timestep,
-                        bool lastTimestep) {
+                        bool lastTimestep)
+                {
 
                     if (timestep%fftWriteInterval==0) {
                         ionsInactiveWriter->writeTimestep(ionsInactive, time);
@@ -529,65 +493,13 @@ int main(int argc, const char * argv[]) {
         AppUtils::Stopwatch stopWatch;
         stopWatch.start();
 
-        if (integratorMode==VERLET) {
-            Integration::VerletIntegrator verletIntegrator(
-                    particlePtrs,
-                    accelerationFctQIT_verletIntegration, timestepWriteFunction,
-                    otherActionsFunctionQIT, particleStartMonitoringFct,
-                    &hsModel);
-            AppUtils::SignalHandler::setReceiver(verletIntegrator);
-            verletIntegrator.run(timeSteps, dt);
-        }
-        else if (integratorMode==PARALLEL_VERLET) {
-            Integration::ParallelVerletIntegrator verletIntegrator(
-                    particlePtrs,
-                    accelerationFctQIT_verletIntegration, timestepWriteFunction,
-                    otherActionsFunctionQIT, particleStartMonitoringFct,
-                    &hsModel);
-            AppUtils::SignalHandler::setReceiver(verletIntegrator);
-            verletIntegrator.run(timeSteps, dt);
-        }
-        else if (integratorMode==PARALLEL_RUNGE_KUTTA4) {
-            Integration::ParallelRK4Integrator rk4Integrator(
-                    particlePtrs,
-                    accelerationFctTrapField_RKIntegration, spaceChargeAccelerationFct_RKIntegration,
-                    timestepWriteFunction, otherActionsFunctionQIT, particleStartMonitoringFct,
-                    &hsModel);
-            AppUtils::SignalHandler::setReceiver(rk4Integrator);
-            rk4Integrator.run(timeSteps, dt);
-        }
-#ifdef WITH_FMM_3d
-        else if (integratorMode==FMM3D_VERLET) {
-            Integration::FMMVerletIntegrator<FMM3D::FMMSolver> integrator(
-                    particlePtrs,
-                    accelerationFctQIT_verletIntegration, timestepWriteFunction,
-                    otherActionsFunctionQIT, particleStartMonitoringFct,
-                    &hsModel);
-
-            if (simConf->isParameter("FMM3D_precision")) {
-                integrator.getFMMSolver()->setRequestedPrecision(simConf->doubleParameter("FMM3D_precision"));
-            }
-
-            AppUtils::SignalHandler::setReceiver(integrator);
-            integrator.run(timeSteps, dt);
-        }
-#endif
-#ifdef WITH_EXAFMMT
-        else if (integratorMode==EXAFMM_VERLET) {
-            Integration::FMMVerletIntegrator<ExaFMMt::FMMSolver> integrator(
-                    particlePtrs,
-                    accelerationFctQIT_verletIntegration, timestepWriteFunction,
-                    otherActionsFunctionQIT, particleStartMonitoringFct,
-                    &hsModel);
-
-            if (simConf->isParameter("ExaFMM_order")) {
-                integrator.getFMMSolver()->setExpansionOrder(simConf->intParameter("ExaFMM_order"));
-            }
-
-            AppUtils::SignalHandler::setReceiver(integrator);
-            integrator.run(timeSteps, dt);
-        }
-#endif
+        AppUtils::runTrajectoryIntegration(
+                simConf, timeSteps, dt,
+                particlePtrs,
+                accelerationFctQIT_verletIntegration,
+                accelerationFctTrapField_RKIntegration,
+                spaceChargeAccelerationFct_RKIntegration,
+                postTimestepFunction, otherActionsFunctionQIT, particleStartMonitoringFct, &hsModel);
 
         hdf5Writer->writeNumericListDataset("Particle Masses", ionMasses);
 

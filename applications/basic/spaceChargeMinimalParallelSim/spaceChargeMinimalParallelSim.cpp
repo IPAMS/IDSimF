@@ -136,10 +136,12 @@ int main(int argc, const char * argv[]) {
                     return (spaceChargeForce/particle->getMass());
                 };
 
-        auto timestepWriteFunction =
+        auto postTimestepFunction =
                 [trajectoryWriteInterval, &hdf5Writer, &logger](
+                        Integration::AbstractTimeIntegrator* /*integrator*/,
                         std::vector<Core::Particle*>& particles, double time, unsigned int timestep,
-                        bool lastTimestep) {
+                        bool lastTimestep)
+                {
 
                     if (lastTimestep) {
                         hdf5Writer->writeTimestep(particles, time);
@@ -160,7 +162,7 @@ int main(int argc, const char * argv[]) {
         stopWatch.start();
 
         Integration::ParallelVerletIntegrator verletIntegrator(
-                particlePtrs, accelerationFunction, timestepWriteFunction);
+                particlePtrs, accelerationFunction, postTimestepFunction);
         AppUtils::SignalHandler::setReceiver(verletIntegrator);
         verletIntegrator.run(timeSteps, dt);
         stopWatch.stop();

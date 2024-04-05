@@ -31,22 +31,6 @@
 #include "FileIO_trajectoryHDF5Writer.hpp"
 #include "FileIO_scalar_writer.hpp"
 #include "PSim_util.hpp"
-#include "Integration_verletIntegrator.hpp"
-#include "Integration_parallelVerletIntegrator.hpp"
-#include "Integration_fullSumVerletIntegrator.hpp"
-#include "Integration_parallelRK4Integrator.hpp"
-#include "Integration_fullSumRK4Integrator.hpp"
-
-#ifdef WITH_FMM_3d
-#include "Integration_fmmIntegrator.hpp"
-#include "FMM3D_fmmSolver.hpp"
-#endif
-
-#ifdef WITH_EXAFMMT
-#include "Integration_fmmIntegrator.hpp"
-#include "ExaFMMt_fmmSolver.hpp"
-#endif
-
 #include "PSim_sampledWaveform.hpp"
 #include "PSim_particleStartSplatTracker.hpp"
 #include "PSim_math.hpp"
@@ -59,13 +43,13 @@
 #include "appUtils_stopwatch.hpp"
 #include "appUtils_signalHandler.hpp"
 #include "appUtils_commandlineParser.hpp"
+#include "appUtils_integrationRunning.hpp"
 #include "FileIO_ionCloudReader.hpp"
 #include <iostream>
 #include <vector>
 #include <ctime>
 #include <filesystem>
 
-enum IntegratorMode {VERLET, PARALLEL_VERLET, FMM3D_VERLET, EXAFMM_VERLET, FULL_SUM_VERLET, PARALLEL_RUNGE_KUTTA4, FULL_SUM_RUNGE_KUTTA4};
 enum RfAmplitudeMode {STATIC_RF,RAMPED_RF};
 enum ExciteMode {RECTPULSE,SWIFT};
 enum FftWriteMode {UNRESOLVED,MASS_RESOLVED};
@@ -89,37 +73,6 @@ int main(int argc, const char * argv[]) {
         std::filesystem::path confBasePath = simConf->confBasePath();
 
         // read basic simulation parameters =============================================================
-        std::string integratorMode_str = simConf->stringParameter("integrator_mode");
-        IntegratorMode integratorMode;
-        if (integratorMode_str=="verlet") {
-            integratorMode = VERLET;
-        }
-        else if (integratorMode_str=="parallel_verlet") {
-            integratorMode = PARALLEL_VERLET;
-        }
-        else if (integratorMode_str=="RK4") {
-            integratorMode = PARALLEL_RUNGE_KUTTA4;
-        }
-        else if (integratorMode_str=="full_sum_RK4") {
-            integratorMode = FULL_SUM_RUNGE_KUTTA4;
-        }
-        else if (integratorMode_str=="full_sum_verlet") {
-            integratorMode = FULL_SUM_VERLET;
-        }
-#ifdef WITH_FMM_3d
-        else if (integratorMode_str=="FMM3D_verlet") {
-            integratorMode = FMM3D_VERLET;
-        }
-#endif
-#ifdef WITH_EXAFMMT
-            else if (integratorMode_str=="ExaFMM_verlet") {
-            integratorMode = EXAFMM_VERLET;
-        }
-#endif
-        else {
-            throw std::invalid_argument("wrong configuration value: integrator mode");
-        }
-
         unsigned int timeSteps = simConf->unsignedIntParameter("sim_time_steps");
         unsigned int trajectoryWriteInterval = simConf->unsignedIntParameter("trajectory_write_interval");
         unsigned int fftWriteInterval = simConf->unsignedIntParameter("fft_write_interval");
@@ -407,16 +360,16 @@ int main(int argc, const char * argv[]) {
         hdf5Writer->setParticleAttributes(particleAttributesNames, particleAttributesTransformFct);
         hdf5Writer->setParticleAttributes(integerParticleAttributesNames, integerParticleAttributesTransformFct);
 
-        Integration::AbstractTimeIntegrator* integratorPtr;
-        auto timestepWriteFunction =
+        auto postTimestepFunction =
                 [trajectoryWriteInterval, fftWriteInterval, fftWriteMode, &V_0, &V_rf_export, &ionsInactive,
-                        &hdf5Writer, &startSplatTracker, &ionsInactiveWriter, &fftWriter, &integratorPtr, &logger](
+                        &hdf5Writer, &startSplatTracker, &ionsInactiveWriter, &fftWriter, &logger](
+                        Integration::AbstractTimeIntegrator* integrator,
                         std::vector<Core::Particle*>& particles,  double time, unsigned int timestep,
                         bool lastTimestep) {
 
                     // check if simulation should be terminated (if all particles are terminated)
                     if (ionsInactive>=particles.size() && particles.size()>0) {
-                        integratorPtr->setTerminationState();
+                        integrator->setTerminationState();
                     }
 
                     // process time step data and write / export results
@@ -428,13 +381,12 @@ int main(int argc, const char * argv[]) {
                         else if (fftWriteMode==MASS_RESOLVED) {
                             //fftWriter->writeTimestepMassResolved(time);
                             std::stringstream ss;
-                            ss << "Mass resolved induction current not implemented";
+                            ss << "Mass resolved induction currently not implemented";
                             throw (std::runtime_error(ss.str()));
                         }
                     }
 
                     if (timestep%trajectoryWriteInterval==0 || lastTimestep) {
-
                         logger->info("ts:{} time:{:.2e} V_rf:{} ions existing:{} ions inactive:{}",
                                 timestep, time, V_0, particles.size(), ionsInactive);
 
@@ -458,87 +410,13 @@ int main(int argc, const char * argv[]) {
         AppUtils::Stopwatch stopWatch;
         stopWatch.start();
 
-        if (integratorMode==VERLET) {
-            Integration::VerletIntegrator verletIntegrator(
-                    particlePtrs,
-                    accelerationFunctionQIT_verletIntegration, timestepWriteFunction, otherActionsFunctionQIT, particleStartMonitoringFct,
-                    &hsModel);
-            integratorPtr = &verletIntegrator;
-            AppUtils::SignalHandler::setReceiver(verletIntegrator);
-            verletIntegrator.run(timeSteps, dt);
-        }
-        else if (integratorMode==PARALLEL_VERLET) {
-            Integration::ParallelVerletIntegrator verletIntegrator(
-                    particlePtrs,
-                    accelerationFunctionQIT_verletIntegration, timestepWriteFunction, otherActionsFunctionQIT,
-                    particleStartMonitoringFct,
-                    &hsModel);
-
-            integratorPtr = &verletIntegrator;
-            AppUtils::SignalHandler::setReceiver(verletIntegrator);
-            verletIntegrator.run(timeSteps, dt);
-        }
-        else if (integratorMode==FULL_SUM_VERLET) {
-            Integration::FullSumVerletIntegrator verletIntegrator(
-                    particlePtrs,
-                    accelerationFunctionQIT_verletIntegration, timestepWriteFunction, otherActionsFunctionQIT,
-                    particleStartMonitoringFct,
-                    &hsModel);
-
-            integratorPtr = &verletIntegrator;
-            AppUtils::SignalHandler::setReceiver(verletIntegrator);
-            verletIntegrator.run(timeSteps, dt);
-        }
-        else if (integratorMode==PARALLEL_RUNGE_KUTTA4) {
-            Integration::ParallelRK4Integrator rk4Integrator(
-                    particlePtrs,
-                    accelerationFctTrapField_RKIntegration, spaceChargeAccelerationFct_RKIntegration,
-                    timestepWriteFunction, otherActionsFunctionQIT, particleStartMonitoringFct,
-                    &hsModel);
-            AppUtils::SignalHandler::setReceiver(rk4Integrator);
-            rk4Integrator.run(timeSteps, dt);
-        }
-        else if (integratorMode==FULL_SUM_RUNGE_KUTTA4) {
-            Integration::FullSumRK4Integrator fullSumRK4Integrator(
-                    particlePtrs,
-                    accelerationFctTrapField_RKIntegration, spaceChargeAccelerationFct_RKIntegration,
-                    timestepWriteFunction, otherActionsFunctionQIT, particleStartMonitoringFct,
-                    &hsModel);
-            AppUtils::SignalHandler::setReceiver(fullSumRK4Integrator);
-            fullSumRK4Integrator.run(timeSteps, dt);
-        }
-#ifdef WITH_FMM_3d
-        else if (integratorMode==FMM3D_VERLET) {
-            Integration::FMMVerletIntegrator<FMM3D::FMMSolver> integrator(
-                    particlePtrs,
-                    accelerationFunctionQIT_verletIntegration, timestepWriteFunction,
-                    otherActionsFunctionQIT, particleStartMonitoringFct,
-                    &hsModel);
-
-            if (simConf->isParameter("FMM3D_precision")) {
-                integrator.getFMMSolver()->setRequestedPrecision(simConf->doubleParameter("FMM3D_precision"));
-            }
-
-            AppUtils::SignalHandler::setReceiver(integrator);
-            integrator.run(timeSteps, dt);
-        }
-#endif
-#ifdef WITH_EXAFMMT
-        else if (integratorMode==EXAFMM_VERLET) {
-            Integration::FMMVerletIntegrator<ExaFMMt::FMMSolver> integrator(
-                    particlePtrs,
-                    accelerationFunctionQIT_verletIntegration, timestepWriteFunction,
-                    otherActionsFunctionQIT, particleStartMonitoringFct,
-                    &hsModel);
-
-            if (simConf->isParameter("ExaFMM_order")) {
-                integrator.getFMMSolver()->setExpansionOrder(simConf->intParameter("ExaFMM_order"));
-            }
-
-            AppUtils::SignalHandler::setReceiver(integrator);
-            integrator.run(timeSteps, dt);
-        }
-#endif
+        AppUtils::runTrajectoryIntegration(
+            simConf, timeSteps, dt,
+            particlePtrs,
+            accelerationFunctionQIT_verletIntegration,
+            accelerationFctTrapField_RKIntegration,
+            spaceChargeAccelerationFct_RKIntegration,
+            postTimestepFunction, otherActionsFunctionQIT, particleStartMonitoringFct, &hsModel);
 
         if (rfMode==RAMPED_RF) {
             hdf5Writer->writeNumericListDataset("V_rf", V_rf_export);

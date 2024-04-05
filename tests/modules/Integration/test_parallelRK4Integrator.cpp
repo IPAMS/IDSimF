@@ -166,8 +166,9 @@ TEST_CASE( "Test parallel runge kutta 4 integrator", "[ParticleSimulation][Paral
             SECTION("Integration should run through and functions should be called") {
 
                 unsigned int nTimestepsRecorded = 0;
-                auto timestepWriteFct = [&nTimestepsRecorded](std::vector<Core::Particle*>& /*particles*/,
-                                                              double /*time*/, int /*timestep*/, bool /*lastTimestep*/){
+                auto postTimestepFct = [&nTimestepsRecorded](
+                        Integration::AbstractTimeIntegrator* /*integrator*/, std::vector<Core::Particle*>& /*particles*/,
+                        double /*time*/, int /*timestep*/, bool /*lastTimestep*/){
                     nTimestepsRecorded++;
                 };
 
@@ -184,7 +185,7 @@ TEST_CASE( "Test parallel runge kutta 4 integrator", "[ParticleSimulation][Paral
                 };
 
                 Integration::ParallelRK4Integrator RK4Integrator(
-                        particlesPtrs, accelerationFct, spaceChargeAccelerationFct, timestepWriteFct, otherActionsFct, particleStartMonitoringFct);
+                        particlesPtrs, accelerationFct, spaceChargeAccelerationFct, postTimestepFct, otherActionsFct, particleStartMonitoringFct);
 
                 RK4Integrator.run(timeSteps, dt);
 
@@ -217,30 +218,34 @@ TEST_CASE( "Test parallel runge kutta 4 integrator", "[ParticleSimulation][Paral
                 unsigned int terminationTimeStep = 40;
 
                 unsigned int nTimestepsRecorded = 0;
-                auto timestepWriteFct = [&nTimestepsRecorded](std::vector<Core::Particle*>& /*particles*/,
-                                                              double /*time*/, int /*timestep*/, bool /*lastTimestep*/){
+                auto postTimestepFct = [&nTimestepsRecorded](
+                        Integration::AbstractTimeIntegrator* /*integrator*/,
+                        std::vector<Core::Particle*>& /*particles*/,
+                        double /*time*/, int /*timestep*/, bool /*lastTimestep*/)
+                {
                     nTimestepsRecorded++;
                 };
 
                 auto terminationActionFct = [&integratorPtr, terminationTimeStep] (
                         Core::Vector& /*newPartPos*/, Core::Particle* /*particle*/,
-                        int /*particleIndex*/, double /*time*/, unsigned int timestep){
+                        int /*particleIndex*/, double /*time*/, unsigned int timestep)
+                {
                     if (timestep >= terminationTimeStep){
                         integratorPtr->setTerminationState();
                     }
                 };
 
-                Integration::ParallelRK4Integrator verletIntegrator(
+                Integration::ParallelRK4Integrator RK4Integrator(
                         particlesPtrs,
                         accelerationFct, spaceChargeAccelerationFct,
-                        timestepWriteFct, terminationActionFct);
+                        postTimestepFct, terminationActionFct);
 
-                integratorPtr = &verletIntegrator;
+                integratorPtr = &RK4Integrator;
 
-                verletIntegrator.run(timeSteps, dt);
+                RK4Integrator.run(timeSteps, dt);
                 CHECK(nTimestepsRecorded == terminationTimeStep+3);
-                CHECK(verletIntegrator.timeStep() == terminationTimeStep+1);
-                CHECK(verletIntegrator.time() == Approx(dt*(terminationTimeStep+1)));
+                CHECK(RK4Integrator.timeStep() == terminationTimeStep+1);
+                CHECK(RK4Integrator.time() == Approx(dt*(terminationTimeStep+1)));
             }
         }
     }

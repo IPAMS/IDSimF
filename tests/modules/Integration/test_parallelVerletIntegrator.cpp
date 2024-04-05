@@ -158,8 +158,9 @@ TEST_CASE( "Test parallel verlet integrator", "[ParticleSimulation][ParallelVerl
             SECTION("Integration should run through and functions should be called") {
 
                 unsigned int nTimestepsRecorded = 0;
-                auto timestepWriteFct = [&nTimestepsRecorded](std::vector<Core::Particle*>& /*particles*/,
-                                                              double /*time*/, int /*timestep*/, bool /*lastTimestep*/){
+                auto postTimestepFct = [&nTimestepsRecorded](
+                        Integration::AbstractTimeIntegrator* /*integrator*/, std::vector<Core::Particle*>& /*particles*/,
+                        double /*time*/, int /*timestep*/, bool /*lastTimestep*/){
                     nTimestepsRecorded++;
                 };
 
@@ -176,7 +177,7 @@ TEST_CASE( "Test parallel verlet integrator", "[ParticleSimulation][ParallelVerl
                 };
 
                 Integration::ParallelVerletIntegrator verletIntegrator(
-                        particlesPtrs, accelerationFct, timestepWriteFct, otherActionsFct, particleStartMonitoringFct);
+                        particlesPtrs, accelerationFct, postTimestepFct, otherActionsFct, particleStartMonitoringFct);
 
                 verletIntegrator.run(timeSteps, dt);
 
@@ -204,34 +205,24 @@ TEST_CASE( "Test parallel verlet integrator", "[ParticleSimulation][ParallelVerl
             }
 
             SECTION("Integration should be stoppable") {
-
-                Integration::AbstractTimeIntegrator* integratorPtr;
                 unsigned int terminationTimeStep = 40;
 
                 unsigned int nTimestepsRecorded = 0;
-                auto timestepWriteFct = [&nTimestepsRecorded](std::vector<Core::Particle*>& /*particles*/,
-                                                              double /*time*/, int /*timestep*/, bool /*lastTimestep*/){
+                auto postTimestepFct = [&nTimestepsRecorded, terminationTimeStep](
+                        Integration::AbstractTimeIntegrator* integrator, std::vector<Core::Particle*>& /*particles*/,
+                        double /*time*/, unsigned int timestep, bool /*lastTimestep*/){
                     nTimestepsRecorded++;
-                };
-
-                auto terminationActionFct = [&integratorPtr, terminationTimeStep] (
-                        Core::Vector& /*newPartPos*/, Core::Particle* /*particle*/,
-                        int /*particleIndex*/, double /*time*/, unsigned int timestep){
                     if (timestep >= terminationTimeStep){
-                        integratorPtr->setTerminationState();
+                        integrator->setTerminationState();
                     }
                 };
 
                 Integration::ParallelVerletIntegrator verletIntegrator(
-                        particlesPtrs,
-                        accelerationFct, timestepWriteFct, terminationActionFct);
-
-                integratorPtr = &verletIntegrator;
-
+                        particlesPtrs, accelerationFct, postTimestepFct);
                 verletIntegrator.run(timeSteps, dt);
-                CHECK(nTimestepsRecorded == terminationTimeStep+3);
-                CHECK(verletIntegrator.timeStep() == terminationTimeStep+1);
-                CHECK(verletIntegrator.time() == Approx(dt*(terminationTimeStep+1)));
+                CHECK(nTimestepsRecorded == terminationTimeStep+2);
+                CHECK(verletIntegrator.timeStep() == terminationTimeStep);
+                CHECK(verletIntegrator.time() == Approx(dt*(terminationTimeStep)));
             }
         }
     }

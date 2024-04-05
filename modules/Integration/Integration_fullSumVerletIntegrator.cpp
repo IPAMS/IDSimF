@@ -92,20 +92,7 @@ void Integration::FullSumVerletIntegrator::run(unsigned int nTimesteps, double d
 }
 
 void Integration::FullSumVerletIntegrator::runSingleStep(double dt){
-
-    //std::cout << "runSingleStep "<<dt<<" "<<time_<<std::endl;
-    //first: Generate new particles if necessary
     bearParticles_(time_);
-
-    int ver=0;
-
-    // Feld, das für die Kraftberechnung benutzt wird
-    // Vector of tree nodes which is used for the serialized, non recursive force calculation
-    // (
-    //std::vector<BTree::ParallelNode*> MyNod(numberOfNodes_, nullptr);
-
-    //
-
     if (collisionModel_ !=nullptr){
         collisionModel_->updateModelTimestepParameters(timestep_, time_);
     }

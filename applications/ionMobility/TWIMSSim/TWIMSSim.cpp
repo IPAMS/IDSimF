@@ -373,22 +373,25 @@ int main(int argc, const char * argv[]) {
 
         auto accelerationFct =
                 [&WavePotentialArrays, &RFPotentialArrays, &totalFieldNow, potentialScale, spaceChargeFactor]
-                        (Core::Particle* particle, int /*particleIndex*/, SpaceCharge::FieldCalculator &scFieldCalculator,
-                         double /*time*/, int /*timestep*/){
+                        (Core::Particle* particle, int /*particleIndex*/,
+                         SpaceCharge::FieldCalculator& scFieldCalculator,
+                         double /*time*/, int /*timestep*/)
+                {
                     Core::Vector fEfield(0, 0, 0);
                     Core::Vector pos = particle->getLocation();
                     double particleCharge = particle->getCharge();
 
-                    for(size_t i=0; i<WavePotentialArrays.size(); i++) {
+                    for (size_t i = 0; i<WavePotentialArrays.size(); i++) {
                         Core::Vector paField = WavePotentialArrays[i]->getField(pos.x(), pos.y(), pos.z());
-                        Core::Vector paEffectiveField = paField * totalFieldNow[i] * potentialScale;
+                        Core::Vector paEffectiveField = paField*totalFieldNow[i]*potentialScale;
 
                         fEfield = fEfield+paEffectiveField;
                     }
 
-                    for(size_t i=0; i<RFPotentialArrays.size(); i++) {
+                    for (size_t i = 0; i<RFPotentialArrays.size(); i++) {
                         Core::Vector paField = RFPotentialArrays[i]->getField(pos.x(), pos.y(), pos.z());
-                        Core::Vector paEffectiveField = paField * totalFieldNow[WavePotentialArrays.size()+i] * potentialScale;
+                        Core::Vector paEffectiveField =
+                                paField*totalFieldNow[WavePotentialArrays.size()+i]*potentialScale;
 
                         fEfield = fEfield+paEffectiveField;
                     }
@@ -396,7 +399,7 @@ int main(int argc, const char * argv[]) {
                     particle->setFloatAttribute("effectiveField", fEfield.magnitude());
 
                     if (Core::isDoubleEqual(spaceChargeFactor, 0.0)) {
-                        return (fEfield * particleCharge / particle->getMass());
+                        return (fEfield*particleCharge/particle->getMass());
                     }
                     else {
                         Core::Vector spaceChargeForce =
@@ -405,12 +408,14 @@ int main(int argc, const char * argv[]) {
                     }
                 };
 
-
-        auto timestepWriteFct =
+        auto postTimestepFct =
                 [&trajectoryWriter, &voltageWriter, trajectoryWriteInterval, &rsSim, &resultFilewriter, concentrationWriteInterval,
                         &totalFieldNow, &logger, &ionsInactive]
-                        (std::vector<Core::Particle*>& particles, double time, int timestep,
-                         bool lastTimestep) {
+                        (
+                                Integration::AbstractTimeIntegrator* /*integrator*/,
+                                std::vector<Core::Particle*>& particles, double time, int timestep,
+                                bool lastTimestep)
+                {
 
                     if (timestep%concentrationWriteInterval==0) {
                         resultFilewriter.writeTimestep(rsSim);
@@ -424,7 +429,7 @@ int main(int argc, const char * argv[]) {
                     }
                     else if (timestep%trajectoryWriteInterval==0) {
                         logger->info("ts:{} time:{:.2e} splatted ions:{}",
-                                     timestep, time, ionsInactive);
+                                timestep, time, ionsInactive);
                         rsSim.logConcentrations(logger);
                         trajectoryWriter.writeTimestep(particles, time);
                     }
@@ -665,7 +670,7 @@ int main(int argc, const char * argv[]) {
         //init trajectory simulation object:
         Integration::ParallelVerletIntegrator verletIntegrator(
                 particlesPtrs,
-                accelerationFct, timestepWriteFct, otherActionsFct, particleStartMonitoringFct,
+                accelerationFct, postTimestepFct, otherActionsFct, particleStartMonitoringFct,
                 collisionModelPtr.get());
         // ======================================================================================
 

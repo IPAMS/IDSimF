@@ -178,6 +178,40 @@ bool AppUtils::SimulationConfiguration::boolParameter(const std::string& jsonNam
     }
 }
 
+AppUtils::IntegratorMode AppUtils::SimulationConfiguration::integratorMode() const {
+    std::string integratorMode_str = this->stringParameter("integrator_mode");
+    IntegratorMode integratorMode;
+    if (integratorMode_str=="verlet") {
+        integratorMode = VERLET;
+    }
+    else if (integratorMode_str=="parallel_verlet") {
+        integratorMode = PARALLEL_VERLET;
+    }
+    else if (integratorMode_str=="RK4") {
+        integratorMode = PARALLEL_RUNGE_KUTTA4;
+    }
+    else if (integratorMode_str=="full_sum_RK4") {
+        integratorMode = FULL_SUM_RUNGE_KUTTA4;
+    }
+    else if (integratorMode_str=="full_sum_verlet") {
+        integratorMode = FULL_SUM_VERLET;
+    }
+#ifdef WITH_FMM_3d
+    else if (integratorMode_str=="FMM3D_verlet") {
+        integratorMode = FMM3D_VERLET;
+    }
+#endif
+#ifdef WITH_EXAFMMT
+    else if (integratorMode_str=="ExaFMM_verlet") {
+        integratorMode = EXAFMM_VERLET;
+    }
+#endif
+    else {
+        throw std::invalid_argument("wrong configuration value: integrator mode");
+    }
+    return integratorMode;
+}
+
 std::unique_ptr<ParticleSimulation::InterpolatedField> AppUtils::SimulationConfiguration::readInterpolatedField(
         const std::string& jsonName) const {
         if (isParameter(jsonName)){

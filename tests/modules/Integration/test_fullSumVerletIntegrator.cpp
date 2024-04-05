@@ -158,7 +158,8 @@ TEST_CASE( "Test full sum verlet integrator", "[ParticleSimulation][FullSumVerle
             SECTION("Integration should run through and functions should be called") {
 
                 unsigned int nTimestepsRecorded = 0;
-                auto timestepWriteFct = [&nTimestepsRecorded](std::vector<Core::Particle*>& /*particles*/,
+                auto postTimestepFct = [&nTimestepsRecorded](
+                        Integration::AbstractTimeIntegrator* /*integrator*/, std::vector<Core::Particle*>& /*particles*/,
                                                               double /*time*/, int /*timestep*/, bool /*lastTimestep*/){
                     nTimestepsRecorded++;
                 };
@@ -176,7 +177,7 @@ TEST_CASE( "Test full sum verlet integrator", "[ParticleSimulation][FullSumVerle
                 };
 
                 Integration::FullSumVerletIntegrator verletIntegrator(
-                        particlesPtrs, accelerationFct, timestepWriteFct, otherActionsFct, particleStartMonitoringFct);
+                        particlesPtrs, accelerationFct, postTimestepFct, otherActionsFct, particleStartMonitoringFct);
 
                 verletIntegrator.run(timeSteps, dt);
 
@@ -209,8 +210,10 @@ TEST_CASE( "Test full sum verlet integrator", "[ParticleSimulation][FullSumVerle
                 unsigned int terminationTimeStep = 40;
 
                 unsigned int nTimestepsRecorded = 0;
-                auto timestepWriteFct = [&nTimestepsRecorded](std::vector<Core::Particle*>& /*particles*/,
-                                                              double /*time*/, int /*timestep*/, bool /*lastTimestep*/){
+                auto timestepWriteFct = [&nTimestepsRecorded](
+                        Integration::AbstractTimeIntegrator* /*integrator*/,
+                        std::vector<Core::Particle*>& /*particles*/,
+                        double /*time*/, int /*timestep*/, bool /*lastTimestep*/) {
                     nTimestepsRecorded++;
                 };
 

@@ -108,29 +108,32 @@ TEST_CASE( "Test MD and integrator", "[ParticleSimulation][VelocityIntegrator][t
                     }
                 };
 
-        auto timestepWriteFctVerlet =
+        auto postTimestepFctVerlet =
                 [&timestepWriteFctSimple]
-                        (std::vector<Core::Particle*>& particles,  double time, int timestep,
-                         bool lastTimestep) {
+                        (Integration::AbstractTimeIntegrator* /*integrator*/, std::vector<Core::Particle*>& particles,
+                         double time, int timestep,
+                         bool lastTimestep)
+                {
                     timestepWriteFctSimple(particles, time, timestep, lastTimestep);
                 };
 
-        
         auto otherActionsFunctionIMSSimple =
                 [&ionsInactive]
                         (Core::Vector& newPartPos, Core::Particle* particle, int /*particleIndex*/, double time,
-                         int /*timestep*/) {
+                         int /*timestep*/)
+                {
                     if (newPartPos.x()>=1) {
                         particle->setActive(false);
                         particle->setSplatTime(time);
                         ionsInactive++;
                     }
                 };
-        
+
         auto otherActionsFunctionIMSVerlet =
                 [&otherActionsFunctionIMSSimple]
                         (Core::Vector& newPartPos, Core::Particle* particle, int particleIndex,
-                          double time, int timestep) {
+                         double time, int timestep)
+                {
                     otherActionsFunctionIMSSimple(newPartPos, particle, particleIndex, time, timestep);
                 };
 
@@ -177,7 +180,7 @@ TEST_CASE( "Test MD and integrator", "[ParticleSimulation][VelocityIntegrator][t
 
         std::unique_ptr<Integration::AbstractTimeIntegrator> trajectoryIntegrator = std::make_unique<Integration::VerletIntegrator>(
                     particlesPtrs,
-                    accelerationFctVerlet, timestepWriteFctVerlet, otherActionsFunctionIMSVerlet,
+                    accelerationFctVerlet, postTimestepFctVerlet, otherActionsFunctionIMSVerlet,
                     ParticleSimulation::noFunction,
                     collisionModelPtr.get());
         for (int step = 0; step<timeSteps; step++) {

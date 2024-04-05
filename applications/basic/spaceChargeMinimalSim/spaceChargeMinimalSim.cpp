@@ -53,7 +53,7 @@ int main(int argc, const char * argv[]) {
 
         // read basic simulation parameters =============================================================
         unsigned int timeSteps = simConf->unsignedIntParameter("sim_time_steps");
-        int trajectoryWriteInterval = simConf->intParameter("trajectory_write_interval");
+        unsigned int trajectoryWriteInterval = simConf->unsignedIntParameter("trajectory_write_interval");
         double dt = simConf->doubleParameter("dt");
 
         //read physical configuration ===================================================================
@@ -118,10 +118,12 @@ int main(int argc, const char * argv[]) {
                     return (spaceChargeForce/particle->getMass());
                 };
 
-        auto timestepWriteFunction =
+        auto postTimestepFunction =
                 [trajectoryWriteInterval, &hdf5Writer, &logger](
+                        Integration::AbstractTimeIntegrator* /*integrator*/,
                         std::vector<Core::Particle*>& particles, double time,
-                        int timestep, bool lastTimestep) {
+                        unsigned int timestep, bool lastTimestep)
+                {
 
                     if (lastTimestep) {
                         hdf5Writer->writeTimestep(particles, time);
@@ -142,7 +144,7 @@ int main(int argc, const char * argv[]) {
         stopWatch.start();
         Integration::VerletIntegrator verletIntegrator(
                 particlePtrs,
-                accelerationFunction, timestepWriteFunction);
+                accelerationFunction, postTimestepFunction);
         AppUtils::SignalHandler::setReceiver(verletIntegrator);
         verletIntegrator.run(timeSteps, dt);
 

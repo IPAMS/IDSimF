@@ -32,8 +32,6 @@
 #include "FileIO_trajectoryHDF5Writer.hpp"
 #include "FileIO_scalar_writer.hpp"
 #include "PSim_util.hpp"
-#include "Integration_verletIntegrator.hpp"
-#include "Integration_parallelVerletIntegrator.hpp"
 #include "PSim_sampledWaveform.hpp"
 #include "PSim_particleStartSplatTracker.hpp"
 #include "PSim_math.hpp"
@@ -42,6 +40,7 @@
 #include "PSim_simionPotentialArray.hpp"
 #include "CollisionModel_HardSphere.hpp"
 #include "appUtils_simulationConfiguration.hpp"
+#include "appUtils_integrationRunning.hpp"
 #include "appUtils_ionDefinitionReading.hpp"
 #include "appUtils_logging.hpp"
 #include "appUtils_stopwatch.hpp"
@@ -52,7 +51,6 @@
 #include <ctime>
 #include <filesystem>
 
-enum IntegratorMode {VERLET,PARALLEL_VERLET};
 enum RfAmplitudeMode {STATIC_RF,RAMPED_RF};
 enum ExciteMode {RECTPULSE,SWIFT};
 enum FftWriteMode {UNRESOLVED,MASS_RESOLVED};
@@ -77,15 +75,6 @@ int main(int argc, const char * argv[]) {
 
 
         // read basic simulation parameters =============================================================
-        std::string integratorMode_str = simConf->stringParameter("integrator_mode");
-        IntegratorMode integratorMode;
-        if (integratorMode_str=="parallel_verlet") {
-            integratorMode = PARALLEL_VERLET;
-        }
-        else {
-            throw std::invalid_argument("wrong configuration value: integrator mode");
-        }
-
         unsigned int timeSteps = simConf->unsignedIntParameter("sim_time_steps");
         int trajectoryWriteInterval = simConf->intParameter("trajectory_write_interval");
         int fftWriteInterval = simConf->intParameter("fft_write_interval");
@@ -373,16 +362,17 @@ int main(int argc, const char * argv[]) {
         hdf5Writer->setParticleAttributes(particleAttributesNames, particleAttributesTransformFct);
         hdf5Writer->setParticleAttributes(integerParticleAttributesNames, integerParticleAttributesTransformFct);
 
-        Integration::AbstractTimeIntegrator* integratorPtr;
-        auto timestepWriteFunction =
+        auto postTimestepFunction =
                 [trajectoryWriteInterval, fftWriteInterval, fftWriteMode, &V_0, &V_rf_export, &ionsInactive,
-                        &hdf5Writer, &startSplatTracker, &ionsInactiveWriter, &fftWriter, &integratorPtr, &logger](
-                        std::vector<Core::Particle*>& particles,  double time, int timestep,
-                        bool lastTimestep) {
+                 &hdf5Writer, &startSplatTracker, &ionsInactiveWriter, &fftWriter, &logger](
+                        Integration::AbstractTimeIntegrator* integrator,
+                        std::vector<Core::Particle*>& particles, double time, int timestep,
+                        bool lastTimestep)
+                {
 
                     // check if simulation should be terminated (if all particles are terminated)
                     if (ionsInactive>=particles.size() && particles.size()>0) {
-                        integratorPtr->setTerminationState();
+                        integrator->setTerminationState();
                     }
 
                     // process time step data and write / export results
@@ -422,18 +412,11 @@ int main(int argc, const char * argv[]) {
         AppUtils::Stopwatch stopWatch;
         stopWatch.start();
 
-        if (integratorMode==PARALLEL_VERLET) {
-            Integration::ParallelVerletIntegrator verletIntegrator(
-                    particlePtrs,
-                    accelerationFunctionLIT, timestepWriteFunction, otherActionsFunctionQIT,
-                    particleStartMonitoringFct,
-                    &hsModel);
-
-            integratorPtr = &verletIntegrator;
-
-            AppUtils::SignalHandler::setReceiver(verletIntegrator);
-            verletIntegrator.run(timeSteps, dt);
-        }
+        AppUtils::runTrajectoryIntegration(
+                simConf, timeSteps, dt,
+                particlePtrs,
+                accelerationFunctionLIT,
+                postTimestepFunction, otherActionsFunctionQIT, particleStartMonitoringFct, &hsModel);
 
         if (rfMode==RAMPED_RF) {
             hdf5Writer->writeNumericListDataset("V_rf", V_rf_export);

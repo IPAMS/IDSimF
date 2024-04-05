@@ -322,10 +322,12 @@ int main(int argc, const char *argv[]){
                     }
                 };
 
-        auto timestepWriteFctVerlet =
+        auto postTimestepFctVerlet =
                 [&timestepWriteFctSimple]
-                        (std::vector<Core::Particle*>& particles,  double time, int timestep,
-                         bool lastTimestep) {
+                        (Integration::AbstractTimeIntegrator* /*integrator*/,
+                         std::vector<Core::Particle*>& particles, double time, int timestep,
+                         bool lastTimestep)
+                {
                     timestepWriteFctSimple(particles, time, timestep, lastTimestep);
                 };
 
@@ -346,7 +348,6 @@ int main(int argc, const char *argv[]){
                           double time, int timestep) {
                     otherActionsFunctionIMSSimple(newPartPos, particle, particleIndex, time, timestep);
                 };
-
 
         //define and init transport models and trajectory integrators:
         std::unique_ptr<CollisionModel::AbstractCollisionModel> collisionModelPtr;
@@ -466,7 +467,7 @@ int main(int argc, const char *argv[]){
         if(integratorType==VERLET_PARALLEL){
             trajectoryIntegrator = std::make_unique<Integration::ParallelVerletIntegrator>(
                 particlesPtrs,
-                accelerationFctVerlet, timestepWriteFctVerlet, otherActionsFunctionIMSVerlet, 
+                accelerationFctVerlet, postTimestepFctVerlet, otherActionsFunctionIMSVerlet,
                 ParticleSimulation::noFunction,
                 collisionModelPtr.get());
         }
