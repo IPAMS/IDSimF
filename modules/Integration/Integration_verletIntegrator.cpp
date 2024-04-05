@@ -36,15 +36,15 @@
 Integration::VerletIntegrator::VerletIntegrator(
         std::vector<Core::Particle *> particles,
         Integration::accelerationFctSingleStepType accelerationFunction,
-        Integration::timestepWriteFctType timestepWriteFunction,
+        Integration::postTimestepFctType timestepWriteFunction,
         Integration::otherActionsFctType otherActionsFunction,
         Integration::AbstractTimeIntegrator::particleStartMonitoringFctType ionStartMonitoringFunction,
         CollisionModel::AbstractCollisionModel* collisionModel) :
-    Integration::AbstractTimeIntegrator(particles, ionStartMonitoringFunction),
-    collisionModel_(collisionModel),
-    accelerationFunction_(std::move(accelerationFunction)),
-    timestepWriteFunction_(std::move(timestepWriteFunction)),
-    otherActionsFunction_(std::move(otherActionsFunction))
+        Integration::AbstractTimeIntegrator(particles, ionStartMonitoringFunction),
+        collisionModel_(collisionModel),
+        accelerationFunction_(std::move(accelerationFunction)),
+        postTimestepFunction_(std::move(timestepWriteFunction)),
+        otherActionsFunction_(std::move(otherActionsFunction))
 {}
 
 /**
@@ -57,15 +57,15 @@ Integration::VerletIntegrator::VerletIntegrator(
  */
 Integration::VerletIntegrator::VerletIntegrator(
         Integration::accelerationFctSingleStepType accelerationFunction,
-        Integration::timestepWriteFctType timestepWriteFunction,
+        Integration::postTimestepFctType timestepWriteFunction,
         Integration::otherActionsFctType otherActionsFunction,
         Integration::AbstractTimeIntegrator::particleStartMonitoringFctType ionStartMonitoringFunction,
         CollisionModel::AbstractCollisionModel* collisionModel) :
-    AbstractTimeIntegrator(ionStartMonitoringFunction),
-    collisionModel_(collisionModel),
-    accelerationFunction_(std::move(accelerationFunction)),
-    timestepWriteFunction_(std::move(timestepWriteFunction)),
-    otherActionsFunction_(std::move(otherActionsFunction))
+        AbstractTimeIntegrator(ionStartMonitoringFunction),
+        collisionModel_(collisionModel),
+        accelerationFunction_(std::move(accelerationFunction)),
+        postTimestepFunction_(std::move(timestepWriteFunction)),
+        otherActionsFunction_(std::move(otherActionsFunction))
 {}
 
 /**
@@ -92,8 +92,8 @@ void Integration::VerletIntegrator::run(unsigned int nTimesteps, double dt) {
 
     this->runState_ = RUNNING;
     bearParticles_(0.0);
-    if (timestepWriteFunction_ !=nullptr) {
-        timestepWriteFunction_(particles_, time_, timestep_, false);
+    if (postTimestepFunction_ !=nullptr) {
+        postTimestepFunction_(this, particles_, time_, timestep_, false);
     }
 
     for (unsigned int step=0; step< nTimesteps; ++step){
@@ -158,8 +158,8 @@ void Integration::VerletIntegrator::runSingleStep(double dt) {
     }
     timestep_++;
     time_ = time_ + dt;
-    if (timestepWriteFunction_ != nullptr){
-        timestepWriteFunction_(particles_, time_, timestep_, false);
+    if (postTimestepFunction_ != nullptr){
+        postTimestepFunction_(this, particles_, time_, timestep_, false);
     }
 }
 
@@ -167,8 +167,8 @@ void Integration::VerletIntegrator::runSingleStep(double dt) {
  * Finalizes the verlet integration run (should be called after the last time step).
  */
 void Integration::VerletIntegrator::finalizeSimulation(){
-    if (timestepWriteFunction_ !=nullptr) {
-        timestepWriteFunction_(particles_, time_, timestep_, true);
+    if (postTimestepFunction_ !=nullptr) {
+        postTimestepFunction_(this, particles_, time_, timestep_, true);
     }
 }
 

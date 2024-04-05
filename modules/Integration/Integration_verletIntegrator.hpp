@@ -63,7 +63,7 @@ namespace Integration{
         VerletIntegrator(
                 std::vector<Core::Particle*> particles,
                 accelerationFctSingleStepType accelerationFunction,
-                timestepWriteFctType timestepWriteFunction = nullptr,
+                postTimestepFctType timestepWriteFunction = nullptr,
                 otherActionsFctType otherActionsFunction = nullptr,
                 AbstractTimeIntegrator::particleStartMonitoringFctType ionStartMonitoringFunction = nullptr,
                 CollisionModel::AbstractCollisionModel* collisionModel = nullptr
@@ -71,7 +71,7 @@ namespace Integration{
 
         VerletIntegrator(
                 accelerationFctSingleStepType accelerationFunction,
-                timestepWriteFctType timestepWriteFunction = nullptr,
+                postTimestepFctType timestepWriteFunction = nullptr,
                 otherActionsFctType otherActionsFunction = nullptr,
                 AbstractTimeIntegrator::particleStartMonitoringFctType ionStartMonitoringFunction = nullptr,
                 CollisionModel::AbstractCollisionModel* collisionModel = nullptr
@@ -86,7 +86,7 @@ namespace Integration{
         CollisionModel::AbstractCollisionModel* collisionModel_ = nullptr; ///< a gas collision model active in the simulation
 
         accelerationFctSingleStepType accelerationFunction_ = nullptr; ///< function to calculate particle acceleration
-        timestepWriteFctType timestepWriteFunction_ = nullptr; ///< function to define what is exported in every time step
+        postTimestepFctType postTimestepFunction_ = nullptr; ///< function to define what is exported in every time step
         otherActionsFctType otherActionsFunction_ = nullptr; ///< function with other actions done in every time step
 
 

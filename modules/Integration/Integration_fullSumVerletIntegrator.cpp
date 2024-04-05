@@ -26,28 +26,28 @@
 Integration::FullSumVerletIntegrator::FullSumVerletIntegrator(
         const std::vector<Core::Particle *>& particles,
         Integration::accelerationFctSingleStepType accelerationFunction,
-        Integration::timestepWriteFctType timestepWriteFunction,
+        Integration::postTimestepFctType timestepWriteFunction,
         Integration::otherActionsFctType otherActionsFunction,
         Integration::AbstractTimeIntegrator::particleStartMonitoringFctType ionStartMonitoringFunction,
         CollisionModel::AbstractCollisionModel* collisionModel) :
-    AbstractTimeIntegrator(particles, ionStartMonitoringFunction),
-    collisionModel_(collisionModel),
-    accelerationFunction_(std::move(accelerationFunction)),
-    timestepWriteFunction_(std::move(timestepWriteFunction)),
-    otherActionsFunction_(std::move(otherActionsFunction))
+        AbstractTimeIntegrator(particles, ionStartMonitoringFunction),
+        collisionModel_(collisionModel),
+        accelerationFunction_(std::move(accelerationFunction)),
+        postTimestepFunction_(std::move(timestepWriteFunction)),
+        otherActionsFunction_(std::move(otherActionsFunction))
 {}
 
 Integration::FullSumVerletIntegrator::FullSumVerletIntegrator(
         Integration::accelerationFctSingleStepType accelerationFunction,
-        Integration::timestepWriteFctType timestepWriteFunction,
+        Integration::postTimestepFctType timestepWriteFunction,
         Integration::otherActionsFctType otherActionsFunction,
         Integration::AbstractTimeIntegrator::particleStartMonitoringFctType ionStartMonitoringFunction,
         CollisionModel::AbstractCollisionModel* collisionModel) :
-    AbstractTimeIntegrator(ionStartMonitoringFunction),
-    collisionModel_(collisionModel),
-    accelerationFunction_(std::move(accelerationFunction)),
-    timestepWriteFunction_(std::move(timestepWriteFunction)),
-    otherActionsFunction_(std::move(otherActionsFunction))
+        AbstractTimeIntegrator(ionStartMonitoringFunction),
+        collisionModel_(collisionModel),
+        accelerationFunction_(std::move(accelerationFunction)),
+        postTimestepFunction_(std::move(timestepWriteFunction)),
+        otherActionsFunction_(std::move(otherActionsFunction))
 {}
 
 
@@ -76,8 +76,8 @@ void Integration::FullSumVerletIntegrator::run(unsigned int nTimesteps, double d
     this->runState_ = RUNNING;
     bearParticles_(0.0);
 
-    if (timestepWriteFunction_ !=nullptr) {
-        timestepWriteFunction_(particles_, time_, timestep_, false);
+    if (postTimestepFunction_ !=nullptr) {
+        postTimestepFunction_(this, particles_, time_, timestep_, false);
     }
 
     // run:
@@ -164,8 +164,8 @@ void Integration::FullSumVerletIntegrator::runSingleStep(double dt){
     }
     time_ = time_ + dt;
     timestep_++;
-    if (timestepWriteFunction_ != nullptr) {
-        timestepWriteFunction_(particles_, time_, timestep_, false);
+    if (postTimestepFunction_ != nullptr) {
+        postTimestepFunction_(this, particles_, time_, timestep_, false);
     }
 }
 
@@ -173,8 +173,8 @@ void Integration::FullSumVerletIntegrator::runSingleStep(double dt){
  * Finalizes the verlet integration run (should be called after the last time step).
  */
 void Integration::FullSumVerletIntegrator::finalizeSimulation(){
-    if (timestepWriteFunction_ != nullptr){
-        timestepWriteFunction_(particles_, time_, timestep_, true);
+    if (postTimestepFunction_ != nullptr){
+        postTimestepFunction_(this, particles_, time_, timestep_, true);
     }
 }
 

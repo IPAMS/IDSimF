@@ -49,7 +49,7 @@ namespace Integration{
             ParallelVerletIntegrator(
                     const std::vector<Core::Particle*>& particles,
                     accelerationFctSingleStepType accelerationFunction,
-                    timestepWriteFctType timestepWriteFunction = nullptr,
+                    postTimestepFctType timestepWriteFunction = nullptr,
                     otherActionsFctType otherActionsFunction = nullptr,
                     AbstractTimeIntegrator::particleStartMonitoringFctType ionStartMonitoringFunction = nullptr,
                     CollisionModel::AbstractCollisionModel* collisionModel = nullptr
@@ -57,7 +57,7 @@ namespace Integration{
 
             ParallelVerletIntegrator(
                     accelerationFctSingleStepType accelerationFunction,
-                    timestepWriteFctType timestepWriteFunction = nullptr,
+                    postTimestepFctType timestepWriteFunction = nullptr,
                     otherActionsFctType otherActionsFunction = nullptr,
                     AbstractTimeIntegrator::particleStartMonitoringFctType ionStartMonitoringFunction = nullptr,
                     CollisionModel::AbstractCollisionModel* collisionModel = nullptr
@@ -73,7 +73,7 @@ namespace Integration{
         CollisionModel::AbstractCollisionModel* collisionModel_ = nullptr; ///< the gas collision model to perform while integrating
 
         accelerationFctSingleStepType accelerationFunction_ = nullptr;   ///< function to calculate particle acceleration
-        timestepWriteFctType timestepWriteFunction_ = nullptr; ///< function to export / write time step results
+        postTimestepFctType postTimestepWriteFunction_ = nullptr; ///< function to export / write time step results
         otherActionsFctType otherActionsFunction_ = nullptr;   ///< function for arbitrary other actions in the simulation
 
         //internal variables for actual calculations:

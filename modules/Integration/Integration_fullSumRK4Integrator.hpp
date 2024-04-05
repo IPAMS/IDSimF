@@ -48,7 +48,7 @@ namespace Integration{
                     const std::vector<Core::Particle*>& particles,
                     accelerationFctType accelerationFunction,
                     accelerationFctSpaceChargeType spaceChargeAccelerationFunction,
-                    timestepWriteFctType timestepWriteFunction = nullptr,
+                    postTimestepFctType timestepWriteFunction = nullptr,
                     otherActionsFctType otherActionsFunction = nullptr,
                     AbstractTimeIntegrator::particleStartMonitoringFctType ionStartMonitoringFunction = nullptr,
                     CollisionModel::AbstractCollisionModel* collisionModel = nullptr
@@ -57,7 +57,7 @@ namespace Integration{
             FullSumRK4Integrator(
                     accelerationFctType accelerationFunction,
                     accelerationFctSpaceChargeType spaceChargeAccelerationFunction,
-                    timestepWriteFctType timestepWriteFunction = nullptr,
+                    postTimestepFctType timestepWriteFunction = nullptr,
                     otherActionsFctType otherActionsFunction = nullptr,
                     AbstractTimeIntegrator::particleStartMonitoringFctType ionStartMonitoringFunction = nullptr,
                     CollisionModel::AbstractCollisionModel* collisionModel = nullptr
@@ -74,7 +74,7 @@ namespace Integration{
 
         accelerationFctType accelerationFunction_ = nullptr;   ///< function to calculate particle acceleration (without space charge)
         accelerationFctSpaceChargeType spaceChargeAccelerationFunction_ = nullptr;   ///< function to calculate particle acceleration from space charge
-        timestepWriteFctType timestepWriteFunction_ = nullptr; ///< function to export / write time step results
+        postTimestepFctType postTimestepFunction_ = nullptr; ///< function to export / write time step results
         otherActionsFctType otherActionsFunction_ = nullptr;   ///< function for arbitrary other actions in the simulation
 
         Core::Vector evaluateAccelerationFunction_(Core::Particle* particle,

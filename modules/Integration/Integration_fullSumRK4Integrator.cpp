@@ -27,31 +27,31 @@ Integration::FullSumRK4Integrator::FullSumRK4Integrator(
         const std::vector<Core::Particle *>& particles,
         Integration::accelerationFctType accelerationFunction,
         Integration::accelerationFctSpaceChargeType spaceChargeAccelerationFunction,
-        Integration::timestepWriteFctType timestepWriteFunction,
+        Integration::postTimestepFctType timestepWriteFunction,
         Integration::otherActionsFctType otherActionsFunction,
         Integration::AbstractTimeIntegrator::particleStartMonitoringFctType ionStartMonitoringFunction,
         CollisionModel::AbstractCollisionModel* collisionModel) :
-    AbstractTimeIntegrator(particles, ionStartMonitoringFunction),
-    collisionModel_(collisionModel),
-    accelerationFunction_(std::move(accelerationFunction)),
-    spaceChargeAccelerationFunction_(std::move(spaceChargeAccelerationFunction)),
-    timestepWriteFunction_(std::move(timestepWriteFunction)),
-    otherActionsFunction_(std::move(otherActionsFunction))
+        AbstractTimeIntegrator(particles, ionStartMonitoringFunction),
+        collisionModel_(collisionModel),
+        accelerationFunction_(std::move(accelerationFunction)),
+        spaceChargeAccelerationFunction_(std::move(spaceChargeAccelerationFunction)),
+        postTimestepFunction_(std::move(timestepWriteFunction)),
+        otherActionsFunction_(std::move(otherActionsFunction))
 {}
 
 Integration::FullSumRK4Integrator::FullSumRK4Integrator(
         Integration::accelerationFctType accelerationFunction,
         Integration::accelerationFctSpaceChargeType spaceChargeAccelerationFunction,
-        Integration::timestepWriteFctType timestepWriteFunction,
+        Integration::postTimestepFctType timestepWriteFunction,
         Integration::otherActionsFctType otherActionsFunction,
         Integration::AbstractTimeIntegrator::particleStartMonitoringFctType ionStartMonitoringFunction,
         CollisionModel::AbstractCollisionModel* collisionModel) :
-    AbstractTimeIntegrator(ionStartMonitoringFunction),
-    collisionModel_(collisionModel),
-    accelerationFunction_(std::move(accelerationFunction)),
-    spaceChargeAccelerationFunction_(std::move(spaceChargeAccelerationFunction)),
-    timestepWriteFunction_(std::move(timestepWriteFunction)),
-    otherActionsFunction_(std::move(otherActionsFunction))
+        AbstractTimeIntegrator(ionStartMonitoringFunction),
+        collisionModel_(collisionModel),
+        accelerationFunction_(std::move(accelerationFunction)),
+        spaceChargeAccelerationFunction_(std::move(spaceChargeAccelerationFunction)),
+        postTimestepFunction_(std::move(timestepWriteFunction)),
+        otherActionsFunction_(std::move(otherActionsFunction))
 {}
 
 
@@ -78,8 +78,8 @@ void Integration::FullSumRK4Integrator::run(unsigned int nTimesteps, double dt) 
     this->runState_ = RUNNING;
     bearParticles_(0.0);
 
-    if (timestepWriteFunction_ !=nullptr) {
-        timestepWriteFunction_(particles_, time_, timestep_, false);
+    if (postTimestepFunction_ !=nullptr) {
+        postTimestepFunction_(this, particles_, time_, timestep_, false);
     }
 
     // run:
@@ -192,8 +192,8 @@ void Integration::FullSumRK4Integrator::runSingleStep(double dt){
 
     time_ = time_ + dt;
     timestep_++;
-    if (timestepWriteFunction_ != nullptr) {
-        timestepWriteFunction_(particles_, time_, timestep_, false);
+    if (postTimestepFunction_ != nullptr) {
+        postTimestepFunction_(this, particles_, time_, timestep_, false);
     }
 }
 
@@ -201,8 +201,8 @@ void Integration::FullSumRK4Integrator::runSingleStep(double dt){
  * Finalizes the RK4 integration run (should be called after the last time step).
  */
 void Integration::FullSumRK4Integrator::finalizeSimulation(){
-    if (timestepWriteFunction_ != nullptr){
-        timestepWriteFunction_(particles_, time_, timestep_, true);
+    if (postTimestepFunction_ != nullptr){
+        postTimestepFunction_(this, particles_, time_, timestep_, true);
     }
 }
 

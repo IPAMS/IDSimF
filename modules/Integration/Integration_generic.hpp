@@ -32,6 +32,10 @@
 #include <functional>
 
 namespace Integration{
+
+    // Forward abstract time integrator
+    class AbstractTimeIntegrator;
+
     /**
      * type definition for acceleration calculation functions (single step velocity verlet typed acceleration)
      */
@@ -73,15 +77,17 @@ namespace Integration{
 
 
     /**
-     * type definition for functions exporting data in every timestep
+     * type definition for functions doing things after every timestep (mostly exporting data in every timestep or
+     * stopping the integration)
      */
     typedef std::function
         <void (
+            AbstractTimeIntegrator* integrator,
             std::vector<Core::Particle*>& particles,
             double time,
             unsigned int timestep,
             bool lastTimestep)>
-    timestepWriteFctType;
+    postTimestepFctType;
 
     /**
      * type definition for functions defining "other actions", which are additional arbitrary actions performed
