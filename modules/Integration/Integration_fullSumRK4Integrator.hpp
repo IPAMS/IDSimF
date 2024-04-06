@@ -19,7 +19,7 @@
  along with IDSimF.  If not, see <https://www.gnu.org/licenses/>.
 
  ------------
- BTree_parallelRK4Integrator.hpp
+ BTree_fullSumRK4Integrator.hpp
  
  Parallel version of a Runge Kutta 4 Integrator with naive full sum space charge calculation
  (mostly for benchmarking and testing purposes)
@@ -37,8 +37,6 @@
 #include <vector>
 
 namespace Integration{
-
-    //std::function<Core::Vector(Core::Particle* particle, int particleIndex, Core::Tree& tree, double time, int timestep)> accelerationFctSingleStepType;
 
     class FullSumRK4Integrator: public AbstractTimeIntegrator {
 

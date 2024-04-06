@@ -39,10 +39,6 @@ Additional file writer provide additional export file formats.
 
     The additional file writer are currently not well maintained. 
 
-.. doxygenclass:: FileIO::TrajectoryExplorerJSONwriter
-    :members:
-    :undoc-members:
-
 .. doxygenclass:: FileIO::SimpleVTKwriter
     :members:
     :undoc-members:

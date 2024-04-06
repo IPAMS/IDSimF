@@ -111,5 +111,5 @@ The electrode geometry and the resulting electric potential is defined by SIMION
     * :math:`F_{\text{RF}}` given by ``rf_potential_factors``.
 
 
-.. include:: includes/ion_definition_reading_options.rst
+.. include:: includes/apputils_ion_definition_params.rst
 

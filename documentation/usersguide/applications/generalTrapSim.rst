@@ -58,7 +58,7 @@ Simulation configuration description
         [[x low, x high], [y low, y high], [z low, z high]]
 
 
-.. include:: includes/ion_definition_reading_options.rst
+.. include:: includes/apputils_ion_definition_params.rst
 
 
 --------------------------------------------------------

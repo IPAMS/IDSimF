@@ -101,7 +101,7 @@ Simulation configuration description
     Maximum radius a simulated particle can have before it is terminated in the simulation, in m. 
 
 
-.. include:: includes/ion_definition_reading_options.rst
+.. include:: includes/apputils_ion_definition_params
 
 
 ----------------------------

@@ -29,21 +29,21 @@
  * Creates a verlet integrator
  * @param particles group / cloud of charged particles to be integrated
  * @param accelerationFunction a function to calculate the acceleration to the individual particles
- * @param timestepWriteFunction  a function to export data from the simulation
+ * @param postTimestepFunction  a function performed for every time step after the particles are moved (for data export etc.)
  * @param otherActionsFunction  a function to perform arbitrary other actions in every time step of the simulation
  * @param collisionModel a collision model, modeling the interaction between charged particles and background gas
  */
 Integration::VerletIntegrator::VerletIntegrator(
         std::vector<Core::Particle *> particles,
         Integration::accelerationFctSingleStepType accelerationFunction,
-        Integration::postTimestepFctType timestepWriteFunction,
+        Integration::postTimestepFctType postTimestepFunction,
         Integration::otherActionsFctType otherActionsFunction,
         Integration::AbstractTimeIntegrator::particleStartMonitoringFctType ionStartMonitoringFunction,
         CollisionModel::AbstractCollisionModel* collisionModel) :
         Integration::AbstractTimeIntegrator(particles, ionStartMonitoringFunction),
         collisionModel_(collisionModel),
         accelerationFunction_(std::move(accelerationFunction)),
-        postTimestepFunction_(std::move(timestepWriteFunction)),
+        postTimestepFunction_(std::move(postTimestepFunction)),
         otherActionsFunction_(std::move(otherActionsFunction))
 {}
 
@@ -51,20 +51,20 @@ Integration::VerletIntegrator::VerletIntegrator(
  * Creates an empty verlet integrator (without simulated particles)
  *
  * @param accelerationFunction a function to calculate the acceleration to the individual particles
- * @param timestepWriteFunction  a function to export data from the simulation
+ * @param postTimestepFunction  a function to export data from the simulation
  * @param otherActionsFunction  a function to perform arbitrary other actions in every time step of the simulation
  * @param collisionModel a collision model, modeling the interaction between charged particles and background gas
  */
 Integration::VerletIntegrator::VerletIntegrator(
         Integration::accelerationFctSingleStepType accelerationFunction,
-        Integration::postTimestepFctType timestepWriteFunction,
+        Integration::postTimestepFctType postTimestepFunction,
         Integration::otherActionsFctType otherActionsFunction,
         Integration::AbstractTimeIntegrator::particleStartMonitoringFctType ionStartMonitoringFunction,
         CollisionModel::AbstractCollisionModel* collisionModel) :
         AbstractTimeIntegrator(ionStartMonitoringFunction),
         collisionModel_(collisionModel),
         accelerationFunction_(std::move(accelerationFunction)),
-        postTimestepFunction_(std::move(timestepWriteFunction)),
+        postTimestepFunction_(std::move(postTimestepFunction)),
         otherActionsFunction_(std::move(otherActionsFunction))
 {}
 

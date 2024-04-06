@@ -26,28 +26,28 @@
 Integration::ParallelVerletIntegrator::ParallelVerletIntegrator(
         const std::vector<Core::Particle *>& particles,
         Integration::accelerationFctSingleStepType accelerationFunction,
-        Integration::postTimestepFctType timestepWriteFunction,
+        Integration::postTimestepFctType postTimestepFunction,
         Integration::otherActionsFctType otherActionsFunction,
         Integration::AbstractTimeIntegrator::particleStartMonitoringFctType ionStartMonitoringFunction,
         CollisionModel::AbstractCollisionModel* collisionModel) :
         AbstractTimeIntegrator(particles, ionStartMonitoringFunction),
         collisionModel_(collisionModel),
         accelerationFunction_(std::move(accelerationFunction)),
-        postTimestepWriteFunction_(std::move(timestepWriteFunction)),
+        postTimestepWriteFunction_(std::move(postTimestepFunction)),
         otherActionsFunction_(std::move(otherActionsFunction))
 {}
 
 Integration::ParallelVerletIntegrator::ParallelVerletIntegrator(
         Integration::accelerationFctSingleStepType accelerationFunction,
         Integration::postTimestepFctType timestepWriteFunction,
-        Integration::otherActionsFctType otherActionsFunction,
+        Integration::otherActionsFctType postTimestepFunction,
         Integration::AbstractTimeIntegrator::particleStartMonitoringFctType ionStartMonitoringFunction,
         CollisionModel::AbstractCollisionModel* collisionModel) :
         AbstractTimeIntegrator(ionStartMonitoringFunction),
         collisionModel_(collisionModel),
         accelerationFunction_(std::move(accelerationFunction)),
         postTimestepWriteFunction_(std::move(timestepWriteFunction)),
-        otherActionsFunction_(std::move(otherActionsFunction))
+        otherActionsFunction_(std::move(postTimestepFunction))
 {
     initInternalState_();
 }
@@ -76,6 +76,11 @@ void Integration::ParallelVerletIntegrator::initInternalState_(){
     tree_.init();
 }
 
+/**
+ * Runs the integration
+ * @param nTimesteps number of time steps to run
+ * @param dt time step length
+ */
 void Integration::ParallelVerletIntegrator::run(unsigned int nTimesteps, double dt) {
 
     // run init:
@@ -97,6 +102,10 @@ void Integration::ParallelVerletIntegrator::run(unsigned int nTimesteps, double 
     this->runState_ = STOPPED;
 }
 
+/**
+ * Runs a single step of the integration
+ * @param dt time step length
+ */
 void Integration::ParallelVerletIntegrator::runSingleStep(double dt){
 
     //std::cout << "runSingleStep "<<dt<<" "<<time_<<std::endl;

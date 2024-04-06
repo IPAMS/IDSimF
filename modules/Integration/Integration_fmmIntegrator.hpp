@@ -37,8 +37,6 @@
 
 namespace Integration{
 
-    //std::function<Core::Vector(Core::Particle* particle, int particleIndex, Core::Tree& tree, double time, int timestep)> accelerationFctSingleStepType;
-
     template <class FMMSolverT>
     class FMMVerletIntegrator : public AbstractTimeIntegrator {
     public:

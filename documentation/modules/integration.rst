@@ -21,8 +21,12 @@ Simple Integrators
     :members:
     :undoc-members:
 
-Verlet Integrators with BTree
-=============================
+Velocity Verlet (Leapfrog type) Integrators
+===========================================
+
+Velocity verlet integration is a leapfrog type integration algorithm. IDSimF has different velocity verlet integrators with different space charge / particle-particle interaction calculation schemes 
+(Full sum, serial / parallel BTree, FMM with different FMM libraries)
+
 
 .. doxygenclass:: Integration::VerletIntegrator
     :members:
@@ -32,10 +36,25 @@ Verlet Integrators with BTree
     :members:
     :undoc-members:
 
-
-Verlet Integrators with FMM
-===========================
-
 .. doxygenclass:: Integration::FMMVerletIntegrator
+    :members:
+    :undoc-members:
+
+.. doxygenclass:: Integration::FullSumVerletIntegrator
+    :members:
+    :undoc-members:
+
+
+Runge-Kutta 4 Integrators
+=========================
+
+Integrators with the classical Runge-Kutta 4 algorithm with different space charge / particle-particle interaction calculation schemes (Full sum, parallel BTree)
+
+
+.. doxygenclass:: Integration::ParallelRK4Integrator
+    :members:
+    :undoc-members:
+
+.. doxygenclass:: Integration::FullSumRK4Integrator
     :members:
     :undoc-members:
