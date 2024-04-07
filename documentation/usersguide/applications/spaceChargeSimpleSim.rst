@@ -12,6 +12,8 @@ Space charge is calculated with a serial version of a Barnes-Hut tree.
 Simulation configuration description
 ====================================
 
+.. include:: includes/apputils_run_integration_params.rst
+
 ``sim_time_steps`` : integer
     Number of simulation time steps
 

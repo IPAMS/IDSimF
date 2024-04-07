@@ -10,6 +10,8 @@ Simulates the electric particle-particle interactions (space-charge) in an defin
 Simulation configuration parameters 
 ===================================
 
+.. include:: includes/apputils_run_integration_params.rst
+
 ``sim_time_steps`` : integer
     Number of simulation time steps
 

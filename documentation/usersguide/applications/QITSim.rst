@@ -103,10 +103,10 @@ Background gas configuration
 ----------------------------
 
 
-``background_pressure_Pa`` : float
+``background_gas_pressure_Pa`` : float
     Pressure of the neutral background as in Pa. 
 
-``background_temperature_K`` : float
+``background_gas_temperature_K`` : float
     Temperature of the background gas in K. 
 
 ``collision_gas_mass_amu`` : float
