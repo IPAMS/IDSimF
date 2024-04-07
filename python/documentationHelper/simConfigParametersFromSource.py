@@ -37,7 +37,7 @@ def parse_cpp_file(fname):
 
 def parse_rst_file(fname): 
 
-    pattern_param = re.compile(r"""``(?P<key>.*)`` : (?P<type>.*)""")
+    pattern_param = re.compile(r"""\s*``(?P<key>.*)``\s?:\s?(?P<type>.*)""")
 
 
     result = []

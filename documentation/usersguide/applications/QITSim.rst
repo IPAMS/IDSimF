@@ -1,8 +1,8 @@
 .. _application-BT-QITSim:
 
-=========
-BT-QITSim
-=========
+======
+QITSim
+======
 
 Model theory / description 
 ==========================
@@ -70,11 +70,7 @@ The simulation app supports the simulation of this FT detection mode.
 Simulation configuration description
 ====================================
 
-``integrator_mode`` : Keyword:[``verlet``, ``parallel_verlet``]
-    Selects the trajectory integrator
-
-    * ``verlet``: Serial (non parallelized) verlet integrator
-    * ``parallel_verlet``: Parallelized verlet integrator
+.. include:: includes/apputils_run_integration_params.rst
 
 ``sim_time_steps`` : integer
     Number of simulation time steps
@@ -100,9 +96,7 @@ Simulation configuration description
 ``max_ion_radius`` : float
     Maximum radius a simulated particle can have before it is terminated in the simulation, in m. 
 
-
-.. include:: includes/apputils_ion_definition_params
-
+.. include:: includes/apputils_ion_definition_params.rst
 
 ----------------------------
 Background gas configuration
