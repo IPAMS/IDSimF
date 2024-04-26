@@ -290,9 +290,9 @@ int main(int argc, const char * argv[]) {
                             double a = (U_0+V_rf)/d_square_2*particleCharge;
 
                             rfForce = Core::Vector(
-                                    a*pPos.x(),
-                                    a*pPos.y(),
-                                    -2*a*pPos.z()+a_ex);
+                                    -a*pPos.x(),
+                                    -a*pPos.y(),
+                                    2*a*pPos.z()+a_ex);
                         }
                         else if (fieldMode==HIGHER_ORDERS) {
                             // Source for this derivation of the field components:
