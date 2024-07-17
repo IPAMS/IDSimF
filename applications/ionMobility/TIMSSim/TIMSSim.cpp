@@ -56,7 +56,7 @@
 #include <cmath>
 
 const std::string key_ChemicalIndex = "keyChemicalIndex";
-enum FlowMode {UNIFORM_FLOW};
+enum FlowMode {PARABOLIC_FLOW, UNIFORM_FLOW};
 enum CollisionType {SDS, HS, MD, NO_COLLISION};
 
 int main(int argc, const char * argv[]) {
@@ -113,6 +113,18 @@ int main(int argc, const char * argv[]) {
         }
         else {
             throw std::invalid_argument("wrong configuration value: collision_model_type");
+        }
+
+        std::string flowModeStr = simConf->stringParameter("flow_mode");
+        FlowMode flowMode;
+        if (flowModeStr=="uniform") {
+            flowMode = UNIFORM_FLOW;
+        }
+        else if (flowModeStr=="parabolic") {
+            flowMode = PARABOLIC_FLOW;
+        }
+        else {
+            throw std::invalid_argument("wrong configuration value: flow_mode");
         }
 
         double backgroundPressure_Pa = simConf->doubleParameter("background_pressure_Pa");
@@ -449,10 +461,20 @@ int main(int argc, const char * argv[]) {
             auto backgroundTemperatureFct = CollisionModel::getConstantDoubleFunction(backgroundTemperature_K);
 
             std::function<Core::Vector(const Core::Vector&)> velocityFct;
-
-            velocityFct =[gasVelocityX](const Core::Vector& /*pos*/) {
+            if (flowMode==UNIFORM_FLOW) {
+                velocityFct =
+                        [gasVelocityX](const Core::Vector& /*pos*/) {
                             return Core::Vector(gasVelocityX, 0.0, 0.0);
                         };
+            }
+            /*else if (flowMode==PARABOLIC_FLOW) {
+                velocityFct =
+                        [gasVelocityX, electrodeHalfDistanceSquared_m](const Core::Vector& pos) {
+                            //parabolic profile is vX = 2 * Vavg * (1 - r^2 / R^2) with the radius / electrode distance R
+                            double xVelo = gasVelocityX*2.0*(1-pos.z()*pos.z()/electrodeHalfDistanceSquared_m);
+                            return Core::Vector(xVelo, 0.0, 0.0);
+                        };
+            }*/
 
             if (collisionType==SDS){
                 std::unique_ptr<CollisionModel::StatisticalDiffusionModel> collisionModel =
