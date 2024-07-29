@@ -20,7 +20,7 @@
  ****************************/
 
 #include "Integration_abstractTimeIntegrator.hpp"
-
+#include <algorithm>
 
 Integration::AbstractTimeIntegrator::AbstractTimeIntegrator(particleStartMonitoringFctType ionStartMonitorFct) :
         particleStartMonitorFct_(std::move(ionStartMonitorFct))
