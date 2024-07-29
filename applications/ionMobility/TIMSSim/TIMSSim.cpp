@@ -116,7 +116,6 @@ int main(int argc, const char * argv[]) {
             throw std::invalid_argument("wrong configuration value: collision_model_type");
         }
 
-        //std::string flowModeStr = simConf->stringParameter("flow_mode");
         FlowMode flowMode;
         if (simConf->isParameter("flow_mode")) {
             std::string flowModeStr = simConf->stringParameter("flow_mode");
@@ -142,7 +141,7 @@ int main(int argc, const char * argv[]) {
         //Additional parameters needed for MD collision model
         std::string collisionGasIdentifier;
         std::vector<std::string> particleIdentifier;
-        double collisionGasPolarizability_m3;
+        double collisionGasPolarizability_m3 = 0;
         double subIntegratorIntegrationTime_s = 0;
         double subIntegratorStepSize_s = 0;
         double collisionRadiusScaling = 0;
@@ -346,7 +345,7 @@ int main(int argc, const char * argv[]) {
 
         auto accelerationFct = [&PotentialArrays, &totalFieldNow, potentialScale, spaceChargeFactor]
                 (Core::Particle* particle, int /*particleIndex*/, SpaceCharge::FieldCalculator &scFieldCalculator,
-                 double /*time*/, int timestep){
+                 double /*time*/, int /*timestep*/){
             Core::Vector fEfield(0, 0, 0);
             Core::Vector pos = particle->getLocation();
             double particleCharge = particle->getCharge();
@@ -427,7 +426,7 @@ int main(int argc, const char * argv[]) {
                 ionsInactive++;
             }
             Core::Vector PartVelocity(particle->getVelocity());
-            if (V_rf == 0.0) {
+            if (Core::isDoubleEqual(V_rf, 0.0)) {
                 double boundary = 0.001;
                 if (newPartPos.y() > boundary) {
                     double new_y = -(boundary - (newPartPos.y() - boundary));
@@ -533,16 +532,16 @@ int main(int argc, const char * argv[]) {
                                 molecularStructureCollection);
 
                 if (saveTrajectory){
-                    int saveTrajectoryStartTimeStep = simConf->intParameter("trajectory_start_time_step");
+                    unsigned int saveTrajectoryStartTimeStep = simConf->unsignedIntParameter("trajectory_start_time_step");
                     double trajectoryDistance_m = simConf->doubleParameter("trajectory_distance_m");
                     collisionModel->setTrajectoryWriter(projectName+"_md_trajectories.txt",
                                                         trajectoryDistance_m, saveTrajectoryStartTimeStep);
                 }
             }
         }
-            else if (collisionType==NO_COLLISION) {
-                collisionModelPtr = nullptr;
-            }
+        else if (collisionType==NO_COLLISION) {
+            collisionModelPtr = nullptr;
+        }
 
         //define reaction simulation functions:
         auto particlesHasReactedFct = [&collisionModelPtr, &substanceIndices](RS::ReactiveParticle* particle){
