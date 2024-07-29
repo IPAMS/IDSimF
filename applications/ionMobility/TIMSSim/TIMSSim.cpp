@@ -116,16 +116,20 @@ int main(int argc, const char * argv[]) {
             throw std::invalid_argument("wrong configuration value: collision_model_type");
         }
 
-        std::string flowModeStr = simConf->stringParameter("flow_mode");
+        //std::string flowModeStr = simConf->stringParameter("flow_mode");
         FlowMode flowMode;
-        if (flowModeStr=="uniform") {
-            flowMode = UNIFORM_FLOW;
-        }
-        else if (flowModeStr=="parabolic") {
-            flowMode = PARABOLIC_FLOW;
+        if (simConf->isParameter("flow_mode")) {
+            std::string flowModeStr = simConf->stringParameter("flow_mode");
+            if (flowModeStr == "uniform") {
+                flowMode = UNIFORM_FLOW;
+            } else if (flowModeStr == "parabolic") {
+                flowMode = PARABOLIC_FLOW;
+            } else {
+                throw std::invalid_argument("wrong configuration value: flow_mode");
+            }
         }
         else {
-            throw std::invalid_argument("wrong configuration value: flow_mode");
+            flowMode = UNIFORM_FLOW;
         }
 
         double backgroundPressure_Pa = simConf->doubleParameter("background_pressure_Pa");
