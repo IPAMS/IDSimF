@@ -82,16 +82,13 @@ Simulation configuration description
 Potential Array Configuration
 -----------------------------
 
-The electrode geometry and potentials of the TWIMS electrode stack are defined through SIMION potential arrays. As TWIMS utilizes two different voltage patterns applied to the ring electrodes, the transient wave pattern and a confining RF-voltage, two sets of potential arrays are required.
-
-The Traveling Wave pattern can be created across a variable number of electrodes that is defined by the number of potential arrays given, i.e. if 8 potential array files are given it is assumed that a single wave pattern encompasses 8 ring electrodes. 
-The confining field is meant to prevent radial ion drift and is created by applying opposing phases of a RF-voltage to two adjacent electrodes, thus two potential arrays are required for the RF-field.
+The electrode geometry and potentials of the TIMS analyzer are defined through SIMION potential arrays. Potentials are applied to the potential arrays in the order they are supplied via the potential gradient, e.g. the first value given in the potential gradient file/vector is applied to the first potential arrays, the second value to the second array and so on. At the same time opposite phases of an RF voltage are applied to adjacent electrodes throughout the entire analyzer.  
 
 ``potential_array_scale`` : float
     Geometric scaling factor for the potential arrays specified in ``potential_arrays``.
     
 ``potential_arrays`` : Vector of file paths
-    Paths to the SIMION potential array files defining the electrode geometry of the stack and the potentials of the transient wave. Typically, SIMION potential arrays generated with the *fast adjust* option are used for potential definition. 
+    Paths to the SIMION potential array files defining the electrode geometry of the analyzer. Typically, SIMION potential arrays generated with the *fast adjust* option are used for potential definition. 
 
     The potential arrays have to have the same geometric extend and are assumed to be normalized. The total potential at a location is calculated by a linear combination of the individual potentials. 
 
