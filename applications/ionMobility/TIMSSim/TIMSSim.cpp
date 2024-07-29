@@ -1,7 +1,7 @@
 /***************************
  Ion Dynamics Simulation Framework (IDSimF)
 
- Copyright 2020 - Physical and Theoretical Chemistry /
+ Copyright 2024 - Physical and Theoretical Chemistry /
  Institute of Pure and Applied Mass Spectrometry
  of the University of Wuppertal, Germany
 
@@ -64,7 +64,7 @@ int main(int argc, const char * argv[]) {
 
     try {
         // open configuration, parse configuration file =========================================
-        AppUtils::CommandlineParser cmdLineParser(argc, argv, "BT-RS-TIMSSim", "TIMS Simulation with trajectories and chemistry", true);
+        AppUtils::CommandlineParser cmdLineParser(argc, argv, "TIMSSim", "TIMS Simulation with trajectories and chemistry", true);
         std::string projectName = cmdLineParser.resultName();
         AppUtils::logger_ptr logger = cmdLineParser.logger();
 
