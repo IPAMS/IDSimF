@@ -118,7 +118,15 @@ The collision model mode is controlled by the ``collision_model`` parameter:
     
 ``background_temperature_K``: float
     Background gas temperature in Kelvin.
+
+``flow_mode``: keyword [``uniform``, ``parabolic``]
+    Sets the background gas flow mode: 
+
+    * ``uniform``: Uniform flow velocity in ``x`` direction (default value)
+    * ``parabolic``: Uniform flow velocity in ``x`` direction
     
+    The parameter is *optional*, if it is omitted, ``uniform`` flow profile is assumed.
+
 ``collision_gas_velocity_x_ms-1`` : float
     Uniform background gas velocity in ``x`` direction in m per second.
 
