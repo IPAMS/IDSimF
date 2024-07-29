@@ -40,25 +40,30 @@
 
 namespace Integration{
 
-    //std::function<Core::Vector(Core::Particle* particle, int particleIndex, Core::Tree& tree, double time, int timestep)> accelerationFctType;
-
+    /**
+     * Ion trajectory integrator with a velocity verlet trajectory integrator scheme including space charge.
+     * Space charge calculation with a partly parallelized version of a Barnes-Hut Tree.
+     *
+     * The acceleration calculation and additional actions performed is passed to this trajectory integrator externally
+     * by functions. Thus, the integration scheme can be applied to arbitrary simulation problems.
+     */
     class ParallelVerletIntegrator: public AbstractTimeIntegrator {
 
         public:
 
             ParallelVerletIntegrator(
                     const std::vector<Core::Particle*>& particles,
-                    accelerationFctType accelerationFunction,
-                    timestepWriteFctType timestepWriteFunction = nullptr,
+                    accelerationFctSingleStepType accelerationFunction,
+                    postTimestepFctType postTimestepFunction = nullptr,
                     otherActionsFctType otherActionsFunction = nullptr,
                     AbstractTimeIntegrator::particleStartMonitoringFctType ionStartMonitoringFunction = nullptr,
                     CollisionModel::AbstractCollisionModel* collisionModel = nullptr
             );
 
             ParallelVerletIntegrator(
-                    accelerationFctType accelerationFunction,
-                    timestepWriteFctType timestepWriteFunction = nullptr,
-                    otherActionsFctType otherActionsFunction = nullptr,
+                    accelerationFctSingleStepType accelerationFunction,
+                    postTimestepFctType timestepWriteFunction = nullptr,
+                    otherActionsFctType postTimestepFunction = nullptr,
                     AbstractTimeIntegrator::particleStartMonitoringFctType ionStartMonitoringFunction = nullptr,
                     CollisionModel::AbstractCollisionModel* collisionModel = nullptr
             );
@@ -72,8 +77,8 @@ namespace Integration{
 
         CollisionModel::AbstractCollisionModel* collisionModel_ = nullptr; ///< the gas collision model to perform while integrating
 
-        accelerationFctType accelerationFunction_ = nullptr;   ///< function to calculate particle acceleration
-        timestepWriteFctType timestepWriteFunction_ = nullptr; ///< function to export / write time step results
+        accelerationFctSingleStepType accelerationFunction_ = nullptr;   ///< function to calculate particle acceleration
+        postTimestepFctType postTimestepWriteFunction_ = nullptr; ///< function to export / write time step results
         otherActionsFctType otherActionsFunction_ = nullptr;   ///< function for arbitrary other actions in the simulation
 
         //internal variables for actual calculations:

@@ -50,43 +50,54 @@ template<class solverType>
         ){
             double ionAcceleration = 10.0; //((1000V / 100mm) * elementary charge) / 100 amu = 9.64e9 m/s^2
 
-            auto accelerationFct = [ionAcceleration](Core::Particle* /*particle*/, int /*particleIndex*/, SpaceCharge::FieldCalculator& /*tree*/,
-                    double /*time*/, int /*timestep*/){
+            auto accelerationFct = [ionAcceleration](
+                    Core::Particle* /*particle*/, int /*particleIndex*/, SpaceCharge::FieldCalculator& /*tree*/,
+                    double /*time*/, int /*timestep*/)
+            {
                 Core::Vector result(ionAcceleration, 0, ionAcceleration * 0.5);
                 return (result);
             };
 
             unsigned int nTimestepsRecorded = 0;
-            auto timestepWriteFct = [&nTimestepsRecorded](std::vector<Core::Particle*>& /*particles*/,
+
+            auto postTimestepFct = [&nTimestepsRecorded](
+                    Integration::AbstractTimeIntegrator* /*integrator*/, std::vector<Core::Particle*>& /*particles*/,
                     double /*time*/, int /*timestep*/,
-                    bool /*lastTimestep*/) {
+                    bool /*lastTimestep*/)
+            {
                 nTimestepsRecorded++;
             };
 
             unsigned int nParticlesTouched = 0;
             auto otherActionsFct = [&nParticlesTouched](
                     Core::Vector& /*newPartPos*/, Core::Particle* /*particle*/,
-                    int /*particleIndex*/, double /*time*/, int /*timestep*/) {
-
+                    int /*particleIndex*/, double /*time*/, int /*timestep*/)
+            {
                 #pragma omp atomic
                 nParticlesTouched++;
             };
 
             unsigned int nParticlesStartMonitored = 0;
-            auto particleStartMonitoringFct = [&nParticlesStartMonitored](Core::Particle* /*particle*/,
-                    double /*time*/) {
+            auto particleStartMonitoringFct = [&nParticlesStartMonitored](
+                    Core::Particle* /*particle*/, double /*time*/)
+            {
                 nParticlesStartMonitored++;
             };
 
             Integration::FMMVerletIntegrator<solverType> verletIntegrator(
-                    particlesPtrs, accelerationFct, timestepWriteFct, otherActionsFct, particleStartMonitoringFct);
+                    particlesPtrs, accelerationFct, postTimestepFct, otherActionsFct, particleStartMonitoringFct);
 
+#ifdef WITH_EXAFMMT
             if constexpr (std::is_same_v<solverType, ExaFMMt::FMMSolver>) {
                 verletIntegrator.getFMMSolver()->setExpansionOrder(7);
-            } else if constexpr (std::is_same_v<solverType, FMM3D::FMMSolver>) {
+            }
+#endif
+
+#ifdef WITH_FMM_3d
+            if constexpr (std::is_same_v<solverType, FMM3D::FMMSolver>) {
                 verletIntegrator.getFMMSolver()->setRequestedPrecision(0.3e-6);
             }
-
+#endif
             verletIntegrator.run(timeSteps, dt);
 
             CHECK(verletIntegrator.time()==Approx(timeSteps*dt));

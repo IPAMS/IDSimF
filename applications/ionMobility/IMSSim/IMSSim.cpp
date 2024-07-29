@@ -41,12 +41,13 @@
 #include "CollisionModel_StatisticalDiffusion.hpp"
 #include "CollisionModel_MultiCollisionModel.hpp"
 #include "CollisionModel_SoftSphere.hpp"
+#include "CollisionModel_MDInteractions.hpp"
+#include "CollisionModel_MDForceField_LJ12_6.hpp"
 #include "appUtils_simulationConfiguration.hpp"
 #include "appUtils_logging.hpp"
 #include "appUtils_stopwatch.hpp"
 #include "appUtils_signalHandler.hpp"
 #include "appUtils_commandlineParser.hpp"
-#include "CollisionModel_MDInteractions.hpp"
 #include "FileIO_MolecularStructureReader.hpp"
 #include "Core_randomGenerators.hpp"
 #include "json.h"
@@ -111,7 +112,7 @@ int main(int argc, const char *argv[]){
         double spawnRadius_m = 0; 
         double trajectoryDistance_m = 0;
         bool saveTrajectory = false;
-        int saveTrajectoryStartTimeStep = 0;
+        unsigned int saveTrajectoryStartTimeStep = 0;
         if(transportModelType=="btree_MD"){
             collisionGasPolarizability_m3 = simConf->doubleVectorParameter("collision_gas_polarizability_m3");
             collisionGasIdentifier = simConf->stringVectorParameter("collision_gas_identifier");
@@ -123,7 +124,7 @@ int main(int argc, const char *argv[]){
             spawnRadius_m = simConf->doubleParameter("spawn_radius_m");
             saveTrajectory = simConf->boolParameter("save_trajectory");
             trajectoryDistance_m = simConf->doubleParameter("trajectory_distance_m");
-            saveTrajectoryStartTimeStep = simConf->intParameter("trajectory_start_time_step");
+            saveTrajectoryStartTimeStep = simConf->unsignedIntParameter("trajectory_start_time_step");
         }
 
         std::size_t nBackgroundGases = backgroundPartialPressures_Pa.size();
@@ -205,7 +206,7 @@ int main(int argc, const char *argv[]){
         }
 
         //init hdf5 filewriter
-        std::string hdf5Filename = projectName+"_trajectories.hd5";
+        std::string hdf5Filename = projectName+"_trajectories.h5";
         FileIO::TrajectoryHDF5Writer hdf5Writer(hdf5Filename);
         hdf5Writer.setParticleAttributes(auxParamNames, additionalParamTFct);
 
@@ -321,10 +322,12 @@ int main(int argc, const char *argv[]){
                     }
                 };
 
-        auto timestepWriteFctVerlet =
+        auto postTimestepFctVerlet =
                 [&timestepWriteFctSimple]
-                        (std::vector<Core::Particle*>& particles,  double time, int timestep,
-                         bool lastTimestep) {
+                        (Integration::AbstractTimeIntegrator* /*integrator*/,
+                         std::vector<Core::Particle*>& particles, double time, int timestep,
+                         bool lastTimestep)
+                {
                     timestepWriteFctSimple(particles, time, timestep, lastTimestep);
                 };
 
@@ -345,7 +348,6 @@ int main(int argc, const char *argv[]){
                           double time, int timestep) {
                     otherActionsFunctionIMSSimple(newPartPos, particle, particleIndex, time, timestep);
                 };
-
 
         //define and init transport models and trajectory integrators:
         std::unique_ptr<CollisionModel::AbstractCollisionModel> collisionModelPtr;
@@ -410,18 +412,20 @@ int main(int argc, const char *argv[]){
             //prepare multimodel with multiple MD models (one per collision gas)
             std::vector<std::unique_ptr<CollisionModel::AbstractCollisionModel>> mdModels;
             for (std::size_t i = 0; i<nBackgroundGases; ++i) {
+                CollisionModel::MDForceField_LJ12_6 forceField(collisionGasPolarizability_m3[i]);
+                auto forceFieldPtr = std::make_unique<CollisionModel::MDForceField_LJ12_6>(forceField);
                 auto mdModel = std::make_unique<CollisionModel::MDInteractionsModel>(
                         backgroundPartialPressures_Pa[i],
                         backgroundTemperature_K,
                         collisionGasMasses_Amu[i],
                         collisionGasDiameters_m[i],
-                        collisionGasPolarizability_m3[i],
                         collisionGasIdentifier[i],
                         subIntegratorIntegrationTime_s, 
                         subIntegratorStepSize_s,
                         collisionRadiusScaling,
                         angleThetaScaling,
-                        spawnRadius_m, 
+                        spawnRadius_m,
+                        std::move(forceFieldPtr),
                         molecularStructureCollection);
 
                 if (saveTrajectory){
@@ -463,7 +467,7 @@ int main(int argc, const char *argv[]){
         if(integratorType==VERLET_PARALLEL){
             trajectoryIntegrator = std::make_unique<Integration::ParallelVerletIntegrator>(
                 particlesPtrs,
-                accelerationFctVerlet, timestepWriteFctVerlet, otherActionsFunctionIMSVerlet, 
+                accelerationFctVerlet, postTimestepFctVerlet, otherActionsFunctionIMSVerlet,
                 ParticleSimulation::noFunction,
                 collisionModelPtr.get());
         }

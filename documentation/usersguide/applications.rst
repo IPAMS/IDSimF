@@ -61,12 +61,10 @@ This section gives an overview of the simulation application categories and the 
 ``basic``: Basic / Idealized Ion interaction 
 --------------------------------------------
 
-:doc:`spaceChargeMinimalSim <applications/spaceChargeMinimalSim>`: Particle cloud interacting by space charge (serial version)
-    Minimal serial (non parallelized) simulation of an ensemble of charged particles interacting by space charge. Particle ensemble is predefined by an input file. Space charge is calculated with a Barnes-Hut tree. 
-:doc:`spaceChargeMinimalParallelSim <applications/spaceChargeMinimalParallelSim>`: Particles interacting by space charge (parallel version)
-    Minimal parallelized simulation of an ensemble of charged particles interacting by space charge. Particle ensemble is predefined by an input file or a random box of particles is used as start condition. Space charge is calculated with a parallelized Barnes-Hut tree. 
-:doc:`spaceChargeSimpleSim <applications/spaceChargeSimpleSim>`: Random particle particles interacting by space charge (serial version)
-    Minimal serial (non parallelized) simulation of a random ensemble of charged particles interacting by space charge. Particle ensemble initialized as a random box. Space charge is calculated with a serial version of a Barnes-Hut tree. 
+:doc:`spaceChargeMinimalSim <applications/spaceChargeMinimalSim>`: Defined particle cloud interacting by space charge
+    Minimal simulation of an ensemble of charged particles interacting by space charge. Particle ensemble is predefined by an input file. Space charge is calculated with a Barnes-Hut tree. 
+:doc:`spaceChargeSimpleSim <applications/spaceChargeSimpleSim>`: Random particle particles interacting by space charge
+    Minimal simulation of a random ensemble of charged particles interacting by space charge. Particle ensemble initialized as a random box. Space charge is calculated with a serial version of a Barnes-Hut tree. 
 :doc:`staticSimionPASim <applications/staticSimionPASim>`: Particle cloud interacting by space charge in an arbitrary electrode geometry
     A random ensemble of charged particles in an arbitrary electric potential distribution / electrode geometry defined by SIMION potential arrays, interacting by electric particle-particle force (space charge). 
 
@@ -75,7 +73,6 @@ This section gives an overview of the simulation application categories and the 
     :hidden:
 
     applications/spaceChargeMinimalSim
-    applications/spaceChargeMinimalParallelSim
     applications/spaceChargeSimpleSim
     applications/staticSimionPASim
 

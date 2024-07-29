@@ -76,8 +76,8 @@ std::vector<DTYPE> FileIO::HDF5Reader::readAttributeVector(std::string groupName
                 datType = &H5::PredType::NATIVE_DOUBLE;
             }
 
-            DTYPE datBuf[dims[0]];
-            attr.read(*datType, datBuf);
+            std::vector<DTYPE> datBuf(dims[0]);
+            attr.read(*datType, datBuf.data());
             for (hsize_t i=0; i<dims[0]; ++i){
                 result.emplace_back(datBuf[i]);
             }

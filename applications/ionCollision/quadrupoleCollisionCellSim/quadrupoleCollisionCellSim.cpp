@@ -228,7 +228,7 @@ int main(int argc, const char * argv[]) {
 
         //prepare file writers ==============================================================================
         auto hdf5Writer = std::make_unique<FileIO::TrajectoryHDF5Writer>(
-                simResultBasename+"_trajectories.hd5");
+                simResultBasename+"_trajectories.h5");
 
         if (ionRecordMode==FULL) {
             std::vector<std::string> particleAttributeNames = {"velocity x", "velocity y", "velocity z",
@@ -249,16 +249,15 @@ int main(int argc, const char * argv[]) {
         };
 
         std::size_t ionsInactive = 0;
-        Integration::AbstractTimeIntegrator *integratorPtr;
-        auto timestepWriteFunction =
-                [trajectoryWriteInterval, ionRecordMode, &ionsInactive, &hdf5Writer, &startSplatTracker,
-                 &integratorPtr, &logger](
+        auto postTimestepFunction =
+                [trajectoryWriteInterval, ionRecordMode, &ionsInactive, &hdf5Writer, &startSplatTracker, &logger](
+                        Integration::AbstractTimeIntegrator* integrator,
                         std::vector<Core::Particle*>& particles,
                         double time, unsigned int timestep, bool lastTimestep) {
 
                     // check if simulation should be terminated (if all particles are terminated)
                     if (ionsInactive >= particles.size() && particles.size() > 0){
-                        integratorPtr->setTerminationState();
+                        integrator->setTerminationState();
                     }
 
                     if (timestep==0 && ionRecordMode==FULL) {
@@ -337,9 +336,8 @@ int main(int argc, const char * argv[]) {
 
         Integration::ParallelVerletIntegrator verletIntegrator(
                 particlePtrs,
-                accelerationFunction, timestepWriteFunction, otherActionsFunction, particleStartMonitoringFct,
+                accelerationFunction, postTimestepFunction, otherActionsFunction, particleStartMonitoringFct,
                 &hsModel);
-        integratorPtr = &verletIntegrator;
         AppUtils::SignalHandler::setReceiver(verletIntegrator);
         verletIntegrator.run(timeSteps, dt);
 

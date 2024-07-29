@@ -26,4 +26,4 @@ void lfmm3d_s_c_g_wrapper(double *eps, int *nsource,
                           double *source, double *charge,
                           double *pot, double *grad, int *ier){
     lfmm3d_s_c_g_(eps, nsource, source, charge, pot, grad, ier);
-};
+}

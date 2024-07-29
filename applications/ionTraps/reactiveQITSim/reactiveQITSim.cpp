@@ -395,15 +395,17 @@ int main(int argc, const char * argv[]) {
         std::vector<std::string> integerParticleAttributesNames = {"global index", "total collisions", "chemical id"};
 
         auto hdf5Writer = std::make_unique<FileIO::TrajectoryHDF5Writer>(
-                simResultBasename+"_trajectories.hd5");
+                simResultBasename+"_trajectories.h5");
         hdf5Writer->setParticleAttributes(auxParamNames, additionalParameterTransformFct);
         hdf5Writer->setParticleAttributes(integerParticleAttributesNames, integerParticleAttributesTransformFct);
 
-        auto timestepWriteFunction =
+        auto postTimestepFunction =
                 [trajectoryWriteInterval, fftWriteInterval, fftWriteMode, &V_0, &V_rf_export, &ionsInactive,
-                        &hdf5Writer, &ionsInactiveWriter, &fftWriter, &startSplatTracker, &logger](
+                 &hdf5Writer, &ionsInactiveWriter, &fftWriter, &startSplatTracker, &logger](
+                        Integration::AbstractTimeIntegrator* /*integrator*/,
                         std::vector<Core::Particle*>& particles, double time, int timestep,
-                        bool lastTimestep) {
+                        bool lastTimestep)
+                {
 
                     if (timestep%fftWriteInterval==0) {
                         ionsInactiveWriter->writeTimestep(ionsInactive, time);
@@ -447,7 +449,7 @@ int main(int argc, const char * argv[]) {
         // simulate ===============================================================================================
         Integration::VerletIntegrator verletIntegrator(
                 particlePtrs,
-                accelerationFunctionQIT, timestepWriteFunction, otherActionsFunctionQIT, particleStartMonitoringFct,
+                accelerationFunctionQIT, postTimestepFunction, otherActionsFunctionQIT, particleStartMonitoringFct,
                 &combinedCollisionModel);
         AppUtils::SignalHandler::setReceiver(verletIntegrator);
 

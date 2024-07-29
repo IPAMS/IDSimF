@@ -149,7 +149,8 @@ TEST_CASE("Test parsing of chemical systems with RS config file parser", "[RS][C
                 10,
                 "a simple step test reaction");
 
-        RS::CollisionConditions collisionConditions = {.totalCollisionEnergy = 1.0e-5};
+        RS::CollisionConditions collisionConditions;
+        collisionConditions.totalCollisionEnergy = 1.0e-5;
         k_test = reac_compare_4.attemptReaction(collisionConditions, &dummyParticle).reactionProbability;
         double k_4 = r4->attemptReaction(collisionConditions, &dummyParticle).reactionProbability;
 

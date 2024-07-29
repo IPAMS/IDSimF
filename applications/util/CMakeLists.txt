@@ -15,7 +15,9 @@ set(SOURCE_FILES
         appUtils_signalHandler.cpp
         appUtils_signalHandler.hpp
         appUtils_commandlineParser.cpp
-        appUtils_commandlineParser.hpp)
+        appUtils_commandlineParser.hpp
+        appUtils_integrationRunning.cpp
+        appUtils_integrationRunning.hpp)
 
 add_library(apputils STATIC ${SOURCE_FILES})
 target_include_directories(apputils PUBLIC

@@ -37,27 +37,25 @@
 
 namespace Integration{
 
-    //std::function<Core::Vector(Core::Particle* particle, int particleIndex, Core::Tree& tree, double time, int timestep)> accelerationFctType;
-
     template <class FMMSolverT>
     class FMMVerletIntegrator : public AbstractTimeIntegrator {
     public:
 
         FMMVerletIntegrator(
-            const std::vector<Core::Particle*>& particles,
-            accelerationFctType accelerationFunction,
-            timestepWriteFctType timestepWriteFunction = nullptr,
-            otherActionsFctType otherActionsFunction = nullptr,
-            AbstractTimeIntegrator::particleStartMonitoringFctType ionStartMonitoringFunction = nullptr,
-            CollisionModel::AbstractCollisionModel* collisionModel = nullptr
+                const std::vector<Core::Particle*>& particles,
+                accelerationFctSingleStepType accelerationFunction,
+                postTimestepFctType timestepWriteFunction = nullptr,
+                otherActionsFctType otherActionsFunction = nullptr,
+                AbstractTimeIntegrator::particleStartMonitoringFctType ionStartMonitoringFunction = nullptr,
+                CollisionModel::AbstractCollisionModel* collisionModel = nullptr
         );
 
         FMMVerletIntegrator(
-            accelerationFctType accelerationFunction,
-            timestepWriteFctType timestepWriteFunction = nullptr,
-            otherActionsFctType otherActionsFunction = nullptr,
-            AbstractTimeIntegrator::particleStartMonitoringFctType ionStartMonitoringFunction = nullptr,
-            CollisionModel::AbstractCollisionModel* collisionModel = nullptr
+                accelerationFctSingleStepType accelerationFunction,
+                postTimestepFctType timestepWriteFunction = nullptr,
+                otherActionsFctType otherActionsFunction = nullptr,
+                AbstractTimeIntegrator::particleStartMonitoringFctType ionStartMonitoringFunction = nullptr,
+                CollisionModel::AbstractCollisionModel* collisionModel = nullptr
         );
 
         void addParticle(Core::Particle* particle) override;
@@ -71,8 +69,8 @@ namespace Integration{
 
         CollisionModel::AbstractCollisionModel* collisionModel_ = nullptr; ///< the gas collision model to perform while integrating
 
-        accelerationFctType accelerationFunction_ = nullptr;   ///< function to calculate particle acceleration
-        timestepWriteFctType timestepWriteFunction_ = nullptr; ///< function to export / write time step results
+        accelerationFctSingleStepType accelerationFunction_ = nullptr;   ///< function to calculate particle acceleration
+        postTimestepFctType postTimestepFunction_ = nullptr; ///< function to export / write time step results
         otherActionsFctType otherActionsFunction_ = nullptr;   ///< function for arbitrary other actions in the simulation
 
         std::vector<Core::Vector>  a_t_;     ///< last time step acceleration for particles
@@ -84,29 +82,29 @@ namespace Integration{
     template <class FMMSolverT>
     FMMVerletIntegrator<FMMSolverT>::FMMVerletIntegrator(
             const std::vector<Core::Particle*>& particles,
-            accelerationFctType accelerationFunction,
-            timestepWriteFctType timestepWriteFunction,
+            accelerationFctSingleStepType accelerationFunction,
+            postTimestepFctType timestepWriteFunction,
             otherActionsFctType otherActionsFunction,
             AbstractTimeIntegrator::particleStartMonitoringFctType ionStartMonitoringFunction,
             CollisionModel::AbstractCollisionModel* collisionModel):
         AbstractTimeIntegrator(particles, ionStartMonitoringFunction),
         collisionModel_(collisionModel),
         accelerationFunction_(std::move(accelerationFunction)),
-        timestepWriteFunction_(std::move(timestepWriteFunction)),
+        postTimestepFunction_(std::move(timestepWriteFunction)),
         otherActionsFunction_(std::move(otherActionsFunction))
     {}
 
     template <class FMMSolverT>
     FMMVerletIntegrator<FMMSolverT>::FMMVerletIntegrator(
-            accelerationFctType accelerationFunction,
-            timestepWriteFctType timestepWriteFunction,
+            accelerationFctSingleStepType accelerationFunction,
+            postTimestepFctType timestepWriteFunction,
             otherActionsFctType otherActionsFunction,
             AbstractTimeIntegrator::particleStartMonitoringFctType ionStartMonitoringFunction,
             CollisionModel::AbstractCollisionModel* collisionModel) :
         AbstractTimeIntegrator(ionStartMonitoringFunction),
         collisionModel_(collisionModel),
         accelerationFunction_(std::move(accelerationFunction)),
-        timestepWriteFunction_(std::move(timestepWriteFunction)),
+        postTimestepFunction_(std::move(timestepWriteFunction)),
         otherActionsFunction_(std::move(otherActionsFunction))
     {}
 
@@ -126,8 +124,8 @@ namespace Integration{
         this->runState_ = RUNNING;
         bearParticles_(0.0);
 
-        if (timestepWriteFunction_ !=nullptr) {
-            timestepWriteFunction_(particles_, time_, timestep_, false);
+        if (postTimestepFunction_ !=nullptr) {
+            postTimestepFunction_(this, particles_, time_, timestep_, false);
         }
 
         // run:
@@ -197,15 +195,15 @@ namespace Integration{
         // Update time and timestep, if existting: Call write timestep function
         time_ = time_ + dt;
         timestep_++;
-        if (timestepWriteFunction_ != nullptr) {
-            timestepWriteFunction_(particles_, time_, timestep_, false);
+        if (postTimestepFunction_ != nullptr) {
+            postTimestepFunction_(this, particles_, time_, timestep_, false);
         }
     }
 
     template <class FMMSolverT>
     void FMMVerletIntegrator<FMMSolverT>::finalizeSimulation() {
-        if (timestepWriteFunction_ != nullptr){
-            timestepWriteFunction_(particles_, time_, timestep_, true);
+        if (postTimestepFunction_ != nullptr){
+            postTimestepFunction_(this, particles_, time_, timestep_, true);
         }
     }
 

@@ -42,6 +42,7 @@
 #include "CollisionModel_StatisticalDiffusion.hpp"
 #include "CollisionModel_HardSphere.hpp"
 #include "CollisionModel_MDInteractions.hpp"
+#include "CollisionModel_MDForceField_LJ12_6.hpp"
 #include "CollisionModel_SpatialFieldFunctions.hpp"
 #include "appUtils_simulationConfiguration.hpp"
 #include "appUtils_logging.hpp"
@@ -370,8 +371,11 @@ int main(int argc, const char * argv[]) {
         auto timestepWriteFct =
                 [&trajectoryWriter, &voltageWriter, trajectoryWriteInterval, &rsSim, &resultFilewriter, concentrationWriteInterval,
                         &totalFieldNow, &logger, &ionsInactive]
-                        (std::vector<Core::Particle*>& particles, double time, int timestep,
-                         bool lastTimestep) {
+                        (
+                                Integration::AbstractTimeIntegrator* /*integrator*/,
+                                std::vector<Core::Particle*>& particles, double time, int timestep,
+                                bool lastTimestep)
+                {
 
                     if (timestep%concentrationWriteInterval==0) {
                         resultFilewriter.writeTimestep(rsSim);
@@ -506,6 +510,8 @@ int main(int argc, const char * argv[]) {
                 collisionModelPtr = std::move(collisionModel);
             }
             else if (collisionType==MD){
+                CollisionModel::MDForceField_LJ12_6 forceField(collisionGasPolarizability_m3);
+                auto forceFieldPtr = std::make_unique<CollisionModel::MDForceField_LJ12_6>(forceField);
                 std::unique_ptr<CollisionModel::MDInteractionsModel> collisionModel =
                         std::make_unique<CollisionModel::MDInteractionsModel>(
                                 staticPressureFct,
@@ -513,13 +519,13 @@ int main(int argc, const char * argv[]) {
                                 backgroundTemperatureFct,
                                 collisionGasMass_Amu,
                                 collisionGasDiameter_nm*1e-9,
-                                collisionGasPolarizability_m3,
                                 collisionGasIdentifier,
                                 subIntegratorIntegrationTime_s,
                                 subIntegratorStepSize_s,
                                 collisionRadiusScaling,
                                 angleThetaScaling,
                                 spawnRadius_m,
+                                std::move(forceFieldPtr),
                                 molecularStructureCollection);
 
                 if (saveTrajectory){

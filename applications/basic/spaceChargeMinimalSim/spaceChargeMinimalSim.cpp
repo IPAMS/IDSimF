@@ -21,17 +21,16 @@
  ------------
  spaceChargeMinimalSim.cpp
 
- Minimal serial simulation of pure particle / particle interaction (space charge)
+ Minimal simulation of pure particle / particle interaction (space charge)
 
  ****************************/
 
 #include "Core_particle.hpp"
 #include "BTree_tree.hpp"
-#include "FileIO_trajectoryExplorerJSONwriter.hpp"
 #include "FileIO_trajectoryHDF5Writer.hpp"
-#include "Integration_verletIntegrator.hpp"
 #include "FileIO_ionCloudReader.hpp"
 #include "appUtils_simulationConfiguration.hpp"
+#include "appUtils_integrationRunning.hpp"
 #include "appUtils_logging.hpp"
 #include "appUtils_stopwatch.hpp"
 #include "appUtils_signalHandler.hpp"
@@ -43,7 +42,7 @@ int main(int argc, const char * argv[]) {
     try{
         // parse commandline / create conf and logger ===================================================
         AppUtils::CommandlineParser cmdLineParser(argc, argv, "BT-spaceChargeMinimalSim",
-                "Basic space charge simulation (non parallel, mostly for testing purposes)", false);
+                "Basic space charge simulation (mostly for testing purposes)", true);
         std::string simResultBasename = cmdLineParser.resultName();
         AppUtils::logger_ptr logger = cmdLineParser.logger();
 
@@ -53,7 +52,7 @@ int main(int argc, const char * argv[]) {
 
         // read basic simulation parameters =============================================================
         unsigned int timeSteps = simConf->unsignedIntParameter("sim_time_steps");
-        int trajectoryWriteInterval = simConf->intParameter("trajectory_write_interval");
+        unsigned int trajectoryWriteInterval = simConf->unsignedIntParameter("trajectory_write_interval");
         double dt = simConf->doubleParameter("dt");
 
         //read physical configuration ===================================================================
@@ -93,7 +92,7 @@ int main(int argc, const char * argv[]) {
 
         std::vector<std::string> auxParamNames = {"velocity x", "velocity y", "velocity z"};
 
-        auto hdf5Writer = std::make_unique<FileIO::TrajectoryHDF5Writer>(simResultBasename+"_trajectories.hd5");
+        auto hdf5Writer = std::make_unique<FileIO::TrajectoryHDF5Writer>(simResultBasename+"_trajectories.h5");
         hdf5Writer->setParticleAttributes(auxParamNames, additionalParameterTransformFct);
 
         /*auto jsonWriter = std::make_unique<FileIO::TrajectoryExplorerJSONwriter>(
@@ -118,21 +117,23 @@ int main(int argc, const char * argv[]) {
                     return (spaceChargeForce/particle->getMass());
                 };
 
-        auto timestepWriteFunction =
+        auto postTimestepFunction =
                 [trajectoryWriteInterval, &hdf5Writer, &logger](
+                        Integration::AbstractTimeIntegrator* /*integrator*/,
                         std::vector<Core::Particle*>& particles, double time,
-                        int timestep, bool lastTimestep) {
+                        unsigned int timestep, bool lastTimestep)
+                {
 
                     if (lastTimestep) {
                         hdf5Writer->writeTimestep(particles, time);
 
                         hdf5Writer->writeSplatTimes(particles);
                         hdf5Writer->finalizeTrajectory();
-                        logger->info("finished ts:{} time:{:.2e}", timestep, time);
+                        logger->info("ts:{} time:{:.2e} n_particles:{}", timestep, time, particles.size());
                     }
 
                     else if (timestep%trajectoryWriteInterval==0) {
-                        logger->info("ts:{} time:{:.2e}", timestep, time);
+                        logger->info("ts:{} time:{:.2e} n_particles:{}", timestep, time, particles.size());
                         hdf5Writer->writeTimestep(particles, time);
                     }
                 };
@@ -140,11 +141,11 @@ int main(int argc, const char * argv[]) {
         // simulate ===============================================================================================
         AppUtils::Stopwatch stopWatch;
         stopWatch.start();
-        Integration::VerletIntegrator verletIntegrator(
+        AppUtils::runTrajectoryIntegration(
+                simConf, timeSteps, dt,
                 particlePtrs,
-                accelerationFunction, timestepWriteFunction);
-        AppUtils::SignalHandler::setReceiver(verletIntegrator);
-        verletIntegrator.run(timeSteps, dt);
+                accelerationFunction,
+                postTimestepFunction);
 
         logger->info("elapsed secs (wall time) {}", stopWatch.elapsedSecondsWall());
         logger->info("elapsed secs (cpu time) {}", stopWatch.elapsedSecondsCPU());

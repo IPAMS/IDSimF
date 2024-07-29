@@ -159,6 +159,8 @@ int main(int argc, char** argv) {
     //std::vector<Core::Vector> locationsSerial = runSimulation<Integration::VerletIntegrator>(
     //        nIonsPerDirection, timeSteps, dt, spaceChargeFactor, useCollisionModel, "serial");
 
+    std::cout << "---- Benchmark on " << numberOfThreads_ <<" threads -------" << std::endl;
+
     std::vector<Core::Vector> locationsParallel = runSimulation<Integration::ParallelVerletIntegrator>(
             nIonsPerDirection, timeSteps, dt, spaceChargeFactor, useCollisionModel, "parallel BTree");
 
@@ -180,4 +182,6 @@ int main(int argc, char** argv) {
 #ifdef WITH_EXAFMMT
     analyzeParticleLocationDifferences(locationsParallel, locationsExa, "parallel BTree vs. ExaFMM");
 #endif
+
+    std::cout << "====================" << std::endl;
 }

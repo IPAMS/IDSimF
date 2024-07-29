@@ -41,6 +41,7 @@
 #include "CollisionModel_StatisticalDiffusion.hpp"
 #include "CollisionModel_HardSphere.hpp"
 #include "CollisionModel_MDInteractions.hpp"
+#include "CollisionModel_MDForceField_LJ12_6.hpp"
 #include "CollisionModel_SpatialFieldFunctions.hpp"
 #include "appUtils_simulationConfiguration.hpp"
 #include "appUtils_logging.hpp"
@@ -160,7 +161,7 @@ int main(int argc, const char * argv[]) {
         double spawnRadius_m = 0;
         double trajectoryDistance_m = 0;
         bool saveTrajectory = false;
-        int saveTrajectoryStartTimeStep = 0;
+        unsigned int saveTrajectoryStartTimeStep = 0;
         if(usesMDmodel){
             collisionGasPolarizability_m3 = simConf->doubleVectorParameter("collision_gas_polarizability_m3");
             collisionGasIdentifier = simConf->stringVectorParameter("collision_gas_identifier");
@@ -172,7 +173,7 @@ int main(int argc, const char * argv[]) {
             spawnRadius_m = simConf->doubleParameter("spawn_radius_m");
             saveTrajectory = simConf->boolParameter("save_trajectory");
             trajectoryDistance_m = simConf->doubleParameter("trajectory_distance_m");
-            saveTrajectoryStartTimeStep = simConf->intParameter("trajectory_start_time_step");
+            saveTrajectoryStartTimeStep = simConf->unsignedIntParameter("trajectory_start_time_step");
         }
 
         // ======================================================================================
@@ -290,7 +291,7 @@ int main(int argc, const char * argv[]) {
             return result;
         };
 
-        std::string hdf5Filename = projectName+"_trajectories.hd5";
+        std::string hdf5Filename = projectName+"_trajectories.h5";
         FileIO::TrajectoryHDF5Writer trajectoryWriter(hdf5Filename);
         trajectoryWriter.setParticleAttributes(integerParticleAttributesNames, additionalIntegerParamTFct);
         trajectoryWriter.setParticleAttributes(auxParamNames, auxParamFct);
@@ -372,22 +373,25 @@ int main(int argc, const char * argv[]) {
 
         auto accelerationFct =
                 [&WavePotentialArrays, &RFPotentialArrays, &totalFieldNow, potentialScale, spaceChargeFactor]
-                        (Core::Particle* particle, int /*particleIndex*/, SpaceCharge::FieldCalculator &scFieldCalculator,
-                         double /*time*/, int timestep){
+                        (Core::Particle* particle, int /*particleIndex*/,
+                         SpaceCharge::FieldCalculator& scFieldCalculator,
+                         double /*time*/, int /*timestep*/)
+                {
                     Core::Vector fEfield(0, 0, 0);
                     Core::Vector pos = particle->getLocation();
                     double particleCharge = particle->getCharge();
 
-                    for(size_t i=0; i<WavePotentialArrays.size(); i++) {
+                    for (size_t i = 0; i<WavePotentialArrays.size(); i++) {
                         Core::Vector paField = WavePotentialArrays[i]->getField(pos.x(), pos.y(), pos.z());
-                        Core::Vector paEffectiveField = paField * totalFieldNow[i] * potentialScale;
+                        Core::Vector paEffectiveField = paField*totalFieldNow[i]*potentialScale;
 
                         fEfield = fEfield+paEffectiveField;
                     }
 
-                    for(size_t i=0; i<RFPotentialArrays.size(); i++) {
+                    for (size_t i = 0; i<RFPotentialArrays.size(); i++) {
                         Core::Vector paField = RFPotentialArrays[i]->getField(pos.x(), pos.y(), pos.z());
-                        Core::Vector paEffectiveField = paField * totalFieldNow[WavePotentialArrays.size()+i] * potentialScale;
+                        Core::Vector paEffectiveField =
+                                paField*totalFieldNow[WavePotentialArrays.size()+i]*potentialScale;
 
                         fEfield = fEfield+paEffectiveField;
                     }
@@ -395,7 +399,7 @@ int main(int argc, const char * argv[]) {
                     particle->setFloatAttribute("effectiveField", fEfield.magnitude());
 
                     if (Core::isDoubleEqual(spaceChargeFactor, 0.0)) {
-                        return (fEfield * particleCharge / particle->getMass());
+                        return (fEfield*particleCharge/particle->getMass());
                     }
                     else {
                         Core::Vector spaceChargeForce =
@@ -404,12 +408,14 @@ int main(int argc, const char * argv[]) {
                     }
                 };
 
-
-        auto timestepWriteFct =
+        auto postTimestepFct =
                 [&trajectoryWriter, &voltageWriter, trajectoryWriteInterval, &rsSim, &resultFilewriter, concentrationWriteInterval,
                         &totalFieldNow, &logger, &ionsInactive]
-                        (std::vector<Core::Particle*>& particles, double time, int timestep,
-                         bool lastTimestep) {
+                        (
+                                Integration::AbstractTimeIntegrator* /*integrator*/,
+                                std::vector<Core::Particle*>& particles, double time, int timestep,
+                                bool lastTimestep)
+                {
 
                     if (timestep%concentrationWriteInterval==0) {
                         resultFilewriter.writeTimestep(rsSim);
@@ -423,7 +429,7 @@ int main(int argc, const char * argv[]) {
                     }
                     else if (timestep%trajectoryWriteInterval==0) {
                         logger->info("ts:{} time:{:.2e} splatted ions:{}",
-                                     timestep, time, ionsInactive);
+                                timestep, time, ionsInactive);
                         rsSim.logConcentrations(logger);
                         trajectoryWriter.writeTimestep(particles, time);
                     }
@@ -456,8 +462,9 @@ int main(int argc, const char * argv[]) {
                 startSplatTracker.particleSplat(particle, time);
                 ionsInactive++;
             }
+
             Core::Vector PartVelocity(particle->getVelocity());
-            if (V_rf == 0.0) {
+            if (Core::isDoubleEqual(V_rf, 0.0)) {
                 double boundary = 0.001;
                 if (newPartPos.y() > boundary) {
                     double new_y = -(boundary - (newPartPos.y() - boundary));
@@ -558,18 +565,20 @@ int main(int argc, const char * argv[]) {
                 //prepare multimodel with multiple MD models (one per collision gas)
                 std::vector<std::unique_ptr<CollisionModel::AbstractCollisionModel>> mdModels;
                 for (std::size_t i = 0; i<nBackgroundGases; ++i) {
+                    CollisionModel::MDForceField_LJ12_6 forceField(collisionGasPolarizability_m3[i]);
+                    auto forceFieldPtr = std::make_unique<CollisionModel::MDForceField_LJ12_6>(forceField);
                     auto mdModel = std::make_unique<CollisionModel::MDInteractionsModel>(
                             backgroundPartialPressures_Pa[i],
                             backgroundTemperature_K,
                             collisionGasMasses_Amu[i],
                             collisionGasDiameters_m[i],
-                            collisionGasPolarizability_m3[i],
                             collisionGasIdentifier[i],
                             subIntegratorIntegrationTime_s,
                             subIntegratorStepSize_s,
                             collisionRadiusScaling,
                             angleThetaScaling,
                             spawnRadius_m,
+                            std::move(forceFieldPtr),
                             molecularStructureCollection);
                     if (saveTrajectory){
                         mdModel->setTrajectoryWriter(projectName+"_md_trajectories.txt",
@@ -612,18 +621,20 @@ int main(int argc, const char * argv[]) {
                         hsmdModels.emplace_back(std::move(cllModel));
                     }
                     else {
+                        CollisionModel::MDForceField_LJ12_6 forceField(collisionGasPolarizability_m3[i]);
+                        auto forceFieldPtr = std::make_unique<CollisionModel::MDForceField_LJ12_6>(forceField);
                         auto cllModel = std::make_unique<CollisionModel::MDInteractionsModel>(
                                 backgroundPartialPressures_Pa[i],
                                 backgroundTemperature_K,
                                 collisionGasMasses_Amu[i],
                                 collisionGasDiameters_m[i],
-                                collisionGasPolarizability_m3[i],
                                 collisionGasIdentifier[i],
                                 subIntegratorIntegrationTime_s,
                                 subIntegratorStepSize_s,
                                 collisionRadiusScaling,
                                 angleThetaScaling,
                                 spawnRadius_m,
+                                std::move(forceFieldPtr),
                                 molecularStructureCollection);
                         if (saveTrajectory){
                             cllModel->setTrajectoryWriter(projectName+"_md_trajectories.txt",
@@ -669,7 +680,7 @@ int main(int argc, const char * argv[]) {
         //init trajectory simulation object:
         Integration::ParallelVerletIntegrator verletIntegrator(
                 particlesPtrs,
-                accelerationFct, timestepWriteFct, otherActionsFct, particleStartMonitoringFct,
+                accelerationFct, postTimestepFct, otherActionsFct, particleStartMonitoringFct,
                 collisionModelPtr.get());
         // ======================================================================================
 

@@ -36,6 +36,7 @@ FileIO::TrajectoryHDF5Writer::TrajectoryHDF5Writer(const std::string& hdf5Filena
 {
     h5f_ = std::make_unique<H5::H5File>(hdf5Filename.c_str(), H5F_ACC_TRUNC);
     baseGroup_ = std::make_unique<H5::Group>(h5f_->createGroup("particle_trajectory"));
+    optionalDataSetGroup_ = std::make_unique<H5::Group>(baseGroup_->createGroup("optional_datasets"));
     h5f_->createGroup("/particle_trajectory/timesteps");
 
     //write version number
@@ -185,6 +186,10 @@ void FileIO::TrajectoryHDF5Writer::writeNumericListDataset(std::string dsName, c
         std::array<DT,1> ar = {val};
         valuesPacked.emplace_back(ar);
     }
+    if (group == nullptr){
+        group = optionalDataSetGroup_.get();
+    }
+
     writeArrayDataSet<DT, 1>(dsName, valuesPacked, group);
 };
 
@@ -195,6 +200,11 @@ void FileIO::TrajectoryHDF5Writer::write3DVectorListDataset(std::string dsName, 
         std::array<double,3> ar = {val.x(), val.y(), val.z()};
         valuesPacked.emplace_back(ar);
     }
+
+    if (group == nullptr){
+        group = optionalDataSetGroup_.get();
+    }
+
     writeArrayDataSet<double, 3>(dsName, valuesPacked, group);
 };
 
@@ -276,13 +286,7 @@ void FileIO::TrajectoryHDF5Writer::writeTrajectoryAttribute(std::string attrName
     hsize_t dims[1] = { nVals };
     H5::DataSpace attr_dataspace = H5::DataSpace (1, dims);
     H5::Attribute doubleAttribute = baseGroup_->createAttribute(attrName.c_str(), H5::PredType::IEEE_F32BE, attr_dataspace);
-
-    double data[nVals];
-    for (std::size_t i = 0; i < nVals; ++i)
-    {
-        data[i] = values[i];
-    }
-    doubleAttribute.write(H5::PredType::NATIVE_DOUBLE, data);
+    doubleAttribute.write(H5::PredType::NATIVE_DOUBLE, values.data());
 }
 
 /**
@@ -305,12 +309,13 @@ void FileIO::TrajectoryHDF5Writer::writeTrajectoryAttribute(std::string attrName
 
     //Due to a abi bug between the std lib and hdf, we need to provide raw strings to the hdf5 methods
     //Save array of pointers to the raw c strings and use that array as data buffer
-    const char* data[nVals];
+    std::vector<const char*> dataBuf(nVals);
+    const char** dataBufArray = dataBuf.data();
     for (std::size_t i = 0; i < nVals; ++i)
     {
-        data[i] = values[i].c_str();
+        dataBufArray[i] = values[i].c_str();
     }
-    stringAttribute.write(strdatatype, data);
+    stringAttribute.write(strdatatype, dataBufArray);
 }
 
 /**

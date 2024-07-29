@@ -29,16 +29,6 @@
 #include "Core_particle.hpp"
 #include "FileIO_trajectoryHDF5Writer.hpp"
 #include "PSim_util.hpp"
-#include "Integration_verletIntegrator.hpp"
-#include "Integration_parallelVerletIntegrator.hpp"
-#ifdef WITH_FMM_3d
-#include "FMM3D_fmmSolver.hpp"
-#endif
-
-#ifdef WITH_EXAFMMT
-#include "ExaFMMt_fmmSolver.hpp"
-#endif
-
 #include "FileIO_scalar_writer.hpp"
 #include "PSim_sampledWaveform.hpp"
 #include "PSim_math.hpp"
@@ -47,6 +37,7 @@
 #include "PSim_particleStartSplatTracker.hpp"
 #include "CollisionModel_HardSphere.hpp"
 #include "appUtils_simulationConfiguration.hpp"
+#include "appUtils_integrationRunning.hpp"
 #include "appUtils_ionDefinitionReading.hpp"
 #include "appUtils_logging.hpp"
 #include "appUtils_stopwatch.hpp"
@@ -54,15 +45,13 @@
 #include "appUtils_commandlineParser.hpp"
 #include <iostream>
 #include <vector>
-#include <Integration_fmmIntegrator.hpp>
 
-enum IntegratorMode {VERLET, PARALLEL_VERLET, FMM3D_VERLET, EXAFMM_VERLET};
 enum GeometryMode {DEFAULT, SCALED,VARIABLE};
 enum RfAmplitudeMode {STATIC_RF, RAMPED_RF};
 enum RfWaveMode {SINE, SAMPLED};
-enum FieldMode {BASIC, HIGHER_ORDERS};
+enum FieldMode {BASIC, HIGHER_ORDERS, AVERAGED};
 enum ExciteMode {RECTPULSE, SWIFT};
-enum FftWriteMode {UNRESOLVED, MASS_RESOLVED};
+enum FftWriteMode {UNRESOLVED, MASS_RESOLVED, ION_CLOUD_POSITION};
 
 std::string key_spaceCharge_x = "keySpaceChargeX";
 std::string key_spaceCharge_y = "keySpaceChargeY";
@@ -91,34 +80,11 @@ int main(int argc, const char * argv[]) {
         std::filesystem::path confBasePath = simConf->confBasePath();
 
         // read basic simulation parameters =============================================================
-        std::string integratorMode_str = simConf->stringParameter("integrator_mode");
-        IntegratorMode integratorMode;
-        if (integratorMode_str=="verlet") {
-            integratorMode = VERLET;
-        }
-        else if (integratorMode_str=="parallel_verlet") {
-            integratorMode = PARALLEL_VERLET;
-        }
-#ifdef WITH_FMM_3d
-        else if (integratorMode_str=="FMM3D_verlet") {
-            integratorMode = FMM3D_VERLET;
-        }
-#endif
-#ifdef WITH_EXAFMMT
-        else if (integratorMode_str=="ExaFMM_verlet") {
-            integratorMode = EXAFMM_VERLET;
-        }
-#endif
-        else {
-            throw std::invalid_argument("wrong configuration value: integrator mode");
-        }
-
         unsigned int timeSteps = simConf->unsignedIntParameter("sim_time_steps");
         unsigned int trajectoryWriteInterval = simConf->unsignedIntParameter("trajectory_write_interval");
         unsigned int fftWriteInterval = simConf->unsignedIntParameter("fft_write_interval");
         double dt = simConf->doubleParameter("dt");
         std::vector<int> nIons = std::vector<int>();
-        std::vector<double> ionMasses = std::vector<double>();
         std::vector<double> ionCollisionDiameters_angstrom = std::vector<double>();
         std::string fftWriteMode_str = simConf->stringParameter("fft_write_mode");
         FftWriteMode fftWriteMode = UNRESOLVED;
@@ -127,6 +93,9 @@ int main(int argc, const char * argv[]) {
         }
         else if (fftWriteMode_str=="mass_resolved") {
             fftWriteMode = MASS_RESOLVED;
+        }
+        else if (fftWriteMode_str=="ion_cloud_position") {
+            fftWriteMode = ION_CLOUD_POSITION;
         }
 
         //read geometrical configuration of the trap======================================================
@@ -162,8 +131,8 @@ int main(int argc, const char * argv[]) {
 
         //read physical configuration ===================================================================
         double maxIonRadius = simConf->doubleParameter("max_ion_radius");
-        double backgroundPressure = simConf->doubleParameter("background_pressure_Pa");
-        double backgroundTemperature = simConf->doubleParameter("background_temperature_K");
+        double backgroundPressure = simConf->doubleParameter("background_gas_pressure_Pa");
+        double backgroundTemperature = simConf->doubleParameter("background_gas_temperature_K");
         double spaceChargeFactor = simConf->doubleParameter("space_charge_factor");
         double collisionGasMassAmu = simConf->doubleParameter("collision_gas_mass_amu");
         double collisionGasDiameterM = simConf->doubleParameter("collision_gas_diameter_angstrom")*1e-10;
@@ -180,12 +149,15 @@ int main(int argc, const char * argv[]) {
             fieldMode = HIGHER_ORDERS;
             higherFieldOrdersCoefficients = simConf->doubleVectorParameter("field_higher_orders_coeffs");
         }
+        else if (fieldMode_str=="averaged") {
+            fieldMode = AVERAGED;
+        }
         else {
             throw std::invalid_argument("wrong configuration value: field_mode");
         }
 
         double f_rf = simConf->doubleParameter("f_rf"); //RF frequency 1e6;
-        double omega = f_rf*2.0*M_PI; //RF angular frequencyf_rf* 2.0 * M_PI;
+        double omega = f_rf*2.0*M_PI; //RF angular frequency_rf* 2.0 * M_PI;
 
         // read sampled RF waveform
         RfWaveMode rfWaveMode;
@@ -261,12 +233,10 @@ int main(int argc, const char * argv[]) {
         // define functions for the trajectory integration ==================================================
         auto trapFieldFunction =
                 [exciteMode, rfWaveMode, rfAmplitudeMode, fieldMode, excitePulseLength, excitePulsePotential,
-                        omega, z_0, U_0, d_square_2,
+                        omega, z_0, r_0, U_0, d_square_2,
                         &rfSampledWaveForm, &higherFieldOrdersCoefficients, &swiftWaveForm, &V_0, &V_0_ramp](
-                        Core::Particle* particle, int /*particleIndex*/,
-                        double time, unsigned int timestep) -> Core::Vector {
-
-                    Core::Vector pos = particle->getLocation();
+                        Core::Particle* particle, Core::Vector pPos, double time, unsigned int timestep) -> Core::Vector
+                {
                     double particleCharge = particle->getCharge();
                     double excitePotential = 0;
                     if (exciteMode==RECTPULSE) {
@@ -281,74 +251,122 @@ int main(int argc, const char * argv[]) {
                     if (rfAmplitudeMode==RAMPED_RF) {
                         V_0 = V_0_ramp[timestep];
                     }
-
-                    double V_rf = 0.0;
-                    if (rfWaveMode==SINE) {
-                        V_rf = V_0*cos(omega*time);
-                    }
-                    else if (rfWaveMode==SAMPLED) {
-                        V_rf = V_0*rfSampledWaveForm->getValueLooped(timestep);
-                    }
-
                     double a_ex = excitePotential/z_0*particleCharge;
 
-                    Core::Vector rfForce(0, 0, 0);
-                    if (fieldMode==BASIC) {
-                        double a = (U_0+V_rf)/d_square_2*particleCharge;
-
-                        rfForce = Core::Vector(
-                                a*pos.x(),
-                                a*pos.y(),
-                                -2*a*pos.z()+a_ex);
-                    }
-                    else if (fieldMode==HIGHER_ORDERS) {
+                    if (fieldMode==AVERAGED){
                         // transform to z-r space, calculate higher orders and transform force back to cartesian space
-                        double r = std::sqrt(pos.x()*pos.x()+pos.y()*pos.y());
-                        double z = pos.z();
-                        double phi = std::atan2(pos.x(), pos.y());
+                        double r = std::sqrt(pPos.x()*pPos.x()+pPos.y()*pPos.y());
+                        double z = pPos.z();
+                        double phi = std::atan2(pPos.x(), pPos.y());
 
-                        //d_square_2 == r_0^2 for ideal electrode geometry
-                        double phi_0 = (U_0+V_rf)/2.0*particleCharge;
+                        double ponderomotiveForceFactor = -(particleCharge*particleCharge) / (2.0 * particle->getMass() * omega * omega);
 
-                        // ideal quadropole field:
-                        double E_2_r = 2.0*r/d_square_2;
-                        double E_2_z = -4.0*z/d_square_2;
+                        double rz_0Factor = r_0*r_0 + 2*z_0*z_0;
+                        double a_2_avg = V_0 * V_0 / (2*rz_0Factor*rz_0Factor);
 
-                        //hexapole field:
-                        double r_0_3 = std::pow(d_square_2, 3.0/2.0);
-                        double E_3_r = -6*r*z/r_0_3;
-                        double E_3_z = -3*(r*r-2*z*z)/r_0_3;
-
-                        //octapole field:
-                        double r_0_4 = d_square_2*d_square_2;
-                        double E_4_r = 12*(r*r*r-4*r*z*z)/r_0_4;
-                        double E_4_z = (32*z*z*z-48*r*r*z)/r_0_4;
-
-                        double E_r = phi_0*(E_2_r
-                                +higherFieldOrdersCoefficients[0]*E_3_r
-                                +higherFieldOrdersCoefficients[1]*E_4_r);
-
-                        double E_z = phi_0*(E_2_z
-                                +higherFieldOrdersCoefficients[0]*E_3_z
-                                +higherFieldOrdersCoefficients[1]*E_4_z);
+                        double F_r = 8 * a_2_avg * r;
+                        double F_z = 32 * a_2_avg * z;
 
                         // transform back to cartesian space:
-                        rfForce = Core::Vector(
-                                E_r*std::sin(phi),
-                                E_r*std::cos(phi),
-                                E_z+a_ex);
+                        Core::Vector averagedRFForce{
+                                ponderomotiveForceFactor*F_r*std::sin(phi),
+                                ponderomotiveForceFactor*F_r*std::cos(phi),
+                                ponderomotiveForceFactor*F_z+a_ex};
+                        //std::cout <<"V0 "<< V_0 << " forceFactor " << forceFactor<< "  ffRad "<< fieldFactorRadial <<"  xField: "<<xField<< "  zField: "<<zField<<std::endl;
+
+                        return averagedRFForce;
                     }
-                    return rfForce;
+                    else {
+                        double V_rf = 0.0;
+                        if (rfWaveMode==SINE) {
+                            V_rf = V_0*cos(omega*time);
+                        }
+                        else if (rfWaveMode==SAMPLED) {
+                            V_rf = V_0*rfSampledWaveForm->getValueLooped(timestep);
+                        }
+
+                        Core::Vector rfForce(0, 0, 0);
+                        if (fieldMode==BASIC) {
+                            double a = (U_0+V_rf)/d_square_2*particleCharge;
+
+                            rfForce = Core::Vector(
+                                    -a*pPos.x(),
+                                    -a*pPos.y(),
+                                    2*a*pPos.z()+a_ex);
+                        }
+                        else if (fieldMode==HIGHER_ORDERS) {
+                            // Source for this derivation of the field components:
+                            // https://doi.org/10.1016/1044-0305(93)80017-S
+                            // Nonlinear Resonance Effects During Ion Storage in a Quadrupole Ion Trap, Eades et.al.
+
+                            // transform to z-r space, calculate higher orders and transform force back to cartesian space
+                            double r = std::sqrt(pPos.x()*pPos.x()+pPos.y()*pPos.y());
+                            double z = pPos.z();
+                            double phi = std::atan2(pPos.x(), pPos.y());
+
+                            //d_square_2 == r_0^2 for ideal electrode geometry
+                            double phi_0 = (U_0+V_rf)/2.0*particleCharge;
+
+                            // ideal quadropole field:
+                            double E_2_r = 2.0*r/d_square_2;
+                            double E_2_z = -4.0*z/d_square_2;
+
+                            //hexapole field:
+                            double r_0_3 = std::pow(d_square_2, 3.0/2.0);
+                            double E_3_r = -6*r*z/r_0_3;
+                            double E_3_z = -3*(r*r-2*z*z)/r_0_3;
+
+                            //octapole field:
+                            double r_0_4 = d_square_2*d_square_2;
+                            double E_4_r = 12*(r*r*r-4*r*z*z)/r_0_4;
+                            double E_4_z = (32*z*z*z-48*r*r*z)/r_0_4;
+
+                            double E_r = phi_0*(E_2_r
+                                    +higherFieldOrdersCoefficients[0]*E_3_r
+                                    +higherFieldOrdersCoefficients[1]*E_4_r);
+
+                            double E_z = phi_0*(E_2_z
+                                    +higherFieldOrdersCoefficients[0]*E_3_z
+                                    +higherFieldOrdersCoefficients[1]*E_4_z);
+
+                            // transform back to cartesian space:
+                            rfForce = Core::Vector(
+                                    E_r*std::sin(phi),
+                                    E_r*std::cos(phi),
+                                    E_z+a_ex);
+                        }
+                        return rfForce;
+                    }
                 };
 
-        auto accelerationFunctionQIT =
+        auto spaceChargeAccelerationFct_RKIntegration =
+                     [spaceChargeFactor](
+                             Core::Particle* particle, int /*particleIndex*/,
+                             SpaceCharge::FieldCalculator& scFieldCalculator, double /*time*/, unsigned int /*timestep*/) -> Core::Vector {
+
+                     Core::Vector spaceChargeForce(0, 0, 0);
+                     if (spaceChargeFactor>0) {
+                         spaceChargeForce =
+                                 scFieldCalculator.getEFieldFromSpaceCharge(*particle)*(particle->getCharge()*spaceChargeFactor);
+                     }
+
+                     return (spaceChargeForce/particle->getMass());
+                };
+
+        auto accelerationFctTrapField_RKIntegration =
+                [&trapFieldFunction](Core::Particle* particle, Core::Vector position, Core::Vector /*velocity*/, double time, unsigned int timestep){
+                    return trapFieldFunction(particle, position, time, timestep)/particle->getMass();
+                };
+
+
+        auto accelerationFctQIT_verletIntegration =
                 [spaceChargeFactor, &trapFieldFunction](
-                        Core::Particle* particle, int particleIndex,
+                        Core::Particle* particle, int /*particleIndex*/,
                         SpaceCharge::FieldCalculator& scFieldCalculator, double time, unsigned int timestep) -> Core::Vector {
 
                     double particleCharge = particle->getCharge();
 
-                    Core::Vector rfForce = trapFieldFunction(particle, particleIndex, time, timestep);
+                    Core::Vector rfForce = trapFieldFunction(particle, particle->getLocation(), time, timestep);
 
                     Core::Vector spaceChargeForce(0, 0, 0);
                     if (spaceChargeFactor>0) {
@@ -386,8 +404,8 @@ int main(int argc, const char * argv[]) {
         };
 
         //prepare file writers and data writing functions ==============================================================================
-        auto avgPositionWriter = std::make_unique<FileIO::AverageChargePositionWriter>(
-                simResultBasename+"_averagePosition.txt");
+        /*auto avgPositionWriter = std::make_unique<FileIO::AverageChargePositionWriter>(
+                simResultBasename+"_averagePosition.txt");*/
         auto fftWriter = std::make_unique<FileIO::IdealizedQitFFTWriter>(particlePtrs,
                 simResultBasename+"_fft.txt");
 
@@ -422,16 +440,18 @@ int main(int argc, const char * argv[]) {
 
         std::vector<std::string> integerParticleAttributesNames = {"global index"};
 
-        auto hdf5Writer = std::make_unique<FileIO::TrajectoryHDF5Writer>(simResultBasename+"_trajectories.hd5");
+        auto hdf5Writer = std::make_unique<FileIO::TrajectoryHDF5Writer>(simResultBasename+"_trajectories.h5");
         hdf5Writer->setParticleAttributes(auxParamNames, additionalParameterTransformFct);
         hdf5Writer->setParticleAttributes(integerParticleAttributesNames, integerParticleAttributesTransformFct);
 
-        auto timestepWriteFunction =
+        auto postTimestepFunction =
                 [trajectoryWriteInterval, fftWriteInterval, fftWriteMode, &V_0, &V_rf_export, &ionsInactive,
-                        &hdf5Writer, &ionsInactiveWriter,
-                        &fftWriter, &startSplatTracker, &logger](
+                &hdf5Writer, &ionsInactiveWriter,
+                &fftWriter, &startSplatTracker, &logger](
+                        Integration::AbstractTimeIntegrator* /*integrator*/,
                         std::vector<Core::Particle*>& particles, double time, unsigned int timestep,
-                        bool lastTimestep) {
+                        bool lastTimestep)
+                {
 
                     if (timestep%fftWriteInterval==0) {
                         ionsInactiveWriter->writeTimestep(ionsInactive, time);
@@ -441,12 +461,20 @@ int main(int argc, const char * argv[]) {
                         else if (fftWriteMode==MASS_RESOLVED) {
                             fftWriter->writeTimestepMassResolved(time);
                         }
+                        else if (fftWriteMode==ION_CLOUD_POSITION) {
+                            fftWriter->writeTimestepAverageIonCloudPosition(time);
+                        }
                     }
 
                     if (lastTimestep) {
                         V_rf_export.emplace_back(V_0);
                         hdf5Writer->writeStartSplatData(startSplatTracker);
                         hdf5Writer->writeTimestep(particles, time);
+                        std::vector<double> ionMasses = std::vector<double>();
+                        for (const auto& particle: particles) {
+                            ionMasses.emplace_back(particle->getMass()/Core::AMU_TO_KG);
+                        }
+                        hdf5Writer->writeNumericListDataset("Particle Masses", ionMasses);
                         hdf5Writer->finalizeTrajectory();
                         logger->info("finished ts:{} time:{:.2e}", timestep, time);
                     }
@@ -468,56 +496,13 @@ int main(int argc, const char * argv[]) {
         AppUtils::Stopwatch stopWatch;
         stopWatch.start();
 
-        if (integratorMode==VERLET) {
-            Integration::VerletIntegrator verletIntegrator(
-                    particlePtrs,
-                    accelerationFunctionQIT, timestepWriteFunction,
-                    otherActionsFunctionQIT, particleStartMonitoringFct,
-                    &hsModel);
-            AppUtils::SignalHandler::setReceiver(verletIntegrator);
-            verletIntegrator.run(timeSteps, dt);
-        }
-        else if (integratorMode==PARALLEL_VERLET) {
-            Integration::ParallelVerletIntegrator verletIntegrator(
-                    particlePtrs,
-                    accelerationFunctionQIT, timestepWriteFunction,
-                    otherActionsFunctionQIT, particleStartMonitoringFct,
-                    &hsModel);
-            AppUtils::SignalHandler::setReceiver(verletIntegrator);
-            verletIntegrator.run(timeSteps, dt);
-        }
-#ifdef WITH_FMM_3d
-        else if (integratorMode==FMM3D_VERLET) {
-            Integration::FMMVerletIntegrator<FMM3D::FMMSolver> integrator(
-                    particlePtrs,
-                    accelerationFunctionQIT, timestepWriteFunction,
-                    otherActionsFunctionQIT, particleStartMonitoringFct,
-                    &hsModel);
-
-            if (simConf->isParameter("FMM3D_precision")) {
-                integrator.getFMMSolver()->setRequestedPrecision(simConf->doubleParameter("FMM3D_precision"));
-            }
-
-            AppUtils::SignalHandler::setReceiver(integrator);
-            integrator.run(timeSteps, dt);
-        }
-#endif
-#ifdef WITH_EXAFMMT
-        else if (integratorMode==EXAFMM_VERLET) {
-            Integration::FMMVerletIntegrator<ExaFMMt::FMMSolver> integrator(
-                    particlePtrs,
-                    accelerationFunctionQIT, timestepWriteFunction,
-                    otherActionsFunctionQIT, particleStartMonitoringFct,
-                    &hsModel);
-
-            if (simConf->isParameter("ExaFMM_order")) {
-                integrator.getFMMSolver()->setExpansionOrder(simConf->intParameter("ExaFMM_order"));
-            }
-
-            AppUtils::SignalHandler::setReceiver(integrator);
-            integrator.run(timeSteps, dt);
-        }
-#endif
+        AppUtils::runTrajectoryIntegration(
+                simConf, timeSteps, dt,
+                particlePtrs,
+                accelerationFctQIT_verletIntegration,
+                accelerationFctTrapField_RKIntegration,
+                spaceChargeAccelerationFct_RKIntegration,
+                postTimestepFunction, otherActionsFunctionQIT, particleStartMonitoringFct, &hsModel);
 
         if (rfAmplitudeMode==RAMPED_RF) {
             hdf5Writer->writeNumericListDataset("V_rf", V_rf_export);

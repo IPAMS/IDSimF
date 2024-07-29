@@ -20,11 +20,7 @@ The simulation app supports the simulation of this FT detection mode.
 Simulation configuration description
 ====================================
 
-``integrator_mode`` : Keyword:[``verlet``, ``parallel_verlet``]
-    Selects the trajectory integrator
-
-    * ``verlet``: Serial (non parallelized) Verlet integrator
-    * ``parallel_verlet``: Parallelized Verlet integrator
+.. include:: includes/apputils_run_integration_params.rst
 
 ``sim_time_steps`` : integer
     Number of simulation time steps
@@ -58,7 +54,7 @@ Simulation configuration description
         [[x low, x high], [y low, y high], [z low, z high]]
 
 
-.. include:: includes/ion_definition_reading_options.rst
+.. include:: includes/apputils_ion_definition_params.rst
 
 
 --------------------------------------------------------
@@ -68,8 +64,26 @@ Potential Array Configuration / Trap Field Configuration
 ``frequency_rf`` : float
     Frequency of the RF trapping field in Hz. 
 
+Trap field RF voltage
+---------------------
+
+The RF trap field voltage (ground to peak) can be static or can be ramped during the simulation. 
+
+A static trap field voltage is set by ``V_rf``:
+
 ``V_rf`` : float
-    Ground to peak amplitude of the RF trapping field in V. 
+    Static ground to peak trap field amplitude in volt. 
+
+If ``V_rf_start`` and ``V_rf_end`` are set, the trap field voltage is ramped linearly during the simulation from ``V_rf_start`` to ``V_rf_end``: 
+
+``V_rf_start`` : float 
+    Ground to peak trap field amplitude in volt at the begin of the trap field voltage ramp.
+
+``V_rf_end`` : float
+    Ground to peak trap field amplitude in volt at the end of the trap field voltage ramp.
+
+Potential Arrays and DC / RF Potentials
+---------------------------------------
 
 ``potential_arrays`` : Vector of file paths
     Paths to the SIMION potential array files defining the electric potentials and electrode geometry in the trap. Typically, SIMION potential arrays generated with the *fast adjust* option are used for potential definition. 
@@ -96,7 +110,7 @@ Potential Array Configuration / Trap Field Configuration
     with
 
     * :math:`t` the current time in the simulation
-    * :math:`V_{\text{RF}}` given by ``V_rf``
+    * :math:`V_{\text{RF}}` given by ``V_rf`` (or the current :math:`V_{\text{RF}}` in the ramp between ``V_rf_start`` and ``V_rf_end``)
     * the angular frequency :math:`\omega`, given by :math:`2\pi\cdot` ``frequency_rf``
     * :math:`F_{\text{RF}}` given by ``rf_potential_factors``.
 

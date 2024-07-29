@@ -20,6 +20,7 @@
  ****************************/
 
 #include "CollisionModel_MolecularStructure.hpp"
+#include "Core_utils.hpp"
 #include <algorithm>
 #include <iostream>
 
@@ -119,7 +120,7 @@ double CollisionModel::MolecularStructure::getMomentOfInertia(double x1, double 
 }
 
 double CollisionModel::MolecularStructure::getAngularVelocity(double T, double I){
-    if(I == 0){
+    if(Core::isDoubleEqual(I, 0.0)){
         return 0;
     }else{
         return sqrt(2 * Core::K_BOLTZMANN * T/I);

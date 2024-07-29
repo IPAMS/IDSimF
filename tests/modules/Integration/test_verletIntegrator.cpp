@@ -117,7 +117,8 @@ TEST_CASE("Test serial verlet integrator", "[ParticleSimulation][VerletIntegrato
         SECTION("Verlet integrator should run through and should call functions"){
 
             unsigned int nTimeStepsRecorded = 0;
-            auto timestepWriteFct = [&nTimeStepsRecorded](std::vector<Core::Particle*>& /*particles*/, double /*time*/, int /*timestep*/,
+            auto postTimestepFct = [&nTimeStepsRecorded](
+                    Integration::AbstractTimeIntegrator* /*integrator*/, std::vector<Core::Particle*>& /*particles*/, double /*time*/, int /*timestep*/,
                                        bool /*lastTimestep*/){
                 nTimeStepsRecorded++;
             };
@@ -136,7 +137,7 @@ TEST_CASE("Test serial verlet integrator", "[ParticleSimulation][VerletIntegrato
 
             Integration::VerletIntegrator verletIntegrator(
                     particlesPtrs,
-                    accelerationFct, timestepWriteFct, otherActionsFct, particleStartMonitoringFct);
+                    accelerationFct, postTimestepFct, otherActionsFct, particleStartMonitoringFct);
 
             verletIntegrator.run(timeSteps, dt);
 
@@ -164,21 +165,18 @@ TEST_CASE("Test serial verlet integrator", "[ParticleSimulation][VerletIntegrato
         }
 
         SECTION("Verlet integrator should be stoppable"){
-
-            Integration::AbstractTimeIntegrator* integratorPtr;
             unsigned int terminationTimeStep = 50;
 
-            auto timestepStopFct = [&integratorPtr, terminationTimeStep](
-                    std::vector<Core::Particle*>& /*particles*/, double /*time*/, unsigned int timestep, bool /*lastTimestep*/){
+            auto timestepStopFct = [terminationTimeStep](
+                    Integration::AbstractTimeIntegrator* integrator, std::vector<Core::Particle*>& /*particles*/, double /*time*/, unsigned int timestep, bool /*lastTimestep*/){
                 if (timestep >= terminationTimeStep){
-                    integratorPtr->setTerminationState();
+                    integrator->setTerminationState();
                 }
             };
 
             Integration::VerletIntegrator verletIntegrator(
                     particlesPtrs,
                     accelerationFct, timestepStopFct);
-            integratorPtr = &verletIntegrator;
             verletIntegrator.run(timeSteps, dt);
 
             CHECK(verletIntegrator.timeStep() == terminationTimeStep);

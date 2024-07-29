@@ -28,6 +28,7 @@
 #include "appUtils_simulationConfiguration.hpp"
 #include "catch.hpp"
 #include "test_util.hpp"
+#include "Core_utils.hpp"
 #include <string>
 
 TEST_CASE( "Test simulation configuration ", "[ApplicationUtils]") {
@@ -38,7 +39,7 @@ TEST_CASE( "Test simulation configuration ", "[ApplicationUtils]") {
         CHECK(simConf.intParameter("integer_parameter") == 1500);
         CHECK(simConf.intVectorParameter("integer_vector") == std::vector<int>({8000, 9000}));
 
-        CHECK(simConf.doubleParameter("double_parameter") == 500.5);
+        CHECK(Core::isDoubleEqual(simConf.doubleParameter("double_parameter"), 500.5));
         CHECK(simConf.doubleVectorParameter("double_vector") == std::vector<double>({35.5, 100.1, 45.5}));
 
         CHECK(simConf.stringParameter("string_parameter") == "cylinder");

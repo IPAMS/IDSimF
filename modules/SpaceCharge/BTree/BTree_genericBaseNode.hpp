@@ -220,7 +220,6 @@ namespace BTree{
         //iterate through parent nodes:
         NodType* parentNode = parent_;
         NodType* leafNode = nullptr;
-        int lnodes=0;
 
         //remove this node from the octant nodes of the parent node:
         if (parentNode != nullptr){
@@ -251,7 +250,6 @@ namespace BTree{
                         parentNode->charge_ = parentNode->octNodes_[i]->charge_;
                         parentNode->particle_->setHostNode(parentNode);
                         leafNode = parentNode;
-                        lnodes++;
 
                         //delete the sibling from the tree:
                         delete(parentNode->octNodes_[i]);

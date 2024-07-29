@@ -1,0 +1,48 @@
+image: gcc
+
+services:
+  - docker:dind
+
+stages:         
+  - build
+  - test
+  - deploy
+  
+build-job:      
+  stage: build
+  script:
+    - apt-get update --yes
+    - apt-get install --yes cmake
+    - apt-get -y install hdf5-tools 
+    - apt-get -y install h5utils 
+    - apt-get -y install libhdf5-dev 
+    - rm -Rf build  
+    - mkdir build
+    - cd build
+    - cmake ..
+    - make -j8
+  artifacts:
+    paths:
+      - build/
+
+test-job:   
+  stage: test    
+  script:
+    - apt-get update --yes
+    - apt-get install --yes cmake
+    - apt-get -y install hdf5-tools 
+    - apt-get -y install h5utils 
+    - apt-get -y install libhdf5-dev 
+    - cd build
+    - ctest --repeat until-pass:10 --rerun-failed --output-on-failure
+
+deploy-job:      
+  stage: deploy  
+  environment: production
+  image: docker:latest
+  script:
+    - cd docker
+    - docker login -u $DOCKER_USER -p $DOCKER_ACCESS_TOKEN
+    - docker build -t $DOCKER_USER/idsimf-cli .
+    - docker push mrajkovic/idsimf-cli:latest
+    - echo "Application successfully deployed."

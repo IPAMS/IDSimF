@@ -3,6 +3,8 @@ channels:
   - conda-forge
   - defaults
 dependencies:
-  - python=3.8
+  - python=3.11
   - breathe
   - doxygen=1.9.1
+  - pip:
+    - sphinx-rtd-theme>=1.0.0

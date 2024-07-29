@@ -1,7 +1,7 @@
 /***************************
  Ion Dynamics Simulation Framework (IDSimF)
 
- Copyright 2020 - Physical and Theoretical Chemistry /
+ Copyright 2023 - Physical and Theoretical Chemistry /
  Institute of Pure and Applied Mass Spectrometry
  of the University of Wuppertal, Germany
 
@@ -31,8 +31,6 @@
 #include "FileIO_trajectoryHDF5Writer.hpp"
 #include "FileIO_scalar_writer.hpp"
 #include "PSim_util.hpp"
-#include "Integration_verletIntegrator.hpp"
-#include "Integration_parallelVerletIntegrator.hpp"
 #include "PSim_sampledWaveform.hpp"
 #include "PSim_particleStartSplatTracker.hpp"
 #include "PSim_math.hpp"
@@ -45,13 +43,13 @@
 #include "appUtils_stopwatch.hpp"
 #include "appUtils_signalHandler.hpp"
 #include "appUtils_commandlineParser.hpp"
+#include "appUtils_integrationRunning.hpp"
 #include "FileIO_ionCloudReader.hpp"
 #include <iostream>
 #include <vector>
 #include <ctime>
 #include <filesystem>
 
-enum IntegratorMode {VERLET,PARALLEL_VERLET};
 enum RfAmplitudeMode {STATIC_RF,RAMPED_RF};
 enum ExciteMode {RECTPULSE,SWIFT};
 enum FftWriteMode {UNRESOLVED,MASS_RESOLVED};
@@ -75,18 +73,6 @@ int main(int argc, const char * argv[]) {
         std::filesystem::path confBasePath = simConf->confBasePath();
 
         // read basic simulation parameters =============================================================
-        std::string integratorMode_str = simConf->stringParameter("integrator_mode");
-        IntegratorMode integratorMode;
-        if (integratorMode_str=="verlet") {
-            integratorMode = VERLET;
-        }
-        else if (integratorMode_str=="parallel_verlet") {
-            integratorMode = PARALLEL_VERLET;
-        }
-        else {
-            throw std::invalid_argument("wrong configuration value: integrator mode");
-        }
-
         unsigned int timeSteps = simConf->unsignedIntParameter("sim_time_steps");
         unsigned int trajectoryWriteInterval = simConf->unsignedIntParameter("trajectory_write_interval");
         unsigned int fftWriteInterval = simConf->unsignedIntParameter("fft_write_interval");
@@ -222,10 +208,9 @@ int main(int argc, const char * argv[]) {
                 [exciteMode, rfMode, excitePulseLength, excitePulsePotential,
                         omega, &swiftWaveForm, &V_0, &V_0_ramp,
                         &potentialArrays, &potentialsFactorsDc, &potentialFactorsRf, &potentialFactorsExcite]
-                        (Core::Particle* particle, int /*particleIndex*/,  double time, unsigned int timestep)
+                        (Core::Particle* particle, Core::Vector pos, double time, unsigned int timestep)
                         -> Core::Vector {
 
-                    Core::Vector pos = particle->getLocation();
                     double particleCharge = particle->getCharge();
                     double excitePotential = 0;
                     if (exciteMode==RECTPULSE) {
@@ -258,14 +243,38 @@ int main(int argc, const char * argv[]) {
                     return fEfield*particleCharge;
                 };
 
-        auto accelerationFunctionQIT =
+
+        auto spaceChargeAccelerationFct_RKIntegration =
+                [spaceChargeFactor](
+                        Core::Particle* particle, int /*particleIndex*/,
+                        SpaceCharge::FieldCalculator& scFieldCalculator, double /*time*/, unsigned int /*timestep*/) -> Core::Vector {
+
+                    Core::Vector spaceChargeForce(0, 0, 0);
+                    if (spaceChargeFactor>0) {
+                        spaceChargeForce =
+                                scFieldCalculator.getEFieldFromSpaceCharge(*particle)*(particle->getCharge()*spaceChargeFactor);
+                    }
+
+                    particle->setFloatAttribute(key_spaceCharge_x, spaceChargeForce.x());
+                    particle->setFloatAttribute(key_spaceCharge_y, spaceChargeForce.y());
+                    particle->setFloatAttribute(key_spaceCharge_z, spaceChargeForce.z());
+
+                    return (spaceChargeForce/particle->getMass());
+                };
+
+        auto accelerationFctTrapField_RKIntegration =
+                [&trapFieldFunction](Core::Particle* particle, Core::Vector position, Core::Vector /*velocity*/, double time, unsigned int timestep){
+                    return trapFieldFunction(particle, position, time, timestep)/particle->getMass();
+                };
+
+        auto accelerationFunctionQIT_verletIntegration =
                 [spaceChargeFactor, &trapFieldFunction](
-                        Core::Particle* particle, int particleIndex, SpaceCharge::FieldCalculator& scFieldCalculator,
+                        Core::Particle* particle, int /*particleIndex*/, SpaceCharge::FieldCalculator& scFieldCalculator,
                         double time, unsigned int timestep) -> Core::Vector {
 
                     double particleCharge = particle->getCharge();
 
-                    Core::Vector trapForce = trapFieldFunction(particle, particleIndex, time, timestep);
+                    Core::Vector trapForce = trapFieldFunction(particle, particle->getLocation(), time, timestep);
 
                     Core::Vector spaceChargeForce(0, 0, 0);
                     if (spaceChargeFactor>0) {
@@ -347,20 +356,20 @@ int main(int argc, const char * argv[]) {
 
         std::vector<std::string> integerParticleAttributesNames = {"global index"};
 
-        auto hdf5Writer = std::make_unique<FileIO::TrajectoryHDF5Writer>(simResultBasename+"_trajectories.hd5");
+        auto hdf5Writer = std::make_unique<FileIO::TrajectoryHDF5Writer>(simResultBasename+"_trajectories.h5");
         hdf5Writer->setParticleAttributes(particleAttributesNames, particleAttributesTransformFct);
         hdf5Writer->setParticleAttributes(integerParticleAttributesNames, integerParticleAttributesTransformFct);
 
-        Integration::AbstractTimeIntegrator* integratorPtr;
-        auto timestepWriteFunction =
+        auto postTimestepFunction =
                 [trajectoryWriteInterval, fftWriteInterval, fftWriteMode, &V_0, &V_rf_export, &ionsInactive,
-                        &hdf5Writer, &startSplatTracker, &ionsInactiveWriter, &fftWriter, &integratorPtr, &logger](
+                        &hdf5Writer, &startSplatTracker, &ionsInactiveWriter, &fftWriter, &logger](
+                        Integration::AbstractTimeIntegrator* integrator,
                         std::vector<Core::Particle*>& particles,  double time, unsigned int timestep,
                         bool lastTimestep) {
 
                     // check if simulation should be terminated (if all particles are terminated)
                     if (ionsInactive>=particles.size() && particles.size()>0) {
-                        integratorPtr->setTerminationState();
+                        integrator->setTerminationState();
                     }
 
                     // process time step data and write / export results
@@ -372,13 +381,12 @@ int main(int argc, const char * argv[]) {
                         else if (fftWriteMode==MASS_RESOLVED) {
                             //fftWriter->writeTimestepMassResolved(time);
                             std::stringstream ss;
-                            ss << "Mass resolved induction current not implemented";
+                            ss << "Mass resolved induction currently not implemented";
                             throw (std::runtime_error(ss.str()));
                         }
                     }
 
                     if (timestep%trajectoryWriteInterval==0 || lastTimestep) {
-
                         logger->info("ts:{} time:{:.2e} V_rf:{} ions existing:{} ions inactive:{}",
                                 timestep, time, V_0, particles.size(), ionsInactive);
 
@@ -402,26 +410,13 @@ int main(int argc, const char * argv[]) {
         AppUtils::Stopwatch stopWatch;
         stopWatch.start();
 
-        if (integratorMode==VERLET) {
-            Integration::VerletIntegrator verletIntegrator(
-                    particlePtrs,
-                    accelerationFunctionQIT, timestepWriteFunction, otherActionsFunctionQIT, particleStartMonitoringFct,
-                    &hsModel);
-            integratorPtr = &verletIntegrator;
-            AppUtils::SignalHandler::setReceiver(verletIntegrator);
-            verletIntegrator.run(timeSteps, dt);
-        }
-        else if (integratorMode==PARALLEL_VERLET) {
-            Integration::ParallelVerletIntegrator verletIntegrator(
-                    particlePtrs,
-                    accelerationFunctionQIT, timestepWriteFunction, otherActionsFunctionQIT,
-                    particleStartMonitoringFct,
-                    &hsModel);
-
-            integratorPtr = &verletIntegrator;
-            AppUtils::SignalHandler::setReceiver(verletIntegrator);
-            verletIntegrator.run(timeSteps, dt);
-        }
+        AppUtils::runTrajectoryIntegration(
+            simConf, timeSteps, dt,
+            particlePtrs,
+            accelerationFunctionQIT_verletIntegration,
+            accelerationFctTrapField_RKIntegration,
+            spaceChargeAccelerationFct_RKIntegration,
+            postTimestepFunction, otherActionsFunctionQIT, particleStartMonitoringFct, &hsModel);
 
         if (rfMode==RAMPED_RF) {
             hdf5Writer->writeNumericListDataset("V_rf", V_rf_export);

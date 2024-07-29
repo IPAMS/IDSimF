@@ -41,6 +41,7 @@
 #include "CollisionModel_StatisticalDiffusion.hpp"
 #include "CollisionModel_HardSphere.hpp"
 #include "CollisionModel_MDInteractions.hpp"
+#include "CollisionModel_MDForceField_LJ12_6.hpp"
 #include "CollisionModel_SpatialFieldFunctions.hpp"
 #include "appUtils_simulationConfiguration.hpp"
 #include "appUtils_logging.hpp"
@@ -216,7 +217,7 @@ int main(int argc, const char * argv[]) {
             return result;
         };
 
-        std::string hdf5Filename = projectName+"_trajectories.hd5";
+        std::string hdf5Filename = projectName+"_trajectories.h5";
         FileIO::TrajectoryHDF5Writer trajectoryWriter(hdf5Filename);
         trajectoryWriter.setParticleAttributes(auxParamNames, additionalParamTFct);
 
@@ -293,12 +294,12 @@ int main(int argc, const char * argv[]) {
                     }
                 };
 
-
-        auto timestepWriteFct =
+        auto postTimestepFct =
                 [&trajectoryWriter, &voltageWriter, trajectoryWriteInterval, &rsSim, &resultFilewriter, concentrationWriteInterval,
-                 &totalFieldNow_VPerM, &logger]
-                        (std::vector<Core::Particle*>& particles, double time, int timestep,
-                         bool lastTimestep) {
+                        &totalFieldNow_VPerM, &logger](
+                        Integration::AbstractTimeIntegrator* /*integrator*/, std::vector<Core::Particle*>& particles,
+                        double time, unsigned int timestep, bool lastTimestep)
+                {
 
                     if (timestep%concentrationWriteInterval==0) {
                         resultFilewriter.writeTimestep(rsSim);
@@ -398,7 +399,10 @@ int main(int argc, const char * argv[]) {
                 double angleThetaScaling = simConf->doubleParameter("angle_theta_scaling");
                 double spawnRadius_m = simConf->doubleParameter("spawn_radius_m");
 
-                //construct MD model:
+                //construct Force Field and MD model:
+                CollisionModel::MDForceField_LJ12_6 forceField(collisionGasPolarizability_m3);
+                auto forceFieldPtr = std::make_unique<CollisionModel::MDForceField_LJ12_6>(forceField);
+
                 std::unique_ptr<CollisionModel::MDInteractionsModel> collisionModel =
                         std::make_unique<CollisionModel::MDInteractionsModel>(
                             staticPressureFct,
@@ -406,20 +410,20 @@ int main(int argc, const char * argv[]) {
                             backgroundTemperatureFct,
                             collisionGasMass_Amu,
                             collisionGasDiameter_nm*1e-9,
-                            collisionGasPolarizability_m3,
                             collisionGasIdentifier,
                             subIntegratorIntegrationTime_s,
                             subIntegratorStepSize_s,
                             collisionRadiusScaling,
                             angleThetaScaling,
                             spawnRadius_m,
+                            std::move(forceFieldPtr),
                             molecularStructureCollection);
 
                 // Set trajectory writing options:
                 bool saveTrajectory = simConf->boolParameter("save_trajectory");
 
                 if (saveTrajectory){
-                    int saveTrajectoryStartTimeStep = simConf->intParameter("trajectory_start_time_step");
+                    unsigned int saveTrajectoryStartTimeStep = simConf->unsignedIntParameter("trajectory_start_time_step");
                     double trajectoryDistance_m = simConf->doubleParameter("trajectory_distance_m");
                     collisionModel->setTrajectoryWriter(projectName+"_md_trajectories.txt",
                             trajectoryDistance_m, saveTrajectoryStartTimeStep);
@@ -467,7 +471,7 @@ int main(int argc, const char * argv[]) {
         //init trajectory simulation object:
         Integration::ParallelVerletIntegrator verletIntegrator(
                 particlesPtrs,
-                accelerationFct, timestepWriteFct, otherActionsFct, ParticleSimulation::noFunction,
+                accelerationFct, postTimestepFct, otherActionsFct, ParticleSimulation::noFunction,
                 collisionModelPtr.get());
         // ======================================================================================
 

@@ -23,12 +23,14 @@ set(SOURCE_FILES
         CollisionModel_MDInteractionsPreconstructed.cpp
         CollisionModel_MDInteractionsPreconstructed.hpp
         CollisionModel_MDInteractions.hpp
+        CollisionModel_AbstractMDForceField.cpp
+        CollisionModel_AbstractMDForceField.hpp
         CollisionModel_Atom.cpp
         CollisionModel_Atom.hpp
         CollisionModel_Molecule.cpp
         CollisionModel_Molecule.hpp
         CollisionModel_MolecularStructure.cpp
-        CollisionModel_MolecularStructure.hpp )
+        CollisionModel_MolecularStructure.hpp CollisionModel_MDForceField_LJ12_6.cpp CollisionModel_MDForceField_LJ12_6.hpp)
 
 add_library(collisionmodels STATIC ${SOURCE_FILES})
 target_include_directories(collisionmodels PUBLIC .)

@@ -46,15 +46,12 @@ namespace CollisionModel{
 }
 
 namespace Integration{
-
-    //std::function<Core::Vector(Core::Particle* particle, int particleIndex, Core::Tree& tree, double time, int timestep)> accelerationFctType;
-
     /**
-     * Core based ion trajectory integration with a simple verlet trajectory integrator scheme including space charge.
+     * Ion trajectory integrator with a simple velocity verlet trajectory integrator scheme including space charge.
+     * Space charge calculation with a serial Barnes Hut algorithm.
      *
-     * The acceleration calculation, additional ("other") actions performed in every time step and what is exported
-     * in every time step is passed to this trajectory integrator externally by functions. Thus, the integration scheme
-     * can be applied to arbitrary simulation problems.
+     * The acceleration calculation and additional actions performed is passed to this trajectory integrator externally
+     * by functions. Thus, the integration scheme can be applied to arbitrary simulation problems.
      */
     class VerletIntegrator: public AbstractTimeIntegrator{
 
@@ -62,16 +59,16 @@ namespace Integration{
 
         VerletIntegrator(
                 std::vector<Core::Particle*> particles,
-                accelerationFctType accelerationFunction,
-                timestepWriteFctType timestepWriteFunction = nullptr,
+                accelerationFctSingleStepType accelerationFunction,
+                postTimestepFctType postTimestepFunction = nullptr,
                 otherActionsFctType otherActionsFunction = nullptr,
                 AbstractTimeIntegrator::particleStartMonitoringFctType ionStartMonitoringFunction = nullptr,
                 CollisionModel::AbstractCollisionModel* collisionModel = nullptr
         );
 
         VerletIntegrator(
-                accelerationFctType accelerationFunction,
-                timestepWriteFctType timestepWriteFunction = nullptr,
+                accelerationFctSingleStepType accelerationFunction,
+                postTimestepFctType postTimestepFunction = nullptr,
                 otherActionsFctType otherActionsFunction = nullptr,
                 AbstractTimeIntegrator::particleStartMonitoringFctType ionStartMonitoringFunction = nullptr,
                 CollisionModel::AbstractCollisionModel* collisionModel = nullptr
@@ -85,8 +82,8 @@ namespace Integration{
     private:
         CollisionModel::AbstractCollisionModel* collisionModel_ = nullptr; ///< a gas collision model active in the simulation
 
-        accelerationFctType accelerationFunction_ = nullptr; ///< function to calculate particle acceleration
-        timestepWriteFctType timestepWriteFunction_ = nullptr; ///< function to define what is exported in every time step
+        accelerationFctSingleStepType accelerationFunction_ = nullptr; ///< function to calculate particle acceleration
+        postTimestepFctType postTimestepFunction_ = nullptr; ///< function to define what is exported in every time step
         otherActionsFctType otherActionsFunction_ = nullptr; ///< function with other actions done in every time step
 
 

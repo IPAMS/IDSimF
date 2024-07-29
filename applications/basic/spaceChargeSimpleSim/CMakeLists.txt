@@ -8,7 +8,8 @@ target_link_libraries(${PROJECT_NAME} core apputils spacecharge collisionmodels 
 target_link_libraries(${PROJECT_NAME} ${VTK_LIBRARIES} ${HDF5_CXX_LIBRARIES} ${HDF5_LIBRARIES})
 
 # register example runs for CTest
-add_test(NAME app_basic_spaceChargeSimpleSim_benchmarkRunShort COMMAND ${PROJECT_NAME} "example/benchmarkRun_short.json" "run_app_basic_spaceChargeSimpleSim_benchmarkRunShort")
+add_test(NAME app_basic_spaceChargeSimpleSim_benchmarkRunShort_parallel COMMAND ${PROJECT_NAME} "example/benchmarkRun_short_parallel.json" "run_app_basic_spaceChargeSimpleSim_benchmarkRunShort_parallel" -n ${N_THREADS})
+add_test(NAME app_basic_spaceChargeSimpleSim_benchmarkRunShort_serial COMMAND ${PROJECT_NAME} "example/benchmarkRun_short_serial.json" "run_app_basic_spaceChargeSimpleSim_benchmarkRunShort_serial" -n ${N_THREADS})
 
 add_custom_command(TARGET ${PROJECT_NAME} PRE_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory

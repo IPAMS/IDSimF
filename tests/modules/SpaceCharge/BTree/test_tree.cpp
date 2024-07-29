@@ -268,7 +268,7 @@ TEST_CASE( "Test serial tree charge distribution calculation","[Tree]"){
     }
 
     SECTION( "Test force calculation with a large number of particles in a latticed cube"){
-        std::size_t nPerDirection = 20;
+        unsigned int nPerDirection = 20;
         auto ions = getIonsInLattice(nPerDirection);
 
         SpaceCharge::FullSumSolver fullSumSolver;

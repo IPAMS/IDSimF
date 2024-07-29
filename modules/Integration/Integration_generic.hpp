@@ -32,8 +32,12 @@
 #include <functional>
 
 namespace Integration{
+
+    // Forward abstract time integrator
+    class AbstractTimeIntegrator;
+
     /**
-     * type definition for acceleration calculation functions
+     * type definition for acceleration calculation functions (single step velocity verlet typed acceleration)
      */
     typedef std::function
         <Core::Vector (
@@ -42,18 +46,48 @@ namespace Integration{
             SpaceCharge::FieldCalculator &forceCalculator,
             double time,
             unsigned int timestep)>
+    accelerationFctSingleStepType;
+
+    /**
+     * Acceleration function for arbitrary position, velocity, time and mass
+     * (typically for pure forces without space charge in multistep methods)
+     */
+    typedef std::function
+            <Core::Vector (
+                    Core::Particle* particle,
+                    Core::Vector position,
+                    Core::Vector velocity,
+                    double time,
+                    unsigned int timestep)>
     accelerationFctType;
 
     /**
-     * type definition for functions exporting data in every timestep
+     * Acceleration of a particle from space charge
+     * (typically for space charge contribution in multistep integrator methods)
+     */
+    typedef std::function
+            <Core::Vector (
+                    Core::Particle* particle,
+                    std::size_t particleIndex,
+                    SpaceCharge::FieldCalculator &forceCalculator,
+                    double time,
+                    unsigned int timestep)>
+    accelerationFctSpaceChargeType;
+
+
+
+    /**
+     * type definition for functions doing things after every timestep (mostly exporting data in every timestep or
+     * stopping the integration)
      */
     typedef std::function
         <void (
+            AbstractTimeIntegrator* integrator,
             std::vector<Core::Particle*>& particles,
             double time,
             unsigned int timestep,
             bool lastTimestep)>
-    timestepWriteFctType;
+    postTimestepFctType;
 
     /**
      * type definition for functions defining "other actions", which are additional arbitrary actions performed

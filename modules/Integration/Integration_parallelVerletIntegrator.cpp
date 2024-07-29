@@ -25,29 +25,29 @@
 
 Integration::ParallelVerletIntegrator::ParallelVerletIntegrator(
         const std::vector<Core::Particle *>& particles,
-        Integration::accelerationFctType accelerationFunction,
-        Integration::timestepWriteFctType timestepWriteFunction,
+        Integration::accelerationFctSingleStepType accelerationFunction,
+        Integration::postTimestepFctType postTimestepFunction,
         Integration::otherActionsFctType otherActionsFunction,
         Integration::AbstractTimeIntegrator::particleStartMonitoringFctType ionStartMonitoringFunction,
         CollisionModel::AbstractCollisionModel* collisionModel) :
-    AbstractTimeIntegrator(particles, ionStartMonitoringFunction),
-    collisionModel_(collisionModel),
-    accelerationFunction_(std::move(accelerationFunction)),
-    timestepWriteFunction_(std::move(timestepWriteFunction)),
-    otherActionsFunction_(std::move(otherActionsFunction))
+        AbstractTimeIntegrator(particles, ionStartMonitoringFunction),
+        collisionModel_(collisionModel),
+        accelerationFunction_(std::move(accelerationFunction)),
+        postTimestepWriteFunction_(std::move(postTimestepFunction)),
+        otherActionsFunction_(std::move(otherActionsFunction))
 {}
 
 Integration::ParallelVerletIntegrator::ParallelVerletIntegrator(
-        Integration::accelerationFctType accelerationFunction,
-        Integration::timestepWriteFctType timestepWriteFunction,
-        Integration::otherActionsFctType otherActionsFunction,
+        Integration::accelerationFctSingleStepType accelerationFunction,
+        Integration::postTimestepFctType timestepWriteFunction,
+        Integration::otherActionsFctType postTimestepFunction,
         Integration::AbstractTimeIntegrator::particleStartMonitoringFctType ionStartMonitoringFunction,
         CollisionModel::AbstractCollisionModel* collisionModel) :
-    AbstractTimeIntegrator(ionStartMonitoringFunction),
-    collisionModel_(collisionModel),
-    accelerationFunction_(std::move(accelerationFunction)),
-    timestepWriteFunction_(std::move(timestepWriteFunction)),
-    otherActionsFunction_(std::move(otherActionsFunction))
+        AbstractTimeIntegrator(ionStartMonitoringFunction),
+        collisionModel_(collisionModel),
+        accelerationFunction_(std::move(accelerationFunction)),
+        postTimestepWriteFunction_(std::move(timestepWriteFunction)),
+        otherActionsFunction_(std::move(postTimestepFunction))
 {
     initInternalState_();
 }
@@ -76,14 +76,19 @@ void Integration::ParallelVerletIntegrator::initInternalState_(){
     tree_.init();
 }
 
+/**
+ * Runs the integration
+ * @param nTimesteps number of time steps to run
+ * @param dt time step length
+ */
 void Integration::ParallelVerletIntegrator::run(unsigned int nTimesteps, double dt) {
 
     // run init:
     this->runState_ = RUNNING;
     bearParticles_(0.0);
 
-    if (timestepWriteFunction_ !=nullptr) {
-        timestepWriteFunction_(particles_, time_, timestep_, false);
+    if (postTimestepWriteFunction_ !=nullptr) {
+        postTimestepWriteFunction_(this, particles_, time_, timestep_, false);
     }
 
     // run:
@@ -97,6 +102,10 @@ void Integration::ParallelVerletIntegrator::run(unsigned int nTimesteps, double 
     this->runState_ = STOPPED;
 }
 
+/**
+ * Runs a single step of the integration
+ * @param dt time step length
+ */
 void Integration::ParallelVerletIntegrator::runSingleStep(double dt){
 
     //std::cout << "runSingleStep "<<dt<<" "<<time_<<std::endl;
@@ -173,8 +182,8 @@ void Integration::ParallelVerletIntegrator::runSingleStep(double dt){
     tree_.updateNodes(ver);
     time_ = time_ + dt;
     timestep_++;
-    if (timestepWriteFunction_ != nullptr) {
-        timestepWriteFunction_(particles_, time_, timestep_, false);
+    if (postTimestepWriteFunction_ != nullptr) {
+        postTimestepWriteFunction_(this, particles_, time_, timestep_, false);
     }
 }
 
@@ -182,8 +191,8 @@ void Integration::ParallelVerletIntegrator::runSingleStep(double dt){
  * Finalizes the verlet integration run (should be called after the last time step).
  */
 void Integration::ParallelVerletIntegrator::finalizeSimulation(){
-    if (timestepWriteFunction_ != nullptr){
-        timestepWriteFunction_(particles_, time_, timestep_, true);
+    if (postTimestepWriteFunction_ != nullptr){
+        postTimestepWriteFunction_(this, particles_, time_, timestep_, true);
     }
 }
 

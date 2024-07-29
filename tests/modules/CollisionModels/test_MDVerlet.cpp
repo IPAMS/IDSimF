@@ -1,7 +1,7 @@
 /***************************
  Ion Dynamics Simulation Framework (IDSimF)
 
- Copyright 2020 - Physical and Theoretical Chemistry /
+ Copyright 2024 - Physical and Theoretical Chemistry /
  Institute of Pure and Applied Mass Spectrometry
  of the University of Wuppertal, Germany
 
@@ -19,9 +19,7 @@
  along with IDSimF.  If not, see <https://www.gnu.org/licenses/>.
 
  ------------
- test_velocityIntegrator.cpp
-
- Testing of pure velocity integrator for particle simulation
+ test_MDVerlet.cpp
 
  ****************************/
 
@@ -31,6 +29,7 @@
 #include "Core_particle.hpp"
 #include "catch.hpp"
 #include "CollisionModel_MDInteractions.hpp"
+#include "CollisionModel_MDForceField_LJ12_6.hpp"
 #include "FileIO_MolecularStructureReader.hpp"
 #include "FileIO_trajectoryHDF5Writer.hpp"
 
@@ -67,7 +66,7 @@ TEST_CASE( "Test MD and integrator", "[ParticleSimulation][VelocityIntegrator][t
         
 
         //init hdf5 filewriter
-        std::string hdf5Filename = "test_trajectories.hd5";
+        std::string hdf5Filename = "test_trajectories.h5";
         FileIO::TrajectoryHDF5Writer hdf5Writer(hdf5Filename);
         hdf5Writer.setParticleAttributes(auxParamNames, additionalParamTFct);
 
@@ -109,29 +108,32 @@ TEST_CASE( "Test MD and integrator", "[ParticleSimulation][VelocityIntegrator][t
                     }
                 };
 
-        auto timestepWriteFctVerlet =
+        auto postTimestepFctVerlet =
                 [&timestepWriteFctSimple]
-                        (std::vector<Core::Particle*>& particles,  double time, int timestep,
-                         bool lastTimestep) {
+                        (Integration::AbstractTimeIntegrator* /*integrator*/, std::vector<Core::Particle*>& particles,
+                         double time, int timestep,
+                         bool lastTimestep)
+                {
                     timestepWriteFctSimple(particles, time, timestep, lastTimestep);
                 };
 
-        
         auto otherActionsFunctionIMSSimple =
                 [&ionsInactive]
                         (Core::Vector& newPartPos, Core::Particle* particle, int /*particleIndex*/, double time,
-                         int /*timestep*/) {
+                         int /*timestep*/)
+                {
                     if (newPartPos.x()>=1) {
                         particle->setActive(false);
                         particle->setSplatTime(time);
                         ionsInactive++;
                     }
                 };
-        
+
         auto otherActionsFunctionIMSVerlet =
                 [&otherActionsFunctionIMSSimple]
                         (Core::Vector& newPartPos, Core::Particle* particle, int particleIndex,
-                          double time, int timestep) {
+                         double time, int timestep)
+                {
                     otherActionsFunctionIMSSimple(newPartPos, particle, particleIndex, time, timestep);
                 };
 
@@ -156,18 +158,20 @@ TEST_CASE( "Test MD and integrator", "[ParticleSimulation][VelocityIntegrator][t
 
         std::unique_ptr<CollisionModel::AbstractCollisionModel> collisionModelPtr;
         std::vector<std::unique_ptr<CollisionModel::AbstractCollisionModel>> mdModels;
+        CollisionModel::MDForceField_LJ12_6 forceField(0.203E-30);
+        auto forceFieldPtr = std::make_unique<CollisionModel::MDForceField_LJ12_6>(forceField);
         auto mdModel = std::make_unique<CollisionModel::MDInteractionsModel>(
                         100000,
                         298,
                         4.003,
                         2.89e-10,
-                        0.203e-30,
                         "He",
                         400e-14, 
                         1e-15, 
                         2,
                         4,
                         25e-10,
+                        std::move(forceFieldPtr),
                         molecularStructureCollection);
         mdModels.emplace_back(std::move(mdModel));
         std::unique_ptr<CollisionModel::MultiCollisionModel> collisionModel =
@@ -176,7 +180,7 @@ TEST_CASE( "Test MD and integrator", "[ParticleSimulation][VelocityIntegrator][t
 
         std::unique_ptr<Integration::AbstractTimeIntegrator> trajectoryIntegrator = std::make_unique<Integration::VerletIntegrator>(
                     particlesPtrs,
-                    accelerationFctVerlet, timestepWriteFctVerlet, otherActionsFunctionIMSVerlet,
+                    accelerationFctVerlet, postTimestepFctVerlet, otherActionsFunctionIMSVerlet,
                     ParticleSimulation::noFunction,
                     collisionModelPtr.get());
         for (int step = 0; step<timeSteps; step++) {

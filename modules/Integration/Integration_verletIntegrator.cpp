@@ -29,43 +29,43 @@
  * Creates a verlet integrator
  * @param particles group / cloud of charged particles to be integrated
  * @param accelerationFunction a function to calculate the acceleration to the individual particles
- * @param timestepWriteFunction  a function to export data from the simulation
+ * @param postTimestepFunction  a function performed for every time step after the particles are moved (for data export etc.)
  * @param otherActionsFunction  a function to perform arbitrary other actions in every time step of the simulation
  * @param collisionModel a collision model, modeling the interaction between charged particles and background gas
  */
 Integration::VerletIntegrator::VerletIntegrator(
         std::vector<Core::Particle *> particles,
-        Integration::accelerationFctType accelerationFunction,
-        Integration::timestepWriteFctType timestepWriteFunction,
+        Integration::accelerationFctSingleStepType accelerationFunction,
+        Integration::postTimestepFctType postTimestepFunction,
         Integration::otherActionsFctType otherActionsFunction,
         Integration::AbstractTimeIntegrator::particleStartMonitoringFctType ionStartMonitoringFunction,
         CollisionModel::AbstractCollisionModel* collisionModel) :
-    Integration::AbstractTimeIntegrator(particles, ionStartMonitoringFunction),
-    collisionModel_(collisionModel),
-    accelerationFunction_(std::move(accelerationFunction)),
-    timestepWriteFunction_(std::move(timestepWriteFunction)),
-    otherActionsFunction_(std::move(otherActionsFunction))
+        Integration::AbstractTimeIntegrator(particles, ionStartMonitoringFunction),
+        collisionModel_(collisionModel),
+        accelerationFunction_(std::move(accelerationFunction)),
+        postTimestepFunction_(std::move(postTimestepFunction)),
+        otherActionsFunction_(std::move(otherActionsFunction))
 {}
 
 /**
  * Creates an empty verlet integrator (without simulated particles)
  *
  * @param accelerationFunction a function to calculate the acceleration to the individual particles
- * @param timestepWriteFunction  a function to export data from the simulation
+ * @param postTimestepFunction  a function to export data from the simulation
  * @param otherActionsFunction  a function to perform arbitrary other actions in every time step of the simulation
  * @param collisionModel a collision model, modeling the interaction between charged particles and background gas
  */
 Integration::VerletIntegrator::VerletIntegrator(
-        Integration::accelerationFctType accelerationFunction,
-        Integration::timestepWriteFctType timestepWriteFunction,
+        Integration::accelerationFctSingleStepType accelerationFunction,
+        Integration::postTimestepFctType postTimestepFunction,
         Integration::otherActionsFctType otherActionsFunction,
         Integration::AbstractTimeIntegrator::particleStartMonitoringFctType ionStartMonitoringFunction,
         CollisionModel::AbstractCollisionModel* collisionModel) :
-    AbstractTimeIntegrator(ionStartMonitoringFunction),
-    collisionModel_(collisionModel),
-    accelerationFunction_(std::move(accelerationFunction)),
-    timestepWriteFunction_(std::move(timestepWriteFunction)),
-    otherActionsFunction_(std::move(otherActionsFunction))
+        AbstractTimeIntegrator(ionStartMonitoringFunction),
+        collisionModel_(collisionModel),
+        accelerationFunction_(std::move(accelerationFunction)),
+        postTimestepFunction_(std::move(postTimestepFunction)),
+        otherActionsFunction_(std::move(otherActionsFunction))
 {}
 
 /**
@@ -92,8 +92,8 @@ void Integration::VerletIntegrator::run(unsigned int nTimesteps, double dt) {
 
     this->runState_ = RUNNING;
     bearParticles_(0.0);
-    if (timestepWriteFunction_ !=nullptr) {
-        timestepWriteFunction_(particles_, time_, timestep_, false);
+    if (postTimestepFunction_ !=nullptr) {
+        postTimestepFunction_(this, particles_, time_, timestep_, false);
     }
 
     for (unsigned int step=0; step< nTimesteps; ++step){
@@ -158,8 +158,8 @@ void Integration::VerletIntegrator::runSingleStep(double dt) {
     }
     timestep_++;
     time_ = time_ + dt;
-    if (timestepWriteFunction_ != nullptr){
-        timestepWriteFunction_(particles_, time_, timestep_, false);
+    if (postTimestepFunction_ != nullptr){
+        postTimestepFunction_(this, particles_, time_, timestep_, false);
     }
 }
 
@@ -167,8 +167,8 @@ void Integration::VerletIntegrator::runSingleStep(double dt) {
  * Finalizes the verlet integration run (should be called after the last time step).
  */
 void Integration::VerletIntegrator::finalizeSimulation(){
-    if (timestepWriteFunction_ !=nullptr) {
-        timestepWriteFunction_(particles_, time_, timestep_, true);
+    if (postTimestepFunction_ !=nullptr) {
+        postTimestepFunction_(this, particles_, time_, timestep_, true);
     }
 }
 

@@ -50,7 +50,7 @@ void FMM3D::FMMSolver::computeChargeDistribution() {
 
     // call the actual fmm routine
     int ier =0;
-    int nP = nParticles;
+    int nP = (int) nParticles;
     lfmm3d_s_c_g_wrapper(&requestedPrecision_, &nP, sources.data(), charges.data(),
                          potentials.data(), gradients.data(), &ier);
 

@@ -59,6 +59,7 @@ namespace FileIO{
 
         void writeTimestep(double time);
         void writeTimestepMassResolved(double time);
+        void writeTimestepAverageIonCloudPosition(double time);
 
     private:
         std::unique_ptr<std::ofstream> transientFile_;

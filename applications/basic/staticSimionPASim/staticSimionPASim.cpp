@@ -28,7 +28,7 @@
 
 #include "Core_particle.hpp"
 #include "BTree_tree.hpp"
-#include "FileIO_trajectoryExplorerJSONwriter.hpp"
+#include "FileIO_trajectoryHDF5Writer.hpp"
 #include "PSim_util.hpp"
 #include "Integration_verletIntegrator.hpp"
 #include "FileIO_ionCloudReader.hpp"
@@ -80,12 +80,6 @@ int main(int argc, const char * argv[]) {
             particlePtrs.push_back(part.get());
         }
 
-        //prepare file writer ==============================================================================
-        auto jsonWriter = std::make_unique<FileIO::TrajectoryExplorerJSONwriter>(
-                simResultBasename+"_trajectories.json");
-        jsonWriter->setScales(1000, 1e6);
-
-
         // define functions for the trajectory integration ==================================================
 
         auto accelerationFunction =
@@ -110,7 +104,11 @@ int main(int argc, const char * argv[]) {
                         return Core::Vector(0.0, 0.0, 0.0);
                     }
                 };
+        //prepare file writer ==============================================================================
+        auto hdf5Writer = std::make_unique<FileIO::TrajectoryHDF5Writer>(
+                simResultBasename+"_trajectories.h5");
 
+        std::vector<std::string> auxParamNames = {"velocity x", "velocity y", "velocity z"};
         // function to add some additional exported parameters to the exported trajectory file:
         FileIO::partAttribTransformFctType additionalParameterTransformFct =
                 [](Core::Particle* particle) -> std::vector<double> {
@@ -121,31 +119,30 @@ int main(int argc, const char * argv[]) {
                     };
                     return result;
                 };
+        hdf5Writer->setParticleAttributes(auxParamNames, additionalParameterTransformFct);
 
-        auto timestepWriteFunction =
-                [trajectoryWriteInterval, &jsonWriter, &additionalParameterTransformFct, &logger](
+        auto postTimestepFunction =
+                [trajectoryWriteInterval, &hdf5Writer, &additionalParameterTransformFct, &logger](
+                        Integration::AbstractTimeIntegrator* /*integrator*/,
                         std::vector<Core::Particle*>& particles, double time, int timestep,
-                        bool lastTimestep) {
+                        bool lastTimestep)
+                {
 
                     if (lastTimestep) {
-                        jsonWriter->writeTimestep(
-                                particles,
-                                additionalParameterTransformFct,
-                                time, true);
-
-                        jsonWriter->writeSplatTimes(particles);
-                        jsonWriter->writeIonMasses(particles);
-
+                        hdf5Writer->writeTimestep(particles, time);
+                        hdf5Writer->writeSplatTimes(particles);
+                        std::vector<double> ionMasses = std::vector<double>();
+                        for (const auto& particle: particles) {
+                            ionMasses.emplace_back(particle->getMass()/Core::AMU_TO_KG);
+                        }
+                        hdf5Writer->writeNumericListDataset("Particle Masses", ionMasses);
+                        hdf5Writer->finalizeTrajectory();
                         logger->info("finished ts:{} time:{:.2e}", timestep, time);
                     }
-
                     else if (timestep%trajectoryWriteInterval==0) {
-
                         logger->info("ts:{} time:{:.2e}", timestep, time);
-                        jsonWriter->writeTimestep(
-                                particles,
-                                additionalParameterTransformFct,
-                                time, false);
+                        hdf5Writer->writeTimestep(
+                                particles, time);
                     }
                 };
 
@@ -155,7 +152,7 @@ int main(int argc, const char * argv[]) {
         stopWatch.start();
         Integration::VerletIntegrator verletIntegrator(
                 particlePtrs,
-                accelerationFunction, timestepWriteFunction);
+                accelerationFunction, postTimestepFunction);
         AppUtils::SignalHandler::setReceiver(verletIntegrator);
         verletIntegrator.run(timeSteps, dt);
 
