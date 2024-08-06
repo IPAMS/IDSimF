@@ -358,7 +358,7 @@ int main(int argc, const char * argv[]) {
 
         std::vector<std::string> integerParticleAttributesNames = {"global index", "index"};
 
-        auto hdf5Writer = std::make_unique<FileIO::TrajectoryHDF5Writer>(simResultBasename+"_trajectories.h5");
+        auto hdf5Writer = std::make_unique<FileIO::TrajectoryHDF5Writer>(cmdLineParser.trajectoriesResultName());
         hdf5Writer->setParticleAttributes(particleAttributesNames, particleAttributesTransformFct);
         hdf5Writer->setParticleAttributes(integerParticleAttributesNames, integerParticleAttributesTransformFct);
 

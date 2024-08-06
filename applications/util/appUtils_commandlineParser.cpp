@@ -76,21 +76,28 @@ std::shared_ptr<spdlog::logger> AppUtils::CommandlineParser::logger() {
 /**
  * Returns the name of the configuration file name specified in the commandline
  */
-std::string AppUtils::CommandlineParser::confFileName() {
+std::string AppUtils::CommandlineParser::confFileName() const {
     return confFileName_;
 }
 
 /**
  * Returns the result base name specified in the commandline
  */
-std::string AppUtils::CommandlineParser::resultName() {
+std::string AppUtils::CommandlineParser::resultName() const {
     return simResultName_;
+}
+
+/**
+ * Returns the name of the HDF5 trajectories file specified by the result base name in the commandline
+ */
+std::string AppUtils::CommandlineParser::trajectoriesResultName() const {
+    return simResultName_+"_trajectories.h5";;
 }
 
 /**
  * Returns the number of parallel threads specified by the commandline. For a single threaded application, the number
  * of threads is always 1
  */
-int AppUtils::CommandlineParser::numberOfThreads() {
+int AppUtils::CommandlineParser::numberOfThreads() const {
     return  numberOfThreads_;
 }

@@ -150,8 +150,7 @@ int main(int argc, const char * argv[]) {
             return result;
         };
 
-        std::string hdf5Filename = projectName+"_trajectories.h5";
-        FileIO::TrajectoryHDF5Writer trajectoryWriter(hdf5Filename);
+        FileIO::TrajectoryHDF5Writer trajectoryWriter(cmdLineParser.trajectoriesResultName());
         trajectoryWriter.setParticleAttributes(auxParamNames, additionalParamTFct);
 
         std::unique_ptr<FileIO::Scalar_writer> cvFieldWriter;

@@ -106,7 +106,7 @@ int main(int argc, const char * argv[]) {
                 };
         //prepare file writer ==============================================================================
         auto hdf5Writer = std::make_unique<FileIO::TrajectoryHDF5Writer>(
-                simResultBasename+"_trajectories.h5");
+                cmdLineParser.trajectoriesResultName());
 
         std::vector<std::string> auxParamNames = {"velocity x", "velocity y", "velocity z"};
         // function to add some additional exported parameters to the exported trajectory file:

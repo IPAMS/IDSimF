@@ -100,7 +100,7 @@ int main(int argc, const char * argv[]) {
 
         //prepare file writers ==============================================================================
         auto hdf5Writer = std::make_unique<FileIO::TrajectoryHDF5Writer>
-                (simResultBasename+"_trajectories.h5");
+                (cmdLineParser.trajectoriesResultName());
 
         // prepare random generators:
         //todo: reimplement ion start zone with ion start zone class

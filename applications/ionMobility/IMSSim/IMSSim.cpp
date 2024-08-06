@@ -206,8 +206,7 @@ int main(int argc, const char *argv[]){
         }
 
         //init hdf5 filewriter
-        std::string hdf5Filename = projectName+"_trajectories.h5";
-        FileIO::TrajectoryHDF5Writer hdf5Writer(hdf5Filename);
+        FileIO::TrajectoryHDF5Writer hdf5Writer(cmdLineParser.trajectoriesResultName());
         hdf5Writer.setParticleAttributes(auxParamNames, additionalParamTFct);
 
         unsigned int ionsInactive = 0;
