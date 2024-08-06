@@ -18,7 +18,7 @@ For example, running the simulation application ``BT-spaceChargeMinimalParallelS
 
     $ ./BT-spaceChargeMinimalParallelSim simConfiguration.json simulationRun001
 
-creates a result file ``simulationRun001_trajectories.hd5`` and a simulation log file ``simulationRun001.log``. The trajectory file contains the simulated ion trajectory data in a structured `HDF5 <https://en.wikipedia.org/wiki/Hierarchical_Data_Format>`_ file which can be read and analyzed with `IDSimPy <https://github.com/IPAMS/IDSimPy>`_. The log file contains the status information presented during the simulation to the user, which is also printed to the terminal. 
+creates a result file ``simulationRun001_trajectories.h5`` and a simulation log file ``simulationRun001.log``. The trajectory file contains the simulated ion trajectory data in a structured `HDF5 <https://en.wikipedia.org/wiki/Hierarchical_Data_Format>`_ file which can be read and analyzed with `IDSimPy <https://github.com/IPAMS/IDSimPy>`_. The log file contains the status information presented during the simulation to the user, which is also printed to the terminal. 
 
 Which types of result files are produced depends on the simulation type, but all simulation applications generate a simulation log file. 
 
