@@ -42,3 +42,21 @@ std::function<Core::Vector(const Core::Vector&)> CollisionModel::getConstantVect
     
     return [=](const Core::Vector&)->Core::Vector{ return constantValue;};
 }
+
+std::function<double(const Core::Vector&)> CollisionModel::getVariableScalarFunction(
+    ParticleSimulation::InterpolatedField &interpolatedField, int fieldIndex) {
+
+    return [&interpolatedField,fieldIndex](const Core::Vector& position)->double
+    {
+        return interpolatedField.getInterpolatedScalar(position.x(), position.y(), position.z(), fieldIndex);
+    };
+}
+
+std::function<double(const Core::Vector&)> CollisionModel::getVariableScalarFunction(
+    ParticleSimulation::SimionPotentialArray &simionPA) {
+
+    return [&simionPA](const Core::Vector& position)->double
+    {
+        return simionPA.getInterpolatedPotential(position.x(), position.y(), position.z());
+    };
+}

@@ -30,12 +30,16 @@
 #define Collision_SpatialFieldFunctions_hpp
 
 #include "Core_vector.hpp"
+#include "PSim_interpolatedField.hpp"
+#include "PSim_simionPotentialArray.hpp"
 #include <functional>
 
 namespace CollisionModel{
     
     std::function<double(const Core::Vector&)>getConstantDoubleFunction(double constantValue);
     std::function<Core::Vector(const Core::Vector&)>getConstantVectorFunction(Core::Vector constantValue);
+    std::function<double(const Core::Vector&)>getVariableScalarFunction(ParticleSimulation::InterpolatedField &interpolatedField, int fieldIndex=0);
+    std::function<double(const Core::Vector&)>getVariableScalarFunction(ParticleSimulation::SimionPotentialArray &simionPA);
 
 }
 

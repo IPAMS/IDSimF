@@ -22,6 +22,9 @@ set(TEST_FILES
         ${TEST_FILE_FOLDER}/cs_icdf_2020_02_27_001_test.dat
         ${TEST_FILE_FOLDER}/cs_icdf_2020_03_15_001_parameterTest.dat
         ${TEST_FILE_FOLDER}/test_molecularstructure_reader.json
+        ${TEST_FILE_FOLDER}/test_linear_scalar_field_01.h5
+        ${TEST_FILE_FOLDER}/simion_test_planar_2d.pa
+        ${TEST_FILE_FOLDER}/simion_test_planar_3d.pa
         )
 
 file(COPY ${TEST_FILES} DESTINATION .)
