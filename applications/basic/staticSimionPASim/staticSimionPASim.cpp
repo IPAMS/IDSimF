@@ -120,9 +120,11 @@ int main(int argc, const char * argv[]) {
                     return result;
                 };
         hdf5Writer->setParticleAttributes(auxParamNames, additionalParameterTransformFct);
+        auxParamNames = {"velocity x", "velocity y", "velocity z"};
+        hdf5Writer->setParticleAttributes(auxParamNames, additionalParameterTransformFct);
 
         auto postTimestepFunction =
-                [trajectoryWriteInterval, &hdf5Writer, &additionalParameterTransformFct, &logger](
+                [trajectoryWriteInterval, &hdf5Writer, &logger](
                         Integration::AbstractTimeIntegrator* /*integrator*/,
                         std::vector<Core::Particle*>& particles, double time, int timestep,
                         bool lastTimestep)
