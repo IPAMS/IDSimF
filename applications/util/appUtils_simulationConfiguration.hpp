@@ -70,7 +70,7 @@ namespace AppUtils{
                 const std::string& jsonName) const;
 
         std::vector<std::unique_ptr<ParticleSimulation::SimionPotentialArray>> readPotentialArrays(
-            const std::string& jsonName, double paSpatialScale = 1.0) const;
+            const std::string& jsonName, double paSpatialScale = 1.0, bool fastAdjustPA=false) const;
 
         std::string pathRelativeToConfFile(const std::string& pathStr) const;
         std::string pathRelativeToConfBasePath(const std::string& pathStr) const;
