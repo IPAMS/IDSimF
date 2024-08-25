@@ -39,6 +39,7 @@ namespace CollisionModel{
     std::function<double(const Core::Vector&)>getConstantScalarFunction(double constantValue);
     std::function<Core::Vector(const Core::Vector&)>getConstantVectorFunction(Core::Vector constantValue);
     std::function<double(const Core::Vector&)>getVariableScalarFunction(ParticleSimulation::InterpolatedField &interpolatedField, std::size_t fieldIndex = 0);
+    std::function<Core::Vector(const Core::Vector&)>getVariableVectorFunction(ParticleSimulation::InterpolatedField &interpolatedField, std::size_t fieldIndex = 0);
     std::function<double(const Core::Vector&)>getVariableScalarFunction(ParticleSimulation::SimionPotentialArray &simionPA);
 
 }

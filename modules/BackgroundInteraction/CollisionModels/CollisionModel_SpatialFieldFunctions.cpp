@@ -52,6 +52,15 @@ std::function<double(const Core::Vector&)> CollisionModel::getVariableScalarFunc
     };
 }
 
+std::function<Core::Vector(const Core::Vector&)> CollisionModel::getVariableVectorFunction(
+    ParticleSimulation::InterpolatedField &interpolatedField, std::size_t fieldIndex) {
+
+    return [&interpolatedField,fieldIndex](const Core::Vector& position)->Core::Vector
+    {
+        return interpolatedField.getInterpolatedVector(position.x(), position.y(), position.z(), fieldIndex);
+    };
+}
+
 std::function<double(const Core::Vector&)> CollisionModel::getVariableScalarFunction(
     ParticleSimulation::SimionPotentialArray &simionPA) {
 

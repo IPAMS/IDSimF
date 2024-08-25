@@ -52,6 +52,22 @@ TEST_CASE("Test spatial functions", "[CollisionModels][SpatialFunctions]") {
                 std::invalid_argument);
     }
 
+    SECTION("Variable spatial vector function from interpolated field should produce correct values") {
+        ParticleSimulation::InterpolatedField intField =
+        ParticleSimulation::InterpolatedField("test_linear_vector_field_01.h5");
+        auto fieldFct = CollisionModel::getVariableVectorFunction(intField);
+        auto fieldFct_1 = CollisionModel::getVariableVectorFunction(intField, 1);
+
+        CHECK(fieldFct({0.01, 0.0, 0.01}) == Core::Vector(0.02, 5.0, 1.0));
+        CHECK(fieldFct_1({0.01, 0.0, 0.01}) == Core::Vector(0.02, 15.0, 11.0));
+
+        CHECK(fieldFct({7.0, 0.0, 0.1}) == Core::Vector(7.1, 5.0, 1.0));
+        CHECK((fieldFct({2.0, 0.0, 2.1}) - Core::Vector(4.1, 5, 1)).magnitude() < 1e-6);
+        CHECK_THROWS_AS(
+                fieldFct({-100.0, -100.0, 0.1}) == Core::Vector(0.0, 0.0, 0.0),
+                std::invalid_argument);
+    }
+
     SECTION("Variable spatial function from mirrored 2D SIMION PA should produce correct values") {
         std::string paFilename = "simion_test_planar_2d.pa";
         ParticleSimulation::SimionPotentialArray simPa(paFilename);
