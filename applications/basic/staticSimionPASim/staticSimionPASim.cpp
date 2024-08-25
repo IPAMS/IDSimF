@@ -120,8 +120,6 @@ int main(int argc, const char * argv[]) {
                     return result;
                 };
         hdf5Writer->setParticleAttributes(auxParamNames, additionalParameterTransformFct);
-        auxParamNames = {"velocity x", "velocity y", "velocity z"};
-        hdf5Writer->setParticleAttributes(auxParamNames, additionalParameterTransformFct);
 
         auto postTimestepFunction =
                 [trajectoryWriteInterval, &hdf5Writer, &logger](
