@@ -78,8 +78,8 @@ int main(int argc, const char * argv[]) {
         std::vector<unsigned int> nParticles = simConf->unsignedIntVectorParameter("n_particles");
         unsigned int nSteps = simConf->unsignedIntParameter("sim_time_steps");
         unsigned int nStepsPerOscillation = simConf->unsignedIntParameter("sim_time_steps_per_sv_oscillation");
-        int concentrationWriteInterval = simConf->intParameter("concentrations_write_interval");
-        int trajectoryWriteInterval = simConf->intParameter("trajectory_write_interval");
+        unsigned int concentrationWriteInterval = simConf->unsignedIntParameter("concentrations_write_interval");
+        unsigned int trajectoryWriteInterval = simConf->unsignedIntParameter("trajectory_write_interval");
         double spaceChargeFactor = simConf->doubleParameter("space_charge_factor");
 
 
