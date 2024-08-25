@@ -91,10 +91,8 @@ int main(int argc, const char * argv[]) {
         std::vector<std::string> potentialArraysNames = simConf->stringVectorParameter("potential_arrays");
         double potentialArrayScale = simConf->doubleParameter("potential_array_scale");
         std::vector<std::unique_ptr<ParticleSimulation::SimionPotentialArray>> potentialArrays =
-                AppUtils::readPotentialArrayFiles(potentialArraysNames, simConf->confBasePath(), potentialArrayScale,
-                        true);
+            simConf->readPotentialArrays("potential_arrays", potentialArrayScale, true);
 
-        //scaling factor of 0.1 because SIMION uses a value of 10000 in  Fast Adjust PAs and  mm to m is 1000 = 0.1
         std::vector<double> potentialsDc = simConf->doubleVectorParameter("dc_potentials");
         std::vector<double> potentialFactorsRf = simConf->doubleVectorParameter("rf_potential_factors");
 

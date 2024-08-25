@@ -178,29 +178,16 @@ int main(int argc, const char * argv[]) {
 
         // ======================================================================================
 
-        //read potential array configuration of the trap =================================================
+        //read potential array configuration of the TWIMS system =================================================
         std::filesystem::path confBasePath = simConf->confBasePath();
 
         double paSpatialScale = simConf->doubleParameter("potential_array_scale");
-        std::vector<std::unique_ptr<ParticleSimulation::SimionPotentialArray>> WavePotentialArrays;
-        std::vector<std::string> WavePotentialArraysNames = simConf->stringVectorParameter("wave_potential_arrays");
-        for (const auto& paName: WavePotentialArraysNames) {
-            std::filesystem::path paPath = confBasePath/paName;
-            std::unique_ptr<ParticleSimulation::SimionPotentialArray> pa_pt =
-                    std::make_unique<ParticleSimulation::SimionPotentialArray>(paPath, paSpatialScale);
-            WavePotentialArrays.push_back(std::move(pa_pt));
-        }
 
-        std::vector<std::unique_ptr<ParticleSimulation::SimionPotentialArray>> RFPotentialArrays;
-        std::vector<std::string> RFPotentialArraysNames = simConf->stringVectorParameter("RF_potential_arrays");
-        for (const auto& paName: RFPotentialArraysNames) {
-            std::filesystem::path paPath = confBasePath/paName;
-            std::unique_ptr<ParticleSimulation::SimionPotentialArray> pa_pt =
-                    std::make_unique<ParticleSimulation::SimionPotentialArray>(paPath, paSpatialScale);
-            RFPotentialArrays.push_back(std::move(pa_pt));
-        }
+        std::vector<std::unique_ptr<ParticleSimulation::SimionPotentialArray>> WavePotentialArrays =
+            simConf->readPotentialArrays("wave_potential_arrays", paSpatialScale, true);
 
-        double potentialScale = 1.0/10000.0;
+        std::vector<std::unique_ptr<ParticleSimulation::SimionPotentialArray>> RFPotentialArrays =
+            simConf->readPotentialArrays("RF_potential_arrays", paSpatialScale, true);
 
         [[maybe_unused]] double wavePeriod = 1.0/waveFrequency;
 
@@ -366,12 +353,10 @@ int main(int argc, const char * argv[]) {
                         totalFieldNow[WavePotentialArrays.size()+i] = -1 * sin(time*omega) * V_rf;
                     }
                 }
-
-
         };
 
         auto accelerationFct =
-                [&WavePotentialArrays, &RFPotentialArrays, &totalFieldNow, potentialScale, spaceChargeFactor]
+                [&WavePotentialArrays, &RFPotentialArrays, &totalFieldNow, spaceChargeFactor]
                         (Core::Particle* particle, int /*particleIndex*/,
                          SpaceCharge::FieldCalculator& scFieldCalculator,
                          double /*time*/, int /*timestep*/)
@@ -382,7 +367,7 @@ int main(int argc, const char * argv[]) {
 
                     for (size_t i = 0; i<WavePotentialArrays.size(); i++) {
                         Core::Vector paField = WavePotentialArrays[i]->getField(pos.x(), pos.y(), pos.z());
-                        Core::Vector paEffectiveField = paField*totalFieldNow[i]*potentialScale;
+                        Core::Vector paEffectiveField = paField*totalFieldNow[i];
 
                         fEfield = fEfield+paEffectiveField;
                     }
@@ -390,7 +375,7 @@ int main(int argc, const char * argv[]) {
                     for (size_t i = 0; i<RFPotentialArrays.size(); i++) {
                         Core::Vector paField = RFPotentialArrays[i]->getField(pos.x(), pos.y(), pos.z());
                         Core::Vector paEffectiveField =
-                                paField*totalFieldNow[WavePotentialArrays.size()+i]*potentialScale;
+                                paField*totalFieldNow[WavePotentialArrays.size()+i];
 
                         fEfield = fEfield+paEffectiveField;
                     }

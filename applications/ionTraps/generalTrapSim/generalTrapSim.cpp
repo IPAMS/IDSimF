@@ -89,21 +89,13 @@ int main(int argc, const char * argv[]) {
 
         //read potential array configuration of the trap =================================================
         double paSpatialScale = simConf->doubleParameter("potential_array_scale");
-        std::vector<std::unique_ptr<ParticleSimulation::SimionPotentialArray>> potentialArrays;
-        std::vector<std::string> potentialArraysNames = simConf->stringVectorParameter("potential_arrays");
-        for (const auto& paName: potentialArraysNames) {
-            std::filesystem::path paPath = confBasePath/paName;
-            std::unique_ptr<ParticleSimulation::SimionPotentialArray> pa_pt =
-                    std::make_unique<ParticleSimulation::SimionPotentialArray>(paPath, paSpatialScale);
-            potentialArrays.push_back(std::move(pa_pt));
-        }
+        std::vector<std::unique_ptr<ParticleSimulation::SimionPotentialArray>> potentialArrays =
+            simConf->readPotentialArrays("potential_arrays", paSpatialScale, true);
 
         // SIMION fast adjust PAs use 10000 as normalized potential value, thus we have to scale everything with 1/10000
-        double potentialScale = 1.0/10000.0;
-        std::vector<double> potentialsFactorsDc = simConf->doubleVectorParameter("dc_potentials", potentialScale);
-        std::vector<double> potentialFactorsRf = simConf->doubleVectorParameter("rf_potential_factors", potentialScale);
-        std::vector<double> potentialFactorsExcite = simConf->doubleVectorParameter("excite_potential_factors",
-                potentialScale);
+        std::vector<double> potentialsFactorsDc = simConf->doubleVectorParameter("dc_potentials");
+        std::vector<double> potentialFactorsRf = simConf->doubleVectorParameter("rf_potential_factors");
+        std::vector<double> potentialFactorsExcite = simConf->doubleVectorParameter("excite_potential_factors");
         std::vector<double> detectionPAFactorsRaw = simConf->doubleVectorParameter("detection_potential_factors");
         std::vector<ParticleSimulation::SimionPotentialArray*> detectionPAs;
 

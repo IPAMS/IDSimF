@@ -233,7 +233,7 @@ std::vector<std::unique_ptr<ParticleSimulation::SimionPotentialArray> > AppUtils
     if (isParameter(jsonName)){
         std::vector<std::string> potentialArraysNames = stringVectorParameter(jsonName);
         std::vector<std::unique_ptr<ParticleSimulation::SimionPotentialArray>> potentialArrays =
-            AppUtils::readPotentialArrayFiles(potentialArraysNames, confBasePath(), paSpatialScale, fastAdjustPA);
+            readPotentialArrayFiles(potentialArraysNames, confBasePath(), paSpatialScale, fastAdjustPA);
 
         return potentialArrays;
     }else{

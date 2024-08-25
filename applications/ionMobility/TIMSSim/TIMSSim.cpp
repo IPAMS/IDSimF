@@ -166,16 +166,8 @@ int main(int argc, const char * argv[]) {
         std::filesystem::path confBasePath = simConf->confBasePath();
 
         double paSpatialScale = simConf->doubleParameter("potential_array_scale");
-        std::vector<std::unique_ptr<ParticleSimulation::SimionPotentialArray>> PotentialArrays;
-        std::vector<std::string> PotentialArraysNames = simConf->stringVectorParameter("potential_arrays");
-        for (const auto& paName: PotentialArraysNames) {
-            std::filesystem::path paPath = confBasePath/paName;
-            std::unique_ptr<ParticleSimulation::SimionPotentialArray> pa_pt =
-                    std::make_unique<ParticleSimulation::SimionPotentialArray>(paPath, paSpatialScale);
-            PotentialArrays.push_back(std::move(pa_pt));
-        }
-
-        double potentialScale = 1.0/10000.0;
+        std::vector<std::unique_ptr<ParticleSimulation::SimionPotentialArray>> PotentialArrays =
+            simConf->readPotentialArrays("potential_arrays", paSpatialScale, true);
 
         std::vector<double> PotentialGradient = std::vector<double>();
         if (simConf->isParameter("potential_gradient_filename")) {
@@ -342,7 +334,7 @@ int main(int argc, const char * argv[]) {
         };
 
 
-        auto accelerationFct = [&PotentialArrays, &totalFieldNow, potentialScale, spaceChargeFactor]
+        auto accelerationFct = [&PotentialArrays, &totalFieldNow, spaceChargeFactor]
                 (Core::Particle* particle, int /*particleIndex*/, SpaceCharge::FieldCalculator &scFieldCalculator,
                  double /*time*/, int /*timestep*/){
             Core::Vector fEfield(0, 0, 0);
@@ -351,7 +343,7 @@ int main(int argc, const char * argv[]) {
 
             for(size_t i=0; i<PotentialArrays.size(); i++) {
                 Core::Vector paField = PotentialArrays[i]->getField(pos.x(), pos.y(), pos.z());
-                Core::Vector paEffectiveField = paField * totalFieldNow[i] * potentialScale;
+                Core::Vector paEffectiveField = paField * totalFieldNow[i];
 
                 fEfield = fEfield + paEffectiveField;
             }
