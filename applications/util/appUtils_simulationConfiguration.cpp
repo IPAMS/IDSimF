@@ -227,6 +227,26 @@ std::unique_ptr<ParticleSimulation::InterpolatedField> AppUtils::SimulationConfi
         }
 }
 
+std::vector<std::unique_ptr<ParticleSimulation::SimionPotentialArray> > AppUtils::SimulationConfiguration::readPotentialArrays(
+    const std::string& jsonName, double paSpatialScale) const {
+    if (isParameter(jsonName)){
+        std::vector<std::unique_ptr<ParticleSimulation::SimionPotentialArray>> potentialArrays;
+        std::vector<std::string> potentialArraysNames = stringVectorParameter(jsonName);
+        for (const auto& paName: potentialArraysNames) {
+            std::filesystem::path paPath = confFileBasePath_/paName;
+            std::unique_ptr<ParticleSimulation::SimionPotentialArray> pa_pt =
+                    std::make_unique<ParticleSimulation::SimionPotentialArray>(paPath, paSpatialScale);
+            potentialArrays.push_back(std::move(pa_pt));
+        }
+
+        return potentialArrays;
+    }else{
+        throw std::invalid_argument("missing configuration value: " + jsonName);
+    }
+}
+
+
+
 std::string AppUtils::SimulationConfiguration::pathRelativeToConfFile(const std::string& pathStr) const {
     return confFilePath_.parent_path() / std::filesystem::path(pathStr);
 }

@@ -30,6 +30,7 @@
 #include "json.h"
 #include "spdlog/spdlog.h"
 #include "PSim_interpolatedField.hpp"
+#include "PSim_simionPotentialArray.hpp"
 #include "appUtils_logging.hpp"
 #include <filesystem>
 #include <vector>
@@ -67,6 +68,9 @@ namespace AppUtils{
         AppUtils::IntegratorMode integratorMode() const;
         std::unique_ptr<ParticleSimulation::InterpolatedField> readInterpolatedField(
                 const std::string& jsonName) const;
+
+        std::vector<std::unique_ptr<ParticleSimulation::SimionPotentialArray>> readPotentialArrays(
+            const std::string& jsonName, double paSpatialScale = 1.0) const;
 
         std::string pathRelativeToConfFile(const std::string& pathStr) const;
         std::string pathRelativeToConfBasePath(const std::string& pathStr) const;

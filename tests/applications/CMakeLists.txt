@@ -7,6 +7,8 @@ set(SOURCE_FILES
         test_simulation_configuration.cpp)
 
 set(TEST_FILE_FOLDER ${CMAKE_SOURCE_DIR}/tests/testfields/simulation_configurations)
+set(TEST_PA_FOLDER ${CMAKE_SOURCE_DIR}/tests/testfields/capacitor_test_pa)
+
 set(TEST_FILES
         ${TEST_FILE_FOLDER}/ionBox.json
         ${TEST_FILE_FOLDER}/ionCylinder_minimal.json
@@ -16,6 +18,10 @@ set(TEST_FILES
         ${TEST_FILE_FOLDER}/ionDefinition_invalid.json
         ${TEST_FILE_FOLDER}/ionDefinition_invalid_2.json
         ${TEST_FILE_FOLDER}/simulationConfiguration_typesTest.json
+        ${TEST_FILE_FOLDER}/simulationConfiguration_fileReadingTest.json
+        ${TEST_PA_FOLDER}/cylinder_capacitor.pa1
+        ${TEST_PA_FOLDER}/cylinder_capacitor.pa2
+        ${TEST_PA_FOLDER}/cylinder_capacitor.pa3
         )
 file(COPY ${TEST_FILES} DESTINATION .)
 

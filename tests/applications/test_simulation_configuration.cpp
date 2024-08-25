@@ -33,9 +33,10 @@
 
 TEST_CASE( "Test simulation configuration ", "[ApplicationUtils]") {
 
-    AppUtils::SimulationConfiguration simConf("simulationConfiguration_typesTest.json");
-
     SECTION("Sim Conf reading: Types should be readable") {
+
+        AppUtils::SimulationConfiguration simConf("simulationConfiguration_typesTest.json");
+
         CHECK(simConf.intParameter("integer_parameter") == 1500);
         CHECK(simConf.intVectorParameter("integer_vector") == std::vector<int>({8000, 9000}));
 
@@ -54,4 +55,25 @@ TEST_CASE( "Test simulation configuration ", "[ApplicationUtils]") {
         CHECK( !simConf.isVectorParameter("not_a_parameter"));
     }
 
+    SECTION("Potential Array reading convienence function should be functional") {
+
+        AppUtils::SimulationConfiguration simConf("simulationConfiguration_fileReadingTest.json");
+
+        std::vector<std::unique_ptr<ParticleSimulation::SimionPotentialArray>> potentialArrays =
+            simConf.readPotentialArrays("potential_arrays", 1.0);
+
+        CHECK(potentialArrays[0]->getBounds()[0] == Approx(0.0));
+        CHECK(potentialArrays[0]->getBounds()[1] == Approx(99.0));
+
+        CHECK(potentialArrays[1]->getBounds()[3] == Approx(34.0));
+        CHECK(potentialArrays[2]->getBounds()[3] == Approx(34.0));
+
+        CHECK(potentialArrays[0]->getNumberOfGridPoints()[0] == 100);
+        CHECK(potentialArrays[1]->getNumberOfGridPoints()[0] == 100);
+        CHECK(potentialArrays[2]->getNumberOfGridPoints()[0] == 100);
+
+        CHECK(potentialArrays[0]->getInterpolatedPotential(80.1, 10.1, 0.0) == Approx(2.1801610625));
+        CHECK(potentialArrays[1]->getInterpolatedPotential(80.1, 10.1, 0.0) == Approx(4950.0400784919));
+        CHECK(potentialArrays[2]->getInterpolatedPotential(80.1, 10.1, 0.0) == Approx(103.8599748651));
+    }
 }
