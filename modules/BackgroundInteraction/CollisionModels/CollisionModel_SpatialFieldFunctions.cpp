@@ -44,7 +44,7 @@ std::function<Core::Vector(const Core::Vector&)> CollisionModel::getConstantVect
 }
 
 std::function<double(const Core::Vector&)> CollisionModel::getVariableScalarFunction(
-    ParticleSimulation::InterpolatedField &interpolatedField, int fieldIndex) {
+    ParticleSimulation::InterpolatedField &interpolatedField, std::size_t fieldIndex) {
 
     return [&interpolatedField,fieldIndex](const Core::Vector& position)->double
     {
