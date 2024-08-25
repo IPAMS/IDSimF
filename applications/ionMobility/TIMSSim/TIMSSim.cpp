@@ -463,8 +463,8 @@ int main(int argc, const char * argv[]) {
         if (collisionType==SDS || collisionType==HS || collisionType==MD) {
             // prepare static pressure and temperature functions
 
-            auto staticPressureFct = CollisionModel::getConstantDoubleFunction(backgroundPressure_Pa);
-            auto backgroundTemperatureFct = CollisionModel::getConstantDoubleFunction(backgroundTemperature_K);
+            auto staticPressureFct = CollisionModel::getConstantScalarFunction(backgroundPressure_Pa);
+            auto backgroundTemperatureFct = CollisionModel::getConstantScalarFunction(backgroundTemperature_K);
 
             std::function<Core::Vector(const Core::Vector&)> velocityFct;
             if (flowMode==UNIFORM_FLOW) {

@@ -65,8 +65,8 @@ CollisionModel::StatisticalDiffusionModel::StatisticalDiffusionModel(
         double collisionGasDiameterM,
         CollisionStatistics cs):
             StatisticalDiffusionModel(
-                getConstantDoubleFunction(staticPressure),
-                getConstantDoubleFunction(staticTemperature),
+                getConstantScalarFunction(staticPressure),
+                getConstantScalarFunction(staticTemperature),
                 getConstantVectorFunction(staticGasVelocity),
                 collisionGasMassAmu,
                 collisionGasDiameterM,

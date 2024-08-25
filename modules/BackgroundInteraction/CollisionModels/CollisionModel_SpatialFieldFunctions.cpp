@@ -27,7 +27,7 @@
  * @param constantValue the constant value which is returned by the function
  * @return spatial scalar function always returning the given constant value
  */
-std::function<double(const Core::Vector&)> CollisionModel::getConstantDoubleFunction(double constantValue){
+std::function<double(const Core::Vector&)> CollisionModel::getConstantScalarFunction(double constantValue){
     
     return [=](const Core::Vector&)->double{ return constantValue;};
 }

@@ -46,7 +46,7 @@ CollisionModel::MDInteractionsModelPreconstructed::MDInteractionsModelPreconstru
                                                         double spawnRadius,
                                                         std::unordered_map<std::string,  std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection) :
         MDInteractionsModelPreconstructed(
-        getConstantDoubleFunction(staticPressure),
+        getConstantScalarFunction(staticPressure),
         getConstantVectorFunction(Core::Vector(0.0, 0.0, 0.0)),
         staticTemperature,
         collisionGasMassAmu,
@@ -77,7 +77,7 @@ CollisionModel::MDInteractionsModelPreconstructed::MDInteractionsModelPreconstru
                                                         Core::Vector startPosition, 
                                                         Core::Vector startRotation) :
         MDInteractionsModelPreconstructed(
-        getConstantDoubleFunction(staticPressure),
+        getConstantScalarFunction(staticPressure),
         getConstantVectorFunction(Core::Vector(0.0, 0.0, 0.0)),
         staticTemperature,
         collisionGasMassAmu,
@@ -111,7 +111,7 @@ CollisionModel::MDInteractionsModelPreconstructed::MDInteractionsModelPreconstru
         MDInteractionsModelPreconstructed(
                 std::move(pressureFunction),
                 std::move(velocityFunction),
-                getConstantDoubleFunction(staticTemperature),
+                getConstantScalarFunction(staticTemperature),
                 collisionGasMassAmu,
                 collisionGasDiameterM,
                 collisionGasPolarizabilityM3,
@@ -142,7 +142,7 @@ CollisionModel::MDInteractionsModelPreconstructed::MDInteractionsModelPreconstru
         MDInteractionsModelPreconstructed(
                 std::move(pressureFunction),
                 std::move(velocityFunction),
-                getConstantDoubleFunction(staticTemperature),
+                getConstantScalarFunction(staticTemperature),
                 collisionGasMassAmu,
                 collisionGasDiameterM,
                 collisionGasPolarizabilityM3,

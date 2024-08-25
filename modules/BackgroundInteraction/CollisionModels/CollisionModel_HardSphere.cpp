@@ -39,7 +39,7 @@ CollisionModel::HardSphereModel::HardSphereModel(
         bool maxwellianApproximation)
         :
         HardSphereModel(
-                getConstantDoubleFunction(staticPressure),
+                getConstantScalarFunction(staticPressure),
                 getConstantVectorFunction(Core::Vector(0.0, 0.0, 0.0)),
                 staticTemperature,
                 collisionGasMassAmu,
@@ -63,9 +63,9 @@ CollisionModel::HardSphereModel::HardSphereModel(
         bool maxwellianApproximation)
         :
         HardSphereModel(
-                getConstantDoubleFunction(staticPressure),
+                getConstantScalarFunction(staticPressure),
                 getConstantVectorFunction(Core::Vector(0.0, 0.0, 0.0)),
-                getConstantDoubleFunction(staticTemperature),
+                getConstantScalarFunction(staticTemperature),
                 collisionGasMassAmu,
                 collisionGasDiameterM,
                 std::move(afterCollisionFunction),
@@ -86,7 +86,7 @@ CollisionModel::HardSphereModel::HardSphereModel(
         HardSphereModel(
                 std::move(pressureFunction),
                 std::move(velocityFunction),
-                getConstantDoubleFunction(staticTemperature),
+                getConstantScalarFunction(staticTemperature),
                 collisionGasMassAmu,
                 collisionGasDiameterM,
                 nullptr,

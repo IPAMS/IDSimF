@@ -131,7 +131,7 @@ int main(int argc, const char * argv[]) {
         if (backgroundTempStr=="isotherm") {
             //backgroundTempMode = ISOTHERM;
             double backgroundTemperature_K = simConf->doubleParameter("background_temperature_K");
-            backgroundTemperatureFct = CollisionModel::getConstantDoubleFunction(backgroundTemperature_K);
+            backgroundTemperatureFct = CollisionModel::getConstantScalarFunction(backgroundTemperature_K);
         }
         else if (backgroundTempStr=="linear_gradient") {
             //backgroundTempMode = LINEAR_GRADIENT;
@@ -338,7 +338,7 @@ int main(int argc, const char * argv[]) {
         std::unique_ptr<CollisionModel::AbstractCollisionModel> collisionModelPtr;
         if (collisionType==SDS || collisionType==HS || collisionType==MD) {
             // prepare static pressure and temperature functions
-            auto staticPressureFct = CollisionModel::getConstantDoubleFunction(backgroundPressure_Pa);
+            auto staticPressureFct = CollisionModel::getConstantScalarFunction(backgroundPressure_Pa);
 
             std::function<Core::Vector(const Core::Vector&)> velocityFct;
 

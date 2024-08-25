@@ -56,7 +56,7 @@ CollisionModel::MDInteractionsModel::MDInteractionsModel(double staticPressure,
                                                         std::unique_ptr<CollisionModel::AbstractMDForceField> forceField,
                                                         std::unordered_map<std::string,  std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection) :
         MDInteractionsModel(
-        getConstantDoubleFunction(staticPressure),
+        getConstantScalarFunction(staticPressure),
         getConstantVectorFunction(Core::Vector(0.0, 0.0, 0.0)),
         staticTemperature,
         collisionGasMassAmu,
@@ -87,7 +87,7 @@ CollisionModel::MDInteractionsModel::MDInteractionsModel(std::function<double(Co
         MDInteractionsModel(
                 std::move(pressureFunction),
                 std::move(velocityFunction),
-                getConstantDoubleFunction(staticTemperature),
+                getConstantScalarFunction(staticTemperature),
                 collisionGasMassAmu,
                 collisionGasDiameterM,
                 collisionMolecule,

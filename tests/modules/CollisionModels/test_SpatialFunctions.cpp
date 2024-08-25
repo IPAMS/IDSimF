@@ -32,7 +32,7 @@ Ion Dynamics Simulation Framework (IDSimF)
 
 TEST_CASE("Test spatial functions", "[CollisionModels][SpatialFunctions]") {
     SECTION("Constant spatial functions should produce constant values") {
-        auto constScalarFunction = CollisionModel::getConstantDoubleFunction(10.0);
+        auto constScalarFunction = CollisionModel::getConstantScalarFunction(10.0);
         CHECK(constScalarFunction({1.0, 2.0, 3.0}) == Approx(10.0));
         CHECK(constScalarFunction({-2.0, -4.0, -6.0}) == Approx(10.0));
     }
