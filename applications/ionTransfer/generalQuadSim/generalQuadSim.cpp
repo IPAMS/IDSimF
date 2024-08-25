@@ -121,10 +121,6 @@ int main(int argc, const char * argv[]) {
             }
         }
 
-        auto backgroundGasVelocityFunction = [&flowField](Core::Vector& location) {
-            Core::Vector flowVelo = flowField->getInterpolatedVector(location.x(), location.y(), location.z(), 0);
-            return flowVelo;
-        };
 
         auto backgroundGasPressureFunction = [&rhoField, P_factor](Core::Vector& location) {
             double rho = rhoField->getInterpolatedScalar(location.x(), location.y(), location.z(), 0);
@@ -136,7 +132,7 @@ int main(int argc, const char * argv[]) {
         //init gas collision models:
         CollisionModel::HardSphereModel hsModel = CollisionModel::HardSphereModel(
                 backgroundGasPressureFunction,
-                backgroundGasVelocityFunction,
+                CollisionModel::getVariableVectorFunction(*flowField),
                 backgroundTemperture,
                 collisionGasMassAmu,
                 collisionGasDiameterM
