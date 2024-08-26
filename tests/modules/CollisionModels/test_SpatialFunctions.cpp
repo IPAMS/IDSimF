@@ -68,7 +68,7 @@ TEST_CASE("Test spatial functions", "[CollisionModels][SpatialFunctions]") {
                 std::invalid_argument);
     }
 
-    SECTION("Variable spatial function from mirrored 2D SIMION PA should produce correct values") {
+    SECTION("Variable spatial scalar function from mirrored 2D SIMION PA should produce correct values") {
         std::string paFilename = "simion_test_planar_2d.pa";
         ParticleSimulation::SimionPotentialArray simPa(paFilename);
 
@@ -86,7 +86,7 @@ TEST_CASE("Test spatial functions", "[CollisionModels][SpatialFunctions]") {
         CHECK(fieldFct({0.03, 0.02, 0.0}) == Approx(simPa.getInterpolatedPotential(0.03, 0.02, 0.0)));
     }
 
-    SECTION("Variable spatial function from 3D SIMION PA should produce correct values") {
+    SECTION("Variable spatial scalar function from 3D SIMION PA should produce correct values") {
         std::string paFilename = "simion_test_planar_3d.pa";
         ParticleSimulation::SimionPotentialArray simPa(paFilename);
 
@@ -100,5 +100,17 @@ TEST_CASE("Test spatial functions", "[CollisionModels][SpatialFunctions]") {
         CHECK(fieldFct({0.02, 0.015, 0.03}) == Approx(-85.37619));
         CHECK(fieldFct({0.038, 0.018, 0.038}) == Approx(10.0));
         CHECK(fieldFct({0.032, 0.008, 0.018}) == Approx(simPa.getInterpolatedPotential(0.032, 0.008, 0.018)));
+    }
+
+    SECTION("Variable spatial vector function from SIMION PA should produce correct values") {
+        ParticleSimulation::SimionPotentialArray pa_x("cylinder_capacitor.pa1", 1.0);
+        ParticleSimulation::SimionPotentialArray pa_y("cylinder_capacitor.pa2", 1.0);
+        ParticleSimulation::SimionPotentialArray pa_z("cylinder_capacitor.pa3", 1.0);
+
+        auto fieldFct = CollisionModel::getVariableVectorFunction(pa_x, pa_y, pa_z);
+        Core::Vector result = fieldFct( {80.1, 10.1, 0.0} );
+        CHECK(result.x() == Approx(2.1801610625));
+        CHECK(result.y() == Approx(4950.0400784919));
+        CHECK(result.z() == Approx(103.8599748651));
     }
 }
