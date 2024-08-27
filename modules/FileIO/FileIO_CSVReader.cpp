@@ -21,19 +21,29 @@
 
 #include "FileIO_CSVReader.hpp"
 #include <fstream>
+#include <sstream>
+#include <string>
 
-std::vector<double> FileIO::CSVReader::readCSVFile(std::string filename) {
+std::vector<std::vector<std::string>> FileIO::CSVReader::readCSVFile(std::string filename, char delimiter) {
 
     std::ifstream in;
     in.open(filename);
 
     if (in.good()){
         std::string line;
-        std::vector<double> result = std::vector<double>();
+        std::vector<std::vector<std::string>> result = std::vector<std::vector<std::string>>();
 
         while (std::getline(in, line)){
             if (line[0] != '#'){
-                result.push_back(std::stod(line, nullptr));
+                std::string token;
+                std::vector<std::string> temp;
+                std::stringstream ss(line);
+
+                while(getline(ss, token, delimiter)){
+                    temp.push_back(token);
+                }
+
+                result.push_back(temp);
             }
         }
         return result;
@@ -41,4 +51,27 @@ std::vector<double> FileIO::CSVReader::readCSVFile(std::string filename) {
     else {
         throw(FileIO::CSVReaderException("file not found"));
     }
+}
+
+std::vector<double> FileIO::CSVReader::extractDouble(std::vector<std::vector<std::string>> &string_vector, unsigned int column) {
+
+    std::vector<double> result = std::vector<double>();
+
+    for(auto i : string_vector){
+        result.push_back(std::stod(i[column]));
+    }
+
+    return result;
+}
+
+std::vector<std::string> FileIO::CSVReader::extractString(std::vector<std::vector<std::string>> &string_vector,
+                                                          unsigned int column) {
+
+    std::vector<std::string> result = std::vector<std::string>();
+
+    for(auto i : string_vector){
+        result.push_back(i[column]);
+    }
+
+    return result;
 }

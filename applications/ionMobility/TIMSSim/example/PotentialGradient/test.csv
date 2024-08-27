@@ -1,0 +1,11 @@
+# a test csv-file meant to check whether the file reader used in the TIMS app works
+PotentialArrays/tims_geometry.pa1; -100; 1; 0; 0
+PotentialArrays/tims_geometry.pa2; -150; -1; 0; 0
+PotentialArrays/tims_geometry.pa3; -200; 1; 0; 1
+PotentialArrays/tims_geometry.pa4; -150; -1; 0; 0.5
+PotentialArrays/tims_geometry.pa5; -100; 1; 0; 0
+PotentialArrays/tims_geometry.pa6; -125; -1; 0; 0
+PotentialArrays/tims_geometry.pa7; -150; 1; 1; 0
+PotentialArrays/tims_geometry.pa8; -50; -1; 0.5; 0
+PotentialArrays/tims_geometry.pa9; 50; 1; 0; 0
+PotentialArrays/tims_geometry.pa10; 0; -1; 0; 0

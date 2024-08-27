@@ -132,10 +132,18 @@ int main(int argc, const char * argv[]) {
         }
 
         double backgroundPressure_Pa = simConf->doubleParameter("background_pressure_Pa");
-        double gasVelocityX = simConf->doubleParameter("collision_gas_velocity_x_ms-1");
+        double gasVelocityX = simConf->doubleParameter("collision_gas_velocity_x_mscylinder-1");
         double collisionGasMass_Amu = simConf->doubleParameter("collision_gas_mass_amu");
         double collisionGasDiameter_nm = simConf->doubleParameter("collision_gas_diameter_nm");
         double backgroundTemperature_K = simConf->doubleParameter("background_temperature_K");
+
+        double gateOpenTime = simConf->doubleParameter("gate_open_time_s");
+        double gateOpenDuration = simConf->doubleParameter("gate_open_duration_s");
+        double gateVoltage = simConf->doubleParameter("gate_voltage_V");
+        double gradientStartTime = simConf->doubleParameter("gradient_start_time_s");
+        double gradientVelocity = simConf->doubleParameter("gradient_ramp_velocity_V/ms")*1000;
+        double gradientVoltage = simConf->doubleParameter("gradient_voltage_V");
+        double gradientDuration = gradientVoltage / gradientVelocity;
 
 
         //Additional parameters needed for MD collision model
@@ -165,20 +173,37 @@ int main(int argc, const char * argv[]) {
         //read potential array configuration of the trap =================================================
         std::filesystem::path confBasePath = simConf->confBasePath();
 
-        double paSpatialScale = simConf->doubleParameter("potential_array_scale");
-        std::vector<std::unique_ptr<ParticleSimulation::SimionPotentialArray>> PotentialArrays =
-            simConf->readPotentialArrays("potential_arrays", paSpatialScale, true);
+        FileIO::CSVReader csvReader = FileIO::CSVReader();
+        std::vector<std::vector<std::string>> stringVector = std::vector<std::vector<std::string>>();
+        std::string potentialConfFn = simConf->pathRelativeToConfFile(simConf->stringParameter("potential_configuration"));
+        stringVector = csvReader.readCSVFile(potentialConfFn, ';');
+        std::vector<std::string> PotentialArraysNames = csvReader.extractString(stringVector, 0);
+        std::vector<double> DCVoltages = csvReader.extractDouble(stringVector, 1);
+        std::vector<double> RFFactor = csvReader.extractDouble(stringVector, 2);
+        std::vector<double> gradient = csvReader.extractDouble(stringVector, 3);
+        std::vector<double> gate = csvReader.extractDouble(stringVector, 4);
 
-        std::vector<double> PotentialGradient = std::vector<double>();
-        if (simConf->isParameter("potential_gradient_filename")) {
-            std::string PotentialGradientFilename = simConf->pathRelativeToConfFile(
-                    simConf->stringParameter("potential_gradient_filename"));
-            FileIO::CSVReader csvReader = FileIO::CSVReader();
-            PotentialGradient = csvReader.readCSVFile(PotentialGradientFilename);
+        double paSpatialScale = simConf->doubleParameter("potential_array_scale");
+        std::vector<std::unique_ptr<ParticleSimulation::SimionPotentialArray>> PotentialArrays;
+        //std::vector<std::string> PotentialArraysNames = simConf->stringVectorParameter("potential_arrays");
+        for (const auto& paName: PotentialArraysNames) {
+            std::filesystem::path paPath = confBasePath/paName;
+            std::unique_ptr<ParticleSimulation::SimionPotentialArray> pa_pt =
+                    std::make_unique<ParticleSimulation::SimionPotentialArray>(paPath, paSpatialScale);
+            PotentialArrays.push_back(std::move(pa_pt));
         }
-        else {
-            PotentialGradient = simConf->doubleVectorParameter("potential_gradient");
-        }
+
+        double potentialScale = 1.0/10000.0;
+
+        std::vector<std::unique_ptr<ParticleSimulation::SimionPotentialArray>> flowField =
+                simConf->readPotentialArrays("flow_field", paSpatialScale, true);
+
+        std::vector<std::unique_ptr<ParticleSimulation::SimionPotentialArray>> pressureField =
+                simConf->readPotentialArrays("pressure_field", paSpatialScale, true);
+
+        std::vector<std::unique_ptr<ParticleSimulation::SimionPotentialArray>> temperatureField =
+                simConf->readPotentialArrays("temperature_field", paSpatialScale, true);
+
 
         // defining simulation domain box (used for ion termination):
         std::array<std::array<double, 2>, 3> simulationDomainBoundaries{};
@@ -264,7 +289,8 @@ int main(int argc, const char * argv[]) {
             return result;
         };
 
-        FileIO::TrajectoryHDF5Writer trajectoryWriter(cmdLineParser.trajectoriesResultName());
+        std::string hdf5Filename = projectName+"_trajectories.hd5";
+        FileIO::TrajectoryHDF5Writer trajectoryWriter(hdf5Filename);
         trajectoryWriter.setParticleAttributes(integerParticleAttributesNames, additionalIntegerParamTFct);
         trajectoryWriter.setParticleAttributes(auxParamNames, auxParamFct);
 
@@ -323,18 +349,22 @@ int main(int argc, const char * argv[]) {
         // define trajectory integration parameters / functions =================================
         std::vector<double> totalFieldNow(PotentialArrays.size(), 0.0);
 
-        auto paVoltageFct = [&PotentialArrays, &PotentialGradient, &totalFieldNow, omega, V_rf](double time){
+        auto paVoltageFct = [&PotentialArrays, &DCVoltages, &RFFactor, &gradient, &gate, &totalFieldNow,
+                             omega, V_rf, gateOpenTime, gateOpenDuration, gateVoltage, gradientStartTime, gradientDuration, gradientVoltage, gradientVelocity]
+                                     (double time){
             for(size_t i=0; i<PotentialArrays.size(); i++) {
-                if (i%2 == 0) {
-                    totalFieldNow[i] = PotentialGradient[i] + sin(time*omega) * V_rf;
-                } else {
-                    totalFieldNow[i] = PotentialGradient[i] - sin(time*omega) * V_rf;
-                }
+                totalFieldNow[i] = DCVoltages[i] + sin(time*omega) * (V_rf * RFFactor[i]);
+
+                if (time >= gateOpenTime && time <= (gateOpenTime + gateOpenDuration))
+                    totalFieldNow[i] = totalFieldNow[i] + gate[i] * (gateVoltage);
+
+                if (time >= gradientStartTime && time <= (gradientStartTime + gradientDuration)){
+                    totalFieldNow[i] = totalFieldNow[i] + gradient[i] * ((time-gradientStartTime)*gradientVelocity);}
             }
         };
 
 
-        auto accelerationFct = [&PotentialArrays, &totalFieldNow, spaceChargeFactor]
+        auto accelerationFct = [&PotentialArrays, &totalFieldNow, potentialScale, spaceChargeFactor]
                 (Core::Particle* particle, int /*particleIndex*/, SpaceCharge::FieldCalculator &scFieldCalculator,
                  double /*time*/, int /*timestep*/){
             Core::Vector fEfield(0, 0, 0);
@@ -343,7 +373,7 @@ int main(int argc, const char * argv[]) {
 
             for(size_t i=0; i<PotentialArrays.size(); i++) {
                 Core::Vector paField = PotentialArrays[i]->getField(pos.x(), pos.y(), pos.z());
-                Core::Vector paEffectiveField = paField * totalFieldNow[i];
+                Core::Vector paEffectiveField = paField * totalFieldNow[i] * potentialScale;
 
                 fEfield = fEfield + paEffectiveField;
             }
@@ -455,29 +485,15 @@ int main(int argc, const char * argv[]) {
         if (collisionType==SDS || collisionType==HS || collisionType==MD) {
             // prepare static pressure and temperature functions
 
-            auto staticPressureFct = CollisionModel::getConstantScalarFunction(backgroundPressure_Pa);
-            auto backgroundTemperatureFct = CollisionModel::getConstantScalarFunction(backgroundTemperature_K);
+            auto pressureFct = CollisionModel::getVariableScalarFunction(*pressureField[0]);
+            auto backgroundTemperatureFct = CollisionModel::getVariableScalarFunction(*temperatureField[0]);
+            auto velocityFct = CollisionModel::getVariableVectorFunction(*flowField[0], *flowField[1], *flowField[2]);
 
-            std::function<Core::Vector(const Core::Vector&)> velocityFct;
-            if (flowMode==UNIFORM_FLOW) {
-                velocityFct =
-                        [gasVelocityX](const Core::Vector& /*pos*/) {
-                            return Core::Vector(gasVelocityX, 0.0, 0.0);
-                        };
-            }
-            /*else if (flowMode==PARABOLIC_FLOW) {
-                velocityFct =
-                        [gasVelocityX, electrodeHalfDistanceSquared_m](const Core::Vector& pos) {
-                            //parabolic profile is vX = 2 * Vavg * (1 - r^2 / R^2) with the radius / electrode distance R
-                            double xVelo = gasVelocityX*2.0*(1-pos.z()*pos.z()/electrodeHalfDistanceSquared_m);
-                            return Core::Vector(xVelo, 0.0, 0.0);
-                        };
-            }*/
 
             if (collisionType==SDS){
                 std::unique_ptr<CollisionModel::StatisticalDiffusionModel> collisionModel =
                         std::make_unique<CollisionModel::StatisticalDiffusionModel>(
-                                staticPressureFct,
+                                pressureFct,
                                 backgroundTemperatureFct,
                                 velocityFct,
                                 collisionGasMass_Amu,
@@ -495,7 +511,7 @@ int main(int argc, const char * argv[]) {
             else if (collisionType==HS){
                 std::unique_ptr<CollisionModel::HardSphereModel> collisionModel =
                         std::make_unique<CollisionModel::HardSphereModel>(
-                                staticPressureFct,
+                                pressureFct,
                                 velocityFct,
                                 backgroundTemperatureFct,
                                 collisionGasMass_Amu,
@@ -508,7 +524,7 @@ int main(int argc, const char * argv[]) {
                 auto forceFieldPtr = std::make_unique<CollisionModel::MDForceField_LJ12_6>(forceField);
                 std::unique_ptr<CollisionModel::MDInteractionsModel> collisionModel =
                         std::make_unique<CollisionModel::MDInteractionsModel>(
-                                staticPressureFct,
+                                pressureFct,
                                 velocityFct,
                                 backgroundTemperatureFct,
                                 collisionGasMass_Amu,

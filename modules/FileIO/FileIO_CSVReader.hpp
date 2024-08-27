@@ -21,7 +21,7 @@
  ------------
  FileIO_CSVReader.hpp
 
- Simple reader class for one column csv files
+ Simple reader class for csv files
 
  ****************************/
 
@@ -37,9 +37,11 @@ class CSVReaderException : public std::runtime_error {
         explicit CSVReaderException (const std::string msg): std::runtime_error(msg){}
     };
 
-    class CSVReader {
+class CSVReader {
     public:
-        [[nodiscard]] std::vector<double> readCSVFile(std::string filename);
+        [[nodiscard]] std::vector<std::vector<std::string>> readCSVFile(std::string filename, char delimiter);
+        [[nodiscard]] std::vector<double> extractDouble(std::vector<std::vector<std::string>> &string_vector, unsigned int column);
+        [[nodiscard]] std::vector<std::string> extractString(std::vector<std::vector<std::string>> &string_vector, unsigned int column);
     };
 }
 
