@@ -71,6 +71,8 @@ namespace ParticleSimulation{
         //disable copies:
         SimionPotentialArray(const SimionPotentialArray&) = delete;
 
+        void setCornerPosition(Core::Vector newCornerPosition);
+
         [[nodiscard]] double getPotential(index_t ix, index_t iy, index_t iz) const;
         [[nodiscard]] double getInterpolatedPotential(double xPt, double yPt, double zPt) const;
         [[nodiscard]] Core::Vector getField(double xPt, double yPt, double zPt) const;
