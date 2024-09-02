@@ -1,0 +1,12 @@
+# a test csv-file meant to check whether the file reader used in the TIMS app works
+# potential name; static DC potential; RF factor; ramp gradient factor; gate factor
+PotentialArrays/tims_geometry.pa1;  0;    1; 0.1; 0
+PotentialArrays/tims_geometry.pa2; 0; -1; 0.2; 0
+PotentialArrays/tims_geometry.pa3; 0;    1; 0.3; 0
+PotentialArrays/tims_geometry.pa4; 0; -1; 0.4; 1.0
+PotentialArrays/tims_geometry.pa5; 0; 1; 0.5; 0
+PotentialArrays/tims_geometry.pa6; 0;-1; 0.6; 0
+PotentialArrays/tims_geometry.pa7; 0; 1; 0.7; 0
+PotentialArrays/tims_geometry.pa8; 0;-1; 0.8; 0
+PotentialArrays/tims_geometry.pa9; 0; 1; 0.0; 0
+PotentialArrays/tims_geometry.pa10;0;-1; 1.0; 0
