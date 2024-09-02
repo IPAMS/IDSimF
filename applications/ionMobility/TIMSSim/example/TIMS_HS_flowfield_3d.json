@@ -20,7 +20,7 @@
   "gradient_start_time_s": 1e-04,
   "gradient_ramp_velocity_V/ms": -200.0,
   "gradient_voltage_V": -200,
-  "n_particles":[600,0,0,0,0,600],
+  "n_particles":[300,0,0,0,0,300],
   "start_box_dimensions_mm":[1.0,1.0,1.0],
   "start_box_position_mm":[4.0,-0.5,-0.5],
   "simulation_domain_boundaries_m": [[0.0001, 0.009], [-0.0003, 0.003], [-0.003, 0.003]],
