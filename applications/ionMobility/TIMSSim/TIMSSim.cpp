@@ -33,7 +33,6 @@
 #include "RS_ConfigFileParser.hpp"
 #include "RS_ConcentrationFileWriter.hpp"
 #include "PSim_util.hpp"
-#include "PSim_constants.hpp"
 #include "Integration_parallelVerletIntegrator.hpp"
 #include "FileIO_trajectoryHDF5Writer.hpp"
 #include "FileIO_scalar_writer.hpp"
@@ -49,15 +48,14 @@
 #include "appUtils_stopwatch.hpp"
 #include "appUtils_signalHandler.hpp"
 #include "appUtils_commandlineParser.hpp"
-#include "dmsSim_dmsFields.hpp"
+#include "appUtils_inputFileUtilities.hpp"
 #include "PSim_simionPotentialArray.hpp"
 #include "PSim_particleStartSplatTracker.hpp"
-#include "CollisionModel_MultiCollisionModel.hpp"
 #include <iostream>
 #include <cmath>
 
 const std::string key_ChemicalIndex = "keyChemicalIndex";
-enum FlowMode {PARABOLIC_FLOW, UNIFORM_FLOW};
+enum FlowMode {PARABOLIC_FLOW, UNIFORM_FLOW, STATIC_FIELD};
 enum CollisionType {SDS, HS, MD, NO_COLLISION};
 
 int main(int argc, const char * argv[]) {
@@ -96,8 +94,19 @@ int main(int argc, const char * argv[]) {
         double startWidthY_m = startWidth_mm[1]/1000.0;
         double startWidthZ_m = startWidth_mm[2]/1000.0;
 
+        double paSpatialScale = simConf->doubleParameter("potential_array_scale"); // is used for all PAs in the simulation
 
-        //background gas parameters:
+        // parameters of the TIMS potentials / voltages
+        double gateOpenTime = simConf->doubleParameter("gate_open_time_s");
+        double gateOpenDuration = simConf->doubleParameter("gate_open_duration_s");
+        double gateVoltage = simConf->doubleParameter("gate_voltage_V");
+        double gradientStartTime = simConf->doubleParameter("gradient_start_time_s");
+        double gradientVelocity = simConf->doubleParameter("gradient_ramp_velocity_V/ms")*1000;
+        double gradientVoltage = simConf->doubleParameter("gradient_voltage_V");
+        double gradientDuration = gradientVoltage / gradientVelocity;
+        logger->info("gradient! start:{} duration:{}", gradientStartTime, gradientDuration);
+
+        //background gas parameters and background gas flow parameters:
         std::string collisionTypeStr = simConf->stringParameter("collision_model");
         CollisionType collisionType;
         if (collisionTypeStr=="SDS") {
@@ -117,12 +126,58 @@ int main(int argc, const char * argv[]) {
         }
 
         FlowMode flowMode;
+        std::function<double(const Core::Vector&)> pressureFct;
+        std::function<double(const Core::Vector&)> backgroundTemperatureFct;
+        std::function<Core::Vector(const Core::Vector&)> velocityFct;
+
+        //FIXME: ugly....
+        std::vector<std::unique_ptr<ParticleSimulation::SimionPotentialArray>> flowField;
+        std::vector<std::unique_ptr<ParticleSimulation::SimionPotentialArray>> pressureField;
+        std::vector<std::unique_ptr<ParticleSimulation::SimionPotentialArray>> temperatureField;
+
         if (simConf->isParameter("flow_mode")) {
             std::string flowModeStr = simConf->stringParameter("flow_mode");
             if (flowModeStr == "uniform") {
                 flowMode = UNIFORM_FLOW;
             } else if (flowModeStr == "parabolic") {
                 flowMode = PARABOLIC_FLOW;
+            } else if (flowModeStr == "static_field") {
+                flowMode = STATIC_FIELD;
+                flowField =
+                    simConf->readPotentialArrays("flow_field", paSpatialScale, false);
+                pressureField =
+                    simConf->readPotentialArrays("pressure_field", paSpatialScale, false);
+                temperatureField =
+                    simConf->readPotentialArrays("temperature_field", paSpatialScale, false);
+
+                pressureFct = CollisionModel::getVariableScalarFunction(*pressureField[0]);
+                backgroundTemperatureFct = CollisionModel::getVariableScalarFunction(*temperatureField[0]);
+
+                if(flowField.size() == 2) {
+                    // 2d axial symmetric flow field
+                    logger->info("2d axial symmetric flow field");
+                    flowField[0]->printState();
+                    flowField[1]->printState();
+                    velocityFct = CollisionModel::getVariableAxialSymmetricVectorFunction(*flowField[0], *flowField[1]);
+                }
+                else if(flowField.size() == 3) {
+                    // 3d planar flow field
+                    Core::Vector flowPACornerPosition = {0.0,0.0,0.0};
+                    if(simConf->isVectorParameter("flow_fields_corner_position")) {
+                        flowPACornerPosition = simConf->vector3dParameter("flow_fields_corner_position");
+                    }
+                    logger->info("3d planar flow field");
+                    flowField[0]->setCornerPosition(flowPACornerPosition);
+                    flowField[1]->setCornerPosition(flowPACornerPosition);
+                    flowField[2]->setCornerPosition(flowPACornerPosition);
+
+                    pressureField[0]->setCornerPosition(flowPACornerPosition);
+                    temperatureField[0]->setCornerPosition(flowPACornerPosition);
+                    velocityFct = CollisionModel::getVariableVectorFunction(*flowField[0], *flowField[1], *flowField[2]);
+                }
+                else {
+                    throw std::invalid_argument("wrong number of flow field velocity components (2 for axial symmetric, 3 for 3d)");
+                }
             } else {
                 throw std::invalid_argument("wrong configuration value: flow_mode");
             }
@@ -130,21 +185,34 @@ int main(int argc, const char * argv[]) {
         else {
             flowMode = UNIFORM_FLOW;
         }
+        if (flowMode == UNIFORM_FLOW || flowMode == PARABOLIC_FLOW) {
+            double backgroundPressure_Pa = simConf->doubleParameter("background_pressure_Pa");
+            double gasVelocityX = simConf->doubleParameter("background_velocity_x_ms-1");
+            double backgroundTemperature_K = simConf->doubleParameter("background_temperature_K");
 
-        double backgroundPressure_Pa = simConf->doubleParameter("background_pressure_Pa");
-        double gasVelocityX = simConf->doubleParameter("collision_gas_velocity_x_mscylinder-1");
+            pressureFct = CollisionModel::getConstantScalarFunction(backgroundPressure_Pa);
+            backgroundTemperatureFct = CollisionModel::getConstantScalarFunction(backgroundTemperature_K);
+
+            // define spatial functions for uniform and parabolic
+            if(flowMode == UNIFORM_FLOW) {
+                velocityFct = CollisionModel::getConstantVectorFunction({gasVelocityX, 0.0, 0.0});
+            }
+            else if(flowMode == PARABOLIC_FLOW){
+                double flowProfileMaxRadius_m = simConf->doubleParameter("flow_profile_maximum_radius_m");
+                velocityFct = [gasVelocityX, flowProfileMaxRadius_m](const Core::Vector& pos) {
+                    //parabolic profile is vX = 2 * Vavg * (1 - r^2 / R^2) with the electrode radius R
+                    double radial_dist = std::sqrt(pos.y()*pos.y() + pos.z()*pos.z())/flowProfileMaxRadius_m ;
+                    double xVelo = gasVelocityX*2.0*(1-radial_dist);
+                    if (xVelo < 0.0) {
+                        xVelo = 0.0;
+                    }
+                    return Core::Vector(xVelo, 0.0, 0.0);
+                };
+            }
+        }
+
         double collisionGasMass_Amu = simConf->doubleParameter("collision_gas_mass_amu");
         double collisionGasDiameter_nm = simConf->doubleParameter("collision_gas_diameter_nm");
-        double backgroundTemperature_K = simConf->doubleParameter("background_temperature_K");
-
-        double gateOpenTime = simConf->doubleParameter("gate_open_time_s");
-        double gateOpenDuration = simConf->doubleParameter("gate_open_duration_s");
-        double gateVoltage = simConf->doubleParameter("gate_voltage_V");
-        double gradientStartTime = simConf->doubleParameter("gradient_start_time_s");
-        double gradientVelocity = simConf->doubleParameter("gradient_ramp_velocity_V/ms")*1000;
-        double gradientVoltage = simConf->doubleParameter("gradient_voltage_V");
-        double gradientDuration = gradientVoltage / gradientVelocity;
-
 
         //Additional parameters needed for MD collision model
         std::string collisionGasIdentifier;
@@ -170,9 +238,7 @@ int main(int argc, const char * argv[]) {
 
         // ======================================================================================
 
-        //read potential array configuration of the trap =================================================
-        std::filesystem::path confBasePath = simConf->confBasePath();
-
+        //read potential array configuration of the TIMS system =================================================
         FileIO::CSVReader csvReader = FileIO::CSVReader();
         std::vector<std::vector<std::string>> stringVector = std::vector<std::vector<std::string>>();
         std::string potentialConfFn = simConf->pathRelativeToConfFile(simConf->stringParameter("potential_configuration"));
@@ -183,27 +249,8 @@ int main(int argc, const char * argv[]) {
         std::vector<double> gradient = csvReader.extractDouble(stringVector, 3);
         std::vector<double> gate = csvReader.extractDouble(stringVector, 4);
 
-        double paSpatialScale = simConf->doubleParameter("potential_array_scale");
-        std::vector<std::unique_ptr<ParticleSimulation::SimionPotentialArray>> PotentialArrays;
-        //std::vector<std::string> PotentialArraysNames = simConf->stringVectorParameter("potential_arrays");
-        for (const auto& paName: PotentialArraysNames) {
-            std::filesystem::path paPath = confBasePath/paName;
-            std::unique_ptr<ParticleSimulation::SimionPotentialArray> pa_pt =
-                    std::make_unique<ParticleSimulation::SimionPotentialArray>(paPath, paSpatialScale);
-            PotentialArrays.push_back(std::move(pa_pt));
-        }
-
-        double potentialScale = 1.0/10000.0;
-
-        std::vector<std::unique_ptr<ParticleSimulation::SimionPotentialArray>> flowField =
-                simConf->readPotentialArrays("flow_field", paSpatialScale, true);
-
-        std::vector<std::unique_ptr<ParticleSimulation::SimionPotentialArray>> pressureField =
-                simConf->readPotentialArrays("pressure_field", paSpatialScale, true);
-
-        std::vector<std::unique_ptr<ParticleSimulation::SimionPotentialArray>> temperatureField =
-                simConf->readPotentialArrays("temperature_field", paSpatialScale, true);
-
+        std::vector<std::unique_ptr<ParticleSimulation::SimionPotentialArray>> PotentialArrays =
+            AppUtils::readPotentialArrayFiles(PotentialArraysNames, simConf->confBasePath(), paSpatialScale, true);
 
         // defining simulation domain box (used for ion termination):
         std::array<std::array<double, 2>, 3> simulationDomainBoundaries{};
@@ -255,8 +302,6 @@ int main(int argc, const char * argv[]) {
             molecularStructureCollection = mdConfReader.readMolecularStructure(mdCollisionConfFile);
         }
 
-
-
         // prepare file writer  =================================================================
         RS::ConcentrationFileWriter resultFilewriter(projectName+"_conc.csv");
 
@@ -270,9 +315,10 @@ int main(int argc, const char * argv[]) {
 
         std::vector<std::string> auxParamNames = {"velocity x", "velocity y", "velocity z",
                                                   "ion velocity","kinetic energy (eV)", "effective Field (V/m)", "ion temperature (K)"};
-        auto auxParamFct = [backgroundTemperature_K, collisionGasMass_Amu](Core::Particle* particle) -> std::vector<double> {
+        auto auxParamFct = [&backgroundTemperatureFct, collisionGasMass_Amu](Core::Particle* particle) -> std::vector<double> {
             double ionVelocity = particle->getVelocity().magnitude();
             double kineticEnergy_eV = 0.5*particle->getMass()*ionVelocity*ionVelocity*Core::JOULE_TO_EV;
+            double backgroundTemperature_K = backgroundTemperatureFct(particle->getLocation());
             double ionTemperature = backgroundTemperature_K + (collisionGasMass_Amu*pow(ionVelocity,2))/3*1.381e-23;
             std::vector<double> result = {
                     particle->getVelocity().x(),
@@ -289,8 +335,7 @@ int main(int argc, const char * argv[]) {
             return result;
         };
 
-        std::string hdf5Filename = projectName+"_trajectories.hd5";
-        FileIO::TrajectoryHDF5Writer trajectoryWriter(hdf5Filename);
+        FileIO::TrajectoryHDF5Writer trajectoryWriter(cmdLineParser.trajectoriesResultName());
         trajectoryWriter.setParticleAttributes(integerParticleAttributesNames, additionalIntegerParamTFct);
         trajectoryWriter.setParticleAttributes(auxParamNames, auxParamFct);
 
@@ -302,7 +347,6 @@ int main(int argc, const char * argv[]) {
 
         std::unique_ptr<FileIO::Scalar_writer> voltageWriter;
         voltageWriter = std::make_unique<FileIO::Scalar_writer>(projectName+"_voltages.csv");
-
 
         // init simulation  =====================================================================
 
@@ -350,7 +394,7 @@ int main(int argc, const char * argv[]) {
         std::vector<double> totalFieldNow(PotentialArrays.size(), 0.0);
 
         auto paVoltageFct = [&PotentialArrays, &DCVoltages, &RFFactor, &gradient, &gate, &totalFieldNow,
-                             omega, V_rf, gateOpenTime, gateOpenDuration, gateVoltage, gradientStartTime, gradientDuration, gradientVoltage, gradientVelocity]
+                             omega, V_rf, gateOpenTime, gateOpenDuration, gateVoltage, gradientStartTime, gradientDuration, gradientVelocity]
                                      (double time){
             for(size_t i=0; i<PotentialArrays.size(); i++) {
                 totalFieldNow[i] = DCVoltages[i] + sin(time*omega) * (V_rf * RFFactor[i]);
@@ -359,12 +403,14 @@ int main(int argc, const char * argv[]) {
                     totalFieldNow[i] = totalFieldNow[i] + gate[i] * (gateVoltage);
 
                 if (time >= gradientStartTime && time <= (gradientStartTime + gradientDuration)){
-                    totalFieldNow[i] = totalFieldNow[i] + gradient[i] * ((time-gradientStartTime)*gradientVelocity);}
+                    double gradient_field= gradient[i] * ((time-gradientStartTime)*gradientVelocity);
+                    //std::cout <<"gradient!" <<"gi: "<< gradient[i] <<" :->"<< gradient_field<<std::endl;
+                    totalFieldNow[i] = totalFieldNow[i] + gradient_field;}
             }
         };
 
 
-        auto accelerationFct = [&PotentialArrays, &totalFieldNow, potentialScale, spaceChargeFactor]
+        auto accelerationFct = [&PotentialArrays, &totalFieldNow, spaceChargeFactor]
                 (Core::Particle* particle, int /*particleIndex*/, SpaceCharge::FieldCalculator &scFieldCalculator,
                  double /*time*/, int /*timestep*/){
             Core::Vector fEfield(0, 0, 0);
@@ -373,7 +419,7 @@ int main(int argc, const char * argv[]) {
 
             for(size_t i=0; i<PotentialArrays.size(); i++) {
                 Core::Vector paField = PotentialArrays[i]->getField(pos.x(), pos.y(), pos.z());
-                Core::Vector paEffectiveField = paField * totalFieldNow[i] * potentialScale;
+                Core::Vector paEffectiveField = paField * totalFieldNow[i];
 
                 fEfield = fEfield + paEffectiveField;
             }
@@ -427,7 +473,7 @@ int main(int argc, const char * argv[]) {
 
         auto otherActionsFct = [&simulationDomainBoundaries, &ionsInactive, &PotentialArrays, &V_rf, &startSplatTracker](
                 Core::Vector& newPartPos, Core::Particle* particle,
-                int /*particleIndex*/,  double time, int /*timestep*/) {
+                int /*particleIndex*/,  double time, int /*timestep*/){
             //Core::Vector pos = particle->getLocation();
             if (newPartPos.x()<=simulationDomainBoundaries[0][0] ||
                 newPartPos.x()>=simulationDomainBoundaries[0][1] ||
@@ -447,7 +493,10 @@ int main(int argc, const char * argv[]) {
                 ionsInactive++;
             }
             Core::Vector PartVelocity(particle->getVelocity());
-            if (Core::isDoubleEqual(V_rf, 0.0)) {
+
+            // Periodic boundary conditions in yz direction disabled at the moment
+
+            /*if (Core::isDoubleEqual(V_rf, 0.0)) {
                 double boundary = 0.001;
                 if (newPartPos.y() > boundary) {
                     double new_y = -(boundary - (newPartPos.y() - boundary));
@@ -477,18 +526,13 @@ int main(int argc, const char * argv[]) {
                     Core::Vector newPartVelocity(PartVelocity.x(), PartVelocity.y(), -PartVelocity.z());
                     particle->setVelocity(newPartVelocity);
                 }
-            }
+            }*/
         };
 
         //define / gas interaction /  collision model:
         std::unique_ptr<CollisionModel::AbstractCollisionModel> collisionModelPtr;
         if (collisionType==SDS || collisionType==HS || collisionType==MD) {
             // prepare static pressure and temperature functions
-
-            auto pressureFct = CollisionModel::getVariableScalarFunction(*pressureField[0]);
-            auto backgroundTemperatureFct = CollisionModel::getVariableScalarFunction(*temperatureField[0]);
-            auto velocityFct = CollisionModel::getVariableVectorFunction(*flowField[0], *flowField[1], *flowField[2]);
-
 
             if (collisionType==SDS){
                 std::unique_ptr<CollisionModel::StatisticalDiffusionModel> collisionModel =
@@ -560,15 +604,16 @@ int main(int argc, const char * argv[]) {
             particle->setIntegerAttribute(key_ChemicalIndex, substIndex);
         };
 
-        auto reactionConditionsFct = [backgroundTemperature_K, backgroundPressure_Pa]
+        auto reactionConditionsFct = [&backgroundTemperatureFct, &pressureFct]
                 (RS::ReactiveParticle* particle, double /*time*/)->RS::ReactionConditions{
             RS::ReactionConditions reactionConditions = RS::ReactionConditions();
 
-            reactionConditions.temperature = backgroundTemperature_K;
+            reactionConditions.temperature = backgroundTemperatureFct(particle->getLocation());
             reactionConditions.electricField = particle->getFloatAttribute("effectiveField");
-            reactionConditions.pressure = backgroundPressure_Pa;
+            reactionConditions.pressure = pressureFct(particle->getLocation());
             return reactionConditions;
         };
+
 
         //init trajectory simulation object:
         Integration::ParallelVerletIntegrator verletIntegrator(
