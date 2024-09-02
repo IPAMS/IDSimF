@@ -45,6 +45,9 @@ namespace CollisionModel{
         ParticleSimulation::SimionPotentialArray &pa_x,
         ParticleSimulation::SimionPotentialArray &pa_y,
         ParticleSimulation::SimionPotentialArray &pa_z);
+    std::function<Core::Vector(const Core::Vector&)>getVariableAxialSymmetricVectorFunction(
+        ParticleSimulation::SimionPotentialArray &pa_x,
+        ParticleSimulation::SimionPotentialArray &pa_r);
 
 }
 

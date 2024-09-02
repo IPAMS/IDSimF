@@ -455,7 +455,8 @@ std::array<double,3> ParticleSimulation::SimionPotentialArray::transformAndCheck
                                    xT > internalBoundsUpper_[0] ||
                                    r  > internalBoundsUpper_[1] ) ){
             std::stringstream ss;
-            ss << "Point " << xPt << " " << yPt << " " << zPt << " is not in the cylindrical potential array";
+            ss << "Point " << xPt << " " << yPt << " " << zPt << " is not in the cylindrical potential array (internal: "
+                << xT <<" " << yT << " " << zT<<")";
             throw (ParticleSimulation::PotentialArrayException(ss.str()));
         }
 
@@ -470,7 +471,8 @@ std::array<double,3> ParticleSimulation::SimionPotentialArray::transformAndCheck
                  yT < internalBoundsLower_[1] || yT > internalBoundsUpper_[1] ||
                  zT < internalBoundsLower_[2] || zT > internalBoundsUpper_[2] )) {
             std::stringstream ss;
-            ss << "Point " << xPt << " " << yPt << " " << zPt << " is not in the planar potential array";
+            ss << "Point " << xPt << " " << yPt << " " << zPt << " is not in the planar potential array (internal: "
+                << xT <<" " << yT << " " << zT<<")";
             throw (ParticleSimulation::PotentialArrayException(ss.str()));
         }
 

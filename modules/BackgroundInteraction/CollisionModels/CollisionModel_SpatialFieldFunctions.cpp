@@ -20,7 +20,7 @@
  ****************************/
 
 #include "CollisionModel_SpatialFieldFunctions.hpp"
-
+#include <cmath>
 /**
  * Generates a constant scalar function
  *
@@ -84,6 +84,27 @@ std::function<Core::Vector(const Core::Vector&)> CollisionModel::getVariableVect
             pa_x.getInterpolatedPotential(x,y,z),
             pa_y.getInterpolatedPotential(x,y,z),
             pa_z.getInterpolatedPotential(x,y,z)
+        };
+    };
+}
+
+std::function<Core::Vector(const Core::Vector&)> CollisionModel::getVariableAxialSymmetricVectorFunction(
+    ParticleSimulation::SimionPotentialArray &pa_x,
+    ParticleSimulation::SimionPotentialArray &pa_r) {
+
+    return [&pa_x, &pa_r](const Core::Vector& position)->Core::Vector
+    {
+        double x = position.x();
+        double y = position.y();
+        double z = position.z();
+        double r = std::sqrt(position.y()*position.y() + position.z()*position.z());
+
+        double r_result = pa_r.getInterpolatedPotential(x,r,0.0);
+
+        return {
+            pa_x.getInterpolatedPotential(x,y,z),
+            r_result * y,
+            r_result * z
         };
     };
 }
