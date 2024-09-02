@@ -16,7 +16,7 @@ There are four different electric potentials which can be applied to the electro
     * ``Scan ramp``: Potential which is linearly ramped to a final value, for mobility scan 
     * ``Gate``: Potential to gate ions into TIMS region, gate voltage is switched on after a delay time and is held for a gate open time
   
-Those electric potentials are configured in a separate CSV file for every individual potential array. See :ref:`tims-voltage-config` for details
+Those electric potentials are configured in a separate CSV file for every individual potential array. See :ref:`tims-voltage-config` for details.
 
 Ions start uniformly distributed in a configurable start zone. The interaction between background gas and the ions can be described with different collision models. Electric ion-ion interaction (space charge) can be modeled with a parallelized version of a Barnes-Hut tree. 
 
@@ -26,6 +26,9 @@ The modeled ions are chemically reactive. The temperature dependent reactions of
 Simulation configuration description
 ====================================
 
+------------------
+General Parameters
+------------------
 
 ``sim_time_steps`` : integer
     Number of simulation time steps
@@ -97,7 +100,7 @@ This file has the following form:
 
 The individual columns are: 
 
-    * ``Potential Name``: Name / Paths of the potential array (PA) file. The file paths are relative to the simulation run configuration file. 
+    * ``potential name``: Name / Paths of the potential array (PA) file. The file paths are relative to the simulation run configuration file. 
     * ``static DC potential`` :math:`U_{\text{dc}}`: Static (DC), absolute potential for this PA 
     * ``RF factor`` :math:`f_{\text{RF}}`: RF amplitude for this PA, given as factor relative to the absolute RF amplitude defined in ``confining_RF_amplitude_V``
     * ``ramp gradient factor`` :math:`f_{\text{Ramp}}`: Amplitude of the linear scan ramp for this PA, given as factor relative to the absolute scan ramp amplitude defined by ``gradient_voltage_V`` and ``gradient_ramp_velocity_V/ms``
