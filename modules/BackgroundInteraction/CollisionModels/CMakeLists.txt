@@ -30,7 +30,11 @@ set(SOURCE_FILES
         CollisionModel_Molecule.cpp
         CollisionModel_Molecule.hpp
         CollisionModel_MolecularStructure.cpp
-        CollisionModel_MolecularStructure.hpp CollisionModel_MDForceField_LJ12_6.cpp CollisionModel_MDForceField_LJ12_6.hpp)
+        CollisionModel_MolecularStructure.hpp 
+        CollisionModel_MDForceField_LJ12_6.cpp 
+        CollisionModel_MDForceField_LJ12_6.hpp
+        CollisionModel_MDForceField_Buckingham.cpp 
+        CollisionModel_MDForceField_Buckingham.hpp)
 
 add_library(collisionmodels STATIC ${SOURCE_FILES})
 target_include_directories(collisionmodels PUBLIC .)
