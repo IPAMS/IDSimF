@@ -1,0 +1,18 @@
+{
+  "background_temperature_K":298,
+  "background_pressures_Pa":2000,
+  "collision_gas_masses_amu":4.003,
+  "collision_gas_diameters_angstrom":2.8,
+  "collision_gas_polarizability_m3":0.205e-30,
+  "collision_gas_identifier":"He",
+  "particle_identifier":"Li+",
+  "md_configuration":"./moleculeStructures_MOBCAL_MMFF93.json",
+  "sub_integrator_integration_time_s":1e-9,
+  "sub_integrator_step_size_s":1e-17,
+  "collision_radius_scaling":4,
+  "angle_theta_scaling":1,
+  "spawn_radius_m":43e-10,
+  "trajectory_file":"trajectories_MD_Collisions_idealized.txt",
+  "trajectory_distance_m":43e-10,
+  "trajectory_start_time_step":1
+}
