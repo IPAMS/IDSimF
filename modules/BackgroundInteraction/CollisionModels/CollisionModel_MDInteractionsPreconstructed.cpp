@@ -37,13 +37,13 @@ CollisionModel::MDInteractionsModelPreconstructed::MDInteractionsModelPreconstru
                                                         double staticTemperature,
                                                         double collisionGasMassAmu,
                                                         double collisionGasDiameterM, 
-                                                        double collisionGasPolarizabilityM3,
                                                         std::string collisionMolecule,
                                                         double integrationTime,
                                                         double subTimeStep,
                                                         double collisionRadiusScaling,
                                                         double angleThetaScaling,
                                                         double spawnRadius,
+                                                        std::unique_ptr<CollisionModel::AbstractMDForceField> forceField,
                                                         std::unordered_map<std::string,  std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection) :
         MDInteractionsModelPreconstructed(
         getConstantScalarFunction(staticPressure),
@@ -51,13 +51,13 @@ CollisionModel::MDInteractionsModelPreconstructed::MDInteractionsModelPreconstru
         staticTemperature,
         collisionGasMassAmu,
         collisionGasDiameterM,
-        collisionGasPolarizabilityM3,
         collisionMolecule,
         integrationTime,
         subTimeStep,
         collisionRadiusScaling,
         angleThetaScaling,
         spawnRadius,
+        std::move(forceField),
         molecularStructureCollection) { }
 
 CollisionModel::MDInteractionsModelPreconstructed::MDInteractionsModelPreconstructed(
@@ -65,13 +65,13 @@ CollisionModel::MDInteractionsModelPreconstructed::MDInteractionsModelPreconstru
                                                         double staticTemperature,
                                                         double collisionGasMassAmu,
                                                         double collisionGasDiameterM, 
-                                                        double collisionGasPolarizabilityM3,
                                                         std::string collisionMolecule,
                                                         double integrationTime,
                                                         double subTimeStep,
                                                         double collisionRadiusScaling,
                                                         double angleThetaScaling, 
                                                         double spawnRadius,
+                                                        std::unique_ptr<CollisionModel::AbstractMDForceField> forceField,
                                                         std::unordered_map<std::string,
                                                         std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection, 
                                                         Core::Vector startPosition, 
@@ -82,13 +82,13 @@ CollisionModel::MDInteractionsModelPreconstructed::MDInteractionsModelPreconstru
         staticTemperature,
         collisionGasMassAmu,
         collisionGasDiameterM,
-        collisionGasPolarizabilityM3,
         collisionMolecule,
         integrationTime,
         subTimeStep,
         collisionRadiusScaling,
         angleThetaScaling,
         spawnRadius,
+        std::move(forceField),
         molecularStructureCollection, 
         startPosition, 
         startRotation) { }
@@ -99,13 +99,13 @@ CollisionModel::MDInteractionsModelPreconstructed::MDInteractionsModelPreconstru
                                                         double staticTemperature,
                                                         double collisionGasMassAmu,
                                                         double collisionGasDiameterM,
-                                                        double collisionGasPolarizabilityM3,
                                                         std::string collisionMolecule,
                                                         double integrationTime,
                                                         double subTimeStep,
                                                         double collisionRadiusScaling,
                                                         double angleThetaScaling,
                                                         double spawnRadius,
+                                                        std::unique_ptr<CollisionModel::AbstractMDForceField> forceField,
                                                         std::unordered_map<std::string,
                                                         std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection) :
         MDInteractionsModelPreconstructed(
@@ -114,13 +114,13 @@ CollisionModel::MDInteractionsModelPreconstructed::MDInteractionsModelPreconstru
                 getConstantScalarFunction(staticTemperature),
                 collisionGasMassAmu,
                 collisionGasDiameterM,
-                collisionGasPolarizabilityM3,
                 collisionMolecule,
                 integrationTime,
                 subTimeStep,
                 collisionRadiusScaling,
                 angleThetaScaling,
                 spawnRadius,
+                std::move(forceField),
                 molecularStructureCollection) { }
 
 CollisionModel::MDInteractionsModelPreconstructed::MDInteractionsModelPreconstructed(std::function<double(Core::Vector& location)> pressureFunction,
@@ -128,13 +128,13 @@ CollisionModel::MDInteractionsModelPreconstructed::MDInteractionsModelPreconstru
                                                         double staticTemperature,
                                                         double collisionGasMassAmu,
                                                         double collisionGasDiameterM,
-                                                        double collisionGasPolarizabilityM3,
                                                         std::string collisionMolecule,
                                                         double integrationTime,
                                                         double subTimeStep,
                                                         double collisionRadiusScaling,
                                                         double angleThetaScaling,
                                                         double spawnRadius,
+                                                        std::unique_ptr<CollisionModel::AbstractMDForceField> forceField,
                                                         std::unordered_map<std::string,
                                                         std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection,
                                                         Core::Vector startPosition, 
@@ -145,13 +145,13 @@ CollisionModel::MDInteractionsModelPreconstructed::MDInteractionsModelPreconstru
                 getConstantScalarFunction(staticTemperature),
                 collisionGasMassAmu,
                 collisionGasDiameterM,
-                collisionGasPolarizabilityM3,
                 collisionMolecule,
                 integrationTime,
                 subTimeStep,
                 collisionRadiusScaling,
                 angleThetaScaling,
                 spawnRadius,
+                std::move(forceField),
                 molecularStructureCollection, 
                 startPosition, 
                 startRotation) { }
@@ -161,19 +161,18 @@ CollisionModel::MDInteractionsModelPreconstructed::MDInteractionsModelPreconstru
                                                         std::function<double(const Core::Vector&)> temperatureFunction,
                                                         double collisionGasMassAmu,
                                                         double collisionGasDiameterM,
-                                                        double collisionGasPolarizabilityM3,
                                                         std::string collisionMolecule,
                                                         double integrationTime,
                                                         double subTimeStep,
                                                         double collisionRadiusScaling,
                                                         double angleThetaScaling,
                                                         double spawnRadius,
+                                                        std::unique_ptr<CollisionModel::AbstractMDForceField> forceField,
                                                         std::unordered_map<std::string,
                                                         std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection) :
 
         collisionGasMass_kg_(collisionGasMassAmu*Core::AMU_TO_KG),
         collisionGasDiameter_m_(collisionGasDiameterM),
-        collisionGasPolarizability_m3_(collisionGasPolarizabilityM3),
         collisionMolecule_(collisionMolecule),
         integrationTime_(integrationTime),
         subTimeStep_(subTimeStep),
@@ -183,6 +182,7 @@ CollisionModel::MDInteractionsModelPreconstructed::MDInteractionsModelPreconstru
         pressureFunction_(std::move(pressureFunction)),
         velocityFunction_(std::move(velocityFunction)),
         temperatureFunction_(std::move(temperatureFunction)),
+        forceField_(std::move(forceField)),
         molecularStructureCollection_(std::move(molecularStructureCollection)) {}
 
 CollisionModel::MDInteractionsModelPreconstructed::MDInteractionsModelPreconstructed(std::function<double(Core::Vector& location)> pressureFunction,
@@ -190,13 +190,13 @@ CollisionModel::MDInteractionsModelPreconstructed::MDInteractionsModelPreconstru
                                                         std::function<double(const Core::Vector&)> temperatureFunction,
                                                         double collisionGasMassAmu,
                                                         double collisionGasDiameterM,
-                                                        double collisionGasPolarizabilityM3,
                                                         std::string collisionMolecule,
                                                         double integrationTime,
                                                         double subTimeStep,
                                                         double collisionRadiusScaling,
                                                         double angleThetaScaling,
                                                         double spawnRadius,
+                                                        std::unique_ptr<CollisionModel::AbstractMDForceField> forceField,
                                                         std::unordered_map<std::string,
                                                         std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection,
                                                         Core::Vector startPosition, 
@@ -204,7 +204,6 @@ CollisionModel::MDInteractionsModelPreconstructed::MDInteractionsModelPreconstru
 
         collisionGasMass_kg_(collisionGasMassAmu*Core::AMU_TO_KG),
         collisionGasDiameter_m_(collisionGasDiameterM),
-        collisionGasPolarizability_m3_(collisionGasPolarizabilityM3),
         collisionMolecule_(collisionMolecule),
         integrationTime_(integrationTime),
         subTimeStep_(subTimeStep),
@@ -214,6 +213,7 @@ CollisionModel::MDInteractionsModelPreconstructed::MDInteractionsModelPreconstru
         pressureFunction_(std::move(pressureFunction)),
         velocityFunction_(std::move(velocityFunction)),
         temperatureFunction_(std::move(temperatureFunction)),
+        forceField_(std::move(forceField)),
         molecularStructureCollection_(std::move(molecularStructureCollection)),
         startPosition_(startPosition), 
         startRotation_(startRotation) {}
@@ -308,7 +308,190 @@ void CollisionModel::MDInteractionsModelPreconstructed::modifyAcceleration(Core:
 
 }
 
-void CollisionModel::MDInteractionsModelPreconstructed::modifyVelocity(Core::Particle& particle) {}
+void CollisionModel::MDInteractionsModelPreconstructed::modifyVelocity(Core::Particle& particle) {
+    Core::RandomSource* rndSource = Core::globalRandomGeneratorPool->getThreadRandomSource();
+
+    // Calculate collision cross section between particle and collision gas:
+    double collisionRadius = collisionRadiusScaling_*(particle.getDiameter() + collisionGasDiameter_m_)/2.0;
+    //double sigma_m2 = M_PI * collisionRadius * collisionRadius;
+
+    Core::Vector moleculeComPosition = particle.getLocation();
+    double localPressure_Pa = pressureFunction_(moleculeComPosition);
+    if (Core::isDoubleEqual(localPressure_Pa, 0.0)){
+        return; //pressure 0 means no collision at all
+    }
+
+    // Transform the frame of reference in a frame where the mean background gas velocity is zero.
+    Core::Vector vGasMean = velocityFunction_(moleculeComPosition);
+    Core::Vector vFrameMeanBackRest = particle.getVelocity() - vGasMean;
+
+    double vRelIonMeanBackRest = vFrameMeanBackRest.magnitude(); //relative ion relative to bulk gas velocity
+
+    // Calculate the mean free path (MFP) from current ion velocity:
+
+    // a static ion leads in static gas leads to a relative velocity of zero, which leads
+    // to undefined behavior due to division by zero later.
+    // The whole process converges to the MFP and collision probability of a static ion, thus
+    // it is possible to assume a small velocity (1 nm/s) for the static ions to get rid of undefined behavior
+    if (vRelIonMeanBackRest < 1e-9){
+        vRelIonMeanBackRest = 1e-9;
+    }
+
+    // Calculate the mean gas speed (m/s)
+    double temperature_K = temperatureFunction_(moleculeComPosition);
+    //double vMeanGas = std::sqrt(8.0*Core::K_BOLTZMANN*temperature_K/M_PI/(collisionGasMass_kg_));
+
+    // Calculate the median gas speed (m/s)
+    // double vMedianGas = std::sqrt(2.0*Core::K_BOLTZMANN*temperature_K/(collisionGasMass_kg_));
+
+    // Compute the mean relative speed (m/s) between ion and gas.
+    //double s = vRelIonMeanBackRest / vMedianGas;
+    //double cMeanRel = vMeanGas * (
+    //        (s + 1.0/(2.0*s)) * 0.5 * sqrt(M_PI) * std::erf(s) + 0.5 * std::exp(-s*s) );
+
+    // Compute mean-free-path (m)
+    //double effectiveMFP_m = Core::K_BOLTZMANN * temperature_K *
+    //                        (vRelIonMeanBackRest / cMeanRel) / (localPressure_Pa * sigma_m2);
+
+    // Compute probability of collision in the current time-step.
+    // double collisionProb = 1.0 - std::exp(-vRelIonMeanBackRest * dt / effectiveMFP_m);
+
+    // Always let collision happen  
+
+    bool trajectorySuccess = false;
+    int iterations = 0;
+    double spawnRad = spawnRadius_;
+    //double collisionTheta = std::asin(collisionRadius / spawnRad);
+
+
+    do{
+        // Collision happens
+        // Construct the actual molecule and its atoms
+        CollisionModel::Molecule mole = CollisionModel::Molecule(Core::Vector(0.0, 0.0, 0.0), Core::Vector(0.0, 0.0, 0.0), particle.getMolecularStructure());
+
+        // Construct the background gas particle
+        CollisionModel::Molecule bgMole = CollisionModel::Molecule(Core::Vector(0.0, 0.0, 0.0), Core::Vector(0.0, 0.0, 0.0),
+                                            molecularStructureCollection_.at(collisionMolecule_));
+
+        // Give background gas its position, velocity, rotation:
+        // Calculate the standard deviation of the one dimensional velocity distribution of the
+        // background gas particles. Std. dev. in one dimension is given from Maxwell-Boltzmann
+        // as sqrt(kT / particle mass).
+
+        // HEAD-ON COLLISION IN X 
+        // bgMole.setComPos(startPosition_);
+        Core::Vector startingPosition = sphereRand(spawnRad);
+        bgMole.setComPos(startingPosition);
+        double  vrStdevBgMolecule = std::sqrt( Core::K_BOLTZMANN * temperature_K / (collisionGasMass_kg_) );
+    
+        Core::Vector velocityBgMolecule = { (mole.getComPos().x()-bgMole.getComPos().x())  
+                                             - particle.getVelocity().x(),
+                                            (mole.getComPos().y()-bgMole.getComPos().y())  
+                                             - particle.getVelocity().y(),
+                                            (mole.getComPos().z()-bgMole.getComPos().z())  
+                                             - particle.getVelocity().z()};
+
+        //deliberately switch off float equal warning here
+        #pragma GCC diagnostic push
+        #pragma GCC diagnostic ignored "-Wfloat-equal"
+            if(bgMole.getComPos().x() == 0){
+                velocityBgMolecule.x(0);
+            }
+            if(bgMole.getComPos().y() == 0){
+                velocityBgMolecule.y(0);
+            }
+            if(bgMole.getComPos().z() == 0){
+                velocityBgMolecule.z(0);
+            }
+        #pragma GCC diagnostic pop
+
+        velocityBgMolecule = velocityBgMolecule / velocityBgMolecule.magnitude() * rndSource->uniformRealRndValue() * vrStdevBgMolecule;
+        // rotate(startRotation_, velocityBgMolecule);
+        // velocityBgMolecule = Core::Vector(-8.9232907224423748e-5, -879.91866989450602, 0.0);
+        bgMole.setComVel(velocityBgMolecule);
+        // std::cout << mole.getComVel() << std::endl;
+        // std::cout << velocityBgMolecule << std::endl;
+        // std::cout << bgMole.getComVel() << std::endl;
+        // std::cout << collisionRadius << std::endl;
+
+        // // calculate random point on sphere
+        // // as follows:
+        // // draw random number in as long until magnitude is less than 1
+        // // normalize result
+        // double circleVectorMagnitude = 0;
+        // Core::Vector circleVector(0,0,0);
+        // double directionAngle = 0;
+        // do{
+        //     circleVector = Core::Vector{
+        //           (rndSource->uniformRealRndValue() * 2 - 1)
+        //         , (rndSource->uniformRealRndValue() * 2 - 1)
+        //         , (rndSource->uniformRealRndValue() * 2 - 1)
+        //     };
+        //     circleVectorMagnitude = circleVector.magnitude();
+        //     circleVector = spawnRad / circleVectorMagnitude * circleVector;
+        //     directionAngle  = std::acos(
+        //         ( (-1. * circleVector) * velocityBgMolecule)
+        //         / ( spawnRad * velocityBgMolecule.magnitude() )
+        //     );
+        // }while(circleVectorMagnitude > 1 || directionAngle >  angleThetaScaling_ * collisionTheta);
+
+        // bgMole.setComPos(circleVector);
+        // NO ROTATION
+
+        double pi = 3.1415; 
+        // rotate it randomly
+        
+
+        // Give molecule a random orientation:
+        mole.setAngles(Core::Vector(rndSource->uniformRealRndValue()*2*pi-pi,
+                                    rndSource->uniformRealRndValue()*2*pi-pi,
+                                    rndSource->uniformRealRndValue()*2*pi-pi));
+
+
+
+        std::vector<CollisionModel::Molecule*> moleculesPtr = {&mole, &bgMole};
+
+        // possible check for energy conservation
+        std::vector<Core::Vector> startVelocity;
+        double startEnergy = 0;
+        for(auto* molecule : moleculesPtr){
+            startVelocity.push_back(molecule->getComVel());
+            startEnergy += 0.5 * molecule->getMass() * molecule->getComVel().magnitudeSquared();
+        }
+
+        // Call the sub-integrator
+        double finalTime = integrationTime_; //  final integration time in seconds
+        double timeStep = subTimeStep_; // step size in seconds
+
+        // Core::Vector bgMole_originalComPos = bgMole.getComPos();
+        // Core::Vector bgMole_originalComVel = bgMole.getComVel();
+        // Core::Vector mole_originalComPos = mole.getComPos();
+        // Core::Vector mole_originalComVel = mole.getComVel();
+
+        // trajectorySuccess = leapfrogIntern(moleculesPtr, timeStep, finalTime, collisionRadius);
+        trajectorySuccess = rk4InternAdaptiveStep(moleculesPtr, timeStep, finalTime, collisionRadius);
+
+
+        double endEnergy = 0;
+        for(auto* molecule : moleculesPtr){
+            endEnergy += 0.5 * molecule->getMass() * molecule->getComVel().magnitudeSquared();
+        }
+        std::cout << startEnergy << " " << endEnergy << std::endl;
+        if(endEnergy*0.90 >= startEnergy){
+            std::cout << "Not energy conserving." << std::endl;
+            trajectorySuccess = false;
+        }
+        if(trajectorySuccess){
+            particle.setVelocity(mole.getComVel() + particle.getVelocity());
+        }
+        ++iterations;
+
+    }while(!trajectorySuccess && iterations < 1);
+
+    if(trajectorySuccess == false){
+        std::cerr << "No trajectory that hit the collision sphere was found.\n";
+    }
+}
 
 void CollisionModel::MDInteractionsModelPreconstructed::modifyVelocity(Core::Particle& particle, double dt) {
     Core::RandomSource* rndSource = Core::globalRandomGeneratorPool->getThreadRandomSource();
@@ -523,7 +706,7 @@ bool CollisionModel::MDInteractionsModelPreconstructed::leapfrogIntern(std::vect
     int nSteps = int(round(finalTime/dt));
 
     std::vector<Core::Vector> forceMolecules(moleculesPtr_size);
-    forceFieldMD(moleculesPtr, forceMolecules);
+    forceField_->calculateForceField(moleculesPtr, forceMolecules);
 
     // do the first half step for the velocity, as per leapfrog definition
     double energyStart = 0;
@@ -582,7 +765,7 @@ bool CollisionModel::MDInteractionsModelPreconstructed::leapfrogIntern(std::vect
         }
 
         // recalculate the force
-        forceFieldMD(moleculesPtr, forceMolecules);
+        forceField_->calculateForceField(moleculesPtr, forceMolecules);
         i = 0;
         // time step for the new velocity
         for(auto* molecule : moleculesPtr){
@@ -645,7 +828,7 @@ bool CollisionModel::MDInteractionsModelPreconstructed::rk4Intern(std::vector<Co
         for(auto* molecule : moleculesPtr){
             mass.push_back(molecule->getMass());
         }
-        forceFieldMD(moleculesPtr, forceMolecules);
+        forceField_->calculateForceField(moleculesPtr, forceMolecules);
 
         std::array<std::array<Core::Vector, 2>, 4> k;
         std::array<std::array<Core::Vector, 2>, 4> l;
@@ -664,7 +847,7 @@ bool CollisionModel::MDInteractionsModelPreconstructed::rk4Intern(std::vector<Co
                 i++;
             }
 
-            forceFieldMD(moleculesPtr, forceMolecules);
+            forceField_->calculateForceField(moleculesPtr, forceMolecules);
 
             for(i = 0; i < nMolecules; i++){
                 k[n][i] = forceMolecules.at(i) * dt / mass[i];
@@ -778,7 +961,7 @@ bool CollisionModel::MDInteractionsModelPreconstructed::rk4InternAdaptiveStep(st
             i++;
         }
 
-        forceFieldMD(moleculesPtr, forceMolecules);
+        forceField_->calculateForceField(moleculesPtr, forceMolecules);
 
         for(size_t q = 0; q < nMolecules; q++){
             k[0][q] = forceMolecules[q] * dt / mass[q];
@@ -799,7 +982,7 @@ bool CollisionModel::MDInteractionsModelPreconstructed::rk4InternAdaptiveStep(st
                 }
             }
 
-            forceFieldMD(moleculesPtr, forceMolecules);
+            forceField_->calculateForceField(moleculesPtr, forceMolecules);
             
             
             for(i = 0; i < nMolecules; i++){
@@ -903,201 +1086,3 @@ bool CollisionModel::MDInteractionsModelPreconstructed::rk4InternAdaptiveStep(st
     return false;
 }
 
-
-void CollisionModel::MDInteractionsModelPreconstructed::forceFieldMD(std::vector<CollisionModel::Molecule*>& moleculesPtr, std::vector<Core::Vector>& forceMolecules){
-
-    // save all the forces acting on each molecule
-    CollisionModel::Molecule* ion = moleculesPtr[0];
-    CollisionModel::Molecule* bgGas = moleculesPtr[1];
-    forceMolecules[0] = Core::Vector(0.0, 0.0, 0.0);
-    forceMolecules[1] = Core::Vector(0.0, 0.0, 0.0);
-    bool isN2 = false;
-    bool isN2Approx = false;
-
-    if(bgGas->getMolecularStructureName()=="N2"){
-        isN2 = true;
-    }else if(bgGas->getMolecularStructureName()=="N2Approx"){
-        isN2Approx = true;
-    }
-
-
-    // construct E-field acting on the molecule
-    std::array<double, 3> eField = {0., 0., 0.};
-    std::array<double, 6> eFieldDerivative = {0., 0., 0., 0., 0., 0.};
-
-    /*
-    * therefore we need the interaction between each atom of a molecule with the atoms of the
-    * other one
-    */
-    for(auto& atomI : ion->getAtoms()){
-        for(auto& atomJ : bgGas->getAtoms()){
-
-            // First contribution: Lennard-Jones potential
-            // This always contributes to the experienced force
-            Core::Vector absPosAtomI = ion->getComPos() + atomI->getRelativePosition();
-            Core::Vector absPosAtomJ = bgGas->getComPos() + atomJ->getRelativePosition();
-
-            Core::Vector distance = absPosAtomI - absPosAtomJ;
-            
-            // cut-off
-            if(distance.magnitude() > 100e-10){
-                return;
-            }
-
-            double distanceSquared = distance.magnitudeSquared();
-            double distanceSquaredInverse = 1./distanceSquared;
-            double sigma = CollisionModel::Atom::calcLJSig(*atomI, *atomJ);
-            double sigma6 = sigma * sigma * sigma * sigma * sigma * sigma;
-            double epsilon = CollisionModel::Atom::calcLJEps(*atomI, *atomJ);
-            double ljFactor = 24 * epsilon * distanceSquaredInverse*distanceSquaredInverse*distanceSquaredInverse*distanceSquaredInverse *
-                              (2 * distanceSquaredInverse*distanceSquaredInverse*distanceSquaredInverse * sigma6 * sigma6 - sigma6);
-            // calculate the force that acts on the atoms and add it to the overall force on the molecule
-            Core::Vector atomForce;
-            atomForce.x(distance.x() * ljFactor);
-            atomForce.y(distance.y() * ljFactor);
-            atomForce.z(distance.z() * ljFactor);
-            forceMolecules[0] += atomForce;
-            forceMolecules[1] += atomForce * (-1);
-
-            // Second contribution: C4 ion-induced dipole potential
-            // This requires an ion and one neutrally charged molecule to be present
-            double distanceCubed = distanceSquared * sqrt(distanceSquared);
-            double currentCharge = 0;
-            // Check if one of the molecules is an ion and the other one is not
-            if(isN2){
-                if(int(ceil(fabs(atomI->getCharge()/Core::ELEMENTARY_CHARGE))) != 0 &&
-                   atomJ->getType() == CollisionModel::Atom::AtomType::COM){
-
-                    currentCharge = atomI->getCharge();
-
-                }else if (int(ceil(fabs(atomJ->getCharge()/Core::ELEMENTARY_CHARGE))) != 0 &&
-                          atomI->getType() == CollisionModel::Atom::AtomType::COM){
-
-                    currentCharge = atomJ->getCharge();
-
-                }
-            }else{
-                if(int(ceil(fabs(atomI->getCharge()/Core::ELEMENTARY_CHARGE))) != 0 &&
-                   atomJ->getType() != CollisionModel::Atom::AtomType::COM){
-
-                    currentCharge = atomI->getCharge();
-
-                }else if (int(ceil(fabs(atomJ->getCharge()/Core::ELEMENTARY_CHARGE))) != 0 &&
-                          atomI->getType() != CollisionModel::Atom::AtomType::COM){
-
-                    currentCharge = atomJ->getCharge();
-
-                }
-            }
-            
-            // if(distance.magnitudeSquared() > 1e-12){
-            eField[0] += distance.x() * currentCharge / distanceCubed; // E-field in x
-            eField[1] += distance.y() * currentCharge / distanceCubed; // E-field in y
-            eField[2] += distance.z() * currentCharge / distanceCubed; // E-field in z
-
-            // derivative x to x
-            eFieldDerivative[0] += currentCharge / distanceCubed -
-                                    3 * currentCharge * distance.x() * distance.x() / (distanceCubed * distanceSquared);
-            // derivative x to y
-            eFieldDerivative[1] += -3 * currentCharge * distance.x() * distance.y() / (distanceCubed * distanceSquared);
-            // derivative y to y
-            eFieldDerivative[2] += currentCharge / distanceCubed -
-                                    3 * currentCharge * distance.y() * distance.y() / (distanceCubed * distanceSquared);
-            // derivative y to z
-            eFieldDerivative[3] += -3 * currentCharge * distance.y() * distance.z() / (distanceCubed * distanceSquared);
-            // derivative z to z
-            eFieldDerivative[4] += currentCharge / distanceCubed -
-                                    3 * currentCharge * distance.z() * distance.z() / (distanceCubed * distanceSquared);
-            // derivative x to z
-            eFieldDerivative[5] += -3 * currentCharge * distance.x() * distance.z() / (distanceCubed * distanceSquared);
-            // }
-            
-            
-
-
-            // Third contribution: ion <-> permanent dipole potential
-            // This requires an ion and a dipole to be present
-            // double dipoleDistanceScalar = 0;
-            //double dipoleX = 0, dipoleY = 0, dipoleZ = 0;
-            currentCharge = 0;
-            if(int(atomI->getCharge()/Core::ELEMENTARY_CHARGE) != 0 &&
-               moleculesPtr[1]->getIsDipole() == true){
-
-                currentCharge = atomI->getCharge();
-                /*dipoleX = moleculesPtr[1]->getDipole().x();
-                dipoleY = moleculesPtr[1]->getDipole().y();
-                dipoleZ = moleculesPtr[1]->getDipole().z();
-                dipoleDistanceScalar =  dipoleX * distance.x() +
-                                        dipoleY * distance.y() +
-                                        dipoleZ * distance.z();*/
-
-            }else if (moleculesPtr[0]->getIsDipole() == true &&
-                      int(atomJ->getCharge()/Core::ELEMENTARY_CHARGE) != 0){
-
-                currentCharge = atomJ->getCharge();
-                /*dipoleX = moleculesPtr[0]->getDipole().x();
-                dipoleY = moleculesPtr[0]->getDipole().y();
-                dipoleZ = moleculesPtr[0]->getDipole().z();
-                dipoleDistanceScalar =  dipoleX * distance.x() +
-                                        dipoleY * distance.y() +
-                                        dipoleZ * distance.z();*/
-            }
-            // Core::Vector ionDipoleForce;
-            // ionDipoleForce.x(-currentCharge * 1./Core::ELECTRIC_CONSTANT *
-            //                     (1./distanceCubed * dipoleX -
-            //                     3 * dipoleDistanceScalar * 1./(distanceCubed*distanceSquared) * distance.x()) );
-            // ionDipoleForce.y(-currentCharge * 1./Core::ELECTRIC_CONSTANT *
-            //                     (1./distanceCubed * dipoleY -
-            //                     3 * dipoleDistanceScalar * 1./(distanceCubed*distanceSquared) * distance.y()) );
-            // ionDipoleForce.z(-currentCharge * 1./Core::ELECTRIC_CONSTANT *
-            //                     (1./distanceCubed * dipoleZ -
-            //                     3 * dipoleDistanceScalar * 1./(distanceCubed*distanceSquared) * distance.z()) );
-            // forceMolecules[0] += ionDipoleForce;
-            // forceMolecules[1] += ionDipoleForce * (-1);
-
-            // Fourth contribution: quadrupole moment if background gas is N2
-            // This requires an ion and N2 to be present
-            double partialChargeN2 = 0;
-            if(int(ceil(fabs(atomI->getCharge()/Core::ELEMENTARY_CHARGE))) != 0 && 
-                (isN2 == true || isN2Approx == true)){
-
-                currentCharge = atomI->getCharge();
-                partialChargeN2 = atomJ->getPartCharge();
-
-            }else if ((isN2 == true || isN2Approx == true) && 
-                        int(ceil(fabs(atomJ->getCharge()/Core::ELEMENTARY_CHARGE))) != 0){
-
-                currentCharge = atomJ->getCharge();
-                partialChargeN2 = atomI->getPartCharge();
-            }
-
-            Core::Vector quadrupoleForce;
-            quadrupoleForce.x(currentCharge * partialChargeN2 * 1./Core::ELECTRIC_CONSTANT * distance.x() / distanceCubed );
-            quadrupoleForce.y(currentCharge * partialChargeN2 * 1./Core::ELECTRIC_CONSTANT * distance.y() / distanceCubed );
-            quadrupoleForce.z(currentCharge * partialChargeN2 * 1./Core::ELECTRIC_CONSTANT * distance.z() / distanceCubed );
-            forceMolecules[0] += quadrupoleForce;
-            forceMolecules[1] += quadrupoleForce * (-1);
-
-        }
-    }
-
-    // add the C4 ion-induced dipole force contribution
-    Core::Vector ionInducedForce;
-    if(isN2Approx){
-        ionInducedForce.x(1./(Core::ELECTRIC_CONSTANT) * collisionGasPolarizability_m3_/2 * 
-                    (eField[0]*eFieldDerivative[0] + eField[1]*eFieldDerivative[1] + eField[2]*eFieldDerivative[5]));
-        ionInducedForce.y(1./(Core::ELECTRIC_CONSTANT) * collisionGasPolarizability_m3_/2 * 
-                    (eField[0]*eFieldDerivative[1] + eField[1]*eFieldDerivative[2] + eField[2]*eFieldDerivative[3]));
-        ionInducedForce.z(1./(Core::ELECTRIC_CONSTANT) * collisionGasPolarizability_m3_/2 * 
-                    (eField[0]*eFieldDerivative[5] + eField[1]*eFieldDerivative[3] + eField[2]*eFieldDerivative[4]));
-    }else{
-        ionInducedForce.x(1./(Core::ELECTRIC_CONSTANT) * collisionGasPolarizability_m3_ * 
-                    (eField[0]*eFieldDerivative[0] + eField[1]*eFieldDerivative[1] + eField[2]*eFieldDerivative[5]));
-        ionInducedForce.y(1./(Core::ELECTRIC_CONSTANT) * collisionGasPolarizability_m3_ * 
-                    (eField[0]*eFieldDerivative[1] + eField[1]*eFieldDerivative[2] + eField[2]*eFieldDerivative[3]));
-        ionInducedForce.z(1./(Core::ELECTRIC_CONSTANT) * collisionGasPolarizability_m3_ * 
-                    (eField[0]*eFieldDerivative[5] + eField[1]*eFieldDerivative[3] + eField[2]*eFieldDerivative[4]));
-    }
-    forceMolecules[0] += ionInducedForce;
-    forceMolecules[1] += ionInducedForce * (-1);
-}

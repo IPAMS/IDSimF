@@ -37,6 +37,7 @@
 #include "appUtils_signalHandler.hpp"
 #include "appUtils_commandlineParser.hpp"
 #include "FileIO_CSVReader.hpp"
+#include "CollisionModel_MDForceField_Buckingham.hpp"
 #include <iostream>
 
 int main(int argc, const char * argv[]) {
@@ -82,7 +83,8 @@ int main(int argc, const char * argv[]) {
                                                                         mdConfReader.readMolecularStructure(mdCollisionConfFile);
 
 
-    double diameterN2 = CollisionModel::MDInteractionsModelPreconstructed::DIAMETER_N2;
+    CollisionModel::MDForceField_Buckingham forceField(collisionGasPolarizability_m3);
+    auto forceFieldPtr = std::make_unique<CollisionModel::MDForceField_Buckingham>(forceField);
 
     Core::Particle ion;
     ion.setMolecularStructure(molecularStructureCollection.at(particleIdentifier));
@@ -108,12 +110,12 @@ int main(int argc, const char * argv[]) {
                                                                                                                 backgroundTemperature_K, 
                                                                                                                 collisionGasMasses_Amu, 
                                                                                                                 collisionGasDiameters_angstrom,
-                                                                                                                collisionGasPolarizability_m3, 
                                                                                                                 collisionGasIdentifier, 
                                                                                                                 subIntegratorIntegrationTime_s, 
                                                                                                                 subIntegratorStepSize_s, 
                                                                                                                 collisionRadiusScaling, angleThetaScaling, 
                                                                                                                 spawnRadius_m,
+                                                                                                                std::move(forceFieldPtr),
                                                                                                                 molecularStructureCollection);
 
         

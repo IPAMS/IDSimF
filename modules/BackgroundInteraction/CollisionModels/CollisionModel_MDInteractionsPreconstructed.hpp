@@ -44,6 +44,7 @@
 #include "Core_constants.hpp"
 #include "CollisionModel_AbstractCollisionModel.hpp"
 #include "CollisionModel_SpatialFieldFunctions.hpp"
+#include "CollisionModel_AbstractMDForceField.hpp"
 #include "CollisionModel_MathFunctions.hpp"
 #include "CollisionModel_Molecule.hpp"
 #include "RS_AbstractReaction.hpp"
@@ -67,13 +68,13 @@ namespace CollisionModel{
             double staticTemperature,
             double collisionGasMassAmu,
             double collisionGasDiameterM, 
-            double collisionGasPolarizabilityM3,
             std::string collisionMolecule,
             double integrationTime,
             double subTimeStep,
             double collisionRadiusScaling,
             double angleThetaScaling, 
             double spawnRadius,
+            std::unique_ptr<AbstractMDForceField> forceField_,
             std::unordered_map<std::string,
             std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection);
 
@@ -82,13 +83,13 @@ namespace CollisionModel{
             double staticTemperature,
             double collisionGasMassAmu,
             double collisionGasDiameterM, 
-            double collisionGasPolarizabilityM3,
             std::string collisionMolecule,
             double integrationTime,
             double subTimeStep,
             double collisionRadiusScaling,
             double angleThetaScaling, 
             double spawnRadius,
+            std::unique_ptr<AbstractMDForceField> forceField_,
             std::unordered_map<std::string,
             std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection, 
             Core::Vector startPosition, 
@@ -100,13 +101,13 @@ namespace CollisionModel{
             double StaticTemperature,
             double collisionGasMassAmu,
             double collisionGasDiameterM, 
-            double collisionGasPolarizabilityM3,
             std::string collisionMolecule,
             double integrationTime,
             double subTimeStep,
             double collisionRadiusScaling,
             double angleThetaScaling,
             double spawnRadius,
+            std::unique_ptr<AbstractMDForceField> forceField_,
             std::unordered_map<std::string, std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection);
 
         MDInteractionsModelPreconstructed(
@@ -115,13 +116,13 @@ namespace CollisionModel{
             double StaticTemperature,
             double collisionGasMassAmu,
             double collisionGasDiameterM, 
-            double collisionGasPolarizabilityM3,
             std::string collisionMolecule,
             double integrationTime,
             double subTimeStep,
             double collisionRadiusScaling,
             double angleThetaScaling,
             double spawnRadius,
+            std::unique_ptr<AbstractMDForceField> forceField_,
             std::unordered_map<std::string, std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection,
             Core::Vector startPosition, 
             Core::Vector startRotation);
@@ -132,13 +133,13 @@ namespace CollisionModel{
             std::function<double(const Core::Vector&)> temperatureFunction,
             double collisionGasMassAmu,
             double collisionGasDiameterM, 
-            double collisionGasPolarizabilityM3,
             std::string collisionMolecule,
             double integrationTime,
             double subTimeStep,
             double collisionRadiusScaling,
             double angleThetaScaling,
             double spawnRadius,
+            std::unique_ptr<AbstractMDForceField> forceField_,
             std::unordered_map<std::string, std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection);
 
         MDInteractionsModelPreconstructed(
@@ -147,13 +148,13 @@ namespace CollisionModel{
             std::function<double(const Core::Vector&)> temperatureFunction,
             double collisionGasMassAmu,
             double collisionGasDiameterM, 
-            double collisionGasPolarizabilityM3,
             std::string collisionMolecule,
             double integrationTime,
             double subTimeStep,
             double collisionRadiusScaling,
             double angleThetaScaling,
             double spawnRadius,
+            std::unique_ptr<AbstractMDForceField> forceField_,
             std::unordered_map<std::string, std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection, 
             Core::Vector startPosition, 
             Core::Vector startRotation);
@@ -175,8 +176,6 @@ namespace CollisionModel{
         bool rk4Intern(std::vector<CollisionModel::Molecule*> moleculesPtr, double dt, double finalTime, double requiredRad);
 
         bool rk4InternAdaptiveStep(std::vector<CollisionModel::Molecule*> moleculesPtr, double dt, double finalTime, double requiredRad);
-
-        void forceFieldMD(std::vector<CollisionModel::Molecule*>& moleculesPtr, std::vector<Core::Vector>& forceMolecules);
 
         void initializeModelParticleParameters(Core::Particle& ion) const;
 
@@ -201,7 +200,6 @@ namespace CollisionModel{
     private:
         double collisionGasMass_kg_ = 0.0;    ///< mass of the neutral colliding gas particles in kg
         double collisionGasDiameter_m_ = 0.0; ///< effective collision diameter of the neutral collision gas particles in m
-        double collisionGasPolarizability_m3_ = 0.0; ///< polarizability of the collision gas in m^3
         std::string collisionMolecule_ = ""; ///< particle identifier of the collision gas
         double integrationTime_ = 0.0; ///< integration time of the sub-integrator 
         double subTimeStep_ = 0.0; ///< step size of the sub-integrator 
@@ -214,6 +212,7 @@ namespace CollisionModel{
         unsigned int recordTrajectoryStartTimeStep_ = 0; ///< time step at which the trajectory recording begins
         std::unique_ptr<std::ofstream> trajectoryOutputStream_;
 
+        std::unique_ptr<AbstractMDForceField> forceField_; ///< The molecular force field to use
         std::function<double(Core::Vector&)> pressureFunction_ = nullptr; ///< a spatial pressure function
         std::function<Core::Vector(Core::Vector&)> velocityFunction_ = nullptr; ///< a spatial velocity function
         std::function<double(const Core::Vector&)>temperatureFunction_ = nullptr;  ///< Spatial temperature function
