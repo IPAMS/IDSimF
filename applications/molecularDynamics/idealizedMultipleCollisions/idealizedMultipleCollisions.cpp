@@ -50,7 +50,7 @@ int main(int argc, const char * argv[]) {
     std::string confFileName = cmdLineParser.confFileName();
     AppUtils::simConf_ptr simConf = cmdLineParser.simulationConfiguration();
 
-
+    double backgroundTemperature_K = simConf->doubleParameter("background_temperature_K");
     double backgroundPartialPressures_Pa = simConf->doubleParameter("background_pressures_Pa");
     double collisionGasMasses_Amu = simConf->doubleParameter("collision_gas_masses_amu");
     double collisionGasDiameters_angstrom = simConf->doubleParameter("collision_gas_diameters_angstrom");
@@ -62,7 +62,7 @@ int main(int argc, const char * argv[]) {
     double collisionRadiusScaling = simConf->doubleParameter("collision_radius_scaling");
     double angleThetaScaling = simConf->doubleParameter("angle_theta_scaling");
     double spawnRadius_m = simConf->doubleParameter("spawn_radius_m");
-    bool saveTrajectory = simConf->boolParameter("save_trajectory");
+    std::string trajectoryFile = simConf->stringParameter("trajectory_file");
     double trajectoryDistance_m = simConf->doubleParameter("trajectory_distance_m");
     unsigned int saveTrajectoryStartTimeStep = simConf->unsignedIntParameter("trajectory_start_time_step");
     
@@ -70,10 +70,9 @@ int main(int argc, const char * argv[]) {
 
     //read position and velocity input 
     
-    std::string mdCollisionConfFile = simConf->pathRelativeToConfFile(simConf->stringParameter("md_configuration"));
-    FileIO::MolecularStructureReader mdConfReader = FileIO::MolecularStructureReader();
-    std::unordered_map<std::string,  std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection = 
-                                                                        mdConfReader.readMolecularStructure(mdCollisionConfFile);
+    std::string startingConfiguration = simConf->pathRelativeToConfFile(simConf->stringParameter("starting_configuration"));
+    FileIO::CSVReader startConfReader = FileIO::CSVReader();
+    std::vector<std::vector<std::string>> startingConfigurationCollection = startConfReader.readCSVFile(startingConfiguration, ' ');
 
     //read molecular structure file
     
@@ -87,7 +86,6 @@ int main(int argc, const char * argv[]) {
 
     Core::Particle ion;
     ion.setMolecularStructure(molecularStructureCollection.at(particleIdentifier));
-    // Core::RandomSource* rndSource = Core::globalRandomGeneratorPool->getThreadRandomSource();
 
     size_t samples = 1;
     // double pi = 3.1415;
@@ -105,21 +103,23 @@ int main(int argc, const char * argv[]) {
     Core::Vector ionVelocities = {0, 0, 0};
     for(size_t i = 0; i < samples; i++){
         ion.setVelocity(ionVelocities);
-        CollisionModel::MDInteractionsModelPreconstructed mdSim = CollisionModel::MDInteractionsModelPreconstructed(2000000, 298, 28, 
-                                                                                        diameterN2,
-                                                                                        1.7E-30, 
-                                                                                        "N2", 
-                                                                                        1e-9, 
-                                                                                        1E-17, 
-                                                                                        4, 1, 
-                                                                                        43e-10,
-                                                                                        molecularStructureCollection);
+        CollisionModel::MDInteractionsModelPreconstructed mdSim = 
+                                                            CollisionModel::MDInteractionsModelPreconstructed(backgroundPartialPressures_Pa, 
+                                                                                                                backgroundTemperature_K, 
+                                                                                                                collisionGasMasses_Amu, 
+                                                                                                                collisionGasDiameters_angstrom,
+                                                                                                                collisionGasPolarizability_m3, 
+                                                                                                                collisionGasIdentifier, 
+                                                                                                                subIntegratorIntegrationTime_s, 
+                                                                                                                subIntegratorStepSize_s, 
+                                                                                                                collisionRadiusScaling, angleThetaScaling, 
+                                                                                                                spawnRadius_m,
+                                                                                                                molecularStructureCollection);
 
         
-        mdSim.setTrajectoryWriter("MD_collisions_preconstructed_trajectories_CO2+N2_rotation.txt", 43e-10, 0);
+        mdSim.setTrajectoryWriter(trajectoryFile, spawnRadius_m, 0);
         mdSim.updateModelTimestepParameters(1, 0);
-        double dt = 2e-11;
-        mdSim.modifyVelocity(ion, dt);
+        mdSim.modifyVelocity(ion);
     }
 }
 
