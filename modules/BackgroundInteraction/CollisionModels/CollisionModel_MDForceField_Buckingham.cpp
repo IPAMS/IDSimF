@@ -71,12 +71,13 @@ void CollisionModel::MDForceField_Buckingham::calculateForceField(std::vector<Co
             }
 
             double distanceSquared = distance.magnitudeSquared();
+            double distanceAbs = sqrt(distanceSquared);
             double distanceSquaredInverse = 1./distanceSquared;
             double sigma = CollisionModel::Atom::calcLJSig(*atomI, *atomJ);
             double sigma6 = sigma * sigma * sigma * sigma * sigma * sigma;
             double epsilon = CollisionModel::Atom::calcLJEps(*atomI, *atomJ);
-            double ljFactor = epsilon * (1.84e5 * exp(12*distanceSquared/sigma) - 
-                                        2.25*distanceSquaredInverse*distanceSquaredInverse*distanceSquaredInverse*sigma6);
+            double ljFactor = epsilon * 1/distanceAbs * (-1.84e5 * 12 * exp(-12*distanceSquared/sigma) * 1/sigma + 
+                                        2.25 * 6 * sigma6 * distanceSquaredInverse*distanceSquaredInverse*distanceSquaredInverse * 1/distanceAbs);
 
             // calculate the force that acts on the atoms and add it to the overall force on the molecule
             Core::Vector atomForce;
