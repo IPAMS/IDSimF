@@ -117,8 +117,8 @@ int main(int argc, const char * argv[]) {
                                                                                                                 molecularStructureCollection);
 
         
-        mdSim.setTrajectoryWriter(trajectoryFile, spawnRadius_m, 0);
-        mdSim.updateModelTimestepParameters(1, 0);
+        mdSim.setTrajectoryWriter(trajectoryFile, trajectoryDistance_m, 0);
+        mdSim.updateModelTimestepParameters(saveTrajectoryStartTimeStep, 0);
         mdSim.modifyVelocity(ion);
     }
 }
