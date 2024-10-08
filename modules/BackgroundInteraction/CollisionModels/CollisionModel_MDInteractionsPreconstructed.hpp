@@ -187,6 +187,9 @@ namespace CollisionModel{
         void modifyAcceleration(Core::Vector& acceleration,
                                         Core::Particle& particle,
                                         double dt);
+                                    
+        void modifyVelocity(Core::Particle& particle);
+
         void modifyVelocity(Core::Particle& particle,
                                     double dt);
 

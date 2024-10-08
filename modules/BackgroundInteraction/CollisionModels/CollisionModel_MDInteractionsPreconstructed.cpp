@@ -308,6 +308,8 @@ void CollisionModel::MDInteractionsModelPreconstructed::modifyAcceleration(Core:
 
 }
 
+void CollisionModel::MDInteractionsModelPreconstructed::modifyVelocity(Core::Particle& particle) {}
+
 void CollisionModel::MDInteractionsModelPreconstructed::modifyVelocity(Core::Particle& particle, double dt) {
     Core::RandomSource* rndSource = Core::globalRandomGeneratorPool->getThreadRandomSource();
 
