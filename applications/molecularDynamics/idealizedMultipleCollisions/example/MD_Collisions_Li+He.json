@@ -7,12 +7,12 @@
   "collision_gas_identifier":"He",
   "particle_identifier":"Li+",
   "md_configuration":"./moleculeStructures_MOBCAL_MMFF93.json",
-  "sub_integrator_integration_time_s":1e-9,
-  "sub_integrator_step_size_s":1e-17,
+  "starting_configuration":"./startingConditions_test.txt",
+  "sub_integrator_integration_time_s":1e-10,
+  "sub_integrator_step_size_s":1e-12,
   "collision_radius_scaling":4,
   "angle_theta_scaling":1,
   "spawn_radius_m":43e-10,
-  "trajectory_file":"trajectories_MD_Collisions_idealized.txt",
   "trajectory_distance_m":43e-10,
   "trajectory_start_time_step":1
 }
