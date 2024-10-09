@@ -75,7 +75,7 @@ CollisionModel::MDInteractionsModelPreconstructed::MDInteractionsModelPreconstru
                                                         std::unordered_map<std::string,
                                                         std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection, 
                                                         Core::Vector startPosition, 
-                                                        Core::Vector startRotation) :
+                                                        Core::Vector startVelocity) :
         MDInteractionsModelPreconstructed(
         getConstantScalarFunction(staticPressure),
         getConstantVectorFunction(Core::Vector(0.0, 0.0, 0.0)),
@@ -91,7 +91,7 @@ CollisionModel::MDInteractionsModelPreconstructed::MDInteractionsModelPreconstru
         std::move(forceField),
         molecularStructureCollection, 
         startPosition, 
-        startRotation) { }
+        startVelocity) { }
 
 
 CollisionModel::MDInteractionsModelPreconstructed::MDInteractionsModelPreconstructed(std::function<double(Core::Vector& location)> pressureFunction,
@@ -138,7 +138,7 @@ CollisionModel::MDInteractionsModelPreconstructed::MDInteractionsModelPreconstru
                                                         std::unordered_map<std::string,
                                                         std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection,
                                                         Core::Vector startPosition, 
-                                                        Core::Vector startRotation) :
+                                                        Core::Vector startVelocity) :
         MDInteractionsModelPreconstructed(
                 std::move(pressureFunction),
                 std::move(velocityFunction),
@@ -154,7 +154,7 @@ CollisionModel::MDInteractionsModelPreconstructed::MDInteractionsModelPreconstru
                 std::move(forceField),
                 molecularStructureCollection, 
                 startPosition, 
-                startRotation) { }
+                startVelocity) { }
 
 CollisionModel::MDInteractionsModelPreconstructed::MDInteractionsModelPreconstructed(std::function<double(Core::Vector& location)> pressureFunction,
                                                         std::function<Core::Vector(Core::Vector& location)> velocityFunction,
@@ -200,7 +200,7 @@ CollisionModel::MDInteractionsModelPreconstructed::MDInteractionsModelPreconstru
                                                         std::unordered_map<std::string,
                                                         std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection,
                                                         Core::Vector startPosition, 
-                                                        Core::Vector startRotation) :
+                                                        Core::Vector startVelocity) :
 
         collisionGasMass_kg_(collisionGasMassAmu*Core::AMU_TO_KG),
         collisionGasDiameter_m_(collisionGasDiameterM),
@@ -216,7 +216,7 @@ CollisionModel::MDInteractionsModelPreconstructed::MDInteractionsModelPreconstru
         forceField_(std::move(forceField)),
         molecularStructureCollection_(std::move(molecularStructureCollection)),
         startPosition_(startPosition), 
-        startRotation_(startRotation) {}
+        startVelocity_(startVelocity) {}
 /**
  * Activates trajectory writing and sets trajectory writer configuration
  * @param trajectoryFileName
@@ -320,10 +320,6 @@ void CollisionModel::MDInteractionsModelPreconstructed::modifyVelocity(Core::Par
     
     double collisionRadius = collisionRadiusScaling_*(particle.getDiameter() + collisionGasDiameter_m_)/2.0;
  
-
-
-  
-
     bool trajectorySuccess = false;
     int iterations = 0;
     double spawnRad = spawnRadius_;
@@ -336,52 +332,8 @@ void CollisionModel::MDInteractionsModelPreconstructed::modifyVelocity(Core::Par
         CollisionModel::Molecule mole = CollisionModel::Molecule(Core::Vector(0.0, 0.0, 0.0), Core::Vector(0.0, 0.0, 0.0), particle.getMolecularStructure());
 
         // Construct the background gas particle
-        CollisionModel::Molecule bgMole = CollisionModel::Molecule(Core::Vector(0.0, 0.0, 0.0), Core::Vector(0.0, 0.0, 0.0),
+        CollisionModel::Molecule bgMole = CollisionModel::Molecule(startPosition_, startVelocity_,
                                             molecularStructureCollection_.at(collisionMolecule_));
-
-        // Give background gas its position, velocity, rotation:
-        // Calculate the standard deviation of the one dimensional velocity distribution of the
-        // background gas particles. Std. dev. in one dimension is given from Maxwell-Boltzmann
-        // as sqrt(kT / particle mass).
-
-        // HEAD-ON COLLISION IN X 
-        // bgMole.setComPos(startPosition_);
-        Core::Vector startingPosition = sphereRand(spawnRad);
-        bgMole.setComPos(startingPosition);
-    
-        Core::Vector velocityBgMolecule = { (mole.getComPos().x()-bgMole.getComPos().x())  
-                                             - particle.getVelocity().x(),
-                                            (mole.getComPos().y()-bgMole.getComPos().y())  
-                                             - particle.getVelocity().y(),
-                                            (mole.getComPos().z()-bgMole.getComPos().z())  
-                                             - particle.getVelocity().z()};
-
-        //deliberately switch off float equal warning here
-        #pragma GCC diagnostic push
-        #pragma GCC diagnostic ignored "-Wfloat-equal"
-            if(bgMole.getComPos().x() == 0){
-                velocityBgMolecule.x(0);
-            }
-            if(bgMole.getComPos().y() == 0){
-                velocityBgMolecule.y(0);
-            }
-            if(bgMole.getComPos().z() == 0){
-                velocityBgMolecule.z(0);
-            }
-        #pragma GCC diagnostic pop
-
-        bgMole.setComVel(velocityBgMolecule);
-       
-
-        double pi = 3.1415; 
-        
-
-        // Give molecule a random orientation:
-        // mole.setAngles(Core::Vector(rndSource->uniformRealRndValue()*2*pi-pi,
-        //                             rndSource->uniformRealRndValue()*2*pi-pi,
-        //                             rndSource->uniformRealRndValue()*2*pi-pi));
-
-
 
         std::vector<CollisionModel::Molecule*> moleculesPtr = {&mole, &bgMole};
 
@@ -397,7 +349,6 @@ void CollisionModel::MDInteractionsModelPreconstructed::modifyVelocity(Core::Par
         double finalTime = integrationTime_; //  final integration time in seconds
         double timeStep = subTimeStep_; // step size in seconds
 
-        std::cout << "TEST" << std::endl;
         //trajectorySuccess = rk4Intern(moleculesPtr, timeStep, finalTime, collisionRadius);
         // trajectorySuccess = leapfrogIntern(moleculesPtr, timeStep, finalTime, collisionRadius);
         trajectorySuccess = rk4InternAdaptiveStep(moleculesPtr, timeStep, finalTime, collisionRadius);

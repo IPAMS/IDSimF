@@ -220,7 +220,7 @@ namespace CollisionModel{
         ///< Function with things to do after a collision (e.g. collision based chemical reactions)
         std::unordered_map<std::string,  std::shared_ptr<MolecularStructure>> molecularStructureCollection_; ///< collection of all available molecular structures 
         Core::Vector startPosition_ = Core::Vector(0.0, 0.0, 0.0); 
-        Core::Vector startRotation_ = Core::Vector(0.0, 0.0, 0.0);
+        Core::Vector startVelocity_ = Core::Vector(0.0, 0.0, 0.0);
     };
 
 }
