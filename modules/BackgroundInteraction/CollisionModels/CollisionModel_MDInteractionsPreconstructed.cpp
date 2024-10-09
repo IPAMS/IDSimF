@@ -272,15 +272,23 @@ void CollisionModel::MDInteractionsModelPreconstructed::rotate(const Core::Vecto
 
 void CollisionModel::MDInteractionsModelPreconstructed::writeTrajectory(double distance, Core::Vector positionBgMolecule, Core::Vector velocityBgMolecule, 
                         std::vector<Core::Vector> forceMolecules, bool endOfTrajectory, std::ofstream* file, double time, double dt, 
-                        Core::Vector positionMolecule, Core::Vector relativeOne, Core::Vector relativeTwo){
+                        Core::Vector positionMolecule){
     if(distance < trajectoryDistance_){
-        *file << positionBgMolecule.x() << ", " << positionBgMolecule.y() << ", " << positionBgMolecule.z() << 
-        ", " << distance << ", " << time <<
-        ", " << velocityBgMolecule.x() << ", " << velocityBgMolecule.y() << ", " << velocityBgMolecule.z() << 
-        ", " << forceMolecules[1].x() << ", " << forceMolecules[1].y() << ", " << forceMolecules[1].z() <<
-        ", " << dt << ", " << positionMolecule.x() << ", " << positionMolecule.y() << ", " << positionMolecule.z() << ", " 
-        << relativeOne.x() << ", " << relativeOne.y() << ", " << relativeOne.z() 
-        << ", " << relativeTwo.x() << ", " << relativeTwo.y() << ", " << relativeTwo.z() <<
+        *file << positionBgMolecule.x() << ", " 
+                << positionBgMolecule.y() << ", " 
+                << positionBgMolecule.z() << ", "  
+                << distance << ", " 
+                << time << ", " 
+                << velocityBgMolecule.x() << ", " 
+                << velocityBgMolecule.y() << ", " 
+                << velocityBgMolecule.z() << ", " 
+                << forceMolecules[1].x() << ", " 
+                << forceMolecules[1].y() << ", " 
+                << forceMolecules[1].z() << ", " 
+                << dt << ", " 
+                << positionMolecule.x() << ", " 
+                << positionMolecule.y() << ", " 
+                << positionMolecule.z() <<
         std::endl;
     }
     if(endOfTrajectory == true){
@@ -309,54 +317,12 @@ void CollisionModel::MDInteractionsModelPreconstructed::modifyAcceleration(Core:
 }
 
 void CollisionModel::MDInteractionsModelPreconstructed::modifyVelocity(Core::Particle& particle) {
-    Core::RandomSource* rndSource = Core::globalRandomGeneratorPool->getThreadRandomSource();
-
-    // Calculate collision cross section between particle and collision gas:
+    
     double collisionRadius = collisionRadiusScaling_*(particle.getDiameter() + collisionGasDiameter_m_)/2.0;
-    //double sigma_m2 = M_PI * collisionRadius * collisionRadius;
+ 
 
-    Core::Vector moleculeComPosition = particle.getLocation();
-    double localPressure_Pa = pressureFunction_(moleculeComPosition);
-    if (Core::isDoubleEqual(localPressure_Pa, 0.0)){
-        return; //pressure 0 means no collision at all
-    }
 
-    // Transform the frame of reference in a frame where the mean background gas velocity is zero.
-    Core::Vector vGasMean = velocityFunction_(moleculeComPosition);
-    Core::Vector vFrameMeanBackRest = particle.getVelocity() - vGasMean;
-
-    double vRelIonMeanBackRest = vFrameMeanBackRest.magnitude(); //relative ion relative to bulk gas velocity
-
-    // Calculate the mean free path (MFP) from current ion velocity:
-
-    // a static ion leads in static gas leads to a relative velocity of zero, which leads
-    // to undefined behavior due to division by zero later.
-    // The whole process converges to the MFP and collision probability of a static ion, thus
-    // it is possible to assume a small velocity (1 nm/s) for the static ions to get rid of undefined behavior
-    if (vRelIonMeanBackRest < 1e-9){
-        vRelIonMeanBackRest = 1e-9;
-    }
-
-    // Calculate the mean gas speed (m/s)
-    double temperature_K = temperatureFunction_(moleculeComPosition);
-    //double vMeanGas = std::sqrt(8.0*Core::K_BOLTZMANN*temperature_K/M_PI/(collisionGasMass_kg_));
-
-    // Calculate the median gas speed (m/s)
-    // double vMedianGas = std::sqrt(2.0*Core::K_BOLTZMANN*temperature_K/(collisionGasMass_kg_));
-
-    // Compute the mean relative speed (m/s) between ion and gas.
-    //double s = vRelIonMeanBackRest / vMedianGas;
-    //double cMeanRel = vMeanGas * (
-    //        (s + 1.0/(2.0*s)) * 0.5 * sqrt(M_PI) * std::erf(s) + 0.5 * std::exp(-s*s) );
-
-    // Compute mean-free-path (m)
-    //double effectiveMFP_m = Core::K_BOLTZMANN * temperature_K *
-    //                        (vRelIonMeanBackRest / cMeanRel) / (localPressure_Pa * sigma_m2);
-
-    // Compute probability of collision in the current time-step.
-    // double collisionProb = 1.0 - std::exp(-vRelIonMeanBackRest * dt / effectiveMFP_m);
-
-    // Always let collision happen  
+  
 
     bool trajectorySuccess = false;
     int iterations = 0;
@@ -382,7 +348,6 @@ void CollisionModel::MDInteractionsModelPreconstructed::modifyVelocity(Core::Par
         // bgMole.setComPos(startPosition_);
         Core::Vector startingPosition = sphereRand(spawnRad);
         bgMole.setComPos(startingPosition);
-        double  vrStdevBgMolecule = std::sqrt( Core::K_BOLTZMANN * temperature_K / (collisionGasMass_kg_) );
     
         Core::Vector velocityBgMolecule = { (mole.getComPos().x()-bgMole.getComPos().x())  
                                              - particle.getVelocity().x(),
@@ -405,47 +370,16 @@ void CollisionModel::MDInteractionsModelPreconstructed::modifyVelocity(Core::Par
             }
         #pragma GCC diagnostic pop
 
-        velocityBgMolecule = velocityBgMolecule / velocityBgMolecule.magnitude() * rndSource->uniformRealRndValue() * vrStdevBgMolecule;
-        // rotate(startRotation_, velocityBgMolecule);
-        // velocityBgMolecule = Core::Vector(-8.9232907224423748e-5, -879.91866989450602, 0.0);
         bgMole.setComVel(velocityBgMolecule);
-        // std::cout << mole.getComVel() << std::endl;
-        // std::cout << velocityBgMolecule << std::endl;
-        // std::cout << bgMole.getComVel() << std::endl;
-        // std::cout << collisionRadius << std::endl;
-
-        // // calculate random point on sphere
-        // // as follows:
-        // // draw random number in as long until magnitude is less than 1
-        // // normalize result
-        // double circleVectorMagnitude = 0;
-        // Core::Vector circleVector(0,0,0);
-        // double directionAngle = 0;
-        // do{
-        //     circleVector = Core::Vector{
-        //           (rndSource->uniformRealRndValue() * 2 - 1)
-        //         , (rndSource->uniformRealRndValue() * 2 - 1)
-        //         , (rndSource->uniformRealRndValue() * 2 - 1)
-        //     };
-        //     circleVectorMagnitude = circleVector.magnitude();
-        //     circleVector = spawnRad / circleVectorMagnitude * circleVector;
-        //     directionAngle  = std::acos(
-        //         ( (-1. * circleVector) * velocityBgMolecule)
-        //         / ( spawnRad * velocityBgMolecule.magnitude() )
-        //     );
-        // }while(circleVectorMagnitude > 1 || directionAngle >  angleThetaScaling_ * collisionTheta);
-
-        // bgMole.setComPos(circleVector);
-        // NO ROTATION
+       
 
         double pi = 3.1415; 
-        // rotate it randomly
         
 
         // Give molecule a random orientation:
-        mole.setAngles(Core::Vector(rndSource->uniformRealRndValue()*2*pi-pi,
-                                    rndSource->uniformRealRndValue()*2*pi-pi,
-                                    rndSource->uniformRealRndValue()*2*pi-pi));
+        // mole.setAngles(Core::Vector(rndSource->uniformRealRndValue()*2*pi-pi,
+        //                             rndSource->uniformRealRndValue()*2*pi-pi,
+        //                             rndSource->uniformRealRndValue()*2*pi-pi));
 
 
 
@@ -463,11 +397,8 @@ void CollisionModel::MDInteractionsModelPreconstructed::modifyVelocity(Core::Par
         double finalTime = integrationTime_; //  final integration time in seconds
         double timeStep = subTimeStep_; // step size in seconds
 
-        // Core::Vector bgMole_originalComPos = bgMole.getComPos();
-        // Core::Vector bgMole_originalComVel = bgMole.getComVel();
-        // Core::Vector mole_originalComPos = mole.getComPos();
-        // Core::Vector mole_originalComVel = mole.getComVel();
-
+        std::cout << "TEST" << std::endl;
+        //trajectorySuccess = rk4Intern(moleculesPtr, timeStep, finalTime, collisionRadius);
         // trajectorySuccess = leapfrogIntern(moleculesPtr, timeStep, finalTime, collisionRadius);
         trajectorySuccess = rk4InternAdaptiveStep(moleculesPtr, timeStep, finalTime, collisionRadius);
 
@@ -496,187 +427,6 @@ void CollisionModel::MDInteractionsModelPreconstructed::modifyVelocity(Core::Par
 void CollisionModel::MDInteractionsModelPreconstructed::modifyVelocity(Core::Particle& particle, double dt) {
     Core::RandomSource* rndSource = Core::globalRandomGeneratorPool->getThreadRandomSource();
 
-    // Calculate collision cross section between particle and collision gas:
-    double collisionRadius = collisionRadiusScaling_*(particle.getDiameter() + collisionGasDiameter_m_)/2.0;
-    //double sigma_m2 = M_PI * collisionRadius * collisionRadius;
-
-    Core::Vector moleculeComPosition = particle.getLocation();
-    double localPressure_Pa = pressureFunction_(moleculeComPosition);
-    if (Core::isDoubleEqual(localPressure_Pa, 0.0)){
-        return; //pressure 0 means no collision at all
-    }
-
-    // Transform the frame of reference in a frame where the mean background gas velocity is zero.
-    Core::Vector vGasMean = velocityFunction_(moleculeComPosition);
-    Core::Vector vFrameMeanBackRest = particle.getVelocity() - vGasMean;
-
-    double vRelIonMeanBackRest = vFrameMeanBackRest.magnitude(); //relative ion relative to bulk gas velocity
-
-    // Calculate the mean free path (MFP) from current ion velocity:
-
-    // a static ion leads in static gas leads to a relative velocity of zero, which leads
-    // to undefined behavior due to division by zero later.
-    // The whole process converges to the MFP and collision probability of a static ion, thus
-    // it is possible to assume a small velocity (1 nm/s) for the static ions to get rid of undefined behavior
-    if (vRelIonMeanBackRest < 1e-9){
-        vRelIonMeanBackRest = 1e-9;
-    }
-
-    // Calculate the mean gas speed (m/s)
-    double temperature_K = temperatureFunction_(moleculeComPosition);
-    //double vMeanGas = std::sqrt(8.0*Core::K_BOLTZMANN*temperature_K/M_PI/(collisionGasMass_kg_));
-
-    // Calculate the median gas speed (m/s)
-    // double vMedianGas = std::sqrt(2.0*Core::K_BOLTZMANN*temperature_K/(collisionGasMass_kg_));
-
-    // Compute the mean relative speed (m/s) between ion and gas.
-    //double s = vRelIonMeanBackRest / vMedianGas;
-    //double cMeanRel = vMeanGas * (
-    //        (s + 1.0/(2.0*s)) * 0.5 * sqrt(M_PI) * std::erf(s) + 0.5 * std::exp(-s*s) );
-
-    // Compute mean-free-path (m)
-    //double effectiveMFP_m = Core::K_BOLTZMANN * temperature_K *
-    //                        (vRelIonMeanBackRest / cMeanRel) / (localPressure_Pa * sigma_m2);
-
-    // Compute probability of collision in the current time-step.
-    // double collisionProb = 1.0 - std::exp(-vRelIonMeanBackRest * dt / effectiveMFP_m);
-
-    // Always let collision happen  
-
-    bool trajectorySuccess = false;
-    int iterations = 0;
-    double spawnRad = spawnRadius_;
-    //double collisionTheta = std::asin(collisionRadius / spawnRad);
-
-
-    do{
-        // Collision happens
-        // Construct the actual molecule and its atoms
-        CollisionModel::Molecule mole = CollisionModel::Molecule(Core::Vector(0.0, 0.0, 0.0), Core::Vector(0.0, 0.0, 0.0), particle.getMolecularStructure());
-
-        // Construct the background gas particle
-        CollisionModel::Molecule bgMole = CollisionModel::Molecule(Core::Vector(0.0, 0.0, 0.0), Core::Vector(0.0, 0.0, 0.0),
-                                            molecularStructureCollection_.at(collisionMolecule_));
-
-        // Give background gas its position, velocity, rotation:
-        // Calculate the standard deviation of the one dimensional velocity distribution of the
-        // background gas particles. Std. dev. in one dimension is given from Maxwell-Boltzmann
-        // as sqrt(kT / particle mass).
-
-        // HEAD-ON COLLISION IN X 
-        // bgMole.setComPos(startPosition_);
-        Core::Vector startingPosition = sphereRand(spawnRad);
-        bgMole.setComPos(startingPosition);
-        double  vrStdevBgMolecule = std::sqrt( Core::K_BOLTZMANN * temperature_K / (collisionGasMass_kg_) );
-    
-        Core::Vector velocityBgMolecule = { (mole.getComPos().x()-bgMole.getComPos().x())  
-                                             - particle.getVelocity().x(),
-                                            (mole.getComPos().y()-bgMole.getComPos().y())  
-                                             - particle.getVelocity().y(),
-                                            (mole.getComPos().z()-bgMole.getComPos().z())  
-                                             - particle.getVelocity().z()};
-
-        //deliberately switch off float equal warning here
-        #pragma GCC diagnostic push
-        #pragma GCC diagnostic ignored "-Wfloat-equal"
-            if(bgMole.getComPos().x() == 0){
-                velocityBgMolecule.x(0);
-            }
-            if(bgMole.getComPos().y() == 0){
-                velocityBgMolecule.y(0);
-            }
-            if(bgMole.getComPos().z() == 0){
-                velocityBgMolecule.z(0);
-            }
-        #pragma GCC diagnostic pop
-
-        velocityBgMolecule = velocityBgMolecule / velocityBgMolecule.magnitude() * rndSource->uniformRealRndValue() * vrStdevBgMolecule;
-        // rotate(startRotation_, velocityBgMolecule);
-        // velocityBgMolecule = Core::Vector(-8.9232907224423748e-5, -879.91866989450602, 0.0);
-        bgMole.setComVel(velocityBgMolecule);
-        // std::cout << mole.getComVel() << std::endl;
-        // std::cout << velocityBgMolecule << std::endl;
-        // std::cout << bgMole.getComVel() << std::endl;
-        // std::cout << collisionRadius << std::endl;
-
-        // // calculate random point on sphere
-        // // as follows:
-        // // draw random number in as long until magnitude is less than 1
-        // // normalize result
-        // double circleVectorMagnitude = 0;
-        // Core::Vector circleVector(0,0,0);
-        // double directionAngle = 0;
-        // do{
-        //     circleVector = Core::Vector{
-        //           (rndSource->uniformRealRndValue() * 2 - 1)
-        //         , (rndSource->uniformRealRndValue() * 2 - 1)
-        //         , (rndSource->uniformRealRndValue() * 2 - 1)
-        //     };
-        //     circleVectorMagnitude = circleVector.magnitude();
-        //     circleVector = spawnRad / circleVectorMagnitude * circleVector;
-        //     directionAngle  = std::acos(
-        //         ( (-1. * circleVector) * velocityBgMolecule)
-        //         / ( spawnRad * velocityBgMolecule.magnitude() )
-        //     );
-        // }while(circleVectorMagnitude > 1 || directionAngle >  angleThetaScaling_ * collisionTheta);
-
-        // bgMole.setComPos(circleVector);
-        // NO ROTATION
-
-        double pi = 3.1415; 
-        // rotate it randomly
-        
-
-        // Give molecule a random orientation:
-        mole.setAngles(Core::Vector(rndSource->uniformRealRndValue()*2*pi-pi,
-                                    rndSource->uniformRealRndValue()*2*pi-pi,
-                                    rndSource->uniformRealRndValue()*2*pi-pi));
-
-
-
-        std::vector<CollisionModel::Molecule*> moleculesPtr = {&mole, &bgMole};
-
-        // possible check for energy conservation
-        std::vector<Core::Vector> startVelocity;
-        double startEnergy = 0;
-        for(auto* molecule : moleculesPtr){
-            startVelocity.push_back(molecule->getComVel());
-            startEnergy += 0.5 * molecule->getMass() * molecule->getComVel().magnitudeSquared();
-        }
-
-        // Call the sub-integrator
-        double finalTime = integrationTime_; //  final integration time in seconds
-        double timeStep = subTimeStep_; // step size in seconds
-
-        // Core::Vector bgMole_originalComPos = bgMole.getComPos();
-        // Core::Vector bgMole_originalComVel = bgMole.getComVel();
-        // Core::Vector mole_originalComPos = mole.getComPos();
-        // Core::Vector mole_originalComVel = mole.getComVel();
-
-        // trajectorySuccess = leapfrogIntern(moleculesPtr, timeStep, finalTime, collisionRadius);
-        trajectorySuccess = rk4InternAdaptiveStep(moleculesPtr, timeStep, finalTime, collisionRadius);
-
-
-        double endEnergy = 0;
-        for(auto* molecule : moleculesPtr){
-            endEnergy += 0.5 * molecule->getMass() * molecule->getComVel().magnitudeSquared();
-        }
-        std::cout << startEnergy << " " << endEnergy << std::endl;
-        if(endEnergy*0.90 >= startEnergy){
-            std::cout << "Not energy conserving." << std::endl;
-            trajectorySuccess = false;
-            dt = dt*0.98;
-        }
-        if(trajectorySuccess){
-            particle.setVelocity(mole.getComVel() + particle.getVelocity());
-        }
-        ++iterations;
-
-    }while(!trajectorySuccess && iterations < 1);
-
-    if(trajectorySuccess == false){
-        std::cerr << "No trajectory that hit the collision sphere was found.\n";
-    }
 }
 
 void CollisionModel::MDInteractionsModelPreconstructed::modifyPosition(Core::Vector& /*position*/, Core::Particle& /*particle*/, double /*dt*/) {
@@ -735,7 +485,7 @@ bool CollisionModel::MDInteractionsModelPreconstructed::leapfrogIntern(std::vect
         for(auto* molecule : moleculesPtr){
             if(trajectoryRecordingActive_ == true && molecule->getMolecularStructureName() == collisionMolecule_){
                 writeTrajectory(distance, molecule->getComPos(), molecule->getComVel(),forceMolecules, false, trajectoryOutputStream_.get(), nSteps*dt, dt,
-                moleculesPtr[0]->getComPos(), moleculesPtr[1]->getAtoms().at(0)->getRelativePosition(), moleculesPtr[1]->getAtoms().at(1)->getRelativePosition());
+                                moleculesPtr[0]->getComPos());
             }
             Core::Vector newComPos =  molecule->getComPos() + molecule->getComVel() * dt;
             if(molecule->getMolecularStructureName() == collisionMolecule_){
@@ -753,7 +503,7 @@ bool CollisionModel::MDInteractionsModelPreconstructed::leapfrogIntern(std::vect
                     if(trajectoryRecordingActive_ == true && moleculesPtr[z]->getMolecularStructureName() == collisionMolecule_){
                         writeTrajectory((moleculesPtr[z]->getComPos() - moleculesPtr[b]->getComPos()).magnitude(),
                                         moleculesPtr[z]->getComPos(), moleculesPtr[z]->getComVel(), forceMolecules, true, trajectoryOutputStream_.get(), nSteps*dt, dt,
-                                        moleculesPtr[0]->getComPos(), moleculesPtr[1]->getAtoms().at(0)->getRelativePosition(), moleculesPtr[1]->getAtoms().at(1)->getRelativePosition());
+                                        moleculesPtr[0]->getComPos());
                     }
                     std::cout << wasHit << std::endl;
                     return wasHit;
@@ -805,6 +555,7 @@ bool CollisionModel::MDInteractionsModelPreconstructed::rk4Intern(std::vector<Co
     size_t i = 0;
 
     for (int j = 0; j < nSteps; j++){
+        std::cout << j << std::endl;
 
         std::vector<Core::Vector> velocityMolecules(nMolecules);
         std::vector<Core::Vector> positionMolecules(nMolecules);
@@ -930,17 +681,18 @@ bool CollisionModel::MDInteractionsModelPreconstructed::rk4InternAdaptiveStep(st
                                 rndSource->uniformRealRndValue()*2*pi-pi};
     double I;
     double angularVelocity = 0;
-    if(moleculesPtr[1]->getMolecularStructureName()=="N2"){
-        nitrogenOne = molecularStructureCollection_.at(moleculesPtr[1]->getMolecularStructureName())->getAtoms().at(0)->getRelativePosition();
-        nitrogenTwo = molecularStructureCollection_.at(moleculesPtr[1]->getMolecularStructureName())->getAtoms().at(1)->getRelativePosition();
-        I = CollisionModel::MolecularStructure::getMomentOfInertia(nitrogenOne.x(), nitrogenTwo.x(), 
-                                                                    moleculesPtr[1]->getMass()/2, moleculesPtr[1]->getMass()/2);
-        angularVelocity = CollisionModel::MolecularStructure::getAngularVelocity(temperatureFunction_(moleculesPtr[1]->getComPos()), I);
-    }
-    moleculesPtr[1]->setAngles(nitrogenAngles);
+    // if(moleculesPtr[1]->getMolecularStructureName()=="N2"){
+    //     nitrogenOne = molecularStructureCollection_.at(moleculesPtr[1]->getMolecularStructureName())->getAtoms().at(0)->getRelativePosition();
+    //     nitrogenTwo = molecularStructureCollection_.at(moleculesPtr[1]->getMolecularStructureName())->getAtoms().at(1)->getRelativePosition();
+    //     I = CollisionModel::MolecularStructure::getMomentOfInertia(nitrogenOne.x(), nitrogenTwo.x(), 
+    //                                                                 moleculesPtr[1]->getMass()/2, moleculesPtr[1]->getMass()/2);
+    //     angularVelocity = CollisionModel::MolecularStructure::getAngularVelocity(temperatureFunction_(moleculesPtr[1]->getComPos()), I);
+    // }
+    // moleculesPtr[1]->setAngles(nitrogenAngles);
     //std::cout << "angVel: " << angularVelocity << std::endl;
 
     while(integrationTimeSum < finalTime){
+        std::cout << "step" << std::endl;
         
         i = 0;
         for(auto* molecule : moleculesPtr){
@@ -960,8 +712,9 @@ bool CollisionModel::MDInteractionsModelPreconstructed::rk4InternAdaptiveStep(st
             mass[i] = molecule->getMass();
             i++;
         }
-
+        std::cout << "befire ff" << std::endl;
         forceField_->calculateForceField(moleculesPtr, forceMolecules);
+        std::cout << "after ff" << std::endl;
 
         for(size_t q = 0; q < nMolecules; q++){
             k[0][q] = forceMolecules[q] * dt / mass[q];
@@ -1012,7 +765,7 @@ bool CollisionModel::MDInteractionsModelPreconstructed::rk4InternAdaptiveStep(st
             newComVelOrder4[i] = initialVelocityMolecules[i] + (k[0][i] * 25./216 + k[2][i] * 1408./2565 + k[3][i] * 2197./4104 + k[4][i] * (-1./5));
         }
         std::array<double,2> R;
-        
+        std::cout << "Error calc" << std::endl;
         #pragma GCC diagnostic push
         #pragma GCC diagnostic ignored "-Wfloat-equal"
         for(size_t p = 0; p < 2; p++){
@@ -1033,25 +786,27 @@ bool CollisionModel::MDInteractionsModelPreconstructed::rk4InternAdaptiveStep(st
         double globalDelta = 0.84 * std::pow((tolerance/globalR), 1./4);
         integrationTimeSum += dt;
         i = 0;
+        std::cout << "traj writing" << std::endl;
         for(auto* molecule : moleculesPtr){
             if(trajectoryRecordingActive_ == true && molecule->getMolecularStructureName() == collisionMolecule_){
                 writeTrajectory(distance, molecule->getComPos(), molecule->getComVel(),forceMolecules, false, trajectoryOutputStream_.get(), integrationTimeSum, dt,
-                moleculesPtr[0]->getComPos(), moleculesPtr[1]->getAtoms().at(0)->getRelativePosition(), moleculesPtr[1]->getAtoms().at(1)->getRelativePosition());
+                                moleculesPtr[0]->getComPos());
             }
             
             molecule->setComPos(newComPosOrder4[i]);
             molecule->setComVel(newComVelOrder4[i]); 
             
-            if(molecule->getMolecularStructureName()=="N2"){
-                CollisionModel::Atom::rotate2D(angularVelocity*dt, nitrogenOne);
-                CollisionModel::Atom::rotate2D(angularVelocity*dt, nitrogenTwo);
-                molecule->getAtoms().at(0)->setRelativePosition(nitrogenOne);
-                molecule->getAtoms().at(1)->setRelativePosition(nitrogenTwo);
-                molecule->setAngles(nitrogenAngles);
-            }
+        //     // if(molecule->getMolecularStructureName()=="N2"){
+        //     //     CollisionModel::Atom::rotate2D(angularVelocity*dt, nitrogenOne);
+        //     //     CollisionModel::Atom::rotate2D(angularVelocity*dt, nitrogenTwo);
+        //     //     molecule->getAtoms().at(0)->setRelativePosition(nitrogenOne);
+        //     //     molecule->getAtoms().at(1)->setRelativePosition(nitrogenTwo);
+        //     //     molecule->setAngles(nitrogenAngles);
+        //     // }
             
             i++;
         }
+        std::cout << "step inc" << std::endl;
         steps++;
         dt = dt * globalDelta;
         
@@ -1067,7 +822,7 @@ bool CollisionModel::MDInteractionsModelPreconstructed::rk4InternAdaptiveStep(st
                     if(trajectoryRecordingActive_ == true && moleculesPtr[z]->getMolecularStructureName() == collisionMolecule_){
                         writeTrajectory((moleculesPtr[z]->getComPos() - moleculesPtr[b]->getComPos()).magnitude(),
                                         moleculesPtr[z]->getComPos(), moleculesPtr[z]->getComVel(), forceMolecules, true, trajectoryOutputStream_.get(), integrationTimeSum, dt,
-                                        moleculesPtr[0]->getComPos(), moleculesPtr[1]->getAtoms().at(0)->getRelativePosition(), moleculesPtr[1]->getAtoms().at(1)->getRelativePosition());
+                                        moleculesPtr[0]->getComPos());
                     }
                     // std::cout << wasHit << std::endl;
                     // Core::Vector endVel = moleculesPtr[1]->getComVel();
@@ -1081,6 +836,7 @@ bool CollisionModel::MDInteractionsModelPreconstructed::rk4InternAdaptiveStep(st
                 // std::cout << (moleculesPtr[z]->getComPos() - moleculesPtr[b]->getComPos()).magnitude()  << " " << requiredRad << std::endl;
             }
         }
+        std::cout << "end of loop" << std::endl;
     }
   
     return false;
