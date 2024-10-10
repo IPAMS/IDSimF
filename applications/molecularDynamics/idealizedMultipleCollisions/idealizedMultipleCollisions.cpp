@@ -39,6 +39,8 @@
 #include "appUtils_commandlineParser.hpp"
 #include "FileIO_CSVReader.hpp"
 #include "CollisionModel_MDForceField_Buckingham.hpp"
+#include "CollisionModel_MDForceField_LJ12_6.hpp"
+
 #include <iostream>
 
 int main(int argc, const char * argv[]) {
@@ -89,45 +91,37 @@ int main(int argc, const char * argv[]) {
     std::unordered_map<std::string,  std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection = 
                                                                         mdConfReader.readMolecularStructure(mdCollisionConfFile);
 
-    CollisionModel::MDForceField_Buckingham forceField(collisionGasPolarizability_m3);
-    auto forceFieldPtr = std::make_unique<CollisionModel::MDForceField_Buckingham>(forceField);
+    
+
+    //auto forceFieldPtr = nullptr;
 
     Core::Particle ion;
     ion.setMolecularStructure(molecularStructureCollection.at(particleIdentifier));
+    ion.setVelocity(Core::Vector{0,0,0,});
 
-    size_t samples = 1;
-    // double pi = 3.1415;
-    // std::vector<Core::Vector> ionVelocities;
-    // std::vector<Core::Vector> ionPositions;
-    // std::vector<Core::Vector> ionRotations;
-    // for(int i = 0; i < samples; i++){
-    //     Core::Vector tmp1 = Core::Vector(0.0, 0.0, 0.0);
-    //     ionVelocities.push_back(tmp1);
-    //     ionPositions.push_back(Core::Vector(3.99e-10, 42.5e-10, 0.0));
-    //     // Core::Vector tmp2 = Core::Vector(0.0, 0.0, rndSource->uniformRealRndValue()*1*pi/2-pi/4);
-    //     Core::Vector tmp2 = Core::Vector(0, 0, 0);
-    //     ionRotations.push_back(tmp2);
-    // }
-    Core::Vector ionVelocities = {0, 0, 0};
-    // for(size_t i = 0; i < samples; i++){
-    ion.setVelocity(ionVelocities);
-    CollisionModel::MDInteractionsModelPreconstructed mdSim = 
-                                                        CollisionModel::MDInteractionsModelPreconstructed(backgroundPartialPressures_Pa, 
-                                                                                                            backgroundTemperature_K, 
-                                                                                                            collisionGasMasses_Amu, 
-                                                                                                            collisionGasDiameters_angstrom,
-                                                                                                            collisionGasIdentifier, 
-                                                                                                            subIntegratorIntegrationTime_s, 
-                                                                                                            subIntegratorStepSize_s, 
-                                                                                                            collisionRadiusScaling, angleThetaScaling, 
-                                                                                                            spawnRadius_m,
-                                                                                                            std::move(forceFieldPtr),
-                                                                                                            molecularStructureCollection);
+    size_t samples = positions.size();
+    for(size_t i = 0; i < samples; i++){
+        CollisionModel::MDForceField_Buckingham forceField(collisionGasPolarizability_m3);
+        auto forceFieldPtr = std::make_unique<CollisionModel::MDForceField_Buckingham>(forceField);
+        CollisionModel::MDInteractionsModelPreconstructed mdSim = 
+                                                            CollisionModel::MDInteractionsModelPreconstructed(backgroundPartialPressures_Pa, 
+                                                                                                                backgroundTemperature_K, 
+                                                                                                                collisionGasMasses_Amu, 
+                                                                                                                collisionGasDiameters_angstrom,
+                                                                                                                collisionGasIdentifier, 
+                                                                                                                subIntegratorIntegrationTime_s, 
+                                                                                                                subIntegratorStepSize_s, 
+                                                                                                                collisionRadiusScaling, angleThetaScaling, 
+                                                                                                                spawnRadius_m,
+                                                                                                                std::move(forceFieldPtr),
+                                                                                                                molecularStructureCollection, 
+                                                                                                                positions[i], 
+                                                                                                                velocities[i]);
 
-    
-    mdSim.setTrajectoryWriter(projectName+".txt", trajectoryDistance_m, 0);
-    mdSim.updateModelTimestepParameters(saveTrajectoryStartTimeStep, 0);
-    mdSim.modifyVelocity(ion);
-    // }
+        
+        mdSim.setTrajectoryWriter(projectName+".txt", trajectoryDistance_m, 0);
+        mdSim.updateModelTimestepParameters(saveTrajectoryStartTimeStep, 0);
+        mdSim.modifyVelocity(ion);
+    }
 }
 

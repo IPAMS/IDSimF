@@ -91,7 +91,7 @@ CollisionModel::MDInteractionsModelPreconstructed::MDInteractionsModelPreconstru
         std::move(forceField),
         molecularStructureCollection, 
         startPosition, 
-        startVelocity) { }
+        startVelocity) {}
 
 
 CollisionModel::MDInteractionsModelPreconstructed::MDInteractionsModelPreconstructed(std::function<double(Core::Vector& location)> pressureFunction,
@@ -350,7 +350,7 @@ void CollisionModel::MDInteractionsModelPreconstructed::modifyVelocity(Core::Par
         double timeStep = subTimeStep_; // step size in seconds
 
         //trajectorySuccess = rk4Intern(moleculesPtr, timeStep, finalTime, collisionRadius);
-        // trajectorySuccess = leapfrogIntern(moleculesPtr, timeStep, finalTime, collisionRadius);
+        //trajectorySuccess = leapfrogIntern(moleculesPtr, timeStep, finalTime, collisionRadius);
         trajectorySuccess = rk4InternAdaptiveStep(moleculesPtr, timeStep, finalTime, collisionRadius);
 
 
@@ -643,7 +643,6 @@ bool CollisionModel::MDInteractionsModelPreconstructed::rk4InternAdaptiveStep(st
     //std::cout << "angVel: " << angularVelocity << std::endl;
 
     while(integrationTimeSum < finalTime){
-        std::cout << "step" << std::endl;
         
         i = 0;
         for(auto* molecule : moleculesPtr){
@@ -663,9 +662,9 @@ bool CollisionModel::MDInteractionsModelPreconstructed::rk4InternAdaptiveStep(st
             mass[i] = molecule->getMass();
             i++;
         }
-        std::cout << "befire ff" << std::endl;
+        
         forceField_->calculateForceField(moleculesPtr, forceMolecules);
-        std::cout << "after ff" << std::endl;
+      
 
         for(size_t q = 0; q < nMolecules; q++){
             k[0][q] = forceMolecules[q] * dt / mass[q];
@@ -716,7 +715,7 @@ bool CollisionModel::MDInteractionsModelPreconstructed::rk4InternAdaptiveStep(st
             newComVelOrder4[i] = initialVelocityMolecules[i] + (k[0][i] * 25./216 + k[2][i] * 1408./2565 + k[3][i] * 2197./4104 + k[4][i] * (-1./5));
         }
         std::array<double,2> R;
-        std::cout << "Error calc" << std::endl;
+
         #pragma GCC diagnostic push
         #pragma GCC diagnostic ignored "-Wfloat-equal"
         for(size_t p = 0; p < 2; p++){
@@ -737,7 +736,6 @@ bool CollisionModel::MDInteractionsModelPreconstructed::rk4InternAdaptiveStep(st
         double globalDelta = 0.84 * std::pow((tolerance/globalR), 1./4);
         integrationTimeSum += dt;
         i = 0;
-        std::cout << "traj writing" << std::endl;
         for(auto* molecule : moleculesPtr){
             if(trajectoryRecordingActive_ == true && molecule->getMolecularStructureName() == collisionMolecule_){
                 writeTrajectory(distance, molecule->getComPos(), molecule->getComVel(),forceMolecules, false, trajectoryOutputStream_.get(), integrationTimeSum, dt,
@@ -757,7 +755,6 @@ bool CollisionModel::MDInteractionsModelPreconstructed::rk4InternAdaptiveStep(st
             
             i++;
         }
-        std::cout << "step inc" << std::endl;
         steps++;
         dt = dt * globalDelta;
         
@@ -787,7 +784,6 @@ bool CollisionModel::MDInteractionsModelPreconstructed::rk4InternAdaptiveStep(st
                 // std::cout << (moleculesPtr[z]->getComPos() - moleculesPtr[b]->getComPos()).magnitude()  << " " << requiredRad << std::endl;
             }
         }
-        std::cout << "end of loop" << std::endl;
     }
   
     return false;

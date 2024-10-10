@@ -69,7 +69,7 @@ void CollisionModel::MDForceField_Buckingham::calculateForceField(std::vector<Co
             if(distance.magnitude() > 100e-10){
                 return;
             }
-
+            
             double distanceSquared = distance.magnitudeSquared();
             double distanceAbs = sqrt(distanceSquared);
             double distanceSquaredInverse = 1./distanceSquared;
@@ -86,6 +86,7 @@ void CollisionModel::MDForceField_Buckingham::calculateForceField(std::vector<Co
             atomForce.z(distance.z() * ljFactor);
             forceMolecules[0] += atomForce;
             forceMolecules[1] += atomForce * (-1);
+
 
             // Second contribution: C4 ion-induced dipole potential
             // This requires an ion and one neutrally charged molecule to be present

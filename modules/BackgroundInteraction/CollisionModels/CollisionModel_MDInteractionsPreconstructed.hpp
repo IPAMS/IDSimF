@@ -93,7 +93,7 @@ namespace CollisionModel{
             std::unordered_map<std::string,
             std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection, 
             Core::Vector startPosition, 
-            Core::Vector startRotation);
+            Core::Vector startVelocity);
 
         MDInteractionsModelPreconstructed(
             std::function<double(Core::Vector& location)> pressureFunction,
@@ -125,7 +125,7 @@ namespace CollisionModel{
             std::unique_ptr<AbstractMDForceField> forceField_,
             std::unordered_map<std::string, std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection,
             Core::Vector startPosition, 
-            Core::Vector startRotation);
+            Core::Vector startVelocity);
 
         MDInteractionsModelPreconstructed(
             std::function<double(Core::Vector& location)> pressureFunction,
@@ -157,7 +157,7 @@ namespace CollisionModel{
             std::unique_ptr<AbstractMDForceField> forceField_,
             std::unordered_map<std::string, std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection, 
             Core::Vector startPosition, 
-            Core::Vector startRotation);
+            Core::Vector startVelocity);
 
         void setTrajectoryWriter(const std::string& trajectoryFileName,
                                  double trajectoryDistance,
