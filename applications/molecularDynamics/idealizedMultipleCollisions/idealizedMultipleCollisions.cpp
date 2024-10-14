@@ -97,7 +97,7 @@ int main(int argc, const char * argv[]) {
 
     Core::Particle ion;
     ion.setMolecularStructure(molecularStructureCollection.at(particleIdentifier));
-    ion.setVelocity(Core::Vector{0,0,0,});
+    //ion.setVelocity(Core::Vector{0,0,0});
 
     size_t samples = positions.size();
     for(size_t i = 0; i < samples; i++){
