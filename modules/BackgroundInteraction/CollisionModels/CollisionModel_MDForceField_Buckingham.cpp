@@ -21,6 +21,7 @@
 
 #include "CollisionModel_MDForceField_Buckingham.hpp"
 #include <array>
+#include <iostream>
 
 CollisionModel::MDForceField_Buckingham::MDForceField_Buckingham(double collisionGasPolarizability_m3):
     collisionGasPolarizability_m3_(collisionGasPolarizability_m3)
@@ -66,9 +67,9 @@ void CollisionModel::MDForceField_Buckingham::calculateForceField(std::vector<Co
 
             Core::Vector distance = absPosAtomI - absPosAtomJ;
 
-            if(distance.magnitude() > 100e-10){
-                return;
-            }
+            // if(distance.magnitude() > 100e-10){
+            //     return;
+            // }
             
             double distanceSquared = distance.magnitudeSquared();
             double distanceAbs = sqrt(distanceSquared);
@@ -76,6 +77,7 @@ void CollisionModel::MDForceField_Buckingham::calculateForceField(std::vector<Co
             double sigma = CollisionModel::Atom::calcLJSig(*atomI, *atomJ);
             double sigma6 = sigma * sigma * sigma * sigma * sigma * sigma;
             double epsilon = CollisionModel::Atom::calcLJEps(*atomI, *atomJ);
+            std::cout << "Sigma: " << sigma << " Eps: " << epsilon << std::endl;
             double ljFactor = epsilon * 1/distanceAbs * (-1.84e5 * 12 * exp(-12*distanceAbs/sigma) * 1/sigma + 
                                         2.25 * 6 * sigma6 * distanceSquaredInverse*distanceSquaredInverse*distanceSquaredInverse * 1/distanceAbs);
 
@@ -120,25 +122,25 @@ void CollisionModel::MDForceField_Buckingham::calculateForceField(std::vector<Co
             }
 
 
-            eField[0] += distance.x() * currentCharge / distanceCubed; // E-field in x
-            eField[1] += distance.y() * currentCharge / distanceCubed; // E-field in y
-            eField[2] += distance.z() * currentCharge / distanceCubed; // E-field in z
+            // eField[0] += distance.x() * currentCharge / distanceCubed; // E-field in x
+            // eField[1] += distance.y() * currentCharge / distanceCubed; // E-field in y
+            // eField[2] += distance.z() * currentCharge / distanceCubed; // E-field in z
 
-            // derivative x to x
-            eFieldDerivative[0] += currentCharge / distanceCubed -
-                    3 * currentCharge * distance.x() * distance.x() / (distanceCubed * distanceSquared);
-            // derivative x to y
-            eFieldDerivative[1] += -3 * currentCharge * distance.x() * distance.y() / (distanceCubed * distanceSquared);
-            // derivative y to y
-            eFieldDerivative[2] += currentCharge / distanceCubed -
-                    3 * currentCharge * distance.y() * distance.y() / (distanceCubed * distanceSquared);
-            // derivative y to z
-            eFieldDerivative[3] += -3 * currentCharge * distance.y() * distance.z() / (distanceCubed * distanceSquared);
-            // derivative z to z
-            eFieldDerivative[4] += currentCharge / distanceCubed -
-                    3 * currentCharge * distance.z() * distance.z() / (distanceCubed * distanceSquared);
-            // derivative x to z
-            eFieldDerivative[5] += -3 * currentCharge * distance.x() * distance.z() / (distanceCubed * distanceSquared);
+            // // derivative x to x
+            // eFieldDerivative[0] += currentCharge / distanceCubed -
+            //         3 * currentCharge * distance.x() * distance.x() / (distanceCubed * distanceSquared);
+            // // derivative x to y
+            // eFieldDerivative[1] += -3 * currentCharge * distance.x() * distance.y() / (distanceCubed * distanceSquared);
+            // // derivative y to y
+            // eFieldDerivative[2] += currentCharge / distanceCubed -
+            //         3 * currentCharge * distance.y() * distance.y() / (distanceCubed * distanceSquared);
+            // // derivative y to z
+            // eFieldDerivative[3] += -3 * currentCharge * distance.y() * distance.z() / (distanceCubed * distanceSquared);
+            // // derivative z to z
+            // eFieldDerivative[4] += currentCharge / distanceCubed -
+            //         3 * currentCharge * distance.z() * distance.z() / (distanceCubed * distanceSquared);
+            // // derivative x to z
+            // eFieldDerivative[5] += -3 * currentCharge * distance.x() * distance.z() / (distanceCubed * distanceSquared);
 
 
 
@@ -208,22 +210,22 @@ void CollisionModel::MDForceField_Buckingham::calculateForceField(std::vector<Co
     }
 
     // add the C4 ion-induced dipole force contribution
-    Core::Vector ionInducedForce;
-    if(isN2Approx){
-        ionInducedForce.x(1./(Core::ELECTRIC_CONSTANT) * collisionGasPolarizability_m3_/2 *
-                (eField[0]*eFieldDerivative[0] + eField[1]*eFieldDerivative[1] + eField[2]*eFieldDerivative[5]));
-        ionInducedForce.y(1./(Core::ELECTRIC_CONSTANT) * collisionGasPolarizability_m3_/2 *
-                (eField[0]*eFieldDerivative[1] + eField[1]*eFieldDerivative[2] + eField[2]*eFieldDerivative[3]));
-        ionInducedForce.z(1./(Core::ELECTRIC_CONSTANT) * collisionGasPolarizability_m3_/2 *
-                (eField[0]*eFieldDerivative[5] + eField[1]*eFieldDerivative[3] + eField[2]*eFieldDerivative[4]));
-    }else{
-        ionInducedForce.x(1./(Core::ELECTRIC_CONSTANT) * collisionGasPolarizability_m3_ *
-                (eField[0]*eFieldDerivative[0] + eField[1]*eFieldDerivative[1] + eField[2]*eFieldDerivative[5]));
-        ionInducedForce.y(1./(Core::ELECTRIC_CONSTANT) * collisionGasPolarizability_m3_ *
-                (eField[0]*eFieldDerivative[1] + eField[1]*eFieldDerivative[2] + eField[2]*eFieldDerivative[3]));
-        ionInducedForce.z(1./(Core::ELECTRIC_CONSTANT) * collisionGasPolarizability_m3_ *
-                (eField[0]*eFieldDerivative[5] + eField[1]*eFieldDerivative[3] + eField[2]*eFieldDerivative[4]));
-    }
-    forceMolecules[0] += ionInducedForce;
-    forceMolecules[1] += ionInducedForce * (-1);
+    // Core::Vector ionInducedForce;
+    // if(isN2Approx){
+    //     ionInducedForce.x(1./(Core::ELECTRIC_CONSTANT) * collisionGasPolarizability_m3_/2 *
+    //             (eField[0]*eFieldDerivative[0] + eField[1]*eFieldDerivative[1] + eField[2]*eFieldDerivative[5]));
+    //     ionInducedForce.y(1./(Core::ELECTRIC_CONSTANT) * collisionGasPolarizability_m3_/2 *
+    //             (eField[0]*eFieldDerivative[1] + eField[1]*eFieldDerivative[2] + eField[2]*eFieldDerivative[3]));
+    //     ionInducedForce.z(1./(Core::ELECTRIC_CONSTANT) * collisionGasPolarizability_m3_/2 *
+    //             (eField[0]*eFieldDerivative[5] + eField[1]*eFieldDerivative[3] + eField[2]*eFieldDerivative[4]));
+    // }else{
+    //     ionInducedForce.x(1./(Core::ELECTRIC_CONSTANT) * collisionGasPolarizability_m3_ *
+    //             (eField[0]*eFieldDerivative[0] + eField[1]*eFieldDerivative[1] + eField[2]*eFieldDerivative[5]));
+    //     ionInducedForce.y(1./(Core::ELECTRIC_CONSTANT) * collisionGasPolarizability_m3_ *
+    //             (eField[0]*eFieldDerivative[1] + eField[1]*eFieldDerivative[2] + eField[2]*eFieldDerivative[3]));
+    //     ionInducedForce.z(1./(Core::ELECTRIC_CONSTANT) * collisionGasPolarizability_m3_ *
+    //             (eField[0]*eFieldDerivative[5] + eField[1]*eFieldDerivative[3] + eField[2]*eFieldDerivative[4]));
+    // }
+    // forceMolecules[0] += ionInducedForce;
+    // forceMolecules[1] += ionInducedForce * (-1);
 }
