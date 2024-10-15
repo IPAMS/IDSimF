@@ -1,0 +1,169 @@
+[
+{
+	"name":"He",
+	"diameter":2.89,
+	"atoms":[
+		{
+			"type":"He", 
+			"posx":0, 
+			"posy":0, 
+			"posz":0, 
+			"mass":4.003, 
+			"charge":0, 
+			"partCharge":0, 
+			"LJsigma":2.96, 
+			"LJeps":0.0908
+		}
+	]
+
+},
+{
+	"name":"H2+",
+	"diameter":2.89,
+	"atoms":[
+		{
+			"type":"H", 
+			"posx":0, 
+			"posy":0.375, 
+			"posz":0, 
+			"mass":1.008, 
+			"charge":1, 
+			"partCharge":0, 
+			"LJsigma":2.97, 
+			"LJeps":0.0904
+		}, 
+		{
+			"type":"H", 
+			"posx":0, 
+			"posy":-0.375, 
+			"posz":0, 
+			"mass":1.008, 
+			"charge":0, 
+			"partCharge":0, 
+			"LJsigma":2.97, 
+			"LJeps":0.0904
+		}
+
+	]
+
+},
+{
+	"name":"O2+",
+	"diameter":3.1,
+	"atoms":[
+		{
+			"type":"O", 
+			"posx":0, 
+			"posy":0.561, 
+			"posz":0, 
+			"mass":15.999, 
+			"charge":1, 
+			"partCharge":0, 
+			"LJsigma":3.56, 
+			"LJeps":0.319
+		}, 
+		{
+			"type":"O", 
+			"posx":0, 
+			"posy":-0.561, 
+			"posz":0, 
+			"mass":15.999, 
+			"charge":0, 
+			"partCharge":0, 
+			"LJsigma":3.56, 
+			"LJeps":0.319
+		}
+
+	]
+
+},
+{
+	"name":"Li+",
+	"diameter":0.12,
+	"atoms":[
+		{
+			"type":"Li", 
+			"posx":0, 
+			"posy":0, 
+			"posz":0, 
+			"mass":6.941, 
+			"charge":1, 
+			"partCharge":0, 
+			"LJsigma":2.49,
+			"LJeps":0.221
+		}
+	]
+
+},
+{
+	"name":"N2_noquad",
+	"diameter":3.65,
+	"atoms":[
+		{
+			"type":"N", 
+			"posx":0, 
+			"posy":0.54, 
+			"posz":0, 
+			"mass":14.0067, 
+			"charge":0, 
+			"partCharge":0, 
+			"LJsigma":1.1, 
+			"LJeps":0.711
+		}, 
+		{
+			"type":"N", 
+			"posx":0, 
+			"posy":-0.54, 
+			"posz":0, 
+			"mass":14.0067, 
+			"charge":0, 
+			"partCharge":0, 
+			"LJsigma":1.1, 
+			"LJeps":0.711
+		}
+
+	]
+
+},
+{
+	"name":"N2",
+	"diameter":3.65,
+	"atoms":[
+		{
+			"type":"N", 
+			"posx":0, 
+			"posy":0.54, 
+			"posz":0, 
+			"mass":14.0067, 
+			"charge":0, 
+			"partCharge":-0.4825, 
+			"LJsigma":3.65, 
+			"LJeps":1.207
+		}, 
+		{
+			"type":"N", 
+			"posx":0, 
+			"posy":-0.54, 
+			"posz":0, 
+			"mass":14.0067, 
+			"charge":0, 
+			"partCharge":-0.4825, 
+			"LJsigma":3.65, 
+			"LJeps":1.207
+		},
+		{
+			"type":"COM", 
+			"posx":0, 
+			"posy":0.000000000001, 
+			"posz":0, 
+			"mass":0, 
+			"charge":0, 
+			"partCharge":0.965, 
+			"LJsigma":0, 
+			"LJeps":0
+		}
+
+	]
+
+}
+]
