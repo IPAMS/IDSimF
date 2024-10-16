@@ -89,7 +89,7 @@
 			"mass":6.941, 
 			"charge":1, 
 			"partCharge":0, 
-			"LJsigma":2.49,
+			"LJsigma":2.59,
 			"LJeps":0.221
 		}
 	]
