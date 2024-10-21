@@ -104,7 +104,8 @@ int main(int argc, const char * argv[]) {
         std::vector<CollisionModel::Molecule*> moleculesPtr = {&ion, &bgGas};
         std::vector<Core::Vector> forceMolecules(moleculesPtr.size());
         forceFieldPtr->calculateForceField(moleculesPtr, forceMolecules);
-        forcesOut << positions[i] << " " << forceMolecules[1] << std::endl;
+        forcesOut << positions[i].x() << "," << positions[i].y() << "," << positions[i].z() 
+        << "," << forceMolecules[1].x() << "," << forceMolecules[1].y() << "," << forceMolecules[1].z() << std::endl;
     }
 }
 
