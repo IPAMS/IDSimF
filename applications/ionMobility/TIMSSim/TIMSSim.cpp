@@ -103,6 +103,14 @@ int main(int argc, const char * argv[]) {
         double gradientStartTime = simConf->doubleParameter("gradient_start_time_s");
         double gradientVelocity = simConf->doubleParameter("gradient_ramp_velocity_V/ms")*1000;
         double gradientVoltage = simConf->doubleParameter("gradient_voltage_V");
+
+        if (gradientVoltage < 0 && gradientVelocity > 0) {
+            //mitigate accidentally wrong sign in gradientVelocity from the user
+            gradientVelocity = gradientVelocity * -1;
+            logger->warn("warning: Gradient velocity was positive while gradient voltage was negative. "
+                         "The sign of gradient velocity was inverted.");
+        }
+
         double gradientDuration = gradientVoltage / gradientVelocity;
         logger->info("gradient! start:{} duration:{}", gradientStartTime, gradientDuration);
 
@@ -408,7 +416,6 @@ int main(int argc, const char * argv[]) {
                     totalFieldNow[i] = totalFieldNow[i] + gradient_field;}
             }
         };
-
 
         auto accelerationFct = [&PotentialArrays, &totalFieldNow, spaceChargeFactor]
                 (Core::Particle* particle, int /*particleIndex*/, SpaceCharge::FieldCalculator &scFieldCalculator,
