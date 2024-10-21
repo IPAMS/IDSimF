@@ -206,22 +206,22 @@ void CollisionModel::MDForceField_LJ12_6::calculateForceField(std::vector<Collis
     }
 
     // add the C4 ion-induced dipole force contribution
-    Core::Vector ionInducedForce;
-    if(isN2Approx){
-        ionInducedForce.x(1./(Core::ELECTRIC_CONSTANT) * collisionGasPolarizability_m3_/2 *
-                (eField[0]*eFieldDerivative[0] + eField[1]*eFieldDerivative[1] + eField[2]*eFieldDerivative[5]));
-        ionInducedForce.y(1./(Core::ELECTRIC_CONSTANT) * collisionGasPolarizability_m3_/2 *
-                (eField[0]*eFieldDerivative[1] + eField[1]*eFieldDerivative[2] + eField[2]*eFieldDerivative[3]));
-        ionInducedForce.z(1./(Core::ELECTRIC_CONSTANT) * collisionGasPolarizability_m3_/2 *
-                (eField[0]*eFieldDerivative[5] + eField[1]*eFieldDerivative[3] + eField[2]*eFieldDerivative[4]));
-    }else{
-        ionInducedForce.x(1./(Core::ELECTRIC_CONSTANT) * collisionGasPolarizability_m3_ *
-                (eField[0]*eFieldDerivative[0] + eField[1]*eFieldDerivative[1] + eField[2]*eFieldDerivative[5]));
-        ionInducedForce.y(1./(Core::ELECTRIC_CONSTANT) * collisionGasPolarizability_m3_ *
-                (eField[0]*eFieldDerivative[1] + eField[1]*eFieldDerivative[2] + eField[2]*eFieldDerivative[3]));
-        ionInducedForce.z(1./(Core::ELECTRIC_CONSTANT) * collisionGasPolarizability_m3_ *
-                (eField[0]*eFieldDerivative[5] + eField[1]*eFieldDerivative[3] + eField[2]*eFieldDerivative[4]));
-    }
-    forceMolecules[0] += ionInducedForce;
-    forceMolecules[1] += ionInducedForce * (-1);
+    // Core::Vector ionInducedForce;
+    // if(isN2Approx){
+    //     ionInducedForce.x(1./(Core::ELECTRIC_CONSTANT) * collisionGasPolarizability_m3_/2 *
+    //             (eField[0]*eFieldDerivative[0] + eField[1]*eFieldDerivative[1] + eField[2]*eFieldDerivative[5]));
+    //     ionInducedForce.y(1./(Core::ELECTRIC_CONSTANT) * collisionGasPolarizability_m3_/2 *
+    //             (eField[0]*eFieldDerivative[1] + eField[1]*eFieldDerivative[2] + eField[2]*eFieldDerivative[3]));
+    //     ionInducedForce.z(1./(Core::ELECTRIC_CONSTANT) * collisionGasPolarizability_m3_/2 *
+    //             (eField[0]*eFieldDerivative[5] + eField[1]*eFieldDerivative[3] + eField[2]*eFieldDerivative[4]));
+    // }else{
+    //     ionInducedForce.x(1./(Core::ELECTRIC_CONSTANT) * collisionGasPolarizability_m3_ *
+    //             (eField[0]*eFieldDerivative[0] + eField[1]*eFieldDerivative[1] + eField[2]*eFieldDerivative[5]));
+    //     ionInducedForce.y(1./(Core::ELECTRIC_CONSTANT) * collisionGasPolarizability_m3_ *
+    //             (eField[0]*eFieldDerivative[1] + eField[1]*eFieldDerivative[2] + eField[2]*eFieldDerivative[3]));
+    //     ionInducedForce.z(1./(Core::ELECTRIC_CONSTANT) * collisionGasPolarizability_m3_ *
+    //             (eField[0]*eFieldDerivative[5] + eField[1]*eFieldDerivative[3] + eField[2]*eFieldDerivative[4]));
+    // }
+    // forceMolecules[0] += ionInducedForce;
+    // forceMolecules[1] += ionInducedForce * (-1);
 }
