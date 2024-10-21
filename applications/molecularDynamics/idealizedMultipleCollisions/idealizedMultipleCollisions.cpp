@@ -61,6 +61,7 @@ int main(int argc, const char * argv[]) {
     double collisionGasPolarizability_m3 = simConf->doubleParameter("collision_gas_polarizability_m3");
     std::string collisionGasIdentifier = simConf->stringParameter("collision_gas_identifier");
     std::string particleIdentifier = simConf->stringParameter("particle_identifier");
+    std::string potentialsFF = simConf->stringParameter("force_field");
     double subIntegratorIntegrationTime_s = simConf->doubleParameter("sub_integrator_integration_time_s");
     double subIntegratorStepSize_s = simConf->doubleParameter("sub_integrator_step_size_s");
     double collisionRadiusScaling = simConf->doubleParameter("collision_radius_scaling");
@@ -101,7 +102,7 @@ int main(int argc, const char * argv[]) {
 
     size_t samples = positions.size();
     for(size_t i = 0; i < samples; i++){
-        CollisionModel::MDForceField_Buckingham forceField(collisionGasPolarizability_m3);
+        CollisionModel::MDForceField_Buckingham forceField(collisionGasPolarizability_m3, potentialsFF);
         auto forceFieldPtr = std::make_unique<CollisionModel::MDForceField_Buckingham>(forceField);
         CollisionModel::MDInteractionsModelPreconstructed mdSim = 
                                                             CollisionModel::MDInteractionsModelPreconstructed(backgroundPartialPressures_Pa, 

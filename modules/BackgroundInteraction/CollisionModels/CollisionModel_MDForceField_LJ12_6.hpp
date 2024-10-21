@@ -33,12 +33,15 @@ namespace CollisionModel{
     class MDForceField_LJ12_6 : public AbstractMDForceField {
 
     public:
-        MDForceField_LJ12_6(double collisionGasPolarizability_m3);
+        MDForceField_LJ12_6(double collisionGasPolarizability_m3, 
+                                std::string potentials = "ALL");
 
-        void calculateForceField(std::vector<CollisionModel::Molecule*>& moleculesPtr, std::vector<Core::Vector>& forceMolecules) override;
+        void calculateForceField(std::vector<CollisionModel::Molecule*>& moleculesPtr, 
+                                std::vector<Core::Vector>& forceMolecules) override;
 
     private:
         double collisionGasPolarizability_m3_ = 0.0; ///< polarizability of the collision gas in m^3
+        std::string potentialsFF_ = "";
     };
 }
 
