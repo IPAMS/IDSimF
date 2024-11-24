@@ -52,7 +52,6 @@ namespace BTree{
     class GenericBaseNode: public AbstractNode {
 
     public:
-
         //Constructors:
         GenericBaseNode(Core::Vector min, Core::Vector max, NodType* parent);
         GenericBaseNode(const GenericBaseNode& that) = delete;
@@ -234,6 +233,9 @@ namespace BTree{
             this->particle_ = nullptr;
             this->charge_ = 0.0;
             this->centerOfCharge_ = Core::Vector(0,0,0);
+            if (centerOfCharge_.magnitude()>1e2) {
+                std::cout << ">>>>>>>>>>>>> GenericBaseNode<NodType>::removeMyselfFromTree CoC: "<<centerOfCharge_<<" charge:"<<charge_/Core::ELEMENTARY_CHARGE<<"numP_:"<<numP_<<std::endl;
+            }
         }
 
         //update the parent nodes up to the root:
@@ -278,6 +280,9 @@ namespace BTree{
     void GenericBaseNode<NodType>::updateSelf(){
         centerOfCharge_ = particle_->wrappedParticle->getLocation();
         charge_ = particle_->wrappedParticle->getCharge();
+        if (centerOfCharge_.magnitude()>1e2) {
+            std::cout << ">>>>>>>>>>>>> GenericBaseNode<NodType>::updateSelf CoC: "<<centerOfCharge_<<" charge:"<<charge_/Core::ELEMENTARY_CHARGE<<"numP_:"<<numP_<<std::endl;
+        }
     }
 
 
@@ -290,6 +295,9 @@ namespace BTree{
         while (parentNode != nullptr) {
             parentNode->charge_ = 0.0;
             parentNode->centerOfCharge_ = Core::Vector(0.0,0.0,0.0);
+            if (true) {
+                //std::cout << ">>>>>>>>> GenericBaseNode<NodType>::updateParents A  CoC: "<<parentNode->centerOfCharge_<<" charge:"<<charge_/Core::ELEMENTARY_CHARGE<<"numP_:"<<numP_<<std::endl;
+            }
             for (int i=0; i<8; i++){
                 if(parentNode->octNodes_[i] != nullptr){
                     parentNode->charge_ += parentNode->octNodes_[i]->getCharge();
@@ -298,13 +306,20 @@ namespace BTree{
                                                    parentNode->octNodes_[i]->charge_);
                 }
             }
-            if (Core::isDoubleUnequal(parentNode->charge_, 0.0)){
+            //if (Core::isDoubleUnequal(parentNode->charge_, 0.0)){
+            if (std::fabs(parentNode->charge_) > CHARGE_EPSILON){
                 parentNode->centerOfCharge_ = parentNode->centerOfCharge_ / parentNode->charge_;
             }
             else {
                 parentNode->centerOfCharge_ = parentNode->center_;
             }
+
+            if (parentNode->centerOfCharge_.magnitude()>1e4) {
+                std::cout << ">>>>>>>>>>>>> GenericBaseNode<NodType>::updateParents CoC: "<<parentNode->centerOfCharge_<<" charge:"<<charge_/Core::ELEMENTARY_CHARGE<<"numP_:"<<numP_<<std::endl;
+            }
+
             parentNode = parentNode->parent_;
+
         }
     }
 
@@ -367,6 +382,9 @@ namespace BTree{
      */
     template<class NodType>
     void GenericBaseNode<NodType>::computeChargeDistributionRecursive(){
+        if (centerOfCharge_.magnitude()>1e2) {
+            std::cout << ">>>>>>>>>>>>> GenericBaseNode<NodType>::computeChargeDistributionRecursive 1 CoC: "<<centerOfCharge_<<" charge:"<<charge_/Core::ELEMENTARY_CHARGE<<"numP_:"<<numP_<<std::endl;
+        }
         if (numP_ == 1){
             this->updateSelf();
             //std::cout << " compCharg 01 charge "<<charge_<<" location "<<centerOfCharge_<<std::endl;
@@ -383,12 +401,25 @@ namespace BTree{
                                     octNode->getCharge());
                 }
             }
-            if (Core::isDoubleUnequal(charge_, 0.0)){
+            //if (Core::isDoubleUnequal(charge_, 0.0)){
+            if (std::fabs(charge_) > CHARGE_EPSILON){
+                //std::cout << "set center of charge 1: "<<centerOfCharge_<<" "<<charge_<<std::endl;
+                Core::Vector old_charge_center = centerOfCharge_;
                 centerOfCharge_ = centerOfCharge_ / charge_;
+                //if (centerOfCharge_.magnitude()>1e2) {
+                    //std::cout << ">>>>>>>>>>>>> charge > EPS  old CC: "<< old_charge_center <<" new CC: "<<centerOfCharge_<<" charge:"<<charge_/Core::ELEMENTARY_CHARGE<<"numP_:"<<numP_<<std::endl;
+                //}
             }
             else {
                 centerOfCharge_ = center_;
+                if (centerOfCharge_.magnitude()>1e2) {
+                    //std::cout << ">>>>>>>>>>>>> charge = center  new CC: "<<centerOfCharge_<<" charge:"<<charge_/Core::ELEMENTARY_CHARGE<<"numP_:"<<numP_<<std::endl;
+                }
+                //std::cout << ">>  CC=center: "<< centerOfCharge_<<" numP_:"<<  numP_<<std::endl;
             }
+        }
+        if (centerOfCharge_.magnitude()>1e2) {
+            //std::cout << ">>>>>>>>>>>>> GenericBaseNode<NodType>::computeChargeDistributionRecursive 2 CoC: "<<centerOfCharge_<<" charge:"<<charge_/Core::ELEMENTARY_CHARGE<<"numP_:"<<numP_<<std::endl;
         }
     }
 

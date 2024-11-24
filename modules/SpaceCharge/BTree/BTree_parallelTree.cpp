@@ -103,6 +103,9 @@ Core::Vector BTree::ParallelTree::getEFieldFromSpaceCharge(Core::Particle &parti
     {
         //process the current node in the node process list
         BTree::ParallelNode* currentNode = nodesToProcess.at(cur);
+        if (currentNode->centerOfCharge_.magnitude() > 1e4) {
+            std::cout << "ILL NODE FOUND "<<currentNode->centerOfCharge_<<std::endl;
+        }
 
         if(currentNode->numP_ == 1){ // if node has only one particle: calculate force directly
             efield=efield+root_->calculateElectricField(loc, currentNode->particle_->wrappedParticle->getLocation(),
@@ -128,6 +131,7 @@ Core::Vector BTree::ParallelTree::getEFieldFromSpaceCharge(Core::Particle &parti
         // the current index is at the end of the process list and the loop is terminated.
         cur++;
     }
+
     return(efield);
 }
 
@@ -324,7 +328,8 @@ void BTree::ParallelTree::updateNodeChargeState_()
                     }
                 }
 
-                if (Core::isDoubleUnequal(currentNode->charge_, 0.0)){
+                if (std::fabs(currentNode->charge_) > AbstractNode::CHARGE_EPSILON){
+                //if (Core::isDoubleUnequal(currentNode->charge_, 0.0)){
                     currentNode->centerOfCharge_ = currentNode->centerOfCharge_ / currentNode->charge_;
                 }
                 else {

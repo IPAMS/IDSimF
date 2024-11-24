@@ -42,11 +42,22 @@ BTree::Node::Node(Core::Vector min, Core::Vector max, BTree::Node* parent):
  * @return the electric force on the particle resulting from the particles in the tree with this node as root
  */
 Core::Vector BTree::Node::computeElectricFieldFromTree(Core::Particle &targetP){
+    size_t pindex_to_print = 100000;
+    size_t current_pindex = targetP.getIndex();
+
+    if (pindex_to_print == current_pindex) {
+        std::cout << "compute Field 0 : "<<" COCh: "<<centerOfCharge_<< "pi: "<<targetP.getIndex()<<std::endl;
+    }
+
     if (numP_ == 1){
         Core::Vector efield= calculateElectricField(
                 targetP.getLocation(),
                 particle_->wrappedParticle->getLocation(),
                 particle_->wrappedParticle->getCharge());
+        if (pindex_to_print == current_pindex) {
+            std::cout << "compute Field A : "<<efield<<" COCh: "<<centerOfCharge_<< "pi: "<<targetP.getIndex()<<std::endl;
+        }
+
         return(efield);
     }
     else{
@@ -58,8 +69,12 @@ Core::Vector BTree::Node::computeElectricFieldFromTree(Core::Particle &targetP){
                     targetP.getLocation(),
                     centerOfCharge_,
                     charge_);
+            //if (targetP.getIndex()==1500) {
+            if (pindex_to_print == current_pindex) {
+                std::cout << "compute Field B : "<<efield<<" COCh: "<<centerOfCharge_<< "pi: "<<targetP.getIndex()<<std::endl;
+            }
+
             return(efield);
-            
         }
         else{
             Core::Vector efield= Core::Vector(0.0,0.0,0.0);
@@ -67,6 +82,9 @@ Core::Vector BTree::Node::computeElectricFieldFromTree(Core::Particle &targetP){
                 if(octNode != nullptr){
                     efield = efield +octNode->computeElectricFieldFromTree(targetP);
                 }
+            }
+            if (pindex_to_print == current_pindex) {
+                std::cout << "compute Field C : "<<efield<<" COCh: "<<centerOfCharge_<< "pi: "<<targetP.getIndex()<<std::endl;
             }
             return(efield);
         }

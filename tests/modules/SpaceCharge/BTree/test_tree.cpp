@@ -28,6 +28,7 @@
 #include "Core_vector.hpp"
 #include "Core_particle.hpp"
 #include "BTree_tree.hpp"
+#include "BTree_parallelTree.hpp"
 #include "PSim_boxStartZone.hpp"
 #include "PSim_util.hpp"
 #include "SC_fullSumSolver.hpp"
@@ -267,9 +268,9 @@ TEST_CASE( "Test serial tree charge distribution calculation","[Tree]"){
         CHECK(std::abs(topForce.z()) < 1 );
     }
 
-    SECTION( "Test force calculation with a large number of particles in a latticed cube"){
+    SECTION( "Test force calculation with a large number of positive particles in a latticed cube"){
         unsigned int nPerDirection = 20;
-        auto ions = getIonsInLattice(nPerDirection);
+        auto ions = getIonsInLattice(nPerDirection, +1);
 
         SpaceCharge::FullSumSolver fullSumSolver;
         std::size_t i = 0;
@@ -289,5 +290,94 @@ TEST_CASE( "Test serial tree charge distribution calculation","[Tree]"){
         Core::Vector force10 = testTree.getEFieldFromSpaceCharge(*ions[10]);
         Core::Vector fullSumForce10 = fullSumSolver.getEFieldFromSpaceCharge(*ions[10]);
         CHECK( ((force10-fullSumForce10).magnitude() / force10.magnitude()) < 1.5e-2);
+    }
+}
+
+
+TEST_CASE( "Test serial tree charge distribution calculation bipolar","[Tree]") {
+    Core::Vector loc_min_ = Core::Vector(-1000,-1000,-1000);
+    Core::Vector loc_max_ = Core::Vector( 1000, 1000, 1000);
+    //Core::Vector loc_min_ = Core::Vector(-1000,-10,-10);
+    //Core::Vector loc_max_ = Core::Vector( 10, 10, 10);
+
+    BTree::Tree testTree(loc_min_,loc_max_);
+    BTree::ParallelTree testTreeParallel(loc_min_,loc_max_);
+
+    SECTION( "Test force calculation with positive and negative charges"){
+        unsigned int nPerDirection = 30;
+        bool print = true;
+        auto cations = getIonsOnXYGrid(nPerDirection, 0.004, 0.001, 1);
+        auto anions = getIonsOnXYGrid(nPerDirection, 0.004, -0.001, -1);
+        std::vector<std::unique_ptr<Core::Particle>> ions;
+        SpaceCharge::FullSumSolver fullSumSolver;
+
+        std::size_t i = 0;
+        for (auto& ion: cations){
+            if (print) {
+                std::cout << ion->getLocation()<<" | ";
+            }
+            fullSumSolver.insertParticle(*ion, i);
+            testTree.insertParticle(*ion, i);
+            testTreeParallel.insertParticle(*ion, i);
+            ions.emplace_back(std::move(ion));
+            ++i;
+        }
+        std::cout << std::endl;
+
+        for (auto& ion: anions){
+            if (print) {
+                std::cout << ion->getLocation()<<" | ";
+            }
+            fullSumSolver.insertParticle(*ion, i);
+            testTree.insertParticle(*ion, i);
+            testTreeParallel.insertParticle(*ion, i);
+            ions.emplace_back(std::move(ion));
+            ++i;
+        }
+        std::cout << std::endl;
+
+        Core::Particle testParticle1({0.0001, 0.0005, -0.0006}, +1);
+        Core::Particle testParticle2({0.0001, 0.0005, -0.0006}, -1);
+        //std::cout << std::endl;
+        //fullSumSolver.insertParticle(testParticle1, i);
+        ++i;
+        //fullSumSolver.insertParticle(testParticle2, i);
+        ions.emplace_back(std::make_unique<Core::Particle>(testParticle1));
+        ions.emplace_back(std::make_unique<Core::Particle>(testParticle2));
+
+        testTree.computeChargeDistribution();
+        testTreeParallel.init();
+        CHECK(testTree.getNumberOfParticles() == nPerDirection * nPerDirection * 2);
+
+        std::vector<int> ionsToTest;// = {1,4,8,9};
+        ionsToTest.push_back(2);
+        ionsToTest.push_back(500);
+        ionsToTest.push_back(1500);
+        ionsToTest.push_back(1300);
+        ionsToTest.push_back(1100);
+        //ionsToTest.push_back(970001);
+        //ionsToTest.push_back(i);
+        //ionsToTest.push_back(i-1);
+        for (auto& ionToTest: ionsToTest) {
+            double charge = ions[ionToTest]->getCharge();
+            std::cout <<"i:   "<<ionToTest<<"  location: "<<ions[ionToTest]->getLocation()<<"  charge: "<<charge<<std::endl;
+
+            Core::Vector force = testTree.getEFieldFromSpaceCharge(*ions[ionToTest])*charge;
+            Core::Vector forceParallel = testTreeParallel.getEFieldFromSpaceCharge(*ions[ionToTest])*charge;
+            Core::Vector fullSumForce = fullSumSolver.getEFieldFromSpaceCharge(*ions[ionToTest])*charge;
+
+            std::cout <<"bt force:   "<<force<<"\n"<<"bt force p: "<<forceParallel<<"\n"<<"full force: "<<fullSumForce<<"\n"<<"---------------------"<<std::endl;
+            //CHECK( ((force-fullSumForce).magnitude() / force.magnitude()) < 1e-2);
+        }
+    }
+}
+
+
+TEST_CASE( "Test serial tree charge distribution calculation with csv input","[Tree]") {
+    BTree::Tree testTree(
+            Core::Vector(-2.0, -2.0, -2.0),
+            Core::Vector(2.0, 2.0, 2.0));
+
+    SECTION( "Test force calculation with positive and negative charges") {
     }
 }

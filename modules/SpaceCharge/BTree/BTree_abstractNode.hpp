@@ -47,6 +47,12 @@ namespace BTree {
          * Sub-Octants of a node (e.g. SWT = south west top, NEB = north east bottom)
          */
         enum Octant {SWT,NWT,SET,NET,SWB,NWB,SEB,NEB};
+        // Constants:
+
+        // Values below CHARGE_EPSILON will be considered as zero in nodes
+        constexpr static double CHARGE_EPSILON = Core::ELEMENTARY_CHARGE * 1e-3; ///< lower boundary of possible charge in nodes,
+
+
 
         // Constructor / Destructor:
         AbstractNode(Core::Vector min, Core::Vector max);
