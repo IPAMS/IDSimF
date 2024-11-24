@@ -69,9 +69,16 @@ int main(int argc, const char * argv[]) {
             FileIO::IonCloudReader reader = FileIO::IonCloudReader();
             particles = reader.readIonCloud(ionCloudFileName);
             //prepare a vector of raw pointers
+            std::size_t i = 0;
             for (const auto& part : particles) {
+                part->setFloatAttribute("field_x", 0.0);
+                part->setFloatAttribute("field_y", 0.0);
+                part->setFloatAttribute("field_z", 0.0);
+                part->setIndex(i);
                 particlePtrs.push_back(part.get());
+                ++i;
             }
+
         }
         else {
             throw std::invalid_argument("missing configuration value: ion_cloud_init_file");
@@ -85,12 +92,15 @@ int main(int argc, const char * argv[]) {
                     std::vector<double> result = {
                             particle->getVelocity().x(),
                             particle->getVelocity().y(),
-                            particle->getVelocity().z()
+                            particle->getVelocity().z(),
+                            particle->getFloatAttribute("field_x"),
+                            particle->getFloatAttribute("field_y"),
+                            particle->getFloatAttribute("field_z")
                     };
                     return result;
                 };
 
-        std::vector<std::string> auxParamNames = {"velocity x", "velocity y", "velocity z"};
+        std::vector<std::string> auxParamNames = {"velocity x", "velocity y", "velocity z", "field x", "field y", "field z"};
 
         auto hdf5Writer = std::make_unique<FileIO::TrajectoryHDF5Writer>(cmdLineParser.trajectoriesResultName());
         hdf5Writer->setParticleAttributes(auxParamNames, additionalParameterTransformFct);
@@ -104,16 +114,32 @@ int main(int argc, const char * argv[]) {
 
         auto accelerationFunction =
                 [spaceChargeFactor](
-                        Core::Particle* particle, int /*particleIndex*/,
+                        Core::Particle* particle, int particleIndex,
                         SpaceCharge::FieldCalculator& scFieldCalculator, double /*time*/, int /*timestep*/) -> Core::Vector {
 
                     double particleCharge = particle->getCharge();
 
                     Core::Vector spaceChargeForce(0, 0, 0);
                     if (spaceChargeFactor>0) {
+                        /*if (particleIndex==0) {
+                            std::cout << "pi: "<<particle->getIndex()<<" spc_1: "<<spaceChargeForce<<std::endl;
+                        }*/
+
                         spaceChargeForce =
                                 scFieldCalculator.getEFieldFromSpaceCharge(*particle)*(particleCharge*spaceChargeFactor);
+
+                        /*if (particleIndex==0) {
+                            std::cout << "pi: "<<particle->getIndex()<<" spc_2: "<<spaceChargeForce<<std::endl;
+                        }*/
                     }
+
+                    particle->setFloatAttribute("field_x", spaceChargeForce.x());
+                    particle->setFloatAttribute("field_y", spaceChargeForce.y());
+                    particle->setFloatAttribute("field_z", spaceChargeForce.z());
+
+                    //Core::Vector particleLocation = particle->getLocation();
+                    //Core::Vector analyticFakeForce = {particleLocation.x()*1e8, particleLocation.y()*1e7, particleLocation.x()*1e-18+particleLocation.y()*1e9};
+                    //return (analyticFakeForce);
                     return (spaceChargeForce/particle->getMass());
                 };
 
@@ -146,6 +172,8 @@ int main(int argc, const char * argv[]) {
                 particlePtrs,
                 accelerationFunction,
                 postTimestepFunction);
+
+        stopWatch.stop();
 
         logger->info("elapsed secs (wall time) {}", stopWatch.elapsedSecondsWall());
         logger->info("elapsed secs (cpu time) {}", stopWatch.elapsedSecondsCPU());
