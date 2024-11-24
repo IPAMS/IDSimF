@@ -63,7 +63,6 @@ Core::Vector BTree::Node::computeElectricFieldFromTree(Core::Particle &targetP){
     else{
         double r = (targetP.getLocation()-centerOfCharge_).magnitude();
         double d = max_.x() - min_.x();
-        
         if (r > 0 && d/r < BTree::Node::theta){
             Core::Vector efield= calculateElectricField(
                     targetP.getLocation(),

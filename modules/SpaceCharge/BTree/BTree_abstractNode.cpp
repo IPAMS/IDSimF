@@ -45,6 +45,22 @@ int BTree::AbstractNode::getNumberOfNodes(){
 }
 
 /**
+ * Sets the multipole acceptance criterion (theta) for the nodes
+ */
+void BTree::AbstractNode::setTheta(double newTheta) {
+    theta = newTheta;
+}
+
+/**
+ * Gets current value of multipole acceptance criterion (theta)
+ */
+double BTree::AbstractNode::getTheta() {
+    return theta;
+}
+
+
+
+/**
  * Computes the electric field on a test charge located at r1 from a charge located at r2
  * @param r1 the position of the small test charge (in m)
  * @param r2 the position of the charge "charge2" (in m)

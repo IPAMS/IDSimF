@@ -67,7 +67,7 @@ TEST_CASE( "Test particle/particle interaction calculation with ExaFMMt", "[ExaF
 
     SECTION( "Test force calculation with a large number of particles in a latticed cube"){
         std::size_t nPerDirection = 15;
-        auto ions = getIonsInLattice(nPerDirection);
+        auto ions = getIonsInLattice(nPerDirection, 1);
 
         std::size_t i = 0;
         for (auto& ion: ions){

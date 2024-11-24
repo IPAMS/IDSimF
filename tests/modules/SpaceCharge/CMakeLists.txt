@@ -6,7 +6,8 @@ set(SOURCE_FILES
         BTree/test_parallelNode.cpp
         BTree/test_parallelTree.cpp
         BTree/test_tree.cpp
-        BTree/test_treeParticle.cpp)
+        BTree/test_treeParticle.cpp
+        BTree/test_treesChargeCalculationPrecision.cpp)
 
 if(USE_FMM_3D)
     set(SOURCE_FILES ${SOURCE_FILES}
@@ -15,7 +16,8 @@ endif()
 
 if(USE_EXAFMMT)
     set(SOURCE_FILES ${SOURCE_FILES}
-        ExaFMMt/test_exafmmtSolver.cpp)
+        ExaFMMt/test_exafmmtSolver.cpp
+            BTree/test_treesChargeCalculationPrecision.cpp)
 endif()
 
 add_executable(test_SpaceCharge ${SOURCE_FILES})
