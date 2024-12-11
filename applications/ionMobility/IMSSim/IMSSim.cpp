@@ -131,7 +131,6 @@ int main(int argc, const char *argv[]){
             potentialsFF = simConf->stringParameter("force_field");
             potentialFunction = simConf->stringParameter("potential_function");
         }
-
         std::size_t nBackgroundGases = backgroundPartialPressures_Pa.size();
         if (collisionGasMasses_Amu.size()!=nBackgroundGases || collisionGasDiameters_angstrom.size()!=nBackgroundGases) {
             throw std::invalid_argument("Inconsistent background gas configuration");

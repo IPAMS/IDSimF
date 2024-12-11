@@ -364,7 +364,9 @@ void CollisionModel::MDInteractionsModel::modifyVelocity(Core::Particle& particl
             particle.setVelocity(mole.getComVel() + particle.getVelocity() + vGasMean);
         }
         ++iterations;
-    }while(!trajectorySuccess && iterations < 100);
+    //}while(!trajectorySuccess && iterations < 100);
+        std::cout << "iterations="<<iterations<<std::endl;
+    }while(!trajectorySuccess && iterations < 1);
 
     if(trajectorySuccess == false){
         std::cerr << "No trajectory that hit the collision sphere was found or energy could not be conserved.\n";
@@ -628,7 +630,16 @@ bool CollisionModel::MDInteractionsModel::rk4InternAdaptiveStep(std::vector<Coll
     }
     moleculesPtr[1]->setAngles(nitrogenAngles);
 
+
+    for(auto* molecule : moleculesPtr){
+        if ( molecule->getComVel().magnitude() > 1e25) {
+            std::cout <<"initial velocityMolecules[i] > 10000 mag:"<<velocityMolecules[i].magnitude()<<"  vec:"<<velocityMolecules[i]<<std::endl;
+        }
+    }
+
+    int debugWrite = 30;
     while(integrationTimeSum < finalTime){
+
         
         i = 0;
         for(auto* molecule : moleculesPtr){
@@ -685,6 +696,11 @@ bool CollisionModel::MDInteractionsModel::rk4InternAdaptiveStep(std::vector<Coll
             newComVelOrder5[i] = initialVelocityMolecules[i] + (k[0][i] * 16./135 + k[2][i] * 6656./12825 + k[3][i] * 28561./56430 + k[4][i] * (-9./50) + k[5][i] * 2./55);
             newComPosOrder4[i] = initialPositionMolecules[i] + (l[0][i] * 25./216 + l[2][i] * 1408./2565 + l[3][i] * 2197./4104 + l[4][i] * (-1./5));
             newComVelOrder4[i] = initialVelocityMolecules[i] + (k[0][i] * 25./216 + k[2][i] * 1408./2565 + k[3][i] * 2197./4104 + k[4][i] * (-1./5));
+
+            if (newComVelOrder4[i].magnitude() > 1e5 && debugWrite > 0) {
+                std::cout <<"newComVelOrder4[i] > 10000| iteration="<<steps<<" mag:"<<newComVelOrder4[i].magnitude()<<"  vec:"<<newComVelOrder4[i]<<" initial:" <<initialVelocityMolecules[i] <<std::endl;
+                debugWrite--;
+            }
         }
 
         #pragma GCC diagnostic push
@@ -723,6 +739,7 @@ bool CollisionModel::MDInteractionsModel::rk4InternAdaptiveStep(std::vector<Coll
             //     molecule->setAngles(nitrogenAngles);
             // }
             i++;
+
         }
 
 
