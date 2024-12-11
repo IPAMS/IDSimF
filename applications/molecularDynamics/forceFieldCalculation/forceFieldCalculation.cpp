@@ -58,6 +58,7 @@ int main(int argc, const char * argv[]) {
     double collisionGasPolarizability_m3 = simConf->doubleParameter("collision_gas_polarizability_m3");
     std::string collisionGasIdentifier = simConf->stringParameter("collision_gas_identifier");
     std::string particleIdentifier = simConf->stringParameter("particle_identifier");
+    std::string potentialsFF = simConf->stringParameter("force_field");
     std::string outputFilename = simConf->stringParameter("output_file");
 
 
@@ -72,8 +73,7 @@ int main(int argc, const char * argv[]) {
     FileIO::CSVReader startConfReader = FileIO::CSVReader();
     std::vector<std::vector<std::string>> startingConfigurationCollection = startConfReader.readCSVFile(startingConfiguration, ' ');
     for(auto &line : startingConfigurationCollection){
-        positions.push_back({std::stod(line[0]), std::stod(line[1]), std::stod(line[2])});
-
+        positions.push_back({std::stold(line[0]), std::stold(line[1]), std::stold(line[2])});
     }
     //read molecular structure file
     
@@ -85,7 +85,7 @@ int main(int argc, const char * argv[]) {
     
 
     //auto forceFieldPtr = nullptr;
-    CollisionModel::MDForceField_Buckingham forceField(collisionGasPolarizability_m3);
+    CollisionModel::MDForceField_Buckingham forceField(collisionGasPolarizability_m3, potentialsFF);
     auto forceFieldPtr = std::make_unique<CollisionModel::MDForceField_Buckingham>(forceField);
 
     CollisionModel::Molecule ion({0,0,0}, {0,0,0}, molecularStructureCollection.at(particleIdentifier));

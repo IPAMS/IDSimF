@@ -273,7 +273,6 @@ void CollisionModel::MDInteractionsModelPreconstructed::rotate(const Core::Vecto
 void CollisionModel::MDInteractionsModelPreconstructed::writeTrajectory(double distance, Core::Vector positionBgMolecule, Core::Vector velocityBgMolecule, 
                         std::vector<Core::Vector> forceMolecules, bool endOfTrajectory, std::ofstream* file, double time, double dt, 
                         Core::Vector positionMolecule){
-    //std::cout << "Wrriting step" << std::endl;
     *file << positionBgMolecule.x() << ", " 
             << positionBgMolecule.y() << ", " 
             << positionBgMolecule.z() << ", "  
@@ -294,7 +293,6 @@ void CollisionModel::MDInteractionsModelPreconstructed::writeTrajectory(double d
         
     }
     if(endOfTrajectory == true){
-        std::cout << "End file" << std::endl;
         *file << "###" << std::endl;
     }
 }
@@ -353,8 +351,8 @@ void CollisionModel::MDInteractionsModelPreconstructed::modifyVelocity(Core::Par
         double timeStep = subTimeStep_; // step size in seconds
 
         //trajectorySuccess = rk4Intern(moleculesPtr, timeStep, finalTime, collisionRadius);
-        trajectorySuccess = leapfrogIntern(moleculesPtr, timeStep, finalTime, collisionRadius);
-        //trajectorySuccess = rk4InternAdaptiveStep(moleculesPtr, timeStep, finalTime, collisionRadius);
+        //trajectorySuccess = leapfrogIntern(moleculesPtr, timeStep, finalTime, collisionRadius);
+        trajectorySuccess = rk4InternAdaptiveStep(moleculesPtr, timeStep, finalTime, collisionRadius);
 
 
         double endEnergy = 0;
@@ -392,8 +390,6 @@ bool CollisionModel::MDInteractionsModelPreconstructed::leapfrogIntern(std::vect
   
     bool wasHit = false;
     double distance = 0.0;
-    std::cout << moleculesPtr[0]->getComVel() << std::endl;
-    std::cout << moleculesPtr[1]->getComVel() << std::endl;
     // distances need to be saved so integration can be stopped if particles leave 
     // the domain of interest 
     std::vector<double> startDistances;
@@ -417,7 +413,6 @@ bool CollisionModel::MDInteractionsModelPreconstructed::leapfrogIntern(std::vect
         energyStart += 0.5 * molecule->getComVel().magnitudeSquared() * molecule->getMass();
         Core::Vector newComVel =  molecule->getComVel() + forceMolecules.at(i) / molecule->getMass() * dt/2;
         if(molecule->getMolecularStructureName() == collisionMolecule_){
-            std::cout << newComVel << std::endl;
             molecule->setComVel(newComVel);
         }
         i++;
@@ -666,7 +661,6 @@ bool CollisionModel::MDInteractionsModelPreconstructed::rk4InternAdaptiveStep(st
     //std::cout << "angVel: " << angularVelocity << std::endl;
 
     while(integrationTimeSum < finalTime){
-        
         i = 0;
         for(auto* molecule : moleculesPtr){
             velocityMolecules[i] = molecule->getComVel();
@@ -759,18 +753,28 @@ bool CollisionModel::MDInteractionsModelPreconstructed::rk4InternAdaptiveStep(st
         }
         #pragma GCC diagnostic pop
         double globalDelta = 0.84 * std::pow((tolerance/globalR), 1./4);
-        integrationTimeSum += dt;
+        
         i = 0;
+        integrationTimeSum += dt;
         for(auto* molecule : moleculesPtr){
-            if(trajectoryRecordingActive_ == true && molecule->getMolecularStructureName() == collisionMolecule_){
-                writeTrajectory(distance, molecule->getComPos(), molecule->getComVel(),forceMolecules, false, trajectoryOutputStream_.get(), integrationTimeSum, dt,
+            std::cout << "Setting molecule at " << integrationTimeSum << std::endl;
+            if(trajectoryRecordingActive_ == true && molecule->getMolecularStructureName() == collisionMolecule_ && integrationTimeSum-dt == 0){
+                writeTrajectory(distance, molecule->getComPos(), molecule->getComVel(),forceMolecules, false, trajectoryOutputStream_.get(), integrationTimeSum-dt, dt,
                                 moleculesPtr[0]->getComPos());
+                
             }
             if(molecule->getMolecularStructureName() == collisionMolecule_){
+
                 molecule->setComPos(newComPosOrder4[i]);
                 molecule->setComVel(newComVelOrder4[i]); 
             }
-            
+            if(trajectoryRecordingActive_ == true && molecule->getMolecularStructureName() == collisionMolecule_ 
+                && integrationTimeSum-dt != 0 && integrationTimeSum < finalTime){
+                writeTrajectory(distance, molecule->getComPos(), molecule->getComVel(),forceMolecules, false, trajectoryOutputStream_.get(), integrationTimeSum, dt,
+                                moleculesPtr[0]->getComPos());
+                
+            }
+        
             
         //     // if(molecule->getMolecularStructureName()=="N2"){
         //     //     CollisionModel::Atom::rotate2D(angularVelocity*dt, nitrogenOne);
@@ -794,7 +798,7 @@ bool CollisionModel::MDInteractionsModelPreconstructed::rk4InternAdaptiveStep(st
                     minDistance = tmp;
                 }
                 if((moleculesPtr[z]->getComPos() - moleculesPtr[b]->getComPos()).magnitude() > startDistances[index++]){
-                    if(trajectoryRecordingActive_ == true && moleculesPtr[z]->getMolecularStructureName() == collisionMolecule_){
+                    if(trajectoryRecordingActive_ == true && moleculesPtr[z]->getMolecularStructureName() == collisionMolecule_ && integrationTimeSum >= finalTime){
                         writeTrajectory((moleculesPtr[z]->getComPos() - moleculesPtr[b]->getComPos()).magnitude(),
                                         moleculesPtr[z]->getComPos(), moleculesPtr[z]->getComVel(), forceMolecules, true, trajectoryOutputStream_.get(), integrationTimeSum, dt,
                                         moleculesPtr[0]->getComPos());
