@@ -43,6 +43,7 @@
 #include "CollisionModel_SoftSphere.hpp"
 #include "CollisionModel_MDInteractions.hpp"
 #include "CollisionModel_MDForceField_LJ12_6.hpp"
+#include "CollisionModel_MDForceField_Buckingham.hpp"
 #include "appUtils_simulationConfiguration.hpp"
 #include "appUtils_logging.hpp"
 #include "appUtils_stopwatch.hpp"
@@ -104,6 +105,8 @@ int main(int argc, const char *argv[]){
         
         std::vector<std::string> collisionGasIdentifier;
         std::vector<std::string> particleIdentifier;
+        std::string potentialsFF;
+        std::string potentialFunction;
         std::vector<double> collisionGasPolarizability_m3;
         double subIntegratorIntegrationTime_s = 0;
         double subIntegratorStepSize_s = 0;
@@ -125,6 +128,8 @@ int main(int argc, const char *argv[]){
             saveTrajectory = simConf->boolParameter("save_trajectory");
             trajectoryDistance_m = simConf->doubleParameter("trajectory_distance_m");
             saveTrajectoryStartTimeStep = simConf->unsignedIntParameter("trajectory_start_time_step");
+            potentialsFF = simConf->stringParameter("force_field");
+            potentialFunction = simConf->stringParameter("potential_function");
         }
 
         std::size_t nBackgroundGases = backgroundPartialPressures_Pa.size();
@@ -411,9 +416,13 @@ int main(int argc, const char *argv[]){
             //prepare multimodel with multiple MD models (one per collision gas)
             std::vector<std::unique_ptr<CollisionModel::AbstractCollisionModel>> mdModels;
             for (std::size_t i = 0; i<nBackgroundGases; ++i) {
-                CollisionModel::MDForceField_LJ12_6 forceField(collisionGasPolarizability_m3[i]);
-                auto forceFieldPtr = std::make_unique<CollisionModel::MDForceField_LJ12_6>(forceField);
-                auto mdModel = std::make_unique<CollisionModel::MDInteractionsModel>(
+                
+                std::unique_ptr<CollisionModel::MDInteractionsModel> mdModel;
+
+                if(potentialFunction == "LJ"){
+                    CollisionModel::MDForceField_LJ12_6 forceField(collisionGasPolarizability_m3[i], potentialsFF);
+                    auto forceFieldPtr = std::make_unique<CollisionModel::MDForceField_LJ12_6>(forceField);
+                    mdModel = std::make_unique<CollisionModel::MDInteractionsModel>(
                         backgroundPartialPressures_Pa[i],
                         backgroundTemperature_K,
                         collisionGasMasses_Amu[i],
@@ -426,7 +435,26 @@ int main(int argc, const char *argv[]){
                         spawnRadius_m,
                         std::move(forceFieldPtr),
                         molecularStructureCollection);
-
+                }
+                else if(potentialFunction == "Buckingham"){
+                    CollisionModel::MDForceField_Buckingham forceField(collisionGasPolarizability_m3[i], potentialsFF);
+                    auto forceFieldPtr = std::make_unique<CollisionModel::MDForceField_Buckingham>(forceField);
+                    mdModel = std::make_unique<CollisionModel::MDInteractionsModel>(
+                        backgroundPartialPressures_Pa[i],
+                        backgroundTemperature_K,
+                        collisionGasMasses_Amu[i],
+                        collisionGasDiameters_m[i],
+                        collisionGasIdentifier[i],
+                        subIntegratorIntegrationTime_s, 
+                        subIntegratorStepSize_s,
+                        collisionRadiusScaling,
+                        angleThetaScaling,
+                        spawnRadius_m,
+                        std::move(forceFieldPtr),
+                        molecularStructureCollection);
+                }
+                
+            
                 if (saveTrajectory){
                     mdModel->setTrajectoryWriter(projectName+"_md_trajectories.txt",
                                                  trajectoryDistance_m, saveTrajectoryStartTimeStep);
