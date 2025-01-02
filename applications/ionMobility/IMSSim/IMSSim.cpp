@@ -80,6 +80,12 @@ int main(int argc, const char *argv[]){
         std::string confFileName = cmdLineParser.confFileName();
         AppUtils::simConf_ptr simConf = cmdLineParser.simulationConfiguration();
 
+        // optionally setting random generator seed manually (for debugging / reproduction purposes):
+        if (simConf->isParameter("random_seed")) {
+            unsigned int randomSeed = simConf->unsignedIntParameter("random_seed");
+            Core::globalRandomGeneratorPool->setSeedForElements(randomSeed);
+        }
+
         std::vector<unsigned int> nParticles = simConf->unsignedIntVectorParameter("n_particles");
         int nSteps = simConf->intParameter("sim_time_steps");
         int concentrationWriteInterval = simConf->intParameter("concentrations_write_interval");

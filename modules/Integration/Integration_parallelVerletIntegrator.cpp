@@ -126,7 +126,7 @@ void Integration::ParallelVerletIntegrator::runSingleStep(double dt){
     }
     std::size_t i;
     #pragma omp parallel \
-            default(none) shared(newPos_, a_tdt_, a_t_, dt, particles_) \
+            default(none) shared(newPos_, a_tdt_, a_t_, dt, particles_, std::cout) \
             private(i) //firstprivate(MyNod)
     {
 
@@ -152,7 +152,7 @@ void Integration::ParallelVerletIntegrator::runSingleStep(double dt){
 
                 //velocity changes due to background interaction:
                 if (collisionModel_ != nullptr) {
-                    //std::cout << "before:" << particles_[i]->getVelocity() << std::endl;
+                    //std::cout << "before:" << particles_[i]->getVelocity() <<" ts: "<<timestep_ <<" pi:"<<i<< std::endl;
                     collisionModel_->modifyVelocity(*(particles_[i]),dt);
                     //std::cout << "after:" << particles_[i]->getVelocity() << std::endl;
                 }

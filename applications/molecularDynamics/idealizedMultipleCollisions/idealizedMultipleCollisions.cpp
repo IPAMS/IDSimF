@@ -102,6 +102,7 @@ int main(int argc, const char * argv[]) {
 
     size_t samples = positions.size();
     for(size_t i = 0; i < samples; i++){
+        std::cout << "i:"<<i<<std::endl;
         CollisionModel::MDForceField_Buckingham forceField(collisionGasPolarizability_m3, potentialsFF);
         auto forceFieldPtr = std::make_unique<CollisionModel::MDForceField_Buckingham>(forceField);
         CollisionModel::MDInteractionsModelPreconstructed mdSim = 

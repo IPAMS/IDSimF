@@ -268,6 +268,7 @@ void CollisionModel::MDInteractionsModel::modifyVelocity(Core::Particle& particl
     if (rndSource->uniformRealRndValue() > collisionProb){
         return; // no collision takes place
     }
+    std::cout << "Collision happened!"<<std::endl;
 
     bool trajectorySuccess = false;
     int iterations = 0;
@@ -345,7 +346,7 @@ void CollisionModel::MDInteractionsModel::modifyVelocity(Core::Particle& particl
         double timeStep = subTimeStep_; // step size in seconds
 
         trajectorySuccess = rk4InternAdaptiveStep(moleculesPtr, timeStep, finalTime, collisionRadius, tolerance);
-        // trajectorySuccess = leapfrogIntern(moleculesPtr, timeStep, finalTime, collisionRadius);
+        //trajectorySuccess = leapfrogIntern(moleculesPtr, timeStep, finalTime, collisionRadius);
        
         double endEnergy = 0;
         for(auto* molecule : moleculesPtr){
@@ -637,7 +638,8 @@ bool CollisionModel::MDInteractionsModel::rk4InternAdaptiveStep(std::vector<Coll
         }
     }
 
-    int debugWrite = 30;
+
+    int debugWrite = 600;
     while(integrationTimeSum < finalTime){
 
         
@@ -697,8 +699,8 @@ bool CollisionModel::MDInteractionsModel::rk4InternAdaptiveStep(std::vector<Coll
             newComPosOrder4[i] = initialPositionMolecules[i] + (l[0][i] * 25./216 + l[2][i] * 1408./2565 + l[3][i] * 2197./4104 + l[4][i] * (-1./5));
             newComVelOrder4[i] = initialVelocityMolecules[i] + (k[0][i] * 25./216 + k[2][i] * 1408./2565 + k[3][i] * 2197./4104 + k[4][i] * (-1./5));
 
-            if (newComVelOrder4[i].magnitude() > 1e5 && debugWrite > 0) {
-                std::cout <<"newComVelOrder4[i] > 10000| iteration="<<steps<<" mag:"<<newComVelOrder4[i].magnitude()<<"  vec:"<<newComVelOrder4[i]<<" initial:" <<initialVelocityMolecules[i] <<std::endl;
+            if (newComVelOrder4[i].magnitude() > 0 && debugWrite > 0) {
+                std::cout <<"newComVelOrder4[i] | iteration="<<steps<<" i:" <<i <<" mag:"<<newComVelOrder4[i].magnitude()<<"  vec:"<<newComVelOrder4[i]<<" pos:" <<initialPositionMolecules[i] <<std::endl;
                 debugWrite--;
             }
         }

@@ -90,6 +90,7 @@ void CollisionModel::MDForceField_Buckingham::calculateForceField(std::vector<Co
                 atomForce.z(distance.z() * ljFactor);
                 forceMolecules[0] += atomForce;
                 forceMolecules[1] += atomForce * (-1);
+                std::cout <<" F atomForce:"<<atomForce<<std::endl;
             }
 
             // Second contribution: C4 ion-induced dipole potential
@@ -238,5 +239,6 @@ void CollisionModel::MDForceField_Buckingham::calculateForceField(std::vector<Co
         }
         forceMolecules[0] += ionInducedForce;
         forceMolecules[1] += ionInducedForce * (-1);
+        std::cout <<" F ionInducedForce:"<<ionInducedForce<<std::endl;
     }
 }

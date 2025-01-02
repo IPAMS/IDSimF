@@ -1,5 +1,6 @@
 {
-  "sim_time_steps":15,
+  "random_seed": 100,
+  "sim_time_steps":10,
   "dt_s":1.0e-11,
   "concentrations_write_interval":10,
   "trajectory_write_interval":50,
@@ -18,7 +19,7 @@
   "collision_gas_diameters_angstrom":[2.8],
   "collision_gas_polarizability_m3":[0.205e-30],
   "collision_gas_identifier":["He"],
-  "particle_identifier":["O2+"],
+  "particle_identifier":["Li+"],
   "force_field":"ALL",
   //"potential_function":"LJ",
   "potential_function":"Buckingham",
@@ -30,5 +31,5 @@
   "spawn_radius_m":25e-10,
   "save_trajectory":"false",
   "trajectory_distance_m":10e-10,
-  "trajectory_start_time_step":100
+  "trajectory_start_time_step":0
 }
