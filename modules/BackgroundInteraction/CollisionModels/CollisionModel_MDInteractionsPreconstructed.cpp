@@ -351,8 +351,8 @@ void CollisionModel::MDInteractionsModelPreconstructed::modifyVelocity(Core::Par
         double timeStep = subTimeStep_; // step size in seconds
 
         //trajectorySuccess = rk4Intern(moleculesPtr, timeStep, finalTime, collisionRadius);
-        trajectorySuccess = leapfrogIntern(moleculesPtr, timeStep, finalTime, collisionRadius);
-        //trajectorySuccess = rk4InternAdaptiveStep(moleculesPtr, timeStep, finalTime, collisionRadius);
+        //trajectorySuccess = leapfrogIntern(moleculesPtr, timeStep, finalTime, collisionRadius);
+        trajectorySuccess = rk4InternAdaptiveStep(moleculesPtr, timeStep, finalTime, collisionRadius);
 
 
         double endEnergy = 0;
@@ -412,9 +412,9 @@ bool CollisionModel::MDInteractionsModelPreconstructed::leapfrogIntern(std::vect
     for(auto* molecule : moleculesPtr){
         energyStart += 0.5 * molecule->getComVel().magnitudeSquared() * molecule->getMass();
         Core::Vector newComVel =  molecule->getComVel() + forceMolecules.at(i) / molecule->getMass() * dt/2;
-        if(molecule->getMolecularStructureName() == collisionMolecule_){
+        //if(molecule->getMolecularStructureName() == collisionMolecule_){
             molecule->setComVel(newComVel);
-        }
+        //}
         i++;
     }
 
@@ -436,9 +436,9 @@ bool CollisionModel::MDInteractionsModelPreconstructed::leapfrogIntern(std::vect
                                 moleculesPtr[0]->getComPos());
             }
             Core::Vector newComPos =  molecule->getComPos() + molecule->getComVel() * dt;
-            if(molecule->getMolecularStructureName() == collisionMolecule_){
+            //if(molecule->getMolecularStructureName() == collisionMolecule_){
                 molecule->setComPos(newComPos);
-            }
+            //}
             energyEnd += 0.5 * molecule->getComVel().magnitudeSquared() * molecule->getMass();
             i++;
         }
@@ -467,9 +467,9 @@ bool CollisionModel::MDInteractionsModelPreconstructed::leapfrogIntern(std::vect
         // time step for the new velocity
         for(auto* molecule : moleculesPtr){
             Core::Vector newComVel =  molecule->getComVel() + forceMolecules.at(i) / molecule->getMass() * dt;
-            if(molecule->getMolecularStructureName() == collisionMolecule_){
+            //if(molecule->getMolecularStructureName() == collisionMolecule_){
                 molecule->setComVel(newComVel);
-            }
+            //}
             i++;
         }
     }
