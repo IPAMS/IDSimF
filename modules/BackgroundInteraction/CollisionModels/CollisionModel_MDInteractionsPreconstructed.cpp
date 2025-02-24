@@ -746,7 +746,7 @@ bool CollisionModel::MDInteractionsModelPreconstructed::rk4InternAdaptiveStep(st
         }
 
         double globalR = std::max({R[0],R[1]});
-        double tolerance = 1e-10;
+        double tolerance = 1e-8;
         
         if (globalR == 0){
             globalR = 1e-15;
@@ -788,6 +788,7 @@ bool CollisionModel::MDInteractionsModelPreconstructed::rk4InternAdaptiveStep(st
         }
         steps++;
         dt = dt * globalDelta;
+        dt = 1e-17;
         
 
         size_t index = 0;

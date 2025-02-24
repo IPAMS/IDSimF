@@ -160,6 +160,9 @@ namespace CollisionModel{
         unsigned int recordTrajectoryStartTimeStep_ = 0;
 
         std::unique_ptr<std::ofstream> trajectoryOutputStream_;
+        std::unique_ptr<std::ofstream> startingConditionsStream_;
+        std::unique_ptr<std::ofstream> startingConditionsCorrect_;
+
 
         std::unique_ptr<AbstractMDForceField> forceField_; ///< The molecular force field to use
         std::function<void(RS::CollisionConditions, Core::Particle&)> afterCollisionActionFunction_ = nullptr;

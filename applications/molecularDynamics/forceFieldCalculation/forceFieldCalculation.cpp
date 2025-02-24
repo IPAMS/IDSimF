@@ -85,8 +85,8 @@ int main(int argc, const char * argv[]) {
     
 
     //auto forceFieldPtr = nullptr;
-    CollisionModel::MDForceField_Buckingham forceField(collisionGasPolarizability_m3, potentialsFF);
-    auto forceFieldPtr = std::make_unique<CollisionModel::MDForceField_Buckingham>(forceField);
+    CollisionModel::MDForceField_LJ12_6 forceField(collisionGasPolarizability_m3, potentialsFF);
+    auto forceFieldPtr = std::make_unique<CollisionModel::MDForceField_LJ12_6>(forceField);
 
     CollisionModel::Molecule ion({0,0,0}, {0,0,0}, molecularStructureCollection.at(particleIdentifier));
 
@@ -103,9 +103,13 @@ int main(int argc, const char * argv[]) {
         bgGas.setComPos(positions[i]);
         std::vector<CollisionModel::Molecule*> moleculesPtr = {&ion, &bgGas};
         std::vector<Core::Vector> forceMolecules(moleculesPtr.size());
-        forceFieldPtr->calculateForceField(moleculesPtr, forceMolecules);
+        Core::Vector forceVDW;
+        Core::Vector forceII;
+        forceFieldPtr->calculateForceFieldComponents(moleculesPtr, forceMolecules, forceVDW, forceII);
         forcesOut << positions[i].x() << "," << positions[i].y() << "," << positions[i].z() 
-        << "," << forceMolecules[1].x() << "," << forceMolecules[1].y() << "," << forceMolecules[1].z() << std::endl;
+        << "," << forceMolecules[1].x() << "," << forceMolecules[1].y() << "," << forceMolecules[1].z()
+        << "," << forceVDW.x() << "," << forceVDW.y() << "," << forceVDW.z()
+        << "," << forceII.x() << "," << forceII.y() << "," << forceII.z() << std::endl;
     }
 }
 

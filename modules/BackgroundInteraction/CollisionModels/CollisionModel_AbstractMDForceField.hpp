@@ -39,6 +39,9 @@ namespace CollisionModel {
 
         virtual void calculateForceField(std::vector<CollisionModel::Molecule*>& moleculesPtr, 
                                         std::vector<Core::Vector>& forceMolecules) = 0;
+                            
+        virtual void calculateForceFieldComponents(std::vector<CollisionModel::Molecule*>& moleculesPtr, 
+                                std::vector<Core::Vector>& forceMolecules, Core::Vector& forceVDW, Core::Vector& forceII) = 0;
     };
 }
 
