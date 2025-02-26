@@ -34,7 +34,8 @@ set(SOURCE_FILES
         CollisionModel_MDForceField_LJ12_6.cpp 
         CollisionModel_MDForceField_LJ12_6.hpp
         CollisionModel_MDForceField_Buckingham.cpp 
-        CollisionModel_MDForceField_Buckingham.hpp)
+        CollisionModel_MDForceField_Buckingham.hpp
+        CollisionModel_AtomInteractionMap.hpp)
 
 add_library(collisionmodels STATIC ${SOURCE_FILES})
 target_include_directories(collisionmodels PUBLIC .)
