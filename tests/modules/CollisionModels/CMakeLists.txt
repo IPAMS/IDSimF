@@ -15,7 +15,8 @@ set(SOURCE_FILES
         test_Molecule.cpp
         test_MDVerlet.cpp
         test_preconstructedMD.cpp
-        test_SpatialFunctions.cpp)
+        test_SpatialFunctions.cpp
+        test_AtomInteractionMap.cpp)
 
 set(TEST_FILE_FOLDER ${CMAKE_SOURCE_DIR}/tests/testfields)
 set(TEST_FILES
