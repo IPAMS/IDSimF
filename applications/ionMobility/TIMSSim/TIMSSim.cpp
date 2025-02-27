@@ -103,6 +103,10 @@ int main(int argc, const char * argv[]) {
         double gradientStartTime = simConf->doubleParameter("gradient_start_time_s");
         double gradientVelocity = simConf->doubleParameter("gradient_ramp_velocity_V/ms")*1000;
         double gradientVoltage = simConf->doubleParameter("gradient_voltage_V");
+        double gradientResetTime = 0.0;
+        if (simConf->isParameter("gradient_reset_time_s")) {
+            gradientResetTime = simConf->doubleParameter("gradient_reset_time_s");
+        }
         double gradientDuration = gradientVoltage / gradientVelocity;
         logger->info("gradient! start:{} duration:{}", gradientStartTime, gradientDuration);
 
@@ -319,7 +323,7 @@ int main(int argc, const char * argv[]) {
             double ionVelocity = particle->getVelocity().magnitude();
             double kineticEnergy_eV = 0.5*particle->getMass()*ionVelocity*ionVelocity*Core::JOULE_TO_EV;
             double backgroundTemperature_K = backgroundTemperatureFct(particle->getLocation());
-            double ionTemperature = backgroundTemperature_K + (collisionGasMass_Amu*pow(ionVelocity,2))/3*1.381e-23;
+            double ionTemperature = backgroundTemperature_K + ((collisionGasMass_Amu*pow(ionVelocity,2))/(3*1.381e-23));
             std::vector<double> result = {
                     particle->getVelocity().x(),
                     particle->getVelocity().y(),
@@ -392,20 +396,25 @@ int main(int argc, const char * argv[]) {
 
         // define trajectory integration parameters / functions =================================
         std::vector<double> totalFieldNow(PotentialArrays.size(), 0.0);
+        std::vector<double> gradientField(PotentialArrays.size(), 0.0);
 
-        auto paVoltageFct = [&PotentialArrays, &DCVoltages, &RFFactor, &gradient, &gate, &totalFieldNow,
-                             omega, V_rf, gateOpenTime, gateOpenDuration, gateVoltage, gradientStartTime, gradientDuration, gradientVelocity]
+        auto paVoltageFct = [&PotentialArrays, &DCVoltages, &RFFactor, &gradient, &gate, &totalFieldNow, &gradientField,
+                             omega, V_rf, gateOpenTime, gateOpenDuration, gateVoltage, gradientStartTime, gradientDuration, gradientVelocity, gradientResetTime]
                                      (double time){
+            if (gradientResetTime != 0.0 && time >= gradientResetTime) {
+                gradientField.assign(PotentialArrays.size(), 0);
+            }
+
             for(size_t i=0; i<PotentialArrays.size(); i++) {
                 totalFieldNow[i] = DCVoltages[i] + sin(time*omega) * (V_rf * RFFactor[i]);
 
                 if (time >= gateOpenTime && time <= (gateOpenTime + gateOpenDuration))
                     totalFieldNow[i] = totalFieldNow[i] + gate[i] * (gateVoltage);
 
-                if (time >= gradientStartTime && time <= (gradientStartTime + gradientDuration)){
-                    double gradient_field= gradient[i] * ((time-gradientStartTime)*gradientVelocity);
-                    //std::cout <<"gradient!" <<"gi: "<< gradient[i] <<" :->"<< gradient_field<<std::endl;
-                    totalFieldNow[i] = totalFieldNow[i] + gradient_field;}
+                if (time >= gradientStartTime && time <= (gradientStartTime + gradientDuration))
+                    gradientField[i] = gradient[i] * ((time-gradientStartTime)*gradientVelocity);
+
+                totalFieldNow[i] = totalFieldNow[i] + gradientField[i];
             }
         };
 
