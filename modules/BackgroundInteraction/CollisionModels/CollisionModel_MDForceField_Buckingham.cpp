@@ -462,9 +462,6 @@ void CollisionModel::MDForceField_Buckingham::calculateForceFieldComponents(std:
 }
 
 double CollisionModel::MDForceField_Buckingham::calculateVDW(const CollisionModel::Atom& atomA, const CollisionModel::Atom& atomB, double distanceAbs){
-    std::cout << "Test4\n";
-    std::cout << "Test5\n";
-
     double distanceSquared = distanceAbs*distanceAbs;
     double distanceSquaredInverse = 1./distanceSquared;
     double distanceCubed = distanceSquared * sqrt(distanceSquared);
@@ -472,21 +469,18 @@ double CollisionModel::MDForceField_Buckingham::calculateVDW(const CollisionMode
     double sigma = CollisionModel::Atom::calcLJSig(atomA, atomB);
     double sigma6 = sigma * sigma * sigma * sigma * sigma * sigma;
     double epsilon = CollisionModel::Atom::calcLJEps(atomA, atomB);
-    double ljFactor = (-1) * epsilon * 1/distanceAbs * (-1.84e5 * 12 * exp(-12*distanceAbs/sigma) * 1/sigma + 
-                                2.25 * 6 * sigma6 * distanceSquaredInverse*distanceSquaredInverse*distanceSquaredInverse * 1/distanceAbs);
+    double ljFactor = epsilon * (1.84e5 * exp(-12*distanceAbs/sigma) - 
+                                2.25 * sigma6 * distanceSquaredInverse*distanceSquaredInverse*distanceSquaredInverse);
 
     return ljFactor;
 
 }
 
 void CollisionModel::MDForceField_Buckingham::populateInteractionTable(std::vector<Core::Particle*> particlesPtrs){
-    std::cout << "Test\n";
     for(const auto& particleI: particlesPtrs){
         for(const auto& particleJ: particlesPtrs){
             for(const auto& atomI: particleI->getMolecularStructure()->getAtoms()){
                 for(const auto& atomJ: particleJ->getMolecularStructure()->getAtoms()){
-                    std::cout << "Test2\n";
-                    std::cout << "Test3\n";
                     double ljFactor = this->calculateVDW(*atomI, *atomJ, 1e-10);
                     std::cout << "LJFactor: " << ljFactor << std::endl;
                 }
