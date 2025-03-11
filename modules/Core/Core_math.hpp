@@ -29,11 +29,28 @@
 
 #include "Core_vector.hpp"
 #include "Core_constants.hpp"
+#include <functional>
 
 namespace Core {
 
     double degToRad(double phi);
     double radToDeg(double phi);
+
+    template<typename T>
+    double goldenSectionSearch(T objA, T objB, std::function<double (T, T, double)> func, double left, double right, double tol = 1e-5){
+        double invphi = (sqrt(5) - 1) / 2;
+
+        while((left-right) > tol){
+            double c = right - (right - left) * invphi;
+            double d = left + (right - left) * invphi;
+            if(func(objA, objB, c) > func(objA, objB, d)){
+                right = d;
+            }else{
+                left = c;
+            }
+        }
+        return (right+left)/2;
+    }
 
     Core::Vector cartesianToPolar(Core::Vector vec);
     Core::Vector elevationRotate(Core::Vector vec, double angle);
