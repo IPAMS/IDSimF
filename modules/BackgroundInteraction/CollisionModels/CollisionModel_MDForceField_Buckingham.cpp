@@ -20,6 +20,7 @@
  ****************************/
 
 #include "CollisionModel_MDForceField_Buckingham.hpp"
+#include "Core_math.hpp"
 #include <array>
 #include <iostream>
 #include <cmath>
@@ -481,7 +482,7 @@ void CollisionModel::MDForceField_Buckingham::populateInteractionTable(std::vect
         for(const auto& particleJ: particlesPtrs){
             for(const auto& atomI: particleI->getMolecularStructure()->getAtoms()){
                 for(const auto& atomJ: particleJ->getMolecularStructure()->getAtoms()){
-                    double ljFactor = this->calculateVDW(*atomI, *atomJ, 1e-10);
+                    double ljFactor = Core::goldenSectionSearch<const CollisionModel::Atom&>(*atomI, *atomJ, calculateVDW, 1e-12, 5e-9, 1e-10);
                     std::cout << "LJFactor: " << ljFactor << std::endl;
                 }
             }

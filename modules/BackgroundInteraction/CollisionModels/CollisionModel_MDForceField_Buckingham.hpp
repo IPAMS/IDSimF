@@ -42,7 +42,7 @@ namespace CollisionModel{
         void calculateForceFieldComponents(std::vector<CollisionModel::Molecule*>& moleculesPtr, 
                                 std::vector<Core::Vector>& forceMolecules, Core::Vector& forceVDW, Core::Vector& forceII) override;
 
-        double calculateVDW(const CollisionModel::Atom& atomA, const CollisionModel::Atom& atomB, double distanceAbs) override;
+        static double calculateVDW(const CollisionModel::Atom& atomA, const CollisionModel::Atom& atomB, double distanceAbs);
 
         void populateInteractionTable(std::vector<Core::Particle*> particlesPtrs);
 

@@ -43,7 +43,6 @@ namespace CollisionModel {
         virtual void calculateForceFieldComponents(std::vector<CollisionModel::Molecule*>& moleculesPtr, 
                                 std::vector<Core::Vector>& forceMolecules, Core::Vector& forceVDW, Core::Vector& forceII) = 0;
 
-        virtual double calculateVDW(const CollisionModel::Atom& atomA, const CollisionModel::Atom& atomB, double distanceAbs) = 0;
     };
 }
 
