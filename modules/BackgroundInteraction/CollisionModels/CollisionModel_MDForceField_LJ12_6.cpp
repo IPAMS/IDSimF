@@ -458,3 +458,7 @@ void CollisionModel::MDForceField_LJ12_6::calculateForceFieldComponents(std::vec
         forceII = ionInducedForce * (-1);
     }
 }
+
+double CollisionModel::MDForceField_LJ12_6::calculateVDW(const CollisionModel::Atom& atomA, const CollisionModel::Atom& atomB, double distanceAbs){
+    return 0;
+}

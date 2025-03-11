@@ -28,6 +28,7 @@
 #define IDSIMF_COLLISIONMODEL_MDFORCEFIELD_BUCKINGHAM_HPP
 
 #include "CollisionModel_AbstractMDForceField.hpp"
+#include "Core_particle.hpp"
 
 namespace CollisionModel{
     class MDForceField_Buckingham : public AbstractMDForceField {
@@ -40,6 +41,10 @@ namespace CollisionModel{
                             
         void calculateForceFieldComponents(std::vector<CollisionModel::Molecule*>& moleculesPtr, 
                                 std::vector<Core::Vector>& forceMolecules, Core::Vector& forceVDW, Core::Vector& forceII) override;
+
+        double calculateVDW(const CollisionModel::Atom& atomA, const CollisionModel::Atom& atomB, double distanceAbs) override;
+
+        void populateInteractionTable(std::vector<Core::Particle*> particlesPtrs);
 
     private:
         double collisionGasPolarizability_m3_ = 0.0; ///< polarizability of the collision gas in m^3

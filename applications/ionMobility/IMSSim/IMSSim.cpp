@@ -457,6 +457,7 @@ int main(int argc, const char *argv[]){
                         spawnRadius_m,
                         std::move(forceFieldPtr),
                         molecularStructureCollection);
+                    forceFieldPtr->populateInteractionTable(particlesPtrs);
                 }
                 
             
