@@ -444,7 +444,7 @@ int main(int argc, const char *argv[]){
                 else if(potentialFunction == "Buckingham"){
                     CollisionModel::MDForceField_Buckingham forceField(collisionGasPolarizability_m3[i], potentialsFF);
                     auto forceFieldPtr = std::make_unique<CollisionModel::MDForceField_Buckingham>(forceField);
-                    forceFieldPtr->populateInteractionTable(particlesPtrs);
+                    forceFieldPtr->populateInteractionTable(particlesPtrs, molecularStructureCollection, collisionGasIdentifier[i]);
                     mdModel = std::make_unique<CollisionModel::MDInteractionsModel>(
                         backgroundPartialPressures_Pa[i],
                         backgroundTemperature_K,

@@ -29,6 +29,8 @@
 
 #include "CollisionModel_AbstractMDForceField.hpp"
 #include "Core_particle.hpp"
+#include "CollisionModel_MolecularStructure.hpp"
+#include "CollisionModel_AtomInteractionMap.hpp"
 
 namespace CollisionModel{
     class MDForceField_Buckingham : public AbstractMDForceField {
@@ -44,11 +46,14 @@ namespace CollisionModel{
 
         static double calculateVDW(const CollisionModel::Atom& atomA, const CollisionModel::Atom& atomB, double distanceAbs);
 
-        void populateInteractionTable(std::vector<Core::Particle*> particlesPtrs);
+        void populateInteractionTable(std::vector<Core::Particle*> particlesPtrs, 
+                            std::unordered_map<std::string, std::shared_ptr<CollisionModel::MolecularStructure>> structureMap, 
+                            std::string collisionGasIdentifier);
 
     private:
         double collisionGasPolarizability_m3_ = 0.0; ///< polarizability of the collision gas in m^3
         std::string potentialsFF_ = "";
+        CollisionModel::AtomInteractionMap<double> interactionMap;
     };
 
 }

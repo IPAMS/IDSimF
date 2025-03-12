@@ -61,7 +61,11 @@ void CollisionModel::MDForceField_Buckingham::calculateForceField(std::vector<Co
     */
     for(auto& atomI : ion->getAtoms()){
         for(auto& atomJ : bgGas->getAtoms()){
-
+            // std::cout << interactionMap.size() << std::endl;
+            // std::cout << atomI.get() << " " << atomJ.get() << std::endl;
+            // std::cout << "----------" << std::endl;
+            //double rmax = interactionMap.get(*atomI, *atomJ);
+            //std::cout << rmax << std::endl;
             // First contribution: Lennard-Jones potential
             // This always contributes to the experienced force
             Core::Vector absPosAtomI = ion->getComPos() + atomI->getRelativePosition();
@@ -277,7 +281,7 @@ void CollisionModel::MDForceField_Buckingham::calculateForceFieldComponents(std:
     */
     for(auto& atomI : ion->getAtoms()){
         for(auto& atomJ : bgGas->getAtoms()){
-
+            
             // First contribution: Lennard-Jones potential
             // This always contributes to the experienced force
             Core::Vector absPosAtomI = ion->getComPos() + atomI->getRelativePosition();
@@ -477,15 +481,18 @@ double CollisionModel::MDForceField_Buckingham::calculateVDW(const CollisionMode
 
 }
 
-void CollisionModel::MDForceField_Buckingham::populateInteractionTable(std::vector<Core::Particle*> particlesPtrs){
+void CollisionModel::MDForceField_Buckingham::populateInteractionTable(std::vector<Core::Particle*> particlesPtrs, 
+                            std::unordered_map<std::string, std::shared_ptr<CollisionModel::MolecularStructure>> structureMap, 
+                            std::string collisionGasIdentifier){
     for(const auto& particleI: particlesPtrs){
-        for(const auto& particleJ: particlesPtrs){
-            for(const auto& atomI: particleI->getMolecularStructure()->getAtoms()){
-                for(const auto& atomJ: particleJ->getMolecularStructure()->getAtoms()){
-                    double ljFactor = Core::goldenSectionSearch<const CollisionModel::Atom&>(*atomI, *atomJ, calculateVDW, 1e-12, 5e-9, 1e-10);
-                    std::cout << "LJFactor: " << ljFactor << std::endl;
-                }
+        for(const auto& atomI: particleI->getMolecularStructure()->getAtoms()){
+            for(const auto& atomJ: (structureMap.at(collisionGasIdentifier))->getAtoms()){
+                double sigma = CollisionModel::Atom::calcLJSig(*atomI, *atomJ);
+                double ljFactor = Core::goldenSectionSearch<const CollisionModel::Atom&>(*atomI, *atomJ, calculateVDW, 1e-12, sigma, 1e-22);
+                interactionMap.insert(*atomI, *atomJ, ljFactor);
+                
             }
         }
     }
 }
+
