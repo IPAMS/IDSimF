@@ -87,7 +87,7 @@ CollisionModel::Molecule::Molecule(const Core::Vector &comPos, const Core::Vecto
 {
     atoms.resize(atomCount);
     for(size_t i = 0; i < atomCount; i++) {
-        this->atoms.at(i) = std::make_shared<Atom>(*(structure->getAtoms().at(i)));
+        this->atoms.at(i) = structure->getAtoms().at(i);
     }
 
 }
