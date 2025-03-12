@@ -12,7 +12,7 @@ target_include_directories(test_core PUBLIC
         ${CMAKE_SOURCE_DIR}/libs/catch
         ${CMAKE_SOURCE_DIR}/tests/util)
 
-target_link_libraries(test_core core)
+target_link_libraries(test_core core collisionmodels)
 if(OpenMP_CXX_FOUND)
     target_link_libraries(test_core OpenMP::OpenMP_CXX)
 endif()

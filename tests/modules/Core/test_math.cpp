@@ -28,8 +28,11 @@
 
 #include "Core_math.hpp"
 #include "catch.hpp"
+#include "CollisionModel_Atom.hpp"
+#include "CollisionModel_MDForceField_Buckingham.hpp"
 
 #include <cmath>
+#include <iostream>
 
 
 TEST_CASE("Test trigonometic functions implementation", "[CollisionModels][Math]") {
@@ -63,5 +66,49 @@ TEST_CASE("Test trigonometic functions implementation", "[CollisionModels][Math]
             REQUIRE(polar.x() == Approx(sqrt(3.0)));
             REQUIRE(polar.y() == Approx(M_PI_4));
         }
+    }
+}
+
+double testFunc(const CollisionModel::Atom& A, const CollisionModel::Atom& B, double x){ return sin(x);}
+
+template<typename T>
+double goldenSectionSearch(const T& objA, const T& objB, std::function<double (const T&, const T&, double)> func,
+                                double right, double left, double tol = 1e-5){
+    double invphi = (sqrt(5) - 1) / 2;
+    while((left-right) > tol){
+
+        double c = left - (left - right) * invphi;
+        double d = right + (left - right) * invphi;
+        if(func(objA, objB, c) > func(objA, objB, d)){
+            left = d;
+        }else{
+            right = c;
+        }
+    }
+    return (right+left)/2;
+}
+
+TEST_CASE("Test golden section search", "[CollisionModels][Math]") {
+
+    SECTION("Test base case"){
+
+        
+        CollisionModel::Atom dummyA;
+        dummyA.setSigma(2.5e-10); 
+        dummyA.setEpsilon(2.5e-22); 
+        CollisionModel::Atom dummyB;
+        dummyB.setSigma(2.5e-10);
+        dummyB.setEpsilon(2.5e-22); 
+
+
+        double result = goldenSectionSearch<const CollisionModel::Atom&>(dummyA, dummyB, 
+                                                 testFunc, 0, 3, 1e-10);
+        double result2 = goldenSectionSearch<const CollisionModel::Atom&>(dummyA, dummyB, 
+                                               CollisionModel::MDForceField_Buckingham::calculateVDW, 0.5e-10, 1.5e-10, 1e-22);
+                                            
+        REQUIRE(result == Approx(1.5708));
+        REQUIRE(result2 == Approx(7.55087e-11));
+
+        
     }
 }
