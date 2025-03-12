@@ -71,22 +71,6 @@ TEST_CASE("Test trigonometic functions implementation", "[CollisionModels][Math]
 
 double testFunc(const CollisionModel::Atom& A, const CollisionModel::Atom& B, double x){ return sin(x);}
 
-template<typename T>
-double goldenSectionSearch(const T& objA, const T& objB, std::function<double (const T&, const T&, double)> func,
-                                double right, double left, double tol = 1e-5){
-    double invphi = (sqrt(5) - 1) / 2;
-    while((left-right) > tol){
-
-        double c = left - (left - right) * invphi;
-        double d = right + (left - right) * invphi;
-        if(func(objA, objB, c) > func(objA, objB, d)){
-            left = d;
-        }else{
-            right = c;
-        }
-    }
-    return (right+left)/2;
-}
 
 TEST_CASE("Test golden section search", "[CollisionModels][Math]") {
 
@@ -101,9 +85,9 @@ TEST_CASE("Test golden section search", "[CollisionModels][Math]") {
         dummyB.setEpsilon(2.5e-22); 
 
 
-        double result = goldenSectionSearch<const CollisionModel::Atom&>(dummyA, dummyB, 
+        double result = Core::goldenSectionSearch<const CollisionModel::Atom&>(dummyA, dummyB, 
                                                  testFunc, 0, 3, 1e-10);
-        double result2 = goldenSectionSearch<const CollisionModel::Atom&>(dummyA, dummyB, 
+        double result2 = Core::goldenSectionSearch<const CollisionModel::Atom&>(dummyA, dummyB, 
                                                CollisionModel::MDForceField_Buckingham::calculateVDW, 0.5e-10, 1.5e-10, 1e-22);
                                             
         REQUIRE(result == Approx(1.5708));
