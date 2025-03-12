@@ -30,12 +30,14 @@
 
 #include "CollisionModel_Atom.hpp"
 #include <unordered_map>
+#include <iostream>
 
 namespace CollisionModel{
     template <typename valueType> class AtomInteractionMap {
     public:
         void insert(const Atom &atomA, const Atom &atomB, valueType value);
         valueType get(const Atom &atomA, const Atom &atomB);
+        int size();
         //valueType operator[](const Atom &atomA, const Atom &atomB);
 
     private:
@@ -78,6 +80,11 @@ namespace CollisionModel{
         const Atom* pAtomU;
         orderAtomPointers_(atomA, atomB, pAtomL, pAtomU);
         return valueMap_.at(pAtomL).at(pAtomU);
+    }
+
+    template<typename valueType>
+    int CollisionModel::AtomInteractionMap<valueType>::size(){
+        return valueMap_.size();
     }
 }
 
