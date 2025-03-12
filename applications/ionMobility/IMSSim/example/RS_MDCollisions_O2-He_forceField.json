@@ -1,6 +1,6 @@
 {
   "random_seed": 100,
-  "sim_time_steps":0,
+  "sim_time_steps":100,
   "dt_s":1.0e-11,
   "concentrations_write_interval":10,
   "trajectory_write_interval":50,
@@ -32,5 +32,6 @@
   "trajectory_distance_m":25e-10,
   "trajectory_start_time_step":0
 }
+
 
 
