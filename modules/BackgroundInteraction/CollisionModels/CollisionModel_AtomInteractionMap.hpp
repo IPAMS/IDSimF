@@ -37,53 +37,55 @@ namespace CollisionModel{
     public:
         void insert(const Atom &atomA, const Atom &atomB, valueType value);
         valueType get(const Atom &atomA, const Atom &atomB);
-        int size();
+        int size() const;
         //valueType operator[](const Atom &atomA, const Atom &atomB);
 
     private:
-        std::unordered_map<const Atom*, std::unordered_map<const Atom*, double>> valueMap_;
+        std::unordered_map<std::size_t, std::unordered_map<std::size_t, double>> valueMap_;
 
-        static void orderAtomPointers_(const Atom &atomA, const Atom &atomB, const Atom* &pAtomL, const Atom* &pAtomU);
+        static void orderAtomPointers_(const Atom &atomA, const Atom &atomB, std::size_t& indexAtomL, std::size_t& indexAtomU);
     };
 
     template<typename valueType>
-    void AtomInteractionMap<valueType>::orderAtomPointers_(const Atom& atomA, const Atom& atomB, const Atom* &pAtomL, const Atom* &pAtomU) {
-        if (&atomA < &atomB) {
-            pAtomL = &atomA;
-            pAtomU = &atomB;
+    void AtomInteractionMap<valueType>::orderAtomPointers_(const Atom& atomA, const Atom& atomB, std::size_t& indexAtomL, std::size_t& indexAtomU) {
+        std::size_t indexA = atomA.getSpeciesIndex();
+        std::size_t indexB = atomB.getSpeciesIndex();
+        if (indexA < indexB) {
+            indexAtomL = indexA;
+            indexAtomU = indexB;
         }
         else {
-            pAtomL = &atomB;
-            pAtomU = &atomA;
+            indexAtomL = indexB;
+            indexAtomU = indexA;
         }
     }
 
     template<typename valueType>
     void CollisionModel::AtomInteractionMap<valueType>::insert(const Atom &atomA, const Atom &atomB, valueType value) {
-        // we use the atom pointer with the lower value as first "dimension" of the
-        const Atom* pAtomL;
-        const Atom* pAtomU;
-        orderAtomPointers_(atomA, atomB, pAtomL, pAtomU);
+        // we use the lower species index first "dimension" of the mapping
+        std::size_t indexAtomL;
+        std::size_t indexAtomU;
+        orderAtomPointers_(atomA, atomB, indexAtomL, indexAtomU);
 
-        if (auto valueL = valueMap_.find(pAtomL); valueL != valueMap_.end()) {
-            valueL->second.insert({pAtomU, value}); //note: re assignments are silently ignored!!
+        if (auto valueL = valueMap_.find(indexAtomL); valueL != valueMap_.end()) {
+            valueL->second.insert({indexAtomU, value}); //note: re assignments are silently ignored!!
         }
         else {
-            valueMap_.emplace(pAtomL, 0);
-            valueMap_.at(pAtomL).insert({pAtomU, value});
+            valueMap_.emplace(indexAtomL, 0);
+            valueMap_.at(indexAtomL).insert({indexAtomU, value});
         }
     }
 
     template<typename valueType>
     valueType CollisionModel::AtomInteractionMap<valueType>::get(const Atom &atomA, const Atom &atomB) {
-        const Atom* pAtomL;
-        const Atom* pAtomU;
-        orderAtomPointers_(atomA, atomB, pAtomL, pAtomU);
-        return valueMap_.at(pAtomL).at(pAtomU);
+        std::size_t indexAtomL;
+        std::size_t indexAtomU;
+        orderAtomPointers_(atomA, atomB, indexAtomL, indexAtomU);
+        return valueMap_.at(indexAtomL).at(indexAtomU);
     }
 
     template<typename valueType>
-    int CollisionModel::AtomInteractionMap<valueType>::size(){
+    int CollisionModel::AtomInteractionMap<valueType>::size() const{
         return valueMap_.size();
     }
 }

@@ -40,7 +40,7 @@ namespace CollisionModel{
 
     public:
 
-        enum class AtomType : int {C, O, N, H, He, Ar, Cl, Li, Sn, COM}; // NOTE: This might not be necessary when directly saving the LJ params 
+        enum class AtomType : int {C, O, N, H, He, Ar, Cl, Li, Sn, COM}; // NOTE: Currently only COM is used to flag a center of mass dummy atom
         static AtomType from_string(std::string str); // Returns enum based on string 
 
         // Constructors
@@ -48,12 +48,13 @@ namespace CollisionModel{
         ~Atom() = default;
         Atom(const Core::Vector &relPos, double massAMU, double chargeElemCharges);
         Atom(const Core::Vector &relPos, double massAMU, double chargeElemCharges, double partChargeElemCharges);
-        Atom(const Core::Vector &relPos, double massAMU, double chargeElemCharges, double partChargeElemCharges, AtomType element, double sig, double eps);
+        Atom(const Core::Vector &relPos, double massAMU, double chargeElemCharges, double partChargeElemCharges, AtomType element, std::size_t speciesIndex, double sig, double eps);
 
         //Setter 
         void setRelativePosition(Core::Vector relPos);
         void setMass(double massAMU);
         void setType(AtomType element);
+        void setSpeciesIndex(std::size_t);
         void setSigma(double sig);
         void setEpsilon(double eps);
         void setCharge(double chargeElemCharges);
@@ -63,6 +64,7 @@ namespace CollisionModel{
         Core::Vector& getRelativePosition();
         double getMass() const;
         AtomType getType() const;
+        std::size_t getSpeciesIndex() const;
         double getSigma() const;
         double getEpsilon() const;
         double getCharge() const;
@@ -85,6 +87,7 @@ namespace CollisionModel{
         double mass = 0.0; // Mass of the atom [kg]
         double charge = 0.0; // Charge [C]
         double partialCharge = 0.0; // Partial charge for dipole moments [C]
+        std::size_t atomSpeciesIndex_ = 0; // A numerical index / unique key for the atomic species
         AtomType type = AtomType::H; // Element of the atom 
         double sigma = 0.0; // Lennard Jones parameter sigma w.r.t its own type [m]
         double epsilon = 0.0; // Lennard Jones parameter epsilon w.r.t its own type [J]

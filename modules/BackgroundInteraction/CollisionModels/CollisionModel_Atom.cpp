@@ -54,17 +54,19 @@ CollisionModel::Atom::Atom(const Core::Vector &relPos, double massAMU, double ch
  * @param massAMU the mass of the atom (in units of atomic mass)
  * @param chargeElemCharges the charge of the atom (in units of elementary charges)
  * @param partChargeElemCharges the partial charge of the atom (in units of elementary charge)
- * @param element the atom type 
+ * @param element the atom type
+ * @param speciesIndex a unique numerical ID for the atomic species of this atom
  * @param sig the Lennard-Jones parameter sigma of the atom (in units of meter)
  * @param eps the Lennard-Jones parameter epsilon of the atom (in units of Joule)
  */
 CollisionModel::Atom::Atom(const Core::Vector &relPos, double massAMU, double chargeElemCharges, double partChargeElemCharges, 
-                            CollisionModel::Atom::AtomType element, double sig, double eps):
+                            CollisionModel::Atom::AtomType element, std::size_t speciesIndex, double sig, double eps):
     relativePosition(relPos),
     mass(massAMU * Core::AMU_TO_KG),
     charge(chargeElemCharges * Core::ELEMENTARY_CHARGE),
     partialCharge(partChargeElemCharges * Core::ELEMENTARY_CHARGE),
     type(element),
+    atomSpeciesIndex_(speciesIndex),
     sigma(sig),
     epsilon(eps)
 {}
@@ -89,6 +91,13 @@ void CollisionModel::Atom::setMass(double massAMU){
  */
 void CollisionModel::Atom::setType(CollisionModel::Atom::AtomType element){
     this->type = element;
+}
+
+/**
+ * Sets the numeric species index
+ */
+void CollisionModel::Atom::setSpeciesIndex(std::size_t speciesIndex) {
+    this->atomSpeciesIndex_ = speciesIndex;
 }
 
 /**
@@ -140,6 +149,13 @@ double CollisionModel::Atom::getMass() const{
  */
 CollisionModel::Atom::AtomType CollisionModel::Atom::getType() const{
     return type;
+}
+
+/**
+ * Get numeric atomic species index
+ */
+std::size_t CollisionModel::Atom::getSpeciesIndex() const {
+    return atomSpeciesIndex_;
 }
 
 /**

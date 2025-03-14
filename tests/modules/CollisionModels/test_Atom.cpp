@@ -70,14 +70,15 @@ TEST_CASE("Basic Atom construction tests", "[CollisionModels][Atom]") {
     }
 
     SECTION("Constructor with position, mass, (partial) charge and LJ parameter"){
-        CollisionModel::Atom atm = CollisionModel::Atom(Core::Vector(0.5, 0.1, -0.2), 4, -1.0, 2.0, 
-                                    CollisionModel::Atom::AtomType::Ar, 1.6, 0.02);
+        CollisionModel::Atom atm = CollisionModel::Atom(Core::Vector(0.5, 0.1, -0.2), 4, -1.0, 2.0,
+                                    CollisionModel::Atom::AtomType::Ar,100, 1.6, 0.02);
 
         CHECK(atm.getRelativePosition() == Core::Vector(0.5, 0.1, -0.2));
         CHECK(isExactDoubleEqual(atm.getCharge(), -1.0*Core::ELEMENTARY_CHARGE));
         CHECK(isExactDoubleEqual(atm.getMass(), 4*Core::AMU_TO_KG));
         CHECK(isExactDoubleEqual(atm.getPartCharge(), 2.0*Core::ELEMENTARY_CHARGE));
         CHECK(atm.getType() == CollisionModel::Atom::AtomType::Ar);
+        CHECK(atm.getSpeciesIndex() == 100);
         CHECK(isExactDoubleEqual(atm.getSigma(), 1.6));
         CHECK(isExactDoubleEqual(atm.getEpsilon(), 0.02));
     }
@@ -85,7 +86,7 @@ TEST_CASE("Basic Atom construction tests", "[CollisionModels][Atom]") {
 
 TEST_CASE("Basic Atom setter tests", "[CollisionModels][Atom]") {
     CollisionModel::Atom atm = CollisionModel::Atom(Core::Vector(0.5, 0.1, -0.2), 4.003, -1.0, 0.2, 
-                                    CollisionModel::Atom::AtomType::Ar, 1.6, 0.02);
+                                    CollisionModel::Atom::AtomType::Ar,1, 1.6, 0.02);
     
     atm.setRelativePosition(Core::Vector(0.1, 0.1, 0.1));
     CHECK(atm.getRelativePosition() == Core::Vector(0.1, 0.1, 0.1));
