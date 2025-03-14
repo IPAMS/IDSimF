@@ -94,6 +94,13 @@ void CollisionModel::Atom::setType(CollisionModel::Atom::AtomType element){
 }
 
 /**
+ * Sets the numeric species index
+ */
+void CollisionModel::Atom::setSpeciesIndex(std::size_t speciesIndex) {
+    this->atomSpeciesIndex_ = speciesIndex;
+}
+
+/**
  * Sets new LJ parameter sigma
  */
 void CollisionModel::Atom::setSigma(double sig){

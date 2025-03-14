@@ -54,6 +54,7 @@ namespace CollisionModel{
         void setRelativePosition(Core::Vector relPos);
         void setMass(double massAMU);
         void setType(AtomType element);
+        void setSpeciesIndex(std::size_t);
         void setSigma(double sig);
         void setEpsilon(double eps);
         void setCharge(double chargeElemCharges);

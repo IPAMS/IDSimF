@@ -36,8 +36,11 @@ TEST_CASE( "Test atom interaction map", "[CollisionModels][AtomInteractionMap]")
         CollisionModel::AtomInteractionMap<double> interactionMap;
 
         CollisionModel::Atom atomH({1.0, 0.0, 0.0}, 1.0, 1.0);
+        atomH.setSpeciesIndex(0);
         CollisionModel::Atom atomHe({0.0, 1.0, 0.0}, 4.0, 1.0);
+        atomHe.setSpeciesIndex(100);
         CollisionModel::Atom atomNe({0.0, 0.0, 1.0}, 20.0, 1.0);
+        atomNe.setSpeciesIndex(11);
 
         interactionMap.insert(atomH, atomHe, 2.0);
         CHECK(interactionMap.get(atomH, atomHe) == Approx(2.0));
