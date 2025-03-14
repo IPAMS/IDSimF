@@ -42,6 +42,7 @@ std::unordered_map<std::string,  std::shared_ptr<CollisionModel::MolecularStruct
         
         std::unordered_map<std::string,  std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection;
 
+        std::size_t nParsedAtoms = 0;
         for (Json::Value::ArrayIndex i = 0; i != confRoot.size(); i++){
             std::shared_ptr<CollisionModel::MolecularStructure> molstrPtr = 
                                     std::make_shared<CollisionModel::MolecularStructure>();
@@ -56,12 +57,13 @@ std::unordered_map<std::string,  std::shared_ptr<CollisionModel::MolecularStruct
             for (Json::Value::ArrayIndex j = 0; j != confRoot[i]["atoms"].size(); j++){
                 std::shared_ptr<CollisionModel::Atom> atm = std::make_shared<CollisionModel::Atom>(
                     Core::Vector(confRoot[i]["atoms"][j]["posx"].asDouble()*1E-10, 
-                        confRoot[i]["atoms"][j]["posy"].asDouble()*1E-10, 
+                        confRoot[i]["atoms"][j]["posy"].asDouble()*1E-10,
                         confRoot[i]["atoms"][j]["posz"].asDouble()*1E-10), //location in angström -> m
                     confRoot[i]["atoms"][j]["mass"].asDouble(), // mass in amu
                     confRoot[i]["atoms"][j]["charge"].asDouble(), // charge in e
                     confRoot[i]["atoms"][j]["partCharge"].asDouble(), // part. charge in e
                     CollisionModel::Atom::from_string(confRoot[i]["atoms"][j]["type"].asString()), // Atom type
+                    nParsedAtoms, //use order of atoms in the config file as species index
                     confRoot[i]["atoms"][j]["LJsigma"].asDouble() * 1E-10,  // sigma in angström -> m
                     confRoot[i]["atoms"][j]["LJeps"].asDouble() * 1E3 / Core::N_AVOGADRO  // epsilon in kJ/mol -> J
                 );
@@ -69,12 +71,13 @@ std::unordered_map<std::string,  std::shared_ptr<CollisionModel::MolecularStruct
                 auto it = molecularStructureCollection.find(name);
                 if (it != molecularStructureCollection.end()) {
                     it->second->addAtom(atm);
+                    nParsedAtoms++;
                 }
             }
         }
         
         return molecularStructureCollection;
-        
+
     }
     else{
         throw  std::runtime_error("file not found");

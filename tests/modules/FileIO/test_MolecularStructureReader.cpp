@@ -44,7 +44,10 @@ TEST_CASE("Test molecular structure reader", "[ParticleSimulation][MolecularStru
         CHECK(it1->second->getAtomCount() == 2);
         CHECK(isExactDoubleEqual(it1->second->getDiameter(), 4e-10));
         CHECK(isExactDoubleEqual(it1->second->getAtoms().at(0)->getMass(), 39.948 * Core::AMU_TO_KG));
+        CHECK(it1->second->getAtoms().at(0)->getSpeciesIndex() == 0);
+        CHECK(it1->second->getAtoms().at(1)->getSpeciesIndex() == 1);
         auto it2 = molecularStructureCollection.find("He");
         CHECK(it2 != molecularStructureCollection.end());
+        CHECK(it2->second->getAtoms().at(0)->getSpeciesIndex() == 2);
     }
 }
