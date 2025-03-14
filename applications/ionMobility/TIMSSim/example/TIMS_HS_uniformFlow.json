@@ -10,7 +10,7 @@
   "flow_mode": "uniform",
   "background_temperature_K":298,
   "background_pressure_Pa":2000,
-  "background_velocity_x_ms-1": -40,
+  "background_velocity_ms-1": [-40,0,0],
   "confining_RF_frequency_Hz": 2.8e6,
   "confining_RF_amplitude_V": 400,
   "gate_open_time_s": 6e-06,
