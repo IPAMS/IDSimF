@@ -33,7 +33,7 @@
 #include <limits>
 #include "CollisionModel_MathFunctions.hpp"
 
-CollisionModel::MDInteractionsModelPreconstructed::MDInteractionsModelPreconstructed(double staticPressure,
+/*CollisionModel::MDInteractionsModelPreconstructed::MDInteractionsModelPreconstructed(double staticPressure,
                                                         double staticTemperature,
                                                         double collisionGasMassAmu,
                                                         double collisionGasDiameterM, 
@@ -169,50 +169,47 @@ CollisionModel::MDInteractionsModelPreconstructed::MDInteractionsModelPreconstru
                                                         double spawnRadius,
                                                         std::unique_ptr<CollisionModel::AbstractMDForceField> forceField,
                                                         std::unordered_map<std::string,
-                                                        std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection) :
+                                                        std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection,
+                                                        Core::Vector startPosition,
+                                                        Core::Vector startVelocity) :
 
-        collisionGasMass_kg_(collisionGasMassAmu*Core::AMU_TO_KG),
+        //collisionGasMass_kg_(collisionGasMassAmu*Core::AMU_TO_KG),
         collisionGasDiameter_m_(collisionGasDiameterM),
         collisionMolecule_(collisionMolecule),
         integrationTime_(integrationTime),
         subTimeStep_(subTimeStep),
         collisionRadiusScaling_(collisionRadiusScaling),
-        angleThetaScaling_(angleThetaScaling),
-        spawnRadius_(spawnRadius),
-        pressureFunction_(std::move(pressureFunction)),
-        velocityFunction_(std::move(velocityFunction)),
-        temperatureFunction_(std::move(temperatureFunction)),
+        //angleThetaScaling_(angleThetaScaling),
+        //spawnRadius_(spawnRadius),
+        //pressureFunction_(std::move(pressureFunction)),
+        //velocityFunction_(std::move(velocityFunction)),
+        //temperatureFunction_(std::move(temperatureFunction)),
         forceField_(std::move(forceField)),
-        molecularStructureCollection_(std::move(molecularStructureCollection)) {}
-
-CollisionModel::MDInteractionsModelPreconstructed::MDInteractionsModelPreconstructed(std::function<double(Core::Vector& location)> pressureFunction,
-                                                        std::function<Core::Vector(Core::Vector& location)> velocityFunction,
-                                                        std::function<double(const Core::Vector&)> temperatureFunction,
-                                                        double collisionGasMassAmu,
+        molecularStructureCollection_(std::move(molecularStructureCollection),
+        startPosition_(startPosition),
+    startVelocity_(startVelocity)){}
+*/
+CollisionModel::MDInteractionsModelPreconstructed::MDInteractionsModelPreconstructed(
                                                         double collisionGasDiameterM,
                                                         std::string collisionMolecule,
                                                         double integrationTime,
                                                         double subTimeStep,
                                                         double collisionRadiusScaling,
-                                                        double angleThetaScaling,
-                                                        double spawnRadius,
+                                                        //double angleThetaScaling,
+                                                        //double spawnRadius,
                                                         std::unique_ptr<CollisionModel::AbstractMDForceField> forceField,
                                                         std::unordered_map<std::string,
                                                         std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection,
                                                         Core::Vector startPosition, 
                                                         Core::Vector startVelocity) :
 
-        collisionGasMass_kg_(collisionGasMassAmu*Core::AMU_TO_KG),
         collisionGasDiameter_m_(collisionGasDiameterM),
         collisionMolecule_(collisionMolecule),
         integrationTime_(integrationTime),
         subTimeStep_(subTimeStep),
         collisionRadiusScaling_(collisionRadiusScaling),
-        angleThetaScaling_(angleThetaScaling),
-        spawnRadius_(spawnRadius),
-        pressureFunction_(std::move(pressureFunction)),
-        velocityFunction_(std::move(velocityFunction)),
-        temperatureFunction_(std::move(temperatureFunction)),
+        //angleThetaScaling_(angleThetaScaling),
+        //spawnRadius_(spawnRadius),
         forceField_(std::move(forceField)),
         molecularStructureCollection_(std::move(molecularStructureCollection)),
         startPosition_(startPosition), 
@@ -323,9 +320,6 @@ void CollisionModel::MDInteractionsModelPreconstructed::modifyVelocity(Core::Par
  
     bool trajectorySuccess = false;
     int iterations = 0;
-    double spawnRad = spawnRadius_;
-    //double collisionTheta = std::asin(collisionRadius / spawnRad);
-
 
     do{
         // Collision happens
