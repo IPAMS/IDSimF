@@ -81,24 +81,9 @@ namespace CollisionModel{
 
         bool rk4InternAdaptiveStep(std::vector<CollisionModel::Molecule*> moleculesPtr, double dt, double finalTime, double requiredRad);
 
-        void initializeModelParticleParameters(Core::Particle& ion) const;
-
-        void updateModelParticleParameters(Core::Particle& ion) const;
-
         void updateModelTimestepParameters(unsigned int timestep, double time);
 
-        void modifyAcceleration(Core::Vector& acceleration,
-                                        Core::Particle& particle,
-                                        double dt);
-                                    
         void modifyVelocity(Core::Particle& particle);
-
-        void modifyVelocity(Core::Particle& particle,
-                                    double dt);
-
-        void modifyPosition(Core::Vector& position,
-                                    Core::Particle& particle,
-                                    double dt);
 
 
     private:

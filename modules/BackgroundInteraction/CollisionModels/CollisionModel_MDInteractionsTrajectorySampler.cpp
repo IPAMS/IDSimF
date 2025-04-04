@@ -111,14 +111,6 @@ void CollisionModel::MDInteractionsTrajectorySampler::writeTrajectoryDelimiter_(
 }
 
 
-void CollisionModel::MDInteractionsTrajectorySampler::initializeModelParticleParameters(Core::Particle& /*ion*/) const {
-
-}
-
-void CollisionModel::MDInteractionsTrajectorySampler::updateModelParticleParameters(Core::Particle& /*ion*/) const {
-
-}
-
 void CollisionModel::MDInteractionsTrajectorySampler::updateModelTimestepParameters(unsigned int timestep, double /*time*/) {
     
     if (modelRecordsTrajectories_ && timestep > recordTrajectoryStartTimeStep_){
@@ -126,10 +118,6 @@ void CollisionModel::MDInteractionsTrajectorySampler::updateModelTimestepParamet
     }
 }
 
-void CollisionModel::MDInteractionsTrajectorySampler::modifyAcceleration(Core::Vector& /*acceleration*/, Core::Particle& /*particle*/,
-                                                         double /*dt*/) {
-
-}
 
 void CollisionModel::MDInteractionsTrajectorySampler::modifyVelocity(Core::Particle& particle) {
     
@@ -187,15 +175,6 @@ void CollisionModel::MDInteractionsTrajectorySampler::modifyVelocity(Core::Parti
     if(trajectorySuccess == false){
         std::cerr << "No trajectory that hit the collision sphere was found.\n";
     }
-}
-
-void CollisionModel::MDInteractionsTrajectorySampler::modifyVelocity(Core::Particle& particle, double dt) {
-    throw (std::runtime_error("Modify velocity in MDInteractionsPreconstructed with time step length not implemented"));
-
-}
-
-void CollisionModel::MDInteractionsTrajectorySampler::modifyPosition(Core::Vector& /*position*/, Core::Particle& /*particle*/, double /*dt*/) {
-
 }
 
 bool CollisionModel::MDInteractionsTrajectorySampler::leapfrogIntern(std::vector<CollisionModel::Molecule*> moleculesPtr, double dt, double finalTime, double requiredRad){
