@@ -22,6 +22,8 @@ set(SOURCE_FILES
         CollisionModel_MDInteractions.cpp
         CollisionModel_MDInteractionsPreconstructed.cpp
         CollisionModel_MDInteractionsPreconstructed.hpp
+        CollisionModel_MDInteractionsTrajectorySampler.cpp
+        CollisionModel_MDInteractionsTrajectorySampler.hpp
         CollisionModel_MDInteractions.hpp
         CollisionModel_AbstractMDForceField.cpp
         CollisionModel_AbstractMDForceField.hpp
