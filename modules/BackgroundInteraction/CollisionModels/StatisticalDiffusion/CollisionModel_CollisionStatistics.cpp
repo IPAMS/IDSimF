@@ -21,7 +21,7 @@
 
 #include "CollisionModel_CollisionStatistics.hpp"
 #include "CollisionStatistic_default.hpp"
-#include "CollisionModel_MathFunctions.hpp"
+#include "../CollisionModel_MathFunctions.hpp"
 #include <algorithm>
 #include <regex>
 
