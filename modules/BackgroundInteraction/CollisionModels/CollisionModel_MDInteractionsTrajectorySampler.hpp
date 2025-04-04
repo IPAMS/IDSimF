@@ -70,9 +70,6 @@ namespace CollisionModel{
                                  unsigned int startTimeStep=0,
                                  double minimalSampleInterval=0);
 
-        double calcSign(double value);
-
-        void rotate(const Core::Vector &angles, Core::Vector& position);
 
         void writeTrajectory(double distance, Core::Vector positionBgMolecule, Core::Vector velocityBgMolecule, 
                         std::vector<Core::Vector> forceMolecules, bool endOfTrajectory, std::ofstream* file, double time, double dt,
