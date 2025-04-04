@@ -21,25 +21,12 @@
  ------------
  CollisionModel_MDInteractions.hpp
 
- Molecular collision model including LJ-12-6 potential and additionally ion-induced dipole as well as ion-permanent
- dipole interactions. Initial collisions are "constructed" through the hard sphere approach.
-
- This model follows the modelling of the HS1 collision model by David Manura,
- for SIMION 8.0 (Scientific Instrument Services, Inc.).
- https://simion.com/
- https://simion.com/info/collision_model_hs1.html
-
- Earlier hard sphere collision models:
-1. Appelhans, A.D., Dahl, D.A.: Measurement of external ion injection and trapping efficiency in the ion
- trap mass spectrometer and comparison with a predictive model.
- International Journal of Mass Spectrometry. 216, 269–284 (2002). https://doi.org/10.1016/S1387-3806(02)00627-9
-2. Ding, L., Sudakov, M., Kumashiro, S.: A simulation study of the digital ion trap mass spectrometer.
- International Journal of Mass Spectrometry. 221, 117–138 (2002). https://doi.org/10.1016/S1387-3806(02)00921-1
+ Code and method development / experimental methods for molecular dynamics collisions
 
  ****************************/
 
-#ifndef IDSIMF_COLLISIONMODEL_MDINTERACTIONS_PRECONSTRUCTED_H
-#define IDSIMF_COLLISIONMODEL_MDINTERACTIONS_PRECONSTRUCTED_H
+#ifndef IDSIMF_COLLISIONMODEL_MDINTERACTIONS_EXPERIMENTAL_H
+#define IDSIMF_COLLISIONMODEL_MDINTERACTIONS_EXPERIMENTAL_H
 
 #include "Core_constants.hpp"
 #include "CollisionModel_AbstractCollisionModel.hpp"
@@ -55,13 +42,13 @@
 
 namespace CollisionModel{
 
-    class MDInteractionsModelPreconstructed : public AbstractCollisionModel {
+    class MDInteractionsModelExperimental : public AbstractCollisionModel {
 
     public:
         constexpr static double DIAMETER_N2 = 3.64e-10;
         constexpr static double DIAMETER_HE = 2.80e-10;
 
-        MDInteractionsModelPreconstructed() = default;
+        MDInteractionsModelExperimental() = default;
         
         /*MDInteractionsModelPreconstructed(
             double staticPressure,
@@ -144,7 +131,7 @@ namespace CollisionModel{
             Core::Vector startPosition,
             Core::Vector startVelocity);*/
 
-        MDInteractionsModelPreconstructed(
+        MDInteractionsModelExperimental(
             double collisionGasDiameterM, 
             std::string collisionMolecule,
             double integrationTime,
@@ -223,4 +210,4 @@ namespace CollisionModel{
 
 }
 
-#endif //IDSIMF_COLLISIONMODEL_MDINTERACTIONS_PRECONSTRUCTED_H
+#endif //IDSIMF_COLLISIONMODEL_MDINTERACTIONS_EXPERIMENTAL_H

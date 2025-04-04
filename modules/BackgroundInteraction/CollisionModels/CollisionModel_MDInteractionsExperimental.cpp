@@ -19,7 +19,7 @@
  along with IDSimF.  If not, see <https://www.gnu.org/licenses/>.
  ****************************/
 
-#include "CollisionModel_MDInteractionsPreconstructed.hpp"
+#include "CollisionModel_MDInteractionsExperimental.hpp"
 #include "Core_math.hpp"
 #include "Core_utils.hpp"
 #include "Core_randomGenerators.hpp"
@@ -189,7 +189,7 @@ CollisionModel::MDInteractionsModelPreconstructed::MDInteractionsModelPreconstru
         startPosition_(startPosition),
     startVelocity_(startVelocity)){}
 */
-CollisionModel::MDInteractionsModelPreconstructed::MDInteractionsModelPreconstructed(
+CollisionModel::MDInteractionsModelExperimental::MDInteractionsModelExperimental(
                                                         double collisionGasDiameterM,
                                                         std::string collisionMolecule,
                                                         double integrationTime,
@@ -219,7 +219,7 @@ CollisionModel::MDInteractionsModelPreconstructed::MDInteractionsModelPreconstru
  * @param trajectoryFileName
  * @param trajectoryDistance
  */
-void CollisionModel::MDInteractionsModelPreconstructed::setTrajectoryWriter(const std::string& trajectoryFileName,
+void CollisionModel::MDInteractionsModelExperimental::setTrajectoryWriter(const std::string& trajectoryFileName,
                                                               double trajectoryDistance,
                                                               unsigned int recordTrajectoryStartTimestep) {
 
@@ -236,7 +236,7 @@ void CollisionModel::MDInteractionsModelPreconstructed::setTrajectoryWriter(cons
     }
 }
 
-double CollisionModel::MDInteractionsModelPreconstructed::calcSign(double value){
+double CollisionModel::MDInteractionsModelExperimental::calcSign(double value){
     if(value > 0){
         return 1.;
     }else if(value < 0){
@@ -246,7 +246,7 @@ double CollisionModel::MDInteractionsModelPreconstructed::calcSign(double value)
     }
 }
 
-void CollisionModel::MDInteractionsModelPreconstructed::rotate(const Core::Vector &angles, Core::Vector& position){
+void CollisionModel::MDInteractionsModelExperimental::rotate(const Core::Vector &angles, Core::Vector& position){
     
     double tmp_x = angles.x();
     double tmp_y = angles.y();
@@ -267,7 +267,7 @@ void CollisionModel::MDInteractionsModelPreconstructed::rotate(const Core::Vecto
     position.z(new_rel_z);
 }  
 
-void CollisionModel::MDInteractionsModelPreconstructed::writeTrajectory(double distance, Core::Vector positionBgMolecule, Core::Vector velocityBgMolecule, 
+void CollisionModel::MDInteractionsModelExperimental::writeTrajectory(double distance, Core::Vector positionBgMolecule, Core::Vector velocityBgMolecule, 
                         std::vector<Core::Vector> forceMolecules, bool endOfTrajectory, std::ofstream* file, double time, double dt, 
                         Core::Vector positionMolecule){
     *file << positionBgMolecule.x() << ", " 
@@ -294,27 +294,27 @@ void CollisionModel::MDInteractionsModelPreconstructed::writeTrajectory(double d
     }
 }
 
-void CollisionModel::MDInteractionsModelPreconstructed::initializeModelParticleParameters(Core::Particle& /*ion*/) const {
+void CollisionModel::MDInteractionsModelExperimental::initializeModelParticleParameters(Core::Particle& /*ion*/) const {
 
 }
 
-void CollisionModel::MDInteractionsModelPreconstructed::updateModelParticleParameters(Core::Particle& /*ion*/) const {
+void CollisionModel::MDInteractionsModelExperimental::updateModelParticleParameters(Core::Particle& /*ion*/) const {
 
 }
 
-void CollisionModel::MDInteractionsModelPreconstructed::updateModelTimestepParameters(unsigned int timestep, double /*time*/) {
+void CollisionModel::MDInteractionsModelExperimental::updateModelTimestepParameters(unsigned int timestep, double /*time*/) {
     
     if (modelRecordsTrajectories_ && timestep > recordTrajectoryStartTimeStep_){
         trajectoryRecordingActive_ = true;
     }
 }
 
-void CollisionModel::MDInteractionsModelPreconstructed::modifyAcceleration(Core::Vector& /*acceleration*/, Core::Particle& /*particle*/,
+void CollisionModel::MDInteractionsModelExperimental::modifyAcceleration(Core::Vector& /*acceleration*/, Core::Particle& /*particle*/,
                                                          double /*dt*/) {
 
 }
 
-void CollisionModel::MDInteractionsModelPreconstructed::modifyVelocity(Core::Particle& particle) {
+void CollisionModel::MDInteractionsModelExperimental::modifyVelocity(Core::Particle& particle) {
     
     double collisionRadius = collisionRadiusScaling_*(particle.getDiameter() + collisionGasDiameter_m_)/2.0;
  
@@ -370,16 +370,16 @@ void CollisionModel::MDInteractionsModelPreconstructed::modifyVelocity(Core::Par
     }
 }
 
-void CollisionModel::MDInteractionsModelPreconstructed::modifyVelocity(Core::Particle& particle, double dt) {
+void CollisionModel::MDInteractionsModelExperimental::modifyVelocity(Core::Particle& particle, double dt) {
     Core::RandomSource* rndSource = Core::globalRandomGeneratorPool->getThreadRandomSource();
 
 }
 
-void CollisionModel::MDInteractionsModelPreconstructed::modifyPosition(Core::Vector& /*position*/, Core::Particle& /*particle*/, double /*dt*/) {
+void CollisionModel::MDInteractionsModelExperimental::modifyPosition(Core::Vector& /*position*/, Core::Particle& /*particle*/, double /*dt*/) {
 
 }
 
-bool CollisionModel::MDInteractionsModelPreconstructed::leapfrogIntern(std::vector<CollisionModel::Molecule*> moleculesPtr, double dt, double finalTime, double requiredRad){
+bool CollisionModel::MDInteractionsModelExperimental::leapfrogIntern(std::vector<CollisionModel::Molecule*> moleculesPtr, double dt, double finalTime, double requiredRad){
 
   
     bool wasHit = false;
@@ -471,7 +471,7 @@ bool CollisionModel::MDInteractionsModelPreconstructed::leapfrogIntern(std::vect
 
 }
 
-bool CollisionModel::MDInteractionsModelPreconstructed::rk4Intern(std::vector<CollisionModel::Molecule*> moleculesPtr, double dt, double finalTime,
+bool CollisionModel::MDInteractionsModelExperimental::rk4Intern(std::vector<CollisionModel::Molecule*> moleculesPtr, double dt, double finalTime,
                                                                     double requiredRad){
 
 
@@ -599,7 +599,7 @@ bool CollisionModel::MDInteractionsModelPreconstructed::rk4Intern(std::vector<Co
 }
 
 
-bool CollisionModel::MDInteractionsModelPreconstructed::rk4InternAdaptiveStep(std::vector<CollisionModel::Molecule*> moleculesPtr, double dt, double finalTime,
+bool CollisionModel::MDInteractionsModelExperimental::rk4InternAdaptiveStep(std::vector<CollisionModel::Molecule*> moleculesPtr, double dt, double finalTime,
                                                                     double requiredRad){
 
     double integrationTimeSum = 0;

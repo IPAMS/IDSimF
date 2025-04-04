@@ -25,7 +25,7 @@
 
  ****************************/
 
-#include "CollisionModel_MDInteractionsPreconstructed.hpp"
+#include "CollisionModel_MDInteractionsExperimental.hpp"
 #include "CollisionModel_Molecule.hpp"
 #include "CollisionModel_Atom.hpp"
 #include "Core_randomGenerators.hpp"
@@ -105,8 +105,8 @@ int main(int argc, const char * argv[]) {
         std::cout << "i:"<<i<<std::endl;
         CollisionModel::MDForceField_Buckingham forceField(collisionGasPolarizability_m3, potentialsFF);
         auto forceFieldPtr = std::make_unique<CollisionModel::MDForceField_Buckingham>(forceField);
-        CollisionModel::MDInteractionsModelPreconstructed mdSim = 
-                                                            CollisionModel::MDInteractionsModelPreconstructed(backgroundPartialPressures_Pa, 
+        CollisionModel::MDInteractionsModelExperimental mdSim = 
+                                                            CollisionModel::MDInteractionsModelExperimental(backgroundPartialPressures_Pa, 
                                                                                                                 backgroundTemperature_K, 
                                                                                                                 collisionGasMasses_Amu, 
                                                                                                                 collisionGasDiameters_angstrom,
