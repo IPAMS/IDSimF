@@ -8,6 +8,7 @@
   "potential_array_scale": 0.0002,
   "potential_configuration": "PotentialConfiguration/tims_potential_configuration_noDC.csv",
   "flow_mode": "static_field",
+  "flow_field_scale": 0.0002,
   "flow_fields_corner_position": [0.0, -0.0039, -0.0039],
   "flow_field": ["FlowFields/TIMS_3d_vx.pa", "FlowFields/TIMS_3d_vy.pa", "FlowFields/TIMS_3d_vz.pa"],
   "pressure_field": ["FlowFields/TIMS_3d_p.pa"],

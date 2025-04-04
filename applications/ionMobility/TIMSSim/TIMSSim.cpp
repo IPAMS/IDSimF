@@ -94,7 +94,7 @@ int main(int argc, const char * argv[]) {
         double startWidthY_m = startWidth_mm[1]/1000.0;
         double startWidthZ_m = startWidth_mm[2]/1000.0;
 
-        double paSpatialScale = simConf->doubleParameter("potential_array_scale"); // is used for all PAs in the simulation
+        double paSpatialScale = simConf->doubleParameter("potential_array_scale"); // is used for all electric PAs in the simulation
 
         // parameters of the TIMS potentials / voltages
         double gateOpenTime = simConf->doubleParameter("gate_open_time_s");
@@ -103,6 +103,16 @@ int main(int argc, const char * argv[]) {
         double gradientStartTime = simConf->doubleParameter("gradient_start_time_s");
         double gradientVelocity = simConf->doubleParameter("gradient_ramp_velocity_V/ms")*1000;
         double gradientVoltage = simConf->doubleParameter("gradient_voltage_V");
+        if (gradientVoltage < 0 && gradientVelocity > 0) {
+            //mitigate accidentally wrong sign in gradientVelocity from the user
+            gradientVelocity = gradientVelocity * -1;
+            logger->warn("warning: Gradient velocity was positive while gradient voltage was negative. "
+                         "The sign of gradient velocity was inverted.");
+        }
+        double gradientResetTime = 0.0;
+        if (simConf->isParameter("gradient_reset_time_s")) {
+            gradientResetTime = simConf->doubleParameter("gradient_reset_time_s");
+        }
         double gradientDuration = gradientVoltage / gradientVelocity;
         logger->info("gradient! start:{} duration:{}", gradientStartTime, gradientDuration);
 
@@ -135,6 +145,7 @@ int main(int argc, const char * argv[]) {
         std::vector<std::unique_ptr<ParticleSimulation::SimionPotentialArray>> pressureField;
         std::vector<std::unique_ptr<ParticleSimulation::SimionPotentialArray>> temperatureField;
 
+        double flowPaSpatialScale = 1.0;
         if (simConf->isParameter("flow_mode")) {
             std::string flowModeStr = simConf->stringParameter("flow_mode");
             if (flowModeStr == "uniform") {
@@ -143,12 +154,13 @@ int main(int argc, const char * argv[]) {
                 flowMode = PARABOLIC_FLOW;
             } else if (flowModeStr == "static_field") {
                 flowMode = STATIC_FIELD;
+                flowPaSpatialScale = simConf->doubleParameter("flow_field_scale"); // is used for all electric PAs in the simulation
                 flowField =
-                    simConf->readPotentialArrays("flow_field", paSpatialScale, false);
+                    simConf->readPotentialArrays("flow_field", flowPaSpatialScale, false);
                 pressureField =
-                    simConf->readPotentialArrays("pressure_field", paSpatialScale, false);
+                    simConf->readPotentialArrays("pressure_field", flowPaSpatialScale, false);
                 temperatureField =
-                    simConf->readPotentialArrays("temperature_field", paSpatialScale, false);
+                    simConf->readPotentialArrays("temperature_field", flowPaSpatialScale, false);
 
                 pressureFct = CollisionModel::getVariableScalarFunction(*pressureField[0]);
                 backgroundTemperatureFct = CollisionModel::getVariableScalarFunction(*temperatureField[0]);
@@ -156,8 +168,6 @@ int main(int argc, const char * argv[]) {
                 if(flowField.size() == 2) {
                     // 2d axial symmetric flow field
                     logger->info("2d axial symmetric flow field");
-                    flowField[0]->printState();
-                    flowField[1]->printState();
                     velocityFct = CollisionModel::getVariableAxialSymmetricVectorFunction(*flowField[0], *flowField[1]);
                 }
                 else if(flowField.size() == 3) {
@@ -187,7 +197,7 @@ int main(int argc, const char * argv[]) {
         }
         if (flowMode == UNIFORM_FLOW || flowMode == PARABOLIC_FLOW) {
             double backgroundPressure_Pa = simConf->doubleParameter("background_pressure_Pa");
-            double gasVelocityX = simConf->doubleParameter("background_velocity_x_ms-1");
+            Core::Vector gasVelocity = simConf->vector3dParameter("background_velocity_ms-1");
             double backgroundTemperature_K = simConf->doubleParameter("background_temperature_K");
 
             pressureFct = CollisionModel::getConstantScalarFunction(backgroundPressure_Pa);
@@ -195,14 +205,18 @@ int main(int argc, const char * argv[]) {
 
             // define spatial functions for uniform and parabolic
             if(flowMode == UNIFORM_FLOW) {
-                velocityFct = CollisionModel::getConstantVectorFunction({gasVelocityX, 0.0, 0.0});
+                velocityFct = CollisionModel::getConstantVectorFunction({gasVelocity.x(), gasVelocity.y(), gasVelocity.z()});
             }
             else if(flowMode == PARABOLIC_FLOW){
+
+                if (Core::isDoubleUnequal(gasVelocity.y(), 0.0) || Core::isDoubleUnequal(gasVelocity.z(), 0.0)) {
+                    logger->warn("Parabolic flow with non zero y and z velocity components! y and z components are ignored!");
+                }
                 double flowProfileMaxRadius_m = simConf->doubleParameter("flow_profile_maximum_radius_m");
-                velocityFct = [gasVelocityX, flowProfileMaxRadius_m](const Core::Vector& pos) {
+                velocityFct = [gasVelocity, flowProfileMaxRadius_m](const Core::Vector& pos) {
                     //parabolic profile is vX = 2 * Vavg * (1 - r^2 / R^2) with the electrode radius R
                     double radial_dist = std::sqrt(pos.y()*pos.y() + pos.z()*pos.z())/flowProfileMaxRadius_m ;
-                    double xVelo = gasVelocityX*2.0*(1-radial_dist);
+                    double xVelo = gasVelocity.x()*2.0*(1-radial_dist);
                     if (xVelo < 0.0) {
                         xVelo = 0.0;
                     }
@@ -319,7 +333,7 @@ int main(int argc, const char * argv[]) {
             double ionVelocity = particle->getVelocity().magnitude();
             double kineticEnergy_eV = 0.5*particle->getMass()*ionVelocity*ionVelocity*Core::JOULE_TO_EV;
             double backgroundTemperature_K = backgroundTemperatureFct(particle->getLocation());
-            double ionTemperature = backgroundTemperature_K + (collisionGasMass_Amu*pow(ionVelocity,2))/3*1.381e-23;
+            double ionTemperature = backgroundTemperature_K + ((collisionGasMass_Amu*pow(ionVelocity,2))/(3*1.381e-23));
             std::vector<double> result = {
                     particle->getVelocity().x(),
                     particle->getVelocity().y(),
@@ -392,23 +406,32 @@ int main(int argc, const char * argv[]) {
 
         // define trajectory integration parameters / functions =================================
         std::vector<double> totalFieldNow(PotentialArrays.size(), 0.0);
+        std::vector<double> gradientField(PotentialArrays.size(), 0.0);
 
-        auto paVoltageFct = [&PotentialArrays, &DCVoltages, &RFFactor, &gradient, &gate, &totalFieldNow,
-                             omega, V_rf, gateOpenTime, gateOpenDuration, gateVoltage, gradientStartTime, gradientDuration, gradientVelocity]
+        auto paVoltageFct = [&PotentialArrays, &DCVoltages, &RFFactor, &gradient, &gate, &totalFieldNow, &gradientField,
+                             omega, V_rf, gateOpenTime, gateOpenDuration, gateVoltage, gradientStartTime, gradientDuration, gradientVelocity, gradientResetTime]
                                      (double time){
+            if (gradientResetTime != 0.0 && time >= gradientResetTime) {
+                gradientField.assign(PotentialArrays.size(), 0);
+            }
+
             for(size_t i=0; i<PotentialArrays.size(); i++) {
-                totalFieldNow[i] = DCVoltages[i] + sin(time*omega) * (V_rf * RFFactor[i]);
+                double rf_field = sin(time*omega) * (V_rf * RFFactor[i]);
+//                if (i<2) {
+//                    std::cout << rf_field<< " ";
+//                }
+                totalFieldNow[i] = DCVoltages[i] + rf_field;
 
                 if (time >= gateOpenTime && time <= (gateOpenTime + gateOpenDuration))
                     totalFieldNow[i] = totalFieldNow[i] + gate[i] * (gateVoltage);
 
-                if (time >= gradientStartTime && time <= (gradientStartTime + gradientDuration)){
-                    double gradient_field= gradient[i] * ((time-gradientStartTime)*gradientVelocity);
-                    //std::cout <<"gradient!" <<"gi: "<< gradient[i] <<" :->"<< gradient_field<<std::endl;
-                    totalFieldNow[i] = totalFieldNow[i] + gradient_field;}
-            }
-        };
+                if (time >= gradientStartTime && time <= (gradientStartTime + gradientDuration))
+                    gradientField[i] = gradient[i] * ((time-gradientStartTime)*gradientVelocity);
 
+                totalFieldNow[i] = totalFieldNow[i] + gradientField[i];
+            }
+//            std::cout << std::endl;
+        };
 
         auto accelerationFct = [&PotentialArrays, &totalFieldNow, spaceChargeFactor]
                 (Core::Particle* particle, int /*particleIndex*/, SpaceCharge::FieldCalculator &scFieldCalculator,
@@ -437,10 +460,15 @@ int main(int argc, const char * argv[]) {
 
         };
 
+        // Prepare ion start / stop tracker and ion start monitoring / ion termination functions
+        ParticleSimulation::ParticleStartSplatTracker startSplatTracker;
+        auto particleStartMonitoringFct = [&startSplatTracker](Core::Particle* particle, double time) {
+            startSplatTracker.particleStart(particle, time);
+        };
 
         auto timestepWriteFct =
                 [&trajectoryWriter, &voltageWriter, trajectoryWriteInterval, &rsSim, &resultFilewriter, concentrationWriteInterval,
-                        &totalFieldNow, &logger, &ionsInactive]
+                        &totalFieldNow, &logger, &ionsInactive, &startSplatTracker]
                         (
                                 Integration::AbstractTimeIntegrator* /*integrator*/,
                                 std::vector<Core::Particle*>& particles, double time, int timestep,
@@ -454,6 +482,7 @@ int main(int argc, const char * argv[]) {
                     if (lastTimestep) {
                         trajectoryWriter.writeTimestep(particles, time);
                         trajectoryWriter.writeSplatTimes(particles);
+                        trajectoryWriter.writeStartSplatData(startSplatTracker);
                         trajectoryWriter.finalizeTrajectory();
                         logger->info("finished ts:{} time:{:.2e}", timestep, time);
                     }
@@ -464,12 +493,6 @@ int main(int argc, const char * argv[]) {
                         trajectoryWriter.writeTimestep(particles, time);
                     }
                 };
-
-        // Prepare ion start / stop tracker and ion start monitoring / ion termination functions
-        ParticleSimulation::ParticleStartSplatTracker startSplatTracker;
-        auto particleStartMonitoringFct = [&startSplatTracker](Core::Particle* particle, double time) {
-            startSplatTracker.particleStart(particle, time);
-        };
 
         auto otherActionsFct = [&simulationDomainBoundaries, &ionsInactive, &PotentialArrays, &V_rf, &startSplatTracker](
                 Core::Vector& newPartPos, Core::Particle* particle,

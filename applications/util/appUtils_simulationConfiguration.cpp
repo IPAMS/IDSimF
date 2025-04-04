@@ -106,7 +106,11 @@ std::vector<double> AppUtils::SimulationConfiguration::doubleVectorParameter(con
 
 Core::Vector AppUtils::SimulationConfiguration::vector3dParameter(const std::string& jsonName) const {
     std::vector<double> vectorRaw = doubleVectorParameter(jsonName);
-    return {vectorRaw[0], vectorRaw[1], vectorRaw[2]};
+    Core::Vector result{vectorRaw[0], vectorRaw[1], vectorRaw[2]};
+    if (logger_){
+        logger_->info("{}:{} {} {}",jsonName, result.x(), result.y(), result.z());
+    }
+    return result;
 }
 
 
