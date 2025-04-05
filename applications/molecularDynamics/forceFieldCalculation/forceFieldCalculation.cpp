@@ -73,7 +73,7 @@ int main(int argc, const char * argv[]) {
     FileIO::CSVReader startConfReader = FileIO::CSVReader();
     std::vector<std::vector<std::string>> startingConfigurationCollection = startConfReader.readCSVFile(startingConfiguration, ' ');
     for(auto &line : startingConfigurationCollection){
-        positions.push_back({std::stold(line[0]), std::stold(line[1]), std::stold(line[2])});
+        positions.push_back({std::stod(line[0]), std::stod(line[1]), std::stod(line[2])});
     }
     //read molecular structure file
     
