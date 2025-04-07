@@ -152,18 +152,6 @@ void CollisionModel::MDInteractionsModel::setTrajectoryWriter(const std::string&
         throw (std::runtime_error("Trajectory Output Stream failed to open"));
     }
 }
-/**
- * Returns sign of a number (+1, -1) or 0.
-*/
-double CollisionModel::MDInteractionsModel::calcSign(double value){
-    if(value > 0){
-        return 1.;
-    }else if(value < 0){
-        return -1.;
-    }else{
-        return 0;
-    }
-}
 
 /**
  * Writes trajectory data to a predefined file. Individual collisions are separated by a line containing '###'. 
