@@ -23,7 +23,7 @@
 
 CollisionModel::MDTrajectoryWriter::MDTrajectoryWriter(const std::string& trajectoryFileName, double minimalSampleInterval) {
     trajectoryOutputStream_ = std::make_unique<std::ofstream>();
-    trajectoryOutputStream_->open(trajectoryFileName, std::ofstream::app);
+    trajectoryOutputStream_->open(trajectoryFileName, std::ofstream::out);
 
     if (trajectoryOutputStream_->good()){
         minimalSampleInterval_ = minimalSampleInterval;
@@ -40,7 +40,8 @@ void CollisionModel::MDTrajectoryWriter::writeTrajectorySample(double time, doub
                                                                double distance) {
     if (time>nextTrajectorySampleTime_) {
         nextTrajectorySampleTime_ += minimalSampleInterval_;
-        *trajectoryOutputStream_ << positionBgMolecule.x() << ", "
+        *trajectoryOutputStream_
+                << positionBgMolecule.x() << ", "
                 << positionBgMolecule.y() << ", "
                 << positionBgMolecule.z() << ", "
                 << distance << ", "

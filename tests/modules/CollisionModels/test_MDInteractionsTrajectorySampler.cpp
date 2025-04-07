@@ -25,14 +25,11 @@
 
  ****************************/
 
-
-#include "CollisionModel_MDInteractionsTrajectorySampler.hpp"
-#include "CollisionModel_Molecule.hpp"
-#include "CollisionModel_Atom.hpp"
-#include "CollisionModel_MDForceField_LJ12_6.hpp"
-#include "Core_randomGenerators.hpp"
-#include "Core_constants.hpp"
 #include "catch.hpp"
+#include "Core_randomGenerators.hpp"
+#include "CollisionModel_MDInteractionsTrajectorySampler.hpp"
+#include "CollisionModel_MDForceField_LJ12_6.hpp"
+#include "FileIO_CSVReader.hpp"
 #include "FileIO_MolecularStructureReader.hpp"
 #include "test_util.hpp"
 
@@ -64,6 +61,12 @@ TEST_CASE("Basic test of MD trajectory sampler", "[CollisionModels][MDInteractio
     mdSim.updateModelTimestepParameters(1, 0);
     mdSim.modifyVelocity(ion);
 
-    std::string readBack_result = readTextFile("MD_collisions_trajectory_sampler_test.txt");
+    FileIO::CSVReader csvReader;
+    std::vector<std::vector<std::string>> readBack_result = csvReader.readCSVFile("MD_collisions_trajectory_sampler_test.txt", ',');
+    CHECK(readBack_result.size() == 411);
+    std::vector<double> times = csvReader.extractDouble(readBack_result, 4);
+    std::vector<double> bgMolecule_x = csvReader.extractDouble(readBack_result, 0);
+    CHECK(Approx(times[0])==1e-16);
+    //std::string readBack_result = readTextFile("MD_collisions_trajectory_sampler_test.txt");
 
 }
