@@ -37,7 +37,9 @@ set(SOURCE_FILES
         MDInteractions/CollisionModel_MDForceField_LJ12_6.hpp
         MDInteractions/CollisionModel_MDForceField_Buckingham.cpp
         MDInteractions/CollisionModel_MDForceField_Buckingham.hpp
-        MDInteractions/CollisionModel_AtomInteractionMap.hpp)
+        MDInteractions/CollisionModel_AtomInteractionMap.hpp
+        MDInteractions/CollisionModel_MDTrajectoryWriter.cpp
+        MDInteractions/CollisionModel_MDTrajectoryWriter.hpp)
 
 add_library(collisionmodels STATIC ${SOURCE_FILES})
 target_include_directories(collisionmodels PUBLIC . HardSoftSphere StatisticalDiffusion MDInteractions)

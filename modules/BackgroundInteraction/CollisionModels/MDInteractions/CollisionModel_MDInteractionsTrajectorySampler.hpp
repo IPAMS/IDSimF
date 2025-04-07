@@ -32,6 +32,7 @@
 
 #include "Core_constants.hpp"
 #include "CollisionModel_AbstractCollisionModel.hpp"
+#include "CollisionModel_MDTrajectoryWriter.hpp"
 #include "CollisionModel_SpatialFieldFunctions.hpp"
 #include "CollisionModel_AbstractMDForceField.hpp"
 #include "CollisionModel_MathFunctions.hpp"
@@ -101,7 +102,7 @@ namespace CollisionModel{
         unsigned int recordTrajectoryStartTimeStep_ = 0; ///< time step at which the trajectory recording begins
         double recordTrajectoryMinimalSampleInterval_ = 0; ///< minimal time interval between trajectory samples
         double nextTrajectorySampleTime_ = 0; ///< next time for a written trajectory sample
-        std::unique_ptr<std::ofstream> trajectoryOutputStream_;
+        std::unique_ptr<MDTrajectoryWriter> trajectoryWriter_ = nullptr;
 
         std::unique_ptr<AbstractMDForceField> forceField_; ///< The molecular force field to use
         //std::function<double(Core::Vector&)> pressureFunction_ = nullptr; ///< a spatial pressure function
@@ -112,8 +113,6 @@ namespace CollisionModel{
         std::unordered_map<std::string,  std::shared_ptr<MolecularStructure>> molecularStructureCollection_; ///< collection of all available molecular structures 
         Core::Vector startPosition_ = Core::Vector(0.0, 0.0, 0.0); 
         Core::Vector startVelocity_ = Core::Vector(0.0, 0.0, 0.0);
-
-        void writeTrajectoryDelimiter_(std::ofstream* file);
     };
 
 }

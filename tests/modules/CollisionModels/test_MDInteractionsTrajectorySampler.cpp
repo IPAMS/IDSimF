@@ -65,4 +65,5 @@ TEST_CASE("Basic test of MD trajectory sampler", "[CollisionModels][MDInteractio
     mdSim.modifyVelocity(ion);
 
     std::string readBack_result = readTextFile("MD_collisions_trajectory_sampler_test.txt");
+
 }

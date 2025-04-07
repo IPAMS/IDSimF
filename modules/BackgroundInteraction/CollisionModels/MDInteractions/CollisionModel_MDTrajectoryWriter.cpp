@@ -37,7 +37,7 @@ void CollisionModel::MDTrajectoryWriter::writeTrajectorySample(double time, doub
                                                                Core::Vector positionBgMolecule,
                                                                Core::Vector velocityBgMolecule,
                                                                Core::Vector positionMolecule, std::vector<Core::Vector> forceMolecules,
-                                                               double distance, bool endOfTrajectory) {
+                                                               double distance) {
     if (time>nextTrajectorySampleTime_) {
         nextTrajectorySampleTime_ += minimalSampleInterval_;
         *trajectoryOutputStream_ << positionBgMolecule.x() << ", "
@@ -56,9 +56,6 @@ void CollisionModel::MDTrajectoryWriter::writeTrajectorySample(double time, doub
                 << positionMolecule.y() << ", "
                 << positionMolecule.z() <<
                    std::endl;
-    }
-    if(endOfTrajectory == true){
-        writeTrajectoryDelimiter();
     }
 }
 

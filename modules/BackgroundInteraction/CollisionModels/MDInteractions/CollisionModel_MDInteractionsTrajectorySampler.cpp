@@ -43,7 +43,6 @@ CollisionModel::MDInteractionsTrajectorySampler::MDInteractionsTrajectorySampler
                                                         std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection,
                                                         Core::Vector startPosition, 
                                                         Core::Vector startVelocity) :
-
         collisionGasDiameter_m_(collisionGasDiameterM),
         collisionMolecule_(collisionMolecule),
         integrationTime_(integrationTime),
@@ -65,18 +64,9 @@ void CollisionModel::MDInteractionsTrajectorySampler::setTrajectoryWriter(const 
                                                               unsigned int recordTrajectoryStartTimestep,
                                                               double minimalSampleInterval) {
 
-    trajectoryOutputStream_ = std::make_unique<std::ofstream>();
-    trajectoryOutputStream_->open(trajectoryFileName, std::ofstream::app);
-
-    if (trajectoryOutputStream_->good()){
-        trajectoryDistance_ = trajectoryDistance;
-        recordTrajectoryStartTimeStep_ = recordTrajectoryStartTimestep;
-        recordTrajectoryMinimalSampleInterval_ = minimalSampleInterval;
-        modelRecordsTrajectories_ = true;
-    }
-    else{
-        throw (std::runtime_error("Trajectory Output Stream failed to open"));
-    }
+    trajectoryWriter_= std::make_unique<CollisionModel::MDTrajectoryWriter>(trajectoryFileName, minimalSampleInterval);
+    recordTrajectoryStartTimeStep_ = recordTrajectoryStartTimestep;
+    modelRecordsTrajectories_ = true;
 }
 
 void CollisionModel::MDInteractionsTrajectorySampler::writeTrajectory(double distance, Core::Vector positionBgMolecule, Core::Vector velocityBgMolecule,
@@ -102,12 +92,8 @@ void CollisionModel::MDInteractionsTrajectorySampler::writeTrajectory(double dis
                    std::endl;
     }
     if(endOfTrajectory == true){
-        writeTrajectoryDelimiter_(file);
+        trajectoryWriter_->writeTrajectoryDelimiter();
     }
-}
-
-void CollisionModel::MDInteractionsTrajectorySampler::writeTrajectoryDelimiter_(std::ofstream* file) {
-    *file << "###" << std::endl;
 }
 
 
@@ -224,8 +210,9 @@ bool CollisionModel::MDInteractionsTrajectorySampler::leapfrogIntern(std::vector
 
         for(auto* molecule : moleculesPtr){
             if(trajectoryRecordingActive_ == true && molecule->getMolecularStructureName() == collisionMolecule_){
-                writeTrajectory(distance, molecule->getComPos(), molecule->getComVel(),forceMolecules, false, trajectoryOutputStream_.get(), j*dt, dt,
-                                moleculesPtr[0]->getComPos());
+                trajectoryWriter_->writeTrajectorySample(
+                    j * dt, dt, molecule->getComPos(), molecule->getComVel(),
+                    moleculesPtr[0]->getComPos(),forceMolecules, distance);
             }
             Core::Vector newComPos =  molecule->getComPos() + molecule->getComVel() * dt;
             //if(molecule->getMolecularStructureName() == collisionMolecule_){
@@ -234,16 +221,16 @@ bool CollisionModel::MDInteractionsTrajectorySampler::leapfrogIntern(std::vector
             energyEnd += 0.5 * molecule->getComVel().magnitudeSquared() * molecule->getMass();
             i++;
         }
-        
 
         size_t index = 0;
         for(size_t b = 0; b < moleculesPtr_size; ++b){
             for(size_t z = b+1; z < moleculesPtr_size; ++z){
                 if((moleculesPtr.at(z)->getComPos() - moleculesPtr.at(b)->getComPos()).magnitude() > startDistances.at(index++)){
                     if(trajectoryRecordingActive_ == true && moleculesPtr[z]->getMolecularStructureName() == collisionMolecule_ && (j+1) == nSteps){
-                        writeTrajectory((moleculesPtr[z]->getComPos() - moleculesPtr[b]->getComPos()).magnitude(),
-                                        moleculesPtr[z]->getComPos(), moleculesPtr[z]->getComVel(), forceMolecules, true, trajectoryOutputStream_.get(), j*dt, dt,
-                                        moleculesPtr[0]->getComPos());
+                        double distance = (moleculesPtr[z]->getComPos() - moleculesPtr[b]->getComPos()).magnitude();
+                        trajectoryWriter_->writeTrajectorySample(
+                            j*dt, dt, moleculesPtr[z]->getComPos(), moleculesPtr[z]->getComVel(),
+                            moleculesPtr[0]->getComPos(),forceMolecules, distance);
                     }
                     //return wasHit;
                 }
@@ -364,8 +351,9 @@ bool CollisionModel::MDInteractionsTrajectorySampler::rk4Intern(std::vector<Coll
             Core::Vector newComPos = initialPositionMolecules.at(i) + (l[0][i]+ l[1][i]*2 + l[2][i]*2 + l[3][i]) * 1./6;
             Core::Vector newComVel = initialVelocityMolecules.at(i) + (k[0][i]+ k[1][i]*2 + k[2][i]*2 + k[3][i]) * 1./6;
             if(trajectoryRecordingActive_ == true && molecule->getMolecularStructureName() == collisionMolecule_){
-                writeTrajectory(distance, molecule->getComPos(), molecule->getComVel(),forceMolecules, false, trajectoryOutputStream_.get(), j*dt, dt,
-                                moleculesPtr[0]->getComPos());
+                trajectoryWriter_->writeTrajectorySample(
+                    j*dt, dt, molecule->getComPos(), molecule->getComVel(),
+                    moleculesPtr[0]->getComPos(),forceMolecules, distance);
                 }
             if(molecule->getMolecularStructureName() == collisionMolecule_){
                 molecule->setComPos(newComPos);
@@ -380,9 +368,10 @@ bool CollisionModel::MDInteractionsTrajectorySampler::rk4Intern(std::vector<Coll
             for(size_t l = k+1; l < nMolecules; ++l){
                 if((moleculesPtr[l]->getComPos() - moleculesPtr[k]->getComPos()).magnitude() > startDistances[index++]){
                     if(trajectoryRecordingActive_ == true && moleculesPtr[l]->getMolecularStructureName() == collisionMolecule_ && (j+1) == nSteps){
-                        writeTrajectory((moleculesPtr[l]->getComPos() - moleculesPtr[k]->getComPos()).magnitude(),
-                                        moleculesPtr[l]->getComPos(), moleculesPtr[l]->getComVel(), forceMolecules, true, trajectoryOutputStream_.get(), j*dt, dt,
-                                        moleculesPtr[0]->getComPos());
+                        double distance = (moleculesPtr[l]->getComPos() - moleculesPtr[k]->getComPos()).magnitude();
+                        trajectoryWriter_->writeTrajectorySample(
+                            j*dt, dt, moleculesPtr[l]->getComPos(), moleculesPtr[l]->getComVel(),
+                            moleculesPtr[0]->getComPos(),forceMolecules, distance);
                     }
                     //return wasHit;
                 }
@@ -564,9 +553,9 @@ bool CollisionModel::MDInteractionsTrajectorySampler::rk4InternAdaptiveStep(std:
             }
             if(trajectoryRecordingActive_ == true && molecule->getMolecularStructureName() == collisionMolecule_ 
                 /*&& integrationTimeSum-dt != 0*/ && integrationTimeSum < finalTime){
-                writeTrajectory(distance, molecule->getComPos(), molecule->getComVel(),forceMolecules, false, trajectoryOutputStream_.get(), integrationTimeSum, dt,
-                                moleculesPtr[0]->getComPos());
-                
+                trajectoryWriter_->writeTrajectorySample(
+                    integrationTimeSum, dt, molecule->getComPos(), molecule->getComVel(),
+                    moleculesPtr[0]->getComPos(),forceMolecules, distance);
             }
         
             
@@ -609,7 +598,7 @@ bool CollisionModel::MDInteractionsTrajectorySampler::rk4InternAdaptiveStep(std:
         }*/
     }
     if(trajectoryRecordingActive_ == true) {
-        writeTrajectoryDelimiter_(trajectoryOutputStream_.get());
+        trajectoryWriter_->writeTrajectoryDelimiter();
     }
     return false;
 }

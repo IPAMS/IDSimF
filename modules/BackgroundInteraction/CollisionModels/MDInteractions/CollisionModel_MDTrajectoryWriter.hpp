@@ -27,9 +27,10 @@
 #ifndef COLLISIONMODEL_MDTRAJECTORYWRITER_HPP
 #define COLLISIONMODEL_MDTRAJECTORYWRITER_HPP
 
+#include "Core_vector.hpp"
 #include <iostream>
 #include <fstream>
-#include <string>
+#include <vector>
 
 namespace CollisionModel{
     class MDTrajectoryWriter {
@@ -39,8 +40,7 @@ namespace CollisionModel{
             void writeTrajectorySample(double time, double dt,
                                        Core::Vector positionBgMolecule,
                                        Core::Vector velocityBgMolecule, Core::Vector positionMolecule, std::vector<Core::Vector> forceMolecules,
-                                       double distance,
-                                       bool endOfTrajectory);
+                                       double distance);
 
             void writeTrajectoryDelimiter();
 
