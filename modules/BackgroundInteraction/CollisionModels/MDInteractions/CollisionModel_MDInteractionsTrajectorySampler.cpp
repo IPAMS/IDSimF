@@ -27,22 +27,17 @@
 #include <fstream>
 
 CollisionModel::MDInteractionsTrajectorySampler::MDInteractionsTrajectorySampler(
-            std::string collisionMolecule,
-            double integrationTime,
-            double subTimeStep,
             std::unique_ptr<CollisionModel::AbstractMDForceField> forceField,
             std::unordered_map<std::string, std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection,
-            Core::Vector startPosition,
-            Core::Vector startVelocity) :
-        collisionMolecule_(collisionMolecule),
-        integrationTime_(integrationTime),
-        subTimeStep_(subTimeStep),
+            AppUtils::logger_ptr logger
+            ) :
         forceField_(std::move(forceField)),
         molecularStructureCollection_(std::move(molecularStructureCollection)),
-        startPosition_(startPosition), 
-        startVelocity_(startVelocity){}
+        logger_(logger)
+        {}
+
 /**
- * Activates trajectory writing and sets trajectory writer configuration
+ * Sets up a trajectory writer
  * @param trajectoryFileName
  * @param trajectoryDistance
  */
@@ -52,8 +47,9 @@ void CollisionModel::MDInteractionsTrajectorySampler::setTrajectoryWriter(const 
     trajectoryWriter_= std::make_unique<CollisionModel::MDTrajectoryWriter>(trajectoryFileName, minimalSampleInterval);
 }
 
-
-void CollisionModel::MDInteractionsTrajectorySampler::calculateTrajectory(Core::Particle& particle) {
+void CollisionModel::MDInteractionsTrajectorySampler::calculateTrajectory(
+        Core::Particle& particle, std::string collisionMolecule, Core::Vector collisionParticleStartPosition, Core::Vector collisionParticleStartVelocity,
+        double integrationTime, double subTimeStep, MDIntegratorType integratorType) {
 
     int iterations = 0;
 
@@ -61,8 +57,9 @@ void CollisionModel::MDInteractionsTrajectorySampler::calculateTrajectory(Core::
     Molecule mole(Core::Vector(0.0, 0.0, 0.0), Core::Vector(0.0, 0.0, 0.0), particle.getMolecularStructure());
 
     // Construct the background gas particle
-    Molecule bgMole(startPosition_, startVelocity_,
-                                        molecularStructureCollection_.at(collisionMolecule_));
+    Molecule bgMole(collisionParticleStartPosition, collisionParticleStartVelocity,
+                                        molecularStructureCollection_.at(collisionMolecule));
+    currentCollisionMolecule_ = collisionMolecule;
 
     // TODO: Rotate background gas molecule here
     //moleculesPtr[1]->setAngles(nitrogenAngles);
@@ -77,13 +74,16 @@ void CollisionModel::MDInteractionsTrajectorySampler::calculateTrajectory(Core::
     }
 
     // Call the sub-integrator
-    double finalTime = integrationTime_; // final integration time in seconds
-    double timeStep = subTimeStep_; // step size in seconds
+    double finalTime = integrationTime; // final integration time in seconds
+    double timeStep = subTimeStep; // step size in seconds
 
 
     //trajectorySuccess = rk4Intern(moleculesPtr, timeStep, finalTime, collisionRadius);
     //trajectorySuccess = leapfrogIntern(moleculesPtr, timeStep, finalTime, collisionRadius);
-    bool trajectorySuccess = rk4InternAdaptiveStep(moleculesPtr, timeStep, finalTime);
+    bool trajectorySuccess;
+    if (integratorType == RK4_ADAPTIVE) {
+        trajectorySuccess = rk4InternAdaptiveStep(moleculesPtr, timeStep, finalTime);
+    }
 
     double endEnergy = 0;
     for(auto* molecule : moleculesPtr){
@@ -135,7 +135,7 @@ bool CollisionModel::MDInteractionsTrajectorySampler::leapfrogIntern(std::vector
         }
 
         for(auto* molecule : moleculesPtr){
-            if(trajectoryWriter_ != nullptr && molecule->getMolecularStructureName() == collisionMolecule_){
+            if(trajectoryWriter_ != nullptr && molecule->getMolecularStructureName() == currentCollisionMolecule_){
                 trajectoryWriter_->writeTrajectorySample(
                     j * dt, dt, molecule->getComPos(), molecule->getComVel(),
                     moleculesPtr[0]->getComPos(),forceMolecules, distance);
@@ -152,7 +152,7 @@ bool CollisionModel::MDInteractionsTrajectorySampler::leapfrogIntern(std::vector
         for(size_t b = 0; b < moleculesPtr_size; ++b){
             for(size_t z = b+1; z < moleculesPtr_size; ++z){
                 if((moleculesPtr.at(z)->getComPos() - moleculesPtr.at(b)->getComPos()).magnitude() > startDistances.at(index++)){
-                    if(trajectoryWriter_ != nullptr && moleculesPtr[z]->getMolecularStructureName() == collisionMolecule_ && (j+1) == nSteps){
+                    if(trajectoryWriter_ != nullptr && moleculesPtr[z]->getMolecularStructureName() == currentCollisionMolecule_ && (j+1) == nSteps){
                         double distance = (moleculesPtr[z]->getComPos() - moleculesPtr[b]->getComPos()).magnitude();
                         trajectoryWriter_->writeTrajectorySample(
                             j*dt, dt, moleculesPtr[z]->getComPos(), moleculesPtr[z]->getComVel(),
@@ -205,7 +205,7 @@ bool CollisionModel::MDInteractionsTrajectorySampler::rk4Intern(std::vector<Coll
         std::vector<Core::Vector> positionMolecules(nMolecules);
         i = 0;
         for(auto* molecule : moleculesPtr){
-            if(molecule->getMolecularStructureName() == collisionMolecule_){
+            if(molecule->getMolecularStructureName() == currentCollisionMolecule_){
                 velocityMolecules.at(i) = molecule->getComVel();
                 positionMolecules.at(i) = molecule->getComPos();
             }else{
@@ -267,12 +267,12 @@ bool CollisionModel::MDInteractionsTrajectorySampler::rk4Intern(std::vector<Coll
         for(auto* molecule : moleculesPtr){
             Core::Vector newComPos = initialPositionMolecules.at(i) + (l[0][i]+ l[1][i]*2 + l[2][i]*2 + l[3][i]) * 1./6;
             Core::Vector newComVel = initialVelocityMolecules.at(i) + (k[0][i]+ k[1][i]*2 + k[2][i]*2 + k[3][i]) * 1./6;
-            if(trajectoryWriter_ != nullptr && molecule->getMolecularStructureName() == collisionMolecule_){
+            if(trajectoryWriter_ != nullptr && molecule->getMolecularStructureName() == currentCollisionMolecule_){
                 trajectoryWriter_->writeTrajectorySample(
                     j*dt, dt, molecule->getComPos(), molecule->getComVel(),
                     moleculesPtr[0]->getComPos(),forceMolecules, distance);
                 }
-            if(molecule->getMolecularStructureName() == collisionMolecule_){
+            if(molecule->getMolecularStructureName() == currentCollisionMolecule_){
                 molecule->setComPos(newComPos);
                 molecule->setComVel(newComVel);
             }
@@ -283,7 +283,7 @@ bool CollisionModel::MDInteractionsTrajectorySampler::rk4Intern(std::vector<Coll
         for(size_t k = 0; k < nMolecules; ++k){
             for(size_t l = k+1; l < nMolecules; ++l){
                 if((moleculesPtr[l]->getComPos() - moleculesPtr[k]->getComPos()).magnitude() > startDistances[index++]){
-                    if(trajectoryWriter_ != nullptr && moleculesPtr[l]->getMolecularStructureName() == collisionMolecule_ && (j+1) == nSteps){
+                    if(trajectoryWriter_ != nullptr && moleculesPtr[l]->getMolecularStructureName() == currentCollisionMolecule_ && (j+1) == nSteps){
                         double distance = (moleculesPtr[l]->getComPos() - moleculesPtr[k]->getComPos()).magnitude();
                         trajectoryWriter_->writeTrajectorySample(
                             j*dt, dt, moleculesPtr[l]->getComPos(), moleculesPtr[l]->getComVel(),
@@ -362,7 +362,7 @@ bool CollisionModel::MDInteractionsTrajectorySampler::rk4InternAdaptiveStep(std:
                 for(auto* molecule : moleculesPtr){
                     positionMolecules[i] += l[m][i]*weight[n-1][m];
                     //TODO: Add Switch statement for ion movement:|| integrate all = true
-                    if(molecule->getMolecularStructureName() == collisionMolecule_){
+                    if(molecule->getMolecularStructureName() == currentCollisionMolecule_){
                         molecule->setComPos(positionMolecules[i]);
                     }
                     i++;
@@ -421,11 +421,11 @@ bool CollisionModel::MDInteractionsTrajectorySampler::rk4InternAdaptiveStep(std:
         for(auto* molecule : moleculesPtr){
 
             //TODO: Add Switch statement for ion movement:|| integrate all = true
-            if(molecule->getMolecularStructureName() == collisionMolecule_){
+            if(molecule->getMolecularStructureName() == currentCollisionMolecule_){
                 molecule->setComPos(newComPosOrder4[i]);
                 molecule->setComVel(newComVelOrder4[i]); 
             }
-            if(trajectoryWriter_ != nullptr && molecule->getMolecularStructureName() == collisionMolecule_ && integrationTimeSum < finalTime){
+            if(trajectoryWriter_ != nullptr && molecule->getMolecularStructureName() == currentCollisionMolecule_ && integrationTimeSum < finalTime){
                 trajectoryWriter_->writeTrajectorySample(
                     integrationTimeSum, dt, molecule->getComPos(), molecule->getComVel(),
                     moleculesPtr[0]->getComPos(),forceMolecules, distance);

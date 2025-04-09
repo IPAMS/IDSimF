@@ -31,19 +31,16 @@
 #define IDSIMF_COLLISIONMODEL_MDINTERACTIONS_TRAJECTORY_SAMPLER_H
 
 #include "Core_constants.hpp"
-#include "CollisionModel_AbstractCollisionModel.hpp"
 #include "CollisionModel_MDTrajectoryWriter.hpp"
-#include "CollisionModel_SpatialFieldFunctions.hpp"
 #include "CollisionModel_AbstractMDForceField.hpp"
-#include "CollisionModel_MathFunctions.hpp"
 #include "CollisionModel_Molecule.hpp"
 #include "RS_AbstractReaction.hpp"
 #include "appUtils_logging.hpp"
-#include <cstdio>
-#include <functional>
 #include <string>
 
 namespace CollisionModel{
+
+    enum MDIntegratorType{RK4_ADAPTIVE, RK4, LEAPFROG};
 
     class MDInteractionsTrajectorySampler {
 
@@ -54,35 +51,33 @@ namespace CollisionModel{
         MDInteractionsTrajectorySampler() = default;
 
         MDInteractionsTrajectorySampler(
-            std::string collisionMolecule,
-            double integrationTime,
-            double subTimeStep,
             std::unique_ptr<AbstractMDForceField> forceField,
-            std::unordered_map<std::string, std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection, 
-            Core::Vector startPosition, 
-            Core::Vector startVelocity);
+            std::unordered_map<std::string, std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection,
+            AppUtils::logger_ptr logger);
 
         void setTrajectoryWriter(const std::string& trajectoryFileName,
                                  double minimalSampleInterval=0);
 
-        void calculateTrajectory(Core::Particle& particle);
+        void calculateTrajectory(Core::Particle& particle,
+                                 std::string collisionMolecule,
+                                 Core::Vector collisionParticleStartPosition,
+                                 Core::Vector collisionParticleStartVelocity,
+                                 double integrationTime,
+                                 double subTimeStep,
+                                 MDIntegratorType integratorType = RK4_ADAPTIVE);
 
         bool leapfrogIntern(std::vector<CollisionModel::Molecule*> moleculesPtr, double dt, double finalTime, double requiredRad);
         bool rk4Intern(std::vector<CollisionModel::Molecule*> moleculesPtr, double dt, double finalTime, double requiredRad);
         bool rk4InternAdaptiveStep(std::vector<CollisionModel::Molecule*> moleculesPtr, double dt, double finalTime);
 
     private:
-        std::string collisionMolecule_ = ""; ///< particle identifier of the collision gas
-        double integrationTime_ = 0.0; ///< integration time of the sub-integrator 
-        double subTimeStep_ = 0.0; ///< step size of the sub-integrator
-        unsigned int recordTrajectoryStartTimeStep_ = 0; ///< time step at which the trajectory recording begins
-        double recordTrajectoryMinimalSampleInterval_ = 0; ///< minimal time interval between trajectory samples
+
+        std::string currentCollisionMolecule_ = "";
 
         std::unique_ptr<MDTrajectoryWriter> trajectoryWriter_ = nullptr;
         std::unique_ptr<AbstractMDForceField> forceField_; ///< The molecular force field to use
         std::unordered_map<std::string,  std::shared_ptr<MolecularStructure>> molecularStructureCollection_; ///< collection of all available molecular structures
-        Core::Vector startPosition_ = Core::Vector(0.0, 0.0, 0.0); 
-        Core::Vector startVelocity_ = Core::Vector(0.0, 0.0, 0.0);
+        AppUtils::logger_ptr logger_ = nullptr;
     };
 }
 
