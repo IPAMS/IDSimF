@@ -49,17 +49,14 @@ TEST_CASE("Basic test of MD trajectory sampler", "[CollisionModels][MDInteractio
     Core::Vector particleVelocity({1000,0,0});
 
     CollisionModel::MDInteractionsTrajectorySampler mdSim(
-        CollisionModel::MDInteractionsTrajectorySampler::DIAMETER_HE,
         "N2",1e-11,1e-16,
-        4.0,
         std::move(forceFieldPtr),
         molecularStructureCollection,
         particlePosition,
         particleVelocity);
 
-    mdSim.setTrajectoryWriter("MD_collisions_trajectory_sampler_test.txt", 1.0, 0, 0.0);
-    mdSim.updateModelTimestepParameters(1, 0);
-    mdSim.modifyVelocity(ion);
+    mdSim.setTrajectoryWriter("MD_collisions_trajectory_sampler_test.txt", 0.0);
+    mdSim.calculateTrajectory(ion);
 
     FileIO::CSVReader csvReader;
     std::vector<std::vector<std::string>> readBack_result = csvReader.readCSVFile("MD_collisions_trajectory_sampler_test.txt", ',');
@@ -67,6 +64,4 @@ TEST_CASE("Basic test of MD trajectory sampler", "[CollisionModels][MDInteractio
     std::vector<double> times = csvReader.extractDouble(readBack_result, 4);
     std::vector<double> bgMolecule_x = csvReader.extractDouble(readBack_result, 0);
     CHECK(Approx(times[0])==1e-16);
-    //std::string readBack_result = readTextFile("MD_collisions_trajectory_sampler_test.txt");
-
 }
