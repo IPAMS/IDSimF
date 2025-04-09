@@ -112,8 +112,6 @@ namespace CollisionModel{
                                  double trajectoryDistance,
                                  unsigned int startTimeStep=0);
 
-        double calcSign(double value);
-
         void writeTrajectory(double distance, Core::Vector positionBgMolecule, Core::Vector velocityBgMolecule, 
                         std::vector<Core::Vector> forceMolecules, bool endOfTrajectory, std::ofstream* file, double time, double dt);
 
@@ -138,7 +136,6 @@ namespace CollisionModel{
         void modifyPosition(Core::Vector& position,
                                     Core::Particle& particle,
                                     double dt);
-
 
     private:
 

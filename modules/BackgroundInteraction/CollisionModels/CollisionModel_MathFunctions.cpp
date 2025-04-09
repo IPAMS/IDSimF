@@ -54,3 +54,35 @@ Core::Vector CollisionModel::sphereRand(double r) {
 
     return {x,y,z};
 }
+
+
+double CollisionModel::calcSign(const double value){
+    if(value > 0){
+        return 1.;
+    }else if(value < 0){
+        return -1.;
+    }else{
+        return 0;
+    }
+}
+
+void CollisionModel::rotate(const Core::Vector &angles, Core::Vector& position){
+
+    double tmp_x = angles.x();
+    double tmp_y = angles.y();
+    double tmp_z = angles.z();
+
+    double new_rel_x = cos(tmp_y) * cos(tmp_z) * position.x()
+                        + (sin(tmp_x) * sin(tmp_y) * cos(tmp_z) + cos(tmp_x) * sin(tmp_z)) * position.y()
+                        + (sin(tmp_x) * sin(tmp_z) - cos(tmp_x) * sin(tmp_y) * cos(tmp_z)) * position.z();
+    double new_rel_y = - cos(tmp_y) * sin(tmp_z) * position.x()
+                        + (cos(tmp_x) * cos(tmp_z) - sin(tmp_x) * sin(tmp_y) * sin(tmp_z)) * position.y()
+                        + (cos(tmp_x) * sin(tmp_y) * sin(tmp_z) + sin(tmp_x)*cos(tmp_z)) * position.z();
+    double new_rel_z = sin(tmp_y) * position.x()
+                        - sin(tmp_x) * cos(tmp_y) * position.y()
+                        + cos(tmp_x) * cos(tmp_y) * position.z();
+
+    position.x(new_rel_x);
+    position.y(new_rel_y);
+    position.z(new_rel_z);
+}

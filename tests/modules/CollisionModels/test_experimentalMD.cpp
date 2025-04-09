@@ -25,7 +25,7 @@
 
  ****************************/
 
-#include "CollisionModel_MDInteractionsPreconstructed.hpp"
+#include "CollisionModel_MDInteractionsExperimental.hpp"
 #include "CollisionModel_Molecule.hpp"
 #include "CollisionModel_Atom.hpp"
 #include "Core_randomGenerators.hpp"
@@ -35,7 +35,7 @@
 #include <iostream>
 
 
-TEST_CASE("Basic test MD preconstructed", "[CollisionModels][MDInteractionsModel]") {
+TEST_CASE("Basic test MD experimental", "[CollisionModels][MDInteractionsModel]") {
 
     // Core::globalRandomGeneratorPool = std::make_unique<Core::RandomGeneratorPool>();
 

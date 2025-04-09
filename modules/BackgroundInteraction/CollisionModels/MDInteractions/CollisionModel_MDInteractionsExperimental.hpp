@@ -38,8 +38,8 @@
 
  ****************************/
 
-#ifndef IDSIMF_COLLISIONMODEL_MDINTERACTIONS_PRECONSTRUCTED_H
-#define IDSIMF_COLLISIONMODEL_MDINTERACTIONS_PRECONSTRUCTED_H
+#ifndef IDSIMF_COLLISIONMODEL_MDINTERACTIONS_EXPERIMENTAL_H
+#define IDSIMF_COLLISIONMODEL_MDINTERACTIONS_EXPERIMENTAL_H
 
 #include "Core_constants.hpp"
 #include "CollisionModel_AbstractCollisionModel.hpp"
@@ -55,15 +55,15 @@
 
 namespace CollisionModel{
 
-    class MDInteractionsModelPreconstructed : public AbstractCollisionModel {
+    class MDInteractionsModelExperimental : public AbstractCollisionModel {
 
     public:
         constexpr static double DIAMETER_N2 = 3.64e-10;
         constexpr static double DIAMETER_HE = 2.80e-10;
 
-        MDInteractionsModelPreconstructed() = default;
+        MDInteractionsModelExperimental() = default;
         
-        MDInteractionsModelPreconstructed(
+        MDInteractionsModelExperimental(
             double staticPressure,
             double staticTemperature,
             double collisionGasMassAmu,
@@ -78,7 +78,7 @@ namespace CollisionModel{
             std::unordered_map<std::string,
             std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection);
 
-        MDInteractionsModelPreconstructed(
+        MDInteractionsModelExperimental(
             double staticPressure,
             double staticTemperature,
             double collisionGasMassAmu,
@@ -95,7 +95,7 @@ namespace CollisionModel{
             Core::Vector startPosition, 
             Core::Vector startVelocity);
 
-        MDInteractionsModelPreconstructed(
+        MDInteractionsModelExperimental(
             std::function<double(Core::Vector& location)> pressureFunction,
             std::function<Core::Vector(Core::Vector& location)> velocityFunction,
             double StaticTemperature,
@@ -110,7 +110,7 @@ namespace CollisionModel{
             std::unique_ptr<AbstractMDForceField> forceField_,
             std::unordered_map<std::string, std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection);
 
-        MDInteractionsModelPreconstructed(
+        MDInteractionsModelExperimental(
             std::function<double(Core::Vector& location)> pressureFunction,
             std::function<Core::Vector(Core::Vector& location)> velocityFunction,
             double StaticTemperature,
@@ -127,7 +127,7 @@ namespace CollisionModel{
             Core::Vector startPosition, 
             Core::Vector startVelocity);
 
-        MDInteractionsModelPreconstructed(
+        MDInteractionsModelExperimental(
             std::function<double(Core::Vector& location)> pressureFunction,
             std::function<Core::Vector(Core::Vector& location)> velocityFunction,
             std::function<double(const Core::Vector&)> temperatureFunction,
@@ -142,7 +142,7 @@ namespace CollisionModel{
             std::unique_ptr<AbstractMDForceField> forceField_,
             std::unordered_map<std::string, std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection);
 
-        MDInteractionsModelPreconstructed(
+        MDInteractionsModelExperimental(
             std::function<double(Core::Vector& location)> pressureFunction,
             std::function<Core::Vector(Core::Vector& location)> velocityFunction,
             std::function<double(const Core::Vector&)> temperatureFunction,
@@ -162,10 +162,6 @@ namespace CollisionModel{
         void setTrajectoryWriter(const std::string& trajectoryFileName,
                                  double trajectoryDistance,
                                  unsigned int startTimeStep=0);
-
-        double calcSign(double value);
-
-        void rotate(const Core::Vector &angles, Core::Vector& position);
 
         void writeTrajectory(double distance, Core::Vector positionBgMolecule, Core::Vector velocityBgMolecule, 
                         std::vector<Core::Vector> forceMolecules, bool endOfTrajectory, std::ofstream* file, double time, double dt,
@@ -225,4 +221,4 @@ namespace CollisionModel{
 
 }
 
-#endif //IDSIMF_COLLISIONMODEL_MDINTERACTIONS_PRECONSTRUCTED_H
+#endif //IDSIMF_COLLISIONMODEL_MDINTERACTIONS_EXPERIMENTAL_H

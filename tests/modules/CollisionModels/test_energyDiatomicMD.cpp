@@ -25,7 +25,7 @@
 
  ****************************/
 
-#include "CollisionModel_MDInteractionsPreconstructed.hpp"
+#include "CollisionModel_MDInteractionsExperimental.hpp"
 #include "CollisionModel_Molecule.hpp"
 #include "CollisionModel_Atom.hpp"
 #include "Core_randomGenerators.hpp"
