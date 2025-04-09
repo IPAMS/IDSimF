@@ -459,7 +459,6 @@ int main(int argc, const char *argv[]){
                         std::move(forceFieldPtr),
                         molecularStructureCollection);
                 }
-                
             
                 if (saveTrajectory){
                     mdModel->setTrajectoryWriter(projectName+"_md_trajectories.txt",
