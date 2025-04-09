@@ -66,16 +66,29 @@ int main(int argc, const char * argv[]) {
 
         Core::Particle ion;
         ion.setMolecularStructure(molecularStructureCollection.at(particleIdentifier));
-        ion.setVelocity({0, 0, 0});
 
-        CollisionModel::MDForceField_LJ12_6 forceField(collisionGasPolarizability_m3, potentialsFF);
-        auto forceFieldPtr = std::make_unique<CollisionModel::MDForceField_LJ12_6>(forceField);
+
+        std::unique_ptr<CollisionModel::AbstractMDForceField> forceFieldPtr;
+        if(potentialFunction == "LJ") {
+            forceFieldPtr = std::make_unique<CollisionModel::MDForceField_LJ12_6>(collisionGasPolarizability_m3, potentialsFF);
+        }
+        else if(potentialFunction == "Buckingham") {
+            //we have to initialize buckingham force field:
+            std::vector<Core::Particle*> particlePtrs = {&ion};
+            auto buckinghamPtr = std::make_unique<CollisionModel::MDForceField_Buckingham>(collisionGasPolarizability_m3, potentialsFF);
+            buckinghamPtr->populateInteractionTable(particlePtrs, molecularStructureCollection, collisionGasIdentifier);
+            forceFieldPtr = std::move(buckinghamPtr);
+        }
         CollisionModel::MDInteractionsTrajectorySampler mdSim(
             std::move(forceFieldPtr), molecularStructureCollection, logger);
         mdSim.setTrajectoryWriter(simResultBasename+"_MD_traj.txt", trajectoryMinimalSampleInterval_s);
 
         double gridSpacing_m = gridSpacing_ang*1e-10;
         for(int i = -gridSamples+1; i < gridSamples; i++) {
+            //reset ion position:
+            ion.setLocation({0, 0, 0});
+            ion.setVelocity({0, 0, 0});
+
             Core::Vector particlePosition({-50e-10, i*gridSpacing_m, 0});
             Core::Vector particleVelocity({velocity_x,0,0});
             mdSim.calculateTrajectory(ion, "N2", particlePosition, particleVelocity, subIntegratorIntegrationTime_s,
