@@ -49,7 +49,7 @@ void CollisionModel::MDInteractionsTrajectorySampler::setTrajectoryWriter(const 
 
 void CollisionModel::MDInteractionsTrajectorySampler::calculateTrajectory(
         Core::Particle& particle, std::string collisionMolecule, Core::Vector collisionParticleStartPosition, Core::Vector collisionParticleStartVelocity,
-        double integrationTime, double subTimeStep, MDIntegratorType integratorType) {
+        double integrationTime, double subTimeStep, int maximumSteps, bool ionIsFrozen, MDIntegratorType integratorType) {
 
     int iterations = 0;
 
@@ -82,7 +82,7 @@ void CollisionModel::MDInteractionsTrajectorySampler::calculateTrajectory(
     //trajectorySuccess = leapfrogIntern(moleculesPtr, timeStep, finalTime, collisionRadius);
     bool trajectorySuccess;
     if (integratorType == RK4_ADAPTIVE) {
-        trajectorySuccess = rk4InternAdaptiveStep(moleculesPtr, timeStep, finalTime);
+        trajectorySuccess = rk4InternAdaptiveStep(moleculesPtr, timeStep, finalTime, maximumSteps, ionIsFrozen);
     }
 
     double endEnergy = 0;
@@ -300,8 +300,8 @@ bool CollisionModel::MDInteractionsTrajectorySampler::rk4Intern(std::vector<Coll
     return false;
 }
 
-
-bool CollisionModel::MDInteractionsTrajectorySampler::rk4InternAdaptiveStep(std::vector<CollisionModel::Molecule*> moleculesPtr, double dt, double finalTime){
+bool CollisionModel::MDInteractionsTrajectorySampler::rk4InternAdaptiveStep(
+        std::vector<CollisionModel::Molecule*> moleculesPtr, double dt, double finalTime, int maximumSteps, bool ionIsFrozen) {
 
     double integrationTimeSum = 0;
     size_t nMolecules = moleculesPtr.size();
@@ -326,7 +326,7 @@ bool CollisionModel::MDInteractionsTrajectorySampler::rk4InternAdaptiveStep(std:
     std::array<std::array<Core::Vector, 2>, 6> k;
     std::array<std::array<Core::Vector, 2>, 6> l;
 
-    while(integrationTimeSum < finalTime){
+    while(integrationTimeSum < finalTime && steps < maximumSteps){
         i = 0;
         for(auto* molecule : moleculesPtr){
             velocityMolecules[i] = molecule->getComVel();
@@ -361,8 +361,7 @@ bool CollisionModel::MDInteractionsTrajectorySampler::rk4InternAdaptiveStep(std:
                 i = 0;
                 for(auto* molecule : moleculesPtr){
                     positionMolecules[i] += l[m][i]*weight[n-1][m];
-                    //TODO: Add Switch statement for ion movement:|| integrate all = true
-                    if(molecule->getMolecularStructureName() == currentCollisionMolecule_){
+                    if(molecule->getMolecularStructureName() == currentCollisionMolecule_ || !ionIsFrozen){
                         molecule->setComPos(positionMolecules[i]);
                     }
                     i++;

@@ -58,15 +58,15 @@ TEST_CASE("Basic test of MD trajectory sampler", "[CollisionModels][MDInteractio
 
     //Calculate two trajectories with the same sampler:
     mdSim.calculateTrajectory(ion, "N2", particlePosition, particleVelocity,
-        1e-11, 1e-16);
+        1e-11, 1e-16, 1000, true);
 
     mdSim.calculateTrajectory(ion, "Ar", particlePosition, particleVelocity,
-    1e-11, 1e-16);
+    1e-11, 1e-16, 200, false);
 
 
     FileIO::CSVReader csvReader;
     std::vector<std::vector<std::string>> readBack_result = csvReader.readCSVFile("MD_collisions_trajectory_sampler_test.txt", ',');
-    CHECK(readBack_result.size() == 860);
+    CHECK(readBack_result.size() == 611);
     std::vector<double> times = csvReader.extractDouble(readBack_result, 4);
     std::vector<double> bgMolecule_x = csvReader.extractDouble(readBack_result, 0);
     CHECK(Approx(times[0])==1e-16);

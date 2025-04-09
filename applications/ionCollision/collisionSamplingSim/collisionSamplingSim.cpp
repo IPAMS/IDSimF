@@ -53,10 +53,12 @@ int main(int argc, const char * argv[]) {
         int gridSamples = simConf->intParameter("grid_samples");
         double subIntegratorIntegrationTime_s = simConf->doubleParameter("sub_integrator_integration_time_s");
         double subIntegratorStepSize_s = simConf->doubleParameter("sub_integrator_step_size_s");
+        int maximumSteps = simConf->intParameter("maximum_step_number");
         double trajectoryMinimalSampleInterval_s = simConf->doubleParameter("trajectory_minimal_sample_interval_s");
         double velocity_x = simConf->doubleParameter("velocity_x");
         std::string potentialsFF = simConf->stringParameter("force_field");
         std::string potentialFunction = simConf->stringParameter("potential_function");
+        bool ionIsFrozen = simConf->boolParameter("ion_is_frozen");
 
         //read molecular structure file
         std::unordered_map<std::string,  std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection;
@@ -66,7 +68,6 @@ int main(int argc, const char * argv[]) {
 
         Core::Particle ion;
         ion.setMolecularStructure(molecularStructureCollection.at(particleIdentifier));
-
 
         std::unique_ptr<CollisionModel::AbstractMDForceField> forceFieldPtr;
         if(potentialFunction == "LJ") {
@@ -92,7 +93,7 @@ int main(int argc, const char * argv[]) {
             Core::Vector particlePosition({-50e-10, i*gridSpacing_m, 0});
             Core::Vector particleVelocity({velocity_x,0,0});
             mdSim.calculateTrajectory(ion, "N2", particlePosition, particleVelocity, subIntegratorIntegrationTime_s,
-                subIntegratorStepSize_s);
+                subIntegratorStepSize_s, maximumSteps, ionIsFrozen);
             logger->info("i:{} ",i);
         }
     }
