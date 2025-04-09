@@ -21,6 +21,7 @@
 
 #include "appUtils_commandlineParser.hpp"
 #include "appUtils_logging.hpp"
+#include <filesystem>
 #include <omp.h>
 
 /**
@@ -38,7 +39,7 @@ AppUtils::CommandlineParser::CommandlineParser(
     CLI::App app{appDescription, appName};
 
     app.add_option("--conf,-c,run_config",confFileName_, "Configuration file")->required();
-    app.add_option("--result,-r,result",simResultName_, "Result name")->required();
+    app.add_option("--result,-r,result",simResultName_, "Result name");
 
     if (multithreaded){
         app.add_option("--n_threads,-n", numberOfThreads_, "number of parallel threads")->required();
@@ -50,6 +51,10 @@ AppUtils::CommandlineParser::CommandlineParser(
     } catch(const CLI::ParseError &e) {
         int returnCode = (app).exit(e);
         throw AppUtils::TerminatedWhileCommandlineParsing(returnCode, "app terminated while commandline parsing");
+    }
+
+    if (simResultName_ == "") {
+        simResultName_ = std::filesystem::path(confFileName_).stem();
     }
 
     if (multithreaded){
