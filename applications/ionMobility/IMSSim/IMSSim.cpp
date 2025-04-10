@@ -247,6 +247,7 @@ int main(int argc, const char *argv[]){
                 uniqueReactivePartPtr particle = std::make_unique<RS::ReactiveParticle>(subst);
 
                 particle->setLocation(initialPositions[k]);
+                particle->setFloatAttribute(key_ChemicalIndex, substanceIndices.at(particle->getSpecies()));
                 if(transportModelType=="btree_MD"){
                     particle->setMolecularStructure(molecularStructureCollection.at(particleIdentifier[i]));
                     particle->setDiameter(particle->getMolecularStructure()->getDiameter());
@@ -525,6 +526,7 @@ int main(int argc, const char *argv[]){
         AppUtils::Stopwatch stopWatch;
         stopWatch.start();
 
+        timestepWriteFctSimple(particlesPtrs, 0.0, 0, false); //explicitly write state before first timestep
         for (int step = 0; step<nSteps; step++) {
             if (step%concentrationWriteInterval==0) {
                 resultFilewriter.writeTimestep(rsSim);
