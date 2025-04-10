@@ -253,7 +253,7 @@ void CollisionModel::HardSphereModel::modifyVelocity(Core::Particle &ion, double
 
     // Determine angle of the collision plane round the collision axis. All collision
     // planes are equally probable, since there is no preferential direction.
-    double impactTheta = PI_2*rndSource->uniformRealRndValue();
+    double impactTheta = Core::PI_2*rndSource->uniformRealRndValue();
 
     // Compute spherical coordinates in current velocity reference frame.
     Core::Vector vFrameCollidingRest_sp = cartesianToPolar(vFrameCollidingBackRest);

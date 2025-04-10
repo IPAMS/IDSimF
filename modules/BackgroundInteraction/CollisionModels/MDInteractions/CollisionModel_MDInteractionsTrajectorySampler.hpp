@@ -62,6 +62,7 @@ namespace CollisionModel{
                                  std::string collisionMolecule,
                                  Core::Vector collisionParticleStartPosition,
                                  Core::Vector collisionParticleStartVelocity,
+                                 Core::Vector collisionParticleRotationAngles,
                                  double integrationTime,
                                  double subTimeStep,
                                  int maximumSteps,

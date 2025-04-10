@@ -45,7 +45,6 @@ int main(int argc, const char * argv[]) {
         AppUtils::logger_ptr logger = cmdLineParser.logger();
         AppUtils::simConf_ptr simConf = cmdLineParser.simulationConfiguration();
 
-
         double collisionGasPolarizability_m3 = simConf->doubleParameter("collision_gas_polarizability_m3");
         std::string collisionGasIdentifier = simConf->stringParameter("collision_gas_identifier");
         std::string particleIdentifier = simConf->stringParameter("particle_identifier");
@@ -56,6 +55,7 @@ int main(int argc, const char * argv[]) {
         int maximumSteps = simConf->intParameter("maximum_step_number");
         double trajectoryMinimalSampleInterval_s = simConf->doubleParameter("trajectory_minimal_sample_interval_s");
         double velocity_x = simConf->doubleParameter("velocity_x");
+        double angle_z = simConf->doubleParameter("angle_z");
         std::string potentialsFF = simConf->stringParameter("force_field");
         std::string potentialFunction = simConf->stringParameter("potential_function");
         bool ionIsFrozen = simConf->boolParameter("ion_is_frozen");
@@ -92,8 +92,11 @@ int main(int argc, const char * argv[]) {
 
             Core::Vector particlePosition({-50e-10, i*gridSpacing_m, 0});
             Core::Vector particleVelocity({velocity_x,0,0});
-            mdSim.calculateTrajectory(ion, "N2", particlePosition, particleVelocity, subIntegratorIntegrationTime_s,
+            Core::Vector particleRotationAngle({0,0,angle_z});
+            mdSim.calculateTrajectory(ion, "N2", particlePosition, particleVelocity, particleRotationAngle,
+                subIntegratorIntegrationTime_s,
                 subIntegratorStepSize_s, maximumSteps, ionIsFrozen);
+
             logger->info("i:{} ",i);
         }
     }

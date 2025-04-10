@@ -109,7 +109,6 @@ namespace CollisionModel{
 
     private:
         const double PI_SQRT = std::sqrt(M_PI);
-        const double PI_2 = 2.0*M_PI;
         const double SQRT3_3 = std::sqrt(3) * 3;
 
         bool maxwellianApproximation_ = false;  ///< flag if a pure maxwellian approximation for the gas particles is used

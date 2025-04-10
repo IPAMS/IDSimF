@@ -32,7 +32,8 @@
 
 namespace Core {
     //typedef std::mt19937 MyRNG;  // the Mersenne Twister with a popular choice of parameters
-    
+
+    // physical constants:
     constexpr double ELEMENTARY_CHARGE = 1.60217e-19; ///< Elementary charge (Coulomb)
     constexpr double EPSILON_0 = 8.854e-12;           ///< Vacuum permittivity (Farad / m)
     constexpr double ELECTRIC_CONSTANT = (4.0*M_PI*EPSILON_0); ///< Electrical constant
@@ -44,5 +45,8 @@ namespace Core {
     constexpr double N_AVOGADRO = 6.02214199e23;        ///< Avogadro's number
     constexpr double MOL_VOLUME = 22.413996e-3;         //Volume (m^3) of one mol
                                                     // of ideal gas at 0 C, 101.325 kPa
+
+    // math constants:
+    constexpr double PI_2 = 2.0*M_PI;
 }
 #endif /* BTree_constants_h */

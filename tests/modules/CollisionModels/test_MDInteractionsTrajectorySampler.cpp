@@ -47,6 +47,7 @@ TEST_CASE("Basic test of MD trajectory sampler", "[CollisionModels][MDInteractio
 
     Core::Vector particlePosition({-50e-10, 1e-10, 0});
     Core::Vector particleVelocity({1000,0,0});
+    Core::Vector particleRotation;
 
     CollisionModel::MDInteractionsTrajectorySampler mdSim(
         std::move(forceFieldPtr),
@@ -57,18 +58,31 @@ TEST_CASE("Basic test of MD trajectory sampler", "[CollisionModels][MDInteractio
     mdSim.setTrajectoryWriter("MD_collisions_trajectory_sampler_test.txt", 0.0);
 
     //Calculate two trajectories with the same sampler:
-    mdSim.calculateTrajectory(ion, "N2", particlePosition, particleVelocity,
-        1e-11, 1e-16, 1000, true);
 
-    mdSim.calculateTrajectory(ion, "Ar", particlePosition, particleVelocity,
-    1e-11, 1e-16, 200, false);
+    particleRotation = {0,0,0};
+    mdSim.calculateTrajectory(ion, "N2", particlePosition, particleVelocity, particleRotation,
+        1e-11, 1e-16, 200, true);
+
+    particleRotation = {0,0,M_PI/2.0};
+    mdSim.calculateTrajectory(ion, "N2", particlePosition, particleVelocity, particleRotation,
+        1e-11, 1e-16, 200, true);
+
+    mdSim.calculateTrajectory(ion, "Ar", particlePosition, particleVelocity, particleRotation,
+    1e-11, 1e-16, 300, false);
 
 
     FileIO::CSVReader csvReader;
     std::vector<std::vector<std::string>> readBack_result = csvReader.readCSVFile("MD_collisions_trajectory_sampler_test.txt", ',');
-    CHECK(readBack_result.size() == 611);
+    CHECK(readBack_result.size() == 579);
     std::vector<double> times = csvReader.extractDouble(readBack_result, 4);
     std::vector<double> bgMolecule_x = csvReader.extractDouble(readBack_result, 0);
+
+    // Trajectories should begin at the right indices
     CHECK(Approx(times[0])==1e-16);
-    CHECK(Approx(times[411])==1e-16);
+    CHECK(Approx(times[200])==1e-16);
+    CHECK(Approx(times[400])==1e-16);
+
+    // start positions should be equal, but rotation of background molecule should change things
+    CHECK(Approx(bgMolecule_x[0])==bgMolecule_x[200]);
+    CHECK(Approx(bgMolecule_x[100]) != bgMolecule_x[300]);
 }

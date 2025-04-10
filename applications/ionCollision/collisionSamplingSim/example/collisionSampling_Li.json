@@ -3,6 +3,7 @@
   "collision_gas_identifier":"N2",
   "particle_identifier":"Li+",
   "ion_is_frozen": "false",
+  "angle_z": 1.57079, //pi/2
   "force_field":"VDWII",
   "potential_function":"Buckingham",
   "md_configuration":"./md_configuration.json",

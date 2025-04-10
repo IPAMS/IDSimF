@@ -48,7 +48,8 @@ void CollisionModel::MDInteractionsTrajectorySampler::setTrajectoryWriter(const 
 }
 
 void CollisionModel::MDInteractionsTrajectorySampler::calculateTrajectory(
-        Core::Particle& particle, std::string collisionMolecule, Core::Vector collisionParticleStartPosition, Core::Vector collisionParticleStartVelocity,
+        Core::Particle& particle, std::string collisionMolecule, Core::Vector collisionParticleStartPosition,
+        Core::Vector collisionParticleStartVelocity, Core::Vector collisionPartnerRotationAngles,
         double integrationTime, double subTimeStep, int maximumSteps, bool ionIsFrozen, MDIntegratorType integratorType) {
 
     int iterations = 0;
@@ -61,8 +62,9 @@ void CollisionModel::MDInteractionsTrajectorySampler::calculateTrajectory(
                                         molecularStructureCollection_.at(collisionMolecule));
     currentCollisionMolecule_ = collisionMolecule;
 
-    // TODO: Rotate background gas molecule here
-    //moleculesPtr[1]->setAngles(nitrogenAngles);
+    // Rotate background gas molecule
+    bgMole.setAngles(collisionPartnerRotationAngles);
+
     std::vector<CollisionModel::Molecule*> moleculesPtr = {&mole, &bgMole};
 
     // possible check for energy conservation
@@ -418,9 +420,7 @@ bool CollisionModel::MDInteractionsTrajectorySampler::rk4InternAdaptiveStep(
         i = 0;
         integrationTimeSum += dt;
         for(auto* molecule : moleculesPtr){
-
-            //TODO: Add Switch statement for ion movement:|| integrate all = true
-            if(molecule->getMolecularStructureName() == currentCollisionMolecule_){
+            if(molecule->getMolecularStructureName() == currentCollisionMolecule_ || !ionIsFrozen){
                 molecule->setComPos(newComPosOrder4[i]);
                 molecule->setComVel(newComVelOrder4[i]); 
             }
