@@ -93,7 +93,7 @@ int main(int argc, const char * argv[]) {
             Core::Vector particlePosition({-50e-10, i*gridSpacing_m, 0});
             Core::Vector particleVelocity({velocity_x,0,0});
             Core::Vector particleRotationAngle({0,0,angle_z});
-            mdSim.calculateTrajectory(ion, "N2", particlePosition, particleVelocity, particleRotationAngle,
+            mdSim.calculateTrajectory(ion, collisionGasIdentifier, particlePosition, particleVelocity, particleRotationAngle,
                 subIntegratorIntegrationTime_s,
                 subIntegratorStepSize_s, maximumSteps, ionIsFrozen);
 
