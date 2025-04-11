@@ -64,7 +64,8 @@ void CollisionModel::MDInteractionsTrajectorySampler::calculateTrajectory(
 
     // Rotate background gas molecule
     bgMole.setAngles(collisionPartnerRotationAngles);
-
+    //bgMole.getAtoms()[0]->getRelativePosition().y(0.0);
+    //bgMole.getAtoms()[1]->getRelativePosition().y(0.0);
     std::vector<CollisionModel::Molecule*> moleculesPtr = {&mole, &bgMole};
 
     // possible check for energy conservation
@@ -84,6 +85,14 @@ void CollisionModel::MDInteractionsTrajectorySampler::calculateTrajectory(
     //trajectorySuccess = leapfrogIntern(moleculesPtr, timeStep, finalTime, collisionRadius);
     bool trajectorySuccess;
     if (integratorType == RK4_ADAPTIVE) {
+        Core::Vector atom0_pos = bgMole.getAtoms()[0]->getRelativePosition();
+        Core::Vector atom1_pos = bgMole.getAtoms()[1]->getRelativePosition();
+        Core::Vector atom2_pos = bgMole.getAtoms()[2]->getRelativePosition();
+        logger_->info("atom 0 x={} y={} z={}, atom 1 x={} y={} z={}, atom 2 x={} y={} z={}",
+            atom0_pos.x(), atom0_pos.y(), atom0_pos.z(),
+            atom1_pos.x(), atom1_pos.y(), atom1_pos.z(),
+            atom2_pos.x(), atom2_pos.y(), atom2_pos.z()
+            );
         trajectorySuccess = rk4InternAdaptiveStep(moleculesPtr, timeStep, finalTime, maximumSteps, ionIsFrozen);
     }
 
