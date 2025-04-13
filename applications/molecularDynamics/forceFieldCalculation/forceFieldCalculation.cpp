@@ -99,6 +99,7 @@ int main(int argc, const char * argv[]) {
 
 
     size_t samples = positions.size();
+    forcesOut << "x, y, z, f_x, f_y, f_z, vdw_x, vdw_y, vdw_z, ii_x, ii_y, ii_z" << std::endl;
     for(size_t i = 0; i < samples; i++){
         bgGas.setComPos(positions[i]);
         std::vector<CollisionModel::Molecule*> moleculesPtr = {&ion, &bgGas};
