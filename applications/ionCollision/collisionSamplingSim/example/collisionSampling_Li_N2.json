@@ -1,5 +1,5 @@
 {
-  "collision_gas_polarizability_m3":0.205e-30,
+  "collision_gas_polarizability_m3":1.71e-30,
   "collision_gas_identifier":"N2",
   "particle_identifier":"Li+",
   "ion_is_frozen": "false",

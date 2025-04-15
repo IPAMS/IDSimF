@@ -68,9 +68,9 @@ void CollisionModel::MDForceField_LJ12_6::calculateForceField(std::vector<Collis
 
             Core::Vector distance = absPosAtomI - absPosAtomJ;
 
-            if(distance.magnitude() > 100e-10){
+            /*if(distance.magnitude() > 100e-10){
                 return;
-            }
+            }*/
 
             double distanceSquared = distance.magnitudeSquared();
             double distanceSquaredInverse = 1./distanceSquared;
@@ -242,7 +242,7 @@ void CollisionModel::MDForceField_LJ12_6::calculateForceField(std::vector<Collis
     }
 }
 
-void CollisionModel::MDForceField_LJ12_6::calculateForceFieldComponents(std::vector<CollisionModel::Molecule*>& moleculesPtr, 
+void CollisionModel::MDForceField_LJ12_6::calculateForceFieldComponents(std::vector<CollisionModel::Molecule*>& moleculesPtr,
                                 std::vector<Core::Vector>& forceMolecules, Core::Vector& forceVDW, Core::Vector& forceII){
 
 
@@ -283,9 +283,9 @@ void CollisionModel::MDForceField_LJ12_6::calculateForceFieldComponents(std::vec
 
             Core::Vector distance = absPosAtomI - absPosAtomJ;
 
-            if(distance.magnitude() > 100e-10){
+            /*if(distance.magnitude() > 100e-10){
                 return;
-            }
+            }*/
 
             double distanceSquared = distance.magnitudeSquared();
             double distanceSquaredInverse = 1./distanceSquared;
