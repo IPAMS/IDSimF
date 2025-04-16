@@ -54,7 +54,7 @@ AppUtils::CommandlineParser::CommandlineParser(
     }
 
     if (simResultName_ == "") {
-        simResultName_ = std::filesystem::path(confFileName_).stem();
+        simResultName_ = std::filesystem::path(confFileName_).parent_path() / std::filesystem::path(confFileName_).stem();
     }
 
     if (multithreaded){
