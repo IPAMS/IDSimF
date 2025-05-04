@@ -1,7 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
 project(ionSimulation_cpp)
-
-set(CMAKE_CXX_STANDARD 14)
 
 set(SOURCE_FILES
         sds_runtime_benchmark.cpp)
@@ -11,4 +8,4 @@ include_directories(${CMAKE_SOURCE_DIR}/modules/backgroundInteraction/collisionM
 include_directories(${CMAKE_SOURCE_DIR}/modules/RS)
 
 add_executable(benchmark_collision_statisticaldiffusion_runtime ${SOURCE_FILES})
-target_link_libraries(benchmark_collision_statisticaldiffusion_runtime core collisionmodels apputils)
+target_link_libraries(benchmark_collision_statisticaldiffusion_runtime core apputils particlesimulation collisionmodels)

@@ -1,7 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
 project(ionSimulation_cpp)
-
-set(CMAKE_CXX_STANDARD 14)
 
 set(SOURCE_FILES
         md_runtime_benchmark.cpp)
@@ -17,4 +14,4 @@ set(TEST_FILES
 file(COPY ${TEST_FILES} DESTINATION .)
 
 add_executable(benchmark_collision_md_runtime ${SOURCE_FILES})
-target_link_libraries(benchmark_collision_md_runtime core collisionmodels apputils)
+target_link_libraries(benchmark_collision_md_runtime core apputils particlesimulation collisionmodels)

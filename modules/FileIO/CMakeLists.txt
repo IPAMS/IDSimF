@@ -1,6 +1,7 @@
 project(IDSimF_fileIO)
 
 set(SOURCE_FILES
+
         FileIO_averageChargePositionWriter.hpp
         FileIO_averageChargePositionWriter.cpp
         FileIO_simpleVTKwriter.hpp
@@ -27,5 +28,5 @@ set(SOURCE_FILES
 add_library(file_io STATIC ${SOURCE_FILES})
 target_include_directories(file_io PUBLIC .)
 
-target_link_libraries(file_io core spacecharge particlesimulation)
-target_link_libraries(file_io ${HDF5_CXX_LIBRARIES} ${HDF5_LIBRARIES} spdlog::spdlog)
+target_link_libraries(file_io PRIVATE core particlesimulation spacecharge collisionmodels
+        ${HDF5_CXX_LIBRARIES} ${HDF5_LIBRARIES} jsoncpp spdlog::spdlog)

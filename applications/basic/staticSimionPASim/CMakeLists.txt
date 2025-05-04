@@ -4,7 +4,7 @@ set(SOURCE_FILES
         staticSimionPASim.cpp)
 
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
-target_link_libraries(${PROJECT_NAME} core apputils spacecharge collisionmodels particlesimulation)
+target_link_libraries(${PROJECT_NAME} core apputils particlesimulation file_io integration spacecharge collisionmodels)
 
 # register example runs for CTest
 add_test(NAME app_basic_staticSimionPASim_benchmarkRunShort COMMAND ${PROJECT_NAME} "example/benchmarkRun_short.json" "run_app_basic_staticSimionPASim_benchmarkRunShort")

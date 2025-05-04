@@ -4,7 +4,7 @@ set(SOURCE_FILES
         DMSSimplifiedSim.cpp)
 
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
-target_link_libraries(${PROJECT_NAME} core apputils rs collisionmodels particlesimulation apputils_ionMobility)
+target_link_libraries(${PROJECT_NAME} core apputils particlesimulation file_io integration spacecharge collisionmodels apputils_ionMobility rs)
 
 add_test(NAME app_ionMobility_DMSSimplifiedSim_waterCluster_staticRun COMMAND ${PROJECT_NAME}
         "example/DMS_waterCluster_static.json" "run_app_ionMobility_waterCluster_static" -n ${N_THREADS})

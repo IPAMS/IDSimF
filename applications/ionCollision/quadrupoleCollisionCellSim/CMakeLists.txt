@@ -4,7 +4,7 @@ set(SOURCE_FILES
         quadrupoleCollisionCellSim.cpp)
 
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
-target_link_libraries(${PROJECT_NAME} core apputils collisionmodels particlesimulation)
+target_link_libraries(${PROJECT_NAME} core apputils particlesimulation file_io integration spacecharge collisionmodels rs)
 target_link_libraries(${PROJECT_NAME} ${VTK_LIBRARIES})
 
 # register example runs for CTest

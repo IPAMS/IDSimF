@@ -26,5 +26,4 @@ set(SOURCE_FILES
 add_library(particlesimulation STATIC ${SOURCE_FILES})
 target_include_directories(particlesimulation PUBLIC .)
 
-target_link_libraries(particlesimulation core spacecharge file_io collisionmodels)
-target_link_libraries(particlesimulation spdlog::spdlog)
+target_link_libraries(particlesimulation PRIVATE core spacecharge file_io collisionmodels spdlog::spdlog)

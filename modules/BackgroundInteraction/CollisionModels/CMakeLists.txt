@@ -43,4 +43,4 @@ set(SOURCE_FILES
 
 add_library(collisionmodels STATIC ${SOURCE_FILES})
 target_include_directories(collisionmodels PUBLIC . HardSoftSphere StatisticalDiffusion MDInteractions)
-target_link_libraries(collisionmodels core spacecharge rs apputils)
+target_link_libraries(collisionmodels PRIVATE core apputils particlesimulation spacecharge rs spdlog::spdlog)

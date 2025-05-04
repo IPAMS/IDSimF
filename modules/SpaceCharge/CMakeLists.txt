@@ -37,14 +37,14 @@ endif()
 
 add_library(spacecharge STATIC ${SOURCE_FILES})
 target_include_directories(spacecharge PUBLIC . BTree FMM3D ExaFMMt)
-target_link_libraries(spacecharge core)
+target_link_libraries(spacecharge PRIVATE core)
 if(OpenMP_CXX_FOUND)
-    target_link_libraries(spacecharge OpenMP::OpenMP_CXX)
+    target_link_libraries(spacecharge PRIVATE OpenMP::OpenMP_CXX)
 endif()
 
 if(USE_FMM_3D)
     target_include_directories(spacecharge PUBLIC ${FMM_3D_PATH}/c)
-    target_link_libraries(spacecharge ${FMM_3D_PATH}/lib/libfmm3d.so)
+    target_link_libraries(spacecharge PRIVATE ${FMM_3D_PATH}/lib/libfmm3d.so)
 endif()
 
 if(USE_EXAFMMT)
@@ -57,7 +57,7 @@ if(USE_EXAFMMT)
     find_package(LAPACK REQUIRED)
     find_package(FFTW REQUIRED)
 
-    target_link_libraries (spacecharge
+    target_link_libraries (spacecharge PRIVATE
             ${BLAS_LIBRARIES}
             ${LAPACK_LIBRARIES}
             ${FFTW_LIBRARIES})

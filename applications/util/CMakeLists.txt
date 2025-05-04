@@ -1,7 +1,6 @@
 project(apputils)
 
 set(SOURCE_FILES
-        ${CMAKE_SOURCE_DIR}/libs/jsoncpp/jsoncpp.cpp
         appUtils_simulationConfiguration.hpp
         appUtils_inputFileUtilities.hpp
         appUtils_inputFileUtilities.cpp
@@ -21,14 +20,14 @@ set(SOURCE_FILES
 
 add_library(apputils STATIC ${SOURCE_FILES})
 target_include_directories(apputils PUBLIC
-        ${CMAKE_SOURCE_DIR}/libs/jsoncpp/json
         ${CMAKE_SOURCE_DIR}/applications/util
         ${CMAKE_SOURCE_DIR}/libs/CLI11)
 
-target_link_libraries(apputils particlesimulation integration spdlog::spdlog)
+target_link_libraries(apputils PRIVATE core particlesimulation collisionmodels integration spacecharge file_io)
+target_link_libraries(apputils PUBLIC spdlog::spdlog jsoncpp)
 if(OpenMP_CXX_FOUND)
-    target_link_libraries(apputils OpenMP::OpenMP_CXX)
+    target_link_libraries(apputils PRIVATE OpenMP::OpenMP_CXX)
 endif()
 if (USE_CPP_FSLIB)
-    target_link_libraries(apputils stdc++fs)
+    target_link_libraries(apputils PRIVATE stdc++fs)
 endif()
