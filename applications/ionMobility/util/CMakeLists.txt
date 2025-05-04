@@ -1,7 +1,6 @@
 project(apputils_ionMobility)
 
 set(SOURCE_FILES
-        dmsSim_dmsFields.hpp
         dmsSim_dmsFields.cpp)
 
 add_library(apputils_ionMobility STATIC ${SOURCE_FILES})
