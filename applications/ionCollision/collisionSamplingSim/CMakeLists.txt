@@ -4,7 +4,7 @@ set(SOURCE_FILES
         collisionSamplingSim.cpp)
 
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
-target_link_libraries(${PROJECT_NAME} core apputils collisionmodels)
+target_link_libraries(${PROJECT_NAME} core apputils particlesimulation file_io integration spacecharge collisionmodels rs)
 
 # register example runs for CTest
 add_test(NAME app_ionCollision_collisionSamplingSim_Li+_N2 COMMAND ${PROJECT_NAME}

@@ -4,7 +4,7 @@ set(SOURCE_FILES
         TIMSSim.cpp)
 
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
-target_link_libraries(${PROJECT_NAME} core apputils rs collisionmodels particlesimulation apputils_ionMobility)
+target_link_libraries(${PROJECT_NAME} core apputils particlesimulation file_io integration spacecharge collisionmodels rs apputils_ionMobility)
 
 add_test(NAME app_ionMobility_TIMSSim_HS_uniformFlow COMMAND ${PROJECT_NAME}
         "example/TIMS_HS_uniformFlow.json" "run_IMS_HS_uniformFlow" -n ${N_THREADS})

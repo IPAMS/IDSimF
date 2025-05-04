@@ -1,7 +1,6 @@
 project(test_FileIO)
 
 set(SOURCE_FILES
-        ${CMAKE_SOURCE_DIR}/libs/jsoncpp/jsoncpp.cpp
         test_main.cpp
         test_vtkFileWriter.cpp
         test_ionCloudReader.cpp
@@ -31,9 +30,9 @@ file(COPY ${TEST_FILES} DESTINATION .)
 add_executable(test_FileIO ${SOURCE_FILES})
 target_include_directories(test_FileIO PUBLIC
         ${CMAKE_SOURCE_DIR}/libs/catch
-        ${CMAKE_SOURCE_DIR}/libs/jsoncpp/json
         ${CMAKE_SOURCE_DIR}/tests/util)
 
-target_link_libraries(test_FileIO core file_io spacecharge collisionmodels rs ${HDF5_CXX_LIBRARIES} ${HDF5_LIBRARIES})
+target_link_libraries(test_FileIO core file_io particlesimulation spacecharge collisionmodels rs
+        spdlog::spdlog jsoncpp ${HDF5_CXX_LIBRARIES} ${HDF5_LIBRARIES})
 
 add_test(NAME test_FileIO COMMAND test_FileIO)

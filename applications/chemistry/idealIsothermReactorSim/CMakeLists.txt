@@ -4,7 +4,7 @@ set(SOURCE_FILES
         idealIsothermReactorSim.cpp)
 
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
-target_link_libraries(${PROJECT_NAME} core apputils spacecharge rs particlesimulation)
+target_link_libraries(${PROJECT_NAME} core apputils particlesimulation integration spacecharge rs)
 target_link_libraries(${PROJECT_NAME} ${VTK_LIBRARIES})
 
 # register example runs for CTest

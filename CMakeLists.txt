@@ -98,6 +98,7 @@ endif()
 
 # third party libraries ------------------------------------
 add_subdirectory(libs/spdlog)
+add_subdirectory(libs/jsoncpp)
 # add_subdirectory(libs/cxxopts)
 
 add_subdirectory (modules/Core)

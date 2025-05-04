@@ -4,7 +4,7 @@ set(SOURCE_FILES
         generalQuadSim.cpp)
 
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
-target_link_libraries(${PROJECT_NAME} core apputils collisionmodels particlesimulation)
+target_link_libraries(${PROJECT_NAME} core apputils particlesimulation file_io integration spacecharge collisionmodels rs)
 target_link_libraries(${PROJECT_NAME} ${VTK_LIBRARIES})
 
 add_test(NAME app_ionTransfer_generalQuadSim_benchmarkRun COMMAND ${PROJECT_NAME}
