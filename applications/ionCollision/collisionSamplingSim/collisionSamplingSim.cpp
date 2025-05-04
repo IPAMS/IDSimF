@@ -35,6 +35,7 @@
 #include "CollisionModel_MDInteractionsTrajectorySampler.hpp"
 #include "CollisionModel_MDForceField_LJ12_6.hpp"
 #include "CollisionModel_MDForceField_Buckingham.hpp"
+#include "Core_math.hpp"
 
 int main(int argc, const char * argv[]) {
     try {
@@ -55,7 +56,8 @@ int main(int argc, const char * argv[]) {
         int maximumSteps = simConf->intParameter("maximum_step_number");
         double trajectoryMinimalSampleInterval_s = simConf->doubleParameter("trajectory_minimal_sample_interval_s");
         double velocity_x = simConf->doubleParameter("velocity_x");
-        double angle_z = simConf->doubleParameter("angle_z");
+        double angle_z_deg = simConf->doubleParameter("angle_z_deg");
+        double angle_z_rad = Core::degToRad(angle_z_deg);
         std::string potentialsFF = simConf->stringParameter("force_field");
         std::string potentialFunction = simConf->stringParameter("potential_function");
         bool ionIsFrozen = simConf->boolParameter("ion_is_frozen");
@@ -92,7 +94,7 @@ int main(int argc, const char * argv[]) {
 
             Core::Vector particlePosition({-50e-10, i*gridSpacing_m, 0});
             Core::Vector particleVelocity({velocity_x,0,0});
-            Core::Vector particleRotationAngle({0,0,angle_z});
+            Core::Vector particleRotationAngle({0,0,angle_z_rad});
             mdSim.calculateTrajectory(ion, collisionGasIdentifier, particlePosition, particleVelocity, particleRotationAngle,
                 subIntegratorIntegrationTime_s,
                 subIntegratorStepSize_s, maximumSteps, ionIsFrozen);
