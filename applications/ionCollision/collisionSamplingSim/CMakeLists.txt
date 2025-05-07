@@ -11,7 +11,7 @@ add_test(NAME app_ionCollision_collisionSamplingSim_Li+_N2 COMMAND ${PROJECT_NAM
         "example/collisionSampling_Li_N2.json" "run_app_ionCollision_collisionSamplingSim_Li_N2" -n ${N_THREADS})
 
 add_test(NAME app_ionCollision_collisionSamplingSim_Li+_Ar COMMAND ${PROJECT_NAME}
-        "example/collisionSampling_Li_Ar.json" "run_app_ionCollision_collisionSamplingSim_Li_Ar" -n ${N_THREADS})
+        "example/collisionSampling_O2_Ar.json" "run_app_ionCollision_collisionSamplingSim_O2_Ar" -n ${N_THREADS})
 
 
 add_custom_command(TARGET ${PROJECT_NAME} PRE_BUILD

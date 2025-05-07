@@ -56,8 +56,13 @@ int main(int argc, const char * argv[]) {
         int maximumSteps = simConf->intParameter("maximum_step_number");
         double trajectoryMinimalSampleInterval_s = simConf->doubleParameter("trajectory_minimal_sample_interval_s");
         double velocity_x = simConf->doubleParameter("velocity_x");
-        double angle_z_deg = simConf->doubleParameter("angle_z_deg");
-        double angle_z_rad = Core::degToRad(angle_z_deg);
+        double angleGas_z_deg = simConf->doubleParameter("gas_particle_angle_z_deg");
+        double angleGas_z_rad = Core::degToRad(angleGas_z_deg);
+        Core::Vector anglesIon_deg = simConf->vector3dParameter("ion_angles_deg");
+        Core::Vector anglesIon_rad = {
+            Core::degToRad(anglesIon_deg.x()),
+            Core::degToRad(anglesIon_deg.y()),
+            Core::degToRad(anglesIon_deg.z()) };
         std::string potentialsFF = simConf->stringParameter("force_field");
         std::string potentialFunction = simConf->stringParameter("potential_function");
         bool ionIsFrozen = simConf->boolParameter("ion_is_frozen");
@@ -92,12 +97,14 @@ int main(int argc, const char * argv[]) {
             ion.setLocation({0, 0, 0});
             ion.setVelocity({0, 0, 0});
 
-            Core::Vector particlePosition({-50e-10, i*gridSpacing_m, 0});
-            Core::Vector particleVelocity({velocity_x,0,0});
-            Core::Vector particleRotationAngle({0,0,angle_z_rad});
-            mdSim.calculateTrajectory(ion, collisionGasIdentifier, particlePosition, particleVelocity, particleRotationAngle,
-                subIntegratorIntegrationTime_s,
-                subIntegratorStepSize_s, maximumSteps, ionIsFrozen);
+
+            Core::Vector gasParticlePosition({-50e-10, i*gridSpacing_m, 0});
+            Core::Vector gasParticleVelocity({velocity_x,0,0});
+            Core::Vector gasParticleRotationAngles({0,0,angleGas_z_rad});
+            mdSim.calculateTrajectory(
+                ion, anglesIon_rad,
+                collisionGasIdentifier, gasParticlePosition, gasParticleVelocity, gasParticleRotationAngles,
+                subIntegratorIntegrationTime_s, subIntegratorStepSize_s, maximumSteps, ionIsFrozen);
 
             logger->info("i:{} ",i);
         }

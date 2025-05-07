@@ -1,7 +1,7 @@
 {
-  "collision_gas_polarizability_m3":1.71e-30,
+  "collision_gas_polarizability_m3":1.66e-30,
   "collision_gas_identifier":"Ar",
-  "particle_identifier":"Li+",
+  "particle_identifier":"O2+",
   "force_field":"ALL",
   "potential_function":"LJ",
   "ion_is_frozen": "false",
@@ -12,8 +12,9 @@
   "grid_spacing_angstrom":2.5,
   "grid_samples": 10,
   "velocity_x": 250,
-  "angle_z": 0.0,
-  "trajectory_minimal_sample_interval_s": 0.0 //1e-16
+  "trajectory_minimal_sample_interval_s": 0.0, //1e-16
+  "gas_particle_angle_z_deg": 0.0,
+  "ion_angles_deg": [10,20,50]
 }
 
 

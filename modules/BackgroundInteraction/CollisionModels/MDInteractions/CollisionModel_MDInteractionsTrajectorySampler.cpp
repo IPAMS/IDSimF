@@ -48,14 +48,16 @@ void CollisionModel::MDInteractionsTrajectorySampler::setTrajectoryWriter(const 
 }
 
 void CollisionModel::MDInteractionsTrajectorySampler::calculateTrajectory(
-        Core::Particle& particle, std::string collisionMolecule, Core::Vector collisionParticleStartPosition,
-        Core::Vector collisionParticleStartVelocity, Core::Vector collisionPartnerRotationAngles,
+        Core::Particle& particle, Core::Vector particleRotationAngles,
+        std::string collisionMolecule,
+        Core::Vector collisionParticleStartPosition, Core::Vector collisionParticleStartVelocity, Core::Vector collisionPartnerRotationAngles,
         double integrationTime, double subTimeStep, int maximumSteps, bool ionIsFrozen, MDIntegratorType integratorType) {
 
     int iterations = 0;
 
-    // Construct the actual molecule and its atoms
+    // Construct the molecule of interest (in most cases the simulated molecular ion) and its atoms
     Molecule mole(Core::Vector(0.0, 0.0, 0.0), Core::Vector(0.0, 0.0, 0.0), particle.getMolecularStructure());
+    mole.setAngles(particleRotationAngles);
 
     // Construct the background gas particle
     Molecule bgMole(collisionParticleStartPosition, collisionParticleStartVelocity,

@@ -42,12 +42,13 @@ TEST_CASE("Basic test of MD trajectory sampler", "[CollisionModels][MDInteractio
     Core::Particle ion;
     ion.setMolecularStructure(molecularStructureCollection.at("Ar+"));
     ion.setVelocity(Core::Vector(600.0, 50.0, 0.0));
+    Core::Vector ionRotation({0,0,0});
     CollisionModel::MDForceField_LJ12_6 forceField(0.205E-30);
     auto forceFieldPtr = std::make_unique<CollisionModel::MDForceField_LJ12_6>(forceField);
 
-    Core::Vector particlePosition({-50e-10, 1e-10, 0});
-    Core::Vector particleVelocity({1000,0,0});
-    Core::Vector particleRotation;
+    Core::Vector collisionParticlePosition({-50e-10, 1e-10, 0});
+    Core::Vector collisionParticleVelocity({1000,0,0});
+    Core::Vector collisionParticleRotation;
 
     CollisionModel::MDInteractionsTrajectorySampler mdSim(
         std::move(forceFieldPtr),
@@ -59,21 +60,30 @@ TEST_CASE("Basic test of MD trajectory sampler", "[CollisionModels][MDInteractio
 
     //Calculate two trajectories with the same sampler:
 
-    particleRotation = {0,0,0};
-    mdSim.calculateTrajectory(ion, "N2", particlePosition, particleVelocity, particleRotation,
+    collisionParticleRotation = {0,0,0};
+    mdSim.calculateTrajectory(ion, ionRotation,
+        "N2", collisionParticlePosition, collisionParticleVelocity, collisionParticleRotation,
         1e-11, 1e-16, 200, true);
 
-    particleRotation = {0,0,M_PI/2.0};
-    mdSim.calculateTrajectory(ion, "N2", particlePosition, particleVelocity, particleRotation,
+    collisionParticleRotation = {0,0,M_PI/2.0};
+    mdSim.calculateTrajectory(ion, ionRotation,
+        "N2", collisionParticlePosition, collisionParticleVelocity, collisionParticleRotation,
         1e-11, 1e-16, 200, true);
 
-    mdSim.calculateTrajectory(ion, "Ar", particlePosition, particleVelocity, particleRotation,
+    mdSim.calculateTrajectory(ion, ionRotation,
+        "Ar", collisionParticlePosition, collisionParticleVelocity, collisionParticleRotation,
     1e-11, 1e-16, 300, false);
+
+    ion.setMolecularStructure(molecularStructureCollection.at("Acetone"));
+    ionRotation = {90,0,0};
+    mdSim.calculateTrajectory(ion, ionRotation,
+    "Ar", collisionParticlePosition, collisionParticleVelocity, collisionParticleRotation,
+1e-11, 1e-16, 300, false);
 
 
     FileIO::CSVReader csvReader;
     std::vector<std::vector<std::string>> readBack_result = csvReader.readCSVFile("MD_collisions_trajectory_sampler_test.txt", ',');
-    CHECK(readBack_result.size() == 579);
+    CHECK(readBack_result.size() == 762);
     std::vector<double> times = csvReader.extractDouble(readBack_result, 4);
     std::vector<double> bgMolecule_x = csvReader.extractDouble(readBack_result, 0);
 

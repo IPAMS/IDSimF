@@ -59,6 +59,7 @@ namespace CollisionModel{
                                  double minimalSampleInterval=0);
 
         void calculateTrajectory(Core::Particle& particle,
+                                 Core::Vector particleRotationAngles,
                                  std::string collisionMolecule,
                                  Core::Vector collisionParticleStartPosition,
                                  Core::Vector collisionParticleStartVelocity,
