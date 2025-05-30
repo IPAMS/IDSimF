@@ -67,12 +67,14 @@ int main(int argc, const char * argv[]) {
 
         std::vector<unsigned int> nIons = simConf->unsignedIntVectorParameter("n_ions");
         std::vector<double> ionMasses = simConf->doubleVectorParameter("ion_masses");
+        std::vector<double> ionCharges = simConf->doubleVectorParameter("ion_charges");
 
         for (std::size_t i = 0; i<nIons.size(); i++) {
             unsigned int nParticles = nIons[i];
             double mass = ionMasses[i];
+            double charge = ionCharges[i];
             ParticleSimulation::BoxStartZone startZone(Core::Vector(3.0, 3.0, 3.0)/1000.0);
-            auto ions = startZone.getRandomParticlesInStartZone(nParticles, 1.0);
+            auto ions = startZone.getRandomParticlesInStartZone(nParticles, charge);
             /*auto ions = ParticleSimulation::util::getRandomIonsInBox(nParticles, 1.0,
                                                                      Core::Vector(-1.5, -1.5, -1.5) /
                                                                      1000.0,
