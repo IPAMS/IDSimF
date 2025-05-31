@@ -463,7 +463,7 @@ TEST_CASE( "Test field calculation in serial node", "[Node]") {
         CHECK( testField1.x() == Approx(testField1.z()).epsilon(0.001));
     }
 
-    SECTION("Test charge distribution calculation in all spatial directions with many particles") {
+    SECTION("Test charge distribution calculation in all spatial directions with many particles and varied theta") {
 
         Core::Particle testIon1 = Core::Particle(Core::Vector(9.0,0.0,0.0),1.0);
         Core::Particle testIon2 = Core::Particle(Core::Vector(0.0,0.0,9.0),1.0);
@@ -482,6 +482,8 @@ TEST_CASE( "Test field calculation in serial node", "[Node]") {
         }
         testNode.computeChargeDistributionRecursive();
 
+        CHECK( testNode.getTheta() ==Approx(0.9));
+
         Core::Vector testField1 = testNode.computeElectricFieldFromTree(testIon1);
         Core::Vector testField2 = testNode.computeElectricFieldFromTree(testIon2);
         Core::Vector testField3 = testNode.computeElectricFieldFromTree(testIon3);
@@ -490,5 +492,20 @@ TEST_CASE( "Test field calculation in serial node", "[Node]") {
         CHECK( (testField1.x() - testField2.z()) < 1e-8);
         CHECK( (testField1.x() - testField3.y()) < 1e-8);
         CHECK( (testField3 - testField4).magnitude() < 1e-8);
+
+        testNode.setTheta(0.02);
+        testNode.computeChargeDistributionRecursive();
+        CHECK( testNode.getTheta() ==Approx(0.02));
+
+        Core::Vector testField1_lowTheta = testNode.computeElectricFieldFromTree(testIon1);
+        Core::Vector testField2_lowTheta = testNode.computeElectricFieldFromTree(testIon2);
+        Core::Vector testField3_lowTheta = testNode.computeElectricFieldFromTree(testIon3);
+        Core::Vector testField4_lowTheta = testNode.computeElectricFieldFromTree(testIon4);
+
+        CHECK( (testField1_lowTheta.x() - testField2_lowTheta.z()) < 1e-8);
+        CHECK( (testField1_lowTheta.x() - testField3_lowTheta.y()) < 1e-8);
+        CHECK( (testField3_lowTheta - testField4_lowTheta).magnitude() < 1e-8);
+
+
     }
 }

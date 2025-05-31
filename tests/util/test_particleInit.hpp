@@ -38,8 +38,7 @@ inline std::vector<std::unique_ptr<Core::Particle>> getRandomIonsInBox(std::size
     return startZone.getRandomParticlesInStartZone(numIons, 1.0);
 }
 
-inline std::vector<std::unique_ptr<Core::Particle>> getIonsInLattice(unsigned int nPerDirection){
-
+inline std::vector<std::unique_ptr<Core::Particle>> getIonsInLattice(unsigned int nPerDirection, double charge){
     std::vector<std::unique_ptr<Core::Particle>> particles;
     unsigned int nTotal = 0;
     for (unsigned int i=0; i<nPerDirection; i++){
@@ -48,11 +47,27 @@ inline std::vector<std::unique_ptr<Core::Particle>> getIonsInLattice(unsigned in
             double pY = j*1.0/nPerDirection;
             for (unsigned int k=0; k<nPerDirection; k++){
                 double pZ = k*1.0/nPerDirection;
-                std::unique_ptr<Core::Particle> newIon = std::make_unique<Core::Particle>(Core::Vector(pX,pY,pZ), 1.0);
+                std::unique_ptr<Core::Particle> newIon = std::make_unique<Core::Particle>(Core::Vector(pX,pY,pZ), charge);
                 newIon -> setMassAMU(100);
                 particles.push_back(std::move(newIon));
                 nTotal++;
             }
+        }
+    }
+    return particles;
+}
+
+inline std::vector<std::unique_ptr<Core::Particle>> getIonsOnXYGrid(unsigned int nPerDirection, double spanXY, double zPosition, double charge){
+    std::vector<std::unique_ptr<Core::Particle>> particles;
+    unsigned int nTotal = 0;
+    for (unsigned int i=0; i<nPerDirection; i++){
+        double pX = i*spanXY/(nPerDirection-1) - spanXY/2.0;
+        for (unsigned int j=0; j<nPerDirection; j++){
+            double pY = j*spanXY/(nPerDirection-1) - spanXY/2.0;
+            std::unique_ptr<Core::Particle> newIon = std::make_unique<Core::Particle>(Core::Vector(pX,pY,zPosition), charge);
+            newIon -> setMassAMU(100);
+            particles.push_back(std::move(newIon));
+            nTotal++;
         }
     }
     return particles;

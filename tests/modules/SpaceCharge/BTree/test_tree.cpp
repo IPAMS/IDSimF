@@ -28,6 +28,7 @@
 #include "Core_vector.hpp"
 #include "Core_particle.hpp"
 #include "BTree_tree.hpp"
+#include "BTree_parallelTree.hpp"
 #include "PSim_boxStartZone.hpp"
 #include "PSim_util.hpp"
 #include "SC_fullSumSolver.hpp"
@@ -267,9 +268,9 @@ TEST_CASE( "Test serial tree charge distribution calculation","[Tree]"){
         CHECK(std::abs(topForce.z()) < 1 );
     }
 
-    SECTION( "Test force calculation with a large number of particles in a latticed cube"){
+    SECTION( "Test force calculation with a large number of positive particles in a latticed cube"){
         unsigned int nPerDirection = 20;
-        auto ions = getIonsInLattice(nPerDirection);
+        auto ions = getIonsInLattice(nPerDirection, +1);
 
         SpaceCharge::FullSumSolver fullSumSolver;
         std::size_t i = 0;
