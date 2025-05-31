@@ -58,6 +58,8 @@ namespace BTree {
 
         // Static methods:
         static int getNumberOfNodes();
+        static void setTheta(double newTheta);
+        static double getTheta();
         static Core::Vector calculateElectricField(const Core::Vector &r1, const Core::Vector &r2, double charge2);
 
         // Accessors:
