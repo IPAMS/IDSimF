@@ -233,9 +233,6 @@ namespace BTree{
             this->particle_ = nullptr;
             this->charge_ = 0.0;
             this->centerOfCharge_ = Core::Vector(0,0,0);
-            if (centerOfCharge_.magnitude()>1e2) {
-                std::cout << ">>>>>>>>>>>>> GenericBaseNode<NodType>::removeMyselfFromTree CoC: "<<centerOfCharge_<<" charge:"<<charge_/Core::ELEMENTARY_CHARGE<<"numP_:"<<numP_<<std::endl;
-            }
         }
 
         //update the parent nodes up to the root:
@@ -280,9 +277,6 @@ namespace BTree{
     void GenericBaseNode<NodType>::updateSelf(){
         centerOfCharge_ = particle_->wrappedParticle->getLocation();
         charge_ = particle_->wrappedParticle->getCharge();
-        if (centerOfCharge_.magnitude()>1e2) {
-            std::cout << ">>>>>>>>>>>>> GenericBaseNode<NodType>::updateSelf CoC: "<<centerOfCharge_<<" charge:"<<charge_/Core::ELEMENTARY_CHARGE<<"numP_:"<<numP_<<std::endl;
-        }
     }
 
 
@@ -313,11 +307,6 @@ namespace BTree{
             else {
                 parentNode->centerOfCharge_ = parentNode->center_;
             }
-
-            if (parentNode->centerOfCharge_.magnitude()>1e4) {
-                std::cout << ">>>>>>>>>>>>> GenericBaseNode<NodType>::updateParents CoC: "<<parentNode->centerOfCharge_<<" charge:"<<charge_/Core::ELEMENTARY_CHARGE<<"numP_:"<<numP_<<std::endl;
-            }
-
             parentNode = parentNode->parent_;
 
         }
