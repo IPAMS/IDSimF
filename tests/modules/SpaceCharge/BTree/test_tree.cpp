@@ -199,11 +199,9 @@ TEST_CASE( "Test serial tree charge distribution calculation","[Tree]"){
 
         testTree.computeChargeDistribution();
         CHECK(testTree.getEFieldFromSpaceCharge(testIon1) != Core::Vector(0.0,0.0,0.0));
-        CHECK(
-                vectorApproxCompare(
-                        testTree.getEFieldFromSpaceCharge(testIon2),
-                        Core::Vector(0.0,0.0,0.0))
-                        ==  vectorsApproxEqual);
+        CHECK_THAT(
+            testTree.getEFieldFromSpaceCharge(testIon2),
+            ApproxEqual(Core::Vector(0.0,0.0,0.0)));
         CHECK(testTree.getEFieldFromSpaceCharge(testIon3) != Core::Vector(0.0,0.0,0.0));
     }
 

@@ -361,13 +361,12 @@ TEST_CASE( "Test field calculation in serial node", "[Node]") {
         Core::Vector c = BTree::Node::calculateElectricField(a, b, 1.0);
         Core::Vector d = Core::Vector(-(1.0/(4*M_PI*8.854e-12)),0.0,0.0);
 
-        CHECK(
-                vectorApproxCompare(
-                        BTree::Node::calculateElectricField(a, b, 1.0),
-                        BTree::Node::calculateElectricField(b, a, 1.0)*(-1))
-                        ==  vectorsApproxEqual);
+        CHECK_THAT(
+            BTree::Node::calculateElectricField(a, b, 1.0),
+            ApproxEqual(BTree::Node::calculateElectricField(b, a, 1.0)*(-1)));
 
-        CHECK(vectorApproxCompare(c,d) == vectorsApproxEqual);
+        CHECK_THAT(c, ApproxEqual(d));
+
     }
 
     SECTION( "Test physical correctness of charge calculation") {
