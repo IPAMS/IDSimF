@@ -32,6 +32,7 @@
 #include <vector>
 #include <memory>
 #include <iostream>
+#include <string>
 #include "H5Cpp.h"
 
 namespace FileIO{
