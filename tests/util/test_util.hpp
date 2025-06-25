@@ -6,8 +6,6 @@
 #include <sstream>
 #include <fstream>
 
-const std::string vectorsApproxEqual("Vectors approximately equal");
-
 class VectorApproxMatcher : public Catch::MatcherBase<Core::Vector> {
     private:
         Core::Vector target_;

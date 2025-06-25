@@ -69,7 +69,7 @@ TEST_CASE("Test trigonometic functions implementation", "[CollisionModels][Math]
     }
 }
 
-double testFunc(const CollisionModel::Atom& A, const CollisionModel::Atom& B, double x){ return sin(x);}
+double testFunc(const CollisionModel::Atom& , const CollisionModel::Atom& , double x){ return sin(x);}
 
 
 TEST_CASE("Test golden section search", "[CollisionModels][Math]") {

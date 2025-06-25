@@ -83,11 +83,9 @@ TEST_CASE("SIMION PA basic tests","[SimionPotentialArray]") {
                 REQUIRE(simPa.getInterpolatedPotential(0.02, 0.015, 0.03) == Approx(-85.37619));
                 REQUIRE(simPa.getInterpolatedPotential(0.038, 0.018, 0.038) == Approx(10.0));
 
-                REQUIRE(
-                        vectorApproxCompare(
-                                simPa.getField(0.02, 0.015, 0.03),
-                                Core::Vector(-113.889,-3781.03,-8.519e-5))
-                                ==  vectorsApproxEqual);
+                CHECK_THAT(
+                        simPa.getField(0.02, 0.015, 0.03),
+                        ApproxEqual(Core::Vector(-113.889,-3781.03,-8.519e-5)));
         }
 
         SECTION("Test with planar 3d PA with spatial scaling and translation") {
@@ -101,11 +99,9 @@ TEST_CASE("SIMION PA basic tests","[SimionPotentialArray]") {
 
                 REQUIRE(simPaScaled.getInterpolatedPotential(30.0, 25.0, 30.0) == Approx(-8537.619));
 
-                REQUIRE(
-                    vectorApproxCompare(
-                            simPaScaled.getField(30.0, 25.0, 30.0),
-                            simPa.getField(0.02, 0.015, 0.03)*0.1)
-                            ==  vectorsApproxEqual);
+                CHECK_THAT(
+                        simPaScaled.getField(30.0, 25.0, 30.0),
+                        ApproxEqual(simPa.getField(0.02, 0.015, 0.03)*0.1));
 
                 simPaScaled.setCornerPosition({20.0,-20.0,10.0});
                 REQUIRE(simPaScaled.getBounds() == std::array<double,6>{20.0, 59.0, -20.0, -1.0, 10.0, 49.0});
@@ -131,11 +127,9 @@ TEST_CASE("SIMION PA basic tests","[SimionPotentialArray]") {
                         Approx(simPa.getInterpolatedPotential(0.02, 0.015, 0.03)));
 
 
-                REQUIRE(
-                        vectorApproxCompare(
-                                simPa.getField(0.0168, 0.012, 0.0)*potScaleFactor,
-                                simPaScaled.getField(0.0168, 0.012, 0.0))
-                                ==  vectorsApproxEqual);
+                CHECK_THAT(
+                        simPa.getField(0.0168, 0.012, 0.0)*potScaleFactor,
+                        ApproxEqual(simPaScaled.getField(0.0168, 0.012, 0.0)));
         }
 
         SECTION("Test with cylindrical PA") {
@@ -174,17 +168,13 @@ TEST_CASE("SIMION PA basic tests","[SimionPotentialArray]") {
                         simPa.getInterpolatedPotential(0.14899, 0.002, 0.002),
                         simPa.getInterpolatedPotential(0.14899, 0.002, 0.002)));
 
-                REQUIRE(
-                    vectorApproxCompare(
-                            simPa.getField(0.14899, 0.002, 0.002),
-                            Core::Vector(0.601785,1.59432,1.59432)*scale_mm_to_m)
-                            ==  vectorsApproxEqual);
+                CHECK_THAT(
+                        simPa.getField(0.14899, 0.002, 0.002),
+                        ApproxEqual(Core::Vector(0.601785,1.59432,1.59432)*scale_mm_to_m));
 
-                REQUIRE(
-                    vectorApproxCompare(
-                            simPa.getField(0.109, 0.01, 0.0),
-                            Core::Vector(5.3374,-3.4043,0)*scale_mm_to_m)
-                            ==  vectorsApproxEqual);
+                CHECK_THAT(
+                        simPa.getField(0.109, 0.01, 0.0),
+                        ApproxEqual(Core::Vector(5.3374,-3.4043,0)*scale_mm_to_m));
         }
 
         SECTION("Test with cylindrical PA with synthetic flow data") {
