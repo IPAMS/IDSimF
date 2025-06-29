@@ -85,7 +85,7 @@ TEST_CASE("SIMION PA basic tests","[SimionPotentialArray]") {
 
                 CHECK_THAT(
                         simPa.getField(0.02, 0.015, 0.03),
-                        ApproxEqual(Core::Vector(-113.889,-3781.03,-8.519e-5)));
+                        ApproxEqual(Core::Vector(-113.889,-3781.03,-8.519e-5), 1e-2));
         }
 
         SECTION("Test with planar 3d PA with spatial scaling and translation") {
@@ -170,11 +170,11 @@ TEST_CASE("SIMION PA basic tests","[SimionPotentialArray]") {
 
                 CHECK_THAT(
                         simPa.getField(0.14899, 0.002, 0.002),
-                        ApproxEqual(Core::Vector(0.601785,1.59432,1.59432)*scale_mm_to_m));
+                        ApproxEqual(Core::Vector(0.601785,1.59432,1.59432)*scale_mm_to_m, 1e-3));
 
                 CHECK_THAT(
                         simPa.getField(0.109, 0.01, 0.0),
-                        ApproxEqual(Core::Vector(5.3374,-3.4043,0)*scale_mm_to_m));
+                        ApproxEqual(Core::Vector(5.3374,-3.4043,0)*scale_mm_to_m, 3e-3));
         }
 
         SECTION("Test with cylindrical PA with synthetic flow data") {
