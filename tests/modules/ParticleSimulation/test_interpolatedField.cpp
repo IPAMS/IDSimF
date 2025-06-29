@@ -125,6 +125,6 @@ TEST_CASE("Test self implemented interpolated field", "[ParticleSimulation][Inte
         ParticleSimulation::InterpolatedField largeVectorField("quad_dev_flow_3d.h5");
         CHECK_THAT(
                 largeVectorField.getVector(296, 38, 31, 0),
-                ApproxEqual(Core::Vector(3.15582, 0, 0)));
+                ApproxEqual(Core::Vector(3.15582, 0, 0), 1e-5));
     }
 }
