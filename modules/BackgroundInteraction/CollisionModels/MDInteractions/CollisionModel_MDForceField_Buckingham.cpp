@@ -73,7 +73,7 @@ void CollisionModel::MDForceField_Buckingham::calculateForceField(std::vector<Co
             double distanceAbs = sqrt(distanceSquared);
             double distanceSquaredInverse = 1./distanceSquared;
             double distanceCubed = distanceSquared * sqrt(distanceSquared);
-             double rmax = interactionMap.get(*atomI, *atomJ);
+            double rmax = interactionMap.get(*atomI, *atomJ);
 
             if(distance.magnitude() > 100e-10){
                 return;

@@ -31,19 +31,16 @@
 #define IDSIMF_COLLISIONMODEL_MDINTERACTIONS_TRAJECTORY_SAMPLER_H
 
 #include "Core_constants.hpp"
-#include "CollisionModel_AbstractCollisionModel.hpp"
 #include "CollisionModel_MDTrajectoryWriter.hpp"
-#include "CollisionModel_SpatialFieldFunctions.hpp"
 #include "CollisionModel_AbstractMDForceField.hpp"
-#include "CollisionModel_MathFunctions.hpp"
 #include "CollisionModel_Molecule.hpp"
 #include "RS_AbstractReaction.hpp"
 #include "appUtils_logging.hpp"
-#include <cstdio>
-#include <functional>
 #include <string>
 
 namespace CollisionModel{
+
+    enum MDIntegratorType{RK4_ADAPTIVE, RK4, LEAPFROG};
 
     class MDInteractionsTrajectorySampler {
 
@@ -54,67 +51,38 @@ namespace CollisionModel{
         MDInteractionsTrajectorySampler() = default;
 
         MDInteractionsTrajectorySampler(
-            double collisionGasDiameterM, 
-            std::string collisionMolecule,
-            double integrationTime,
-            double subTimeStep,
-            double collisionRadiusScaling,
-            //double angleThetaScaling,
-            //double spawnRadius,
             std::unique_ptr<AbstractMDForceField> forceField,
-            std::unordered_map<std::string, std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection, 
-            Core::Vector startPosition, 
-            Core::Vector startVelocity);
+            std::unordered_map<std::string, std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection,
+            AppUtils::logger_ptr logger);
 
         void setTrajectoryWriter(const std::string& trajectoryFileName,
-                                 double trajectoryDistance,
-                                 unsigned int startTimeStep=0,
                                  double minimalSampleInterval=0);
 
-
-        void writeTrajectory(double distance, Core::Vector positionBgMolecule, Core::Vector velocityBgMolecule, 
-                        std::vector<Core::Vector> forceMolecules, bool endOfTrajectory, std::ofstream* file, double time, double dt,
-                        Core::Vector positionMolecule);
+        void calculateTrajectory(Core::Particle& particle,
+                                 Core::Vector particleRotationAngles,
+                                 std::string collisionMolecule,
+                                 Core::Vector collisionParticleStartPosition,
+                                 Core::Vector collisionParticleStartVelocity,
+                                 Core::Vector collisionParticleRotationAngles,
+                                 double integrationTime,
+                                 double subTimeStep,
+                                 int maximumSteps,
+                                 bool ionIsFrozen,
+                                 MDIntegratorType integratorType = RK4_ADAPTIVE);
 
         bool leapfrogIntern(std::vector<CollisionModel::Molecule*> moleculesPtr, double dt, double finalTime, double requiredRad);
-
         bool rk4Intern(std::vector<CollisionModel::Molecule*> moleculesPtr, double dt, double finalTime, double requiredRad);
-
-        bool rk4InternAdaptiveStep(std::vector<CollisionModel::Molecule*> moleculesPtr, double dt, double finalTime, double requiredRad);
-
-        void updateModelTimestepParameters(unsigned int timestep, double time);
-
-        void modifyVelocity(Core::Particle& particle);
-
+        bool rk4InternAdaptiveStep(std::vector<CollisionModel::Molecule*> moleculesPtr, double dt, double finalTime, int maximumSteps, bool ionIsFrozen);
 
     private:
-        //double collisionGasMass_kg_ = 0.0;    ///< mass of the neutral colliding gas particles in kg
-        double collisionGasDiameter_m_ = 0.0; ///< effective collision diameter of the neutral collision gas particles in m
-        std::string collisionMolecule_ = ""; ///< particle identifier of the collision gas
-        double integrationTime_ = 0.0; ///< integration time of the sub-integrator 
-        double subTimeStep_ = 0.0; ///< step size of the sub-integrator 
-        double collisionRadiusScaling_ = 0.0; ///< scaling for the radius of the collision sphere
-        //double angleThetaScaling_ = 0.0; ///<  scaling for the angle theta
-        //double spawnRadius_ = 0.0; ///< radius of the spawn sphere for the background gas particle
-        double trajectoryDistance_ = 0.0; ///< distance at which the trajectory recording begins
-        bool trajectoryRecordingActive_ = false; 
-        bool modelRecordsTrajectories_ = false; ///< flag if trajectory will be recorded
-        unsigned int recordTrajectoryStartTimeStep_ = 0; ///< time step at which the trajectory recording begins
-        double recordTrajectoryMinimalSampleInterval_ = 0; ///< minimal time interval between trajectory samples
-        double nextTrajectorySampleTime_ = 0; ///< next time for a written trajectory sample
+
+        std::string currentCollisionMolecule_ = "";
+
         std::unique_ptr<MDTrajectoryWriter> trajectoryWriter_ = nullptr;
-
         std::unique_ptr<AbstractMDForceField> forceField_; ///< The molecular force field to use
-        //std::function<double(Core::Vector&)> pressureFunction_ = nullptr; ///< a spatial pressure function
-        //std::function<Core::Vector(Core::Vector&)> velocityFunction_ = nullptr; ///< a spatial velocity function
-        //std::function<double(const Core::Vector&)>temperatureFunction_ = nullptr;  ///< Spatial temperature function
-        std::function<void(RS::CollisionConditions, Core::Particle&)> afterCollisionActionFunction_ = nullptr;
-        ///< Function with things to do after a collision (e.g. collision based chemical reactions)
-        std::unordered_map<std::string,  std::shared_ptr<MolecularStructure>> molecularStructureCollection_; ///< collection of all available molecular structures 
-        Core::Vector startPosition_ = Core::Vector(0.0, 0.0, 0.0); 
-        Core::Vector startVelocity_ = Core::Vector(0.0, 0.0, 0.0);
+        std::unordered_map<std::string,  std::shared_ptr<MolecularStructure>> molecularStructureCollection_; ///< collection of all available molecular structures
+        AppUtils::logger_ptr logger_ = nullptr;
     };
-
 }
 
 #endif //IDSIMF_COLLISIONMODEL_MDINTERACTIONS_TRAJECTORY_SAMPLER_H

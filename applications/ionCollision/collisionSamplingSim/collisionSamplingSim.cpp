@@ -35,6 +35,7 @@
 #include "CollisionModel_MDInteractionsTrajectorySampler.hpp"
 #include "CollisionModel_MDForceField_LJ12_6.hpp"
 #include "CollisionModel_MDForceField_Buckingham.hpp"
+#include "Core_math.hpp"
 
 int main(int argc, const char * argv[]) {
     try {
@@ -52,16 +53,19 @@ int main(int argc, const char * argv[]) {
         int gridSamples = simConf->intParameter("grid_samples");
         double subIntegratorIntegrationTime_s = simConf->doubleParameter("sub_integrator_integration_time_s");
         double subIntegratorStepSize_s = simConf->doubleParameter("sub_integrator_step_size_s");
-        double collisionRadiusScaling = simConf->doubleParameter("collision_radius_scaling");
-        //double angleThetaScaling = simConf->doubleParameter("angle_theta_scaling");
-        //double spawnRadius_m = simConf->doubleParameter("spawn_radius_m");
-        //bool saveTrajectory = simConf->boolParameter("save_trajectory");
+        int maximumSteps = simConf->intParameter("maximum_step_number");
         double trajectoryMinimalSampleInterval_s = simConf->doubleParameter("trajectory_minimal_sample_interval_s");
         double velocity_x = simConf->doubleParameter("velocity_x");
-        //trajectoryDistance_m = simConf->doubleParameter("trajectory_distance_m");
-        //saveTrajectoryStartTimeStep = simConf->unsignedIntParameter("trajectory_start_time_step");*/
+        double angleGas_z_deg = simConf->doubleParameter("gas_particle_angle_z_deg");
+        double angleGas_z_rad = Core::degToRad(angleGas_z_deg);
+        Core::Vector anglesIon_deg = simConf->vector3dParameter("ion_angles_deg");
+        Core::Vector anglesIon_rad = {
+            Core::degToRad(anglesIon_deg.x()),
+            Core::degToRad(anglesIon_deg.y()),
+            Core::degToRad(anglesIon_deg.z()) };
         std::string potentialsFF = simConf->stringParameter("force_field");
         std::string potentialFunction = simConf->stringParameter("potential_function");
+        bool ionIsFrozen = simConf->boolParameter("ion_is_frozen");
 
         //read molecular structure file
         std::unordered_map<std::string,  std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection;
@@ -71,54 +75,37 @@ int main(int argc, const char * argv[]) {
 
         Core::Particle ion;
         ion.setMolecularStructure(molecularStructureCollection.at(particleIdentifier));
-        ion.setVelocity({0, 0, 0});
+
+        std::unique_ptr<CollisionModel::AbstractMDForceField> forceFieldPtr;
+        if(potentialFunction == "LJ") {
+            forceFieldPtr = std::make_unique<CollisionModel::MDForceField_LJ12_6>(collisionGasPolarizability_m3, potentialsFF);
+        }
+        else if(potentialFunction == "Buckingham") {
+            //we have to initialize buckingham force field:
+            std::vector<Core::Particle*> particlePtrs = {&ion};
+            auto buckinghamPtr = std::make_unique<CollisionModel::MDForceField_Buckingham>(collisionGasPolarizability_m3, potentialsFF);
+            buckinghamPtr->populateInteractionTable(particlePtrs, molecularStructureCollection, collisionGasIdentifier);
+            forceFieldPtr = std::move(buckinghamPtr);
+        }
+        CollisionModel::MDInteractionsTrajectorySampler mdSim(
+            std::move(forceFieldPtr), molecularStructureCollection, logger);
+        mdSim.setTrajectoryWriter(simResultBasename+"_MD_traj.txt", trajectoryMinimalSampleInterval_s);
 
         double gridSpacing_m = gridSpacing_ang*1e-10;
-        for(int i = 0; i < gridSamples; i++) {
-            CollisionModel::MDForceField_LJ12_6 forceField(collisionGasPolarizability_m3, potentialsFF);
-            auto forceFieldPtr = std::make_unique<CollisionModel::MDForceField_LJ12_6>(forceField);
+        for(int i = -gridSamples+1; i < gridSamples; i++) {
+            //reset ion position:
+            ion.setLocation({0, 0, 0});
+            ion.setVelocity({0, 0, 0});
 
-            Core::Vector particlePosition({-50e-10, i*gridSpacing_m, 0});
-            Core::Vector particleVelocity({velocity_x,0,0});
-            CollisionModel::MDInteractionsTrajectorySampler mdSim(
-                CollisionModel::MDInteractionsTrajectorySampler::DIAMETER_N2,
-                "N2",
-                subIntegratorIntegrationTime_s,
-                subIntegratorStepSize_s,
-                collisionRadiusScaling,
-                std::move(forceFieldPtr),
-                molecularStructureCollection,
-                particlePosition,
-                particleVelocity);
 
-            mdSim.setTrajectoryWriter(simResultBasename+"_MD_traj.txt", 1.0, 0, trajectoryMinimalSampleInterval_s);
-            mdSim.updateModelTimestepParameters(1, 0);
-            double dt = 2e-11;
-            mdSim.modifyVelocity(ion);
-            logger->info("i:{} ",i);
-        }
+            Core::Vector gasParticlePosition({-50e-10, i*gridSpacing_m, 0});
+            Core::Vector gasParticleVelocity({velocity_x,0,0});
+            Core::Vector gasParticleRotationAngles({0,0,angleGas_z_rad});
+            mdSim.calculateTrajectory(
+                ion, anglesIon_rad,
+                collisionGasIdentifier, gasParticlePosition, gasParticleVelocity, gasParticleRotationAngles,
+                subIntegratorIntegrationTime_s, subIntegratorStepSize_s, maximumSteps, ionIsFrozen);
 
-        for(int i = 1; i < gridSamples; i++) {
-            CollisionModel::MDForceField_LJ12_6 forceField(collisionGasPolarizability_m3, potentialsFF);
-            auto forceFieldPtr = std::make_unique<CollisionModel::MDForceField_LJ12_6>(forceField);
-
-            Core::Vector particlePosition({-50e-10, -i*gridSpacing_m, 0});
-            Core::Vector particleVelocity({velocity_x,0,0});
-            CollisionModel::MDInteractionsTrajectorySampler mdSim(
-                CollisionModel::MDInteractionsTrajectorySampler::DIAMETER_N2,
-                "N2",
-                subIntegratorIntegrationTime_s,
-                subIntegratorStepSize_s,
-                collisionRadiusScaling,
-                std::move(forceFieldPtr),
-                molecularStructureCollection,
-                particlePosition,
-                particleVelocity);
-
-            mdSim.setTrajectoryWriter(simResultBasename+"_MD_traj.txt", 1.0, 0, trajectoryMinimalSampleInterval_s);
-            mdSim.updateModelTimestepParameters(1, 0);
-            double dt = 2e-11;
-            mdSim.modifyVelocity(ion);
             logger->info("i:{} ",i);
         }
     }
