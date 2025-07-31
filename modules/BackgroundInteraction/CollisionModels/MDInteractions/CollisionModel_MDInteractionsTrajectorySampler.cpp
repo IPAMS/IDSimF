@@ -89,7 +89,7 @@ void CollisionModel::MDInteractionsTrajectorySampler::calculateTrajectory(
     // if (integratorType == RK4_ADAPTIVE) {
     //     trajectorySuccess = rk4InternAdaptiveStep(moleculesPtr, timeStep, finalTime, maximumSteps, ionIsFrozen);
     // }
-    std::cout << moleculesPtr[1]->getComPos() << std::endl;
+    //std::cout << moleculesPtr[1]->getComPos() << std::endl;
     trajectorySuccess = rk4Intern(moleculesPtr, timeStep, finalTime, maximumSteps, ionIsFrozen);
 
     double endEnergy = 0;
@@ -277,7 +277,6 @@ bool CollisionModel::MDInteractionsTrajectorySampler::rk4Intern(std::vector<Coll
                 molecule->setComVel(newComVel);
             }
             if(trajectoryWriter_ != nullptr && molecule->getMolecularStructureName() == currentCollisionMolecule_ && integrationTimeSum < finalTime){
-             
                 trajectoryWriter_->writeTrajectorySample(
                     integrationTimeSum, dt, molecule->getComPos(), molecule->getComVel(),
                     moleculesPtr[0]->getComPos(),forceMolecules, distance);
