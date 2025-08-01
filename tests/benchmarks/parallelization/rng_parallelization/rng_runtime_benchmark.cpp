@@ -23,10 +23,10 @@
  Simple parallel random generator runtime benchmark
 
  ****************************/
-#include "appUtils_simulationConfiguration.hpp"
-#include "appUtils_logging.hpp"
-#include "appUtils_stopwatch.hpp"
-#include "appUtils_signalHandler.hpp"
+#include "AppUtils_simulationConfiguration.hpp"
+#include "AppUtils_logging.hpp"
+#include "AppUtils_stopwatch.hpp"
+#include "AppUtils_signalHandler.hpp"
 #include "Core_randomGenerators.hpp"
 #include "CLI11.hpp"
 

@@ -39,7 +39,7 @@
 #include "CollisionModel_HardSphere.hpp"
 #include "CollisionModel_StatisticalDiffusion.hpp"
 #include "CollisionModel_MultiCollisionModel.hpp"
-#include "appUtils_simulationConfiguration.hpp"
+#include "AppUtils_simulationConfiguration.hpp"
 #include <iostream>
 
 

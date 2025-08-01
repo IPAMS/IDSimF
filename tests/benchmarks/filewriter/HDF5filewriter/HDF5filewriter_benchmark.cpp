@@ -1,6 +1,6 @@
 #include "FileIO_trajectoryHDF5Writer.hpp"
 #include "Core_particle.hpp"
-#include "appUtils_stopwatch.hpp"
+#include "AppUtils_stopwatch.hpp"
 #include <iostream>
 #include <memory>
 #include <vector>

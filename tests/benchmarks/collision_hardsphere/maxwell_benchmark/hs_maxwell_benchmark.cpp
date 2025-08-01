@@ -16,7 +16,7 @@
 
 #include "CollisionModel_HardSphere.hpp"
 #include "Core_particle.hpp"
-#include "appUtils_stopwatch.hpp"
+#include "AppUtils_stopwatch.hpp"
 
 #include <ctime>
 #include <iostream>

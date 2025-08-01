@@ -1,5 +1,5 @@
 #include "CollisionModel_MathFunctions.hpp"
-#include "appUtils_stopwatch.hpp"
+#include "AppUtils_stopwatch.hpp"
 #include <iostream>
 #include <algorithm>
 #include <vector>

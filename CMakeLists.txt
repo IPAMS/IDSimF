@@ -158,7 +158,7 @@ add_subdirectory (tests/modules/ParticleSimulation)
 add_subdirectory (tests/modules/Integration)
 add_subdirectory (tests/modules/FileIO)
 add_subdirectory (tests/simulations)
-add_subdirectory (tests/applications)
+add_subdirectory (tests/modules/AppUtils)
 
 add_subdirectory (tests/benchmarks/errorfunction)
 add_subdirectory (tests/benchmarks/filewriter/HDF5filewriter)

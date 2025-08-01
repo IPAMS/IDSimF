@@ -15,7 +15,7 @@
 #include "Core_debug.hpp"
 #include "PSim_simionPotentialArray.hpp"
 #include "PSim_math.hpp"
-#include "appUtils_stopwatch.hpp"
+#include "AppUtils_stopwatch.hpp"
 #include <iostream>
 
 template<typename PAType>

@@ -25,8 +25,8 @@
 
  ****************************/
 
-#include "appUtils_ionDefinitionReading.hpp"
-#include "appUtils_simulationConfiguration.hpp"
+#include "AppUtils_ionDefinitionReading.hpp"
+#include "AppUtils_simulationConfiguration.hpp"
 #include "catch.hpp"
 #include "test_util.hpp"
 
