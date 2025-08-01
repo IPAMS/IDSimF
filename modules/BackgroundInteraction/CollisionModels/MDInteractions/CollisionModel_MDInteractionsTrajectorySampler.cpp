@@ -253,8 +253,10 @@ bool CollisionModel::MDInteractionsTrajectorySampler::rk4Intern(std::vector<Coll
         for(size_t n = 1; n < 4; n++){
             i = 0;
             for(auto* molecule : moleculesPtr){
-                positionMolecules.at(i) = initialPositionMolecules.at(i) + l[n-1][i]*length[i-1];
-                molecule->setComPos(positionMolecules.at(i));
+                positionMolecules.at(i) = initialPositionMolecules.at(i) + l[n-1][i]*length[n-1];
+                if(molecule->getMolecularStructureName() == currentCollisionMolecule_ || !ionIsFrozen){
+                    molecule->setComPos(positionMolecules.at(i));
+                }
                 i++;
             }
 
