@@ -11,9 +11,8 @@ set(SOURCE_FILES
         appUtils_integrationRunning.cpp)
 
 add_library(apputils STATIC ${SOURCE_FILES})
-target_include_directories(apputils PUBLIC
-        ${CMAKE_SOURCE_DIR}/applications/util
-        ${CMAKE_SOURCE_DIR}/libs/CLI11)
+target_include_directories(apputils PUBLIC .)
+target_include_directories(apputils PUBLIC ${CMAKE_SOURCE_DIR}/libs/CLI11)
 
 target_link_libraries(apputils PRIVATE core particlesimulation collisionmodels integration spacecharge file_io)
 target_link_libraries(apputils PUBLIC spdlog::spdlog jsoncpp)
