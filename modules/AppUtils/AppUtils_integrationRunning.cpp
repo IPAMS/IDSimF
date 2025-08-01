@@ -24,8 +24,8 @@
  Description
 
  ****************************/
-#include "appUtils_integrationRunning.hpp"
-#include "appUtils_signalHandler.hpp"
+#include "AppUtils_integrationRunning.hpp"
+#include "AppUtils_signalHandler.hpp"
 #include "Integration_verletIntegrator.hpp"
 #include "Integration_parallelVerletIntegrator.hpp"
 #include "Integration_fullSumVerletIntegrator.hpp"

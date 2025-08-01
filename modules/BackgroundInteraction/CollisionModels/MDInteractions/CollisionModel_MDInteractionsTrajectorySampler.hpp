@@ -35,7 +35,7 @@
 #include "CollisionModel_AbstractMDForceField.hpp"
 #include "CollisionModel_Molecule.hpp"
 #include "RS_AbstractReaction.hpp"
-#include "appUtils_logging.hpp"
+#include "AppUtils_logging.hpp"
 #include <string>
 
 namespace CollisionModel{

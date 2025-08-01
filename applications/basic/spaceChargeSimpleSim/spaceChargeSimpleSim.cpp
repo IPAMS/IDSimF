@@ -30,12 +30,12 @@
 #include "FileIO_trajectoryHDF5Writer.hpp"
 #include "PSim_util.hpp"
 #include "PSim_boxStartZone.hpp"
-#include "appUtils_simulationConfiguration.hpp"
-#include "appUtils_integrationRunning.hpp"
-#include "appUtils_logging.hpp"
-#include "appUtils_stopwatch.hpp"
-#include "appUtils_signalHandler.hpp"
-#include "appUtils_commandlineParser.hpp"
+#include "AppUtils_simulationConfiguration.hpp"
+#include "AppUtils_integrationRunning.hpp"
+#include "AppUtils_logging.hpp"
+#include "AppUtils_stopwatch.hpp"
+#include "AppUtils_signalHandler.hpp"
+#include "AppUtils_commandlineParser.hpp"
 #include <iostream>
 #include <vector>
 

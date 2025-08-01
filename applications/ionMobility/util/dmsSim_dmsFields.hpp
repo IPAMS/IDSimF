@@ -29,7 +29,7 @@
 #ifndef IDSIMF_DMSSIM_DMSFIELDS_HPP
 #define IDSIMF_DMSSIM_DMSFIELDS_HPP
 
-#include "appUtils_simulationConfiguration.hpp"
+#include "AppUtils_simulationConfiguration.hpp"
 #include "PSim_sampledWaveform.hpp"
 #include <functional>
 

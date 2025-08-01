@@ -28,8 +28,8 @@
 #ifndef IDSIMF_APPUTILS_COMMANDLINEPARSER_HPP
 #define IDSIMF_APPUTILS_COMMANDLINEPARSER_HPP
 
-#include "appUtils_simulationConfiguration.hpp"
-#include "appUtils_logging.hpp"
+#include "AppUtils_simulationConfiguration.hpp"
+#include "AppUtils_logging.hpp"
 #include "CLI11.hpp"
 #include <memory>
 

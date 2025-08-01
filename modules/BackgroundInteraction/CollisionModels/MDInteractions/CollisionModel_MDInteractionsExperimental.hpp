@@ -48,7 +48,7 @@
 #include "CollisionModel_MathFunctions.hpp"
 #include "CollisionModel_Molecule.hpp"
 #include "RS_AbstractReaction.hpp"
-#include "appUtils_logging.hpp"
+#include "AppUtils_logging.hpp"
 #include <cstdio>
 #include <functional>
 #include <string>

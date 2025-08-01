@@ -33,13 +33,13 @@
 #include "PSim_particleStartSplatTracker.hpp"
 #include "Integration_parallelVerletIntegrator.hpp"
 #include "CollisionModel_HardSphere.hpp"
-#include "appUtils_simulationConfiguration.hpp"
-#include "appUtils_inputFileUtilities.hpp"
-#include "appUtils_ionDefinitionReading.hpp"
-#include "appUtils_logging.hpp"
-#include "appUtils_stopwatch.hpp"
-#include "appUtils_signalHandler.hpp"
-#include "appUtils_commandlineParser.hpp"
+#include "AppUtils_simulationConfiguration.hpp"
+#include "AppUtils_inputFileUtilities.hpp"
+#include "AppUtils_ionDefinitionReading.hpp"
+#include "AppUtils_logging.hpp"
+#include "AppUtils_stopwatch.hpp"
+#include "AppUtils_signalHandler.hpp"
+#include "AppUtils_commandlineParser.hpp"
 #include <iostream>
 #include <vector>
 

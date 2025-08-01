@@ -19,8 +19,8 @@
  along with IDSimF.  If not, see <https://www.gnu.org/licenses/>.
  ****************************/
 
-#include "appUtils_commandlineParser.hpp"
-#include "appUtils_logging.hpp"
+#include "AppUtils_commandlineParser.hpp"
+#include "AppUtils_logging.hpp"
 #include <filesystem>
 #include <omp.h>
 

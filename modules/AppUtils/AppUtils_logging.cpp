@@ -18,7 +18,7 @@
  You should have received a copy of the GNU General Public License
  along with IDSimF.  If not, see <https://www.gnu.org/licenses/>.
  ****************************/
-#include "appUtils_logging.hpp"
+#include "AppUtils_logging.hpp"
 #include "spdlog/sinks/stdout_color_sinks.h"
 #include "spdlog/sinks/basic_file_sink.h"
 

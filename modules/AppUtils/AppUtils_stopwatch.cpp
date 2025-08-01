@@ -19,7 +19,7 @@
  along with IDSimF.  If not, see <https://www.gnu.org/licenses/>.
  ****************************/
 
-#include "appUtils_stopwatch.hpp"
+#include "AppUtils_stopwatch.hpp"
 
 void AppUtils::Stopwatch::start() {
     beginCpu_ = std::clock();
