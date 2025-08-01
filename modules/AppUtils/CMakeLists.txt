@@ -1,14 +1,14 @@
 project(apputils)
 
 set(SOURCE_FILES
-        appUtils_inputFileUtilities.cpp
-        appUtils_ionDefinitionReading.cpp
-        appUtils_simulationConfiguration.cpp
-        appUtils_logging.cpp
-        appUtils_stopwatch.cpp
-        appUtils_signalHandler.cpp
-        appUtils_commandlineParser.cpp
-        appUtils_integrationRunning.cpp)
+        AppUtils_inputFileUtilities.cpp
+        AppUtils_ionDefinitionReading.cpp
+        AppUtils_simulationConfiguration.cpp
+        AppUtils_logging.cpp
+        AppUtils_stopwatch.cpp
+        AppUtils_signalHandler.cpp
+        AppUtils_commandlineParser.cpp
+        AppUtils_integrationRunning.cpp)
 
 add_library(apputils STATIC ${SOURCE_FILES})
 target_include_directories(apputils PUBLIC .)
