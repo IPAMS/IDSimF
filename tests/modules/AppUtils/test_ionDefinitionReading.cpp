@@ -25,8 +25,8 @@
 
  ****************************/
 
-#include "appUtils_ionDefinitionReading.hpp"
-#include "appUtils_simulationConfiguration.hpp"
+#include "AppUtils_ionDefinitionReading.hpp"
+#include "AppUtils_simulationConfiguration.hpp"
 #include "catch.hpp"
 #include "test_util.hpp"
 
@@ -107,14 +107,12 @@ TEST_CASE( "Test ion definition reading", "[ApplicationUtils]") {
             AppUtils::readIonDefinitionFromIonCloudFile(particles, particlePtrs, simConf_ionCloud);
 
             CHECK(particles[1]->getCharge()==Approx(-1.0*Core::ELEMENTARY_CHARGE));
-            CHECK(vectorApproxCompare(particles[1]->getLocation(), Core::Vector(1.0, 2.0, 1.0))
-                    =="Vectors approximately equal");
+            CHECK_THAT(particles[1]->getLocation(), ApproxEqual(Core::Vector(1.0, 2.0, 1.0)));
         }
 
         SECTION("Ion definition reading: Full ion definition reading with ion cloud file should work") {
             AppUtils::readIonDefinition(particles, particlePtrs, simConf_ionCloud);
-            CHECK(vectorApproxCompare(particles[1]->getLocation(), Core::Vector(1.0, 2.0, 1.0))
-                    =="Vectors approximately equal");
+            CHECK_THAT(particles[1]->getLocation(), ApproxEqual(Core::Vector(1.0, 2.0, 1.0)));
         }
     }
 

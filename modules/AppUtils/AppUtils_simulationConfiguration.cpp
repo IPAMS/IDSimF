@@ -1,5 +1,5 @@
-#include "appUtils_simulationConfiguration.hpp"
-#include "appUtils_inputFileUtilities.hpp"
+#include "AppUtils_simulationConfiguration.hpp"
+#include "AppUtils_inputFileUtilities.hpp"
 #include "Core_vector.hpp"
 
 AppUtils::SimulationConfiguration::SimulationConfiguration(const std::string& confFileName) {

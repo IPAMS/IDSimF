@@ -14,7 +14,7 @@
 #include "CollisionModel_MDForceField_LJ12_6.hpp"
 #include "FileIO_MolecularStructureReader.hpp"
 #include "Core_particle.hpp"
-#include "appUtils_stopwatch.hpp"
+#include "AppUtils_stopwatch.hpp"
 #include "CLI11.hpp"
 
 #include <omp.h>

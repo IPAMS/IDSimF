@@ -703,6 +703,7 @@ void ParticleSimulation::SimionPotentialArray::printState() const{
     std::cout << "mode: "<<mode_ << " symmetry: "<< symmetry_ <<" ("<<symmetryString<<")"<< " maxVoltage: "<<maxVoltage_ <<std::endl;
     std::cout << "nx: "<<nx_ << " ny: "<<ny_ << " nz: "<<nz_ <<" npoints: "<< numPoints_<<std::endl;
     std::cout << "mx: "<<mirrorx_ << " my: "<<mirrory_<< " mz: "<<mirrorz_ <<std::endl;
+    std::cout << "internal scale dx: "<<dx_ << " dy: "<<dy_<< " dz: "<<dz_ <<std::endl;
     std::cout << "bounds: ";
     for(auto &bound: getBounds()){
         std::cout << " "<<bound;

@@ -52,7 +52,6 @@ namespace BTree{
     class GenericBaseNode: public AbstractNode {
 
     public:
-
         //Constructors:
         GenericBaseNode(Core::Vector min, Core::Vector max, NodType* parent);
         GenericBaseNode(const GenericBaseNode& that) = delete;
@@ -290,6 +289,9 @@ namespace BTree{
         while (parentNode != nullptr) {
             parentNode->charge_ = 0.0;
             parentNode->centerOfCharge_ = Core::Vector(0.0,0.0,0.0);
+            if (true) {
+                //std::cout << ">>>>>>>>> GenericBaseNode<NodType>::updateParents A  CoC: "<<parentNode->centerOfCharge_<<" charge:"<<charge_/Core::ELEMENTARY_CHARGE<<"numP_:"<<numP_<<std::endl;
+            }
             for (int i=0; i<8; i++){
                 if(parentNode->octNodes_[i] != nullptr){
                     parentNode->charge_ += parentNode->octNodes_[i]->getCharge();
@@ -298,13 +300,15 @@ namespace BTree{
                                                    parentNode->octNodes_[i]->charge_);
                 }
             }
-            if (Core::isDoubleUnequal(parentNode->charge_, 0.0)){
+            //if (Core::isDoubleUnequal(parentNode->charge_, 0.0)){
+            if (std::fabs(parentNode->charge_) > CHARGE_EPSILON){
                 parentNode->centerOfCharge_ = parentNode->centerOfCharge_ / parentNode->charge_;
             }
             else {
                 parentNode->centerOfCharge_ = parentNode->center_;
             }
             parentNode = parentNode->parent_;
+
         }
     }
 
@@ -383,7 +387,7 @@ namespace BTree{
                                     octNode->getCharge());
                 }
             }
-            if (Core::isDoubleUnequal(charge_, 0.0)){
+            if (std::fabs(charge_) > CHARGE_EPSILON){
                 centerOfCharge_ = centerOfCharge_ / charge_;
             }
             else {

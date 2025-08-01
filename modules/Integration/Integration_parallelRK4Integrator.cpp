@@ -231,3 +231,7 @@ Core::Vector Integration::ParallelRK4Integrator::evaluateAccelerationFunction_(C
     return acceleration;
 }
 
+void Integration::ParallelRK4Integrator::setTheta(double newTheta) {
+    tree_.getRoot()->setTheta(newTheta);
+}
+

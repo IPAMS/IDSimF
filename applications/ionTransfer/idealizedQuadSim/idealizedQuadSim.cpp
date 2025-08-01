@@ -35,7 +35,7 @@
 #include "Integration_verletIntegrator.hpp"
 #include "CollisionModel_HardSphere.hpp"
 #include "parameterParsing_macro.hpp"
-#include "appUtils_stopwatch.hpp"
+#include "AppUtils_stopwatch.hpp"
 #include "json.h"
 #include <iostream>
 #include <vector>

@@ -39,6 +39,6 @@ add_executable(test_CollisionModels ${SOURCE_FILES})
 target_include_directories(test_CollisionModels PUBLIC ${CMAKE_SOURCE_DIR}/libs/catch ${CMAKE_SOURCE_DIR}/tests/util ${CMAKE_SOURCE_DIR}/libs/jsoncpp/json
                                 ${CMAKE_SOURCE_DIR}/applications/util)
 target_link_libraries(test_CollisionModels core file_io particlesimulation spacecharge integration rs collisionmodels )
-target_link_libraries(test_CollisionModels spdlog::spdlog ${VTK_LIBRARIES})
+target_link_libraries(test_CollisionModels apputils ${VTK_LIBRARIES})
 
 add_test(NAME test_CollisionModels COMMAND test_CollisionModels)

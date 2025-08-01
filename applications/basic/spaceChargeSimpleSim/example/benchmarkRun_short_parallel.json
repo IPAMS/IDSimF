@@ -5,5 +5,7 @@
   "dt":1e-8,
   "space_charge_factor":1e3,
   "n_ions":[300,300],
-  "ion_masses":[35,37]
+  "ion_masses":[35,37],
+  "ion_charges": [1,1],
+  "btree_theta": 0.5
 }

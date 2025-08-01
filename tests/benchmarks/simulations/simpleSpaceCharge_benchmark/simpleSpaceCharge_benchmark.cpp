@@ -11,7 +11,7 @@
 #endif
 #include "PSim_util.hpp"
 #include "CollisionModel_StatisticalDiffusion.hpp"
-#include "appUtils_stopwatch.hpp"
+#include "AppUtils_stopwatch.hpp"
 #include "CLI11.hpp"
 #include <iostream>
 #include <numeric>

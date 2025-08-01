@@ -24,8 +24,8 @@
  Description
 
  ****************************/
-#include "appUtils_integrationRunning.hpp"
-#include "appUtils_signalHandler.hpp"
+#include "AppUtils_integrationRunning.hpp"
+#include "AppUtils_signalHandler.hpp"
 #include "Integration_verletIntegrator.hpp"
 #include "Integration_parallelVerletIntegrator.hpp"
 #include "Integration_fullSumVerletIntegrator.hpp"
@@ -62,11 +62,12 @@ void AppUtils::runTrajectoryIntegration(
         Integration::AbstractTimeIntegrator::particleStartMonitoringFctType ionStartMonitoringFunction,
         CollisionModel::AbstractCollisionModel* collisionModel) {
 
+    std::vector<IntegratorMode> singleStepIntegrators =
+        {IntegratorMode::VERLET, IntegratorMode::PARALLEL_VERLET, IntegratorMode::FULL_SUM_VERLET,
+         IntegratorMode::EXAFMM_VERLET, IntegratorMode::FMM3D_VERLET};
+
     IntegratorMode integratorMode = simConf->integratorMode();
 
-    std::vector<IntegratorMode> singleStepIntegrators =
-            {IntegratorMode::VERLET, IntegratorMode::PARALLEL_VERLET, IntegratorMode::FULL_SUM_VERLET,
-             IntegratorMode::EXAFMM_VERLET, IntegratorMode::FMM3D_VERLET};
 
     if (integratorModeInVector(
             singleStepIntegrators,
@@ -136,7 +137,21 @@ void AppUtils::runTrajectoryIntegration(
         Integration::AbstractTimeIntegrator::particleStartMonitoringFctType ionStartMonitoringFunction,
         CollisionModel::AbstractCollisionModel* collisionModel) {
 
+    std::vector<IntegratorMode> treeBasedIntegrators =
+        {IntegratorMode::VERLET, IntegratorMode::PARALLEL_VERLET, AppUtils::IntegratorMode::PARALLEL_RUNGE_KUTTA4};
+
     AppUtils::IntegratorMode integratorMode = simConf->integratorMode();
+
+    double theta = -1.0;
+    if (integratorModeInVector(treeBasedIntegrators,integratorMode)) {
+        if (simConf->isParameter("btree_theta")) {
+            theta = simConf->doubleParameter("btree_theta");
+            if (theta<=0.0 || theta>=1.0) {
+                throw std::invalid_argument("Barnes Hut Tree multipole acceptance factor (theta) illegal, has to be 0.0 < theta < 1.0: ");
+            }
+        }
+    }
+
 
     if (integratorMode==AppUtils::VERLET) {
         Integration::VerletIntegrator verletIntegrator(
@@ -144,6 +159,10 @@ void AppUtils::runTrajectoryIntegration(
                 singleStepAccelerationFunction, postTimestepFunction, otherActionsFunction,
                 ionStartMonitoringFunction,
                 collisionModel);
+        if (theta > -1.0) {
+            verletIntegrator.setTheta(theta);
+        }
+
         AppUtils::SignalHandler::setReceiver(verletIntegrator);
         verletIntegrator.run(timeSteps, dt);
     }
@@ -153,6 +172,10 @@ void AppUtils::runTrajectoryIntegration(
                 singleStepAccelerationFunction, postTimestepFunction, otherActionsFunction,
                 ionStartMonitoringFunction,
                 collisionModel);
+        if (theta > -1.0) {
+            verletIntegrator.setTheta(theta);
+        }
+
         AppUtils::SignalHandler::setReceiver(verletIntegrator);
         verletIntegrator.run(timeSteps, dt);
     }
@@ -172,6 +195,10 @@ void AppUtils::runTrajectoryIntegration(
                 postTimestepFunction, otherActionsFunction,
                 ionStartMonitoringFunction,
                 collisionModel);
+        if (theta > -1.0) {
+            rk4Integrator.setTheta(theta);
+        }
+
         AppUtils::SignalHandler::setReceiver(rk4Integrator);
         rk4Integrator.run(timeSteps, dt);
     }

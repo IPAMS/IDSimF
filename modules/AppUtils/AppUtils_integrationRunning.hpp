@@ -31,7 +31,7 @@
 #include "Integration_generic.hpp"
 #include "Integration_abstractTimeIntegrator.hpp"
 #include "CollisionModel_AbstractCollisionModel.hpp"
-#include "appUtils_simulationConfiguration.hpp"
+#include "AppUtils_simulationConfiguration.hpp"
 
 namespace AppUtils{
 

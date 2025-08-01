@@ -2,40 +2,46 @@
 #define IDSIMF_CPP_TEST_UTIL_HPP
 
 #include "Core_vector.hpp"
-
 #include <string>
 #include <sstream>
 #include <fstream>
 
-const std::string vectorsApproxEqual("Vectors approximately equal");
+class VectorApproxMatcher : public Catch::MatcherBase<Core::Vector> {
+    private:
+        Core::Vector target_;
+        double epsilon_;
+        mutable bool hasMatched_ = false;
 
-inline std::string vectorApproxCompare(const Core::Vector &lhs, const Core::Vector &rhs,
-                                       double epsilon=std::numeric_limits<float>::epsilon()*100.0){
-    bool equal = true;
-    std::stringstream ss;
+    public:
+        explicit VectorApproxMatcher(const Core::Vector& target, double epsilon= 1e-6):
+            target_(target),
+            epsilon_(epsilon){}
 
-    if (lhs.x() != Approx(rhs.x()).epsilon(epsilon)){
-        equal = false;
-        ss << "x coord unequal "<<lhs.x() <<" != "<<rhs.x()<<std::endl;
-    }
+        bool match(const Core::Vector& vec) const override{
+            hasMatched_ = std::abs(vec.x() - target_.x()) < epsilon_ &&
+                          std::abs(vec.y() - target_.y()) < epsilon_ &&
+                          std::abs(vec.z() - target_.z()) < epsilon_;
 
-    if (lhs.y() != Approx(rhs.y()).epsilon(epsilon)){
-        equal = false;
-        ss << "y coord unequal "<<lhs.y() <<" != "<<rhs.y()<<std::endl;
-    }
+            return hasMatched_;
+        }
 
-    if (lhs.z() != Approx(rhs.z()).epsilon(epsilon)){
-        equal = false;
-        ss << "z coord unequal "<<lhs.z() <<" != "<<rhs.z()<<std::endl;
-    }
+        std::string describe() const override {
+            std::stringstream ss;
+            if (hasMatched_){
+                ss << "is approximately equal to Core::Vector("
+                    << target_.x() << ", " << target_.y() << ", " << target_.z() << ") within " << epsilon_;
+            }
+            else {
+                ss << "differs from Core::Vector("
+                    << target_.x() << ", " << target_.y() << ", " << target_.z() << ") with epsilon=" << epsilon_;
+            }
+            return ss.str();
+        }
+};
 
-    if (equal){
-        return vectorsApproxEqual;
-    }
-    else{
-        return ss.str();
-    }
-}
+inline VectorApproxMatcher ApproxEqual(const Core::Vector& target, double epsilon = 1e-6) {
+    return VectorApproxMatcher(target, epsilon);
+};
 
 // Vector equality means, exact, floating point equality here, thus deactivate
 // floating point comparison warning

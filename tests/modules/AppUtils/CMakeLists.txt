@@ -1,4 +1,4 @@
-project(test_Applications)
+project(test_AppUtils)
 
 set(SOURCE_FILES
         test_main.cpp
@@ -25,11 +25,11 @@ set(TEST_FILES
         )
 file(COPY ${TEST_FILES} DESTINATION .)
 
-add_executable(test_Applications ${SOURCE_FILES})
-target_include_directories(test_Applications PRIVATE
+add_executable(test_AppUtils ${SOURCE_FILES})
+target_include_directories(test_AppUtils PRIVATE
         ${CMAKE_SOURCE_DIR}/libs/catch
         ${CMAKE_SOURCE_DIR}/tests/util)
 
-target_link_libraries(test_Applications core spacecharge particlesimulation apputils jsoncpp)
+target_link_libraries(test_AppUtils core spacecharge particlesimulation apputils jsoncpp)
 
-add_test(NAME test_Applications COMMAND test_Applications)
+add_test(NAME test_AppUtils COMMAND test_AppUtils)

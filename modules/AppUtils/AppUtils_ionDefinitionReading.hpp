@@ -30,7 +30,7 @@
 
 #include "Core_particle.hpp"
 #include "PSim_particleStartZone.hpp"
-#include "appUtils_simulationConfiguration.hpp"
+#include "AppUtils_simulationConfiguration.hpp"
 #include <vector>
 #include <string>
 #include <memory>

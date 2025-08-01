@@ -196,4 +196,12 @@ void Integration::ParallelVerletIntegrator::finalizeSimulation(){
     }
 }
 
+/**
+ * Sets the theta value (multipole acceptance criterion) for the tree used by the integrator
+ */
+void Integration::ParallelVerletIntegrator::setTheta(double newTheta) {
+    tree_.getRoot()->setTheta(newTheta);
+}
+
+
 

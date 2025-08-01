@@ -24,13 +24,13 @@
  Application to study the dynamics of individual ion / background gas particle collisions in detail
 
  ****************************/
-#include "appUtils_simulationConfiguration.hpp"
-#include "appUtils_inputFileUtilities.hpp"
-#include "appUtils_ionDefinitionReading.hpp"
-#include "appUtils_logging.hpp"
-#include "appUtils_stopwatch.hpp"
-#include "appUtils_signalHandler.hpp"
-#include "appUtils_commandlineParser.hpp"
+#include "AppUtils_simulationConfiguration.hpp"
+#include "AppUtils_inputFileUtilities.hpp"
+#include "AppUtils_ionDefinitionReading.hpp"
+#include "AppUtils_logging.hpp"
+#include "AppUtils_stopwatch.hpp"
+#include "AppUtils_signalHandler.hpp"
+#include "AppUtils_commandlineParser.hpp"
 #include "FileIO_MolecularStructureReader.hpp"
 #include "CollisionModel_MDInteractionsTrajectorySampler.hpp"
 #include "CollisionModel_MDForceField_LJ12_6.hpp"

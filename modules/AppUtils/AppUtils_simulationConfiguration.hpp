@@ -31,7 +31,7 @@
 #include "spdlog/spdlog.h"
 #include "PSim_interpolatedField.hpp"
 #include "PSim_simionPotentialArray.hpp"
-#include "appUtils_logging.hpp"
+#include "AppUtils_logging.hpp"
 #include <filesystem>
 #include <vector>
 #include <fstream>

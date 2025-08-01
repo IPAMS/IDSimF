@@ -178,3 +178,10 @@ void Integration::VerletIntegrator::bearParticles_(double time) {
         tree_.computeChargeDistribution();
     }
 }
+
+/**
+ * Sets the theta value (multipole acceptance criterion) for the tree
+ */
+void Integration::VerletIntegrator::setTheta(double newTheta) {
+    tree_.getRoot()->setTheta(newTheta);
+}

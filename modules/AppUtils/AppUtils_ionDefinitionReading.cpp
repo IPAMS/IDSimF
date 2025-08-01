@@ -19,8 +19,8 @@
  along with IDSimF.  If not, see <https://www.gnu.org/licenses/>.
  ****************************/
 
-#include "appUtils_ionDefinitionReading.hpp"
-#include "appUtils_simulationConfiguration.hpp"
+#include "AppUtils_ionDefinitionReading.hpp"
+#include "AppUtils_simulationConfiguration.hpp"
 #include "FileIO_ionCloudReader.hpp"
 #include "PSim_particleStartZone.hpp"
 #include "PSim_boxStartZone.hpp"

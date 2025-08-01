@@ -35,7 +35,7 @@
 #include "CollisionModel_AbstractMDForceField.hpp"
 #include "CollisionModel_Molecule.hpp"
 #include "RS_AbstractReaction.hpp"
-#include "appUtils_logging.hpp"
+#include "AppUtils_logging.hpp"
 #include <string>
 
 namespace CollisionModel{
@@ -70,8 +70,8 @@ namespace CollisionModel{
                                  bool ionIsFrozen,
                                  MDIntegratorType integratorType = RK4_ADAPTIVE);
 
-        bool leapfrogIntern(std::vector<CollisionModel::Molecule*> moleculesPtr, double dt, double finalTime, double requiredRad);
-        bool rk4Intern(std::vector<CollisionModel::Molecule*> moleculesPtr, double dt, double finalTime, double requiredRad);
+        bool leapfrogIntern(std::vector<CollisionModel::Molecule*> moleculesPtr, double dt, double finalTime, int maximumSteps, bool ionIsFrozen);
+        bool rk4Intern(std::vector<CollisionModel::Molecule*> moleculesPtr, double dt, double finalTime, int maximumSteps, bool ionIsFrozen);
         bool rk4InternAdaptiveStep(std::vector<CollisionModel::Molecule*> moleculesPtr, double dt, double finalTime, int maximumSteps, bool ionIsFrozen);
 
     private:

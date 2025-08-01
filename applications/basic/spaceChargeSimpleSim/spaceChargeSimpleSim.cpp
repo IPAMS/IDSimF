@@ -30,12 +30,12 @@
 #include "FileIO_trajectoryHDF5Writer.hpp"
 #include "PSim_util.hpp"
 #include "PSim_boxStartZone.hpp"
-#include "appUtils_simulationConfiguration.hpp"
-#include "appUtils_integrationRunning.hpp"
-#include "appUtils_logging.hpp"
-#include "appUtils_stopwatch.hpp"
-#include "appUtils_signalHandler.hpp"
-#include "appUtils_commandlineParser.hpp"
+#include "AppUtils_simulationConfiguration.hpp"
+#include "AppUtils_integrationRunning.hpp"
+#include "AppUtils_logging.hpp"
+#include "AppUtils_stopwatch.hpp"
+#include "AppUtils_signalHandler.hpp"
+#include "AppUtils_commandlineParser.hpp"
 #include <iostream>
 #include <vector>
 
@@ -67,12 +67,14 @@ int main(int argc, const char * argv[]) {
 
         std::vector<unsigned int> nIons = simConf->unsignedIntVectorParameter("n_ions");
         std::vector<double> ionMasses = simConf->doubleVectorParameter("ion_masses");
+        std::vector<double> ionCharges = simConf->doubleVectorParameter("ion_charges");
 
         for (std::size_t i = 0; i<nIons.size(); i++) {
             unsigned int nParticles = nIons[i];
             double mass = ionMasses[i];
+            double charge = ionCharges[i];
             ParticleSimulation::BoxStartZone startZone(Core::Vector(3.0, 3.0, 3.0)/1000.0);
-            auto ions = startZone.getRandomParticlesInStartZone(nParticles, 1.0);
+            auto ions = startZone.getRandomParticlesInStartZone(nParticles, charge);
             /*auto ions = ParticleSimulation::util::getRandomIonsInBox(nParticles, 1.0,
                                                                      Core::Vector(-1.5, -1.5, -1.5) /
                                                                      1000.0,

@@ -61,6 +61,7 @@ void CollisionModel::MDTrajectoryWriter::writeTrajectorySample(double time, doub
 }
 
 void CollisionModel::MDTrajectoryWriter::writeTrajectoryDelimiter() {
+    nextTrajectorySampleTime_ = 0.0;
     *trajectoryOutputStream_ << "###" << std::endl;
 }
 
