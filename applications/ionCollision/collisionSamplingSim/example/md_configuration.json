@@ -66,6 +66,24 @@
 
 },
 {
+	"name":"He_background",
+	"diameter":2.8,
+	"atoms":[
+		{
+			"type":"He",
+			"posx":0,
+			"posy":0,
+			"posz":0,
+			"mass":4.003,
+			"charge":0,
+			"partCharge":0,
+			"LJsigma":2.556,
+			"LJeps":0.0836
+		}
+	]
+
+},
+{
 	"name":"Ar+",
 	"diameter":3.4,
 	"atoms":[

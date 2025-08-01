@@ -97,7 +97,6 @@ int main(int argc, const char * argv[]) {
             ion.setLocation({0, 0, 0});
             ion.setVelocity({0, 0, 0});
 
-
             Core::Vector gasParticlePosition({-50e-10, i*gridSpacing_m, 0});
             Core::Vector gasParticleVelocity({velocity_x,0,0});
             Core::Vector gasParticleRotationAngles({0,0,angleGas_z_rad});

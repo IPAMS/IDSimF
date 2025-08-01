@@ -90,7 +90,7 @@ void CollisionModel::MDInteractionsTrajectorySampler::calculateTrajectory(
     //     trajectorySuccess = rk4InternAdaptiveStep(moleculesPtr, timeStep, finalTime, maximumSteps, ionIsFrozen);
     // }
     //std::cout << moleculesPtr[1]->getComPos() << std::endl;
-    trajectorySuccess = rk4Intern(moleculesPtr, timeStep, finalTime, maximumSteps, ionIsFrozen);
+    trajectorySuccess = rk4Intern(mole, bgMole, timeStep, finalTime, maximumSteps, ionIsFrozen);
 
     double endEnergy = 0;
     for(auto* molecule : moleculesPtr){
@@ -178,82 +178,73 @@ bool CollisionModel::MDInteractionsTrajectorySampler::leapfrogIntern(std::vector
     return true;
 }
 
-bool CollisionModel::MDInteractionsTrajectorySampler::rk4Intern(std::vector<CollisionModel::Molecule*> moleculesPtr, double dt, double finalTime, 
-                                                                                                            int maximumSteps, bool ionIsFrozen){
+bool CollisionModel::MDInteractionsTrajectorySampler::rk4Intern(CollisionModel::Molecule &mole, CollisionModel::Molecule &bgMole,
+                                                                double dt, double finalTime,
+                                                                int maximumSteps, bool ionIsFrozen){
 
-    int nSteps = int(round(finalTime/dt));
-    size_t nMolecules = moleculesPtr.size();
-    std::vector<Core::Vector> forceMolecules(nMolecules);
+    std::cout<<"Start Velo mole:"<<mole.getComVel()<<std::endl;
+    std::cout<<"Start Velo bg mole:"<<bgMole.getComVel()<<std::endl;
+
+    int nSteps = static_cast<int>(round(finalTime / dt));
+    std::array<Core::Vector, 2> forceMolecules;
 
     bool wasHit = false;
     double distance = 0.0;
     
-    std::vector<double> startDistances;
+    /*std::vector<double> startDistances;
     for(size_t i = 0; i < nMolecules; ++i){
         for(size_t j = i+1; j < nMolecules; ++j){
             startDistances.push_back((moleculesPtr[i]->getComPos() - moleculesPtr[j]->getComPos()).magnitude());
         }
-    }
+    }*/
 
     size_t i = 0;
     double integrationTimeSum = 0;
     int steps = 0;
-    
+
+    Core::Vector v_mole;
+    Core::Vector v_bgMole;
+    Core::Vector p_mole;
+    Core::Vector p_bgMole;
+    double mass_mole = mole.getMass();
+    double mass_bgMole = bgMole.getMass();
+
+    std::vector<CollisionModel::Molecule*> molecPointer = {&mole, &bgMole};
+    std::vector<Core::Vector> molecForces;
+    double length[3] = {1./2, 1./2, 1};
     while(integrationTimeSum < finalTime && steps < maximumSteps){
-        
-        
-        std::vector<Core::Vector> velocityMolecules(nMolecules);
-        std::vector<Core::Vector> positionMolecules(nMolecules);
         i = 0;
-        
-        for(auto* molecule : moleculesPtr){
-            if(molecule->getMolecularStructureName() == currentCollisionMolecule_){
-                velocityMolecules.at(i) = molecule->getComVel();
-                positionMolecules.at(i) = molecule->getComPos();
-            }else{
-                velocityMolecules.at(i) = {0,0,0};
-                positionMolecules.at(i) = {0,0,0};
-            }
-            i++;
-        }
-        
-        
-        std::vector<Core::Vector> initialPositionMolecules(nMolecules);
-        std::vector<Core::Vector> initialVelocityMolecules(nMolecules);
-        for(size_t k = 0; k < nMolecules; k++){
-            initialPositionMolecules.at(k) = Core::Vector( positionMolecules.at(k).x(), positionMolecules.at(k).y(),positionMolecules.at(k).z() );
-            initialVelocityMolecules.at(k) = Core::Vector( velocityMolecules.at(k).x(), velocityMolecules.at(k).y(), velocityMolecules.at(k).z() );
-        }
-        
-        for(size_t k = 0; k < nMolecules; ++k){
-            for(size_t l = k+1; l < nMolecules; ++l){
-                distance = (moleculesPtr[l]->getComPos() - moleculesPtr[k]->getComPos()).magnitude();
-            }
-        }
 
-        
+        v_mole = {0,0,0};
+        v_bgMole = bgMole.getComVel();
 
-        double length[3] = {1./2, 1./2, 1};
-        std::vector<double> mass;
-        i = 0;
-        for(auto* molecule : moleculesPtr){
-            mass.push_back(molecule->getMass());
-        }
-        forceField_->calculateForceField(moleculesPtr, forceMolecules);
+        p_mole = {0,0,0};
+        p_bgMole = bgMole.getComPos();
+
+        Core::Vector init_v_mole = v_mole;
+        Core::Vector init_p_mole = p_mole;
+        Core::Vector init_v_bgMole = v_bgMole;
+        Core::Vector init_p_bgMole = p_bgMole;
+
+        forceField_->calculateForceField(molecPointer, molecForces);
         
         std::array<std::array<Core::Vector, 2>, 4> k;
         std::array<std::array<Core::Vector, 2>, 4> l;
 
+        k[0][0] = molecForces[0] * dt / mass_mole;
+        k[0][1] = molecForces[1] * dt / mass_bgMole;
 
-        for(size_t q = 0; q < nMolecules; q++){
-            k[0][q] = forceMolecules.at(q) * dt / mass[q];
-            l[0][q] = velocityMolecules.at(q) * dt;
-        }
+        l[0][0] = v_mole * dt;
+        l[0][1] = v_bgMole * dt;
+
         
         for(size_t n = 1; n < 4; n++){
+
+            p_mole =
+
             i = 0;
             for(auto* molecule : moleculesPtr){
-                positionMolecules.at(i) = initialPositionMolecules.at(i) + l[n-1][i]*length[i-1];
+                positionMolecules.at(i) = initialPositionMolecules.at(i) + l[n-1][i]*length[n-1];
                 molecule->setComPos(positionMolecules.at(i));
                 i++;
             }
@@ -286,6 +277,8 @@ bool CollisionModel::MDInteractionsTrajectorySampler::rk4Intern(std::vector<Coll
         steps++;
     }
     if(trajectoryWriter_ != nullptr) {
+        std::cout<<"End Velo mole:"<<moleculesPtr[0]->getComVel()<<std::endl;
+        std::cout<<"End Velo bg mole:"<<moleculesPtr[1]->getComVel()<<std::endl;
         trajectoryWriter_->writeTrajectoryDelimiter();
     }
     return true;
