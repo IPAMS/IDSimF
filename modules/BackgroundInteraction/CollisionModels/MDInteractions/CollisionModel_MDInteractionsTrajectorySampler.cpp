@@ -90,7 +90,7 @@ void CollisionModel::MDInteractionsTrajectorySampler::calculateTrajectory(
     //     trajectorySuccess = rk4InternAdaptiveStep(moleculesPtr, timeStep, finalTime, maximumSteps, ionIsFrozen);
     // }
     //std::cout << moleculesPtr[1]->getComPos() << std::endl;
-    trajectorySuccess = rk4Intern(moleculesPtr, timeStep, finalTime, maximumSteps, ionIsFrozen);
+    trajectorySuccess = rk4InternAdaptiveStep(moleculesPtr, timeStep, finalTime, maximumSteps, ionIsFrozen);
 
     double endEnergy = 0;
     for(auto* molecule : moleculesPtr){
@@ -207,13 +207,10 @@ bool CollisionModel::MDInteractionsTrajectorySampler::rk4Intern(std::vector<Coll
         i = 0;
         
         for(auto* molecule : moleculesPtr){
-            if(molecule->getMolecularStructureName() == currentCollisionMolecule_){
-                velocityMolecules.at(i) = molecule->getComVel();
-                positionMolecules.at(i) = molecule->getComPos();
-            }else{
-                velocityMolecules.at(i) = {0,0,0};
-                positionMolecules.at(i) = {0,0,0};
-            }
+            
+            velocityMolecules.at(i) = molecule->getComVel();
+            positionMolecules.at(i) = molecule->getComPos();
+           
             i++;
         }
         
@@ -398,7 +395,7 @@ bool CollisionModel::MDInteractionsTrajectorySampler::rk4InternAdaptiveStep(
         }
 
         double globalR = std::max({R[0],R[1]});
-        double tolerance = 1e-8;
+        double tolerance = 1e-2;
 
         #pragma GCC diagnostic push
         #pragma GCC diagnostic ignored "-Wfloat-equal"

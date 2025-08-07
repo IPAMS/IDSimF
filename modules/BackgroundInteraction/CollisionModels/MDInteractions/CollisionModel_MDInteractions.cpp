@@ -512,7 +512,7 @@ bool CollisionModel::MDInteractionsModel::rk4Intern(std::vector<CollisionModel::
         for(size_t n = 1; n < 4; n++){
             i = 0;
             for(auto* molecule : moleculesPtr){
-                positionMolecules.at(i) = initialPositionMolecules.at(i) + l[n-1][i]*length[i-1];
+                positionMolecules.at(i) = initialPositionMolecules.at(i) + l[n-1][i]*length[n-1];
                 molecule->setComPos(positionMolecules.at(i));
                 i++;
             }
