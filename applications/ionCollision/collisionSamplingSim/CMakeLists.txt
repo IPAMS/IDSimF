@@ -16,6 +16,9 @@ add_test(NAME app_ionCollision_collisionSamplingSim_O2_Ar COMMAND ${PROJECT_NAME
 add_test(NAME app_ionCollision_collisionSamplingSim_O2_Ar_init_file COMMAND ${PROJECT_NAME}
         "example/collisionSampling_O2_Ar_initFile.json" "run_app_ionCollision_collisionSamplingSim_O2_Ar_initFile" -n ${N_THREADS})
 
+add_test(NAME app_ionCollision_collisionSamplingSim_He_He COMMAND ${PROJECT_NAME}
+        "example/collisionSampling_He_he.json" "run_app_ionCollision_collisionSamplingSim_He_He" -n ${N_THREADS})
+
 add_custom_command(TARGET ${PROJECT_NAME} PRE_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${CMAKE_CURRENT_SOURCE_DIR}/example/ $<TARGET_FILE_DIR:${PROJECT_NAME}>/example/)
