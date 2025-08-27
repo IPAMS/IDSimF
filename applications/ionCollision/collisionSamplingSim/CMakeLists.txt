@@ -10,8 +10,11 @@ target_link_libraries(${PROJECT_NAME} core apputils particlesimulation file_io i
 add_test(NAME app_ionCollision_collisionSamplingSim_Li+_N2 COMMAND ${PROJECT_NAME}
         "example/collisionSampling_Li_N2.json" "run_app_ionCollision_collisionSamplingSim_Li_N2" -n ${N_THREADS})
 
-add_test(NAME app_ionCollision_collisionSamplingSim_Li+_Ar COMMAND ${PROJECT_NAME}
+add_test(NAME app_ionCollision_collisionSamplingSim_O2_Ar COMMAND ${PROJECT_NAME}
         "example/collisionSampling_O2_Ar.json" "run_app_ionCollision_collisionSamplingSim_O2_Ar" -n ${N_THREADS})
+
+add_test(NAME app_ionCollision_collisionSamplingSim_O2_Ar_init_file COMMAND ${PROJECT_NAME}
+        "example/collisionSampling_O2_Ar_initFile.json" "run_app_ionCollision_collisionSamplingSim_O2_Ar_initFile" -n ${N_THREADS})
 
 add_test(NAME app_ionCollision_collisionSamplingSim_He_He COMMAND ${PROJECT_NAME}
         "example/collisionSampling_He_He.json" "run_app_ionCollision_collisionSamplingSim_He_He" -n ${N_THREADS})

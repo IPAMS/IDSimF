@@ -40,7 +40,7 @@ if(USE_EXAFMMT)
     set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_LIST_DIR}/ExaFMMt/cmake/findFFTW")
 
     message(STATUS ${CMAKE_MODULE_PATH})
-    target_include_directories(spacecharge PUBLIC ${EXAFMMT_PATH}/include)
+    target_include_directories(spacecharge PUBLIC ${EXAFMMT_PATH}/include ${FFTW_INCLUDE_DIRS})
 
     find_package(BLAS REQUIRED)
     find_package(LAPACK REQUIRED)
