@@ -71,7 +71,7 @@ namespace CollisionModel{
                                  MDIntegratorType integratorType = RK4_ADAPTIVE);
 
         bool leapfrogIntern(std::vector<CollisionModel::Molecule*> moleculesPtr, double dt, double finalTime, int maximumSteps, bool ionIsFrozen);
-        bool rk4Intern(CollisionModel::Molecule &mole, CollisionModel::Molecule &bgMole, double dt, double finalTime, int maximumSteps, bool ionIsFrozen);
+        bool rk4Intern(std::vector<CollisionModel::Molecule*> moleculesPtr, double dt, double finalTime, int maximumSteps, bool ionIsFrozen);
         bool rk4InternAdaptiveStep(std::vector<CollisionModel::Molecule*> moleculesPtr, double dt, double finalTime, int maximumSteps, bool ionIsFrozen);
 
     private:
