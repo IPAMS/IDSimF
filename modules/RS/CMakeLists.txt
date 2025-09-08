@@ -13,6 +13,7 @@ set(SOURCE_FILES
         RS_ConcentrationFileWriter.cpp
         RS_SimpleCollisionStepReaction.cpp
         RS_StaticThermalizingReaction.cpp
+        RS_CrossectionThermalizingReaction.cpp
         RS_util.cpp)
 
 add_library(rs STATIC ${SOURCE_FILES})

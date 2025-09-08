@@ -25,21 +25,23 @@
  thermal velocity drawn from maxwell boltzmann distribution to model the effect of resonant charge transfer
  (Reactions of type A+ + A -> A + A+)
 
+ The reaction probability is calculated from a reaction crossection
+
  ****************************/
 
-#ifndef RS_ThermalizingStaticReaction_hpp
-#define RS_ThermalizingStaticReaction_hpp
+#ifndef RS_CrossectionStaticReaction_hpp
+#define RS_CrossectionStaticReaction_hpp
 
 #include "RS_AbstractReaction.hpp"
 
 namespace RS {
-    class StaticThermalizingReaction : public AbstractReaction {
+    class CrossectionThermalizingReaction : public AbstractReaction {
 
     public:
-        StaticThermalizingReaction(
+        CrossectionThermalizingReaction(
             const std::map<Substance*,int>& educts,
             const std::map<Substance*,int>& products,
-            double rateConstant,
+            double reactionCrossectionM2,
             std::string label
         );
 
@@ -48,7 +50,11 @@ namespace RS {
         RS::ReactionEvent attemptReaction(CollisionConditions conditions, ReactiveParticle* particle) const override;
 
     private:
-        double rateConstant_ = 0.0;
+        const double PI_SQRT = std::sqrt(M_PI);
+        double reactionCrossectionM2_ = 0.0;
+        double reactionPartnerMassAmu_ = 0.0;
+        double reactionPartnerMassKg_ = 0.0;
+        double reactionPartnerNumberConcentration_1m3_ = 0.0;
     };
 }
 

@@ -28,6 +28,7 @@
 #include "RS_Substance.hpp"
 #include "RS_StaticReaction.hpp"
 #include "RS_StaticThermalizingReaction.hpp"
+#include "RS_CrossectionThermalizingReaction.hpp"
 #include "RS_VantHoffReaction.hpp"
 #include "RS_FieldDependentVantHoffReaction.hpp"
 #include "RS_SimpleCollisionStepReaction.hpp"
@@ -38,6 +39,7 @@
 #include <array>
 #include <numeric>
 
+#include "RS_CrossectionThermalizingReaction.hpp"
 
 using sMap = std::map<RS::Substance*,int>;
 using sMapPtr = const sMap*;
@@ -96,7 +98,7 @@ TEST_CASE("Test basic reaction semantics", "[RS][Reaction]") {
     }
 }
 
-TEST_CASE("Test chemical semantics of RS reaction types", "[RS][Reaction]") {
+TEST_CASE("Test chemical semantics of non thermalizing RS reaction types", "[RS][Reaction]") {
 
     // setup an educt and a product substance:
     RS::Substance ed_1 = RS::Substance("educt_1", RS::Substance::substanceType::discrete);
@@ -115,54 +117,6 @@ TEST_CASE("Test chemical semantics of RS reaction types", "[RS][Reaction]") {
         RS::StaticReaction reac = RS::StaticReaction(educts, products, 1.5e10, "a test reaction");
         CHECK(reac.attemptReaction(reactionConditions, &dummyParticle, 1.0).reactionProbability == Approx(1.5e10));
         CHECK(reac.attemptReaction(reactionConditions, &dummyParticle, 0.1).reactionProbability == Approx(1.5e9));
-    }
-
-    SECTION("Static thermalizing reaction should calculate correct reaction probabilities and thermalize reacted particle") {
-
-        //This test is a statistical test: use a real random number generator:
-        Core::globalRandomGeneratorPool = std::make_unique<Core::RandomGeneratorPool>();
-
-        pro_1.mass(200);
-        RS::StaticThermalizingReaction reac = RS::StaticThermalizingReaction(educts, products, 10.0, "a test reaction");
-        reactionConditions.temperature = 298;
-
-        // test if linearized reaction probability is correct:
-        RS::ReactiveParticle productParticle(&pro_1);
-        CHECK(reac.attemptReaction(reactionConditions, &productParticle, 1.0).reactionProbability == Approx(10.0));
-
-        // test if the velocity is reinitialized thermally:
-        // Generate 200000 test samples and determine mean velocity and mean velocity magnitude after collision
-        unsigned int nSamples = 200000;
-        std::vector<Core::Vector> velocities(nSamples);
-        std::vector<double> magnitudes;
-
-        for (auto& vel: velocities){
-            productParticle.setVelocity({1000.0, 0.0, 0.0});
-            reac.attemptReaction(reactionConditions, &productParticle, 1.0);
-            vel = productParticle.getVelocity();
-        }
-
-        Core::Vector meanVelocity =
-                std::accumulate(
-                        velocities.begin(), velocities.end(), Core::Vector(0.0,0.0,0.0)) /
-                        velocities.size();
-
-        REQUIRE(meanVelocity.magnitude() < 1.0);
-
-        std::transform(velocities.begin(), velocities.end(), std::back_inserter(magnitudes),
-                [](Core::Vector vec) -> double { return vec.magnitude(); });
-
-        double meanVelocityMagnitude =
-                std::accumulate(
-                        magnitudes.begin(), magnitudes.end(), 0.0) /
-                        magnitudes.size();
-
-
-        //calculate analytical result:
-        double analyticalMeanVelocityMagnitude = std::sqrt(
-                (8.0 * RS::K_BOLTZMANN * reactionConditions.temperature) / (M_PI * productParticle.getMass() ));
-
-        REQUIRE(meanVelocityMagnitude == Approx(analyticalMeanVelocityMagnitude).margin(2));
     }
 
     SECTION( "Reaction probability of a van't Hoff dependent reaction should be correct") {
@@ -212,7 +166,6 @@ TEST_CASE("Test chemical semantics of RS reaction types", "[RS][Reaction]") {
     }
 
     SECTION("Reaction probability of collision based step reaction should be correct") {
-
         RS::SimpleCollisionStepReaction reac(
                 educts,products,
                 1.5e-1,
@@ -233,5 +186,107 @@ TEST_CASE("Test chemical semantics of RS reaction types", "[RS][Reaction]") {
         collisionConditions.totalCollisionEnergy = totalReactionEnergy;
         probability = reac.attemptReaction(collisionConditions, &dummyParticle).reactionProbability;
         REQUIRE(probability ==Approx(1.0));
+    }
+}
+
+void checkThermalizing(RS::ReactiveParticle& testParticle, RS::AbstractReaction& reac, RS::ReactionConditions& reactionConditions) {
+    // Generate 200000 test samples and determine mean velocity and mean velocity magnitude after collision
+    unsigned int nSamples = 200000;
+    std::vector<Core::Vector> velocities(nSamples);
+    std::vector<double> magnitudes;
+
+    for (auto& vel: velocities){
+        testParticle.setVelocity({1000.0, 0.0, 0.0});
+        reac.attemptReaction(reactionConditions, &testParticle, 1.0);
+        vel = testParticle.getVelocity();
+    }
+
+    // check if velocity is randomized:
+    Core::Vector meanVelocity =
+            std::accumulate(
+                    velocities.begin(), velocities.end(), Core::Vector(0.0,0.0,0.0)) /
+                    velocities.size();
+
+    REQUIRE(meanVelocity.magnitude() < 1.0);
+
+    // check if average velocity magnitude is close to Maxwell Boltzmann average value:
+    std::transform(velocities.begin(), velocities.end(), std::back_inserter(magnitudes),
+            [](Core::Vector vec) -> double { return vec.magnitude(); });
+
+    double meanVelocityMagnitude =
+            std::accumulate(
+                    magnitudes.begin(), magnitudes.end(), 0.0) /
+                    magnitudes.size();
+
+
+    //calculate analytical result:
+    double analyticalMeanVelocityMagnitude = std::sqrt(
+            (8.0 * RS::K_BOLTZMANN * reactionConditions.temperature) / (M_PI * testParticle.getMass() ));
+
+    REQUIRE(meanVelocityMagnitude == Approx(analyticalMeanVelocityMagnitude).margin(2));
+}
+
+TEST_CASE("Test chemical semantics of thermalizing RS reaction types", "[RS][Reaction]") {
+    // setup an educt and a product substance:
+    RS::Substance ed_1 = RS::Substance("educt_1", RS::Substance::substanceType::discrete);
+    RS::Substance pro_1 = RS::Substance("product_1", RS::Substance::substanceType::discrete);
+
+    sMap educts;
+    sMap products;
+    educts.insert(sPair(&ed_1,0));
+    products.insert(sPair(&pro_1,0));
+
+    RS::ReactionConditions reactionConditions;
+    RS::ReactiveParticle dummyParticle(&ed_1);
+
+
+    SECTION("Static thermalizing reaction should calculate correct reaction probabilities and thermalize reacted particle") {
+
+        //This test is a statistical test: use a real random number generator:
+        Core::globalRandomGeneratorPool = std::make_unique<Core::RandomGeneratorPool>();
+
+        RS::StaticThermalizingReaction reac = RS::StaticThermalizingReaction(educts, products, 10.0, "a test reaction");
+        reactionConditions.temperature = 298;
+
+        // test if linearized reaction probability is correct:
+        RS::ReactiveParticle testParticle(&ed_1);
+        pro_1.mass(100.0);
+        testParticle.setMassAMU(100.0);
+        CHECK(reac.attemptReaction(reactionConditions, &testParticle, 1.0).reactionProbability == Approx(10.0));
+
+        // test if the velocity is reinitialized thermally:
+        checkThermalizing(testParticle, reac, reactionConditions);
+    }
+
+    SECTION("Thermalizing reaction defined by a reaction cross section should calculate correct reaction probabilities and thermalize reacted particle") {
+
+        //This test is a statistical test: use a real random number generator:
+        Core::globalRandomGeneratorPool = std::make_unique<Core::RandomGeneratorPool>();
+
+        // prepare educts:
+        RS::Substance ed_2 = RS::Substance("educt_1", RS::Substance::substanceType::isotropic);
+        ed_1.mass(40);
+        ed_2.mass(40);
+        ed_2.staticConcentration(3e22); //in particles / m^3, pressure for ~ 1 torr
+
+        educts.insert(sPair(&ed_2,1));
+
+        pro_1.mass(100);
+        double reactionDiam_cm = 7e-8; // cm
+        double reactionRadius_m = reactionDiam_cm/2.0 / 100.0;
+        double reactionCrossectionM2 = M_PI * reactionRadius_m * reactionRadius_m;
+        RS::CrossectionThermalizingReaction reac = RS::CrossectionThermalizingReaction(educts, products, reactionCrossectionM2, "a test reaction");
+
+        // test if reaction probability is correct:
+        RS::ReactiveParticle testParticle(&ed_1);
+        pro_1.mass(100.0);
+        testParticle.setMassAMU(100.0);
+        testParticle.setVelocity({500,0,0});
+        reactionConditions.temperature = 298;
+        CHECK(reac.attemptReaction(reactionConditions, &testParticle, 1e-9).reactionProbability == Approx(0.0071611927));
+        CHECK(reac.attemptReaction(reactionConditions, &testParticle, 1e-6).reactionProbability == Approx(0.9992436128));
+
+        // test if the velocity is reinitialized thermally:
+        checkThermalizing(testParticle, reac, reactionConditions);
     }
 }
