@@ -41,7 +41,7 @@ namespace RS {
         CrossectionThermalizingReaction(
             const std::map<Substance*,int>& educts,
             const std::map<Substance*,int>& products,
-            double reactionCrossectionM2,
+            double reactionDiamM,
             std::string label
         );
 

@@ -21,6 +21,8 @@
 
 #include "RS_ConfigFileParser.hpp"
 
+#include "RS_CrossectionThermalizingReaction.hpp"
+
 using sMap = std::map<RS::Substance*,int>;
 using sPair= sMap::value_type;
 
@@ -53,6 +55,10 @@ bool RS::ConfigFileParser::parseSubstances(SimulationConfiguration *simConf, con
                     new RS::Substance(name,sType));
             if (subst->type() == RS::Substance::substanceType::isotropic && optNumber1 != ""){
                 subst->staticConcentration(std::strtof(optNumber1.c_str(), nullptr));
+
+                if (optNumber2 != "") {
+                    subst->mass(std::strtof(optNumber2.c_str(), nullptr));
+                }
             }
             else if (subst->type() == RS::Substance::substanceType::isotropic){
                 throw(RS::ConfigurationFileException("Isotropic substance without concentration value found"));
@@ -164,8 +170,15 @@ bool RS::ConfigFileParser::parseReactions(SimulationConfiguration *simConf, cons
                         parsedParams.at(0),
                         labelStr);
             }
-            if (typeStr == "static_thermalizing"){
+            else if (typeStr == "static_thermalizing"){
                 reaction = std::make_unique<RS::StaticThermalizingReaction>(
+                        educts,
+                        products,
+                        parsedParams.at(0),
+                        labelStr);
+            }
+            else if (typeStr == "thermalizing") {
+                reaction = std::make_unique<RS::CrossectionThermalizingReaction>(
                         educts,
                         products,
                         parsedParams.at(0),

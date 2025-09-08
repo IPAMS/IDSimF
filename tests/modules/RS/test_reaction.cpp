@@ -273,9 +273,8 @@ TEST_CASE("Test chemical semantics of thermalizing RS reaction types", "[RS][Rea
 
         pro_1.mass(100);
         double reactionDiam_cm = 7e-8; // cm
-        double reactionRadius_m = reactionDiam_cm/2.0 / 100.0;
-        double reactionCrossectionM2 = M_PI * reactionRadius_m * reactionRadius_m;
-        RS::CrossectionThermalizingReaction reac = RS::CrossectionThermalizingReaction(educts, products, reactionCrossectionM2, "a test reaction");
+        double reactionDiam_m = reactionDiam_cm / 100.0;
+        RS::CrossectionThermalizingReaction reac = RS::CrossectionThermalizingReaction(educts, products, reactionDiam_m, "a test reaction");
 
         // test if reaction probability is correct:
         RS::ReactiveParticle testParticle(&ed_1);

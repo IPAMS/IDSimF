@@ -25,10 +25,10 @@
 RS::CrossectionThermalizingReaction::CrossectionThermalizingReaction(
         const std::map<RS::Substance*, int>& educts,
         const std::map<RS::Substance*, int>& products,
-        double reactionCrossectionM2,
+        double reactionDiamM,
         const std::string label):
-AbstractReaction(educts, products, false, "static_thermalizing", label),
-reactionCrossectionM2_(reactionCrossectionM2){
+AbstractReaction(educts, products, false, "thermalizing", label){
+    reactionCrossectionM2_ = M_PI * (reactionDiamM/2.0) * (reactionDiamM/2.0);
     reactionPartnerNumberConcentration_1m3_ = staticReactionConcentration();
 
     // check if reaction has the correct structure of educts:
@@ -114,5 +114,5 @@ RS::ReactionEvent RS::CrossectionThermalizingReaction::attemptReaction(RS::React
  */
 RS::ReactionEvent RS::CrossectionThermalizingReaction::attemptReaction(CollisionConditions, RS::ReactiveParticle*) const{
     throw std::logic_error(
-            "Collision based reaction probability requested for purely stochastic reaction StaticReaction");
+            "Collision based reaction probability requested for purely stochastic reaction Thermalizing Reaction");
 }

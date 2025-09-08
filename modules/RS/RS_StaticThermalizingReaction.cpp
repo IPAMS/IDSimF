@@ -57,5 +57,5 @@ RS::ReactionEvent RS::StaticThermalizingReaction::attemptReaction(RS::ReactionCo
  */
 RS::ReactionEvent RS::StaticThermalizingReaction::attemptReaction(CollisionConditions, RS::ReactiveParticle*) const{
     throw std::logic_error(
-            "Collision based reaction probability requested for purely stochastic reaction StaticReaction");
+            "Collision based reaction probability requested for purely stochastic reaction Static Thermalizing Reaction");
 }
