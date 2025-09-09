@@ -71,11 +71,12 @@ Substance Types
 
     .. code-block:: none
 
-        <Substance Name> isotropic <concentration>
+        <Substance Name> isotropic <concentration> <molecular mass>
 
     with 
 
-    * ``<concentration>``: Isotropic concentration of this substance. The concentration unit has to be compatible with the reaction rate constants defined in ``[REACTIONS]`` section. 
+    * ``<concentration>``: Isotropic concentration of this substance. The concentration unit has to be compatible with the reaction rate constants defined in ``[REACTIONS]`` section.
+    * optional: ``<molecular mass>``: Mass of a particle of this substance in amu. This parameter is optional and only required for reaction types defined by a reaction cross section.
 
 
 
@@ -148,7 +149,7 @@ specifies a reaction of type ``static`` named ``subst1_forward`` in which one ``
 Reaction Types
 --------------
 
-There are currently 5 different reaction types, described in detail below. 
+There are currently 6 different reaction types, described in detail below. 
 
 .. note::
 
@@ -200,6 +201,48 @@ There are currently 5 different reaction types, described in detail below.
     **Parameter list:** ``; <rate constant>``
 
     * ``<rate constant>``: Static rate constant :math:`k`
+  
+``thermalizing`` : Thermalizing reaction with reaction cross section
+--------------------------------------------------------------------
+
+    Reaction of a ``discrete`` substance with a single ``isotropic`` reaction partner, with thermalization of the ``discrete`` simulated particle. The reaction is similar to ``static_thermalizing``, but the reaction probability is calculated from a reaction cross section defined by a reaction diameter, the velocity of the reactive educt particle and the concentration of the ``isotropic`` reaction partner.  
+    The reaction is thermalizing: The velocity vector of the product particle is reinitialized with a random velocity drawn from the Maxwell-Boltzmann distribution during the reaction.
+
+    This reaction type is primarily intendet to model *resonant charge transfer* reactions of the type: 
+
+    .. math:: 
+
+        \text{A}^+ + \text{A} \rightarrow \text{A} + \text{A}^+
+
+    which transfers charge from a potentially electrically accelerated particle to a thermal particle. 
+
+    The reaction probability is calculated analogously to the collision probability in the hard sphere (HS) collision model, but with the reaction cross section as effective cross section:
+    
+    .. math::
+
+        \begin{align}
+	        \bar{c}_{\text{r}} &= \sqrt{\frac{8 k_b T}{\pi \, m}}\quad\text{(mean neutral reaction partner particle speed)} \\
+	        c^*_{\text{r}} &= \sqrt{\frac{2 k_b T}{m}}\quad\text{(median neutral reaction partner particle speed)} \\	
+	        s &= \frac{v}{c^*_{\text{r}}} \\
+	        \bar{c}_{\text{rel}} &= \bar{c}_{\text{r}} \left( (s+(2s)^{-1})\frac{\sqrt{\pi}}{2} \text{erf}(s) + \frac{1}{2} \exp(-s^2)\right) \\
+            \sigma_{\text{r}} &= \pi\, \left(\frac{d_{\text{r}}}{2}\right)^2 \\
+            \lambda &= \frac{v}{\bar{c}_{\text{rel}}} \frac{1}{N\, \sigma_{\text{r}}} \\
+            p &= 1 - \exp{\left(-\frac{v \, \text{d}t}{\lambda}\right)}
+        \end{align}
+
+    with the background temperature :math:`T`, the reactive particle velocity :math:`v`, the number density of the neutral reaction partner :math:`N`, the reaction diameter :math:`d_{\text{r}}` and the time step length :math:`\text{d}t`.
+
+    **Parameter list:** ``; <reaction diameter>``
+
+    * ``<reaction diameter>``: Effective reaction diameter :math:`d_{\text{r}}` in :math:`\text{m}`
+
+.. note::
+
+    The optional parameter ``<molecular mass>`` has to be set for the ``isotropic`` reaction partner
+
+  
+
+
 
 
 ``vanthoff`` : Reaction with reaction rate given by van't Hoff equation 
