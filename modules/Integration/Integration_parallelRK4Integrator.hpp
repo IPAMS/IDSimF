@@ -21,7 +21,7 @@
  ------------
  BTree_parallelRK4Integrator.hpp
  
- Parallel version of a Runge Kutta 4 Integrator with Barnes-Hut Tree space charge calcultation
+ Parallel version of a Runge Kutta 4 Integrator with Barnes-Hut Tree space charge calculation
 
  ****************************/
 
