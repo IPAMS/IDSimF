@@ -272,17 +272,18 @@ int main(int argc, const char * argv[]) {
                     }
 
                     Core::Vector axialForce = trapAxialForceFct(particle);
+                    Core::Vector trapForce = rfForce + axialForce;
 
                     //update the additional parameters for writing them later to the trajectory:
-                    particle->setFloatAttribute(key_trapForce_x, rfForce.x());
-                    particle->setFloatAttribute(key_trapForce_y, rfForce.y());
-                    particle->setFloatAttribute(key_trapForce_z, rfForce.z());
+                    particle->setFloatAttribute(key_trapForce_x, trapForce.x());
+                    particle->setFloatAttribute(key_trapForce_y, trapForce.y());
+                    particle->setFloatAttribute(key_trapForce_z, trapForce.z());
                     particle->setFloatAttribute(key_spaceCharge_x, spaceChargeForce.x());
                     particle->setFloatAttribute(key_spaceCharge_y, spaceChargeForce.y());
                     particle->setFloatAttribute(key_spaceCharge_z, spaceChargeForce.z());
 
 
-                    return ((rfForce+axialForce+spaceChargeForce)/particle->getMass());
+                    return ((trapForce+spaceChargeForce)/particle->getMass());
                 };
 
         auto accelerationFctSpaceCharge_RKIntegration =
@@ -305,11 +306,15 @@ int main(int argc, const char * argv[]) {
         };
 
         auto accelerationFctTrapField_RKIntegration =
-                [&trapFieldFct, &trapAxialForceFct](Core::Particle* particle, Core::Vector position, Core::Vector /*velocity*/, double time, unsigned int timestep){
+                [&trapFieldFct, &trapAxialForceFct](Core::Particle* particle, Core::Vector /*position*/, Core::Vector /*velocity*/, double time, unsigned int timestep){
                     Core::Vector rfForce = trapFieldFct(particle, time, timestep);
                     Core::Vector axialForce = trapAxialForceFct(particle);
+                    Core::Vector trapForce = rfForce + axialForce;
+                    particle->setFloatAttribute(key_trapForce_x, trapForce.x());
+                    particle->setFloatAttribute(key_trapForce_y, trapForce.y());
+                    particle->setFloatAttribute(key_trapForce_z, trapForce.z());
 
-                    return (rfForce+axialForce)/particle->getMass();
+                    return (trapForce)/particle->getMass();
         };
 
         // Prepare ion start / stop tracker and ion start monitoring / ion termination functions
@@ -366,7 +371,7 @@ int main(int argc, const char * argv[]) {
                 };
 
         std::vector<std::string> particleAttributesNames = {"velocity x", "velocity y", "velocity z",
-                                                            "rf x", "rf y", "rf z",
+                                                            "trap force x", "trap force y", "trap force z",
                                                             "spacecharge x", "spacecharge y", "spacecharge z",
                                                             "mass", "charge"};
 
