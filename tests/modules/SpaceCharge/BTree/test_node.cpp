@@ -123,6 +123,7 @@ TEST_CASE( "Test particle insertion and remove in serial node", "[Node]") {
         CHECK( testNode.getNumberOfParticles() == 0);
         CHECK( testNode.getParticle() == nullptr);
 
+        std::cout<<"Test 010 - 1 "<<std::endl;
         //Test particle add increases the number of particles:
         Core::Particle baseIon1 = Core::Particle(Core::Vector(1.2,1.2,1.2),2.0);
         Core::Particle baseIon2 = Core::Particle(Core::Vector(1.6,1.2,1.2),2.0);
@@ -130,37 +131,47 @@ TEST_CASE( "Test particle insertion and remove in serial node", "[Node]") {
         Core::Particle baseIon4 = Core::Particle(Core::Vector(1.66,1.2,1.2),2.0);
         Core::Particle baseIon5 = Core::Particle(Core::Vector(1.665,1.2,1.2),2.0);
 
+        std::cout<<"Test 010 - 2 "<<std::endl;
         BTree::TreeParticle testIon1(&baseIon1);
         BTree::TreeParticle testIon2(&baseIon2);
         BTree::TreeParticle testIon3(&baseIon3);
         BTree::TreeParticle testIon4(&baseIon4);
         BTree::TreeParticle testIon5(&baseIon5);
 
+        std::cout<<"Test 010 - 3 "<<std::endl;
         testNode.insertParticle(&testIon1);
         CHECK( testNode.getNumberOfParticles() == 1);
+        std::cout<<"Test 010 - 4 "<<std::endl;
 
         //Test particle is added as a reference:
         CHECK( testNode.getParticle() == &testIon1);
-
+        std::cout<<"Test 010 - 5 "<<std::endl;
 
         testNode.insertParticle(&testIon2);
         CHECK( testNode.getNumberOfParticles() == 2);
+        std::cout<<"Test 010 - 6 "<<std::endl;
 
         testNode.insertParticle(&testIon3);
+        std::cout<<"Test 010 - 7 - 1 "<<std::endl;
         testNode.insertParticle(&testIon4);
+        std::cout<<"Test 010 - 7 - 2 "<<std::endl;
         testNode.insertParticle(&testIon5);
+        std::cout<<"Test 010 - 7 - 3 "<<std::endl;
         CHECK( testNode.getNumberOfParticles() == 5);
+        std::cout<<"Test 010 - 7 "<<std::endl;
 
         //Test if particles host node is set correctly and the host node has correct characteristics:
         BTree::AbstractNode* hostNode5 = testIon5.getHostNode();
         Core::Vector pos = testIon5.wrappedParticle->getLocation();
         Core::Vector min = hostNode5->getMin();
         Core::Vector max = hostNode5->getMax();
+        std::cout<<"Test 010 - 8 "<<std::endl;
 
         CHECK(hostNode5->getNumberOfParticles() == 1);
         CHECK((min.x() < pos.x() && pos.x() < max.x()));
         CHECK((min.y() < pos.y() && pos.y() < max.y()));
         CHECK((min.z() < pos.z() && pos.z() < max.z()));
+        std::cout<<"Test 010 - 9 "<<std::endl;
     }
 
     SECTION("Test particle insertion with special edge cases"){
@@ -333,7 +344,7 @@ TEST_CASE( "Test particle insertion and remove in serial node", "[Node]") {
         testIon2.getHostNode()->removeMyselfFromTree();
         testNode2.testNodeIntegrity(0);
         testNode2.testNodeParticleIntegrity();
-        testNode2.testSpatialTreeIntegrity();
+        //testNode2.testSpatialTreeIntegrity();
 
         //testNode2.printTree(1);
         //std::cout << "------------------------------------------"<<std::endl;

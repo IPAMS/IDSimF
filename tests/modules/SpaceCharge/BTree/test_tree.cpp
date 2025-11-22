@@ -133,7 +133,6 @@ TEST_CASE( "Test serial tree semantics / particle management","[Tree]") {
         Core::Particle testIon2(Core::Vector(2.0,1.0,1.0), 1.0);
         testTree_2.insertParticle(testIon2,20);
         testTree_2.computeChargeDistribution();
-
         testTree_2.updateParticleLocation(10, Core::Vector(2.01,1.0,1.0));
         CHECK( testIon1.getLocation() == Core::Vector(2.01,1.0,1.0));
         CHECK( testTree_2.getNumberOfParticles() == 2);
@@ -142,9 +141,15 @@ TEST_CASE( "Test serial tree semantics / particle management","[Tree]") {
         testTree_2.updateParticleLocation(10,Core::Vector(2.01001,1.0,1.0));
         CHECK( testIon1.getLocation() == Core::Vector(2.01001,1.0,1.0));
         CHECK( testTree_2.getRoot()->getCenterOfCharge() == Core::Vector(2.005005,1.0,1.0));
+        std::cout<<"Test 001 - 1 "<<std::endl;
+
+        CHECK_NOTHROW(testTree_2.getRoot()->testSpatialTreeIntegrity());
+        CHECK_NOTHROW(testTree_2.getRoot()->testNodeIntegrity(0));
+        CHECK_NOTHROW(testTree_2.getRoot()->testNodeParticleIntegrity());
     }
 
     SECTION( "Test tree integrity with large number of random particles"){
+        std::cout<<"Test 002 - 1 "<<std::endl;
         std::size_t nions = 10000;
         Core::Vector boxSize(0.002, 0.002, 0.002);
         ParticleSimulation::BoxStartZone startZone(boxSize);
@@ -288,5 +293,24 @@ TEST_CASE( "Test serial tree charge distribution calculation","[Tree]"){
         Core::Vector force10 = testTree.getEFieldFromSpaceCharge(*ions[10]);
         Core::Vector fullSumForce10 = fullSumSolver.getEFieldFromSpaceCharge(*ions[10]);
         CHECK( ((force10-fullSumForce10).magnitude() / force10.magnitude()) < 1.5e-2);
+
+
+        // shift particle cube, reinsert particles and check forces:
+        for (std::size_t k = 0; k<18; ++k){
+            testTree.updateParticleLocation(k, ions[k]->getLocation() + Core::Vector(1.0, 1.1, 1.2));
+        }
+        std::size_t k= 19;
+        testTree.updateParticleLocation(k, ions[k]->getLocation() + Core::Vector(1.0, 1.1, 1.2));
+        //CHECK_NOTHROW(testTree.getRoot()->testSpatialTreeIntegrity());
+        //CHECK_NOTHROW(testTree.getRoot()->testNodeIntegrity(0));
+        //CHECK_NOTHROW(testTree.getRoot()->testNodeParticleIntegrity());
+
+        /*force1 = testTree.getEFieldFromSpaceCharge(*ions[1]);
+        fullSumForce1 = fullSumSolver.getEFieldFromSpaceCharge(*ions[1]);
+        CHECK( ((force1-fullSumForce1).magnitude() / force1.magnitude()) < 1e-2);
+
+        force10 = testTree.getEFieldFromSpaceCharge(*ions[10]);
+        fullSumForce10 = fullSumSolver.getEFieldFromSpaceCharge(*ions[10]);
+        CHECK( ((force10-fullSumForce10).magnitude() / force10.magnitude()) < 1.5e-2);*/
     }
 }
