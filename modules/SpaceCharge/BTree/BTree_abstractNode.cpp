@@ -28,13 +28,12 @@
  * @param max the upper corner of the node (spatial xhi,yhi,zhi corner)
  * @param parent the parent node, the new node will be a subnode of that node (can be nullptr for root nodes)
  */
-BTree::AbstractNode::AbstractNode(Core::Vector min, Core::Vector max)
-        :
-        min_(min),
-        max_(max),
-        center_(min+(max-min)/2)
-{}
-
+BTree::AbstractNode::AbstractNode(Core::Vector min, Core::Vector max) {
+    min_ = min;
+    max_ = max;
+    center_ = (min+(max-min)/2);
+    std::cout<<"abstract node " <<min_ <<" " << max_ << " " << center_ <<std::endl;
+}
 // Static methods:
 
 /**

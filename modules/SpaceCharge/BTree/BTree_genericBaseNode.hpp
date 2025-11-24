@@ -172,6 +172,7 @@ namespace BTree{
                     parent);
         }
         else if(oct == SWT){
+            std::cout << "SWT " << Core::Vector(min_.x(),min_.y(),center_.z())<< "  " << Core::Vector(center_.x(),center_.y(),max_.z())<<"  ";
             result = new NodType(
                     Core::Vector(min_.x(),min_.y(),center_.z()),
                     Core::Vector(center_.x(),center_.y(),max_.z()),
