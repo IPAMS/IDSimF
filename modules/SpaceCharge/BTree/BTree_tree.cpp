@@ -77,6 +77,8 @@ void BTree::Tree::insertParticle(Core::Particle &particle, size_t ext_index){
  */
 BTree::TreeParticle* BTree::Tree::insertParticle_(Core::Particle &particle, size_t ext_index){
 
+    assert( !root_->locationNotInNode(particle.getLocation()));
+
     //create new wrapped particle for tree:
     auto treeParticle = std::make_unique<BTree::TreeParticle>(&particle);
     BTree::TreeParticle* treeParticlePtr = treeParticle.get();

@@ -22,6 +22,7 @@
 #include "BTree_parallelTree.hpp"
 #include "Core_utils.hpp"
 #include <iostream>
+#include <cassert>
 
 /**
  Constructor: Constructs a new tree
@@ -137,6 +138,8 @@ Core::Vector BTree::ParallelTree::getEFieldFromSpaceCharge(Core::Particle &parti
  \param ext_index an external index number for the particle / numerical particle id (most likely from simion)
  */
 void BTree::ParallelTree::insertParticle(Core::Particle &particle, std::size_t ext_index){
+
+    assert( !root_->locationNotInNode(particle.getLocation()));
 
     auto treeParticle = std::make_unique<BTree::TreeParticle>(&particle);
     root_->insertParticle(treeParticle.get());
