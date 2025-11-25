@@ -76,6 +76,7 @@ namespace BTree{
         [[nodiscard]] std::string toString() const override;
         virtual void printTree(int level) const;
         void writeToStream(std::ostream& filestream,void (*writeFct)(std::ostream& filestream, const NodType* node)) const;
+        bool locationNotInNode(const Core::Vector &location) const;
         virtual void testNodeIntegrity(int level);
 
 
@@ -173,7 +174,6 @@ namespace BTree{
                     parent);
         }
         else if(oct == SWT){
-            std::cout << "SWT " << Core::Vector(min_.x(),min_.y(),center_.z())<< "  " << Core::Vector(center_.x(),center_.y(),max_.z())<<"  ";
             result = new NodType(
                     Core::Vector(min_.x(),min_.y(),center_.z()),
                     Core::Vector(center_.x(),center_.y(),max_.z()),
@@ -323,7 +323,7 @@ namespace BTree{
      */
     template<class NodType>
     void GenericBaseNode<NodType>::insertParticle(BTree::TreeParticle* particle){
-        //assert(particle)
+        assert(!locationNotInNode(particle->wrappedParticle->getLocation()));
 
         if (numP_ >1){
             Octant oct = this->getOctant(particle->wrappedParticle->getLocation());
@@ -334,24 +334,17 @@ namespace BTree{
         }
         else if(numP_ == 1){
             BTree::TreeParticle* p2 = particle_;
-            std::cout<<"db 000 " <<min_ <<" |  " << max_ << " |  " << center_ <<std::endl;
-            std::cout <<"db 001 p2 location: "<< p2->wrappedParticle->getLocation()<<std::endl;
-            std::cout <<"db 002 particle location: "<< particle->wrappedParticle->getLocation()<<std::endl;
             if(p2->wrappedParticle->getLocation() != particle->wrappedParticle->getLocation()){
                 //There is already a particle in the node
                 //relocate and subdivide
                 Octant oct = this->getOctant(p2->wrappedParticle->getLocation());
-                std::cout <<"   db 003 octant: "<< oct<<std::endl;
                 if (octNodes_[oct] == nullptr){
                     octNodes_[oct] = this->createOctNode(oct);
                 }
                 octNodes_[oct]->insertParticle(p2);
 
-
                 particle_= nullptr;
-
                 oct = this->getOctant(particle->wrappedParticle->getLocation());
-                std::cout <<"   db 004 octant: "<< oct<<std::endl;
                 if (octNodes_[oct] == nullptr){
                     octNodes_[oct] = this->createOctNode(oct);
                 }
@@ -381,7 +374,6 @@ namespace BTree{
     void GenericBaseNode<NodType>::computeChargeDistributionRecursive(){
         if (numP_ == 1){
             this->updateSelf();
-            //std::cout << " compCharg 01 charge "<<charge_<<" location "<<centerOfCharge_<<std::endl;
         }
         else{
             charge_ = 0.0;
@@ -479,6 +471,16 @@ namespace BTree{
         }
     }
 
+    template<class NodType>
+    bool GenericBaseNode<NodType>::locationNotInNode(const Core::Vector &location) const {
+        return (
+                location.x() < this->min_.x() ||
+                location.y() < this->min_.y() ||
+                location.z() < this->min_.z() ||
+                location.x() > this->max_.x() ||
+                location.y() > this->max_.y() ||
+                location.z() > this->max_.z() );
+    }
 
     /**
      * Tests the node integrity of the subtree with the current node as root
@@ -500,15 +502,7 @@ namespace BTree{
 
         if (this->particle_ != nullptr){
             Core::Vector pLoc = this->particle_->wrappedParticle->getLocation();
-            if (
-                    pLoc.x() < this->min_.x() ||
-                            pLoc.y() < this->min_.y() ||
-                            pLoc.z() < this->min_.z() ||
-                            pLoc.x() > this->max_.x() ||
-                            pLoc.y() > this->max_.y() ||
-                            pLoc.z() > this->max_.z()
-                    ){
-
+            if (locationNotInNode(pLoc)){
                 std::stringstream ss;
                 ss << "Node with illegal particle found : p: "<<this->particle_<<std::endl;
                 ss << this->toString();
