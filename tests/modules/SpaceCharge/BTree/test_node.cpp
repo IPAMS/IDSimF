@@ -354,8 +354,8 @@ TEST_CASE( "Test particle insertion and remove in serial node", "[Node]") {
 TEST_CASE( "Test field calculation in serial node", "[Node]") {
 
     BTree::Tree testTree(
-            Core::Vector(-1.5, -1.5, -1.5),
-            Core::Vector(1.5, 1.5, 1.5)
+            Core::Vector(-2.5, -2.5, -2.5),
+            Core::Vector(2.5, 2.5, 2.5)
     );
 
     BTree::Node testNode(

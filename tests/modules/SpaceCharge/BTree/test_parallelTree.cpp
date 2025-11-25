@@ -155,8 +155,8 @@ TEST_CASE( "Test parallel tree semantics / particle management","[Tree]") {
 
 TEST_CASE( "Test parallel tree charge distribution calculation","[Tree]"){
     BTree::ParallelTree testTree(
-            Core::Vector(-2.0, -2.0, -2.0),
-            Core::Vector(2.0, 2.0, 2.0));
+            Core::Vector(-4.0, -4.0, -4.0),
+            Core::Vector(4.0, 4.0, 4.0));
 
     SECTION("Test basic particle insertion, deletion and charge distribution calculation"){
         //Test particle add increases the number of particles:
@@ -280,6 +280,23 @@ TEST_CASE( "Test parallel tree charge distribution calculation","[Tree]"){
 
         Core::Vector force10 = testTree.getEFieldFromSpaceCharge(*ions[10]);
         Core::Vector fullSumForce10 = fullSumSolver.getEFieldFromSpaceCharge(*ions[10]);
+        CHECK( ((force10-fullSumForce10).magnitude() / force10.magnitude()) < 1.5e-2);
+
+        // shift particle cube, reinsert particles and check forces:
+        i = 0;
+        int modified_nodes=0;
+        for (auto& ion: ions){
+            testTree.updateParticleLocation(i, ion->getLocation() + Core::Vector(1.0, 1.1, 1.2), &modified_nodes);
+            ++i;
+        }
+        testTree.updateNodes(modified_nodes);
+
+        force1 = testTree.getEFieldFromSpaceCharge(*ions[1]);
+        fullSumForce1 = fullSumSolver.getEFieldFromSpaceCharge(*ions[1]);
+        CHECK( ((force1-fullSumForce1).magnitude() / force1.magnitude()) < 2e-2);
+
+        force10 = testTree.getEFieldFromSpaceCharge(*ions[10]);
+        fullSumForce10 = fullSumSolver.getEFieldFromSpaceCharge(*ions[10]);
         CHECK( ((force10-fullSumForce10).magnitude() / force10.magnitude()) < 1.5e-2);
     }
 
