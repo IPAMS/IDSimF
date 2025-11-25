@@ -20,7 +20,9 @@
  ****************************/
 #include "BTree_abstractNode.hpp"
 #include "Core_particle.hpp"
+#include <cassert>
 #include <iostream>
+
 
 /**
  * Constructs a tree node
@@ -28,12 +30,14 @@
  * @param max the upper corner of the node (spatial xhi,yhi,zhi corner)
  * @param parent the parent node, the new node will be a subnode of that node (can be nullptr for root nodes)
  */
-BTree::AbstractNode::AbstractNode(Core::Vector min, Core::Vector max) {
-    min_ = min;
-    max_ = max;
-    center_ = (min+(max-min)/2);
-    std::cout<<"abstract node " <<min_ <<" " << max_ << " " << center_ <<std::endl;
+BTree::AbstractNode::AbstractNode(Core::Vector min, Core::Vector max):
+    min_(min),
+    max_(max),
+    center_(min + (max - min) / 2)
+{
+    assert( (max-min).magnitude() > 1e-10);
 }
+
 // Static methods:
 
 /**

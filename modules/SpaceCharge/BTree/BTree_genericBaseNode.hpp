@@ -36,6 +36,7 @@
 #include "BTree_treeParticle.hpp"
 #include <sstream>
 #include <iostream>
+#include <cassert>
 
 namespace BTree{
 
@@ -322,6 +323,7 @@ namespace BTree{
      */
     template<class NodType>
     void GenericBaseNode<NodType>::insertParticle(BTree::TreeParticle* particle){
+        //assert(particle)
 
         if (numP_ >1){
             Octant oct = this->getOctant(particle->wrappedParticle->getLocation());
@@ -332,10 +334,14 @@ namespace BTree{
         }
         else if(numP_ == 1){
             BTree::TreeParticle* p2 = particle_;
+            std::cout<<"db 000 " <<min_ <<" |  " << max_ << " |  " << center_ <<std::endl;
+            std::cout <<"db 001 p2 location: "<< p2->wrappedParticle->getLocation()<<std::endl;
+            std::cout <<"db 002 particle location: "<< particle->wrappedParticle->getLocation()<<std::endl;
             if(p2->wrappedParticle->getLocation() != particle->wrappedParticle->getLocation()){
                 //There is already a particle in the node
                 //relocate and subdivide
                 Octant oct = this->getOctant(p2->wrappedParticle->getLocation());
+                std::cout <<"   db 003 octant: "<< oct<<std::endl;
                 if (octNodes_[oct] == nullptr){
                     octNodes_[oct] = this->createOctNode(oct);
                 }
@@ -345,6 +351,7 @@ namespace BTree{
                 particle_= nullptr;
 
                 oct = this->getOctant(particle->wrappedParticle->getLocation());
+                std::cout <<"   db 004 octant: "<< oct<<std::endl;
                 if (octNodes_[oct] == nullptr){
                     octNodes_[oct] = this->createOctNode(oct);
                 }
