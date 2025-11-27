@@ -95,7 +95,6 @@ namespace Integration{
      */
     typedef std::function
         <void (
-            Core::Vector& newPartPos,
             Core::Particle* particle,
             std::size_t particleIndex,
             double time,

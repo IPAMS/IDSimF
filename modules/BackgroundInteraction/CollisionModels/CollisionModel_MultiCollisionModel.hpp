@@ -49,8 +49,7 @@ namespace CollisionModel{
                                 double dt) override;
         void modifyVelocity(Core::Particle& ion,
                             double dt) override;
-        void modifyPosition(Core::Vector& position,
-                            Core::Particle& ion,
+        void modifyPosition(Core::Particle& ion,
                             double dt) override;
 
 

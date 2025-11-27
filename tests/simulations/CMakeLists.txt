@@ -2,7 +2,8 @@ project(test_simulations)
 
 set(SOURCE_FILES
         test_main.cpp
-        test_integrators.cpp
+        test_treeSpaceChargeQuality.cpp
+        test_integrationQuality.cpp
 )
 
 add_executable(test_simulations ${SOURCE_FILES})

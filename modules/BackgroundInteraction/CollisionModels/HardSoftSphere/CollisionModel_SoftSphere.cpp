@@ -337,4 +337,4 @@ void CollisionModel::SoftSphereModel::modifyVelocity(Core::Particle &ion, double
 }
 
 
-void CollisionModel::SoftSphereModel::modifyPosition(Core::Vector& /*position*/, Core::Particle& /*ion*/, double /*dt*/) {}
+void CollisionModel::SoftSphereModel::modifyPosition( Core::Particle& /*ion*/, double /*dt*/) {}

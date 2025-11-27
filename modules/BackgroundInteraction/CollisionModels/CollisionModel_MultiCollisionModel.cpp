@@ -71,9 +71,9 @@ void CollisionModel::MultiCollisionModel::modifyVelocity(Core::Particle &ion, do
 /**
  * Calls modifyPosition for all combined sub models
  */
-void CollisionModel::MultiCollisionModel::modifyPosition(Core::Vector &position, Core::Particle &ion, double dt){
+void CollisionModel::MultiCollisionModel::modifyPosition(Core::Particle &ion, double dt){
     for(const auto &model: models_){
-        model->modifyPosition(position,ion,dt);
+        model->modifyPosition(ion,dt);
     }
 }
 

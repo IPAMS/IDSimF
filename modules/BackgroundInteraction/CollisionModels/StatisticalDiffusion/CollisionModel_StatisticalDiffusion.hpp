@@ -76,12 +76,14 @@ namespace CollisionModel {
             void updateModelParticleParameters(Core::Particle& ion) const override;
             void initializeModelParticleParameters(Core::Particle& ion) const override;
             void updateModelTimestepParameters(unsigned int timestep, double time) override;
-            void modifyAcceleration(Core::Vector& acceleration,
+            void modifyAcceleration(
+                    Core::Vector& acceleration,
                     Core::Particle& ion,
                     double dt) override;
-            void modifyVelocity(Core::Particle& ion,
+            void modifyVelocity(
+                    Core::Particle& ion,
                     double dt) override;
-            void modifyPosition(Core::Vector& position,
+            void modifyPosition(
                     Core::Particle& ion,
                     double dt) override;
 

@@ -189,11 +189,11 @@ void Integration::ParallelRK4Integrator::runSingleStep(double dt){
         if (particles_[i]->isActive()){
             //position changes due to background interaction:
             if (collisionModel_ != nullptr) {
-                collisionModel_->modifyPosition(newPos_[i], *(particles_[i]), dt);
+                collisionModel_->modifyPosition(*(particles_[i]), dt);
             }
 
             if (otherActionsFunction_ != nullptr) {
-                otherActionsFunction_(newPos_[i], particles_[i], i, time_, timestep_);
+                otherActionsFunction_(particles_[i], i, time_, timestep_);
             }
             particles_[i]->setLocation(newPos_[i]);
             tree_.updateParticleLocation(i, &ver);

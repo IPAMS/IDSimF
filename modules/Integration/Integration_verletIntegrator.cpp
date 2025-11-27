@@ -118,20 +118,29 @@ void Integration::VerletIntegrator::runSingleStep(double dt) {
         collisionModel_->updateModelTimestepParameters(timestep_, time_);
     }
 
-    for (std::size_t i=0; i<nParticles_; ++i){
+    // First find all new positions, and update tree
+    // This ensures that all new particle positions are found with the updated positions in the tree
+    for (std::size_t i=0; i<nParticles_; ++i) {
         if (particles_[i]->isActive() == true){
+            particles_[i]->setLocation(
+                particles_[i]->getLocation() + particles_[i]->getVelocity() * dt + a_t_[i]*(1.0/2.0*dt*dt));
+            tree_.updateParticleLocation(i);
 
             if (collisionModel_ !=nullptr) {
                 collisionModel_->updateModelParticleParameters(*(particles_[i]));
             }
+        }
+    }
 
-            newPos_[i] = particles_[i]->getLocation() + particles_[i]->getVelocity() * dt + a_t_[i]*(1.0/2.0*dt*dt);
+    // now calculate acceleration and  velocity
+    for (std::size_t i=0; i<nParticles_; ++i){
+        if (particles_[i]->isActive() == true) {
+
             a_tdt_[i] = accelerationFunction_(particles_[i],i,tree_,time_,timestep_);
             //acceleration changes due to background interaction:
             if (collisionModel_ !=nullptr) {
                 collisionModel_->modifyAcceleration(a_tdt_[i], *(particles_[i]), dt);
             }
-
             particles_[i]->setVelocity( particles_[i]->getVelocity() + ((a_t_[i]+ a_tdt_[i])*1.0/2.0 *dt) );
             a_t_[i] = a_tdt_[i];
 
@@ -139,22 +148,12 @@ void Integration::VerletIntegrator::runSingleStep(double dt) {
                 //velocity changes due to background interaction:
                 collisionModel_->modifyVelocity(*(particles_[i]),dt);
                 //position changes due to background interaction:
-                collisionModel_->modifyPosition(newPos_[i],*(particles_[i]),dt);
+                collisionModel_->modifyPosition(*(particles_[i]),dt);
             }
-        }
-    }
-
-    // First find all new positions, then perform arbitrary otherActions and update tree.
-    // This ensures that all new particle positions are found with the state from
-    // last time step. No particle positions are found with a partly updated tree.
-    for (std::size_t i=0; i<nParticles_; ++i){
-        if (particles_[i]->isActive() == true){
 
             if (otherActionsFunction_ != nullptr) {
-                otherActionsFunction_(newPos_[i], particles_[i], i, time_, timestep_);
+                otherActionsFunction_(particles_[i], i, time_, timestep_);
             }
-            particles_[i]->setLocation(newPos_[i]);
-            tree_.updateParticleLocation(i);
         }
     }
     timestep_++;

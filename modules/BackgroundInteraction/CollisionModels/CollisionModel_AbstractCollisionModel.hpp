@@ -48,8 +48,7 @@ namespace CollisionModel {
                                             double dt) = 0;
             virtual void modifyVelocity(Core::Particle& particle,
                                         double dt) = 0;
-            virtual void modifyPosition(Core::Vector& position,
-                                        Core::Particle& particle,
+            virtual void modifyPosition(Core::Particle& particle,
                                         double dt) = 0;
     };
 }

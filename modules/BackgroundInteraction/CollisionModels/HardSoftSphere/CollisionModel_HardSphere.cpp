@@ -316,4 +316,4 @@ void CollisionModel::HardSphereModel::modifyVelocity(Core::Particle &ion, double
     }
 }
 
-void CollisionModel::HardSphereModel::modifyPosition(Core::Vector& /*position*/, Core::Particle& /*ion*/, double /*dt*/) {}
+void CollisionModel::HardSphereModel::modifyPosition(Core::Particle& /*ion*/, double /*dt*/) {}

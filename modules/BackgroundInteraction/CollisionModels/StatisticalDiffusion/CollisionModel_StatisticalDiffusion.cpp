@@ -259,9 +259,9 @@ void CollisionModel::StatisticalDiffusionModel::modifyVelocity(Core::Particle& /
  * @param dt The length of the current time step
   */
 void CollisionModel::StatisticalDiffusionModel::modifyPosition(
-        Core::Vector& position, Core::Particle &ion, double dt) {
+        Core::Particle &ion, double dt) {
 
-    Core::Vector oldPosition = position;
+    Core::Vector oldPosition = ion.getLocation();
     double ionMass_amu = ion.getMass() / Core::AMU_TO_KG;
     double t_ratio = ion.getAuxCollisionParams()[index_tRatio];
     double pt_ratio = ion.getAuxCollisionParams()[index_ptRatio];
@@ -287,5 +287,5 @@ void CollisionModel::StatisticalDiffusionModel::modifyPosition(
 
     // Apply random jump:
     Core::Vector randomJump = sphereRand(randomJumpDistance);
-    position = oldPosition + randomJump;
+    ion.setLocation(oldPosition + randomJump);
 }

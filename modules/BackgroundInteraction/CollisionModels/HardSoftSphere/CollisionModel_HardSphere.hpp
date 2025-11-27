@@ -103,7 +103,6 @@ namespace CollisionModel{
                 double dt) override;
 
         void modifyPosition(
-                Core::Vector& position,
                 Core::Particle& ion,
                 double dt) override;
 
