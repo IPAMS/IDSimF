@@ -91,10 +91,11 @@ void runIntegrator(std::size_t timeSteps, double dt, double forceConstant, doubl
 }
 
 TEST_CASE("Compare integration quality with parabolic profile", "[Simulation]") {
-    unsigned int timeSteps = 1000000;
-    unsigned int writePeriod = 2;
-    double dt = 4e-4;
+    unsigned int timeSteps = 100000;
+    unsigned int writePeriod = 10;
+    double dt = 4e-5;
     double forceConstant = 1.0e-20;
 
-    runIntegrator<Integration::VerletIntegrator>(timeSteps, dt, forceConstant, 0.15, writePeriod,"integration_test_verlet_serial.txt");
+    //runIntegrator<Integration::VerletIntegrator>(timeSteps, dt, forceConstant, 0.15, writePeriod,"integration_test_verlet_serial.txt");
+    runIntegrator<Integration::ParallelVerletIntegrator>(timeSteps, dt, forceConstant, 0.15, writePeriod,"integration_test_verlet_parallel.txt");
 }

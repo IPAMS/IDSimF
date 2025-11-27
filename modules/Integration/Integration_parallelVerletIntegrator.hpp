@@ -88,7 +88,7 @@ namespace Integration{
         BTree::ParallelTree tree_ = BTree::ParallelTree(loc_min_,loc_max_);
         ///< The parallel BTree (primarily for space charge calculation)
 
-        std::vector<Core::Vector>  newPos_;  ///< new position (after time step) for particles
+        //std::vector<Core::Vector>  newPos_;  ///< new position (after time step) for particles
         std::vector<Core::Vector>  a_t_;     ///< last time step acceleration for particles
         std::vector<Core::Vector>  a_tdt_;   ///< new acceleration for particles
 

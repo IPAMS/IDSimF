@@ -180,7 +180,7 @@ BTree::TreeParticle* BTree::ParallelTree::getParticle(std::size_t ext_index) con
 }
 
 /**
- * Upates the location of a particle in this tree.
+ * Updates the location of a particle in this tree.
  * @param extIndex Index / ID of the Particle to modify
  * @param newLocation Location to set for the selected particle
  * @param numNodesChanged an integer reference to count the number of structurally changed nodes
