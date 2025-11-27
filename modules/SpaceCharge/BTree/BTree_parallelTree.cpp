@@ -105,7 +105,7 @@ Core::Vector BTree::ParallelTree::getEFieldFromSpaceCharge(Core::Particle &parti
         //process the current node in the node process list
         BTree::ParallelNode* currentNode = nodesToProcess.at(cur);
         if(currentNode->numP_ == 1){ // if node has only one particle: calculate force directly
-            efield=efield+root_->calculateElectricField(loc, currentNode->particle_->wrappedParticle->getLocation(),
+            efield=efield+root_->calculateElectricField(loc, currentNode->particle_->bufferedTreePosition,
                     currentNode->particle_->wrappedParticle->getCharge());
         }
         else { // if more particles: process the node
@@ -185,10 +185,12 @@ BTree::TreeParticle* BTree::ParallelTree::getParticle(std::size_t ext_index) con
  * @param newLocation Location to set for the selected particle
  * @param numNodesChanged an integer reference to count the number of structurally changed nodes
  */
-void BTree::ParallelTree::updateParticleLocation(std::size_t extIndex, Core::Vector newLocation, int* numNodesChanged){
+void BTree::ParallelTree::updateParticleLocation(std::size_t extIndex, int* numNodesChanged){
 
     BTree::TreeParticle* particle = getParticle(extIndex);
     BTree::AbstractNode* pNode = particle->getHostNode();
+    Core::Particle* wrappedParticle = particle->wrappedParticle;
+    Core::Vector newLocation = wrappedParticle->getLocation();
 
     if ( (   newLocation.x() <= pNode->getMin().x() ||
              newLocation.y() <= pNode->getMin().y() ||
@@ -199,13 +201,11 @@ void BTree::ParallelTree::updateParticleLocation(std::size_t extIndex, Core::Vec
              newLocation.z() >= pNode->getMax().z() ) )
     {
         (*numNodesChanged)++;
-        Core::Particle* wrappedParticle = particle->wrappedParticle;
         removeParticle(extIndex);
-        wrappedParticle->setLocation(newLocation);
         insertParticle(*wrappedParticle, extIndex);
     }
     else{
-        particle->wrappedParticle->setLocation(newLocation);
+        particle->bufferedTreePosition = Core::Vector(newLocation);
     }
 }
 
@@ -307,7 +307,7 @@ void BTree::ParallelTree::updateNodeChargeState_()
 
             if(currentNode->numP_==1) {
                 // If the current node has only one particle: Update node parameters with parameters from particle
-                currentNode->centerOfCharge_ = currentNode->particle_->wrappedParticle->getLocation();
+                currentNode->centerOfCharge_ = currentNode->particle_->bufferedTreePosition;
                 currentNode->charge_ = currentNode->particle_->wrappedParticle->getCharge();
             }
             else {

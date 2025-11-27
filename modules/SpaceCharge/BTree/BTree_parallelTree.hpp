@@ -53,7 +53,7 @@ namespace BTree {
         void insertParticle(Core::Particle &particle, std::size_t ext_index);
         void removeParticle(std::size_t ext_index);
         [[nodiscard]] BTree::TreeParticle* getParticle(std::size_t ext_index) const;
-        void updateParticleLocation(std::size_t extIndex, Core::Vector newLocation, int* numNodesChanged);
+        void updateParticleLocation(std::size_t extIndex, int* numNodesChanged);
         std::size_t updateNodes(int ver);
         
         void printParticles() const;

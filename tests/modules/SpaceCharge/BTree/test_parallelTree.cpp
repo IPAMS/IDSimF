@@ -125,17 +125,71 @@ TEST_CASE( "Test parallel tree semantics / particle management","[Tree]") {
         CHECK( testTree_2.getRoot()->getCenterOfCharge() == Core::Vector(1.5,1.0,1.0));
 
         int updated = 0;
-        testTree_2.updateParticleLocation(10, Core::Vector(2.01, 1.0, 1.0), &updated);
+        testIon1.setLocation(Core::Vector(2.01, 1.0, 1.0));
+        testTree_2.updateParticleLocation(10, &updated);
         testTree_2.updateNodes(updated);
 
         CHECK( testIon1.getLocation() == Core::Vector(2.01,1.0,1.0));
         CHECK( testTree_2.getNumberOfParticles() == 2);
         CHECK( testTree_2.getRoot()->getCenterOfCharge() == Core::Vector(2.005,1.0,1.0));
 
-        testTree_2.updateParticleLocation(10, Core::Vector(2.01001, 1.0, 1.0), &updated);
+        updated= 0;
+        testIon1.setLocation(Core::Vector(2.01001, 1.0, 1.0));
+        testTree_2.updateParticleLocation(10, &updated);
         testTree_2.updateNodes(updated);
         CHECK( testIon1.getLocation() == Core::Vector(2.01001,1.0,1.0));
         CHECK( testTree_2.getRoot()->getCenterOfCharge() == Core::Vector(2.005005,1.0,1.0));
+    }
+
+    SECTION("Test resilience against external particle position updates") {
+
+        //insert particles
+        auto ions = getIonsInLattice(5, +1);
+        std::size_t i = 0;
+        for (auto& ion: ions){
+            testTree.insertParticle(*ion, i);
+            ++i;
+        }
+        testTree.init();
+        CHECK_THAT(
+            testTree.getRoot()->getCenterOfCharge(),
+            ApproxEqual(Core::Vector(0.4,0.4,0.4)));
+
+        //get force to a static test ion and shift particles externally:
+        Core::Particle staticTestIon(Core::Vector(0.0,0.0,0.0), 1.0);
+        Core::Vector forceBeforeShift = testTree.getEFieldFromSpaceCharge(staticTestIon);
+        for (auto& ion: ions) {
+            ion->setLocation(ion->getLocation() + Core::Vector(0.5,0.5,0.0));
+        }
+
+        CHECK_THAT(
+            testTree.getRoot()->getCenterOfCharge(),
+            ApproxEqual(Core::Vector(0.4,0.4,0.4)));
+
+        //force calculation in tree should not be affected by external position shifts without notification of tree:
+        Core::Vector forceAfterShift = testTree.getEFieldFromSpaceCharge(staticTestIon);
+        CHECK_THAT(forceBeforeShift, ApproxEqual(forceAfterShift, 1e-15));
+
+        //todo: update tree
+        //notification should change state of tree:
+        int updated = 0;
+        testTree.updateParticleLocation(0, &updated);
+        testTree.updateNodes(updated);
+
+        CHECK_THAT(
+            testTree.getRoot()->getCenterOfCharge(),
+            ApproxEqual(Core::Vector(0.404,0.404,0.4)));
+
+        updated = 0;
+        testTree.updateParticleLocation(1,  &updated);
+        testTree.updateParticleLocation(10, &updated);
+        testTree.updateParticleLocation(20, &updated);
+
+        testTree.updateNodes(updated);
+
+        CHECK_THAT(
+            testTree.getRoot()->getCenterOfCharge(),
+            ApproxEqual(Core::Vector(0.416,0.416,0.4)));
     }
 
     SECTION( "Test tree integrity with large number of random particles"){
@@ -286,7 +340,8 @@ TEST_CASE( "Test parallel tree charge distribution calculation","[Tree]"){
         i = 0;
         int modified_nodes=0;
         for (auto& ion: ions){
-            testTree.updateParticleLocation(i, ion->getLocation() + Core::Vector(1.0, 1.1, 1.2), &modified_nodes);
+            ion->setLocation(ion->getLocation() + Core::Vector(1.0, 1.1, 1.2));
+            testTree.updateParticleLocation(i, &modified_nodes);
             ++i;
         }
         testTree.updateNodes(modified_nodes);

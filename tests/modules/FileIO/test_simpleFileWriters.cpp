@@ -67,8 +67,8 @@ TEST_CASE( "Average ion position file writer should at least write a file withou
     double diff =0.1;
     for (unsigned int i=0; i< nSteps; ++i){
         for (std::size_t k=0; k < nParticles; ++k){
-            Core::Vector newLocation = particlePtrs[k]->getLocation() + Core::Vector(diff,diff,diff);
-            tree.updateParticleLocation(k, newLocation);
+            particlePtrs[k]->setLocation(particlePtrs[k]->getLocation() + Core::Vector(diff,diff,diff));
+            tree.updateParticleLocation(k);
         }
         fw.writeTimestep(tree,0.1*i);
     }

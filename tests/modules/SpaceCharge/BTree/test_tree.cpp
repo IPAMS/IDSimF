@@ -153,6 +153,8 @@ TEST_CASE( "Test serial tree semantics / particle management","[Tree]") {
     }
 
     SECTION("Test resilience against external particle position updates") {
+
+        //insert particles
         auto ions = getIonsInLattice(5, +1);
         std::size_t i = 0;
         for (auto& ion: ions){
@@ -160,20 +162,26 @@ TEST_CASE( "Test serial tree semantics / particle management","[Tree]") {
             ++i;
         }
         testTree.computeChargeDistribution();
-
         CHECK_THAT(
             testTree.getRoot()->getCenterOfCharge(),
             ApproxEqual(Core::Vector(0.4,0.4,0.4)));
 
+        //get force to a static test ion and shift particles externally:
+        Core::Particle staticTestIon(Core::Vector(0.0,0.0,0.0), 1.0);
+        Core::Vector forceBeforeShift = testTree.getEFieldFromSpaceCharge(staticTestIon);
         for (auto& ion: ions) {
             ion->setLocation(ion->getLocation() + Core::Vector(0.5,0.5,0.0));
         }
         testTree.computeChargeDistribution();
-
         CHECK_THAT(
             testTree.getRoot()->getCenterOfCharge(),
             ApproxEqual(Core::Vector(0.4,0.4,0.4)));
 
+        //force calculation in tree should not be affected by external position shifts without notification of tree:
+        Core::Vector forceAfterShift = testTree.getEFieldFromSpaceCharge(staticTestIon);
+        CHECK_THAT(forceBeforeShift, ApproxEqual(forceAfterShift, 1e-15));
+
+        //notification should change state of tree:
         testTree.updateParticleLocation(0);
         testTree.computeChargeDistribution();
 

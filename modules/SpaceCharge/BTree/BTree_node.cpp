@@ -45,7 +45,7 @@ Core::Vector BTree::Node::computeElectricFieldFromTree(Core::Particle &targetP){
     if (numP_ == 1){
         Core::Vector efield= calculateElectricField(
                 targetP.getLocation(),
-                particle_->wrappedParticle->getLocation(),
+                particle_->bufferedTreePosition,
                 particle_->wrappedParticle->getCharge());
         return(efield);
     }
