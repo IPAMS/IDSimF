@@ -22,7 +22,8 @@
 #include "BTree_treeParticle.hpp"
 
 BTree::TreeParticle::TreeParticle(Core::Particle* baseParticle):
-        wrappedParticle(baseParticle)
+    wrappedParticle(baseParticle),
+    bufferedTreePosition(Core::Vector(baseParticle->getLocation()))
 {}
 
 

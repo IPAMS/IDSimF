@@ -153,7 +153,8 @@ void Integration::VerletIntegrator::runSingleStep(double dt) {
             if (otherActionsFunction_ != nullptr) {
                 otherActionsFunction_(newPos_[i], particles_[i], i, time_, timestep_);
             }
-            tree_.updateParticleLocation(i,newPos_[i]);
+            particles_[i]->setLocation(newPos_[i]);
+            tree_.updateParticleLocation(i);
         }
     }
     timestep_++;
