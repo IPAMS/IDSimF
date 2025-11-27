@@ -395,7 +395,7 @@ bool CollisionModel::MDInteractionsTrajectorySampler::rk4InternAdaptiveStep(
         }
 
         double globalR = std::max({R[0],R[1]});
-        double tolerance = 1e-2;
+        double tolerance = 1e-8;
 
         #pragma GCC diagnostic push
         #pragma GCC diagnostic ignored "-Wfloat-equal"
