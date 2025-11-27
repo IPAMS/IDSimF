@@ -144,7 +144,6 @@ TEST_CASE( "Test serial tree semantics / particle management","[Tree]") {
         testTree_2.updateParticleLocation(10,Core::Vector(2.01001,1.0,1.0));
         CHECK( testIon1.getLocation() == Core::Vector(2.01001,1.0,1.0));
         CHECK( testTree_2.getRoot()->getCenterOfCharge() == Core::Vector(2.005005,1.0,1.0));
-        std::cout<<"Test 001 - 1 "<<std::endl;
 
         CHECK_NOTHROW(testTree_2.getRoot()->testSpatialTreeIntegrity());
         CHECK_NOTHROW(testTree_2.getRoot()->testNodeIntegrity(0));
@@ -152,7 +151,6 @@ TEST_CASE( "Test serial tree semantics / particle management","[Tree]") {
     }
 
     SECTION( "Test tree integrity with large number of random particles"){
-        std::cout<<"Test 002 - 1 "<<std::endl;
         std::size_t nions = 10000;
         Core::Vector boxSize(0.002, 0.002, 0.002);
         ParticleSimulation::BoxStartZone startZone(boxSize);

@@ -37,7 +37,8 @@ Ion Dynamics Simulation Framework (IDSimF)
 #include "test_util.hpp"
 #include <iostream>
 
-void testChargedGrids(Core::Vector loc_min, Core::Vector loc_max, double chargeTop, double chargeBottom, double theta, bool print) {
+void testChargedGrids(Core::Vector loc_min, Core::Vector loc_max, double chargeTop, double chargeBottom,
+                      double theta, double maxResidual, bool print) {
 
     BTree::Tree testTree(loc_min,loc_max);
     BTree::ParallelTree testTreeParallel(loc_min,loc_max);
@@ -88,10 +89,10 @@ void testChargedGrids(Core::Vector loc_min, Core::Vector loc_max, double chargeT
 
     std::vector<std::size_t> ionsToTest;// = {1,4,8,9};
     ionsToTest.push_back(2);
-    //ionsToTest.push_back(500);
-    //ionsToTest.push_back(1500);
-    //ionsToTest.push_back(1300);
-    //ionsToTest.push_back(1100);
+    ionsToTest.push_back(500);
+    ionsToTest.push_back(1500);
+    ionsToTest.push_back(1300);
+    ionsToTest.push_back(1100);
 
     for (auto& ionToTest: ionsToTest) {
         double charge = ions[ionToTest]->getCharge();
@@ -110,33 +111,33 @@ void testChargedGrids(Core::Vector loc_min, Core::Vector loc_max, double chargeT
         if (print) {
             std::cout <<"bt force:   "<<force<<"\n"<<"bt force p: "<<forceParallel<<"\n"<<"full force: "<<fullSumForce<<"\n"<<"---------------------"<<std::endl;
         }
-        //CHECK( ((force-fullSumForce).magnitude() / force.magnitude()) < 1e-2);
+        CHECK( ((force-fullSumForce).magnitude() / force.magnitude()) < maxResidual);
+        CHECK( ((forceParallel-fullSumForce).magnitude() / forceParallel.magnitude()) < maxResidual);
     }
 }
-
 
 TEST_CASE( "Test serial tree charge distribution calculation bipolar","[Tree]") {
     Core::Vector loc_min = Core::Vector(-1000,-1000,-1000);
     Core::Vector loc_max = Core::Vector( 1000, 1000, 1000);
 
     SECTION( "Test force calculation with high theta"){
-        testChargedGrids(loc_min, loc_max,  1, 1, 0.9, true);
-        testChargedGrids(loc_min, loc_max, -1,-1, 0.9, true);
-        testChargedGrids(loc_min, loc_max, -1, 1, 0.9, true);
-        testChargedGrids(loc_min, loc_max,  1,-1, 0.9, true);
+        testChargedGrids(loc_min, loc_max,  1, 1, 0.9, 0.047, false);
+        testChargedGrids(loc_min, loc_max, -1,-1, 0.9, 0.047, false);
+        testChargedGrids(loc_min, loc_max, -1, 1, 0.9, 0.067, false);
+        testChargedGrids(loc_min, loc_max,  1,-1, 0.9, 0.067, false);
     }
 
     SECTION( "Test force calculation with positive and negative charges medium theta") {
-        testChargedGrids(loc_min, loc_max,  1, 1, 0.5, true);
-        testChargedGrids(loc_min, loc_max, -1,-1, 0.5, true);
-        testChargedGrids(loc_min, loc_max, -1, 1, 0.5, true);
-        testChargedGrids(loc_min, loc_max,  1,-1, 0.5, true);
+        testChargedGrids(loc_min, loc_max,  1, 1, 0.5, 0.014, false);
+        testChargedGrids(loc_min, loc_max, -1,-1, 0.5, 0.014, false);
+        testChargedGrids(loc_min, loc_max, -1, 1, 0.5, 0.021, false);
+        testChargedGrids(loc_min, loc_max,  1,-1, 0.5, 0.021, false);
     }
 
     SECTION( "Test force calculation with positive and negative charges low theta") {
-        testChargedGrids(loc_min, loc_max,  1, 1, 0.1, true);
-        testChargedGrids(loc_min, loc_max, -1,-1, 0.1, true);
-        testChargedGrids(loc_min, loc_max, -1, 1, 0.1, true);
-        testChargedGrids(loc_min, loc_max,  1,-1, 0.1, true);;
+        testChargedGrids(loc_min, loc_max,  1, 1, 0.1, 0.00011, false);
+        testChargedGrids(loc_min, loc_max, -1,-1, 0.1, 0.00011, false);
+        testChargedGrids(loc_min, loc_max, -1, 1, 0.1, 0.00047, false);
+        testChargedGrids(loc_min, loc_max,  1,-1, 0.1, 0.00047, false);;
     }
 }

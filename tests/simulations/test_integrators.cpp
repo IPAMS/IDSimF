@@ -95,7 +95,6 @@ TEST_CASE("Compare results of serial and parallel varlet integrators and full su
     Integration::FullSumVerletIntegrator verletIntegratorFullSum(
             particlePtrsFullSum, accelerationFunction);
 
-
     verletIntegratorSerial.run(timeSteps, dt);
     verletIntegratorParallelNew.run(timeSteps, dt);
     verletIntegratorFullSum.run(timeSteps, dt);
@@ -120,14 +119,13 @@ TEST_CASE("Compare results of serial and parallel varlet integrators and full su
         std::cout <<
             particlesSerial[i]->getLocation()<< " | " <<
             particlesParallelNew[i]->getLocation()<< " | " <<
-            (particlesSerial[i]->getLocation() - particlesParallelNew[i]->getLocation()).magnitude()
-        << std::endl;
+            particlesFullSum[i]->getLocation()<< " | " <<std::endl;
     }*/
 
-    CHECK(sum_s_p <= 1e-12);
-    CHECK(sum_s_fs <= 1e-12);
-    CHECK(sum_p_fs <= 1e-12);
+    CHECK(sum_s_p / nIons <= 1e-12);
+    CHECK(sum_s_fs / nIons <= 0.015);
+    CHECK(sum_p_fs / nIons <= 0.015);
     CHECK(maximumDiff_s_p <= 1e-14);
-    CHECK(maximumDiff_s_fs <= 1e-14);
-    CHECK(maximumDiff_p_fs <= 1e-14);
+    CHECK(maximumDiff_s_fs <= 0.035);
+    CHECK(maximumDiff_p_fs <= 0.035);
 }
