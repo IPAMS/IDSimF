@@ -43,20 +43,13 @@ namespace BTree{
 
     public:
         TreeParticle(Core::Particle* baseParticle);
-
-        //[[nodiscard]] Core::Particle* get() const;
-
-        /** Gets the wrapped particle*/
-        /*[[nodiscard]] inline Core::Particle* get() const {
-            return particle_;
-        }*/
         void setHostNode(BTree::AbstractNode* newHostNode);
         [[nodiscard]] BTree::AbstractNode* getHostNode() const;
 
         Core::Particle* wrappedParticle = nullptr;
+        Core::Vector bufferedTreePosition = {0.0, 0.0, 0.0};
 
     private:
-        //Core::Particle* particle_ = nullptr; ////< The particle which is wrapped by this TreeParticle
         BTree::AbstractNode* hostNode_ = nullptr; ///< A link to a tree node to which the particle is belonging currently
     };
 }
