@@ -174,8 +174,7 @@ TEST_CASE( "Test full sum runge kutta 4 integrator", "[ParticleSimulation][Paral
 
                 unsigned int nParticlesTouched = 0;
                 auto otherActionsFct = [&nParticlesTouched] (
-                        Core::Vector& /*newPartPos*/, Core::Particle* /*particle*/,
-                        int /*particleIndex*/, double /*time*/, int /*timestep*/){
+                        Core::Particle* /*particle*/, int /*particleIndex*/, double /*time*/, int /*timestep*/){
                     nParticlesTouched++;
                 };
 

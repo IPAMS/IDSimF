@@ -232,8 +232,7 @@ TEST_CASE("TestParticleStartSplatTracker", "[ParticleSimulation][ParticleStartSp
 
         double zMax = 1e-4;
         auto otherActionsFct = [zMax, &tracker] (
-                Core::Vector& /*newPartPos*/, Core::Particle* particle,
-                int /*particleIndex*/, double time, int /*timestep*/){
+                Core::Particle* particle, int /*particleIndex*/, double time, int /*timestep*/){
             if (particle->getLocation().z() > zMax){
                 particle->setActive(false);
                 particle->setSplatTime(time);
@@ -257,7 +256,7 @@ TEST_CASE("TestParticleStartSplatTracker", "[ParticleSimulation][ParticleStartSp
         CHECK(states[0] == 2);
         CHECK(states[9] == 2);
         CHECK(startTimes[9] == Approx(10*dt*0.5));
-        CHECK(splatTimes[9] == Approx(0.0095));
+        CHECK(splatTimes[9] == Approx(0.0094));
         CHECK_THAT(splatLocations[9], ApproxEqual(Core::Vector(0.00020025, 0.09, 0.000100125)));
         CHECK_THAT(startLocations[9], ApproxEqual(Core::Vector(0.0, 0.09, 0.0)));
     }

@@ -128,14 +128,14 @@ namespace CollisionModel{
         void updateModelTimestepParameters(unsigned int timestep, double time);
 
         void modifyAcceleration(Core::Vector& acceleration,
-                                        Core::Particle& particle,
-                                        double dt);
-        void modifyVelocity(Core::Particle& particle,
-                                    double dt);
+                                Core::Particle& particle,
+                                double dt);
 
-        void modifyPosition(Core::Vector& position,
-                                    Core::Particle& particle,
-                                    double dt);
+        void modifyVelocity(Core::Particle& particle,
+                            double dt);
+
+        void modifyPosition(Core::Particle& particle,
+                            double dt);
 
     private:
 

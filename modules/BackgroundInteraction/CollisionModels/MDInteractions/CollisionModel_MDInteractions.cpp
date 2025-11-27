@@ -364,9 +364,7 @@ void CollisionModel::MDInteractionsModel::modifyVelocity(Core::Particle& particl
     }
 }
 
-void CollisionModel::MDInteractionsModel::modifyPosition(Core::Vector& /*position*/, Core::Particle& /*particle*/, double /*dt*/) {
-
-}
+void CollisionModel::MDInteractionsModel::modifyPosition(Core::Particle& /*particle*/, double /*dt*/) {}
 
 /**
  * Leapfrog method to integrate trajectories of particles involved in a collision. 

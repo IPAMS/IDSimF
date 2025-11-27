@@ -324,12 +324,12 @@ int main(int argc, const char * argv[]) {
         };
 
         auto otherActionsFunctionQIT = [&simulationDomainBoundaries, &ionsInactive, &potentialArrays, &startSplatTracker](
-                const Core::Vector& newPartPos, Core::Particle* particle,
-                int /*particleIndex*/,  double time, int /*timestep*/) {
+                Core::Particle* particle, int /*particleIndex*/,  double time, int /*timestep*/) {
             // if the ion is out of the boundary box or ends up in an electrode:
             // Terminate the ion
             // (since all potential arrays of the simulation define the basis functions of a linear combination,
             // the electrode geometry has to be the same in all electrodes, thus check only the first one)
+            Core::Vector newPartPos = particle->getLocation();
             if (newPartPos.x()<=simulationDomainBoundaries[0][0] ||
                     newPartPos.x()>=simulationDomainBoundaries[0][1] ||
                     newPartPos.y()<=simulationDomainBoundaries[1][0] ||

@@ -350,7 +350,7 @@ void CollisionModel::MDInteractionsModelExperimental::modifyVelocity(Core::Parti
 
 }
 
-void CollisionModel::MDInteractionsModelExperimental::modifyPosition(Core::Vector& /*position*/, Core::Particle& /*particle*/, double /*dt*/) {
+void CollisionModel::MDInteractionsModelExperimental::modifyPosition(Core::Particle& /*particle*/, double /*dt*/) {
 
 }
 

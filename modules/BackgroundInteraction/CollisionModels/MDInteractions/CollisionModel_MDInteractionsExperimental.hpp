@@ -188,8 +188,7 @@ namespace CollisionModel{
         void modifyVelocity(Core::Particle& particle,
                                     double dt);
 
-        void modifyPosition(Core::Vector& position,
-                                    Core::Particle& particle,
+        void modifyPosition(Core::Particle& particle,
                                     double dt);
 
 

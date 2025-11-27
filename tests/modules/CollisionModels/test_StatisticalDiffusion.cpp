@@ -47,7 +47,7 @@ TEST_CASE( "Test SDS collison model", "[CollisionModels][SDS]") {
         sds.updateModelParticleParameters(ion);
         for (int i=0; i< 100; i++){
             //Core::Vector position = ion.getLocation();
-            sds.modifyPosition(ion.getLocation(),ion,1e-2);
+            sds.modifyPosition(ion, 1e-2);
             //ion.setLocation(position);
         }
         Core::Vector ionLoc = ion.getLocation();
@@ -65,7 +65,7 @@ TEST_CASE( "Test SDS collison model", "[CollisionModels][SDS]") {
         sds.updateModelParticleParameters(ion);
         for (int i=0; i< 100; i++){
             //Core::Vector position = ion.getLocation();
-            sds.modifyPosition(ion.getLocation(),ion,1e-2);
+            sds.modifyPosition(ion, 1e-2);
             //ion.setLocation(position);
         }
         Core::Vector ionLoc = ion.getLocation();

@@ -34,7 +34,7 @@ void performBenchmark(int nSamples, double dt){
     for (int i=0; i< nSamples; ++i){
         Core::Vector acceleration {200, 0.0, 0.0};
         sds.modifyAcceleration(acceleration, ion, dt);
-        sds.modifyPosition(ion.getLocation(), ion, dt);
+        sds.modifyPosition(ion, dt);
     }
 
     Core::Vector ionLoc = ion.getLocation();

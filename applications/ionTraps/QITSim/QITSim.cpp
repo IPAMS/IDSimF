@@ -393,9 +393,9 @@ int main(int argc, const char * argv[]) {
 
         int ionsInactive = 0;
         auto otherActionsFunctionQIT = [maxIonRadius, &ionsInactive, &startSplatTracker]
-                (Core::Vector& newPartPos, Core::Particle* particle, unsigned int /*particleIndex*/,
+                (Core::Particle* particle, unsigned int /*particleIndex*/,
                  double time, unsigned int /*timestep*/) {
-            if (newPartPos.magnitude()>maxIonRadius) {
+            if (particle->getLocation().magnitude()>maxIonRadius) {
                 particle->setActive(false);
                 particle->setSplatTime(time);
                 startSplatTracker.particleSplat(particle, time);

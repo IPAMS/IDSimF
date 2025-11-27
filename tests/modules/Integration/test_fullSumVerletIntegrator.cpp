@@ -166,8 +166,8 @@ TEST_CASE( "Test full sum verlet integrator", "[ParticleSimulation][FullSumVerle
 
                 unsigned int nParticlesTouched = 0;
                 auto otherActionsFct = [&nParticlesTouched] (
-                        Core::Vector& /*newPartPos*/, Core::Particle* /*particle*/,
-                        int /*particleIndex*/, double /*time*/, int /*timestep*/){
+                        Core::Particle* /*particle*/, int /*particleIndex*/,
+                        double /*time*/, int /*timestep*/){
                     nParticlesTouched++;
                 };
 
@@ -218,8 +218,8 @@ TEST_CASE( "Test full sum verlet integrator", "[ParticleSimulation][FullSumVerle
                 };
 
                 auto terminationActionFct = [&integratorPtr, terminationTimeStep] (
-                        Core::Vector& /*newPartPos*/, Core::Particle* /*particle*/,
-                        int /*particleIndex*/, double /*time*/, unsigned int timestep){
+                        Core::Particle* /*particle*/, int /*particleIndex*/,
+                        double /*time*/, unsigned int timestep){
                     if (timestep >= terminationTimeStep){
                         integratorPtr->setTerminationState();
                     }

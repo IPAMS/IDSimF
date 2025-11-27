@@ -319,8 +319,10 @@ int main(int argc, const char * argv[]) {
                 };
 
         auto otherActionsFct = [electrodeHalfDistance_m, electrodeLength_m, &ionsInactive](
-                Core::Vector& newPartPos, Core::Particle* particle,
-                int /*particleIndex*/,  double time, int /*timestep*/) {
+                Core::Particle* particle, int /*particleIndex*/,
+                double time, int /*timestep*/) {
+
+            Core::Vector newPartPos = particle->getLocation();
 
             if (std::fabs(newPartPos.z())>=electrodeHalfDistance_m) {
                 particle->setActive(false);

@@ -91,7 +91,7 @@ void Integration::VelocityIntegrator::runSingleStep(double dt) {
             Core::Vector newPos = particles_[i]->getLocation() + particles_[i]->getVelocity() * dt;
             particles_[i]->setLocation(newPos);
             if (otherActionsFunction_ !=nullptr) {
-                otherActionsFunction_(newPos, particles_[i], i, time_, timestep_);
+                otherActionsFunction_(particles_[i], i, time_, timestep_);
             }
         }
     }

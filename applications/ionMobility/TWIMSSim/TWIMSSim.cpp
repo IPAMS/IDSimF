@@ -426,8 +426,9 @@ int main(int argc, const char * argv[]) {
         };
 
         auto otherActionsFct = [&simulationDomainBoundaries, &ionsInactive, &WavePotentialArrays, &V_rf, &startSplatTracker](
-                Core::Vector& newPartPos, Core::Particle* particle,
-                int /*particleIndex*/,  double time, int /*timestep*/) {
+                Core::Particle* particle, int /*particleIndex*/,  double time, int /*timestep*/) {
+
+            Core::Vector newPartPos = particle->getLocation();
             //Core::Vector pos = particle->getLocation();
             if (newPartPos.x()<=simulationDomainBoundaries[0][0] ||
                 newPartPos.x()>=simulationDomainBoundaries[0][1] ||

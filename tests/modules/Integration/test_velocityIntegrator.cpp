@@ -86,8 +86,7 @@ TEST_CASE( "Test velocity integrator", "[ParticleSimulation][VelocityIntegrator]
 
             unsigned int nParticlesTouched = 0;
             auto otherActionsFct = [&nParticlesTouched] (
-                    Core::Vector& /*newPartPos*/,Core::Particle* /*particle*/,
-                    int /*particleIndex*/, double /*time*/, int /*timestep*/){
+                    Core::Particle* /*particle*/, int /*particleIndex*/, double /*time*/, int /*timestep*/){
                 nParticlesTouched++;
             };
 
@@ -111,14 +110,15 @@ TEST_CASE( "Test velocity integrator", "[ParticleSimulation][VelocityIntegrator]
             int terminationTimeStep = 40;
 
             auto terminationActionFct = [&integratorPtr, terminationTimeStep] (
-                    Core::Vector& /*newPartPos*/, Core::Particle* /*particle*/,
-                    int /*particleIndex*/, double /*time*/, int timestep){
+                    Core::Particle* /*particle*/, int /*particleIndex*/,
+                    double /*time*/, int timestep){
                 if (timestep >= terminationTimeStep){
                     integratorPtr->setTerminationState();
                 }
             };
 
-            Integration::VelocityIntegrator velocityIntegrator(particlesPtrs, velocityFct, nullptr, terminationActionFct);
+            Integration::VelocityIntegrator velocityIntegrator(particlesPtrs, velocityFct,
+                nullptr, terminationActionFct);
             integratorPtr = &velocityIntegrator;
 
             velocityIntegrator.run(timeSteps, dt);

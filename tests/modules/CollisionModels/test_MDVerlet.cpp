@@ -119,10 +119,10 @@ TEST_CASE( "Test MD and integrator", "[ParticleSimulation][VelocityIntegrator][t
 
         auto otherActionsFunctionIMSSimple =
                 [&ionsInactive]
-                        (Core::Vector& newPartPos, Core::Particle* particle, int /*particleIndex*/, double time,
+                        (Core::Particle* particle, int /*particleIndex*/, double time,
                          int /*timestep*/)
                 {
-                    if (newPartPos.x()>=1) {
+                    if (particle->getLocation().x()>=1) {
                         particle->setActive(false);
                         particle->setSplatTime(time);
                         ionsInactive++;
@@ -131,10 +131,10 @@ TEST_CASE( "Test MD and integrator", "[ParticleSimulation][VelocityIntegrator][t
 
         auto otherActionsFunctionIMSVerlet =
                 [&otherActionsFunctionIMSSimple]
-                        (Core::Vector& newPartPos, Core::Particle* particle, int particleIndex,
+                        (Core::Particle* particle, int particleIndex,
                          double time, int timestep)
                 {
-                    otherActionsFunctionIMSSimple(newPartPos, particle, particleIndex, time, timestep);
+                    otherActionsFunctionIMSSimple(particle, particleIndex, time, timestep);
                 };
 
 

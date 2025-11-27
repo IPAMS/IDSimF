@@ -494,10 +494,10 @@ int main(int argc, const char * argv[]) {
                     }
                 };
 
-        auto otherActionsFct = [&simulationDomainBoundaries, &ionsInactive, &PotentialArrays, &V_rf, &startSplatTracker](
-                Core::Vector& newPartPos, Core::Particle* particle,
-                int /*particleIndex*/,  double time, int /*timestep*/){
-            //Core::Vector pos = particle->getLocation();
+        auto otherActionsFct = [&simulationDomainBoundaries, &ionsInactive, &PotentialArrays, &startSplatTracker](
+                Core::Particle* particle, int /*particleIndex*/,  double time, int /*timestep*/){
+
+            Core::Vector newPartPos = particle->getLocation();
             if (newPartPos.x()<=simulationDomainBoundaries[0][0] ||
                 newPartPos.x()>=simulationDomainBoundaries[0][1] ||
                 newPartPos.y()<=simulationDomainBoundaries[1][0] ||

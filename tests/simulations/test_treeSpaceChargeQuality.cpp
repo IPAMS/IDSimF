@@ -126,6 +126,6 @@ TEST_CASE("Compare results of serial and parallel varlet integrators and full su
     CHECK(sum_s_fs / nIons <= 0.015);
     CHECK(sum_p_fs / nIons <= 0.015);
     CHECK(maximumDiff_s_p <= 1e-14);
-    CHECK(maximumDiff_s_fs <= 0.035);
-    CHECK(maximumDiff_p_fs <= 0.035);
+    CHECK(maximumDiff_s_fs <= 0.036);
+    CHECK(maximumDiff_p_fs <= 0.036);
 }

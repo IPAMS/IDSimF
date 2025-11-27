@@ -200,10 +200,10 @@ int main(int argc, const char * argv[]) {
             }
         };
 
-        auto otherActionsFunction = [maxQLength, maxRadius, &startZone](Core::Vector& newPartPos,
-                                                                        Core::Particle* particle, int /*particleIndex*/,
+        auto otherActionsFunction = [maxQLength, maxRadius, &startZone](Core::Particle* particle, int /*particleIndex*/,
                                                                          double /*time*/, int /*timestep*/) {
 
+            Core::Vector newPartPos = particle->getLocation();
             double r_pos = std::sqrt(newPartPos.y()*newPartPos.y()+newPartPos.z()*newPartPos.z());
 
             if (newPartPos.x()>maxQLength) {

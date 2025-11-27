@@ -300,10 +300,10 @@ int main(int argc, const char * argv[]) {
 
         if (ionTerminationMode==TERMINATE) {
             otherActionsFunction = [&isIonTerminated, &ionsInactive, &startSplatTracker](
-                    Core::Vector& newPartPos, Core::Particle* particle,
+                    Core::Particle* particle,
                     int /*particleIndex*/,  double time, int /*timestep*/) {
                 // if the ion is out of the boundary box or ion has hit an electrode: Terminate
-                if (isIonTerminated(newPartPos)) {
+                if (isIonTerminated(particle->getLocation())) {
                     startSplatTracker.particleSplat(particle, time);
                     particle->setActive(false);
                     particle->setSplatTime(time);
@@ -316,13 +316,12 @@ int main(int argc, const char * argv[]) {
                     AppUtils::getStartZoneFromIonDefinition(*simConf);
 
             otherActionsFunction = [&isIonTerminated, pz = std::move(particleStartZone), &startSplatTracker](
-                    Core::Vector& newPartPos, Core::Particle* particle,
-                    int /*particleIndex*/,
-                     double time, int /*timestep*/) {
+                    Core::Particle* particle, int /*particleIndex*/, double time, int /*timestep*/) {
                 // if the ion is out of the boundary box or ion has hit an electrode: Restart in ion start zone
-                if (isIonTerminated(newPartPos)) {
-                    newPartPos = pz->getRandomParticlePosition();
-                    startSplatTracker.particleRestart(particle, particle->getLocation(), newPartPos, time);
+                if (isIonTerminated(particle->getLocation())) {
+                    Core::Vector oldPos = particle->getLocation();
+                    particle->setLocation(pz->getRandomParticlePosition());
+                    startSplatTracker.particleRestart(particle, oldPos, particle->getLocation(), time);
                 }
             };
         }

@@ -343,9 +343,9 @@ int main(int argc, const char *argv[]){
 
         auto otherActionsFunctionIMSSimple =
                 [stopPosX_m, &ionsInactive]
-                        (Core::Vector& newPartPos, Core::Particle* particle, int /*particleIndex*/, double time,
+                        (Core::Particle* particle, int /*particleIndex*/, double time,
                          int /*timestep*/) {
-                    if (newPartPos.x()>=stopPosX_m) {
+                    if (particle->getLocation().x()>=stopPosX_m) {
                         particle->setActive(false);
                         particle->setSplatTime(time);
                         ionsInactive++;
@@ -354,9 +354,9 @@ int main(int argc, const char *argv[]){
 
         auto otherActionsFunctionIMSVerlet =
                 [&otherActionsFunctionIMSSimple]
-                        (Core::Vector& newPartPos, Core::Particle* particle, int particleIndex,
+                        (Core::Particle* particle, int particleIndex,
                           double time, int timestep) {
-                    otherActionsFunctionIMSSimple(newPartPos, particle, particleIndex, time, timestep);
+                    otherActionsFunctionIMSSimple(particle, particleIndex, time, timestep);
                 };
 
         //define and init transport models and trajectory integrators:

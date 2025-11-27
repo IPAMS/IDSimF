@@ -125,8 +125,8 @@ TEST_CASE("Test serial verlet integrator", "[ParticleSimulation][VerletIntegrato
 
             int nParticlesTouched = 0;
             auto otherActionsFct = [&nParticlesTouched] (
-                    Core::Vector& /*newPartPos*/,Core::Particle* /*particle*/,
-                    int /*particleIndex*/, double /*time*/, int /*timestep*/){
+                    Core::Particle* /*particle*/, int /*particleIndex*/,
+                    double /*time*/, int /*timestep*/){
                 nParticlesTouched++;
             };
 
