@@ -21,7 +21,9 @@
 
 #include "PSim_particleStartSplatTracker.hpp"
 #include "Core_particle.hpp"
+#include "omp.h"
 #include <algorithm>
+#include <iostream>
 
 ParticleSimulation::ParticleStartSplatTracker::ParticleStartSplatTracker():
     pMap_(),
@@ -55,8 +57,9 @@ void ParticleSimulation::ParticleStartSplatTracker::particleRestart(Core::Partic
         entry.splatLocation = oldPosition;
         entry.splatTime = time;
         entry.state = SPLATTED_AND_RESTARTED;
-        restartedParticlesData_.emplace_back(entry);
 
+        #pragma omp critical //map writing has to be atomic due to invalidation of the map
+        restartedParticlesData_.emplace_back(entry);
         pMapEntry newEntry;
         newEntry.globalIndex = pInsertIndex_;
         newEntry.startLocation = newPosition;

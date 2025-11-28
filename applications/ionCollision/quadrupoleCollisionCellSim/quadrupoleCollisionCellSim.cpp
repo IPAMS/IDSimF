@@ -40,6 +40,7 @@
 #include "AppUtils_stopwatch.hpp"
 #include "AppUtils_signalHandler.hpp"
 #include "AppUtils_commandlineParser.hpp"
+#include "omp.h"
 #include <iostream>
 #include <vector>
 
@@ -142,6 +143,13 @@ int main(int argc, const char * argv[]) {
         std::vector<Core::Particle*> particlePtrs;
 
         AppUtils::readIonDefinition(particles, particlePtrs, *simConf);
+
+        std::size_t i=0;
+        for (Core::Particle* particle: particlePtrs) {
+            particle->setIndex(i);
+            ++i;
+        }
+
 
         //init gas collision models:
         CollisionModel::HardSphereModel hsModel = CollisionModel::HardSphereModel(
@@ -316,10 +324,11 @@ int main(int argc, const char * argv[]) {
                     AppUtils::getStartZoneFromIonDefinition(*simConf);
 
             otherActionsFunction = [&isIonTerminated, pz = std::move(particleStartZone), &startSplatTracker](
-                    Core::Particle* particle, int /*particleIndex*/, double time, int /*timestep*/) {
+                    Core::Particle* particle, int particleIndex, double time, int timestep) {
                 // if the ion is out of the boundary box or ion has hit an electrode: Restart in ion start zone
+
                 if (isIonTerminated(particle->getLocation())) {
-                    Core::Vector oldPos = particle->getLocation();
+                    Core::Vector oldPos = Core::Vector(particle->getLocation());
                     particle->setLocation(pz->getRandomParticlePosition());
                     startSplatTracker.particleRestart(particle, oldPos, particle->getLocation(), time);
                 }
