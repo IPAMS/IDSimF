@@ -9,12 +9,12 @@
   "V_rf":100.0,
   "axial_potential_center": 0.027,
   "axial_potential_floor_width": 0.020,
-  "axial_potential_gradient_V/m": 1000.0,
+  "axial_potential_gradient_V/m": 100000.0,
   "potential_arrays": [
     "quad_pa/geom_2021_04_25_1.pa10",
     "quad_pa/geom_2021_04_25_1.pa11"
   ],
-  "potential_array_scaling": 0.00025, //PA is scaled 0.1 mm / GU
+  "potential_array_scaling": 0.001, //PA is scaled 0.1 mm / GU
   "dc_potentials": [0, 0],
   "rf_potential_factors": [1.0,-1.0],
   "excite_potential_factors": [0,0],
