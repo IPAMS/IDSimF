@@ -38,6 +38,8 @@
 #include <numeric>
 #include <algorithm>
 
+#include "Integration_parallelRK4Integrator.hpp"
+
 template<class INTEGRATOR>
 void runIntegrator(std::size_t timeSteps, double dt, double forceConstant, double maxAcceptedPos, std::size_t writePeriod, std::string fileName) {
 
@@ -91,11 +93,13 @@ void runIntegrator(std::size_t timeSteps, double dt, double forceConstant, doubl
 }
 
 TEST_CASE("Compare integration quality with parabolic profile", "[Simulation]") {
-    unsigned int timeSteps = 100000;
+    unsigned int timeSteps = 20000;
     unsigned int writePeriod = 100;
     double dt = 4e-5;
     double forceConstant = 1.0e-20;
 
     //runIntegrator<Integration::VerletIntegrator>(timeSteps, dt, forceConstant, 0.15, writePeriod,"integration_test_verlet_serial.txt");
     //runIntegrator<Integration::ParallelVerletIntegrator>(timeSteps, dt, forceConstant, 0.15, writePeriod,"integration_test_verlet_parallel.txt");
+    runIntegrator<Integration::FullSumVerletIntegrator>(timeSteps, dt, forceConstant, 0.15, writePeriod,"integration_test_verlet_full_sum.txt");
+    //runIntegrator<Integration::ParallelRK4Integrator>(timeSteps, dt, forceConstant, 0.15, writePeriod,"integration_test_RK4_parallel.txt");
 }

@@ -76,7 +76,6 @@ namespace Integration{
 
         //internal variables for actual calculations:
         SpaceCharge::FullSumSolver fullSumSolver_ = SpaceCharge::FullSumSolver();  ///< full sum space charge solver
-        std::vector<Core::Vector>  newPos_;  ///< new position (after time step) for particles
         std::vector<Core::Vector>  a_t_;     ///< last time step acceleration for particles
         std::vector<Core::Vector>  a_tdt_;   ///< new acceleration for particles
 
