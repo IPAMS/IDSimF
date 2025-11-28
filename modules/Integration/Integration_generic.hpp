@@ -74,8 +74,6 @@ namespace Integration{
                     unsigned int timestep)>
     accelerationFctSpaceChargeType;
 
-
-
     /**
      * type definition for functions doing things after every timestep (mostly exporting data in every timestep or
      * stopping the integration)
