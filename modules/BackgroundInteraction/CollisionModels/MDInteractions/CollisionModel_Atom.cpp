@@ -266,6 +266,7 @@ CollisionModel::Atom::AtomType CollisionModel::Atom::from_string(std::string str
     } else if(str == "COM") {
         return CollisionModel::Atom::AtomType::COM;
     } else {
-        throw std::invalid_argument("No such AtomType can be found.");
+        return CollisionModel::Atom::AtomType::UN;
+        //throw std::invalid_argument("No such AtomType can be found.");
     }
 }
