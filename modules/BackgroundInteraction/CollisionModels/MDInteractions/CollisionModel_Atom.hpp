@@ -40,7 +40,7 @@ namespace CollisionModel{
 
     public:
 
-        enum class AtomType : int {C, O, N, H, He, Ar, Cl, Li, Sn, COM}; // NOTE: Currently only COM is used to flag a center of mass dummy atom
+        enum class AtomType : int {C, O, N, H, He, Ar, Cl, Li, Sn, Na, COM}; // NOTE: Currently only COM is used to flag a center of mass dummy atom
         static AtomType from_string(std::string str); // Returns enum based on string 
 
         // Constructors

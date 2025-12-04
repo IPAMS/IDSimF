@@ -261,6 +261,8 @@ CollisionModel::Atom::AtomType CollisionModel::Atom::from_string(std::string str
         return CollisionModel::Atom::AtomType::Li;
     } else if(str == "Sn") {
         return CollisionModel::Atom::AtomType::Sn;
+    } else if(str == "Na") {
+        return CollisionModel::Atom::AtomType::Na;
     } else if(str == "COM") {
         return CollisionModel::Atom::AtomType::COM;
     } else {
