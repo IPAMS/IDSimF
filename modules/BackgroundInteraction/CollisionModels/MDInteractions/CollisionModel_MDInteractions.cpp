@@ -160,14 +160,17 @@ void CollisionModel::MDInteractionsModel::setTrajectoryWriter(const std::string&
  * integration time, velocity of the background gas, force acting on the background gas and 
  * timestep length
  */
-void CollisionModel::MDInteractionsModel::writeTrajectory(double distance, Core::Vector positionBgMolecule, Core::Vector velocityBgMolecule, 
+void CollisionModel::MDInteractionsModel::writeTrajectory(double distance, CollisionModel::Molecule bg, Core::Vector positionBgMolecule, Core::Vector velocityBgMolecule, 
                         std::vector<Core::Vector> forceMolecules, bool endOfTrajectory, std::ofstream* file, double time, double dt){
+   
     if(distance < trajectoryDistance_){
         *file << positionBgMolecule.x() << ", " << positionBgMolecule.y() << ", " << positionBgMolecule.z() << 
         ", " << distance << ", " << time <<
         ", " << velocityBgMolecule.x() << ", " << velocityBgMolecule.y() << ", " << velocityBgMolecule.z() << 
         ", " << forceMolecules[1].x() << ", " << forceMolecules[1].y() << ", " << forceMolecules[1].z() <<
-        ", " << dt << 
+        ", " << dt << ", " << bg.getAtoms().at(0)->getRelativePosition().x() << ", " << bg.getAtoms().at(0)->getRelativePosition().y() 
+        << ", " << bg.getAtoms().at(0)->getRelativePosition().z() << ", " << bg.getAtoms().at(1)->getRelativePosition().x() << ", " <<
+        bg.getAtoms().at(1)->getRelativePosition().y() << ", " << bg.getAtoms().at(1)->getRelativePosition().z() << 
         std::endl;
     }
     if(endOfTrajectory == true){
@@ -608,16 +611,16 @@ bool CollisionModel::MDInteractionsModel::rk4InternAdaptiveStep(std::vector<Coll
     Core::Vector nitrogenAngles = {rndSource->uniformRealRndValue()*2*pi-pi, 
                                 rndSource->uniformRealRndValue()*2*pi-pi, 
                                 rndSource->uniformRealRndValue()*2*pi-pi};
-    //double I = 0;
-    //double angularVelocity = 0;
-    if(moleculesPtr[1]->getMolecularStructureName()=="N2"){
+    double I = 0;
+    double angularVelocity = 0;
+    if(moleculesPtr[1]->getMolecularStructureName()=="N2" || moleculesPtr[1]->getMolecularStructureName()=="N2Approx"){
         nitrogenOne = molecularStructureCollection_.at(moleculesPtr[1]->getMolecularStructureName())->getAtoms().at(0)->getRelativePosition();
         nitrogenTwo = molecularStructureCollection_.at(moleculesPtr[1]->getMolecularStructureName())->getAtoms().at(1)->getRelativePosition();
-        /*I = CollisionModel::MolecularStructure::getMomentOfInertia(nitrogenOne.x(), nitrogenTwo.x(),
+        I = CollisionModel::MolecularStructure::getMomentOfInertia(nitrogenOne.y(), nitrogenTwo.y(),
                                                                     moleculesPtr[1]->getMass()/2, moleculesPtr[1]->getMass()/2);
-        angularVelocity = CollisionModel::MolecularStructure::getAngularVelocity(temperatureFunction_(moleculesPtr[1]->getComPos()), I);*/
+        angularVelocity = CollisionModel::MolecularStructure::getAngularVelocity(temperatureFunction_(moleculesPtr[1]->getComPos()), I);
     }
-    //moleculesPtr[1]->setAngles(nitrogenAngles);
+    moleculesPtr[1]->setAngles(nitrogenAngles);
 
     while(integrationTimeSum < finalTime){
 
@@ -701,19 +704,19 @@ bool CollisionModel::MDInteractionsModel::rk4InternAdaptiveStep(std::vector<Coll
         i = 0;
         for(auto* molecule : moleculesPtr){
             if(trajectoryRecordingActive_ == true && molecule->getMolecularStructureName() == collisionMolecule_){
-                writeTrajectory(distance, molecule->getComPos(), molecule->getComVel(),forceMolecules, false, trajectoryOutputStream_.get(), integrationTimeSum, dt);
+                writeTrajectory(distance, *molecule, molecule->getComPos(), molecule->getComVel(),forceMolecules, false, trajectoryOutputStream_.get(), integrationTimeSum, dt);
             }
             
             molecule->setComPos(newComPosOrder4[i]);
             molecule->setComVel(newComVelOrder4[i]);
 
-            // if(molecule->getMolecularStructureName()=="N2"){
-            //     CollisionModel::Atom::rotate2D(angularVelocity*dt, nitrogenOne);
-            //     CollisionModel::Atom::rotate2D(angularVelocity*dt, nitrogenTwo);
-            //     molecule->getAtoms().at(0)->setRelativePosition(nitrogenOne);
-            //     molecule->getAtoms().at(1)->setRelativePosition(nitrogenTwo);
-            //     molecule->setAngles(nitrogenAngles);
-            // }
+            if(molecule->getMolecularStructureName()=="N2" || molecule->getMolecularStructureName()=="N2Approx"){
+                CollisionModel::Atom::rotate2D(angularVelocity*dt, nitrogenOne);
+                CollisionModel::Atom::rotate2D(angularVelocity*dt, nitrogenTwo);
+                molecule->getAtoms().at(0)->setRelativePosition(nitrogenOne);
+                molecule->getAtoms().at(1)->setRelativePosition(nitrogenTwo);
+                molecule->setAngles(nitrogenAngles);
+            }
             i++;
 
         }
@@ -728,7 +731,7 @@ bool CollisionModel::MDInteractionsModel::rk4InternAdaptiveStep(std::vector<Coll
             for(size_t z = b+1; z < nMolecules; ++z){
                 if((moleculesPtr[z]->getComPos() - moleculesPtr[b]->getComPos()).magnitude() > startDistances[index++]){
                     if(trajectoryRecordingActive_ == true && moleculesPtr[z]->getMolecularStructureName() == collisionMolecule_){
-                        writeTrajectory((moleculesPtr[z]->getComPos() - moleculesPtr[b]->getComPos()).magnitude(),
+                        writeTrajectory((moleculesPtr[z]->getComPos() - moleculesPtr[b]->getComPos()).magnitude(), *moleculesPtr[z],
                                         moleculesPtr[z]->getComPos(), moleculesPtr[z]->getComVel(), forceMolecules, true, trajectoryOutputStream_.get(), integrationTimeSum, dt);
                     }
                     return wasHit;
