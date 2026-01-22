@@ -30,6 +30,14 @@
 #include "catch.hpp"
 #include "test_util.hpp"
 
+TEST_CASE("Test Vector approx matcher","[Core][Vector]") {
+    Core::Vector a(1.0, 2.5, 5.0);
+    Core::Vector b(1.0, 2.5, 5.0000001);
+
+    CHECK_THAT(a, ApproxEqual(b, 1e-6));
+    CHECK_THAT(a, !ApproxEqual(b, 1e-7));
+}
+
 TEST_CASE("Test Vector construction","[Core][Vector]"){
     SECTION("Vector construction with explicit parameters is working"){
         Core::Vector vec(1.0,2.0,3.0);
