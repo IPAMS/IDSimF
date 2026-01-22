@@ -4,7 +4,8 @@ set(SOURCE_FILES
         Core_vector.cpp
         Core_particle.cpp
         Core_randomGenerators.cpp
-        Core_math.cpp)
+        Core_math.cpp
+        Core_matrix3.cpp)
 
 add_library(core STATIC ${SOURCE_FILES})
 if(OpenMP_CXX_FOUND)

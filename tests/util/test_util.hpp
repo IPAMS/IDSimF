@@ -2,9 +2,51 @@
 #define IDSIMF_CPP_TEST_UTIL_HPP
 
 #include "Core_vector.hpp"
+#include "Core_matrix3.hpp"
 #include <string>
 #include <sstream>
 #include <fstream>
+
+class Matrix3ApproxMatcher : public Catch::MatcherBase<Core::Matrix3> {
+    private:
+        Core::Matrix3 target_;
+        double epsilon_;
+        mutable bool hasMatched_ = false;
+
+    public:
+        explicit Matrix3ApproxMatcher(const Core::Matrix3& target, double epsilon= 1e-6):
+            target_(target),
+            epsilon_(epsilon){}
+
+        bool match(const Core::Matrix3& actual) const override {
+            std::array<double, 9> targetVec = target_.vectorize();
+            std::array<double, 9> actualVec = actual.vectorize();
+
+            bool elementDiffers = false;
+            for (size_t i = 0; i < 9; ++i) {
+                if (!elementDiffers) {
+                    elementDiffers = (std::abs(targetVec[i] - actualVec[i]) >= epsilon_);
+                }
+            }
+
+            return !elementDiffers;
+        }
+
+        std::string describe() const override {
+            std::stringstream ss;
+            if (hasMatched_){
+                ss << "\n is approximately equal to Core::Matrix3(\n" << target_ << "\n) within " << epsilon_;
+            }
+            else {
+                ss << "\n differs from Core::Matrix3(\n" << target_ << "\n) within " << epsilon_;
+            }
+            return ss.str();
+        }
+};
+
+inline Matrix3ApproxMatcher ApproxEqual(const Core::Matrix3& target, double epsilon = 1e-6) {
+    return Matrix3ApproxMatcher(target, epsilon);
+};
 
 class VectorApproxMatcher : public Catch::MatcherBase<Core::Vector> {
     private:

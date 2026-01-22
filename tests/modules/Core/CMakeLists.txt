@@ -5,7 +5,8 @@ set(SOURCE_FILES
         test_vector.cpp
         test_particle.cpp
         test_utils.cpp
-        test_math.cpp)
+        test_math.cpp
+        test_matrix3.cpp)
 
 add_executable(test_core ${SOURCE_FILES})
 target_include_directories(test_core PUBLIC
