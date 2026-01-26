@@ -26,6 +26,7 @@
  ****************************/
 
 #include "Core_matrix3.hpp"
+#include "Core_vector.hpp"
 #include "catch.hpp"
 #include "test_util.hpp"
 #include "../../../libs/CLI11/CLI11.hpp"
@@ -46,6 +47,10 @@ TEST_CASE("Test Matrix3 construction and basic element access", "[Core][Matrix3]
         CHECK(mat2(0,0) == Approx(1.0));
         CHECK(mat2(1,2) == Approx(5.0));
 
+        Core::Matrix3 mat3= {3.0, 2.0, 1.0, -1.0, -2.0, -3.0, 4.0, 5.0, 6.0};
+        CHECK(mat3(0,0) == Approx(3.0));
+        CHECK(mat3(2,1) == Approx(-3.0));
+        CHECK(mat3(1,2) == Approx(5.0));
     }
 
     SECTION("Element access and assignment works"){
@@ -64,5 +69,59 @@ TEST_CASE("Test Matrix3 construction and basic element access", "[Core][Matrix3]
 
         Core::Matrix3 mat3({2.0, 0.0, 0.0, 4.0, 5.0, 6.0, 7.0, 8.0, 10.0});
         CHECK_THAT(mat1, !ApproxEqual(mat3));
+
+        std::array<double, 9> expected = {1.0, 2.0, 15.0, 4.0, 5.0, 6.0, 7.0, 8.0, 10.0};
+        CHECK(mat1.vectorize() == expected);
+    }
+}
+
+TEST_CASE("Test Matrix3 operators", "[Core][Matrix3]") {
+
+    Core::Matrix3 matA({1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0});
+    Core::Matrix3 matB({2.0, 4.0, 6.0, 3.0, 2.0, 1.0, -6.0, -4.0, -2.0});
+    Core::Matrix3 matC({1.0, 0.0, 0.0, 0.0, 5.0, 0.0, 0.0, 0.0, 2.0});
+    Core::Matrix3 matU({1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0});
+
+    Core::Vector vecA(1.0, 2.0, 3.0);
+    Core::Vector vecB(-3.0, -2.0, -1.0);
+
+    SECTION("Matrix addition and subtraction works") {
+
+        Core::Matrix3 expectedAplusB = {3.0, 6.0, 9.0, 7.0, 7.0, 7.0, 1.0, 4.0, 7.0};
+        CHECK_THAT(matA + matB, ApproxEqual(expectedAplusB));
+        CHECK_THAT(matB + matA, ApproxEqual(expectedAplusB));
+
+        Core::Matrix3 expectedBplusB = {4.0, 8.0, 12.0, 6.0, 4.0, 2.0, -12.0, -8.0, -4.0};
+        CHECK_THAT(matB + matB, ApproxEqual(expectedBplusB));
+
+        Core::Matrix3 expectedAminusB = {-1.0, -2.0, -3.0, 1.0, 3.0, 5.0, 13.0, 12.0, 11.0};
+        CHECK_THAT(matA - matB, ApproxEqual(expectedAminusB));
+
+        Core::Matrix3 expectedBminusA = {1.0, 2.0, 3.0, -1.0, -3.0, -5.0, -13.0, -12.0, -11.0};
+        CHECK_THAT(matB - matA, ApproxEqual(expectedBminusA));
+    }
+
+    SECTION("Matrix * scalar multipliction works") {
+        Core::Matrix3 expectedAtimes2 ={2.0, 4.0, 6.0, 8.0, 10.0, 12.0, 14.0, 16.0, 18.0};
+        CHECK_THAT(matA * 2.0, ApproxEqual(expectedAtimes2));
+
+        Core::Matrix3 expectedCtimesNeg1_5 = {-1.5, 0.0, 0.0, 0.0, -7.5, 0.0, 0.0, 0.0, -3.0};
+        CHECK_THAT(matC * -1.5, ApproxEqual(expectedCtimesNeg1_5));
+    }
+
+    SECTION("Matrix * Vector multiplication works") {
+        Core::Vector expectedAtimesVecA(30.0, 36.0, 42.0);
+        CHECK_THAT(matA * vecA, ApproxEqual(expectedAtimesVecA));
+
+        Core::Vector expectedBtimesVecB(-6.0, -12.0, -18.0);
+        CHECK_THAT(matB * vecB, ApproxEqual(expectedBtimesVecB));
+    }
+
+    SECTION("Matrix * Matrix multiplication works") {
+        Core::Matrix3 expectedAtimesB = {60, 72, 84, 18, 24, 30, -36, -48, -60};
+        CHECK_THAT(matA * matB, ApproxEqual(expectedAtimesB));
+
+        Core::Matrix3 expectedBtimesA = {-10, -4, 2, -13, 2, 17, -16, 8, 32};
+        CHECK_THAT(matB * matA, ApproxEqual(expectedBtimesA));
     }
 }

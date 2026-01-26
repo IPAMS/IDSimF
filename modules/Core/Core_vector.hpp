@@ -84,7 +84,7 @@ namespace Core {
 
 
     // overloaded operators:
-    Vector operator+(const Vector &lhs, const Vector &rhs);
+    /*Vector operator+(const Vector &lhs, const Vector &rhs);
     Vector operator-(const Vector &lhs, const Vector &rhs);
     double operator*(const Vector &lhs, const Vector &rhs);
     Vector operator*(const Vector &lhs, double rhs);
@@ -92,7 +92,7 @@ namespace Core {
     Vector operator*(double lhs, const Vector &rhs);
 
     bool operator==(Vector const &lhs, Vector const &rhs);
-    bool operator!=(const Vector &lhs, const Vector &rhs);
+    bool operator!=(const Vector &lhs, const Vector &rhs);*/
 }
 
 std::ostream& operator <<(std::ostream& out, Core::Vector const& vec);

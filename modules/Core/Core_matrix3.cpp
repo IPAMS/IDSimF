@@ -66,7 +66,9 @@ double Core::Matrix3::element(std::size_t row, std::size_t column) const {
     return elements_[row][column];
 }
 
-
+/**
+ * Vectorizes matrix to a linear vector
+ */
 std::array<double, 9> Core::Matrix3::vectorize() const {
     std::array<double, 9> result;
     std::size_t linearIndex = 0;
@@ -77,6 +79,53 @@ std::array<double, 9> Core::Matrix3::vectorize() const {
         }
     }
     return result;
+}
+
+Core::Matrix3 Core::operator+(const Matrix3& lhs, const Matrix3& rhs) {
+    return {
+            lhs.elements_[0][0]+rhs.elements_[0][0], lhs.elements_[1][0]+rhs.elements_[1][0], lhs.elements_[2][0]+rhs.elements_[2][0],
+            lhs.elements_[0][1]+rhs.elements_[0][1], lhs.elements_[1][1]+rhs.elements_[1][1], lhs.elements_[2][1]+rhs.elements_[2][1],
+            lhs.elements_[0][2]+rhs.elements_[0][2], lhs.elements_[1][2]+rhs.elements_[1][2], lhs.elements_[2][2]+rhs.elements_[2][2]
+        };
+}
+
+Core::Matrix3 Core::operator-(const Matrix3& lhs, const Matrix3& rhs) {
+    return {
+            lhs.elements_[0][0]-rhs.elements_[0][0], lhs.elements_[1][0]-rhs.elements_[1][0], lhs.elements_[2][0]-rhs.elements_[2][0],
+            lhs.elements_[0][1]-rhs.elements_[0][1], lhs.elements_[1][1]-rhs.elements_[1][1], lhs.elements_[2][1]-rhs.elements_[2][1],
+            lhs.elements_[0][2]-rhs.elements_[0][2], lhs.elements_[1][2]-rhs.elements_[1][2], lhs.elements_[2][2]-rhs.elements_[2][2]
+        };
+}
+
+Core::Matrix3 Core::operator*(const Matrix3& mat, const double scalar) {
+    return {
+            mat.elements_[0][0]*scalar, mat.elements_[1][0]*scalar, mat.elements_[2][0]*scalar,
+            mat.elements_[0][1]*scalar, mat.elements_[1][1]*scalar, mat.elements_[2][1]*scalar,
+            mat.elements_[0][2]*scalar, mat.elements_[1][2]*scalar, mat.elements_[2][2]*scalar
+        };
+}
+
+Core::Vector Core::operator*(const Matrix3& mat, const Vector& vec) {
+    return {
+        mat.elements_[0][0]*vec.x() + mat.elements_[0][1]*vec.y() + mat.elements_[0][2]*vec.z(),
+        mat.elements_[1][0]*vec.x() + mat.elements_[1][1]*vec.y() + mat.elements_[1][2]*vec.z(),
+        mat.elements_[2][0]*vec.x() + mat.elements_[2][1]*vec.y() + mat.elements_[2][2]*vec.z() };
+}
+
+Core::Matrix3 Core::operator*(const Matrix3& lhs, const Matrix3& rhs) {
+    return {
+        lhs.elements_[0][0]*rhs.elements_[0][0] + lhs.elements_[0][1]*rhs.elements_[1][0] + lhs.elements_[0][2]*rhs.elements_[2][0],
+        lhs.elements_[1][0]*rhs.elements_[0][0] + lhs.elements_[1][1]*rhs.elements_[1][0] + lhs.elements_[1][2]*rhs.elements_[2][0],
+        lhs.elements_[2][0]*rhs.elements_[0][0] + lhs.elements_[2][1]*rhs.elements_[1][0] + lhs.elements_[2][2]*rhs.elements_[2][0],
+
+        lhs.elements_[0][0]*rhs.elements_[0][1] + lhs.elements_[0][1]*rhs.elements_[1][1] + lhs.elements_[0][2]*rhs.elements_[2][1],
+        lhs.elements_[1][0]*rhs.elements_[0][1] + lhs.elements_[1][1]*rhs.elements_[1][1] + lhs.elements_[1][2]*rhs.elements_[2][1],
+        lhs.elements_[2][0]*rhs.elements_[0][1] + lhs.elements_[2][1]*rhs.elements_[1][1] + lhs.elements_[2][2]*rhs.elements_[2][1],
+
+        lhs.elements_[0][0]*rhs.elements_[0][2] + lhs.elements_[0][1]*rhs.elements_[1][2] + lhs.elements_[0][2]*rhs.elements_[2][2],
+        lhs.elements_[1][0]*rhs.elements_[0][2] + lhs.elements_[1][1]*rhs.elements_[1][2] + lhs.elements_[1][2]*rhs.elements_[2][2],
+        lhs.elements_[2][0]*rhs.elements_[0][2] + lhs.elements_[2][1]*rhs.elements_[1][2] + lhs.elements_[2][2]*rhs.elements_[2][2]
+    };
 }
 
 std::ostream& operator<< (std::ostream& os, Core::Matrix3 const& mat){

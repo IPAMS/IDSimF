@@ -30,6 +30,7 @@
 #include <fstream>
 #include <array>
 #include <initializer_list>
+#include "Core_vector.hpp"
 
 namespace Core{
 
@@ -39,31 +40,32 @@ namespace Core{
         // Constructors
         Matrix3() = default;
         explicit Matrix3(const double*);
-        explicit Matrix3(std::initializer_list<double>);
+        Matrix3(std::initializer_list<double>);
 
         // Access operator:
         double& operator()(std::size_t row, std::size_t column);
 
         // Accessors:
         [[nodiscard]] double element(std::size_t row, std::size_t column) const;
-        std::array<double, 9> vectorize() const;
+        [[nodiscard]] std::array<double, 9> vectorize() const;
 
-        // Setters:
-        //void element(std::size_t row, std::size_t column, double newElement);
+        //overloaded operators:
+        friend Matrix3 operator+(const Matrix3 &lhs, const Matrix3 &rhs);
+        friend Matrix3 operator-(const Matrix3 &lhs, const Matrix3 &rhs);
+
+        // matrix multiplication and vector multiplication:
+        friend Matrix3 operator*(const Matrix3 &mat, double scalar);
+        friend Vector operator*(const Matrix3 &mat, const Vector &vec);
+        friend Matrix3 operator*(const Matrix3 &lhs, const Matrix3 &rhs);
+
+
+        friend bool operator==(Matrix3 const &lhs, Matrix3 const &rhs);
+        friend bool operator!=(const Matrix3 &lhs, const Matrix3 &rhs);
 
 
     private:
         double elements_[3][3] = {{0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}};
     };
-
-    // matrix operators:
-
-
-    bool operator==(Matrix3 const &lhs, Matrix3 const &rhs);
-    bool operator!=(const Matrix3 &lhs, const Matrix3 &rhs);
-
-
-
 }
 
 std::ostream& operator <<(std::ostream& out, Core::Matrix3 const& matrix);

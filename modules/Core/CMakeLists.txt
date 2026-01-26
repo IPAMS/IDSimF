@@ -11,5 +11,6 @@ add_library(core STATIC ${SOURCE_FILES})
 if(OpenMP_CXX_FOUND)
     target_link_libraries(core PRIVATE OpenMP::OpenMP_CXX)
 endif()
+
 target_include_directories(core PUBLIC .)
 # target_include_directories(core PUBLIC . ${CMAKE_SOURCE_DIR}/modules/BackgroundInteraction/CollisionModels)
