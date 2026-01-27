@@ -81,8 +81,8 @@ std::vector<T> testVector(unsigned int nElements, int nSteps, std::string messag
 }
 
 int main(int argc, const char * argv[]) {
-    unsigned int nElements = 2000000;
-    int nSteps = 1000;
+    unsigned int nElements = 200000;
+    int nSteps = 10000;
 
     if (argc <2){
         std::cout << "no mode given"<<std::endl;
