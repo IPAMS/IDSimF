@@ -29,7 +29,6 @@
 #include "Core_vector.hpp"
 #include "catch.hpp"
 #include "test_util.hpp"
-#include "../../../libs/CLI11/CLI11.hpp"
 
 TEST_CASE("Test Matrix3 construction and basic element access", "[Core][Matrix3]") {
     SECTION("Matrix initialization works"){
@@ -102,7 +101,7 @@ TEST_CASE("Test Matrix3 operators", "[Core][Matrix3]") {
     }
 
     SECTION("Matrix * scalar multipliction works") {
-        Core::Matrix3 expectedAtimes2 ={2.0, 4.0, 6.0, 8.0, 10.0, 12.0, 14.0, 16.0, 18.0};
+        Core::Matrix3 expectedAtimes2 = {2.0, 4.0, 6.0, 8.0, 10.0, 12.0, 14.0, 16.0, 18.0};
         CHECK_THAT(matA * 2.0, ApproxEqual(expectedAtimes2));
 
         Core::Matrix3 expectedCtimesNeg1_5 = {-1.5, 0.0, 0.0, 0.0, -7.5, 0.0, 0.0, 0.0, -3.0};
@@ -126,66 +125,76 @@ TEST_CASE("Test Matrix3 operators", "[Core][Matrix3]") {
     }
 
     SECTION("Matrix equality operator works") {
-        Core::Matrix3 matEqual({1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0});
+        Core::Matrix3 matEqual = {1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0};
         CHECK(matA == matEqual);
 
-        Core::Matrix3 matDiff1({1.1, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0});
+        Core::Matrix3 matDiff1 = {1.1, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0};
         CHECK(!(matA == matDiff1));
 
-        Core::Matrix3 matDiff2({1.0, 2.1, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0});
+        Core::Matrix3 matDiff2 = {1.0, 2.1, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0};
         CHECK(!(matA == matDiff2));
 
-        Core::Matrix3 matDiff3({1.0, 2.0, 3.1, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0});
+        Core::Matrix3 matDiff3 = {1.0, 2.0, 3.1, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0};
         CHECK(!(matA == matDiff3));
 
-        Core::Matrix3 matDiff4({1.0, 2.0, 3.0, 4.1, 5.0, 6.0, 7.0, 8.0, 9.0});
+        Core::Matrix3 matDiff4 = {1.0, 2.0, 3.0, 4.1, 5.0, 6.0, 7.0, 8.0, 9.0};
         CHECK(!(matA == matDiff4));
 
-        Core::Matrix3 matDiff5({1.0, 2.0, 3.0, 4.0, 5.1, 6.0, 7.0, 8.0, 9.0});
+        Core::Matrix3 matDiff5 = {1.0, 2.0, 3.0, 4.0, 5.1, 6.0, 7.0, 8.0, 9.0};
         CHECK(!(matA == matDiff5));
 
-        Core::Matrix3 matDiff6({1.0, 2.0, 3.0, 4.0, 5.0, 6.1, 7.0, 8.0, 9.0});
+        Core::Matrix3 matDiff6 = {1.0, 2.0, 3.0, 4.0, 5.0, 6.1, 7.0, 8.0, 9.0};
         CHECK(!(matA == matDiff6));
 
-        Core::Matrix3 matDiff7({1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.1, 8.0, 9.0});
+        Core::Matrix3 matDiff7 = {1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.1, 8.0, 9.0};
         CHECK(!(matA == matDiff7));
 
-        Core::Matrix3 matDiff8({1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.1, 9.0});
+        Core::Matrix3 matDiff8 = {1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.1, 9.0};
         CHECK(!(matA == matDiff8));
 
-        Core::Matrix3 matDiff9({1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.1});
+        Core::Matrix3 matDiff9 = {1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.1};
         CHECK(!(matA == matDiff9));
     }
 
     SECTION("Matrix inequality operator works") {
-        Core::Matrix3 matEqual({1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0});
+        Core::Matrix3 matEqual = {1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0};
         CHECK(!(matA != matEqual));
 
-        Core::Matrix3 matDiff1({1.1, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0});
+        Core::Matrix3 matDiff1 = {1.1, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0};
         CHECK(matA != matDiff1);
 
-        Core::Matrix3 matDiff2({1.0, 2.1, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0});
+        Core::Matrix3 matDiff2 = {1.0, 2.1, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0};
         CHECK(matA != matDiff2);
 
-        Core::Matrix3 matDiff3({1.0, 2.0, 3.1, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0});
+        Core::Matrix3 matDiff3 = {1.0, 2.0, 3.1, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0};
         CHECK(matA != matDiff3);
 
-        Core::Matrix3 matDiff4({1.0, 2.0, 3.0, 4.1, 5.0, 6.0, 7.0, 8.0, 9.0});
+        Core::Matrix3 matDiff4 = {1.0, 2.0, 3.0, 4.1, 5.0, 6.0, 7.0, 8.0, 9.0};
         CHECK(matA != matDiff4);
 
-        Core::Matrix3 matDiff5({1.0, 2.0, 3.0, 4.0, 5.1, 6.0, 7.0, 8.0, 9.0});
+        Core::Matrix3 matDiff5 = {1.0, 2.0, 3.0, 4.0, 5.1, 6.0, 7.0, 8.0, 9.0};
         CHECK(matA != matDiff5);
 
-        Core::Matrix3 matDiff6({1.0, 2.0, 3.0, 4.0, 5.0, 6.1, 7.0, 8.0, 9.0});
+        Core::Matrix3 matDiff6 = {1.0, 2.0, 3.0, 4.0, 5.0, 6.1, 7.0, 8.0, 9.0};
         CHECK(matA != matDiff6);
 
-        Core::Matrix3 matDiff7({1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.1, 8.0, 9.0});
+        Core::Matrix3 matDiff7 = {1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.1, 8.0, 9.0};
         CHECK(matA != matDiff7);
 
-        Core::Matrix3 matDiff8({1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.1, 9.0});
+        Core::Matrix3 matDiff8 = {1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.1, 9.0};
         CHECK(matA != matDiff8);
 
-        Core::Matrix3 matDiff9({1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.1});
+        Core::Matrix3 matDiff9 = {1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.1};
         CHECK(matA != matDiff9);
     }
+
+    SECTION("Special matrix operations work") {
+        Core::Matrix3 expectedStarVecA = {0, 3.0, -2.0, -3.0, 0, 1.0, 2.0, -1.0, 0};
+        CHECK_THAT(Core::star(vecA), ApproxEqual(expectedStarVecA));
+
+        Core::Matrix3 expectedStarVecB = {0, -1.0, 2.0, 1.0, 0, -3.0, -2.0, 3.0, 0};
+        CHECK_THAT(Core::star(vecB), ApproxEqual(expectedStarVecB));
+    }
+
+
 }

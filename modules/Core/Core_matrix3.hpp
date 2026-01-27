@@ -43,10 +43,10 @@ namespace Core{
         Matrix3(std::initializer_list<double>);
 
         // Access operator:
-        double& operator()(std::size_t row, std::size_t column);
+        double& operator()(const std::size_t row, const std::size_t column);
 
         // Accessors:
-        [[nodiscard]] double element(std::size_t row, std::size_t column) const;
+        [[nodiscard]] double element(const std::size_t row, const std::size_t column) const;
         [[nodiscard]] std::array<double, 9> vectorize() const;
 
         //overloaded operators:
@@ -74,6 +74,10 @@ namespace Core{
     Matrix3 operator*(const Matrix3 &lhs, const Matrix3 &rhs);
     bool operator==(Matrix3 const &lhs, Matrix3 const &rhs);
     bool operator!=(const Matrix3 &lhs, const Matrix3 &rhs);
+
+
+    // special operators for molecule rotation calculation
+    Matrix3 star(Vector vec);
 }
 
 std::ostream& operator <<(std::ostream& out, Core::Matrix3 const& matrix);

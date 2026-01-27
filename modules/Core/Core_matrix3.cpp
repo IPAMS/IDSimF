@@ -28,7 +28,6 @@
 
 #include <cassert>
 
-
 Core::Matrix3::Matrix3(const double* elements) {
     elements_[0][0] = elements[0];
     elements_[1][0] = elements[1];
@@ -56,12 +55,12 @@ Core::Matrix3::Matrix3(std::initializer_list<double> elements) {
     elements_[2][2] = elemBegin[8];
 }
 
-double& Core::Matrix3::operator()(std::size_t row, std::size_t column){
+double& Core::Matrix3::operator()(const std::size_t row, const std::size_t column){
     assert(row < 3 && column < 3);
     return elements_[row][column];
 }
 
-double Core::Matrix3::element(std::size_t row, std::size_t column) const {
+double Core::Matrix3::element(const std::size_t row, const std::size_t column) const {
     assert(row < 3 && column < 3);
     return elements_[row][column];
 }
@@ -152,6 +151,26 @@ bool Core::operator==(Matrix3 const& lhs, Matrix3 const& rhs) {
 
 bool Core::operator!=(const Matrix3& lhs, const Matrix3& rhs) {
     return !(lhs == rhs);
+}
+
+/**
+ * Special operation for molecule (rigid body) rotation calculation according to:
+ * An Introduction to Physically Based Modeling: Rigid Body Simulation I—Unconstrained Rigid Body Dynamics
+ * David Baraff
+ *
+ * Returns the matrix
+ *     0     -v[2]   v[1]
+ *  v[2]        0   -v[0]
+ * -v[1]      v[0]     0
+ *
+ * for an input vector v ={v[0], v[1], v[2]}
+ */
+Core::Matrix3 Core::star(Vector vec) {
+    return{
+        0, vec.z(), -vec.y(),
+        -vec.z(), 0, vec.x(),
+        vec.y(), -vec.x(), 0
+    };
 }
 
 
