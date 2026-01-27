@@ -62,10 +62,18 @@ namespace Core{
         friend bool operator==(Matrix3 const &lhs, Matrix3 const &rhs);
         friend bool operator!=(const Matrix3 &lhs, const Matrix3 &rhs);
 
-
     private:
         double elements_[3][3] = {{0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}};
     };
+
+    //overloaded operators declarations for namespace:
+    Matrix3 operator+(const Matrix3 &lhs, const Matrix3 &rhs);
+    Matrix3 operator-(const Matrix3 &lhs, const Matrix3 &rhs);
+    Matrix3 operator*(const Matrix3 &mat, double scalar);
+    Vector operator*(const Matrix3 &mat, const Vector &vec);
+    Matrix3 operator*(const Matrix3 &lhs, const Matrix3 &rhs);
+    bool operator==(Matrix3 const &lhs, Matrix3 const &rhs);
+    bool operator!=(const Matrix3 &lhs, const Matrix3 &rhs);
 }
 
 std::ostream& operator <<(std::ostream& out, Core::Matrix3 const& matrix);
