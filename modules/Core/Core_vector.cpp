@@ -29,7 +29,7 @@
  * @param y y component
  * @param z z component
  */
-Core::Vector::Vector(double x,double y, double z)
+Core::Vector::Vector(double x, double y, double z)
 :
     x_(x),
     y_(y),
@@ -127,43 +127,42 @@ double Core::Vector::magnitudeSquared() const{
     return (x_*x_ + y_*y_ + z_*z_);
 }
 
-Core::Vector Core::Vector::crossProduct(const Core::Vector &rhs) const{
-    return Core::Vector(
-          y_ * rhs.z() - z_ * rhs.y()
-        , z_ * rhs.x() - x_ * rhs.z()
-        , x_ * rhs.y() - y_ * rhs.x()
-    );
+Core::Vector Core::Vector::crossProduct(const Vector &rhs) const{
+    return {
+          y_ * rhs.z() - z_ * rhs.y(),
+          z_ * rhs.x() - x_ * rhs.z(),
+          x_ * rhs.y() - y_ * rhs.x() };
 }
 
 // overloaded operators:
-Core::Vector& Core::Vector::operator+=(const Core::Vector &rhs){
+Core::Vector& Core::Vector::operator+=(const Vector &rhs){
     this->x_ += rhs.x_;
     this->y_ += rhs.y_;
     this->z_ += rhs.z_;
 
     return *this;
 }
-Core::Vector Core::operator+(const Core::Vector &lhs, const Core::Vector & rhs){
-    return Core::Vector(lhs.x_ + rhs.x_, lhs.y_ + rhs.y_, lhs.z_ + rhs.z_);
+Core::Vector Core::operator+(const Vector &lhs, const Vector & rhs){
+    return {lhs.x_ + rhs.x_, lhs.y_ + rhs.y_, lhs.z_ + rhs.z_};
 }
 
-Core::Vector Core::operator-(const Core::Vector &lhs, const Core::Vector &rhs){
-    return Core::Vector(lhs.x_ - rhs.x_, lhs.y_ - rhs.y_, lhs.z_ - rhs.z_);
+Core::Vector Core::operator-(const Vector &lhs, const Vector &rhs){
+    return {lhs.x_ - rhs.x_, lhs.y_ - rhs.y_, lhs.z_ - rhs.z_};
 }
 
-double Core::operator*(const Core::Vector &lhs, const Core::Vector &rhs){
+double Core::operator*(const Vector &lhs, const Vector &rhs){
     return lhs.x_ * rhs.x_ + lhs.y_ * rhs.y_ + lhs.z_ * rhs.z_;
 }
 
-Core::Vector Core::operator*(const Core::Vector &lhs, double rhs){
-    return Core::Vector(lhs.x_ * rhs, lhs.y_ * rhs, lhs.z_ * rhs);
+Core::Vector Core::operator*(const Vector &lhs, double rhs){
+    return {lhs.x_ * rhs, lhs.y_ * rhs, lhs.z_ * rhs};
 }
 
-Core::Vector Core::operator/(const Core::Vector &lhs, double rhs){
+Core::Vector Core::operator/(const Vector &lhs, double rhs){
     return lhs * (1.0 / rhs);
 }
 
-Core::Vector Core::operator*(double lhs, const Core::Vector &rhs){
+Core::Vector Core::operator*(double lhs, const Vector &rhs){
     return rhs * lhs;
 }
 
@@ -171,16 +170,16 @@ Core::Vector Core::operator*(double lhs, const Core::Vector &rhs){
 // floating point comparison warning
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wfloat-equal"
-bool Core::operator==(Core::Vector const &lhs, Core::Vector const &rhs){
+bool Core::operator==(Vector const &lhs, Vector const &rhs){
     return (lhs.x_ == rhs.x_ && lhs.y_ == rhs.y_ && lhs.z_ == rhs.z_);
 }
 #pragma GCC diagnostic pop
 
-bool Core::operator!=(const Core::Vector &lhs, const Core::Vector &rhs){
+bool Core::operator!=(const Vector &lhs, const Vector &rhs){
     return !(lhs == rhs);
 }
 
-std::ostream& operator<< (std::ostream& os,Core::Vector const& vec)
+std::ostream& operator<< (std::ostream& os, Core::Vector const& vec)
 {
     os << vec.x() << ' ' << vec.y() << ' ' << vec.z();
     return os;
