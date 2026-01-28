@@ -167,10 +167,7 @@ void CollisionModel::MDInteractionsModel::writeTrajectory(double distance, Colli
         *file << positionBgMolecule.x() << ", " << positionBgMolecule.y() << ", " << positionBgMolecule.z() << 
         ", " << distance << ", " << time <<
         ", " << velocityBgMolecule.x() << ", " << velocityBgMolecule.y() << ", " << velocityBgMolecule.z() << 
-        ", " << forceMolecules[1].x() << ", " << forceMolecules[1].y() << ", " << forceMolecules[1].z() <<
-        ", " << dt << ", " << bg.getAtoms().at(0)->getRelativePosition().x() << ", " << bg.getAtoms().at(0)->getRelativePosition().y() 
-        << ", " << bg.getAtoms().at(0)->getRelativePosition().z() << ", " << bg.getAtoms().at(1)->getRelativePosition().x() << ", " <<
-        bg.getAtoms().at(1)->getRelativePosition().y() << ", " << bg.getAtoms().at(1)->getRelativePosition().z() << 
+        ", " << forceMolecules[1].x() << ", " << forceMolecules[1].y() << ", " << forceMolecules[1].z() << ", " << dt <<
         std::endl;
     }
     if(endOfTrajectory == true){
