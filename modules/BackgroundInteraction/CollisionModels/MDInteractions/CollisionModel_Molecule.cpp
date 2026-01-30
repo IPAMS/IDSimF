@@ -58,8 +58,10 @@ CollisionModel::Molecule::Molecule(const Core::Vector &comPos, const Core::Vecto
     this->calcMass();
     this->setIsDipole();
     this->setIsIon(); 
-    this->rotateMolecule();
     this->atomCount = atoms.size();  
+    this->setCoMCoordinates();
+    this->setInertiaBodyMatrix();
+    this->rotateMolecule();
 }
 
 /**
@@ -89,6 +91,8 @@ CollisionModel::Molecule::Molecule(const Core::Vector &comPos, const Core::Vecto
     for(size_t i = 0; i < atomCount; i++) {
         this->atoms.at(i) = std::make_shared<Atom>(*(structure->getAtoms().at(i)));
     }
+    this->setCoMCoordinates();
+    this->setInertiaBodyMatrix();
 
 }
 
@@ -127,6 +131,15 @@ void CollisionModel::Molecule::setDiameter(double diam){
 void CollisionModel::Molecule::setMolecularStructureName(std::string name){
     this->molecularStructureName = name;
 }
+
+void CollisionModel::Molecule::setAngMom(Core::Vector comAngMom){
+    this->centerOfMassAngMom = comAngMom;
+}
+
+void CollisionModel::Molecule::setAngVel(Core::Vector comAngVel){
+    this->centerOfMassAngVel = comAngVel;
+}
+
 
 /**
  * Gets the center-of-mass position
@@ -212,16 +225,36 @@ std::string CollisionModel::Molecule::getMolecularStructureName() const{
     return molecularStructureName;
 }
 
+Core::Matrix3 CollisionModel::Molecule::getInertiaMatrix() const{
+    return inertiaPrinciple;
+}
+
+
+
+Core::Matrix3 CollisionModel::Molecule::getInertiaInvMatrix() const{
+    return inertiaPrincipleInv;
+}
+
+Core::Matrix3 CollisionModel::Molecule::getWorldInvMatrix() const{
+    return inertiaWorldInv;
+}
+
+Core::Vector& CollisionModel::Molecule::getAngMom() {
+    return centerOfMassAngMom;
+}
+
+Core::Vector& CollisionModel::Molecule::getAngVel() {
+    return centerOfMassAngVel;
+}
+
 /**
  * Calculates the current mass of the molecule
  */
 void CollisionModel::Molecule::calcMass(){
     this->mass = 0;
     for(auto& atom : atoms){
-        //std::cout << atom->getMass() << " " << (int)atom->getType() << std::endl;
         this->mass += atom->getMass();
     }
-    
 }
 
 /**
@@ -305,3 +338,68 @@ void CollisionModel::Molecule::rotateMolecule(){
     }
 }
 
+void CollisionModel::Molecule::setInertiaBodyMatrix(){
+    // since this is the body moment of inertia matrix 
+    // only diagonal matrix elements exist and the rest are omitted by 
+    // default 
+    double Ixx = 0, Iyy = 0,  Izz = 0;
+    for(auto& atom : atoms){
+        Core::Vector atomPos = atom->getRelativePosition();
+        Ixx += atom->getMass() * (atomPos.y()*atomPos.y() + atomPos.z()*atomPos.z());
+        Iyy += atom->getMass() * (atomPos.x()*atomPos.x() + atomPos.z()*atomPos.z());
+        Izz += atom->getMass() * (atomPos.x()*atomPos.x() + atomPos.y()*atomPos.y());
+    }
+    #pragma GCC diagnostic push
+    #pragma GCC diagnostic ignored "-Wfloat-equal"
+    if(Ixx != 0){
+        inertiaPrinciple(0,0) = Ixx; 
+        inertiaPrincipleInv(0,0) = 1/Ixx; 
+    }else{
+        inertiaPrinciple(0,0) = 1e-32; 
+        inertiaPrincipleInv(0,0) = 1/1e-32; 
+    }
+    if(Iyy != 0){
+        inertiaPrinciple(1,1) = Iyy; 
+        inertiaPrincipleInv(1,1) = 1/Iyy; 
+    }else{
+        inertiaPrinciple(1,1) = 1e-32; 
+        inertiaPrincipleInv(1,1) = 1/1e-32; 
+    }
+    if(Izz != 0){
+        inertiaPrinciple(2,2) = Izz; 
+        inertiaPrincipleInv(2,2) = 1/Izz; 
+    }else{
+        inertiaPrinciple(2,2) = 1e-32; 
+        inertiaPrincipleInv(2,2) = 1/1e-32; 
+    }
+    #pragma GCC diagnostic pop
+}
+
+
+void CollisionModel::Molecule::setCoMCoordinates(){
+
+    double comX = 0, comY = 0, comZ = 0; 
+    for(auto& atom : atoms){
+        comX += atom->getMass()*atom->getRelativePosition().x();
+        comY += atom->getMass()*atom->getRelativePosition().y();
+        comZ += atom->getMass()*atom->getRelativePosition().z();
+    }
+    comX = 1/mass * comX;  
+    comY = 1/mass * comY;  
+    comZ = 1/mass * comZ;  
+    for(auto& atom : atoms){
+        Core::Vector atomPos = atom->getRelativePosition();
+        atom->setRelativePosition({atomPos.x()-comX, atomPos.y()-comY, atomPos.z()-comZ});
+    }
+}
+
+void CollisionModel::Molecule::setInertiaWorldInvMatrix(Core::Matrix3 R){
+
+    this->inertiaWorldInv =  R*inertiaPrincipleInv*R.transpose();
+
+}
+
+
+Core::Vector CollisionModel::Molecule::calcAngVel(){
+    return inertiaWorldInv*centerOfMassAngMom;
+}

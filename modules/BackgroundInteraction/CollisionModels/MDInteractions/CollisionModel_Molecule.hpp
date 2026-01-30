@@ -30,6 +30,7 @@
 #define IDSIMF_COLLISIONMODEL_MOLECULE_H
 
 #include "CollisionModel_Atom.hpp"
+#include "Core_matrix3.hpp"
 #include "Core_constants.hpp"
 #include "Core_vector.hpp"
 #include "CollisionModel_MolecularStructure.hpp"
@@ -56,6 +57,11 @@ namespace CollisionModel{
         void setAngles(Core::Vector agls);
         void setDiameter(double diam);
         void setMolecularStructureName(std::string name);
+        void setAngMom(Core::Vector comAngMom);
+        void setAngVel(Core::Vector comAngVel);
+        void setInertiaBodyMatrix();
+        void setCoMCoordinates();
+        void setInertiaWorldInvMatrix(Core::Matrix3 R);
 
         // Getter 
         Core::Vector& getComPos();
@@ -70,6 +76,11 @@ namespace CollisionModel{
         std::vector<std::shared_ptr<CollisionModel::Atom>>& getAtoms();
         double getDiameter() const;
         std::string getMolecularStructureName() const; 
+        Core::Matrix3 getInertiaMatrix() const;
+        Core::Matrix3 getInertiaInvMatrix() const;
+        Core::Matrix3 getWorldInvMatrix() const;
+        Core::Vector& getAngMom();
+        Core::Vector& getAngVel();
 
         // Member functions
         void addAtom(std::shared_ptr<CollisionModel::Atom> atm);
@@ -83,6 +94,7 @@ namespace CollisionModel{
         void calcDipole();
         void setIsDipole();
         void setIsIon();
+        Core::Vector calcAngVel();
         
 
         // Attributes
@@ -98,6 +110,12 @@ namespace CollisionModel{
         std::vector<std::shared_ptr<CollisionModel::Atom>> atoms; // Vector of all atoms belonging to this molecule 
         double diameter = 0.0; // Diameter of the molecule for collision probability [m]
         std::string molecularStructureName = "";
+        Core::Matrix3 inertiaPrinciple = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+        Core::Matrix3 inertiaPrincipleInv = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+        Core::Vector centerOfMassAngVel = {0.0, 0.0, 0.0};
+        Core::Vector centerOfMassAngMom = {0.0, 0.0, 0.0};
+        Core::Matrix3 inertiaWorldInv = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+
 
         
     };

@@ -309,3 +309,36 @@ TEST_CASE("Molecule ability to change properties of atoms", "[CollisionModels][M
     
     
 }
+
+TEST_CASE("Test inertia body matrix calculation"){
+    CollisionModel::Atom atm1 = CollisionModel::Atom();
+    atm1.setRelativePosition(Core::Vector(0, 370/2, 0));
+    atm1.setMass(1.0/Core::AMU_TO_KG);
+    CollisionModel::Atom atm2 = CollisionModel::Atom();
+    atm2.setRelativePosition(Core::Vector(0, -370/2, 0));
+    atm2.setMass(1.0/Core::AMU_TO_KG);
+
+    std::vector<std::shared_ptr<CollisionModel::Atom>> atoms = {
+        std::make_shared<CollisionModel::Atom>(std::move(atm1)), std::make_shared<CollisionModel::Atom>(std::move(atm2))};
+    CollisionModel::Molecule mole = CollisionModel::Molecule(Core::Vector(0.0, 0.0, 0.0), 
+                                                                Core::Vector(0.0, 0.0, 0.0),
+                                                                Core::Vector(0.0, 0.0, 0.0),
+                                                                atoms, 0.5);
+    
+    CHECK(mole.getComPos() == Core::Vector(0.0, 0.0, 0.0));
+    CHECK(mole.getComVel() == Core::Vector(0.0, 0.0, 0.0));
+    CHECK(mole.getAngles() == Core::Vector(0.0, 0.0, 0.0));
+    CHECK(mole.getDipole() == Core::Vector(0.0, 0.0, 0.0));
+    CHECK(mole.getIsDipole() == false);
+    CHECK(mole.getIsIon() == false);
+    CHECK(isExactDoubleEqual(mole.getMass(),2.0/Core::AMU_TO_KG*Core::AMU_TO_KG));
+    CHECK(isExactDoubleEqual(mole.getDipoleMag(), 0.0));
+    CHECK(isExactDoubleEqual(mole.getAtomCount(), 2));
+    CHECK(mole.getAtoms().empty() == false);
+    CHECK(isExactDoubleEqual(mole.getDiameter(), 0.5));
+    Core::Matrix3 expectedInertiaM = {68450, 0.0, 0.0, 0.0, 1e-32, 0.0, 0.0, 0.0, 68450};
+    Core::Matrix3 expectedInertiaInvM = {1.0/68450, 0.0, 0.0, 0.0, 1.0/1e-32, 0.0, 0.0, 0.0, 1.0/68450};
+    CHECK_THAT(mole.getInertiaMatrix(), ApproxEqual(expectedInertiaM));
+    CHECK_THAT(mole.getInertiaInvMatrix(), ApproxEqual(expectedInertiaInvM, 1e-6));
+
+}
