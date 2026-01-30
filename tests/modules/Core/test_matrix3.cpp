@@ -188,6 +188,12 @@ TEST_CASE("Test Matrix3 operators", "[Core][Matrix3]") {
         CHECK(matA != matDiff9);
     }
 
+    SECTION("Matrix transpose works"){
+        Core::Matrix3 mat = {0, 3.0, -2.0, -3.0, 0, 1.0, 2.0, -1.0, 0};
+        Core::Matrix3 expectedTranspose = {0, -3.0, 2.0, 3.0, 0, -1.0, -2.0, 1.0, 0};
+        CHECK_THAT(mat.transpose(), ApproxEqual(expectedTranspose));
+    }
+
     SECTION("Special matrix operations work") {
         Core::Matrix3 expectedStarVecA = {0, 3.0, -2.0, -3.0, 0, 1.0, 2.0, -1.0, 0};
         CHECK_THAT(Core::star(vecA), ApproxEqual(expectedStarVecA));

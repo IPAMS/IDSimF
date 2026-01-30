@@ -62,6 +62,8 @@ namespace Core{
         friend bool operator==(Matrix3 const &lhs, Matrix3 const &rhs);
         friend bool operator!=(const Matrix3 &lhs, const Matrix3 &rhs);
 
+        Matrix3 transpose();
+
     private:
         double elements_[3][3] = {{0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}};
     };
@@ -78,6 +80,7 @@ namespace Core{
 
     // special operators for molecule rotation calculation
     Matrix3 star(Vector vec);
+    
 }
 
 std::ostream& operator <<(std::ostream& out, Core::Matrix3 const& matrix);

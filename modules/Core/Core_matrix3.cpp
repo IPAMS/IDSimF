@@ -153,6 +153,14 @@ bool Core::operator!=(const Matrix3& lhs, const Matrix3& rhs) {
     return !(lhs == rhs);
 }
 
+Core::Matrix3 Core::Matrix3::transpose() {
+    return{
+        this->elements_[0][0], this->elements_[0][1], this->elements_[0][2],
+        this->elements_[1][0], this->elements_[1][1], this->elements_[1][2],
+        this->elements_[2][0], this->elements_[2][1], this->elements_[2][2]
+    };
+}
+
 /**
  * Special operation for molecule (rigid body) rotation calculation according to:
  * An Introduction to Physically Based Modeling: Rigid Body Simulation I—Unconstrained Rigid Body Dynamics
@@ -172,7 +180,6 @@ Core::Matrix3 Core::star(Vector vec) {
         vec.y(), -vec.x(), 0
     };
 }
-
 
 std::ostream& operator<< (std::ostream& os, Core::Matrix3 const& mat){
     os << mat.element(0,0) << ' ' << mat.element(0,1)  << ' ' << mat.element(0,2) << "\n"
