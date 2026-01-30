@@ -53,6 +53,7 @@ CollisionModel::MDInteractionsModel::MDInteractionsModel(double staticPressure,
                                                         double collisionRadiusScaling,
                                                         double angleThetaScaling,
                                                         double spawnRadius,
+                                                        bool rotationActive,
                                                         std::unique_ptr<CollisionModel::AbstractMDForceField> forceField,
                                                         std::unordered_map<std::string,  std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection) :
         MDInteractionsModel(
@@ -67,6 +68,35 @@ CollisionModel::MDInteractionsModel::MDInteractionsModel(double staticPressure,
         collisionRadiusScaling,
         angleThetaScaling,
         spawnRadius,
+        rotationActive,
+        std::move(forceField),
+        molecularStructureCollection) { }
+
+CollisionModel::MDInteractionsModel::MDInteractionsModel(double staticPressure,
+                                                        double staticTemperature,
+                                                        double collisionGasMassAmu,
+                                                        double collisionGasDiameterM,
+                                                        std::string collisionMolecule,
+                                                        double integrationTime,
+                                                        double subTimeStep,
+                                                        double collisionRadiusScaling,
+                                                        double angleThetaScaling,
+                                                        double spawnRadius,
+                                                        std::unique_ptr<CollisionModel::AbstractMDForceField> forceField,
+                                                        std::unordered_map<std::string,  std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection) :
+        MDInteractionsModel(
+        getConstantScalarFunction(staticPressure),
+        getConstantVectorFunction(Core::Vector(0.0, 0.0, 0.0)),
+        staticTemperature,
+        collisionGasMassAmu,
+        collisionGasDiameterM,
+        collisionMolecule,
+        integrationTime,
+        subTimeStep,
+        collisionRadiusScaling,
+        angleThetaScaling,
+        spawnRadius,
+        false,
         std::move(forceField),
         molecularStructureCollection) { }
 
@@ -81,6 +111,7 @@ CollisionModel::MDInteractionsModel::MDInteractionsModel(std::function<double(Co
                                                         double collisionRadiusScaling,
                                                         double angleThetaScaling,
                                                         double spawnRadius,
+                                                        bool rotationActive,
                                                         std::unique_ptr<CollisionModel::AbstractMDForceField> forceField,
                                                         std::unordered_map<std::string,  std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection) :
 
@@ -96,6 +127,7 @@ CollisionModel::MDInteractionsModel::MDInteractionsModel(std::function<double(Co
                 collisionRadiusScaling,
                 angleThetaScaling,
                 spawnRadius,
+                rotationActive,
                 std::move(forceField),
                 molecularStructureCollection) { }
 
@@ -112,6 +144,37 @@ CollisionModel::MDInteractionsModel::MDInteractionsModel(std::function<double(Co
                                                         double spawnRadius,
                                                         std::unique_ptr<CollisionModel::AbstractMDForceField> forceField,
                                                         std::unordered_map<std::string,  std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection) :
+
+        MDInteractionsModel(
+                std::move(pressureFunction),
+                std::move(velocityFunction),
+                std::move(temperatureFunction),
+                collisionGasMassAmu,
+                collisionGasDiameterM,
+                collisionMolecule,
+                integrationTime,
+                subTimeStep,
+                collisionRadiusScaling,
+                angleThetaScaling,
+                spawnRadius,
+                false,
+                std::move(forceField),
+                molecularStructureCollection) { }
+
+CollisionModel::MDInteractionsModel::MDInteractionsModel(std::function<double(Core::Vector& location)> pressureFunction,
+                                                        std::function<Core::Vector(Core::Vector& location)> velocityFunction,
+                                                        std::function<double(const Core::Vector&)> temperatureFunction,
+                                                        double collisionGasMassAmu,
+                                                        double collisionGasDiameterM,
+                                                        std::string collisionMolecule,
+                                                        double integrationTime,
+                                                        double subTimeStep,
+                                                        double collisionRadiusScaling,
+                                                        double angleThetaScaling,
+                                                        double spawnRadius,
+                                                        bool rotationActive,
+                                                        std::unique_ptr<CollisionModel::AbstractMDForceField> forceField,
+                                                        std::unordered_map<std::string,  std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection) :
         pressureFunction_(std::move(pressureFunction)),
         velocityFunction_(std::move(velocityFunction)),
         temperatureFunction_(std::move(temperatureFunction)),
@@ -123,6 +186,7 @@ CollisionModel::MDInteractionsModel::MDInteractionsModel(std::function<double(Co
         collisionRadiusScaling_(collisionRadiusScaling),
         angleThetaScaling_(angleThetaScaling),
         spawnRadius_(spawnRadius),
+        rotationActive_(rotationActive),
         forceField_(std::move(forceField)),
         molecularStructureCollection_(std::move(molecularStructureCollection)) { }
 
