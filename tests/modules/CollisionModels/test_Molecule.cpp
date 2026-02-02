@@ -369,6 +369,11 @@ TEST_CASE("Rotation Matrix calculation"){
 
     CHECK_THAT(mat3, ApproxEqual(expectedRotation3, 1e-6));
 
+    alpha = 0, beta = 0, gamma = M_PI;
+    Core::Matrix3 mat4 = mole.calcRotationMatrix(alpha, beta, gamma);
+    Core::Matrix3 expectedRotation4= {-1, -1.22465e-16, 0, 1.22465e-16, -1, 0, 0, 0, 1.0};
+    CHECK_THAT(mat4, ApproxEqual(expectedRotation4, 1e-6));
+
 }
 
 TEST_CASE("Rotation of molecule by matrix operation"){
@@ -386,18 +391,33 @@ TEST_CASE("Rotation of molecule by matrix operation"){
                                                                 Core::Vector(0.0, 0.0, 0.0),
                                                                 Core::Vector(0.0, 0.0, 0.0),
                                                                 atoms, 0.5);
+    double alpha, beta, gamma;
 
-    double alpha = 0, beta = 0, gamma = M_PI/2;
-    Core::Matrix3 mat1 = mole.calcRotationMatrix(alpha, beta, gamma);
-    mole.setRotationMatrix(mat1);
-    std::cout << mole.getRotationMatrix() << std::endl;
-    mole.rotateMoleculeRotationMatrix();
-    std::cout << mole.getAtoms().at(0)->getRelativePosition() << std::endl;
-    CHECK(atm1.getRelativePosition().x() == Approx(185.0).margin(1E-13));
-    CHECK(atm1.getRelativePosition().y() == Approx(0.0).margin(1E-13));
-    CHECK(atm1.getRelativePosition().z() == Approx(0.0).margin(1E-13));
-    CHECK(atm2.getRelativePosition().x() == Approx(-185.0).margin(1E-13));
-    CHECK(atm2.getRelativePosition().y() == Approx(0.0).margin(1E-13));
-    CHECK(atm2.getRelativePosition().z() == Approx(0.0).margin(1E-13));
+    SECTION("Rotation about z"){
+        alpha = 0, beta = 0, gamma = M_PI/2;
+        Core::Matrix3 mat1 = mole.calcRotationMatrix(alpha, beta, gamma);
+        mole.setRotationMatrix(mat1);
+        mole.rotateMoleculeRotationMatrix();
+        CHECK(mole.getAtoms().at(0)->getRelativePosition().x() == Approx(185.0).margin(1E-13));
+        CHECK(mole.getAtoms().at(0)->getRelativePosition().y() == Approx(0.0).margin(1E-13));
+        CHECK(mole.getAtoms().at(0)->getRelativePosition().z() == Approx(0.0).margin(1E-13));
+        CHECK(mole.getAtoms().at(1)->getRelativePosition().x() == Approx(-185.0).margin(1E-13));
+        CHECK(mole.getAtoms().at(1)->getRelativePosition().y() == Approx(0.0).margin(1E-13));
+        CHECK(mole.getAtoms().at(1)->getRelativePosition().z() == Approx(0.0).margin(1E-13));
+    }
+
+    SECTION("Rotation about y"){
+        alpha = 0, beta = M_PI/2, gamma = 0;
+        Core::Matrix3 mat2 = mole.calcRotationMatrix(alpha, beta, gamma);
+        mole.setRotationMatrix(mat2);
+        mole.rotateMoleculeRotationMatrix();
+        CHECK(mole.getAtoms().at(0)->getRelativePosition().x() == Approx(0.0).margin(1E-13));
+        CHECK(mole.getAtoms().at(0)->getRelativePosition().y() == Approx(185.0).margin(1E-13));
+        CHECK(mole.getAtoms().at(0)->getRelativePosition().z() == Approx(0.0).margin(1E-13));
+        CHECK(mole.getAtoms().at(1)->getRelativePosition().x() == Approx(0.0).margin(1E-13));
+        CHECK(mole.getAtoms().at(1)->getRelativePosition().y() == Approx(-185.0).margin(1E-13));
+        CHECK(mole.getAtoms().at(1)->getRelativePosition().z() == Approx(0.0).margin(1E-13));
+    }
+    
 
 }

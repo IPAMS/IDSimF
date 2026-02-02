@@ -413,17 +413,28 @@ Core::Vector CollisionModel::Molecule::calcAngVel(){
 
 Core::Matrix3 CollisionModel::Molecule::calcRotationMatrix(double alpha, double beta, double gamma){
     Core::Matrix3 mat = { 
-                        cos(beta) * cos(gamma), 
+                        cos(beta) * cos(gamma),
+                        -cos(beta) * sin(gamma),  
+                        sin(beta),
                         (sin(alpha) * sin(beta) * cos(gamma) + cos(alpha) * sin(gamma)), 
-                        (sin(alpha) * sin(gamma) - cos(alpha) * sin(beta) * cos(gamma)), 
-                        -cos(beta) * sin(gamma), 
-                        (cos(alpha) * cos(gamma) - sin(alpha) * sin(beta) * sin(gamma)), 
-                        (cos(alpha) * sin(beta) * sin(gamma) + sin(alpha) * cos(gamma)), 
-                        sin(beta), 
+                        (cos(alpha) * cos(gamma) - sin(alpha) * sin(beta) * sin(gamma)),
                         -sin(alpha) * cos(beta), 
+                        (sin(alpha) * sin(gamma) - cos(alpha) * sin(beta) * cos(gamma)), 
+                        (cos(alpha) * sin(beta) * sin(gamma) + sin(alpha) * cos(gamma)), 
                         cos(alpha) * cos(beta) 
                         };
     return mat; 
+    // R[0, 0] = np.cos(beta) * np.cos(gamma)
+    // R[1, 0] = - np.cos(beta) * np.sin(gamma)
+    // R[2, 0] = np.sin(beta)
+    // R[0, 1] = (np.sin(alpha) * np.sin(beta) * np.cos(gamma) + np.cos(alpha) * np.sin(gamma))
+    // R[1, 1] = (np.cos(alpha) * np.cos(gamma) - np.sin(alpha) * np.sin(beta) * np.sin(gamma))
+    // R[2, 1] = - np.sin(alpha) * np.cos(beta)
+    // R[0, 2] = (np.sin(alpha) * np.sin(gamma) - np.cos(alpha) * np.sin(beta) * np.cos(gamma))
+    // R[1, 2] = (np.cos(alpha) * np.sin(beta) * np.sin(gamma) + np.sin(alpha) * np.cos(gamma))
+    // R[2, 2] = np.cos(alpha) * np.cos(beta)
+    
+    
 }
 
 
@@ -431,8 +442,6 @@ void CollisionModel::Molecule::rotateMoleculeRotationMatrix(){
     for(auto& atom : atoms){
         Core::Vector relPos = atom->getRelativePosition(); 
         Core::Vector newPos = rotationMatrix*relPos;
-        std::cout << newPos << std::endl;
         atom->setRelativePosition(newPos);
-        std::cout << "New: " << atom->getRelativePosition() << std::endl;
     }
 }
