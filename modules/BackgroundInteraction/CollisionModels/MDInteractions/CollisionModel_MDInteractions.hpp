@@ -171,6 +171,9 @@ namespace CollisionModel{
 
     private:
 
+        double initRotation(CollisionModel::Molecule& mole, double temperature_K);
+        double calcRotEnergy(Core::Vector omega, Core::Matrix3 I);
+
         std::function<double(Core::Vector&)> pressureFunction_ = nullptr; ///< a spatial pressure function
         std::function<Core::Vector(Core::Vector&)> velocityFunction_ = nullptr; ///< a spatial velocity function
         std::function<double(const Core::Vector&)>temperatureFunction_ = nullptr;  ///< Spatial temperature function

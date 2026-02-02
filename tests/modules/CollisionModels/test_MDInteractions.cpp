@@ -148,3 +148,50 @@ TEST_CASE("Test modularized force fields", "[CollisionModels][MDInteractionsMode
     CHECK(Approx(forces[0].x()).margin(1e-20) == 4.22513e-16);
     CHECK(Approx(forces[1].x()).margin(1e-20) == -4.22513e-16);
 }
+
+
+TEST_CASE("Test MD Interactions with rotation", "[CollisionModels][MDInteractionsModel]") {
+
+    Core::globalRandomGeneratorPool = std::make_unique<Core::XoshiroTestRandomGeneratorPool>();
+
+    double diameterHe = CollisionModel::MDInteractionsModel::DIAMETER_HE;
+    FileIO::MolecularStructureReader reader = FileIO::MolecularStructureReader();
+    std::unordered_map<std::string,  std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection = reader.readMolecularStructure("test_molecularstructure_reader.json");
+    Core::Particle ion;
+    ion.setMolecularStructure(molecularStructureCollection.at("O2+"));
+    ion.setVelocity(Core::Vector(600.0, 50.0, 0.0));
+    CollisionModel::MDForceField_LJ12_6 forceField(0.205E-30);
+    auto forceFieldPtr = std::make_unique<CollisionModel::MDForceField_LJ12_6>(forceField);
+    CollisionModel::MDInteractionsModel mdSim = CollisionModel::MDInteractionsModel(2000000, 298,
+                                                                                    4.003,
+                                                                                    diameterHe,
+                                                                                    "He",
+                                                                                    1e-10, 
+                                                                                    1E-17,
+                                                                                    2, 1,
+                                                                                    35e-10,
+                                                                                    true,
+                                                                                    std::move(forceFieldPtr),
+                                                                                    molecularStructureCollection);
+
+    double dt = 2e-11;
+    mdSim.setTrajectoryWriter("MD_collisions_rotation_trajectories_test.txt", 35e-10, 0);
+    mdSim.modifyVelocity(ion, dt);
+
+
+    CHECK(Approx(ion.getVelocity().x()).margin(0.2) ==  449.2092547232);
+    CHECK(Approx(ion.getVelocity().y()).margin(0.2) ==  -36.8772475434);
+    CHECK(Approx(ion.getVelocity().z()).margin(0.2) ==  45.5651248115);
+
+
+    unsigned int timestep = 0;
+    double time = 0.0;
+    for(int i = 0; i < 4; i++) {
+        mdSim.updateModelTimestepParameters(timestep, time);
+        mdSim.modifyVelocity(ion, 2e-11);
+    }
+
+    CHECK(Approx(ion.getVelocity().x()).margin(0.8) ==  252.9988351158);
+    CHECK(Approx(ion.getVelocity().y()).margin(0.8) ==  -170.992193862);
+    CHECK(Approx(ion.getVelocity().z()).margin(0.2) ==  -267.150091929);
+}

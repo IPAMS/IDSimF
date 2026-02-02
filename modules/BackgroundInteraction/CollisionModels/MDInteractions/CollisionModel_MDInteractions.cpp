@@ -256,6 +256,26 @@ void CollisionModel::MDInteractionsModel::updateModelTimestepParameters(unsigned
     }
 }
 
+double CollisionModel::MDInteractionsModel::initRotation(CollisionModel::Molecule& mole, double temperature_K){
+    Core::Matrix3 inertiaMatrix = mole.getInertiaMatrix();
+    double I1 = inertiaMatrix(0,0), I2 = inertiaMatrix(1,1), I3=inertiaMatrix(2,2);
+    double energyRotMolecule = 0; 
+    if(I1 > 0) energyRotMolecule += Core::K_BOLTZMANN * temperature_K;
+    if(I2 > 0) energyRotMolecule += Core::K_BOLTZMANN * temperature_K;
+    if(I3 > 0) energyRotMolecule += Core::K_BOLTZMANN * temperature_K;
+    double w1 = sqrt(2*energyRotMolecule/(I1+I2+I3));
+    mole.setAngVel(Core::Vector{w1, w1, w1});
+    Core::Matrix3 initialRotationMatrix = mole.calcRotationMatrix(w1, w1, w1);
+    mole.setRotationMatrix(initialRotationMatrix);
+    mole.rotateMoleculeRotationMatrix();
+
+    return energyRotMolecule;
+}
+
+double CollisionModel::MDInteractionsModel::calcRotEnergy(Core::Vector omega, Core::Matrix3 I){
+    return 0.5*(I(0,0)*omega.x()*omega.x() + I(1,1)*omega.y()*omega.y() + I(2,2*omega.z()*omega.z()));
+}
+
 void CollisionModel::MDInteractionsModel::modifyAcceleration(Core::Vector& /*acceleration*/, Core::Particle& /*particle*/,
                                                          double /*dt*/) {
 
@@ -383,9 +403,13 @@ void CollisionModel::MDInteractionsModel::modifyVelocity(Core::Particle& particl
         //                               rndSource->uniformRealRndValue()*2*pi-pi));
 
         // Give molecule a random orientation:
-        mole.setAngles(Core::Vector(rndSource->uniformRealRndValue()*2*pi-pi,
-                                    rndSource->uniformRealRndValue()*2*pi-pi,
-                                    rndSource->uniformRealRndValue()*2*pi-pi));
+        // mole.setAngles(Core::Vector(rndSource->uniformRealRndValue()*2*pi-pi,
+        //                             rndSource->uniformRealRndValue()*2*pi-pi,
+        //                             rndSource->uniformRealRndValue()*2*pi-pi));
+
+        double energyRotMolecule = initRotation(mole, temperature_K);
+        double energyRotBg = initRotation(bgMole, temperature_K);
+
 
         std::vector<CollisionModel::Molecule*> moleculesPtr = {&mole, &bgMole};
 
@@ -395,6 +419,9 @@ void CollisionModel::MDInteractionsModel::modifyVelocity(Core::Particle& particl
         for(auto* molecule : moleculesPtr){
             startVelocity.push_back(molecule->getComVel());
             startEnergy += 0.5 * molecule->getMass() * molecule->getComVel().magnitudeSquared();
+        }
+        if(rotationActive_){
+            startEnergy += (energyRotMolecule + energyRotBg);
         }
 
         // Call the sub-integrator
@@ -407,6 +434,7 @@ void CollisionModel::MDInteractionsModel::modifyVelocity(Core::Particle& particl
         double endEnergy = 0;
         for(auto* molecule : moleculesPtr){
             endEnergy += 0.5 * molecule->getMass() * molecule->getComVel().magnitudeSquared();
+            endEnergy += calcRotEnergy(molecule->getAngVel(), molecule->getInertiaMatrix());
         }
         // check if energy is conserved up to 10% 
         // if not halve the starting timestep length 
@@ -667,21 +695,21 @@ bool CollisionModel::MDInteractionsModel::rk4InternAdaptiveStep(std::vector<Coll
     // double tolerance = 1e-8;
     double pi = 3.14159;
     Core::RandomSource* rndSource = Core::globalRandomGeneratorPool->getThreadRandomSource();
-    Core::Vector nitrogenOne;
-    Core::Vector nitrogenTwo; 
-    Core::Vector nitrogenAngles = {rndSource->uniformRealRndValue()*2*pi-pi, 
-                                rndSource->uniformRealRndValue()*2*pi-pi, 
-                                rndSource->uniformRealRndValue()*2*pi-pi};
-    double I = 0;
-    double angularVelocity = 0;
-    if(moleculesPtr[1]->getMolecularStructureName()=="N2" || moleculesPtr[1]->getMolecularStructureName()=="N2Approx"){
-        nitrogenOne = molecularStructureCollection_.at(moleculesPtr[1]->getMolecularStructureName())->getAtoms().at(0)->getRelativePosition();
-        nitrogenTwo = molecularStructureCollection_.at(moleculesPtr[1]->getMolecularStructureName())->getAtoms().at(1)->getRelativePosition();
-        I = CollisionModel::MolecularStructure::getMomentOfInertia(nitrogenOne.y(), nitrogenTwo.y(),
-                                                                    moleculesPtr[1]->getMass()/2, moleculesPtr[1]->getMass()/2);
-        angularVelocity = CollisionModel::MolecularStructure::getAngularVelocity(temperatureFunction_(moleculesPtr[1]->getComPos()), I);
-    }
-    moleculesPtr[1]->setAngles(nitrogenAngles);
+    // Core::Vector nitrogenOne;
+    // Core::Vector nitrogenTwo; 
+    // Core::Vector nitrogenAngles = {rndSource->uniformRealRndValue()*2*pi-pi, 
+    //                             rndSource->uniformRealRndValue()*2*pi-pi, 
+    //                             rndSource->uniformRealRndValue()*2*pi-pi};
+    // double I = 0;
+    // double angularVelocity = 0;
+    // if(moleculesPtr[1]->getMolecularStructureName()=="N2" || moleculesPtr[1]->getMolecularStructureName()=="N2Approx"){
+    //     nitrogenOne = molecularStructureCollection_.at(moleculesPtr[1]->getMolecularStructureName())->getAtoms().at(0)->getRelativePosition();
+    //     nitrogenTwo = molecularStructureCollection_.at(moleculesPtr[1]->getMolecularStructureName())->getAtoms().at(1)->getRelativePosition();
+    //     I = CollisionModel::MolecularStructure::getMomentOfInertia(nitrogenOne.y(), nitrogenTwo.y(),
+    //                                                                 moleculesPtr[1]->getMass()/2, moleculesPtr[1]->getMass()/2);
+    //     angularVelocity = CollisionModel::MolecularStructure::getAngularVelocity(temperatureFunction_(moleculesPtr[1]->getComPos()), I);
+    // }
+    // moleculesPtr[1]->setAngles(nitrogenAngles);
 
     while(integrationTimeSum < finalTime){
 
@@ -771,13 +799,13 @@ bool CollisionModel::MDInteractionsModel::rk4InternAdaptiveStep(std::vector<Coll
             molecule->setComPos(newComPosOrder4[i]);
             molecule->setComVel(newComVelOrder4[i]);
 
-            if(molecule->getMolecularStructureName()=="N2" || molecule->getMolecularStructureName()=="N2Approx"){
-                CollisionModel::Atom::rotate2D(angularVelocity*dt, nitrogenOne);
-                CollisionModel::Atom::rotate2D(angularVelocity*dt, nitrogenTwo);
-                molecule->getAtoms().at(0)->setRelativePosition(nitrogenOne);
-                molecule->getAtoms().at(1)->setRelativePosition(nitrogenTwo);
-                molecule->setAngles(nitrogenAngles);
-            }
+            // if(molecule->getMolecularStructureName()=="N2" || molecule->getMolecularStructureName()=="N2Approx"){
+            //     CollisionModel::Atom::rotate2D(angularVelocity*dt, nitrogenOne);
+            //     CollisionModel::Atom::rotate2D(angularVelocity*dt, nitrogenTwo);
+            //     molecule->getAtoms().at(0)->setRelativePosition(nitrogenOne);
+            //     molecule->getAtoms().at(1)->setRelativePosition(nitrogenTwo);
+            //     molecule->setAngles(nitrogenAngles);
+            // }
             i++;
 
         }

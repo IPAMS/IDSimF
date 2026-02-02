@@ -445,3 +445,7 @@ void CollisionModel::Molecule::rotateMoleculeRotationMatrix(){
         atom->setRelativePosition(newPos);
     }
 }
+
+Core::Matrix3 CollisionModel::Molecule::calcRotationMatrixUpdate(Core::Matrix3 R, Core::Vector omega){
+    return Core::star(omega)*R;
+}

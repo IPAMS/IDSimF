@@ -92,6 +92,8 @@ namespace CollisionModel{
         void genInertiaBodyMatrix();
         void genInertiaWorldInvMatrix();
 
+        static Core::Matrix3 calcRotationMatrixUpdate(Core::Matrix3 R, Core::Vector omega);
+
     private:
 
         // Helper functions
