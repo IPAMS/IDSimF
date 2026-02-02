@@ -342,3 +342,31 @@ TEST_CASE("Test inertia body matrix calculation"){
     CHECK_THAT(mole.getInertiaInvMatrix(), ApproxEqual(expectedInertiaInvM, 1e-6));
 
 }
+
+TEST_CASE("Rotation Matrix calculation"){
+   
+    CollisionModel::Molecule mole = CollisionModel::Molecule(Core::Vector(0.0, 0.0, 0.0), 
+                                                                Core::Vector(0.0, 0.0, 0.0));
+    
+    CHECK(mole.getComPos() == Core::Vector(0.0, 0.0, 0.0));
+    CHECK(mole.getComVel() == Core::Vector(0.0, 0.0, 0.0));
+
+    double alpha = 0, beta = 0, gamma = 0;
+    Core::Matrix3 mat1 = mole.calcRotationMatrix(alpha, beta, gamma);
+    Core::Matrix3 expectedRotation1 = {1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0};
+
+     CHECK_THAT(mat1, ApproxEqual(expectedRotation1, 1e-6));
+
+    alpha = M_PI, beta = 0, gamma = 0;
+    Core::Matrix3 mat2 = mole.calcRotationMatrix(alpha, beta, gamma);
+    Core::Matrix3 expectedRotation2= {1.0, 0.0, 0.0, 0.0, -1, -1.22465e-16, 0, 1.22465e-16, -1};
+
+    CHECK_THAT(mat2, ApproxEqual(expectedRotation2, 1e-6));
+
+    alpha = M_PI, beta = M_PI, gamma = 0;
+    Core::Matrix3 mat3 = mole.calcRotationMatrix(alpha, beta, gamma);
+    Core::Matrix3 expectedRotation3= {-1, 0, 1.22465e-16, 1.49975978e-32, -1, 1.22465e-16,  1.22465e-16,  1.22465e-16, 1.0};
+
+    CHECK_THAT(mat3, ApproxEqual(expectedRotation3, 1e-6));
+
+}

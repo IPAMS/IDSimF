@@ -60,7 +60,7 @@ CollisionModel::Molecule::Molecule(const Core::Vector &comPos, const Core::Vecto
     this->setIsIon(); 
     this->atomCount = atoms.size();  
     this->setCoMCoordinates();
-    this->setInertiaBodyMatrix();
+    this->genInertiaBodyMatrix();
     this->rotateMolecule();
 }
 
@@ -92,7 +92,7 @@ CollisionModel::Molecule::Molecule(const Core::Vector &comPos, const Core::Vecto
         this->atoms.at(i) = std::make_shared<Atom>(*(structure->getAtoms().at(i)));
     }
     this->setCoMCoordinates();
-    this->setInertiaBodyMatrix();
+    this->genInertiaBodyMatrix();
 
 }
 
@@ -140,6 +140,9 @@ void CollisionModel::Molecule::setAngVel(Core::Vector comAngVel){
     this->centerOfMassAngVel = comAngVel;
 }
 
+void CollisionModel::Molecule::setRotationMatrix(Core::Matrix3 R){
+    this->rotationMatrix = R; 
+}
 
 /**
  * Gets the center-of-mass position
@@ -247,6 +250,10 @@ Core::Vector& CollisionModel::Molecule::getAngVel() {
     return centerOfMassAngVel;
 }
 
+Core::Matrix3 CollisionModel::Molecule::getRotationMatrix() const{
+    return rotationMatrix;
+}
+
 /**
  * Calculates the current mass of the molecule
  */
@@ -338,7 +345,7 @@ void CollisionModel::Molecule::rotateMolecule(){
     }
 }
 
-void CollisionModel::Molecule::setInertiaBodyMatrix(){
+void CollisionModel::Molecule::genInertiaBodyMatrix(){
     // since this is the body moment of inertia matrix 
     // only diagonal matrix elements exist and the rest are omitted by 
     // default 
@@ -393,13 +400,28 @@ void CollisionModel::Molecule::setCoMCoordinates(){
     }
 }
 
-void CollisionModel::Molecule::setInertiaWorldInvMatrix(Core::Matrix3 R){
+void CollisionModel::Molecule::genInertiaWorldInvMatrix(){
 
-    this->inertiaWorldInv =  R*inertiaPrincipleInv*R.transpose();
+    this->inertiaWorldInv =  rotationMatrix*inertiaPrincipleInv*rotationMatrix.transpose();
 
 }
 
 
 Core::Vector CollisionModel::Molecule::calcAngVel(){
     return inertiaWorldInv*centerOfMassAngMom;
+}
+
+Core::Matrix3 CollisionModel::Molecule::calcRotationMatrix(double alpha, double beta, double gamma){
+    Core::Matrix3 mat = { 
+                        cos(beta) * cos(gamma), 
+                        (sin(alpha) * sin(beta) * cos(gamma) + cos(alpha) * sin(gamma)), 
+                        (sin(alpha) * sin(gamma) - cos(alpha) * sin(beta) * cos(gamma)), 
+                        -cos(beta) * sin(gamma), 
+                        (cos(alpha) * cos(gamma) - sin(alpha) * sin(beta) * sin(gamma)), 
+                        (cos(alpha) * sin(beta) * sin(gamma) + sin(alpha) * cos(gamma)), 
+                        sin(beta), 
+                        -sin(alpha) * cos(beta), 
+                        cos(alpha) * cos(beta) 
+                        };
+    return mat; 
 }

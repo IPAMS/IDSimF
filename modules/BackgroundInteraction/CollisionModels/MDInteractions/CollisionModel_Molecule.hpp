@@ -59,9 +59,9 @@ namespace CollisionModel{
         void setMolecularStructureName(std::string name);
         void setAngMom(Core::Vector comAngMom);
         void setAngVel(Core::Vector comAngVel);
-        void setInertiaBodyMatrix();
         void setCoMCoordinates();
-        void setInertiaWorldInvMatrix(Core::Matrix3 R);
+        void setRotationMatrix(Core::Matrix3 R);
+        
 
         // Getter 
         Core::Vector& getComPos();
@@ -81,11 +81,16 @@ namespace CollisionModel{
         Core::Matrix3 getWorldInvMatrix() const;
         Core::Vector& getAngMom();
         Core::Vector& getAngVel();
+        Core::Matrix3 getRotationMatrix() const;
 
         // Member functions
         void addAtom(std::shared_ptr<CollisionModel::Atom> atm);
         void removeAtom(std::shared_ptr<CollisionModel::Atom> atm);
         void rotateMolecule();
+        Core::Matrix3 calcRotationMatrix(double alpha, double beta, double gamma);
+        void rotateMoleculeRotationMatrix();
+        void genInertiaBodyMatrix();
+        void genInertiaWorldInvMatrix();
 
     private:
 
@@ -95,6 +100,7 @@ namespace CollisionModel{
         void setIsDipole();
         void setIsIon();
         Core::Vector calcAngVel();
+        
         
 
         // Attributes
@@ -115,6 +121,7 @@ namespace CollisionModel{
         Core::Vector centerOfMassAngVel = {0.0, 0.0, 0.0};
         Core::Vector centerOfMassAngMom = {0.0, 0.0, 0.0};
         Core::Matrix3 inertiaWorldInv = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+        Core::Matrix3 rotationMatrix = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
 
 
         
