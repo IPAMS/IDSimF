@@ -431,6 +431,8 @@ void CollisionModel::Molecule::rotateMoleculeRotationMatrix(){
     for(auto& atom : atoms){
         Core::Vector relPos = atom->getRelativePosition(); 
         Core::Vector newPos = rotationMatrix*relPos;
+        std::cout << newPos << std::endl;
         atom->setRelativePosition(newPos);
+        std::cout << "New: " << atom->getRelativePosition() << std::endl;
     }
 }

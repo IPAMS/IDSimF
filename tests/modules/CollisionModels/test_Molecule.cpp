@@ -370,3 +370,34 @@ TEST_CASE("Rotation Matrix calculation"){
     CHECK_THAT(mat3, ApproxEqual(expectedRotation3, 1e-6));
 
 }
+
+TEST_CASE("Rotation of molecule by matrix operation"){
+   
+    CollisionModel::Atom atm1 = CollisionModel::Atom();
+    atm1.setRelativePosition(Core::Vector(0, 370/2, 0));
+    atm1.setMass(1.0);
+    CollisionModel::Atom atm2 = CollisionModel::Atom();
+    atm2.setRelativePosition(Core::Vector(0, -370/2, 0));
+    atm2.setMass(1.0);
+
+    std::vector<std::shared_ptr<CollisionModel::Atom>> atoms = {
+        std::make_shared<CollisionModel::Atom>(std::move(atm1)), std::make_shared<CollisionModel::Atom>(std::move(atm2))};
+    CollisionModel::Molecule mole = CollisionModel::Molecule(Core::Vector(0.0, 0.0, 0.0), 
+                                                                Core::Vector(0.0, 0.0, 0.0),
+                                                                Core::Vector(0.0, 0.0, 0.0),
+                                                                atoms, 0.5);
+
+    double alpha = 0, beta = 0, gamma = M_PI/2;
+    Core::Matrix3 mat1 = mole.calcRotationMatrix(alpha, beta, gamma);
+    mole.setRotationMatrix(mat1);
+    std::cout << mole.getRotationMatrix() << std::endl;
+    mole.rotateMoleculeRotationMatrix();
+    std::cout << mole.getAtoms().at(0)->getRelativePosition() << std::endl;
+    CHECK(atm1.getRelativePosition().x() == Approx(185.0).margin(1E-13));
+    CHECK(atm1.getRelativePosition().y() == Approx(0.0).margin(1E-13));
+    CHECK(atm1.getRelativePosition().z() == Approx(0.0).margin(1E-13));
+    CHECK(atm2.getRelativePosition().x() == Approx(-185.0).margin(1E-13));
+    CHECK(atm2.getRelativePosition().y() == Approx(0.0).margin(1E-13));
+    CHECK(atm2.getRelativePosition().z() == Approx(0.0).margin(1E-13));
+
+}
