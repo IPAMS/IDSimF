@@ -425,3 +425,12 @@ Core::Matrix3 CollisionModel::Molecule::calcRotationMatrix(double alpha, double 
                         };
     return mat; 
 }
+
+
+void CollisionModel::Molecule::rotateMoleculeRotationMatrix(){
+    for(auto& atom : atoms){
+        Core::Vector relPos = atom->getRelativePosition(); 
+        Core::Vector newPos = rotationMatrix*relPos;
+        atom->setRelativePosition(newPos);
+    }
+}
