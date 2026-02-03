@@ -407,8 +407,13 @@ void CollisionModel::MDInteractionsModel::modifyVelocity(Core::Particle& particl
         //                             rndSource->uniformRealRndValue()*2*pi-pi,
         //                             rndSource->uniformRealRndValue()*2*pi-pi));
 
-        double energyRotMolecule = initRotation(mole, temperature_K);
-        double energyRotBg = initRotation(bgMole, temperature_K);
+        double energyRotMolecule = 0;
+        double energyRotBg = 0;
+        if(rotationActive_){
+            energyRotMolecule = initRotation(mole, temperature_K);
+            energyRotBg = initRotation(bgMole, temperature_K);
+        }
+       
 
 
         std::vector<CollisionModel::Molecule*> moleculesPtr = {&mole, &bgMole};
@@ -434,7 +439,7 @@ void CollisionModel::MDInteractionsModel::modifyVelocity(Core::Particle& particl
         double endEnergy = 0;
         for(auto* molecule : moleculesPtr){
             endEnergy += 0.5 * molecule->getMass() * molecule->getComVel().magnitudeSquared();
-            endEnergy += calcRotEnergy(molecule->getAngVel(), molecule->getInertiaMatrix());
+            if(rotationActive_) endEnergy += calcRotEnergy(molecule->getAngVel(), molecule->getInertiaMatrix());
         }
         // check if energy is conserved up to 10% 
         // if not halve the starting timestep length 
@@ -659,6 +664,8 @@ bool CollisionModel::MDInteractionsModel::rk4InternAdaptiveStep(std::vector<Coll
     size_t nMolecules = moleculesPtr.size();
     std::vector<Core::Vector> forceMolecules(nMolecules);
 
+    std::vector<Core::Vector> torqueMolecules(nMolecules);
+
     size_t i = 0;
     int steps = 0;
     double distance = 0.0;
@@ -677,6 +684,13 @@ bool CollisionModel::MDInteractionsModel::rk4InternAdaptiveStep(std::vector<Coll
     std::vector<Core::Vector> positionMolecules(nMolecules);
     std::vector<Core::Vector> initialPositionMolecules(nMolecules);
     std::vector<Core::Vector> initialVelocityMolecules(nMolecules);
+
+    std::vector<Core::Matrix3> rotMolecules(nMolecules);
+    std::vector<Core::Vector> angMomentMolecules(nMolecules);
+    std::vector<Core::Vector> initialAngMomentMolecules(nMolecules);
+    std::vector<Core::Matrix3> initialRotMolecules(nMolecules);
+
+    std::vector<Core::Matrix3> initialInertInvMolecules(nMolecules);
    
     double weight[5][6] = { 
                             {1./4, 0, 0, 0, 0, 0},
@@ -690,6 +704,14 @@ bool CollisionModel::MDInteractionsModel::rk4InternAdaptiveStep(std::vector<Coll
     std::array<Core::Vector, 2> newComVelOrder5;
     std::array<Core::Vector, 2> newComPosOrder4; 
     std::array<Core::Vector, 2> newComVelOrder4;
+
+    std::array<std::array<Core::Matrix3, 2>, 6> u;
+    std::array<std::array<Core::Vector, 2>, 6> v;
+    std::array<Core::Vector, 2> newComAngMomOrder4; 
+    std::array<Core::Matrix3, 2> newComRotOrder4;
+
+    Core::Matrix3 worldInvInertia;
+
     std::array<double, 2> R;
     double globalR, globalDelta;
     // double tolerance = 1e-8;
@@ -721,6 +743,14 @@ bool CollisionModel::MDInteractionsModel::rk4InternAdaptiveStep(std::vector<Coll
             initialPositionMolecules[i] = molecule->getComPos();
             initialVelocityMolecules[i] = molecule->getComVel();
             mass[i] = molecule->getMass();
+
+            if(rotationActive_){
+                angMomentMolecules[i] = molecule->getAngMom();
+                rotMolecules[i] = molecule->getRotationMatrix();
+                initialAngMomentMolecules[i] = molecule->getAngMom();
+                initialRotMolecules[i] = molecule->getRotationMatrix();
+                initialInertInvMolecules[i] = molecule->getInertiaInvMatrix();
+            }
             i++;
         }
 
@@ -729,11 +759,21 @@ bool CollisionModel::MDInteractionsModel::rk4InternAdaptiveStep(std::vector<Coll
         for(size_t q = 0; q < nMolecules; q++){
             k[0][q] = forceMolecules[q] * dt / mass[q];
             l[0][q] = velocityMolecules[q] * dt;
+            if(rotationActive_){
+                worldInvInertia = rotMolecules[q]*initialInertInvMolecules[q]*rotMolecules[q].transpose();
+                Core::Vector omega = worldInvInertia*angMomentMolecules[q];
+                v[0][q] = Core::Vector(0.0, 0.0, 0.0);
+                u[0][q] = CollisionModel::Molecule::calcRotationMatrixUpdate(rotMolecules[q], omega) *dt;
+            }
+            
         }
 
         for(size_t n = 1; n < 6; n++){
             for(i = 0; i < nMolecules; i++){
                 positionMolecules[i] = initialPositionMolecules[i];
+                if(rotationActive_){
+                    rotMolecules[i] = initialRotMolecules[i];
+                }
                 
             }
             for(size_t m = 0; m < 6; m++){
@@ -741,6 +781,10 @@ bool CollisionModel::MDInteractionsModel::rk4InternAdaptiveStep(std::vector<Coll
                 for(auto* molecule : moleculesPtr){
                     positionMolecules[i] += l[m][i]*weight[n-1][m];
                     molecule->setComPos(positionMolecules[i]);
+                    if(rotationActive_){
+                        rotMolecules[i] = rotMolecules[i] + u[m][i]*weight[n-1][m];
+                        molecule->setRotationMatrix(rotMolecules[i]);
+                    }
                     i++;
                 }
             }
@@ -750,10 +794,21 @@ bool CollisionModel::MDInteractionsModel::rk4InternAdaptiveStep(std::vector<Coll
             for(i = 0; i < nMolecules; i++){
                 k[n][i] = forceMolecules[i] * dt / mass[i];
                 l[n][i] = velocityMolecules[i];
+
+                if(rotationActive_){
+                    worldInvInertia = rotMolecules[i]*initialInertInvMolecules[i]*rotMolecules[i].transpose();
+                    Core::Vector omega = worldInvInertia*angMomentMolecules[i];
+                    v[n][i] = Core::Vector(0.0, 0.0, 0.0);
+                    u[n][i] = CollisionModel::Molecule::calcRotationMatrixUpdate(rotMolecules[i], omega);
+                }
+
                 for(size_t m = 0; m < 6; m++){
                     l[n][i] += k[m][i]*weight[n-1][m];
+                    if(rotationActive_) u[n][i] = u[n][i] + 
+                            CollisionModel::Molecule::calcRotationMatrixUpdate(rotMolecules[i],worldInvInertia*v[m][i]*weight[n-1][m]);
                 }
                 l[n][i] = l[n][i]*dt;
+                u[n][i] = u[n][i]*dt;
             }
 
         }
@@ -769,6 +824,11 @@ bool CollisionModel::MDInteractionsModel::rk4InternAdaptiveStep(std::vector<Coll
             newComVelOrder5[i] = initialVelocityMolecules[i] + (k[0][i] * 16./135 + k[2][i] * 6656./12825 + k[3][i] * 28561./56430 + k[4][i] * (-9./50) + k[5][i] * 2./55);
             newComPosOrder4[i] = initialPositionMolecules[i] + (l[0][i] * 25./216 + l[2][i] * 1408./2565 + l[3][i] * 2197./4104 + l[4][i] * (-1./5));
             newComVelOrder4[i] = initialVelocityMolecules[i] + (k[0][i] * 25./216 + k[2][i] * 1408./2565 + k[3][i] * 2197./4104 + k[4][i] * (-1./5));
+            if(rotationActive_){
+                newComAngMomOrder4[i] = initialAngMomentMolecules[i] + (v[0][i] * 25./216 + v[2][i] * 1408./2565 + v[3][i] * 2197./4104 + v[4][i] * (-1./5));
+                newComRotOrder4[i] = initialRotMolecules[i] + (u[0][i] * (25./216) + u[2][i] * (1408./2565) + u[3][i] * (2197./4104) + u[4][i] * (-1./5));
+            }
+            
         }
 
         #pragma GCC diagnostic push
@@ -798,6 +858,12 @@ bool CollisionModel::MDInteractionsModel::rk4InternAdaptiveStep(std::vector<Coll
             
             molecule->setComPos(newComPosOrder4[i]);
             molecule->setComVel(newComVelOrder4[i]);
+            if(rotationActive_){
+                molecule->setAngMom(newComAngMomOrder4[i]);
+                molecule->setRotationMatrix(newComRotOrder4[i]);
+                Core::Matrix3 worldInvI = newComRotOrder4[i]*initialInertInvMolecules[i]*newComRotOrder4[i].transpose();
+                molecule->setAngVel(worldInvI*newComAngMomOrder4[i]);
+            }
 
             // if(molecule->getMolecularStructureName()=="N2" || molecule->getMolecularStructureName()=="N2Approx"){
             //     CollisionModel::Atom::rotate2D(angularVelocity*dt, nitrogenOne);
