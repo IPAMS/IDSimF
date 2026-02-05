@@ -26,18 +26,18 @@
  ****************************/
 
 
-#include "FileIO_HDF5Reader.hpp"
+#include "FileIO_HDF5File.hpp"
 #include "catch.hpp"
 #include <vector>
 #include <array>
 
-TEST_CASE("Test HDF5 file reader", "[ParticleSimulation][file reader]") {
+TEST_CASE("Test HDF5 file reading", "[ParticleSimulation][file reader][file reader]") {
 
-    FileIO::HDF5Reader h5reader_trajectory("test_particle_trajectory.h5");
-    FileIO::HDF5Reader h5reader_scalarField("test_linear_scalar_field_01.h5");
+    FileIO::HDF5File h5reader_trajectory("test_particle_trajectory.h5");
+    FileIO::HDF5File h5reader_scalarField("test_linear_scalar_field_01.h5");
 
     SECTION("Testing of attribute reading") {
-        SECTION("Hdf5 reader can read string attribute vector") {
+        SECTION("Hdf5 file can read string attribute vector") {
             std::vector<std::string> pNames = h5reader_trajectory.readAttributeVector<std::string>(
                     "particle_trajectory", "particle names");
             REQUIRE(pNames.at(0)=="Substance 1");
@@ -45,14 +45,14 @@ TEST_CASE("Test HDF5 file reader", "[ParticleSimulation][file reader]") {
             REQUIRE(pNames.size()==2);
         }
 
-        SECTION("Hdf5 reader can read integer attribute vector") {
+        SECTION("Hdf5 file can read integer attribute vector") {
             std::vector<int> timeSteps = h5reader_trajectory.readAttributeVector<int>(
                     "particle_trajectory", "number of timesteps");
             REQUIRE(timeSteps.size()==1);
             REQUIRE(timeSteps[0]==8);
         }
 
-        SECTION("Hdf5 reader can read double attribute vector") {
+        SECTION("Hdf5 file can read double attribute vector") {
             std::vector<double> pMasses = h5reader_trajectory.readAttributeVector<double>(
                     "particle_trajectory", "particle masses");
             REQUIRE(pMasses.size()==2);
@@ -101,7 +101,7 @@ TEST_CASE("Test HDF5 file reader", "[ParticleSimulation][file reader]") {
     SECTION("Data sets with double type are readable"){
 
         SECTION("Read times vector from particle trajectory"){
-            FileIO::HDF5Reader::DataField dFieldTimes = h5reader_trajectory.readDataset<1>(
+            FileIO::HDF5File::DataField dFieldTimes = h5reader_trajectory.readDataset<1>(
                     "particle_trajectory/times");
             REQUIRE(dFieldTimes.rank == 1);
             REQUIRE(dFieldTimes.data.size() == 8);
@@ -110,19 +110,19 @@ TEST_CASE("Test HDF5 file reader", "[ParticleSimulation][file reader]") {
         }
 
         SECTION("Read particle simulation frame from particle trajectory"){
-            FileIO::HDF5Reader::DataField auxParams =
+            FileIO::HDF5File::DataField auxParams =
                     h5reader_trajectory.readDataset<2>("particle_trajectory/timesteps/3/aux_parameters");
             REQUIRE(auxParams.rank == 2);
             REQUIRE(auxParams.get({2,1}) == Approx(0.2));
 
-            FileIO::HDF5Reader::DataField positions =
+            FileIO::HDF5File::DataField positions =
                     h5reader_trajectory.readDataset<2>("particle_trajectory/timesteps/3/positions");
             REQUIRE(positions.rank == 2);
             REQUIRE(positions.get({4,0}) == Approx(0.4));
         }
 
         SECTION("Read scalar field data set"){
-            FileIO::HDF5Reader::DataField scalarField =
+            FileIO::HDF5File::DataField scalarField =
                     h5reader_scalarField.readDataset<3>("fields/test_field");
             REQUIRE(scalarField.rank == 3);
             REQUIRE(scalarField.get({1,2,3}) == Approx(19.0));
@@ -130,12 +130,12 @@ TEST_CASE("Test HDF5 file reader", "[ParticleSimulation][file reader]") {
         }
 
         SECTION("Read small vector field data set"){
-            FileIO::HDF5Reader h5reader_vectorField("test_linear_vector_field_01.h5");
+            FileIO::HDF5File h5reader_vectorField("test_linear_vector_field_01.h5");
 
-            FileIO::HDF5Reader::DataField vecField_1 =
+            FileIO::HDF5File::DataField vecField_1 =
                     h5reader_vectorField.readDataset<4>("fields/test_vectorfield_1");
 
-            FileIO::HDF5Reader::DataField vecField_2 =
+            FileIO::HDF5File::DataField vecField_2 =
                     h5reader_vectorField.readDataset<4>("fields/test_vectorfield_2");
 
             REQUIRE(vecField_1.rank == 4);
@@ -155,7 +155,7 @@ TEST_CASE("Test HDF5 file reader", "[ParticleSimulation][file reader]") {
         }
 
         SECTION("Read large vector field file") {
-            FileIO::HDF5Reader h5reader_flow("quad_dev_flow_3d.h5");
+            FileIO::HDF5File h5reader_flow("quad_dev_flow_3d.h5");
             auto ds = h5reader_flow.readDataset<4>("/fields/velocity");
             REQUIRE(ds.dims == std::array<hsize_t, 4>({300, 40, 40, 3}));
             REQUIRE(ds.data.size() == 300* 40* 40* 3);

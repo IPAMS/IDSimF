@@ -25,8 +25,8 @@
 
  ****************************/
 
-#ifndef IDSIMF_FILEIO_HDF5READER_HPP
-#define IDSIMF_FILEIO_HDF5READER_HPP
+#ifndef IDSIMF_FILEIO_HDF5FILE_HPP
+#define IDSIMF_FILEIO_HDF5FILE_HPP
 
 #include <string>
 #include <vector>
@@ -36,7 +36,7 @@
 #include "H5Cpp.h"
 
 namespace FileIO{
-    class HDF5Reader {
+    class HDF5File {
 
     public:
         // Define some helping data structures and functions .........
@@ -47,7 +47,7 @@ namespace FileIO{
             DTYPE get(std::array<hsize_t, NDIMS> indices);
         };
 
-        explicit HDF5Reader(const std::string &hdf5Filename);
+        explicit HDF5File(const std::string &hdf5Filename);
 
         template <hsize_t NDIMS> [[nodiscard]] DataField<NDIMS, double>
             readDataset(std::string datasetName) const;
@@ -69,6 +69,6 @@ namespace FileIO{
     };
 }
 
-#include "FileIO_HDF5Reader.tpp"
+#include "FileIO_HDF5File.tpp"
 
-#endif //IDSIMF_FILEIO_HDF5READER_HPP
+#endif //IDSIMF_FILEIO_HDF5FILE_HPP

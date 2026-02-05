@@ -7,7 +7,7 @@ set(SOURCE_FILES
         FileIO_scalar_writer.cpp
         FileIO_idealizedQitFFTWriter.cpp
         FileIO_inductionCurrentWriter.cpp
-        FileIO_HDF5Reader.cpp
+        FileIO_HDF5File.cpp
         FileIO_trajectoryHDF5Writer.cpp
         FileIO_MolecularStructureReader.cpp
         FileIO_CSVReader.cpp)

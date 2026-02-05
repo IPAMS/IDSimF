@@ -6,8 +6,8 @@ set(SOURCE_FILES
         test_ionCloudReader.cpp
         test_simpleFileWriters.cpp
         test_inductionCurrentWriter.cpp
-        test_hdf5FileWriter.cpp
-        test_hdf5FileReader.cpp
+        test_hdf5TrajectoryFileWriter.cpp
+        test_hdf5File.cpp
         test_MolecularStructureReader.cpp)
 
 set(TEST_FILE_FOLDER ${CMAKE_SOURCE_DIR}/tests/testfields)
