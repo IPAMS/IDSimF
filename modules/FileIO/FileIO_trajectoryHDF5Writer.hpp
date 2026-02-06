@@ -36,7 +36,6 @@
 #include <array>
 #include <memory>
 
-
 namespace BTree{
     class Particle;
 }

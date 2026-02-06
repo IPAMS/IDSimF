@@ -21,16 +21,53 @@
 
 #include "FileIO_HDF5File.hpp"
 
-FileIO::HDF5File::HDF5File(const std::string &hdf5Filename) {
-    h5f_ = std::make_unique<H5::H5File>(hdf5Filename.c_str(), H5F_ACC_RDONLY);
+FileIO::HDF5File::HDF5File(const std::string &hdf5Filename, FileMode mode){
+    if (mode == READ_ONLY) {
+        h5f_ = std::make_unique<H5::H5File>(hdf5Filename.c_str(), H5F_ACC_RDONLY);
+    }
+    else if (mode == WRITE_ONLY) {
+        h5f_ = std::make_unique<H5::H5File>(hdf5Filename.c_str(), H5F_ACC_TRUNC);
+    }
 }
+
 
 hsize_t FileIO::HDF5File::numberOfObjectsInGroup(std::string groupName) const{
     H5::Group group (h5f_->openGroup(groupName.c_str()));
     return group.getNumObjs();
 }
 
+H5::Group FileIO::HDF5File::createGroup(std::string groupName) const {
+    H5::LinkCreatPropList propList;
+    propList.setCreateIntermediateGroup(true);
+    H5::Group group = h5f_->createGroup(groupName.c_str(), propList);
+    return group;
+}
 
+H5::DataSet FileIO::HDF5File::initDataset(std::string groupName, std::string datasetName, std::size_t nColumns) {
+
+    //prepare location dataset structures:
+    hsize_t dimsDS[2] = {0, nColumns};            // dataset dimensions at creation
+    hsize_t maxdimsDS[2] = {H5S_UNLIMITED, nColumns};         // maximum dataset dimensions
+    hsize_t chunkDimsDS[2] = {1, nColumns};
+
+    H5::DataSpace dataspaceLocation(2, dimsDS, maxdimsDS);
+
+    H5::DSetCreatPropList propTimesteps;
+    propTimesteps.setChunk(2, chunkDimsDS);
+
+    //create actual dataset for times:
+    H5::Group group = createGroup(groupName);
+    H5::DataSpace dataspaceDS(2,dimsDS,maxdimsDS);
+    H5::DataSet dataSet = group.createDataSet(datasetName, H5::PredType::IEEE_F32BE, dataspaceDS, propTimesteps);
+
+    return dataSet;
+}
+
+void FileIO::HDF5File::writeToDataset(std::string datasetName, const std::vector<double>& data) {
+    //FIXME: To implement
+}
+
+// some functions to be used on data set iterations:
 herr_t collectObjectNames(hid_t /*loc_id*/, const char *name, const H5L_info_t* /*linfo*/, void *opdata)
 {
     auto *nameVec =  static_cast<std::vector<std::string>*>(opdata);
@@ -60,6 +97,7 @@ herr_t collectDatasetNames(hid_t loc_id, const char *name, const H5L_info_t* /*l
     H5Oclose(object);
     return 0;
 }
+// ----------------------------------
 
 std::vector<std::string> FileIO::HDF5File::namesOfObjectsInGroup(std::string groupName) const{
     H5::Group group = h5f_->openGroup(groupName.c_str());

@@ -28,8 +28,20 @@
 
 #include "FileIO_HDF5File.hpp"
 #include "catch.hpp"
+#include "test_hdf5_util.hpp"
 #include <vector>
 #include <array>
+
+TEST_CASE("Test writing into HDF5 file", "[ParticleSimulation][file reader][file reader]") {
+    std::string filenameWriter("test_hdf5_writer_file.h5");
+    FileIO::HDF5File h5file(filenameWriter, FileIO::HDF5File::WRITE_ONLY);
+
+    SECTION("New dataset should be written into HDF5 file") {
+
+        auto dataSet = h5file.initDataset("root_group/test_subgroup", "test_data_set1", 5);
+    }
+}
+
 
 TEST_CASE("Test HDF5 file reading", "[ParticleSimulation][file reader][file reader]") {
 

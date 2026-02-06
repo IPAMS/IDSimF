@@ -4,6 +4,7 @@ set(SOURCE_FILES
         test_main.cpp
         test_treeSpaceChargeQuality.cpp
         test_integrationQuality.cpp
+        ../util/test_hdf5_util.hpp
 )
 
 add_executable(test_simulations ${SOURCE_FILES})

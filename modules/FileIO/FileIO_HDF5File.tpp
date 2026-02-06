@@ -29,10 +29,6 @@ FileIO::HDF5File::DataField<NDIMS, double>
     return readDataset_<NDIMS>(ds);
 }
 
-//template <hsize_t NDIMS>
-//FileIO::HDF5Reader::DataField<NDIMS, double>
-
-
 /**
  * Reads an one dimensional attribute vector from the HDF5 file
  *

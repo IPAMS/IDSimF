@@ -39,6 +39,10 @@ namespace FileIO{
     class HDF5File {
 
     public:
+        enum FileMode{
+            READ_ONLY, WRITE_ONLY
+        };
+
         // Define some helping data structures and functions .........
         template <hsize_t NDIMS, typename DTYPE> struct DataField{
             hsize_t rank = 0;
@@ -47,10 +51,14 @@ namespace FileIO{
             DTYPE get(std::array<hsize_t, NDIMS> indices);
         };
 
-        explicit HDF5File(const std::string &hdf5Filename);
+        explicit HDF5File(const std::string &hdf5Filename, FileMode mode = READ_ONLY);
 
         template <hsize_t NDIMS> [[nodiscard]] DataField<NDIMS, double>
             readDataset(std::string datasetName) const;
+
+        H5::Group createGroup(std::string groupName) const;
+        H5::DataSet initDataset(std::string groupName, std::string datasetName, std::size_t nColumns);
+        void writeToDataset(std::string datasetName, const std::vector<double> &data);
 
         template<typename DTYPE>
         [[nodiscard]] std::vector<DTYPE> readAttributeVector(std::string groupName, std::string attributeName) const;
@@ -62,10 +70,9 @@ namespace FileIO{
 
 
     private:
-        std::unique_ptr<H5::H5File > h5f_;
-
+        std::unique_ptr<H5::H5File > h5f_ = nullptr;
         template <hsize_t NDIMS> [[nodiscard]] DataField<NDIMS, double>
-        readDataset_(H5::DataSet ds) const;
+            readDataset_(H5::DataSet ds) const;
     };
 }
 
