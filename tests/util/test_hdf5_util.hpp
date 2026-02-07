@@ -141,6 +141,46 @@ inline std::vector<std::string> readStringAttribute(H5::Group& group, std::strin
 }
 
 // Todo: Compact code for integral types with templates
+template <typename HDF_OBJTYPE, typename DTYPE> std::vector<DTYPE> readAttribute(HDF_OBJTYPE& hdfObject, std::string attrName) {
+    H5::Attribute attr(hdfObject.openAttribute(attrName.c_str()));
+    H5::DataSpace dataspace = attr.getSpace();
+
+    //get dimensions:
+    hsize_t dims[1];
+    int nDims = dataspace.getSimpleExtentDims(dims, nullptr);
+    CHECK(nDims == 1);
+
+    if constexpr (std::is_same_v<DTYPE,int>) {
+        std::vector<int> result(dims[0]);
+        attr.read(H5::PredType::NATIVE_INT, result.data());
+        return result;
+    }
+    else if constexpr (std::is_same_v<DTYPE,hsize_t>) {
+        std::vector<int> result(dims[0]);
+        attr.read(H5::PredType::NATIVE_UINT64, result.data());
+        return result;
+    }
+    else if constexpr (std::is_same_v<DTYPE,double>) {
+        std::vector<double> result(dims[0]);
+        attr.read(H5::PredType::NATIVE_DOUBLE, result.data());
+        return result;
+    }
+    else if constexpr (std::is_same_v<DTYPE,std::string>) {
+        std::vector<std::string> result;
+        char** datBuf = new char* [dims[0]];
+        H5::StrType strdatatype(H5::PredType::C_S1, H5T_VARIABLE);
+        attr.read(strdatatype, datBuf);
+        for (hsize_t i = 0; i<dims[0]; ++i) {
+            result.emplace_back(datBuf[i]);
+        }
+        return result;
+    }
+    else {
+        //use workaround since static_assert(false) leads to compiler / template instantiation problems
+        static_assert(!std::is_same_v<DTYPE, DTYPE>);
+    }
+}
+
 inline std::vector<int> readIntAttribute(H5::Group& group, std::string attrName){
     H5::Attribute attr(group.openAttribute(attrName.c_str()));
     H5::DataSpace dataspace = attr.getSpace();

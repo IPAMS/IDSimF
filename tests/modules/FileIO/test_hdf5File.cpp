@@ -42,7 +42,6 @@ namespace {
 
 TEST_CASE("Test writing into HDF5 file", "[ParticleSimulation][file reader][file reader]") {
 
-
     SECTION("A simple table dataset should be written into HDF5 file") {
         auto dataSet = h5file.initTableDataset("root_group/test_subgroup", "simple_table", 5);
 
@@ -88,13 +87,49 @@ TEST_CASE("Test writing into HDF5 file", "[ParticleSimulation][file reader][file
         H5::DataSet readBackDS = openDataSet(testHDF5FileName, "root_group/test_subgroup/table_faulty_data");
         DataField<2, double> readBackData = readDataset<2>(readBackDS);
 
-        //check dimensionality and indexing (row first):
+        //check dimensionality:
         CHECK(readBackData.rank == 2);
         CHECK(readBackData.dims[0] == 1);
         CHECK(readBackData.dims[1] == 5);
 
         //check full rows:
         CHECK_THAT(readBackData.getRow(0), Catch::Matchers::Approx(row1));
+    }
+
+    SECTION("It should be possible to add attributes to a data set") {
+        auto dataSet = h5file.initTableDataset("root_group/test_subgroup", "table_with_attributes", 3);
+
+        std::vector<double> row1 = {1.0, 2.0, 3.0};
+        std::vector<double> row2 = {4.0, 5.0, 6.0};
+
+        h5file.writeRowToTableDataset(dataSet, row1);
+        h5file.writeRowToTableDataset(dataSet, row2);
+
+        std::vector<double> doubleAttribute = {11.0, 12.0, 13.0, 14.0};
+        h5file.writeDatasetAttribute<double>(dataSet, "attribute_double", doubleAttribute);
+
+        std::vector<int> intAtribute = {10, 20, 30};
+        h5file.writeDatasetAttribute<int>(dataSet, "attribute_int", intAtribute);
+
+        std::vector<std::string> strAtribute = {"Element A", "Element B", "Element C"};
+        h5file.writeDatasetAttribute<std::string>(dataSet, "attribute_str", strAtribute);
+
+
+        //read back and check data set and attributes:
+        H5::DataSet readBackDS = openDataSet(testHDF5FileName, "root_group/test_subgroup/table_with_attributes");
+        DataField<2, double> readBackData = readDataset<2>(readBackDS);
+        CHECK(readBackData.rank == 2);
+        CHECK(readBackData.dims[0] == 2);
+        CHECK(readBackData.dims[1] == 3);
+
+        std::vector<double> doubleAttribReadBack = readAttribute<H5::DataSet, double>(readBackDS, "attribute_double");
+        CHECK_THAT(doubleAttribReadBack, Catch::Matchers::Approx(doubleAttribute));
+
+        std::vector<int> intAttribReadBack = readAttribute<H5::DataSet, int>(readBackDS, "attribute_int");
+        CHECK_THAT(intAttribReadBack, Catch::Matchers::Equals(intAtribute));
+
+        std::vector<std::string> strAttribReadBack = readAttribute<H5::DataSet, std::string>(readBackDS, "attribute_str");
+        CHECK_THAT(strAttribReadBack, Catch::Matchers::Equals(strAtribute));
     }
 }
 

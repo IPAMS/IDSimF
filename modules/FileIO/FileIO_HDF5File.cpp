@@ -94,8 +94,7 @@ H5::DataSet FileIO::HDF5File::initTableDataset(std::string groupName, std::strin
     return dataSet;
 }
 
-void FileIO::HDF5File::writeRowToTableDataset(H5::DataSet dataSet, const std::vector<double>& data) {
-
+void FileIO::HDF5File::writeRowToTableDataset(H5::DataSet &dataSet, const std::vector<double>& data) {
     // extend dataset:
     hsize_t dims[2];
     dataSet.getSpace().getSimpleExtentDims(dims);

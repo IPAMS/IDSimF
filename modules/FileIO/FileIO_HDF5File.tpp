@@ -20,6 +20,40 @@ DTYPE FileIO::HDF5File::DataField<NDIMS, DTYPE>::get(std::array<hsize_t, NDIMS> 
     return data[linIndex];
 }
 
+template<typename DTYPE>
+void FileIO::HDF5File::writeDatasetAttribute(H5::DataSet &dataSet, const std::string& attrName, const std::vector<DTYPE> &values) {
+    hsize_t nVals = values.size();
+    hsize_t dims[1] = { nVals };
+    H5::DataSpace attrDataSpace = H5::DataSpace (1, dims);
+
+    if constexpr(std::is_same_v<DTYPE, std::string>) {
+        H5::StrType strdatatype(H5::PredType::C_S1, H5T_VARIABLE); // of length 256 characters
+
+        //Due to a abi bug between the std lib and hdf, we need to provide raw strings to the hdf5 methods
+        //Save array of pointers to the raw c strings and use that array as data buffer
+        std::vector<const char*> dataBuf(nVals);
+        const char** dataBufArray = dataBuf.data();
+        for (std::size_t i = 0; i < nVals; ++i)
+        {
+            dataBufArray[i] = values[i].c_str();
+        }
+        H5::Attribute stringAttribute = dataSet.createAttribute(attrName.c_str(), strdatatype, attrDataSpace);
+        stringAttribute.write(strdatatype, dataBufArray);
+    }
+    else if constexpr(std::is_same_v<DTYPE, int>) {
+        H5::Attribute intAttribute = dataSet.createAttribute(attrName.c_str(), H5::PredType::STD_I32BE, attrDataSpace);
+        intAttribute.write(H5::PredType::NATIVE_INT, values.data());
+    }
+    else if constexpr(std::is_same_v<DTYPE, double>) {
+        H5::Attribute doubleAttribute = dataSet.createAttribute(attrName.c_str(), H5::PredType::IEEE_F32BE, attrDataSpace);
+        doubleAttribute.write(H5::PredType::NATIVE_DOUBLE, values.data());
+    }
+    else {
+        //use workaround since static_assert(false) leads to compiler / template instantiation problems
+        static_assert(!std::is_same_v<DTYPE, DTYPE>);
+    }
+}
+
 template <hsize_t NDIMS>
 FileIO::HDF5File::DataField<NDIMS, double>
     FileIO::HDF5File::readDataset(std::string datasetName) const
@@ -55,20 +89,20 @@ std::vector<DTYPE> FileIO::HDF5File::readAttributeVector(std::string groupName, 
 
     std::vector<DTYPE> result;
 
-    if constexpr(std::is_same<DTYPE, std::string>::value) {
+    if constexpr(std::is_same_v<DTYPE, std::string>) {
         char** datBuf = new char* [dims[0]];
 
-        H5::StrType strdatatype(H5::PredType::C_S1, H5T_VARIABLE); // of length 256 characters
+        H5::StrType strdatatype(H5::PredType::C_S1, H5T_VARIABLE);
         attr.read(strdatatype, datBuf);
         for (hsize_t i = 0; i<dims[0]; ++i) {
             result.emplace_back(datBuf[i]);
         }
-    } else if constexpr(std::is_same<DTYPE, int>::value || std::is_same<DTYPE, double>::value) {
+    } else if constexpr(std::is_same_v<DTYPE, int> || std::is_same_v<DTYPE, double>) {
             const H5::PredType* datType;
 
-            if constexpr(std::is_same<DTYPE, int>::value){
+            if constexpr(std::is_same_v<DTYPE, int>){
                 datType = &H5::PredType::NATIVE_INT;
-            } else if constexpr(std::is_same<DTYPE, double>::value){
+            } else if constexpr(std::is_same_v<DTYPE, double>){
                 datType = &H5::PredType::NATIVE_DOUBLE;
             }
 
