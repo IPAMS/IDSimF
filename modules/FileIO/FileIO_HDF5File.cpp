@@ -74,7 +74,7 @@ H5::Group FileIO::HDF5File::createGroup(std::string groupName) const {
     }
 }
 
-H5::DataSet FileIO::HDF5File::initTableDataset(std::string groupName, std::string datasetName, std::size_t nColumns) {
+H5::DataSet FileIO::HDF5File::initTableDataset(std::string groupName, std::string datasetName, std::size_t nColumns) const{
 
     //prepare location dataset structures:
     hsize_t dimsDS[2] = {0, nColumns};            // dataset dimensions at creation
