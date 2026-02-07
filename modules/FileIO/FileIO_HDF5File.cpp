@@ -20,6 +20,8 @@
  ****************************/
 
 #include "FileIO_HDF5File.hpp"
+#include <string>
+#include <sstream>
 #include <cassert>
 
 FileIO::HDF5File::HDF5File(const std::string &hdf5Filename, FileMode mode){
@@ -36,11 +38,40 @@ hsize_t FileIO::HDF5File::numberOfObjectsInGroup(std::string groupName) const{
     return group.getNumObjs();
 }
 
+
+bool FileIO::HDF5File::groupPathExists(std::string groupName) const{
+    //traverse full group path and check for existence:
+    std::stringstream ss(groupName);
+    std::vector<std::string> parts;
+    std::string pathPart;
+
+    while (std::getline(ss, pathPart, '/')) {
+        if (!pathPart.empty()) {
+            parts.push_back(pathPart);
+        }
+    }
+
+    std::string currentPath = "";
+    for (const auto& part : parts) {
+        currentPath += "/" + part;
+        if (H5Lexists(h5f_->getId(), currentPath.c_str(), H5P_DEFAULT) <=0) {
+            return false;
+        };
+    }
+    return true;
+}
+
 H5::Group FileIO::HDF5File::createGroup(std::string groupName) const {
-    H5::LinkCreatPropList propList;
-    propList.setCreateIntermediateGroup(true);
-    H5::Group group = h5f_->createGroup(groupName.c_str(), propList);
-    return group;
+    if (!groupPathExists(groupName)) {
+        H5::LinkCreatPropList propList;
+        propList.setCreateIntermediateGroup(true);
+        H5::Group group = h5f_->createGroup(groupName.c_str(), propList);
+        return group;
+    }
+    else {
+        H5::Group group = h5f_->openGroup(groupName.c_str());
+        return group;
+    }
 }
 
 H5::DataSet FileIO::HDF5File::initTableDataset(std::string groupName, std::string datasetName, std::size_t nColumns) {
@@ -63,11 +94,18 @@ H5::DataSet FileIO::HDF5File::initTableDataset(std::string groupName, std::strin
     return dataSet;
 }
 
-void FileIO::HDF5File::writeToTableDataset(H5::DataSet dataSet, const std::vector<double>& data) {
+void FileIO::HDF5File::writeRowToTableDataset(H5::DataSet dataSet, const std::vector<double>& data) {
 
     // extend dataset:
     hsize_t dims[2];
     dataSet.getSpace().getSimpleExtentDims(dims);
+
+    if (dims[1] != data.size()) {
+        std::stringstream ss;
+        ss << "Invalid input vector for writing a row in HDF5 table. Table columns: "<<dims[1]<< " input vector length: "<<data.size() <<std::endl;
+        throw std::invalid_argument(ss.str());
+    }
+
     hsize_t offset[2] = {dims[0], 0};
     dims[0] += 1;
     dataSet.extend(dims);

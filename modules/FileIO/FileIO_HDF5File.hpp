@@ -56,9 +56,10 @@ namespace FileIO{
         template <hsize_t NDIMS> [[nodiscard]] DataField<NDIMS, double>
             readDataset(std::string datasetName) const;
 
+        bool groupPathExists(std::string groupName) const;
         H5::Group createGroup(std::string groupName) const;
         H5::DataSet initTableDataset(std::string groupName, std::string datasetName, std::size_t nColumns);
-        void writeToTableDataset(H5::DataSet dataSet, const std::vector<double> &data);
+        void writeRowToTableDataset(H5::DataSet dataSet, const std::vector<double> &data);
 
         template<typename DTYPE>
         [[nodiscard]] std::vector<DTYPE> readAttributeVector(std::string groupName, std::string attributeName) const;
