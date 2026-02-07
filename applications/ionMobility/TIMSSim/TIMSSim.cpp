@@ -608,7 +608,7 @@ int main(int argc, const char * argv[]) {
                 if (saveTrajectory){
                     unsigned int saveTrajectoryStartTimeStep = simConf->unsignedIntParameter("trajectory_start_time_step");
                     double trajectoryDistance_m = simConf->doubleParameter("trajectory_distance_m");
-                    collisionModel->setTrajectoryWriter(projectName+"_md_trajectories.txt",
+                    collisionModel->setLegacyTrajectoryWriter(projectName+"_md_trajectories.txt",
                                                         trajectoryDistance_m, saveTrajectoryStartTimeStep);
                 }
             }

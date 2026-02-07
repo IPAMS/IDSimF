@@ -195,10 +195,9 @@ CollisionModel::MDInteractionsModel::MDInteractionsModel(std::function<double(Co
  * @param trajectoryFileName Trajectory Output filename
  * @param trajectoryDistance Distance between ion and background gas in m after which trajectory gets recorded
  */
-void CollisionModel::MDInteractionsModel::setTrajectoryWriter(const std::string& trajectoryFileName,
+void CollisionModel::MDInteractionsModel::setLegacyTrajectoryWriter(const std::string& trajectoryFileName,
                                                               double trajectoryDistance,
-                                                              unsigned int recordTrajectoryStartTimestep) {
-
+                                                              unsigned int startTimeStep) {
     trajectoryOutputStream_ = std::make_unique<std::ofstream>();
     trajectoryOutputStream_->open(trajectoryFileName);
 
@@ -208,13 +207,20 @@ void CollisionModel::MDInteractionsModel::setTrajectoryWriter(const std::string&
     startingConditionsCorrect_->open("md_starting_conds_correct.txt");
 
     if (trajectoryOutputStream_->good()){
-        recordTrajectoryStartTimeStep_ = recordTrajectoryStartTimestep;
+        recordTrajectoryStartTimeStep_ = startTimeStep;
         trajectoryDistance_ = trajectoryDistance;
-        modelRecordsTrajectories_ = true;
+        legacyTWriterConf_.modelRecordsTrajectory = true;
     }
     else{
         throw (std::runtime_error("Trajectory Output Stream failed to open"));
     }
+}
+
+void CollisionModel::MDInteractionsModel::setHDF5TrajectoryWriter(const std::string& trajectoryFileName, double trajectoryDistance, unsigned int startTimeStep) {
+    hdf5TrajectoryWriter_ = std::make_unique<CollisionModel::HDF5MDTrajectoryWriter>(trajectoryFileName);
+    recordTrajectoryStartTimeStep_ = startTimeStep;
+    trajectoryDistance_ = trajectoryDistance;
+    hdf5TWriterConf_.modelRecordsTrajectory = true;
 }
 
 /**
@@ -251,8 +257,11 @@ void CollisionModel::MDInteractionsModel::updateModelParticleParameters(Core::Pa
  * Updates trajectory recording if timestep recording parameter is exceeded
 */
 void CollisionModel::MDInteractionsModel::updateModelTimestepParameters(unsigned int timestep, double /*time*/) {
-    if (modelRecordsTrajectories_ && timestep >= recordTrajectoryStartTimeStep_){
-        trajectoryRecordingActive_ = true;
+    if (legacyTWriterConf_.modelRecordsTrajectory && timestep >= recordTrajectoryStartTimeStep_){
+        legacyTWriterConf_.recordingActive = true;
+    }
+    if (hdf5TWriterConf_.modelRecordsTrajectory && timestep >= recordTrajectoryStartTimeStep_){
+        hdf5TWriterConf_.recordingActive = true;
     }
 }
 
@@ -852,7 +861,7 @@ bool CollisionModel::MDInteractionsModel::rk4InternAdaptiveStep(std::vector<Coll
         integrationTimeSum += dt;
         i = 0;
         for(auto* molecule : moleculesPtr){
-            if(trajectoryRecordingActive_ == true && molecule->getMolecularStructureName() == collisionMolecule_){
+            if(legacyTWriterConf_.recordingActive == true && molecule->getMolecularStructureName() == collisionMolecule_){
                 writeTrajectory(distance, *molecule, molecule->getComPos(), molecule->getComVel(),forceMolecules, false, trajectoryOutputStream_.get(), integrationTimeSum, dt);
             }
             
@@ -876,8 +885,6 @@ bool CollisionModel::MDInteractionsModel::rk4InternAdaptiveStep(std::vector<Coll
 
         }
 
-
-
         steps++;
         dt = dt * globalDelta;
 
@@ -885,7 +892,7 @@ bool CollisionModel::MDInteractionsModel::rk4InternAdaptiveStep(std::vector<Coll
         for(size_t b = 0; b < nMolecules; ++b){
             for(size_t z = b+1; z < nMolecules; ++z){
                 if((moleculesPtr[z]->getComPos() - moleculesPtr[b]->getComPos()).magnitude() > startDistances[index++]){
-                    if(trajectoryRecordingActive_ == true && moleculesPtr[z]->getMolecularStructureName() == collisionMolecule_){
+                    if(legacyTWriterConf_.recordingActive == true && moleculesPtr[z]->getMolecularStructureName() == collisionMolecule_){
                         writeTrajectory((moleculesPtr[z]->getComPos() - moleculesPtr[b]->getComPos()).magnitude(), *moleculesPtr[z],
                                         moleculesPtr[z]->getComPos(), moleculesPtr[z]->getComVel(), forceMolecules, true, trajectoryOutputStream_.get(), integrationTimeSum, dt);
                     }

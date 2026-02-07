@@ -462,7 +462,7 @@ int main(int argc, const char *argv[]){
                 }
             
                 if (saveTrajectory){
-                    mdModel->setTrajectoryWriter(projectName+"_md_trajectories.txt",
+                    mdModel->setLegacyTrajectoryWriter(projectName+"_md_trajectories.txt",
                                                  trajectoryDistance_m, saveTrajectoryStartTimeStep);
                 }
                 mdModels.emplace_back(std::move(mdModel));

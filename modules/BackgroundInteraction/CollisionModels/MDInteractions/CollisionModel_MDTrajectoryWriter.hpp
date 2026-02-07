@@ -22,6 +22,7 @@
  CollisionModel_MDTrajectoryWriter.hpp
 
  A writer for MD collision trajectories
+ (deprecated, better use HDF5 MD trajectory writer)
 
  ****************************/
 #ifndef COLLISIONMODEL_MDTRAJECTORYWRITER_HPP

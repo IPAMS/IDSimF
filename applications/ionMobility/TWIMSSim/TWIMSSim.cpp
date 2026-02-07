@@ -566,7 +566,7 @@ int main(int argc, const char * argv[]) {
                             std::move(forceFieldPtr),
                             molecularStructureCollection);
                     if (saveTrajectory){
-                        mdModel->setTrajectoryWriter(projectName+"_md_trajectories.txt",
+                        mdModel->setLegacyTrajectoryWriter(projectName+"_md_trajectories.txt",
                                                      trajectoryDistance_m, saveTrajectoryStartTimeStep);
                     }
                     mdModels.emplace_back(std::move(mdModel));
@@ -622,7 +622,7 @@ int main(int argc, const char * argv[]) {
                                 std::move(forceFieldPtr),
                                 molecularStructureCollection);
                         if (saveTrajectory){
-                            cllModel->setTrajectoryWriter(projectName+"_md_trajectories.txt",
+                            cllModel->setLegacyTrajectoryWriter(projectName+"_md_trajectories.txt",
                                                           trajectoryDistance_m, saveTrajectoryStartTimeStep);
                         }
                         hsmdModels.emplace_back(std::move(cllModel));
