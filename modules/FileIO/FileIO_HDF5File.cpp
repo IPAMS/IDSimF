@@ -20,6 +20,7 @@
  ****************************/
 
 #include "FileIO_HDF5File.hpp"
+#include <cassert>
 
 FileIO::HDF5File::HDF5File(const std::string &hdf5Filename, FileMode mode){
     if (mode == READ_ONLY) {
@@ -29,7 +30,6 @@ FileIO::HDF5File::HDF5File(const std::string &hdf5Filename, FileMode mode){
         h5f_ = std::make_unique<H5::H5File>(hdf5Filename.c_str(), H5F_ACC_TRUNC);
     }
 }
-
 
 hsize_t FileIO::HDF5File::numberOfObjectsInGroup(std::string groupName) const{
     H5::Group group (h5f_->openGroup(groupName.c_str()));
@@ -43,7 +43,7 @@ H5::Group FileIO::HDF5File::createGroup(std::string groupName) const {
     return group;
 }
 
-H5::DataSet FileIO::HDF5File::initDataset(std::string groupName, std::string datasetName, std::size_t nColumns) {
+H5::DataSet FileIO::HDF5File::initTableDataset(std::string groupName, std::string datasetName, std::size_t nColumns) {
 
     //prepare location dataset structures:
     hsize_t dimsDS[2] = {0, nColumns};            // dataset dimensions at creation
@@ -63,8 +63,21 @@ H5::DataSet FileIO::HDF5File::initDataset(std::string groupName, std::string dat
     return dataSet;
 }
 
-void FileIO::HDF5File::writeToDataset(std::string datasetName, const std::vector<double>& data) {
-    //FIXME: To implement
+void FileIO::HDF5File::writeToTableDataset(H5::DataSet dataSet, const std::vector<double>& data) {
+
+    // extend dataset:
+    hsize_t dims[2];
+    dataSet.getSpace().getSimpleExtentDims(dims);
+    hsize_t offset[2] = {dims[0], 0};
+    dims[0] += 1;
+    dataSet.extend(dims);
+    H5::DataSpace fileSpace = dataSet.getSpace();
+
+    //write to dataset:
+    hsize_t memSpaceDims[2] = {1,dims[1]};
+    fileSpace.selectHyperslab(H5S_SELECT_SET, memSpaceDims, offset);
+    H5::DataSpace memspace(2, memSpaceDims);
+    dataSet.write(data.data(), H5::PredType::NATIVE_DOUBLE, memspace, fileSpace);
 }
 
 // some functions to be used on data set iterations:

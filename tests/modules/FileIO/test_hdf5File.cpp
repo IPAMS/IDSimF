@@ -38,7 +38,14 @@ TEST_CASE("Test writing into HDF5 file", "[ParticleSimulation][file reader][file
 
     SECTION("New dataset should be written into HDF5 file") {
 
-        auto dataSet = h5file.initDataset("root_group/test_subgroup", "test_data_set1", 5);
+        auto dataSet = h5file.initTableDataset("root_group/test_subgroup", "test_data_set1", 5);
+
+        std::vector<double> testData_1 = {1.0, 2.0, 3.0, 4.0, 5.0};
+        std::vector<double> testData_2 = {11.0, 12.0, 13.0, 14.0, 15.0};
+        std::vector<double> faultyTestData_1 = {21.0, 22.0, 23.0, 24.0};
+        std::vector<double> faultyTestData_2 = {31.0, 32.0, 33.0, 34.0, 35.0, 36.0};
+        h5file.writeToTableDataset(dataSet, testData_1);
+        h5file.writeToTableDataset(dataSet, testData_2);
     }
 }
 
