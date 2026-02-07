@@ -32,20 +32,69 @@
 #include <vector>
 #include <array>
 
+#include "../../../libs/CLI11/CLI11.hpp"
+
+namespace {
+    // use unnamed namespace to be able to operate on the same file for multiple test sections
+    std::string testHDF5FileName = "test_hdf5_writer_file.h5";
+    FileIO::HDF5File h5file(testHDF5FileName, FileIO::HDF5File::WRITE_ONLY);
+}
+
 TEST_CASE("Test writing into HDF5 file", "[ParticleSimulation][file reader][file reader]") {
-    std::string filenameWriter("test_hdf5_writer_file.h5");
-    FileIO::HDF5File h5file(filenameWriter, FileIO::HDF5File::WRITE_ONLY);
 
-    SECTION("New dataset should be written into HDF5 file") {
 
-        auto dataSet = h5file.initTableDataset("root_group/test_subgroup", "test_data_set1", 5);
+    SECTION("A simple table dataset should be written into HDF5 file") {
+        auto dataSet = h5file.initTableDataset("root_group/test_subgroup", "simple_table", 5);
 
-        std::vector<double> testData_1 = {1.0, 2.0, 3.0, 4.0, 5.0};
-        std::vector<double> testData_2 = {11.0, 12.0, 13.0, 14.0, 15.0};
-        std::vector<double> faultyTestData_1 = {21.0, 22.0, 23.0, 24.0};
-        std::vector<double> faultyTestData_2 = {31.0, 32.0, 33.0, 34.0, 35.0, 36.0};
-        h5file.writeToTableDataset(dataSet, testData_1);
-        h5file.writeToTableDataset(dataSet, testData_2);
+        std::vector<double> row1 = {1.0, 2.0, 3.0, 4.0, 5.0};
+        std::vector<double> row2 = {11.0, 12.0, 13.0, 14.0, 15.0};
+        std::vector<double> row3 = {21.0, 22.0, 23.0, 24.0, 25.0};
+        h5file.writeRowToTableDataset(dataSet, row1);
+        h5file.writeRowToTableDataset(dataSet, row2);
+        h5file.writeRowToTableDataset(dataSet, row3);
+
+        //read back data set and check:
+        H5::DataSet readBackDS = openDataSet(testHDF5FileName, "root_group/test_subgroup/simple_table");
+        DataField<2, double> readBackData = readDataset<2>(readBackDS);
+
+        //check dimensionality and indexing (row first):
+        CHECK(readBackData.rank == 2);
+        CHECK(readBackData.dims[0] == 3);
+        CHECK(readBackData.dims[1] == 5);
+        std::array<hsize_t,2> indices = {0,0};
+        CHECK_THAT(readBackData.get(indices), Catch::WithinRel(1.0));
+        indices[0] = 1;
+        CHECK_THAT(readBackData.get(indices), Catch::WithinRel(11.0));
+
+        //check full rows:
+        CHECK_THAT(readBackData.getRow(0), Catch::Matchers::Approx(row1));
+        CHECK_THAT(readBackData.getRow(1), Catch::Matchers::Approx(row2));
+        CHECK_THAT(readBackData.getRow(2), Catch::Matchers::Approx(row3));
+    }
+
+    SECTION("HDF5 writing should be able to deal with wrong vector lengths") {
+        auto dataSet = h5file.initTableDataset("root_group/test_subgroup", "table_faulty_data", 5);
+
+        std::vector<double> row1 = {1.0, 2.0, 3.0, 4.0, 5.0};
+        std::vector<double> faultyRow1 = {11.0, 12.0, 13.0, 14.0};
+        std::vector<double> faultyRow2 = {21.0, 22.0, 23.0, 24.0, 25.0, 26.0};
+
+        h5file.writeRowToTableDataset(dataSet, row1);
+
+        CHECK_THROWS_AS(h5file.writeRowToTableDataset(dataSet, faultyRow1), std::invalid_argument);
+        CHECK_THROWS_AS(h5file.writeRowToTableDataset(dataSet, faultyRow2), std::invalid_argument);
+
+        //read back data set and check:
+        H5::DataSet readBackDS = openDataSet(testHDF5FileName, "root_group/test_subgroup/table_faulty_data");
+        DataField<2, double> readBackData = readDataset<2>(readBackDS);
+
+        //check dimensionality and indexing (row first):
+        CHECK(readBackData.rank == 2);
+        CHECK(readBackData.dims[0] == 1);
+        CHECK(readBackData.dims[1] == 5);
+
+        //check full rows:
+        CHECK_THAT(readBackData.getRow(0), Catch::Matchers::Approx(row1));
     }
 }
 

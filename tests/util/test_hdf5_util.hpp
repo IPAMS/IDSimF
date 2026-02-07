@@ -28,12 +28,29 @@
 #define IDSIMF_TEST_HDF5_UTIL_HPP
 
 #include "H5Cpp.h"
+#include <array>
 
 // Define some helping data structures and functions .........
 template <hsize_t NDIMS, typename DTYPE> struct DataField{
     hsize_t rank;
     std::array<hsize_t, NDIMS> dims;
     std::vector<DTYPE> data;
+
+    std::vector<DTYPE> getRow(hsize_t rowIndex) {
+        if (NDIMS == 2) {
+            std::vector<DTYPE> row;
+            std::array<hsize_t,2> indices = {rowIndex,0};
+            for (hsize_t i=0; i<dims[1]; ++i) {
+                indices[1] = i;
+                row.push_back(get(indices));
+            }
+            return row;
+        }
+        else {
+            assert(false);
+        }
+    }
+
 
     DTYPE get(std::array<hsize_t,NDIMS> indices){
         hsize_t linIndex;
@@ -98,6 +115,11 @@ template <hsize_t NDIMS>DataField<NDIMS,double> readDataset(H5::DataSet& ds){
     }
 
     return dField;
+}
+
+inline H5::DataSet openDataSet(const std::string &filename, const std::string &dataSetPath) {
+    H5::H5File bareFile(filename.c_str(),H5F_ACC_RDONLY);
+    return bareFile.openDataSet(dataSetPath.c_str());
 }
 
 inline std::vector<std::string> readStringAttribute(H5::Group& group, std::string attrName){
