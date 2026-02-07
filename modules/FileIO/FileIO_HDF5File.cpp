@@ -61,7 +61,7 @@ bool FileIO::HDF5File::groupPathExists(std::string groupName) const{
     return true;
 }
 
-H5::Group FileIO::HDF5File::createGroup(std::string groupName) const {
+H5::Group FileIO::HDF5File::openGroup(std::string groupName) const {
     if (!groupPathExists(groupName)) {
         H5::LinkCreatPropList propList;
         propList.setCreateIntermediateGroup(true);
@@ -87,7 +87,7 @@ H5::DataSet FileIO::HDF5File::initTableDataset(std::string groupName, std::strin
     propTimesteps.setChunk(2, chunkDimsDS);
 
     //create actual dataset for times:
-    H5::Group group = createGroup(groupName);
+    H5::Group group = openGroup(groupName);
     H5::DataSpace dataspaceDS(2,dimsDS,maxdimsDS);
     H5::DataSet dataSet = group.createDataSet(datasetName, H5::PredType::IEEE_F32BE, dataspaceDS, propTimesteps);
 

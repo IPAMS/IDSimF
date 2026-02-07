@@ -57,7 +57,7 @@ namespace FileIO{
             readDataset(std::string datasetName) const;
 
         bool groupPathExists(std::string groupName) const;
-        H5::Group createGroup(std::string groupName) const;
+        H5::Group openGroup(std::string groupName) const;
         H5::DataSet initTableDataset(std::string groupName, std::string datasetName, std::size_t nColumns) const;
         static void writeRowToTableDataset(H5::DataSet dataSet, const std::vector<double> &data);
 
