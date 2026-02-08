@@ -27,11 +27,11 @@
 
 #include "CollisionModel_MDInteractions.hpp"
 #include "CollisionModel_Molecule.hpp"
-#include "CollisionModel_Atom.hpp"
 #include "CollisionModel_MDForceField_LJ12_6.hpp"
 #include "Core_randomGenerators.hpp"
 #include "catch.hpp"
 #include "FileIO_MolecularStructureReader.hpp"
+#include "test_hdf5_util.hpp"
 #include <iostream>
 
 std::string readTextFile(std::string filename){
@@ -152,6 +152,82 @@ TEST_CASE("Basic test MD Interactions model", "[CollisionModels][MDInteractionsM
             }
         }
         CHECK(i > 920);
+    }
+}
+
+bool checkDims(std::string filename, std::string dataSetName, hsize_t xDim, hsize_t yDim) {
+    auto tra1DS = openDataSet(filename.c_str(), dataSetName.c_str());
+    hsize_t dims[2];
+    hsize_t maxDims[2];
+    H5Sget_simple_extent_dims(tra1DS.getSpace().getId(), dims, maxDims);
+
+    if (dims[0] == xDim && dims[1] == yDim && maxDims[0] == H5S_UNLIMITED && maxDims[1] == yDim) {
+        return true;
+    }
+    UNSCOPED_INFO("check dims failed! dims[0]: "<<dims[0]<<" dims[1]: "<<dims[1]<<" xDim: "<<xDim <<" yDim: "<<yDim);
+    return false;
+}
+
+TEST_CASE("Test MD Model with Multi-Atom Molecules", "[CollisionModels][MDInteractionsModel]") {
+    Core::globalRandomGeneratorPool = std::make_unique<Core::XoshiroTestRandomGeneratorPool>();
+
+    FileIO::MolecularStructureReader reader = FileIO::MolecularStructureReader();
+    std::unordered_map<std::string,  std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection =
+        reader.readMolecularStructure("test_molecularstructure_reader.json");
+    Core::Particle ion;
+    ion.setMolecularStructure(molecularStructureCollection.at("O2+"));
+    ion.setVelocity(Core::Vector(600.0, 50.0, 0.0));
+    CollisionModel::MDForceField_LJ12_6 forceField(0.205E-30);
+    auto forceFieldPtr = std::make_unique<CollisionModel::MDForceField_LJ12_6>(forceField);
+
+    double dt = 2e-11;
+
+    /*SECTION("Test with He as collision gas") {
+        CollisionModel::MDInteractionsModel mdSim = CollisionModel::MDInteractionsModel(
+            2000000, 298,
+            4.003, CollisionModel::MDInteractionsModel::DIAMETER_HE, "He",
+            1e-10, 1E-17, 2, 1, 35e-10,
+            std::move(forceFieldPtr), molecularStructureCollection);
+
+        std::string h5Filename = "MD_collisions_multiatom_trajectories_He.h5";
+        mdSim.setHDF5TrajectoryWriter(h5Filename, 35e-10, 0);
+        mdSim.modifyVelocity(ion, dt);
+        unsigned int timestep = 0;
+        double time = 0.0;
+        for(int i = 0; i < 4; i++) {
+            mdSim.updateModelTimestepParameters(timestep, time);
+            mdSim.modifyVelocity(ion, 2e-11);
+        }
+
+        // check results written into trajectory:
+        CHECK(checkDims(h5Filename, "MD_trajectories/trajectory1", 189, 11));
+        CHECK(checkDims(h5Filename, "MD_trajectories/trajectory2", 206, 11));
+        H5::Group group = openGroup(h5Filename, "MD_trajectories");
+        CHECK(group.getNumObjs() == 4);
+    }
+*/
+    SECTION("Test with N2 as collision gas") {
+        CollisionModel::MDInteractionsModel mdSim = CollisionModel::MDInteractionsModel(
+            2000000, 298,
+            28.0, CollisionModel::MDInteractionsModel::DIAMETER_N2, "N2",
+            1e-10, 1E-17, 2, 1, 35e-10,
+            std::move(forceFieldPtr), molecularStructureCollection);
+
+        std::string h5Filename = "MD_collisions_multiatom_trajectories_N2.h5";
+        mdSim.setHDF5TrajectoryWriter(h5Filename, 35e-10, 0);
+        mdSim.modifyVelocity(ion, dt);
+        unsigned int timestep = 0;
+        double time = 0.0;
+        for(int i = 0; i < 4; i++) {
+            mdSim.updateModelTimestepParameters(timestep, time);
+            mdSim.modifyVelocity(ion, 2e-11);
+        }
+
+        // check results written into trajectory:
+        CHECK(checkDims(h5Filename, "MD_trajectories/trajectory1", 190, 17));
+        CHECK(checkDims(h5Filename, "MD_trajectories/trajectory2", 161, 17));
+        H5::Group group = openGroup(h5Filename, "MD_trajectories");
+        CHECK(group.getNumObjs() == 5);
     }
 }
 

@@ -122,6 +122,11 @@ inline H5::DataSet openDataSet(const std::string &filename, const std::string &d
     return bareFile.openDataSet(dataSetPath.c_str());
 }
 
+inline H5::Group openGroup(const std::string &filename, const std::string &groupPath) {
+    H5::H5File bareFile(filename.c_str(),H5F_ACC_RDONLY);
+    return bareFile.openGroup(groupPath.c_str());
+}
+
 inline std::vector<std::string> readStringAttribute(H5::Group& group, std::string attrName){
     H5::Attribute attr(group.openAttribute(attrName.c_str()));
     H5::DataSpace dataspace = attr.getSpace();

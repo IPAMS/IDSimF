@@ -25,10 +25,10 @@ CollisionModel::HDF5MDTrajectoryWriter::HDF5MDTrajectoryWriter(std::string hdf5F
 
 }
 
-void CollisionModel::HDF5MDTrajectoryWriter::initNewTrajectory(std::size_t nAtomsMolecule, std::size_t nNodesBG) {
+void CollisionModel::HDF5MDTrajectoryWriter::initNewTrajectory(std::size_t nAtomsMolecule, std::size_t nAtomsBG) {
     nTrajectories_++;
     currentDS_ = h5f_->initTableDataset("MD_trajectories", "trajectory"+std::to_string(nTrajectories_),
-        (nAtomsMolecule+nAtomsMolecule)*3 + 2);
+        (nAtomsMolecule+nAtomsBG)*3 + 2);
 
     std::vector<std::string> columnNames={"time", "dt"};
 
@@ -38,7 +38,7 @@ void CollisionModel::HDF5MDTrajectoryWriter::initNewTrajectory(std::size_t nAtom
         columnNames.push_back("mol_a"+std::to_string(i)+"_pos_z");
     }
 
-    for (std::size_t i=0; i<nNodesBG; i++) {
+    for (std::size_t i=0; i<nAtomsBG; i++) {
         columnNames.push_back("bg_a"+std::to_string(i)+"_pos_x");
         columnNames.push_back("bg_a"+std::to_string(i)+"_pos_y");
         columnNames.push_back("bg_a"+std::to_string(i)+"_pos_z");
