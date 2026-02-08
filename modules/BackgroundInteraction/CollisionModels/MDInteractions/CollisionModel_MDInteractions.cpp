@@ -217,7 +217,10 @@ void CollisionModel::MDInteractionsModel::setLegacyTrajectoryWriter(const std::s
 }
 
 void CollisionModel::MDInteractionsModel::setHDF5TrajectoryWriter(const std::string& trajectoryFileName, double trajectoryDistance, unsigned int startTimeStep) {
+
+
     hdf5TrajectoryWriter_ = std::make_unique<CollisionModel::HDF5MDTrajectoryWriter>(trajectoryFileName);
+
     recordTrajectoryStartTimeStep_ = startTimeStep;
     trajectoryDistance_ = trajectoryDistance;
     hdf5TWriterConf_.modelRecordsTrajectory = true;
@@ -230,7 +233,7 @@ void CollisionModel::MDInteractionsModel::setHDF5TrajectoryWriter(const std::str
  * integration time, velocity of the background gas, force acting on the background gas and 
  * timestep length
  */
-void CollisionModel::MDInteractionsModel::writeTrajectory(double distance, CollisionModel::Molecule bg, Core::Vector positionBgMolecule, Core::Vector velocityBgMolecule, 
+void CollisionModel::MDInteractionsModel::writeLegacyTrajectorySample(double distance, CollisionModel::Molecule bg, Core::Vector positionBgMolecule, Core::Vector velocityBgMolecule,
                         std::vector<Core::Vector> forceMolecules, bool endOfTrajectory, std::ofstream* file, double time, double dt){
    
     if(distance < trajectoryDistance_){
@@ -370,6 +373,12 @@ void CollisionModel::MDInteractionsModel::modifyVelocity(Core::Particle& particl
         // Construct the background gas particle
         CollisionModel::Molecule bgMole = CollisionModel::Molecule(Core::Vector(0.0, 0.0, 0.0), Core::Vector(0.0, 0.0, 0.0),
                                             molecularStructureCollection_.at(collisionMolecule_));
+
+        //Init new HDF5 trajectory
+        if(hdf5TWriterConf_.recordingActive == true){
+            hdf5TrajectoryWriter_->initNewTrajectory(mole.getAtoms().size(), bgMole.getAtoms().size());
+        }
+
 
         // Give background gas its position, velocity, rotation:
         // Calculate the standard deviation of the one dimensional velocity distribution of the
@@ -862,7 +871,7 @@ bool CollisionModel::MDInteractionsModel::rk4InternAdaptiveStep(std::vector<Coll
         i = 0;
         for(auto* molecule : moleculesPtr){
             if(legacyTWriterConf_.recordingActive == true && molecule->getMolecularStructureName() == collisionMolecule_){
-                writeTrajectory(distance, *molecule, molecule->getComPos(), molecule->getComVel(),forceMolecules, false, trajectoryOutputStream_.get(), integrationTimeSum, dt);
+                writeLegacyTrajectorySample(distance, *molecule, molecule->getComPos(), molecule->getComVel(),forceMolecules, false, trajectoryOutputStream_.get(), integrationTimeSum, dt);
             }
             
             molecule->setComPos(newComPosOrder4[i]);
@@ -888,12 +897,18 @@ bool CollisionModel::MDInteractionsModel::rk4InternAdaptiveStep(std::vector<Coll
         steps++;
         dt = dt * globalDelta;
 
+        //Write time step to HDF5 trajectory:
+        if(hdf5TWriterConf_.recordingActive == true){
+            hdf5TrajectoryWriter_->writeTrajectorySample(
+                integrationTimeSum, dt, *moleculesPtr.at(0), *moleculesPtr.at(1));
+        }
+
         size_t index = 0;
         for(size_t b = 0; b < nMolecules; ++b){
             for(size_t z = b+1; z < nMolecules; ++z){
                 if((moleculesPtr[z]->getComPos() - moleculesPtr[b]->getComPos()).magnitude() > startDistances[index++]){
                     if(legacyTWriterConf_.recordingActive == true && moleculesPtr[z]->getMolecularStructureName() == collisionMolecule_){
-                        writeTrajectory((moleculesPtr[z]->getComPos() - moleculesPtr[b]->getComPos()).magnitude(), *moleculesPtr[z],
+                        writeLegacyTrajectorySample((moleculesPtr[z]->getComPos() - moleculesPtr[b]->getComPos()).magnitude(), *moleculesPtr[z],
                                         moleculesPtr[z]->getComPos(), moleculesPtr[z]->getComVel(), forceMolecules, true, trajectoryOutputStream_.get(), integrationTimeSum, dt);
                     }
                     return wasHit;

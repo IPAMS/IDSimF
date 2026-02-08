@@ -46,7 +46,6 @@
 #include "CollisionModel_AbstractMDForceField.hpp"
 #include "CollisionModel_SpatialFieldFunctions.hpp"
 #include "CollisionModel_HDF5MDTrajectoryWriter.hpp"
-#include "CollisionModel_MathFunctions.hpp"
 #include "CollisionModel_Molecule.hpp"
 #include "RS_AbstractReaction.hpp"
 #include "AppUtils_logging.hpp"
@@ -149,7 +148,7 @@ namespace CollisionModel{
                                 double trajectoryDistance,
                                 unsigned int startTimeStep=0);
 
-        void writeTrajectory(double distance, CollisionModel::Molecule bg, Core::Vector positionBgMolecule, Core::Vector velocityBgMolecule, 
+        void writeLegacyTrajectorySample(double distance, CollisionModel::Molecule bg, Core::Vector positionBgMolecule, Core::Vector velocityBgMolecule,
                         std::vector<Core::Vector> forceMolecules, bool endOfTrajectory, std::ofstream* file, double time, double dt);
 
         bool leapfrogIntern(std::vector<CollisionModel::Molecule*> moleculesPtr, double dt, double finalTime, double requiredRad);

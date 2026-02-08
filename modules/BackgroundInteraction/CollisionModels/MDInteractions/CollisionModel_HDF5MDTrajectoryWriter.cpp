@@ -22,4 +22,49 @@
 
 CollisionModel::HDF5MDTrajectoryWriter::HDF5MDTrajectoryWriter(std::string hdf5Filename) {
     h5f_ = std::make_unique<FileIO::HDF5File>(hdf5Filename, FileIO::HDF5File::WRITE_ONLY);
+
+}
+
+void CollisionModel::HDF5MDTrajectoryWriter::initNewTrajectory(std::size_t nAtomsMolecule, std::size_t nNodesBG) {
+    nTrajectories_++;
+    currentDS_ = h5f_->initTableDataset("MD_trajectories", "trajectory"+std::to_string(nTrajectories_),
+        (nAtomsMolecule+nAtomsMolecule)*3 + 2);
+
+    std::vector<std::string> columnNames={"time", "dt"};
+
+    for (std::size_t i=0; i<nAtomsMolecule; i++) {
+        columnNames.push_back("mol_a"+std::to_string(i)+"_pos_x");
+        columnNames.push_back("mol_a"+std::to_string(i)+"_pos_y");
+        columnNames.push_back("mol_a"+std::to_string(i)+"_pos_z");
+    }
+
+    for (std::size_t i=0; i<nNodesBG; i++) {
+        columnNames.push_back("bg_a"+std::to_string(i)+"_pos_x");
+        columnNames.push_back("bg_a"+std::to_string(i)+"_pos_y");
+        columnNames.push_back("bg_a"+std::to_string(i)+"_pos_z");
+    }
+    h5f_->writeDatasetAttribute<std::string>(currentDS_,"MD_trajectory/trajectory", columnNames);
+}
+
+void CollisionModel::HDF5MDTrajectoryWriter::writeTrajectorySample(
+    double time, double dt, Molecule& bgMolecule, Molecule& molecule) {
+
+    std::vector<double> row = {time, dt };
+    auto atomsMolecule = molecule.getAtoms();
+    for (const auto& atom : atomsMolecule) {
+        Core::Vector atomPos = atom->getRelativePosition() + molecule.getComPos();
+        row.push_back(atomPos.x());
+        row.push_back(atomPos.y());
+        row.push_back(atomPos.z());
+    }
+
+    auto atomsBg = bgMolecule.getAtoms();
+    for (const auto& atom : atomsBg) {
+        Core::Vector atomPos = atom->getRelativePosition() + bgMolecule.getComPos();
+        row.push_back(atomPos.x());
+        row.push_back(atomPos.y());
+        row.push_back(atomPos.z());
+    }
+
+    h5f_->writeRowToTableDataset(currentDS_, row);
 }

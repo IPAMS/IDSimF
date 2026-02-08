@@ -28,15 +28,22 @@
 #define IDSIMF_HDF5MDTRAJECTORYWRITER_HPP
 
 #include "FileIO_HDF5File.hpp"
+#include "CollisionModel_Molecule.hpp"
 
 namespace CollisionModel{
     class HDF5MDTrajectoryWriter {
     public:
-        explicit HDF5MDTrajectoryWriter(std::string hdf5Filename);
+        HDF5MDTrajectoryWriter(std::string hdf5Filename);
+        void initNewTrajectory(std::size_t nAtomsMolecule, std::size_t nNodesBG);
+
+        void writeTrajectorySample(double time, double dt,
+                                   Molecule &bgMolecule, Molecule &molecule);
 
     private:
+        std::size_t nTrajectories_=0;
         std::unique_ptr<FileIO::HDF5File> h5f_;
+        H5::DataSet currentDS_;
     };
-} // CollisionModel
+}
 
 #endif //IDSIMF_HDF5MDTRAJECTORYWRITER_HPP
