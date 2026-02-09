@@ -43,7 +43,10 @@ void CollisionModel::HDF5MDTrajectoryWriter::initNewTrajectory(std::size_t nAtom
         columnNames.push_back("bg_a"+std::to_string(i)+"_pos_y");
         columnNames.push_back("bg_a"+std::to_string(i)+"_pos_z");
     }
-    h5f_->writeDatasetAttribute<std::string>(currentDS_,"MD_trajectory/trajectory", columnNames);
+    h5f_->writeDatasetAttribute<std::string>(currentDS_,"column_names", columnNames);
+
+    std::vector<std::size_t> nAtoms = {nAtomsMolecule, nAtomsBG};
+    h5f_->writeDatasetAttribute<std::size_t>(currentDS_,"number_of_atoms", nAtoms);
 }
 
 void CollisionModel::HDF5MDTrajectoryWriter::writeTrajectorySample(

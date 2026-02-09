@@ -160,8 +160,8 @@ template <typename HDF_OBJTYPE, typename DTYPE> std::vector<DTYPE> readAttribute
         attr.read(H5::PredType::NATIVE_INT, result.data());
         return result;
     }
-    else if constexpr (std::is_same_v<DTYPE,hsize_t>) {
-        std::vector<int> result(dims[0]);
+    else if constexpr (std::is_same_v<DTYPE,hsize_t> || std::is_same_v<DTYPE,std::size_t>) {
+        std::vector<DTYPE> result(dims[0]);
         attr.read(H5::PredType::NATIVE_UINT64, result.data());
         return result;
     }

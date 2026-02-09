@@ -182,7 +182,7 @@ TEST_CASE("Test MD Model with Multi-Atom Molecules", "[CollisionModels][MDIntera
 
     double dt = 2e-11;
 
-    /*SECTION("Test with He as collision gas") {
+    SECTION("Test with He as collision gas") {
         CollisionModel::MDInteractionsModel mdSim = CollisionModel::MDInteractionsModel(
             2000000, 298,
             4.003, CollisionModel::MDInteractionsModel::DIAMETER_HE, "He",
@@ -204,8 +204,20 @@ TEST_CASE("Test MD Model with Multi-Atom Molecules", "[CollisionModels][MDIntera
         CHECK(checkDims(h5Filename, "MD_trajectories/trajectory2", 206, 11));
         H5::Group group = openGroup(h5Filename, "MD_trajectories");
         CHECK(group.getNumObjs() == 4);
+
+        //check Attributes of first trajectory:
+        H5::DataSet tra1DS = openDataSet(h5Filename, "MD_trajectories/trajectory1");
+        auto colNamesAttribute = readAttribute<H5::DataSet, std::string>(tra1DS, "column_names");
+        std::vector<std::string> expectedColNames = {"time", "dt",
+            "mol_a0_pos_x", "mol_a0_pos_y", "mol_a0_pos_z", "mol_a1_pos_x", "mol_a1_pos_y", "mol_a1_pos_z",
+            "bg_a0_pos_x", "bg_a0_pos_y", "bg_a0_pos_z"};
+        CHECK_THAT(colNamesAttribute, Catch::Matchers::Equals(expectedColNames));
+
+        auto nAtomsAttribute = readAttribute<H5::DataSet, std::size_t>(tra1DS, "number_of_atoms");
+        std::vector<std::size_t> expectedAtomNumbers = {2, 1};
+        CHECK_THAT(nAtomsAttribute, Catch::Matchers::Equals(expectedAtomNumbers));
     }
-*/
+
     SECTION("Test with N2 as collision gas") {
         CollisionModel::MDInteractionsModel mdSim = CollisionModel::MDInteractionsModel(
             2000000, 298,
@@ -228,6 +240,19 @@ TEST_CASE("Test MD Model with Multi-Atom Molecules", "[CollisionModels][MDIntera
         CHECK(checkDims(h5Filename, "MD_trajectories/trajectory2", 161, 17));
         H5::Group group = openGroup(h5Filename, "MD_trajectories");
         CHECK(group.getNumObjs() == 5);
+
+        //check Attributes of first trajectory:
+        H5::DataSet tra1DS = openDataSet(h5Filename, "MD_trajectories/trajectory1");
+        auto colNamesAttribute = readAttribute<H5::DataSet, std::string>(tra1DS, "column_names");
+        std::vector<std::string> expectedColNames = {"time", "dt",
+            "mol_a0_pos_x", "mol_a0_pos_y", "mol_a0_pos_z", "mol_a1_pos_x", "mol_a1_pos_y", "mol_a1_pos_z",
+            "bg_a0_pos_x", "bg_a0_pos_y", "bg_a0_pos_z", "bg_a1_pos_x", "bg_a1_pos_y", "bg_a1_pos_z", "bg_a2_pos_x", "bg_a2_pos_y", "bg_a2_pos_z"};
+        CHECK_THAT(colNamesAttribute, Catch::Matchers::Equals(expectedColNames));
+
+        auto nAtomsAttribute = readAttribute<H5::DataSet, std::size_t>(tra1DS, "number_of_atoms");
+        std::vector<std::size_t> expectedAtomNumbers = {2, 3};
+        CHECK_THAT(nAtomsAttribute, Catch::Matchers::Equals(expectedAtomNumbers));
+
     }
 }
 

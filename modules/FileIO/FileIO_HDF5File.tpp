@@ -44,9 +44,13 @@ void FileIO::HDF5File::writeDatasetAttribute(H5::DataSet &dataSet, const std::st
         H5::Attribute intAttribute = dataSet.createAttribute(attrName.c_str(), H5::PredType::STD_I32BE, attrDataSpace);
         intAttribute.write(H5::PredType::NATIVE_INT, values.data());
     }
+    else if constexpr(std::is_same_v<DTYPE, std::size_t>) {
+        H5::Attribute intAttribute = dataSet.createAttribute(attrName.c_str(), H5::PredType::STD_U64BE, attrDataSpace);
+        intAttribute.write(H5::PredType::NATIVE_UINT64, values.data());
+    }
     else if constexpr(std::is_same_v<DTYPE, double>) {
-        H5::Attribute doubleAttribute = dataSet.createAttribute(attrName.c_str(), H5::PredType::IEEE_F32BE, attrDataSpace);
-        doubleAttribute.write(H5::PredType::NATIVE_DOUBLE, values.data());
+        H5::Attribute hsizetAttribute = dataSet.createAttribute(attrName.c_str(), H5::PredType::IEEE_F32BE, attrDataSpace);
+        hsizetAttribute.write(H5::PredType::NATIVE_DOUBLE, values.data());
     }
     else {
         //use workaround since static_assert(false) leads to compiler / template instantiation problems
