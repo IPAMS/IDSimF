@@ -50,7 +50,7 @@ void CollisionModel::HDF5MDTrajectoryWriter::initNewTrajectory(std::size_t nAtom
 }
 
 void CollisionModel::HDF5MDTrajectoryWriter::writeTrajectorySample(
-    double time, double dt, Molecule& bgMolecule, Molecule& molecule) {
+    double time, double dt, Molecule& molecule, Molecule& bgMolecule) {
 
     std::vector<double> row = {time, dt };
     auto atomsMolecule = molecule.getAtoms();
