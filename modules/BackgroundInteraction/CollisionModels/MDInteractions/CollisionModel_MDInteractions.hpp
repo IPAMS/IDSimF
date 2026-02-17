@@ -173,6 +173,8 @@ namespace CollisionModel{
         void modifyPosition(Core::Particle& particle,
                             double dt);
 
+
+
     private:
 
         struct {

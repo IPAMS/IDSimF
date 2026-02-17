@@ -348,7 +348,9 @@ void CollisionModel::Molecule::rotateMolecule(){
 void CollisionModel::Molecule::genInertiaBodyMatrix(){
     // since this is the body moment of inertia matrix 
     // only diagonal matrix elements exist and the rest are omitted by 
-    // default 
+    // default
+    const double minInertia = 1e-100;
+    const double minInertiaInv = 1.0 / 1e-100;
     double Ixx = 0, Iyy = 0,  Izz = 0;
     for(auto& atom : atoms){
         Core::Vector atomPos = atom->getRelativePosition();
@@ -362,22 +364,22 @@ void CollisionModel::Molecule::genInertiaBodyMatrix(){
         inertiaPrinciple(0,0) = Ixx; 
         inertiaPrincipleInv(0,0) = 1/Ixx; 
     }else{
-        inertiaPrinciple(0,0) = 1e-32; 
-        inertiaPrincipleInv(0,0) = 1/1e-32; 
+        inertiaPrinciple(0,0) = minInertia;
+        inertiaPrincipleInv(0,0) = minInertiaInv;
     }
     if(Iyy != 0){
         inertiaPrinciple(1,1) = Iyy; 
         inertiaPrincipleInv(1,1) = 1/Iyy; 
     }else{
-        inertiaPrinciple(1,1) = 1e-32; 
-        inertiaPrincipleInv(1,1) = 1/1e-32; 
+        inertiaPrinciple(1,1) = minInertia;
+        inertiaPrincipleInv(1,1) = minInertiaInv;
     }
     if(Izz != 0){
         inertiaPrinciple(2,2) = Izz; 
         inertiaPrincipleInv(2,2) = 1/Izz; 
     }else{
-        inertiaPrinciple(2,2) = 1e-32; 
-        inertiaPrincipleInv(2,2) = 1/1e-32; 
+        inertiaPrinciple(2,2) = minInertia;
+        inertiaPrincipleInv(2,2) = minInertiaInv;
     }
     #pragma GCC diagnostic pop
 }

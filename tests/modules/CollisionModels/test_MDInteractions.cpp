@@ -252,7 +252,6 @@ TEST_CASE("Test MD Model with Multi-Atom Molecules", "[CollisionModels][MDIntera
         auto nAtomsAttribute = readAttribute<H5::DataSet, std::size_t>(tra1DS, "number_of_atoms");
         std::vector<std::size_t> expectedAtomNumbers = {2, 3};
         CHECK_THAT(nAtomsAttribute, Catch::Matchers::Equals(expectedAtomNumbers));
-
     }
 }
 
