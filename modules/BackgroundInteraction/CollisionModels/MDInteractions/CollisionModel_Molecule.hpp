@@ -41,6 +41,8 @@ namespace CollisionModel{
     class Molecule {
 
     public:
+        constexpr static double MININERTIA = 1e-100;
+        constexpr static double MININERTIAINV = 1.0 / 1e-100;
 
         // Constructors
         Molecule() = default;

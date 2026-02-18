@@ -272,15 +272,25 @@ double CollisionModel::MDInteractionsModel::initRotation(CollisionModel::Molecul
     Core::Matrix3 inertiaMatrix = mole.getInertiaMatrix();
     double I1 = inertiaMatrix(0,0), I2 = inertiaMatrix(1,1), I3=inertiaMatrix(2,2);
     double energyRotMolecule = 0; 
-    if(I1 > 0) energyRotMolecule += Core::K_BOLTZMANN * temperature_K;
-    if(I2 > 0) energyRotMolecule += Core::K_BOLTZMANN * temperature_K;
-    if(I3 > 0) energyRotMolecule += Core::K_BOLTZMANN * temperature_K;
+    if(I1 > CollisionModel::Molecule::MININERTIA) {
+        energyRotMolecule += Core::K_BOLTZMANN * temperature_K; 
+    }  
+    else I1 = 0;
+    if(I2 > CollisionModel::Molecule::MININERTIA) {
+        energyRotMolecule += Core::K_BOLTZMANN * temperature_K; 
+    }  
+    else I2 = 0;
+    if(I3 > CollisionModel::Molecule::MININERTIA) {
+        energyRotMolecule += Core::K_BOLTZMANN * temperature_K; 
+    }  
+    else I3 = 0;
     double w1 = sqrt(2*energyRotMolecule/(I1+I2+I3));
-    mole.setAngVel(Core::Vector{w1, w1, w1});
-    Core::Matrix3 initialRotationMatrix = mole.calcRotationMatrix(w1, w1, w1);
+    Core::Vector anglVelo = {I1 > 0 ? w1 : 0, I2 > 0 ? w1 : 0, I3 > 0 ? w1 : 0};
+    mole.setAngVel(anglVelo);
+    Core::Matrix3 initialRotationMatrix = mole.calcRotationMatrix(anglVelo.x(), anglVelo.y(), anglVelo.z());
     mole.setRotationMatrix(initialRotationMatrix);
     mole.rotateMoleculeRotationMatrix();
-
+    mole.setAngMom(inertiaMatrix*anglVelo);
     return energyRotMolecule;
 }
 
@@ -431,7 +441,7 @@ void CollisionModel::MDInteractionsModel::modifyVelocity(Core::Particle& particl
             energyRotMolecule = initRotation(mole, temperature_K);
             energyRotBg = initRotation(bgMole, temperature_K);
         }
-       
+        std::cout << "Mole: " << mole.getRotationMatrix() << std::endl;
 
 
         std::vector<CollisionModel::Molecule*> moleculesPtr = {&mole, &bgMole};
@@ -752,6 +762,7 @@ bool CollisionModel::MDInteractionsModel::rk4InternAdaptiveStep(std::vector<Coll
     // moleculesPtr[1]->setAngles(nitrogenAngles);
 
     while(integrationTimeSum < finalTime){
+    //while(steps < 2){
 
         
         i = 0;
@@ -765,6 +776,7 @@ bool CollisionModel::MDInteractionsModel::rk4InternAdaptiveStep(std::vector<Coll
             if(rotationActive_){
                 angMomentMolecules[i] = molecule->getAngMom();
                 rotMolecules[i] = molecule->getRotationMatrix();
+                // std::cout << "Init rot: " << rotMolecules[i] << std::endl;
                 initialAngMomentMolecules[i] = molecule->getAngMom();
                 initialRotMolecules[i] = molecule->getRotationMatrix();
                 initialInertInvMolecules[i] = molecule->getInertiaInvMatrix();
@@ -779,7 +791,11 @@ bool CollisionModel::MDInteractionsModel::rk4InternAdaptiveStep(std::vector<Coll
             l[0][q] = velocityMolecules[q] * dt;
             if(rotationActive_){
                 worldInvInertia = rotMolecules[q]*initialInertInvMolecules[q]*rotMolecules[q].transpose();
+                // std::cout << "Rot: " << rotMolecules[q] << std::endl;
+                // std::cout << "InvBody: " << initialInertInvMolecules[q] << std::endl;
+                // std::cout << "Inv: " << worldInvInertia << std::endl;
                 Core::Vector omega = worldInvInertia*angMomentMolecules[q];
+                // std::cout << "Omega: " << omega << std::endl;
                 v[0][q] = Core::Vector(0.0, 0.0, 0.0);
                 u[0][q] = CollisionModel::Molecule::calcRotationMatrixUpdate(rotMolecules[q], omega) *dt;
             }
@@ -845,9 +861,12 @@ bool CollisionModel::MDInteractionsModel::rk4InternAdaptiveStep(std::vector<Coll
             if(rotationActive_){
                 newComAngMomOrder4[i] = initialAngMomentMolecules[i] + (v[0][i] * 25./216 + v[2][i] * 1408./2565 + v[3][i] * 2197./4104 + v[4][i] * (-1./5));
                 newComRotOrder4[i] = initialRotMolecules[i] + (u[0][i] * (25./216) + u[2][i] * (1408./2565) + u[3][i] * (2197./4104) + u[4][i] * (-1./5));
+                std::cout << "New Rot: " << newComRotOrder4[i] << std::endl;
+                
             }
             
         }
+  
 
         #pragma GCC diagnostic push
         #pragma GCC diagnostic ignored "-Wfloat-equal"
@@ -881,6 +900,7 @@ bool CollisionModel::MDInteractionsModel::rk4InternAdaptiveStep(std::vector<Coll
                 molecule->setRotationMatrix(newComRotOrder4[i]);
                 Core::Matrix3 worldInvI = newComRotOrder4[i]*initialInertInvMolecules[i]*newComRotOrder4[i].transpose();
                 molecule->setAngVel(worldInvI*newComAngMomOrder4[i]);
+                molecule->rotateMoleculeRotationMatrix();
             }
 
             // if(molecule->getMolecularStructureName()=="N2" || molecule->getMolecularStructureName()=="N2Approx"){
