@@ -298,7 +298,9 @@ TEST_CASE("Test MD Interactions with rotation", "[CollisionModels][MDInteraction
                                                                                     molecularStructureCollection);
 
     double dt = 2e-11;
-    mdSim.setLegacyTrajectoryWriter("MD_collisions_rotation_trajectories_test.txt", 35e-10, 0);
+    std::string h5Filename = "MD_collisions_multiatom_trajectories_He.h5";
+    mdSim.setHDF5TrajectoryWriter(h5Filename, 35e-10, 0);
+    //mdSim.setLegacyTrajectoryWriter("MD_collisions_rotation_trajectories_test.txt", 35e-10, 0);
     mdSim.modifyVelocity(ion, dt);
 
 
