@@ -736,11 +736,13 @@ bool CollisionModel::MDInteractionsModel::rk4InternAdaptiveStep(std::vector<Coll
     std::array<std::array<Core::Matrix3, 2>, 6> u;
     std::array<std::array<Core::Vector, 2>, 6> v;
     std::array<Core::Vector, 2> newComAngMomOrder4; 
+    std::array<Core::Vector, 2> newComAngMomOrder5; 
     std::array<Core::Matrix3, 2> newComRotOrder4;
+    std::array<Core::Matrix3, 2> newComRotOrder5;
 
     Core::Matrix3 worldInvInertia;
 
-    std::array<double, 2> R;
+    std::array<std::array<double,2>, 2> R = {0,0,0,0};
     double globalR, globalDelta;
     // double tolerance = 1e-8;
     double pi = 3.14159;
@@ -859,9 +861,12 @@ bool CollisionModel::MDInteractionsModel::rk4InternAdaptiveStep(std::vector<Coll
             newComPosOrder4[i] = initialPositionMolecules[i] + (l[0][i] * 25./216 + l[2][i] * 1408./2565 + l[3][i] * 2197./4104 + l[4][i] * (-1./5));
             newComVelOrder4[i] = initialVelocityMolecules[i] + (k[0][i] * 25./216 + k[2][i] * 1408./2565 + k[3][i] * 2197./4104 + k[4][i] * (-1./5));
             if(rotationActive_){
+                newComAngMomOrder5[i] = initialAngMomentMolecules[i] + (v[0][i] * (16./135) + v[2][i] * (6656./12825) + v[3][i] * (28561./56430) + v[4][i] * (-9./50) + v[5][i] * (2./55));
                 newComAngMomOrder4[i] = initialAngMomentMolecules[i] + (v[0][i] * 25./216 + v[2][i] * 1408./2565 + v[3][i] * 2197./4104 + v[4][i] * (-1./5));
                 newComRotOrder4[i] = initialRotMolecules[i] + (u[0][i] * (25./216) + u[2][i] * (1408./2565) + u[3][i] * (2197./4104) + u[4][i] * (-1./5));
-                std::cout << "New Rot: " << newComRotOrder4[i] << std::endl;
+                newComRotOrder5[i] = initialRotMolecules[i] + (u[0][i] * (16./135) + u[2][i] * (6656./12825) + u[3][i] * (28561./56430) + u[4][i] * (-9./50) + u[5][i] * (2./55));
+                std::cout << "New Rot 4: " << newComRotOrder4[i] << std::endl;
+                std::cout << "New Rot 5: " << newComRotOrder5[i] << std::endl;
                 
             }
             
@@ -871,14 +876,26 @@ bool CollisionModel::MDInteractionsModel::rk4InternAdaptiveStep(std::vector<Coll
         #pragma GCC diagnostic push
         #pragma GCC diagnostic ignored "-Wfloat-equal"
         for(size_t p = 0; p < 2; p++){
+            
+            
             if(fabs(newComVelOrder5[p].magnitude()) != 0)
-                R[p] = fabs(newComVelOrder4[p].magnitude()-newComVelOrder5[p].magnitude())/fabs(newComVelOrder5[p].magnitude());
+                R[p][0] = fabs(newComVelOrder4[p].magnitude()-newComVelOrder5[p].magnitude())/fabs(newComVelOrder5[p].magnitude());
             else
-                R[p] = 0;
-                   
+                R[p][0] = 0;
+
+            if(rotationActive_){
+                if(fabs(Core::norm1(newComRotOrder5[p])) != 0) {
+                    R[p][1] = fabs(Core::norm1(newComRotOrder4[p])-Core::norm1(newComRotOrder5[p]))/fabs(Core::norm1(newComRotOrder5[p]));
+                }   
+                else{
+                    R[p][1] = 0;
+                }
+            }
         }
 
-        globalR = std::max({R[0],R[1]});
+        std::cout << "Error: "<< R[0][0] << " " << R[0][1] << " " << R[1][0] << " " << R[1][1] << std::endl; 
+
+        globalR = std::max({R[1][1], std::max({R[0][1],  std::max({R[0][0],R[1][0]}) }) });
 
         if (globalR == 0){
             globalR = 1e-15;
@@ -916,6 +933,8 @@ bool CollisionModel::MDInteractionsModel::rk4InternAdaptiveStep(std::vector<Coll
 
         steps++;
         dt = dt * globalDelta;
+    
+        std::cout << "DT: " <<  dt << std::endl;
 
         //Write time step to HDF5 trajectory:
         if(hdf5TWriterConf_.recordingActive == true){
