@@ -181,6 +181,15 @@ Core::Matrix3 Core::star(Vector vec) {
     };
 }
 
+double Core::norm1(Matrix3 mat){
+    double a = mat.element(0,0) + mat.element(1,0) + mat.element(2,0);
+    double b = mat.element(0,1) + mat.element(1,1) + mat.element(2,1);
+    double c = mat.element(0,2) + mat.element(1,2) + mat.element(2,2);
+
+    return std::max(a, std::max(b,c));
+
+}
+
 std::ostream& operator<< (std::ostream& os, Core::Matrix3 const& mat){
     os << mat.element(0,0) << ' ' << mat.element(0,1)  << ' ' << mat.element(0,2) << "\n"
        << mat.element(1,0) << ' ' << mat.element(1,1)  << ' ' << mat.element(1,2) << "\n"

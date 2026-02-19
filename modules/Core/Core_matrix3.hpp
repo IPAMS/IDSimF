@@ -80,6 +80,7 @@ namespace Core{
 
     // special operators for molecule rotation calculation
     Matrix3 star(Vector vec);
+    double norm1(Matrix3 mat);
     
 }
 
