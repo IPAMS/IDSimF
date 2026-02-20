@@ -34,18 +34,25 @@ namespace CollisionModel{
 
     public:
         MDForceField_LJ12_6(double collisionGasPolarizability_m3, 
-                                std::string potentials = "ALL");
+                                std::string potentials = "ALL", 
+                                bool rotActive = false);
 
         void calculateForceField(std::vector<CollisionModel::Molecule*>& moleculesPtr, 
-                                std::vector<Core::Vector>& forceMolecules) override;
+                                std::vector<Core::Vector>& forceMolecules, 
+                                std::vector<Core::Vector>& torqueMolecules) override;
 
         void calculateForceFieldComponents(std::vector<CollisionModel::Molecule*>& moleculesPtr, 
                                 std::vector<Core::Vector>& forceMolecules, Core::Vector& forceVDW, Core::Vector& forceII) override;
+
+        void calculateTorque(std::vector<Core::Vector>& positions, 
+                                        std::vector<Core::Vector>& forceMolecules, 
+                                        std::vector<Core::Vector>& torqueMolecules) override;
 
 
     private:
         double collisionGasPolarizability_m3_ = 0.0; ///< polarizability of the collision gas in m^3
         std::string potentialsFF_ = "";
+        bool rotActive_ = false;
     };
 }
 

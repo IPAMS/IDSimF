@@ -36,13 +36,18 @@ namespace CollisionModel{
     class MDForceField_Buckingham : public AbstractMDForceField {
 
     public:
-        MDForceField_Buckingham(double collisionGasPolarizability_m3, std::string potentials = "ALL");
+        MDForceField_Buckingham(double collisionGasPolarizability_m3, std::string potentials = "ALL", bool rotActive =false);
 
         void calculateForceField(std::vector<CollisionModel::Molecule*>& moleculesPtr, 
-                                std::vector<Core::Vector>& forceMolecules) override;
+                                std::vector<Core::Vector>& forceMolecules, 
+                                std::vector<Core::Vector>& torqueMolecules) override;
                             
         void calculateForceFieldComponents(std::vector<CollisionModel::Molecule*>& moleculesPtr, 
                                 std::vector<Core::Vector>& forceMolecules, Core::Vector& forceVDW, Core::Vector& forceII) override;
+                            
+        void calculateTorque(std::vector<Core::Vector>& positions, 
+                                        std::vector<Core::Vector>& forceMolecules, 
+                                        std::vector<Core::Vector>& torqueMolecules) override;
 
         static double calculateVDW(const CollisionModel::Atom& atomA, const CollisionModel::Atom& atomB, double distanceAbs);
 
@@ -53,6 +58,7 @@ namespace CollisionModel{
     private:
         double collisionGasPolarizability_m3_ = 0.0; ///< polarizability of the collision gas in m^3
         std::string potentialsFF_ = "";
+        bool rotActive_ = false;
         CollisionModel::AtomInteractionMap<double> interactionMap;
     };
 

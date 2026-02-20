@@ -373,7 +373,8 @@ bool CollisionModel::MDInteractionsModelExperimental::leapfrogIntern(std::vector
     int nSteps = int(round(finalTime/dt));
 
     std::vector<Core::Vector> forceMolecules(moleculesPtr_size);
-    forceField_->calculateForceField(moleculesPtr, forceMolecules);
+    std::vector<Core::Vector> torqueMolecules(moleculesPtr_size);
+    forceField_->calculateForceField(moleculesPtr, forceMolecules, torqueMolecules);
 
     // do the first half step for the velocity, as per leapfrog definition
     double energyStart = 0;
@@ -431,7 +432,7 @@ bool CollisionModel::MDInteractionsModelExperimental::leapfrogIntern(std::vector
         }
 
         // recalculate the force
-        forceField_->calculateForceField(moleculesPtr, forceMolecules);
+        forceField_->calculateForceField(moleculesPtr, forceMolecules, torqueMolecules);
         i = 0;
         // time step for the new velocity
         for(auto* molecule : moleculesPtr){
@@ -453,6 +454,7 @@ bool CollisionModel::MDInteractionsModelExperimental::rk4Intern(std::vector<Coll
     int nSteps = int(round(finalTime/dt));
     size_t nMolecules = moleculesPtr.size();
     std::vector<Core::Vector> forceMolecules(nMolecules);
+    std::vector<Core::Vector> torqueMolecules(nMolecules);
 
     bool wasHit = false;
     double distance = 0.0;
@@ -504,7 +506,7 @@ bool CollisionModel::MDInteractionsModelExperimental::rk4Intern(std::vector<Coll
         for(auto* molecule : moleculesPtr){
             mass.push_back(molecule->getMass());
         }
-        forceField_->calculateForceField(moleculesPtr, forceMolecules);
+        forceField_->calculateForceField(moleculesPtr, forceMolecules, torqueMolecules);
 
         std::array<std::array<Core::Vector, 2>, 4> k;
         std::array<std::array<Core::Vector, 2>, 4> l;
@@ -526,7 +528,7 @@ bool CollisionModel::MDInteractionsModelExperimental::rk4Intern(std::vector<Coll
                 i++;
             }
 
-            forceField_->calculateForceField(moleculesPtr, forceMolecules);
+            forceField_->calculateForceField(moleculesPtr, forceMolecules, torqueMolecules);
 
             for(i = 0; i < nMolecules; i++){
                 k[n][i] = forceMolecules.at(i) * dt / mass[i];
@@ -580,6 +582,7 @@ bool CollisionModel::MDInteractionsModelExperimental::rk4InternAdaptiveStep(std:
     double integrationTimeSum = 0;
     size_t nMolecules = moleculesPtr.size();
     std::vector<Core::Vector> forceMolecules(nMolecules);
+    std::vector<Core::Vector> torqueMolecules(nMolecules);
 
     size_t i = 0;
     int steps = 0;
@@ -649,7 +652,7 @@ bool CollisionModel::MDInteractionsModelExperimental::rk4InternAdaptiveStep(std:
             i++;
         }
         
-        forceField_->calculateForceField(moleculesPtr, forceMolecules);
+        forceField_->calculateForceField(moleculesPtr, forceMolecules, torqueMolecules);
       
 
         for(size_t q = 0; q < nMolecules; q++){
@@ -673,7 +676,7 @@ bool CollisionModel::MDInteractionsModelExperimental::rk4InternAdaptiveStep(std:
                 }
             }
 
-            forceField_->calculateForceField(moleculesPtr, forceMolecules);
+            forceField_->calculateForceField(moleculesPtr, forceMolecules, torqueMolecules);
             
             
             for(i = 0; i < nMolecules; i++){

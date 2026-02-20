@@ -482,7 +482,7 @@ void CollisionModel::MDInteractionsModel::modifyVelocity(Core::Particle& particl
             particle.setVelocity(mole.getComVel() + particle.getVelocity() + vGasMean);
         }
         ++iterations;
-    }while(!trajectorySuccess && iterations < 100);
+    }while(!trajectorySuccess && iterations < 1);
 
     if(trajectorySuccess == false){
         std::cerr << "No trajectory that hit the collision sphere was found or energy could not be conserved.\n";
@@ -518,7 +518,8 @@ bool CollisionModel::MDInteractionsModel::leapfrogIntern(std::vector<CollisionMo
     int nSteps = int(round(finalTime/dt));
 
     std::vector<Core::Vector> forceMolecules(moleculesPtr_size);
-    forceField_->calculateForceField(moleculesPtr, forceMolecules);
+    std::vector<Core::Vector> torqueMolecules(moleculesPtr_size);
+    forceField_->calculateForceField(moleculesPtr, forceMolecules, torqueMolecules);
 
     // do the first half step for the velocity, as per leapfrog definition
     double energyStart = 0;
@@ -555,7 +556,7 @@ bool CollisionModel::MDInteractionsModel::leapfrogIntern(std::vector<CollisionMo
         }
 
         // recalculate the force
-        forceField_->calculateForceField(moleculesPtr, forceMolecules);
+        forceField_->calculateForceField(moleculesPtr, forceMolecules,torqueMolecules);
         i = 0;
         // time step for the new velocity
         for(auto* molecule : moleculesPtr){
@@ -585,6 +586,8 @@ bool CollisionModel::MDInteractionsModel::rk4Intern(std::vector<CollisionModel::
     int nSteps = int(round(finalTime/dt));
     size_t nMolecules = moleculesPtr.size();
     std::vector<Core::Vector> forceMolecules(nMolecules);
+    std::vector<Core::Vector> torqueMolecules(nMolecules);
+
 
     bool wasHit = false;
     std::vector<double> startDistances;
@@ -621,7 +624,7 @@ bool CollisionModel::MDInteractionsModel::rk4Intern(std::vector<CollisionModel::
             mass[i] = molecule->getMass();
             i++;
         }
-        forceField_->calculateForceField(moleculesPtr, forceMolecules);
+        forceField_->calculateForceField(moleculesPtr, forceMolecules, torqueMolecules);
 
         std::array<std::array<Core::Vector, 2>, 4> k;
         std::array<std::array<Core::Vector, 2>, 4> l;
@@ -640,7 +643,7 @@ bool CollisionModel::MDInteractionsModel::rk4Intern(std::vector<CollisionModel::
                 i++;
             }
 
-            forceField_->calculateForceField(moleculesPtr, forceMolecules);
+            forceField_->calculateForceField(moleculesPtr, forceMolecules, torqueMolecules);
 
             for(i = 0; i < nMolecules; i++){
                 k[n][i] = forceMolecules.at(i) * dt / mass[i];
@@ -691,7 +694,6 @@ bool CollisionModel::MDInteractionsModel::rk4InternAdaptiveStep(std::vector<Coll
     double integrationTimeSum = 0;
     size_t nMolecules = moleculesPtr.size();
     std::vector<Core::Vector> forceMolecules(nMolecules);
-
     std::vector<Core::Vector> torqueMolecules(nMolecules);
 
     size_t i = 0;
@@ -765,6 +767,7 @@ bool CollisionModel::MDInteractionsModel::rk4InternAdaptiveStep(std::vector<Coll
 
     while(integrationTimeSum < finalTime){
     //while(steps < 2){
+    std::cout << steps << std::endl;
 
         
         i = 0;
@@ -786,7 +789,7 @@ bool CollisionModel::MDInteractionsModel::rk4InternAdaptiveStep(std::vector<Coll
             i++;
         }
 
-        forceField_->calculateForceField(moleculesPtr, forceMolecules);
+        forceField_->calculateForceField(moleculesPtr, forceMolecules, torqueMolecules);
 
         for(size_t q = 0; q < nMolecules; q++){
             k[0][q] = forceMolecules[q] * dt / mass[q];
@@ -798,7 +801,8 @@ bool CollisionModel::MDInteractionsModel::rk4InternAdaptiveStep(std::vector<Coll
                 // std::cout << "Inv: " << worldInvInertia << std::endl;
                 Core::Vector omega = worldInvInertia*angMomentMolecules[q];
                 // std::cout << "Omega: " << omega << std::endl;
-                v[0][q] = Core::Vector(0.0, 0.0, 0.0);
+                //v[0][q] = Core::Vector(0.0, 0.0, 0.0);
+                v[0][q] = torqueMolecules[q] * dt;
                 u[0][q] = CollisionModel::Molecule::calcRotationMatrixUpdate(rotMolecules[q], omega) *dt;
             }
             
@@ -825,7 +829,7 @@ bool CollisionModel::MDInteractionsModel::rk4InternAdaptiveStep(std::vector<Coll
                 }
             }
 
-            forceField_->calculateForceField(moleculesPtr, forceMolecules);
+            forceField_->calculateForceField(moleculesPtr, forceMolecules, torqueMolecules);
             
             for(i = 0; i < nMolecules; i++){
                 k[n][i] = forceMolecules[i] * dt / mass[i];
@@ -834,7 +838,9 @@ bool CollisionModel::MDInteractionsModel::rk4InternAdaptiveStep(std::vector<Coll
                 if(rotationActive_){
                     worldInvInertia = rotMolecules[i]*initialInertInvMolecules[i]*rotMolecules[i].transpose();
                     Core::Vector omega = worldInvInertia*angMomentMolecules[i];
-                    v[n][i] = Core::Vector(0.0, 0.0, 0.0);
+                    //v[n][i] = Core::Vector(0.0, 0.0, 0.0);
+                    std::cout << torqueMolecules[i] << std::endl;
+                    v[n][i] = torqueMolecules[i] * dt;
                     u[n][i] = CollisionModel::Molecule::calcRotationMatrixUpdate(rotMolecules[i], omega);
                 }
 
@@ -865,8 +871,6 @@ bool CollisionModel::MDInteractionsModel::rk4InternAdaptiveStep(std::vector<Coll
                 newComAngMomOrder4[i] = initialAngMomentMolecules[i] + (v[0][i] * 25./216 + v[2][i] * 1408./2565 + v[3][i] * 2197./4104 + v[4][i] * (-1./5));
                 newComRotOrder4[i] = initialRotMolecules[i] + (u[0][i] * (25./216) + u[2][i] * (1408./2565) + u[3][i] * (2197./4104) + u[4][i] * (-1./5));
                 newComRotOrder5[i] = initialRotMolecules[i] + (u[0][i] * (16./135) + u[2][i] * (6656./12825) + u[3][i] * (28561./56430) + u[4][i] * (-9./50) + u[5][i] * (2./55));
-                std::cout << "New Rot 4: " << newComRotOrder4[i] << std::endl;
-                std::cout << "New Rot 5: " << newComRotOrder5[i] << std::endl;
                 
             }
             
@@ -893,7 +897,7 @@ bool CollisionModel::MDInteractionsModel::rk4InternAdaptiveStep(std::vector<Coll
             }
         }
 
-        std::cout << "Error: "<< R[0][0] << " " << R[0][1] << " " << R[1][0] << " " << R[1][1] << std::endl; 
+        //std::cout << "Error: "<< R[0][0] << " " << R[0][1] << " " << R[1][0] << " " << R[1][1] << std::endl; 
 
         globalR = std::max({R[1][1], std::max({R[0][1],  std::max({R[0][0],R[1][0]}) }) });
 

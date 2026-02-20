@@ -38,10 +38,15 @@ namespace CollisionModel {
         virtual ~AbstractMDForceField() = default;
 
         virtual void calculateForceField(std::vector<CollisionModel::Molecule*>& moleculesPtr, 
-                                        std::vector<Core::Vector>& forceMolecules) = 0;
+                                        std::vector<Core::Vector>& forceMolecules, 
+                                        std::vector<Core::Vector>& torqueMolecules) = 0;
                             
         virtual void calculateForceFieldComponents(std::vector<CollisionModel::Molecule*>& moleculesPtr, 
                                 std::vector<Core::Vector>& forceMolecules, Core::Vector& forceVDW, Core::Vector& forceII) = 0;
+
+        virtual void calculateTorque(std::vector<Core::Vector>& positions, 
+                                        std::vector<Core::Vector>& forceMolecules, 
+                                        std::vector<Core::Vector>& torqueMolecules) = 0;
 
     };
 }

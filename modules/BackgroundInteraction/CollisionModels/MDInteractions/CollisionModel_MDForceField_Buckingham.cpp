@@ -25,13 +25,17 @@
 #include <iostream>
 #include <cmath>
 
-CollisionModel::MDForceField_Buckingham::MDForceField_Buckingham(double collisionGasPolarizability_m3, std::string potentials):
+CollisionModel::MDForceField_Buckingham::MDForceField_Buckingham(double collisionGasPolarizability_m3, 
+                                                                    std::string potentials, 
+                                                                    bool rotActive):
     collisionGasPolarizability_m3_(collisionGasPolarizability_m3), 
-    potentialsFF_(potentials)
+    potentialsFF_(potentials), 
+    rotActive_(rotActive)
 {}
 
 void CollisionModel::MDForceField_Buckingham::calculateForceField(std::vector<CollisionModel::Molecule*>& moleculesPtr,
-                                                                std::vector<Core::Vector>& forceMolecules) {
+                                                                std::vector<Core::Vector>& forceMolecules, 
+                                                                std::vector<Core::Vector>& torqueMolecules) {
 
     // save all the forces acting on each molecule
     CollisionModel::Molecule* ion = moleculesPtr[0];
@@ -497,5 +501,18 @@ void CollisionModel::MDForceField_Buckingham::populateInteractionTable(std::vect
             }
         }
     }
+}
+
+void CollisionModel::MDForceField_Buckingham::calculateTorque(std::vector<Core::Vector>& positions, 
+                    std::vector<Core::Vector>& forceMolecules, 
+                    std::vector<Core::Vector>& torqueMolecules) {
+    
+    torqueMolecules[0].x(torqueMolecules[0].x() + (positions[1]*forceMolecules[2] - positions[2]*forceMolecules[1])); 
+    torqueMolecules[0].y(torqueMolecules[0].y() + (positions[2]*forceMolecules[0] - positions[0]*forceMolecules[2]));     
+    torqueMolecules[0].z(torqueMolecules[0].z() + (positions[0]*forceMolecules[1] - positions[1]*forceMolecules[0]));  
+    torqueMolecules[1].x(torqueMolecules[0].x() - (positions[1]*forceMolecules[2] - positions[2]*forceMolecules[1])); 
+    torqueMolecules[1].y(torqueMolecules[0].y() - (positions[2]*forceMolecules[0] - positions[0]*forceMolecules[2]));     
+    torqueMolecules[1].z(torqueMolecules[0].z() - (positions[0]*forceMolecules[1] - positions[1]*forceMolecules[0]));                             
+
 }
 
