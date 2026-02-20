@@ -295,7 +295,7 @@ double CollisionModel::MDInteractionsModel::initRotation(CollisionModel::Molecul
 }
 
 double CollisionModel::MDInteractionsModel::calcRotEnergy(Core::Vector omega, Core::Matrix3 I){
-    return 0.5*(I(0,0)*omega.x()*omega.x() + I(1,1)*omega.y()*omega.y() + I(2,2*omega.z()*omega.z()));
+    return 0.5*(I(0,0)*omega.x()*omega.x() + I(1,1)*omega.y()*omega.y() + I(2,2)*omega.z()*omega.z());
 }
 
 void CollisionModel::MDInteractionsModel::modifyAcceleration(Core::Vector& /*acceleration*/, Core::Particle& /*particle*/,
