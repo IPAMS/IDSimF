@@ -364,7 +364,7 @@ void CollisionModel::MDInteractionsModel::modifyVelocity(Core::Particle& particl
     if (rndSource->uniformRealRndValue() > collisionProb){
         return; // no collision takes place
     }
-
+    
     bool trajectorySuccess = false;
     int iterations = 0;
     double spawnRad = spawnRadius_;
@@ -428,9 +428,15 @@ void CollisionModel::MDInteractionsModel::modifyVelocity(Core::Particle& particl
         //                               rndSource->uniformRealRndValue()*2*pi-pi));
 
         //Give molecule a random orientation:
-        mole.setAngles(Core::Vector(rndSource->uniformRealRndValue()*2*pi-pi,
-                                    rndSource->uniformRealRndValue()*2*pi-pi,
-                                    rndSource->uniformRealRndValue()*2*pi-pi));
+
+        double a = 0, b = 0, c = 0;
+        a = rndSource->uniformRealRndValue()*2*pi-pi;
+        b = rndSource->uniformRealRndValue()*2*pi-pi;
+        c = rndSource->uniformRealRndValue()*2*pi-pi;
+        std::cout << a << " " << b << " " << c << std::endl;
+        mole.setAngles(Core::Vector(a,
+                                    b,
+                                    c));
 
         double energyRotMolecule = 0;
         double energyRotBg = 0;
@@ -768,7 +774,6 @@ bool CollisionModel::MDInteractionsModel::rk4InternAdaptiveStep(std::vector<Coll
 
     while(integrationTimeSum < finalTime){
 
-        
         i = 0;
         for(auto* molecule : moleculesPtr){
             velocityMolecules[i] = molecule->getComVel();

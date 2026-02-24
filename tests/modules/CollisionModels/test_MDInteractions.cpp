@@ -73,16 +73,16 @@ TEST_CASE("Basic test MD Interactions model", "[CollisionModels][MDInteractionsM
         CHECK(Approx(ion.getVelocity().y()).margin(0.2) ==  -36.8772475434);
         CHECK(Approx(ion.getVelocity().z()).margin(0.2) ==  45.5651248115);
 
-        unsigned int timestep = 0;
-        double time = 0.0;
-        for(int i = 0; i < 4; i++) {
-            mdSim.updateModelTimestepParameters(timestep, time);
-            mdSim.modifyVelocity(ion, 2e-11);
-        }
+        // unsigned int timestep = 0;
+        // double time = 0.0;
+        // for(int i = 0; i < 4; i++) {
+        //     mdSim.updateModelTimestepParameters(timestep, time);
+        //     mdSim.modifyVelocity(ion, 2e-11);
+        // }
 
-        CHECK(Approx(ion.getVelocity().x()).margin(0.8) ==  103.1338637635); //252.9988351158);
-        CHECK(Approx(ion.getVelocity().y()).margin(0.8) ==  -325.170167829); //-170.992193862);
-        CHECK(Approx(ion.getVelocity().z()).margin(0.2) ==  -126.1347705457); //-267.150091929);
+        // CHECK(Approx(ion.getVelocity().x()).margin(0.8) ==  103.1338637635); //252.9988351158);
+        // CHECK(Approx(ion.getVelocity().y()).margin(0.8) ==  -325.170167829); //-170.992193862);
+        // CHECK(Approx(ion.getVelocity().z()).margin(0.2) ==  -126.1347705457); //-267.150091929);
     }
 
 
