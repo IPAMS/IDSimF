@@ -93,6 +93,7 @@ namespace CollisionModel{
         void rotateMoleculeRotationMatrix();
         void genInertiaBodyMatrix();
         void genInertiaWorldInvMatrix();
+        Core::Vector genWorldFramePosition(const std::shared_ptr<CollisionModel::Atom>& atm);
 
         static Core::Matrix3 calcRotationMatrixUpdate(Core::Matrix3 R, Core::Vector omega);
 
@@ -126,6 +127,7 @@ namespace CollisionModel{
         Core::Vector centerOfMassAngMom = {0.0, 0.0, 0.0};
         Core::Matrix3 inertiaWorldInv = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
         Core::Matrix3 rotationMatrix = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+
 
 
         

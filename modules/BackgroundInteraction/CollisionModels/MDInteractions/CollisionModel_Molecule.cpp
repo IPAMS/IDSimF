@@ -363,22 +363,22 @@ void CollisionModel::Molecule::genInertiaBodyMatrix(){
         inertiaPrinciple(0,0) = Ixx; 
         inertiaPrincipleInv(0,0) = 1/Ixx; 
     }else{
-        inertiaPrinciple(0,0) = MININERTIA;
-        inertiaPrincipleInv(0,0) = MININERTIA;
+        inertiaPrinciple(0,0) = 0;
+        inertiaPrincipleInv(0,0) = 0;
     }
     if(Iyy != 0){
         inertiaPrinciple(1,1) = Iyy; 
         inertiaPrincipleInv(1,1) = 1/Iyy; 
     }else{
-        inertiaPrinciple(1,1) = MININERTIA;
-        inertiaPrincipleInv(1,1) = MININERTIA;
+        inertiaPrinciple(1,1) = 0;
+        inertiaPrincipleInv(1,1) = 0;
     }
     if(Izz != 0){
         inertiaPrinciple(2,2) = Izz; 
         inertiaPrincipleInv(2,2) = 1/Izz; 
     }else{
-        inertiaPrinciple(2,2) = MININERTIA;
-        inertiaPrincipleInv(2,2) = MININERTIA;
+        inertiaPrinciple(2,2) = 0;
+        inertiaPrincipleInv(2,2) = 0;
     }
     #pragma GCC diagnostic pop
 }
@@ -449,4 +449,10 @@ void CollisionModel::Molecule::rotateMoleculeRotationMatrix(){
 
 Core::Matrix3 CollisionModel::Molecule::calcRotationMatrixUpdate(Core::Matrix3 R, Core::Vector omega){
     return Core::star(omega)*R;
+}
+
+
+Core::Vector CollisionModel::Molecule::genWorldFramePosition(const std::shared_ptr<CollisionModel::Atom>& atm){
+    Core::Vector worldPos = this->getComPos() + this->getRotationMatrix() * atm->getRelativePosition();
+    return worldPos;
 }
