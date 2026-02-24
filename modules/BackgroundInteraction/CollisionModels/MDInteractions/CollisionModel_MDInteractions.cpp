@@ -421,23 +421,6 @@ void CollisionModel::MDInteractionsModel::modifyVelocity(Core::Particle& particl
 
         bgMole.setComPos(circleVector);
 
-        double pi = 3.1415; 
-        // // rotate it randomly
-        // bgMole.setAngles(Core::Vector(rndSource->uniformRealRndValue()*2*pi-pi,
-        //                               rndSource->uniformRealRndValue()*2*pi-pi,
-        //                               rndSource->uniformRealRndValue()*2*pi-pi));
-
-        //Give molecule a random orientation:
-
-        double a = 0, b = 0, c = 0;
-        a = rndSource->uniformRealRndValue()*2*pi-pi;
-        b = rndSource->uniformRealRndValue()*2*pi-pi;
-        c = rndSource->uniformRealRndValue()*2*pi-pi;
-        std::cout << a << " " << b << " " << c << std::endl;
-        mole.setAngles(Core::Vector(a,
-                                    b,
-                                    c));
-
         double energyRotMolecule = 0;
         double energyRotBg = 0;
         if(rotationActive_){
@@ -447,13 +430,13 @@ void CollisionModel::MDInteractionsModel::modifyVelocity(Core::Particle& particl
 
         std::vector<CollisionModel::Molecule*> moleculesPtr = {&mole, &bgMole};
 
-        // for(auto* molecule : moleculesPtr){
-        //     Core::Matrix3 initialRotationMatrix = molecule->calcRotationMatrix(rndSource->uniformRealRndValue()*2*M_PI-M_PI, 
-        //                                                                        rndSource->uniformRealRndValue()*2*M_PI-M_PI, 
-        //                                                                        rndSource->uniformRealRndValue()*2*M_PI-M_PI);
-        //     molecule->setRotationMatrix(initialRotationMatrix);
-        //     molecule->rotateMoleculeRotationMatrix();
-        // }
+        for(auto* molecule : moleculesPtr){
+            Core::Matrix3 initialRotationMatrix = molecule->calcRotationMatrix(rndSource->uniformRealRndValue()*2*M_PI-M_PI, 
+                                                                               rndSource->uniformRealRndValue()*2*M_PI-M_PI, 
+                                                                               rndSource->uniformRealRndValue()*2*M_PI-M_PI);
+            molecule->setRotationMatrix(initialRotationMatrix);
+            molecule->rotateMoleculeRotationMatrix();
+        }
 
         // possible check for energy conservation
         std::vector<Core::Vector> startVelocity;

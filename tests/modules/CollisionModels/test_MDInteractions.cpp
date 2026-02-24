@@ -73,16 +73,16 @@ TEST_CASE("Basic test MD Interactions model", "[CollisionModels][MDInteractionsM
         CHECK(Approx(ion.getVelocity().y()).margin(0.2) ==  -36.8772475434);
         CHECK(Approx(ion.getVelocity().z()).margin(0.2) ==  45.5651248115);
 
-        // unsigned int timestep = 0;
-        // double time = 0.0;
-        // for(int i = 0; i < 4; i++) {
-        //     mdSim.updateModelTimestepParameters(timestep, time);
-        //     mdSim.modifyVelocity(ion, 2e-11);
-        // }
+        unsigned int timestep = 0;
+        double time = 0.0;
+        for(int i = 0; i < 4; i++) {
+            mdSim.updateModelTimestepParameters(timestep, time);
+            mdSim.modifyVelocity(ion, 2e-11);
+        }
 
-        // CHECK(Approx(ion.getVelocity().x()).margin(0.8) ==  103.1338637635); //252.9988351158);
-        // CHECK(Approx(ion.getVelocity().y()).margin(0.8) ==  -325.170167829); //-170.992193862);
-        // CHECK(Approx(ion.getVelocity().z()).margin(0.2) ==  -126.1347705457); //-267.150091929);
+        CHECK(Approx(ion.getVelocity().x()).margin(0.8) ==  252.9988351158); //252.9988351158);
+        CHECK(Approx(ion.getVelocity().y()).margin(0.8) ==  -170.992193862); //-170.992193862);
+        CHECK(Approx(ion.getVelocity().z()).margin(0.2) ==  -267.150091929); //-267.150091929);
     }
 
 
@@ -104,9 +104,9 @@ TEST_CASE("Basic test MD Interactions model", "[CollisionModels][MDInteractionsM
             mdSim.modifyVelocity(ion, 2e-11);
         }
 
-        CHECK(Approx(ion.getVelocity().x()).margin(0.8) ==  103.1338637635); //252.9988351158);
-        CHECK(Approx(ion.getVelocity().y()).margin(0.8) ==  -325.170167829); //-170.992193862);
-        CHECK(Approx(ion.getVelocity().z()).margin(0.2) ==  -126.1347705457); //-267.150091929);
+        CHECK(Approx(ion.getVelocity().x()).margin(0.8) ==  252.9988351158); //252.9988351158);
+        CHECK(Approx(ion.getVelocity().y()).margin(0.8) ==  -170.992193862); //-170.992193862);
+        CHECK(Approx(ion.getVelocity().z()).margin(0.2) ==  -267.150091929); //-267.150091929);
 
         std::string readBack_early = readTextFile("MD_collisions_microscopic_trajectories_test.txt");
         // CHECK(readBack_early == "");
@@ -200,10 +200,10 @@ TEST_CASE("Test MD Model with Multi-Atom Molecules", "[CollisionModels][MDIntera
         }
 
         // check results written into trajectory:
-        CHECK(checkDims(h5Filename, "MD_trajectories/trajectory1", 189, 11));
-        CHECK(checkDims(h5Filename, "MD_trajectories/trajectory2", 206, 11));
+        CHECK(checkDims(h5Filename, "MD_trajectories/trajectory1", 175, 11));
+        CHECK(checkDims(h5Filename, "MD_trajectories/trajectory2", 174, 11));
         H5::Group group = openGroup(h5Filename, "MD_trajectories");
-        CHECK(group.getNumObjs() == 4);
+        CHECK(group.getNumObjs() == 3);
 
         //check Attributes of first trajectory:
         H5::DataSet tra1DS = openDataSet(h5Filename, "MD_trajectories/trajectory1");
@@ -236,10 +236,10 @@ TEST_CASE("Test MD Model with Multi-Atom Molecules", "[CollisionModels][MDIntera
         }
 
         // check results written into trajectory:
-        CHECK(checkDims(h5Filename, "MD_trajectories/trajectory1", 190, 17));
-        CHECK(checkDims(h5Filename, "MD_trajectories/trajectory2", 161, 17));
+        CHECK(checkDims(h5Filename, "MD_trajectories/trajectory1", 158, 17));
+        CHECK(checkDims(h5Filename, "MD_trajectories/trajectory2", 140, 17));
         H5::Group group = openGroup(h5Filename, "MD_trajectories");
-        CHECK(group.getNumObjs() == 5);
+        CHECK(group.getNumObjs() == 4);
 
         //check Attributes of first trajectory:
         H5::DataSet tra1DS = openDataSet(h5Filename, "MD_trajectories/trajectory1");
