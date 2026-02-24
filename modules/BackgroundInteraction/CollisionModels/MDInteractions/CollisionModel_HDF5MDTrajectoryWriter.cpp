@@ -55,7 +55,8 @@ void CollisionModel::HDF5MDTrajectoryWriter::writeTrajectorySample(
     std::vector<double> row = {time, dt };
     auto atomsMolecule = molecule.getAtoms();
     for (const auto& atom : atomsMolecule) {
-        Core::Vector atomPos = atom->getRelativePosition() + molecule.getComPos();
+        // Core::Vector atomPos = atom->getRelativePosition() + molecule.getComPos();
+        Core::Vector atomPos = molecule.genWorldFramePosition(atom);
         row.push_back(atomPos.x());
         row.push_back(atomPos.y());
         row.push_back(atomPos.z());
@@ -63,7 +64,7 @@ void CollisionModel::HDF5MDTrajectoryWriter::writeTrajectorySample(
 
     auto atomsBg = bgMolecule.getAtoms();
     for (const auto& atom : atomsBg) {
-        Core::Vector atomPos = atom->getRelativePosition() + bgMolecule.getComPos();
+        Core::Vector atomPos = bgMolecule.genWorldFramePosition(atom);
         row.push_back(atomPos.x());
         row.push_back(atomPos.y());
         row.push_back(atomPos.z());
