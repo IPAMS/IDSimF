@@ -126,7 +126,7 @@ namespace CollisionModel{
         Core::Vector centerOfMassAngVel = {0.0, 0.0, 0.0};
         Core::Vector centerOfMassAngMom = {0.0, 0.0, 0.0};
         Core::Matrix3 inertiaWorldInv = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
-        Core::Matrix3 rotationMatrix = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+        Core::Matrix3 rotationMatrix = {1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0};
 
 
 
