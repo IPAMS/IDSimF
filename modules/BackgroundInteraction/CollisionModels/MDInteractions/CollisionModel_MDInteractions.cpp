@@ -286,11 +286,7 @@ double CollisionModel::MDInteractionsModel::initRotation(CollisionModel::Molecul
     else I3 = 0;
     double w1 = sqrt(2*energyRotMolecule/(I1+I2+I3));
     Core::Vector anglVelo = {I1 > 0 ? w1 : 0, I2 > 0 ? w1 : 0, I3 > 0 ? w1 : 0};
-    anglVelo = {w1, 0.0, w1};
     mole.setAngVel(anglVelo);
-    Core::Matrix3 initialRotationMatrix = mole.calcRotationMatrix(1*M_PI, 0, 0);
-    mole.setRotationMatrix(initialRotationMatrix);
-    mole.rotateMoleculeRotationMatrix();
     mole.setAngMom(inertiaMatrix*anglVelo);
     return energyRotMolecule;
 }
@@ -431,10 +427,10 @@ void CollisionModel::MDInteractionsModel::modifyVelocity(Core::Particle& particl
         //                               rndSource->uniformRealRndValue()*2*pi-pi,
         //                               rndSource->uniformRealRndValue()*2*pi-pi));
 
-        // Give molecule a random orientation:
-        // mole.setAngles(Core::Vector(rndSource->uniformRealRndValue()*2*pi-pi,
-        //                             rndSource->uniformRealRndValue()*2*pi-pi,
-        //                             rndSource->uniformRealRndValue()*2*pi-pi));
+        //Give molecule a random orientation:
+        mole.setAngles(Core::Vector(rndSource->uniformRealRndValue()*2*pi-pi,
+                                    rndSource->uniformRealRndValue()*2*pi-pi,
+                                    rndSource->uniformRealRndValue()*2*pi-pi));
 
         double energyRotMolecule = 0;
         double energyRotBg = 0;
@@ -442,11 +438,16 @@ void CollisionModel::MDInteractionsModel::modifyVelocity(Core::Particle& particl
             energyRotMolecule = initRotation(mole, temperature_K);
             energyRotBg = initRotation(bgMole, temperature_K);
         }
-        
-        
-
 
         std::vector<CollisionModel::Molecule*> moleculesPtr = {&mole, &bgMole};
+
+        // for(auto* molecule : moleculesPtr){
+        //     Core::Matrix3 initialRotationMatrix = molecule->calcRotationMatrix(rndSource->uniformRealRndValue()*2*M_PI-M_PI, 
+        //                                                                        rndSource->uniformRealRndValue()*2*M_PI-M_PI, 
+        //                                                                        rndSource->uniformRealRndValue()*2*M_PI-M_PI);
+        //     molecule->setRotationMatrix(initialRotationMatrix);
+        //     molecule->rotateMoleculeRotationMatrix();
+        // }
 
         // possible check for energy conservation
         std::vector<Core::Vector> startVelocity;
@@ -474,23 +475,30 @@ void CollisionModel::MDInteractionsModel::modifyVelocity(Core::Particle& particl
             kineticEnergyEnd += 0.5 * molecule->getMass() * molecule->getComVel().magnitudeSquared();
             if(rotationActive_) rotationEnergyEnd += calcRotEnergy(molecule->getAngVel(), molecule->getInertiaMatrix());
         }
+
         // check if energy is conserved up to 10% 
         // if not halve the starting timestep length
         endEnergy = kineticEnergyEnd + rotationEnergyEnd; 
-        if(true){
-            std::cout << "Energy not conserved: " << startEnergy << " " << endEnergy << std::endl;
-            std::cout << "Kinetic Energy: " << kineticEnergyStart << " " << kineticEnergyEnd << std::endl;
-            std::cout << "Rotation Energy: " << rotationEnergyStart << " " << rotationEnergyEnd << std::endl;
-            trajectorySuccess = true;
+        if(!rotationActive_){
+            if(endEnergy*0.90 >= startEnergy){
+                std::cout << "Energy not conserved: " << startEnergy << " " << endEnergy << std::endl;
+                trajectorySuccess = false;
+                dt = dt/2;
            
-
+            }
+        }else{
+            if(endEnergy*0.90 <= startEnergy || startEnergy <= endEnergy*1.10)
+                std::cout << "Energy not conserved: " << startEnergy << " " << endEnergy << std::endl;
+                std::cout << "Kinetic Energy: " << kineticEnergyStart << " " << kineticEnergyEnd << std::endl;
+                std::cout << "Rotation Energy: " << rotationEnergyStart << " " << rotationEnergyEnd << std::endl;
+                trajectorySuccess = true;
         }
 
         if(trajectorySuccess){
             particle.setVelocity(mole.getComVel() + particle.getVelocity() + vGasMean);
         }
         ++iterations;
-    }while(!trajectorySuccess && iterations < 1);
+    }while(!trajectorySuccess && iterations < 100);
 
     if(trajectorySuccess == false){
         std::cerr << "No trajectory that hit the collision sphere was found or energy could not be conserved.\n";
