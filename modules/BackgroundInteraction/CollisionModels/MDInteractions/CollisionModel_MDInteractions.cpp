@@ -288,20 +288,10 @@ double CollisionModel::MDInteractionsModel::initRotation(CollisionModel::Molecul
     Core::Vector anglVelo = {I1 > 0 ? w1 : 0, I2 > 0 ? w1 : 0, I3 > 0 ? w1 : 0};
     anglVelo = {w1, 0.0, w1};
     mole.setAngVel(anglVelo);
-    std::cout << "Velo: "  << anglVelo << std::endl;
-    // mole.setAngMom({0.0, 0.0, 0.0});
-    // mole.setAngVel({0.0, 0.0, 0.0});
-    // anglVelo={0.0, 0.0, 0.0};
     Core::Matrix3 initialRotationMatrix = mole.calcRotationMatrix(1*M_PI, 0, 0);
-    std::cout << "---" << std::endl;
-    std::cout << initialRotationMatrix << std::endl;
-    std::cout << "---" << std::endl;
     mole.setRotationMatrix(initialRotationMatrix);
     mole.rotateMoleculeRotationMatrix();
-    // std::cout << inertiaMatrix << std::endl;
-    // std::cout << inertiaMatrix*anglVelo << std::endl;
     mole.setAngMom(inertiaMatrix*anglVelo);
-    // energyRotMolecule = 0; 
     return energyRotMolecule;
 }
 
@@ -411,8 +401,7 @@ void CollisionModel::MDInteractionsModel::modifyVelocity(Core::Particle& particl
                                             rndSource->normalRealRndValue() * vrStdevBgMolecule - particle.getVelocity().z()};
 
         bgMole.setComVel(velocityBgMolecule);
-        std::cout << bgMole.getComVel().magnitude() << std::endl;
-        std::cout << mole.getComVel().magnitude() << std::endl;
+
         // calculate random point on sphere
         // as follows:
         // draw random number in as long until magnitude is less than 1
@@ -497,9 +486,6 @@ void CollisionModel::MDInteractionsModel::modifyVelocity(Core::Particle& particl
 
         }
 
-        
-        std::cout << bgMole.getComVel().magnitude() << std::endl;
-        std::cout << mole.getComVel().magnitude() << std::endl;
         if(trajectorySuccess){
             particle.setVelocity(mole.getComVel() + particle.getVelocity() + vGasMean);
         }
@@ -769,28 +755,10 @@ bool CollisionModel::MDInteractionsModel::rk4InternAdaptiveStep(std::vector<Coll
 
     std::array<std::array<double,2>, 2> R = {0,0,0,0};
     double globalR, globalDelta;
-    // double tolerance = 1e-8;
     double pi = 3.14159;
     Core::RandomSource* rndSource = Core::globalRandomGeneratorPool->getThreadRandomSource();
-    // Core::Vector nitrogenOne;
-    // Core::Vector nitrogenTwo; 
-    // Core::Vector nitrogenAngles = {rndSource->uniformRealRndValue()*2*pi-pi, 
-    //                             rndSource->uniformRealRndValue()*2*pi-pi, 
-    //                             rndSource->uniformRealRndValue()*2*pi-pi};
-    // double I = 0;
-    // double angularVelocity = 0;
-    // if(moleculesPtr[1]->getMolecularStructureName()=="N2" || moleculesPtr[1]->getMolecularStructureName()=="N2Approx"){
-    //     nitrogenOne = molecularStructureCollection_.at(moleculesPtr[1]->getMolecularStructureName())->getAtoms().at(0)->getRelativePosition();
-    //     nitrogenTwo = molecularStructureCollection_.at(moleculesPtr[1]->getMolecularStructureName())->getAtoms().at(1)->getRelativePosition();
-    //     I = CollisionModel::MolecularStructure::getMomentOfInertia(nitrogenOne.y(), nitrogenTwo.y(),
-    //                                                                 moleculesPtr[1]->getMass()/2, moleculesPtr[1]->getMass()/2);
-    //     angularVelocity = CollisionModel::MolecularStructure::getAngularVelocity(temperatureFunction_(moleculesPtr[1]->getComPos()), I);
-    // }
-    // moleculesPtr[1]->setAngles(nitrogenAngles);
 
     while(integrationTimeSum < finalTime){
-    //while(steps < 2){
-    // std::cout << steps << std::endl;
 
         
         i = 0;
@@ -804,17 +772,10 @@ bool CollisionModel::MDInteractionsModel::rk4InternAdaptiveStep(std::vector<Coll
             if(rotationActive_){
                 angMomentMolecules[i] = molecule->getAngMom();
                 rotMolecules[i] = molecule->getRotationMatrix();
-                // std::cout << "Init rot: " << rotMolecules[i] << std::endl;
                 initialAngMomentMolecules[i] = molecule->getAngMom();
                 initialRotMolecules[i] = molecule->getRotationMatrix();
                 initialInertInvMolecules[i] = molecule->getInertiaInvMatrix();
                 initialInertMolecules[i] = molecule->getInertiaMatrix();
-                if(steps == 0 && i == 1){
-                    std::cout << molecule->getAngVel() << std::endl;
-                    std::cout << molecule->getAngMom() << std::endl;
-                    std::cout << initialRotMolecules[i] << std::endl;
-                    std::cout << initialInertInvMolecules[i] << std::endl;
-                } 
             }
             i++;
         }
@@ -827,13 +788,6 @@ bool CollisionModel::MDInteractionsModel::rk4InternAdaptiveStep(std::vector<Coll
             if(rotationActive_){
                 
                 worldInvInertia = rotMolecules[q]*initialInertInvMolecules[q]*rotMolecules[q].transpose();
-                // if(steps == 0 && q == 0){
-                //     std::cout << "Rot: " << rotMolecules[q] << std::endl;
-                //     std::cout << "InvBody: " << initialInertInvMolecules[q] << std::endl;
-                //     std::cout << "Inv: " << worldInvInertia << std::endl;
-                //     std::cout << "Mom: " << angMomentMolecules[q] << std::endl;
-                
-                // }
                 Core::Matrix3 inertiaMatrix = initialInertMolecules[q];
                 double I1 = inertiaMatrix(0,0), I2 = inertiaMatrix(1,1), I3=inertiaMatrix(2,2);
                 Core::Vector omega = worldInvInertia*angMomentMolecules[q];
@@ -846,10 +800,6 @@ bool CollisionModel::MDInteractionsModel::rk4InternAdaptiveStep(std::vector<Coll
                 if(I3 < CollisionModel::Molecule::MININERTIA){
                     omega.z(0.0);
                 }
-                //std::cout << omega << std::endl;
-                // if(steps == 0 && q == 0){
-                //     std::cout << "Omega: " << omega << std::endl;
-                // }
                 //v[0][q] = Core::Vector(0.0, 0.0, 0.0);
                 v[0][q] = torqueMolecules[q] * dt;
                 u[0][q] = CollisionModel::Molecule::calcRotationMatrixUpdate(rotMolecules[q], omega) *dt;
@@ -899,7 +849,6 @@ bool CollisionModel::MDInteractionsModel::rk4InternAdaptiveStep(std::vector<Coll
                         omega.z(0.0);
                     }
                     //v[n][i] = Core::Vector(0.0, 0.0, 0.0);
-                    // std::cout << torqueMolecules[i] << std::endl;
                     v[n][i] = torqueMolecules[i] * dt;
                     u[n][i] = CollisionModel::Molecule::calcRotationMatrixUpdate(rotMolecules[i], omega);
                 }
@@ -957,8 +906,6 @@ bool CollisionModel::MDInteractionsModel::rk4InternAdaptiveStep(std::vector<Coll
             }
         }
 
-        //std::cout << "Error: "<< R[0][0] << " " << R[0][1] << " " << R[1][0] << " " << R[1][1] << std::endl; 
-
         globalR = std::max({R[1][1], std::max({R[0][1],  std::max({R[0][0],R[1][0]}) }) });
 
         if (globalR == 0){
@@ -981,25 +928,13 @@ bool CollisionModel::MDInteractionsModel::rk4InternAdaptiveStep(std::vector<Coll
                 molecule->setRotationMatrix(newComRotOrder4[i]);
                 Core::Matrix3 worldInvI = newComRotOrder4[i]*initialInertInvMolecules[i]*newComRotOrder4[i].transpose();
                 molecule->setAngVel(worldInvI*newComAngMomOrder4[i]);
-                //molecule->rotateMoleculeRotationMatrix();
             }
-
-            // if(molecule->getMolecularStructureName()=="N2" || molecule->getMolecularStructureName()=="N2Approx"){
-            //     CollisionModel::Atom::rotate2D(angularVelocity*dt, nitrogenOne);
-            //     CollisionModel::Atom::rotate2D(angularVelocity*dt, nitrogenTwo);
-            //     molecule->getAtoms().at(0)->setRelativePosition(nitrogenOne);
-            //     molecule->getAtoms().at(1)->setRelativePosition(nitrogenTwo);
-            //     molecule->setAngles(nitrogenAngles);
-            // }
             i++;
 
         }
 
         steps++;
         dt = dt * globalDelta;
-       
-    
-        // std::cout << "DT: " <<  dt << std::endl;
 
         //Write time step to HDF5 trajectory:
         if(hdf5TWriterConf_.recordingActive == true){

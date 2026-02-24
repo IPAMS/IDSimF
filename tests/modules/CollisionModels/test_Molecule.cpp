@@ -336,8 +336,8 @@ TEST_CASE("Test inertia body matrix calculation"){
     CHECK(isExactDoubleEqual(mole.getAtomCount(), 2));
     CHECK(mole.getAtoms().empty() == false);
     CHECK(isExactDoubleEqual(mole.getDiameter(), 0.5));
-    Core::Matrix3 expectedInertiaM = {68450, 0.0, 0.0, 0.0, 1e-32, 0.0, 0.0, 0.0, 68450};
-    Core::Matrix3 expectedInertiaInvM = {1.0/68450, 0.0, 0.0, 0.0, 1.0/1e-32, 0.0, 0.0, 0.0, 1.0/68450};
+    Core::Matrix3 expectedInertiaM = {68450, 0.0, 0.0, 0.0, 0, 0.0, 0.0, 0.0, 68450};
+    Core::Matrix3 expectedInertiaInvM = {1.0/68450, 0.0, 0.0, 0.0, 0, 0.0, 0.0, 0.0, 1.0/68450};
     CHECK_THAT(mole.getInertiaMatrix(), ApproxEqual(expectedInertiaM));
     CHECK_THAT(mole.getInertiaInvMatrix(), ApproxEqual(expectedInertiaInvM, 1e-6));
 
