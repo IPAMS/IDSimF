@@ -400,6 +400,36 @@
 
 },
 {
+	"name":"N2+",
+	"diameter":3.65,
+	"atoms":[
+		{
+			"type":"N", 
+			"posx":0, 
+			"posy":0.54, 
+			"posz":0, 
+			"mass":14.0067, 
+			"charge":1, 
+			"partCharge":0, 
+			"LJsigma":1.1, 
+			"LJeps":0.711
+		}, 
+		{
+			"type":"N", 
+			"posx":0, 
+			"posy":-0.54, 
+			"posz":0, 
+			"mass":14.0067, 
+			"charge":0, 
+			"partCharge":0, 
+			"LJsigma":1.1, 
+			"LJeps":0.711
+		}
+
+	]
+
+},
+{
 	"name":"N2",
 	"diameter":3.65,
 	"atoms":[

@@ -284,23 +284,23 @@ TEST_CASE("Test MD Interactions with rotation", "[CollisionModels][MDInteraction
     Core::Particle ion;
     ion.setMolecularStructure(molecularStructureCollection.at("O2+"));
     ion.setVelocity(Core::Vector(600.0, 50.0, 0.0));
-    CollisionModel::MDForceField_LJ12_6 forceField(0.205E-30, "VDW", true);
+    CollisionModel::MDForceField_LJ12_6 forceField(1.705E-30, "VDWQP", true);
     auto forceFieldPtr = std::make_unique<CollisionModel::MDForceField_LJ12_6>(forceField);
     CollisionModel::MDInteractionsModel mdSim = CollisionModel::MDInteractionsModel(2000000, 298,
-                                                                                    4.003,
-                                                                                    diameterHe,
-                                                                                    "He",
+                                                                                    28,
+                                                                                    CollisionModel::MDInteractionsModel::DIAMETER_N2,
+                                                                                    "N2Approx",
                                                                                     1e-10, 
                                                                                     1E-17,
-                                                                                    2, 1,
-                                                                                    35e-10,
+                                                                                    3, 1,
+                                                                                    45e-10,
                                                                                     true,
                                                                                     std::move(forceFieldPtr),
                                                                                     molecularStructureCollection);
 
     double dt = 2e-11;
-    std::string h5Filename = "MD_collisions_multiatom_trajectories_He.h5";
-    mdSim.setHDF5TrajectoryWriter(h5Filename, 35e-10, 0);
+    std::string h5Filename = "MD_collisions_multiatom_trajectories_N2.h5";
+    mdSim.setHDF5TrajectoryWriter(h5Filename, 45e-10, 0);
     //mdSim.setLegacyTrajectoryWriter("MD_collisions_rotation_trajectories_test.txt", 35e-10, 0);
     //mdSim.modifyVelocity(ion, dt);
 
@@ -312,10 +312,11 @@ TEST_CASE("Test MD Interactions with rotation", "[CollisionModels][MDInteraction
 
     unsigned int timestep = 0;
     double time = 0.0;
-    for(int i = 0; i < 1; i++) {
+    for(int i = 0; i < 3; i++) {
         mdSim.updateModelTimestepParameters(timestep, time);
         mdSim.modifyVelocity(ion, 2e-11);
     }
+    std::cout << ion.getVelocity().magnitude() << std::endl;
 
     // CHECK(Approx(ion.getVelocity().x()).margin(0.8) ==  252.9988351158);
     // CHECK(Approx(ion.getVelocity().y()).margin(0.8) ==  -170.992193862);
