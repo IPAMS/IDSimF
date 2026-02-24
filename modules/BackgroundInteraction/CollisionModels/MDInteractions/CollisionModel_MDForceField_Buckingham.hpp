@@ -46,7 +46,7 @@ namespace CollisionModel{
                                 std::vector<Core::Vector>& forceMolecules, Core::Vector& forceVDW, Core::Vector& forceII) override;
                             
         void calculateTorque(std::vector<Core::Vector>& positions, 
-                                        std::vector<Core::Vector>& forceMolecules, 
+                                        Core::Vector& forceMolecules, 
                                         std::vector<Core::Vector>& torqueMolecules) override;
 
         static double calculateVDW(const CollisionModel::Atom& atomA, const CollisionModel::Atom& atomB, double distanceAbs);

@@ -504,15 +504,9 @@ void CollisionModel::MDForceField_Buckingham::populateInteractionTable(std::vect
 }
 
 void CollisionModel::MDForceField_Buckingham::calculateTorque(std::vector<Core::Vector>& positions, 
-                    std::vector<Core::Vector>& forceMolecules, 
+                    Core::Vector& forceMolecules, 
                     std::vector<Core::Vector>& torqueMolecules) {
-    
-    torqueMolecules[0].x(torqueMolecules[0].x() + (positions[1]*forceMolecules[2] - positions[2]*forceMolecules[1])); 
-    torqueMolecules[0].y(torqueMolecules[0].y() + (positions[2]*forceMolecules[0] - positions[0]*forceMolecules[2]));     
-    torqueMolecules[0].z(torqueMolecules[0].z() + (positions[0]*forceMolecules[1] - positions[1]*forceMolecules[0]));  
-    torqueMolecules[1].x(torqueMolecules[0].x() - (positions[1]*forceMolecules[2] - positions[2]*forceMolecules[1])); 
-    torqueMolecules[1].y(torqueMolecules[0].y() - (positions[2]*forceMolecules[0] - positions[0]*forceMolecules[2]));     
-    torqueMolecules[1].z(torqueMolecules[0].z() - (positions[0]*forceMolecules[1] - positions[1]*forceMolecules[0]));                             
+                            
 
 }
 
