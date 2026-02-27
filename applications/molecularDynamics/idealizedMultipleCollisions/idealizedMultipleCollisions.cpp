@@ -25,17 +25,13 @@
 
  ****************************/
 
-#include "CollisionModel_MDInteractionsExperimental.hpp"
-#include "CollisionModel_Molecule.hpp"
-#include "CollisionModel_Atom.hpp"
+#include "CollisionModel_MDInteractions.hpp"
 #include "Core_randomGenerators.hpp"
 #include "Core_constants.hpp"
 #include "Core_vector.hpp"
 #include "FileIO_MolecularStructureReader.hpp"
 #include "AppUtils_simulationConfiguration.hpp"
 #include "AppUtils_logging.hpp"
-#include "AppUtils_stopwatch.hpp"
-#include "AppUtils_signalHandler.hpp"
 #include "AppUtils_commandlineParser.hpp"
 #include "FileIO_CSVReader.hpp"
 #include "CollisionModel_MDForceField_Buckingham.hpp"
@@ -105,25 +101,26 @@ int main(int argc, const char * argv[]) {
         std::cout << "i:"<<i<<std::endl;
         CollisionModel::MDForceField_Buckingham forceField(collisionGasPolarizability_m3, potentialsFF);
         auto forceFieldPtr = std::make_unique<CollisionModel::MDForceField_Buckingham>(forceField);
-        CollisionModel::MDInteractionsModelExperimental mdSim = 
-                                                            CollisionModel::MDInteractionsModelExperimental(backgroundPartialPressures_Pa, 
-                                                                                                                backgroundTemperature_K, 
-                                                                                                                collisionGasMasses_Amu, 
-                                                                                                                collisionGasDiameters_angstrom,
-                                                                                                                collisionGasIdentifier, 
-                                                                                                                subIntegratorIntegrationTime_s, 
-                                                                                                                subIntegratorStepSize_s, 
-                                                                                                                collisionRadiusScaling, angleThetaScaling, 
-                                                                                                                spawnRadius_m,
-                                                                                                                std::move(forceFieldPtr),
-                                                                                                                molecularStructureCollection, 
-                                                                                                                positions[i], 
-                                                                                                                velocities[i]);
+        /*CollisionModel::MDInteractionsModel mdSim =
+                        CollisionModel::MDInteractionsModel(backgroundPartialPressures_Pa,
+                                                            backgroundTemperature_K,
+                                                            collisionGasMasses_Amu,
+                                                            collisionGasDiameters_angstrom,
+                                                            collisionGasIdentifier,
+                                                            subIntegratorIntegrationTime_s,
+                                                            subIntegratorStepSize_s,
+                                                            collisionRadiusScaling, angleThetaScaling,
+                                                            spawnRadius_m,
+                                                            std::move(forceFieldPtr),
+                                                            molecularStructureCollection,
+                                                            positions[i],
+                                                            velocities[i]);
 
         
-        mdSim.setTrajectoryWriter(projectName+".txt", trajectoryDistance_m, 0);
+        mdSim.setLegacyTrajectoryWriter(projectName+".txt", trajectoryDistance_m, 0);
         mdSim.updateModelTimestepParameters(saveTrajectoryStartTimeStep, 0);
-        mdSim.modifyVelocity(ion);
+        mdSim.modifyVelocity(ion);*/
+
     }
 }
 
