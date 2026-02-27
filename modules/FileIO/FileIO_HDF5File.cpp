@@ -63,9 +63,17 @@ bool FileIO::HDF5File::groupPathExists(std::string groupName) const{
 
 H5::Group FileIO::HDF5File::openGroup(std::string groupName) const {
     if (!groupPathExists(groupName)) {
-        H5::LinkCreatPropList propList;
-        propList.setCreateIntermediateGroup(true);
-        H5::Group group = h5f_->createGroup(groupName.c_str(), propList);
+	// create link property list to keep compatibility with HDF1.8:
+	hid_t propList_id = H5Pcreate(H5P_LINK_CREATE);
+	H5Pset_create_intermediate_group(propList_id, 1);
+        hid_t group_id = H5Gcreate(h5f_->getId(), groupName.c_str(), propList_id, H5P_DEFAULT, H5P_DEFAULT); 
+        H5Pclose(propList_id);
+	H5::Group group(group_id);
+
+	// HDF1.10 way with pure c++ api:
+	//H5::LinkCreatPropList propList;
+	//propList.setCreateIntermediateGroup(true);
+        //H5::Group group = h5f_->createGroup(groupName.c_str(), propList);
         return group;
     }
     else {
