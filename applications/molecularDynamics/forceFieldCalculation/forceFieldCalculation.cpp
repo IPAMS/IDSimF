@@ -25,17 +25,13 @@
 
  ****************************/
 
-#include "CollisionModel_MDInteractionsExperimental.hpp"
+
 #include "CollisionModel_Molecule.hpp"
-#include "CollisionModel_Atom.hpp"
 #include "Core_randomGenerators.hpp"
-#include "Core_constants.hpp"
 #include "Core_vector.hpp"
 #include "FileIO_MolecularStructureReader.hpp"
 #include "AppUtils_simulationConfiguration.hpp"
 #include "AppUtils_logging.hpp"
-#include "AppUtils_stopwatch.hpp"
-#include "AppUtils_signalHandler.hpp"
 #include "AppUtils_commandlineParser.hpp"
 #include "FileIO_CSVReader.hpp"
 #include "CollisionModel_MDForceField_Buckingham.hpp"
@@ -61,8 +57,6 @@ int main(int argc, const char * argv[]) {
     std::string potentialsFF = simConf->stringParameter("force_field");
     std::string outputFilename = simConf->stringParameter("output_file");
 
-
-    
     // ======================================================================================
 
     //read position and velocity input 
@@ -81,8 +75,6 @@ int main(int argc, const char * argv[]) {
     FileIO::MolecularStructureReader mdConfReader = FileIO::MolecularStructureReader();
     std::unordered_map<std::string,  std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection = 
                                                                         mdConfReader.readMolecularStructure(mdCollisionConfFile);
-
-    
 
     //auto forceFieldPtr = nullptr;
     CollisionModel::MDForceField_LJ12_6 forceField(collisionGasPolarizability_m3, potentialsFF);
