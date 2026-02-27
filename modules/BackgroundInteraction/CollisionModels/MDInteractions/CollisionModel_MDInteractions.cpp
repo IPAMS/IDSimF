@@ -469,18 +469,20 @@ void CollisionModel::MDInteractionsModel::modifyVelocity(Core::Particle& particl
         // if not halve the starting timestep length
         endEnergy = kineticEnergyEnd + rotationEnergyEnd; 
         if(!rotationActive_){
-            if(endEnergy*0.90 >= startEnergy){
+            if(startEnergy >= endEnergy*1.10  || startEnergy <= endEnergy*0.90){
                 std::cout << "Energy not conserved: " << startEnergy << " " << endEnergy << std::endl;
                 trajectorySuccess = false;
                 dt = dt/2;
            
             }
         }else{
-            if(endEnergy*0.90 <= startEnergy || startEnergy <= endEnergy*1.10)
+            if(startEnergy >= endEnergy*1.10  || startEnergy <= endEnergy*0.90){
                 std::cout << "Energy not conserved: " << startEnergy << " " << endEnergy << std::endl;
                 std::cout << "Kinetic Energy: " << kineticEnergyStart << " " << kineticEnergyEnd << std::endl;
                 std::cout << "Rotation Energy: " << rotationEnergyStart << " " << rotationEnergyEnd << std::endl;
-                trajectorySuccess = true;
+                trajectorySuccess = false;
+            }
+                
         }
 
         if(trajectorySuccess){
@@ -890,20 +892,23 @@ bool CollisionModel::MDInteractionsModel::rk4InternAdaptiveStep(std::vector<Coll
             if(fabs(newComVelOrder5[p].magnitude()) != 0)
                 R[p][0] = fabs(newComVelOrder4[p].magnitude()-newComVelOrder5[p].magnitude())/fabs(newComVelOrder5[p].magnitude());
             else
-                R[p][0] = 0;
+                R[p][0] = 1e-15;
 
             if(rotationActive_){
                 if(fabs(Core::norm1(newComRotOrder5[p])) != 0) {
                     R[p][1] = fabs(Core::norm1(newComRotOrder4[p])-Core::norm1(newComRotOrder5[p]))/fabs(Core::norm1(newComRotOrder5[p]));
                 }   
                 else{
-                    R[p][1] = 0;
+                    R[p][1] = 1e-15;
                 }
             }
         }
-
-        globalR = std::max({R[1][1], std::max({R[0][1],  std::max({R[0][0],R[1][0]}) }) });
-
+        if(rotationActive_){
+            globalR = std::max({R[1][1], std::max({R[0][1],  std::max({R[0][0],R[1][0]}) }) });
+        }else{
+            globalR = std::max({R[0][0],R[1][0]});
+        }
+        
         if (globalR == 0){
             globalR = 1e-15;
         }

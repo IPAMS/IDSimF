@@ -236,8 +236,8 @@ TEST_CASE("Test MD Model with Multi-Atom Molecules", "[CollisionModels][MDIntera
         }
 
         // check results written into trajectory:
-        CHECK(checkDims(h5Filename, "MD_trajectories/trajectory1", 158, 17));
-        CHECK(checkDims(h5Filename, "MD_trajectories/trajectory2", 140, 17));
+        CHECK(checkDims(h5Filename, "MD_trajectories/trajectory1", 139, 17));
+        CHECK(checkDims(h5Filename, "MD_trajectories/trajectory2", 155, 17));
         H5::Group group = openGroup(h5Filename, "MD_trajectories");
         CHECK(group.getNumObjs() == 4);
 
@@ -278,18 +278,17 @@ TEST_CASE("Test MD Interactions with rotation", "[CollisionModels][MDInteraction
 
     Core::globalRandomGeneratorPool = std::make_unique<Core::XoshiroTestRandomGeneratorPool>();
 
-    double diameterHe = CollisionModel::MDInteractionsModel::DIAMETER_HE;
     FileIO::MolecularStructureReader reader = FileIO::MolecularStructureReader();
     std::unordered_map<std::string,  std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection = reader.readMolecularStructure("test_molecularstructure_reader.json");
     Core::Particle ion;
-    ion.setMolecularStructure(molecularStructureCollection.at("O2+"));
+    ion.setMolecularStructure(molecularStructureCollection.at("Ar+"));
     ion.setVelocity(Core::Vector(600.0, 50.0, 0.0));
-    CollisionModel::MDForceField_LJ12_6 forceField(1.705E-30, "VDWQP", true);
+    CollisionModel::MDForceField_LJ12_6 forceField(1.705E-30, "ALL", true);
     auto forceFieldPtr = std::make_unique<CollisionModel::MDForceField_LJ12_6>(forceField);
     CollisionModel::MDInteractionsModel mdSim = CollisionModel::MDInteractionsModel(2000000, 298,
                                                                                     28,
                                                                                     CollisionModel::MDInteractionsModel::DIAMETER_N2,
-                                                                                    "N2Approx",
+                                                                                    "N2",
                                                                                     1e-10, 
                                                                                     1E-17,
                                                                                     3, 1,
@@ -301,24 +300,23 @@ TEST_CASE("Test MD Interactions with rotation", "[CollisionModels][MDInteraction
     double dt = 2e-11;
     std::string h5Filename = "MD_collisions_multiatom_trajectories_N2.h5";
     mdSim.setHDF5TrajectoryWriter(h5Filename, 45e-10, 0);
-    //mdSim.setLegacyTrajectoryWriter("MD_collisions_rotation_trajectories_test.txt", 35e-10, 0);
-    //mdSim.modifyVelocity(ion, dt);
+    mdSim.modifyVelocity(ion, dt);
 
 
-    // CHECK(Approx(ion.getVelocity().x()).margin(0.2) ==  449.2092547232);
-    // CHECK(Approx(ion.getVelocity().y()).margin(0.2) ==  -36.8772475434);
-    // CHECK(Approx(ion.getVelocity().z()).margin(0.2) ==  45.5651248115);
+    CHECK(Approx(ion.getVelocity().x()).margin(0.2) ==  562.6533455264);
+    CHECK(Approx(ion.getVelocity().y()).margin(0.2) ==  -17.8037704162);
+    CHECK(Approx(ion.getVelocity().z()).margin(0.2) ==  -29.1612891405);
 
 
     unsigned int timestep = 0;
     double time = 0.0;
-    for(int i = 0; i < 3; i++) {
+    for(int i = 0; i < 2; i++) {
         mdSim.updateModelTimestepParameters(timestep, time);
         mdSim.modifyVelocity(ion, 2e-11);
     }
-    std::cout << ion.getVelocity().magnitude() << std::endl;
 
-    // CHECK(Approx(ion.getVelocity().x()).margin(0.8) ==  252.9988351158);
-    // CHECK(Approx(ion.getVelocity().y()).margin(0.8) ==  -170.992193862);
-    // CHECK(Approx(ion.getVelocity().z()).margin(0.2) ==  -267.150091929);
+
+    CHECK(Approx(ion.getVelocity().x()).margin(0.8) ==  -435.0030183332);
+    CHECK(Approx(ion.getVelocity().y()).margin(0.8) ==  136.6501611714);
+    CHECK(Approx(ion.getVelocity().z()).margin(0.2) ==  -146.4818087103);
 }

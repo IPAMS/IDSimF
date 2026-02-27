@@ -441,7 +441,7 @@
 			"mass":14.0067, 
 			"charge":0, 
 			"partCharge":-0.4825, 
-			"LJsigma":2.5, 
+			"LJsigma":3.65, 
 			"LJeps":2.711
 		}, 
 		{
@@ -452,7 +452,7 @@
 			"mass":14.0067, 
 			"charge":0, 
 			"partCharge":-0.4825, 
-			"LJsigma":2.5, 
+			"LJsigma":3.65, 
 			"LJeps":2.711
 		},
 		{
@@ -482,8 +482,8 @@
 			"mass":14.0067, 
 			"charge":0, 
 			"partCharge":-0.4825, 
-			"LJsigma":1.1, 
-			"LJeps":0.711
+			"LJsigma":3.65, 
+			"LJeps":2.711
 		}, 
 		{
 			"type":"N", 
@@ -493,8 +493,8 @@
 			"mass":14.0067, 
 			"charge":0, 
 			"partCharge":-0.4825, 
-			"LJsigma":1.1, 
-			"LJeps":0.711
+			"LJsigma":3.65, 
+			"LJeps":2.711
 		},
 		{
 			"type":"COM", 
