@@ -29,6 +29,7 @@
 
 #include "CollisionModel_Molecule.hpp"
 #include "CollisionModel_AbstractMDForceField.hpp"
+#include "CollisionModel_MDTrajectoryWriter.hpp"
 #include "CollisionModel_HDF5MDTrajectoryWriter.hpp"
 #include "Core_randomGenerators.hpp"
 #include "AppUtils_logging.hpp"
@@ -37,6 +38,7 @@ namespace CollisionModel{
     class MDIntegrator {
 
     public:
+        enum MDIntegratorType{RK4_ADAPTIVE, RK4, LEAPFROG};
 
         MDIntegrator(
             std::string collisionMolecule,
@@ -46,14 +48,12 @@ namespace CollisionModel{
 
         void setLegacyTrajectoryWriter(const std::string& trajectoryFileName,
                          double trajectoryDistance,
+                         double minimalSampleInterval,
                          unsigned int startTimeStep=0);
 
         void setHDF5TrajectoryWriter(const std::string& trajectoryFileName,
                                 double trajectoryDistance,
                                 unsigned int startTimeStep=0);
-
-        void writeLegacyTrajectorySample(double distance, Molecule bg, Core::Vector positionBgMolecule, Core::Vector velocityBgMolecule,
-                        std::vector<Core::Vector> forceMolecules, bool endOfTrajectory, std::ofstream* file, double time, double dt);
 
         bool leapfrogIntern(std::vector<Molecule*> moleculesPtr, double dt, double finalTime, double requiredRad);
         bool rk4Intern(std::vector<Molecule*> moleculesPtr, double dt, double finalTime, double requiredRad);
@@ -64,22 +64,18 @@ namespace CollisionModel{
         struct {
             bool modelRecordsTrajectory = false;
             bool recordingActive = false;
+            double trajectoryDistance = 0.0;
+            unsigned int recordTrajectoryStartTimeStep = 0;
         } legacyTWriterConf_, hdf5TWriterConf_;
 
         double initRotation(Molecule& mole, double temperature_K);
         double calcRotEnergy(Core::Vector omega, Core::Matrix3 I);
 
         std::string collisionMolecule_ = "";
-
-        double trajectoryDistance_ = 0.0;
-
-        unsigned int recordTrajectoryStartTimeStep_ = 0;
         bool rotationActive_ = false;
 
-        std::unique_ptr<std::ofstream> trajectoryOutputStream_;
-        std::unique_ptr<std::ofstream> startingConditionsStream_;
-        std::unique_ptr<std::ofstream> startingConditionsCorrect_;
-        std::unique_ptr<HDF5MDTrajectoryWriter> hdf5TrajectoryWriter_;
+        std::unique_ptr<MDTrajectoryWriter> legacyTrajectoryWriter_ = nullptr;
+        std::unique_ptr<HDF5MDTrajectoryWriter> hdf5TrajectoryWriter_ = nullptr;
 
         std::unique_ptr<AbstractMDForceField> forceField_; ///< The molecular force field to use
     };

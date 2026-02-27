@@ -489,10 +489,6 @@ bool CollisionModel::MDIntegrator::rk4InternAdaptiveStep(std::vector<CollisionMo
         integrationTimeSum += dt;
         i = 0;
         for(auto* molecule : moleculesPtr){
-            if(legacyTWriterConf_.recordingActive == true && molecule->getMolecularStructureName() == collisionMolecule_){
-                writeLegacyTrajectorySample(distance, *molecule, molecule->getComPos(), molecule->getComVel(),forceMolecules, false, trajectoryOutputStream_.get(), integrationTimeSum, dt);
-            }
-
             molecule->setComPos(newComPosOrder4[i]);
             molecule->setComVel(newComVelOrder4[i]);
             if(rotationActive_){
@@ -514,13 +510,19 @@ bool CollisionModel::MDIntegrator::rk4InternAdaptiveStep(std::vector<CollisionMo
                 integrationTimeSum, dt, *moleculesPtr.at(0), *moleculesPtr.at(1));
         }
 
+        //write time step to legacy trajectory:
+        if (legacyTWriterConf_.recordingActive == true) {
+            legacyTrajectoryWriter_->writeTrajectorySample(
+                integrationTimeSum, dt, moleculesPtr[0]->getComPos(), moleculesPtr[0]->getComVel(),
+                moleculesPtr[1]->getComPos(),forceMolecules, distance);
+        }
+
         size_t index = 0;
         for(size_t b = 0; b < nMolecules; ++b){
             for(size_t z = b+1; z < nMolecules; ++z){
                 if((moleculesPtr[z]->getComPos() - moleculesPtr[b]->getComPos()).magnitude() > startDistances[index++]){
-                    if(legacyTWriterConf_.recordingActive == true && moleculesPtr[z]->getMolecularStructureName() == collisionMolecule_){
-                        writeLegacyTrajectorySample((moleculesPtr[z]->getComPos() - moleculesPtr[b]->getComPos()).magnitude(), *moleculesPtr[z],
-                                        moleculesPtr[z]->getComPos(), moleculesPtr[z]->getComVel(), forceMolecules, true, trajectoryOutputStream_.get(), integrationTimeSum, dt);
+                    if (legacyTWriterConf_.recordingActive == true) {
+                        legacyTrajectoryWriter_->writeTrajectoryDelimiter();
                     }
                     return wasHit;
                 }
@@ -530,7 +532,6 @@ bool CollisionModel::MDIntegrator::rk4InternAdaptiveStep(std::vector<CollisionMo
             }
         }
     }
-
     return false;
 }
 
@@ -567,58 +568,25 @@ double CollisionModel::MDIntegrator::calcRotEnergy(Core::Vector omega, Core::Mat
  * Activates trajectory writing and sets trajectory writer configuration
  * @param trajectoryFileName Trajectory Output filename
  * @param trajectoryDistance Distance between ion and background gas in m after which trajectory gets recorded
+ * @param startTimeStep First time step which should be written to the trajectory
+ * @param minimalSampleInterval Minimal interval between trajectory samples
  */
 void CollisionModel::MDIntegrator::setLegacyTrajectoryWriter(const std::string& trajectoryFileName,
                                                               double trajectoryDistance,
-                                                              unsigned int startTimeStep) {
-    trajectoryOutputStream_ = std::make_unique<std::ofstream>();
-    trajectoryOutputStream_->open(trajectoryFileName);
+                                                              double minimalSampleInterval,
+                                                              unsigned int startTimeStep){
 
-    startingConditionsStream_ = std::make_unique<std::ofstream>();
-    startingConditionsStream_->open("md_starting_conds.txt");
-    startingConditionsCorrect_ = std::make_unique<std::ofstream>();
-    startingConditionsCorrect_->open("md_starting_conds_correct.txt");
-
-    if (trajectoryOutputStream_->good()){
-        recordTrajectoryStartTimeStep_ = startTimeStep;
-        trajectoryDistance_ = trajectoryDistance;
-        legacyTWriterConf_.modelRecordsTrajectory = true;
-    }
-    else{
-        throw (std::runtime_error("Trajectory Output Stream failed to open"));
-    }
+    legacyTrajectoryWriter_= std::make_unique<CollisionModel::MDTrajectoryWriter>(trajectoryFileName, minimalSampleInterval);
+    legacyTWriterConf_.recordTrajectoryStartTimeStep = startTimeStep;
+    legacyTWriterConf_.trajectoryDistance = trajectoryDistance;
+    legacyTWriterConf_.modelRecordsTrajectory = true;
 }
 
 void CollisionModel::MDIntegrator::setHDF5TrajectoryWriter(const std::string& trajectoryFileName, double trajectoryDistance, unsigned int startTimeStep) {
 
-
     hdf5TrajectoryWriter_ = std::make_unique<CollisionModel::HDF5MDTrajectoryWriter>(trajectoryFileName);
 
-    recordTrajectoryStartTimeStep_ = startTimeStep;
-    trajectoryDistance_ = trajectoryDistance;
+    hdf5TWriterConf_.recordTrajectoryStartTimeStep = startTimeStep;
+    hdf5TWriterConf_.trajectoryDistance = trajectoryDistance;
     hdf5TWriterConf_.modelRecordsTrajectory = true;
-}
-
-
-
-/**
- * Writes trajectory data to a predefined file. Individual collisions are separated by a line containing '###'.
- *
- * Ouput includes: position of background gas, distance between the two molecules,
- * integration time, velocity of the background gas, force acting on the background gas and
- * timestep length
- */
-void CollisionModel::MDIntegrator::writeLegacyTrajectorySample(double distance, CollisionModel::Molecule bg, Core::Vector positionBgMolecule, Core::Vector velocityBgMolecule,
-                        std::vector<Core::Vector> forceMolecules, bool endOfTrajectory, std::ofstream* file, double time, double dt){
-
-    if(distance < trajectoryDistance_){
-        *file << positionBgMolecule.x() << ", " << positionBgMolecule.y() << ", " << positionBgMolecule.z() <<
-        ", " << distance << ", " << time <<
-        ", " << velocityBgMolecule.x() << ", " << velocityBgMolecule.y() << ", " << velocityBgMolecule.z() <<
-        ", " << forceMolecules[1].x() << ", " << forceMolecules[1].y() << ", " << forceMolecules[1].z() << ", " << dt <<
-        std::endl;
-    }
-    if(endOfTrajectory == true){
-        *file << "###" << std::endl;
-    }
 }

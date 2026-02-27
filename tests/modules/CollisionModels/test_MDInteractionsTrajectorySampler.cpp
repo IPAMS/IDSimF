@@ -52,14 +52,14 @@ TEST_CASE("Basic test of MD trajectory sampler", "[CollisionModels][MDInteractio
 
     CollisionModel::MDInteractionsTrajectorySampler mdSim(
         std::move(forceFieldPtr),
+        false,
         molecularStructureCollection,
         nullptr
         );
 
-    mdSim.setTrajectoryWriter("MD_collisions_trajectory_sampler_test.txt", 0.0);
+    mdSim.setLegacyTrajectoryWriter("MD_collisions_trajectory_sampler_test.txt", 10, 0.0, 0);
 
     //Calculate two trajectories with the same sampler:
-
     collisionParticleRotation = {0,0,0};
     mdSim.calculateTrajectory(ion, ionRotation,
         "N2", collisionParticlePosition, collisionParticleVelocity, collisionParticleRotation,
@@ -80,7 +80,6 @@ TEST_CASE("Basic test of MD trajectory sampler", "[CollisionModels][MDInteractio
     "Ar", collisionParticlePosition, collisionParticleVelocity, collisionParticleRotation,
 1e-11, 1e-16, 300, false);
 
-
     FileIO::CSVReader csvReader;
     std::vector<std::vector<std::string>> readBack_result = csvReader.readCSVFile("MD_collisions_trajectory_sampler_test.txt", ',');
     CHECK(readBack_result.size() == 762);
@@ -88,9 +87,9 @@ TEST_CASE("Basic test of MD trajectory sampler", "[CollisionModels][MDInteractio
     std::vector<double> bgMolecule_x = csvReader.extractDouble(readBack_result, 0);
 
     // Trajectories should begin at the right indices
-    CHECK(Approx(times[0])==1e-16);
-    CHECK(Approx(times[200])==1e-16);
-    CHECK(Approx(times[400])==1e-16);
+    CHECK(Approx(times.at(0))==1e-16);
+    CHECK(Approx(times.at(200))==1e-16);
+    CHECK(Approx(times.at(400))==1e-16);
 
     // start positions should be equal, but rotation of background molecule should change things
     CHECK(Approx(bgMolecule_x[0])==bgMolecule_x[200]);

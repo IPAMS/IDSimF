@@ -30,7 +30,7 @@
 #ifndef IDSIMF_COLLISIONMODEL_MDINTERACTIONS_TRAJECTORY_SAMPLER_H
 #define IDSIMF_COLLISIONMODEL_MDINTERACTIONS_TRAJECTORY_SAMPLER_H
 
-#include "Core_constants.hpp"
+#include "CollisionModel_MDIntegrator.hpp"
 #include "CollisionModel_MDTrajectoryWriter.hpp"
 #include "CollisionModel_AbstractMDForceField.hpp"
 #include "CollisionModel_Molecule.hpp"
@@ -42,7 +42,7 @@ namespace CollisionModel{
 
     enum MDIntegratorType{RK4_ADAPTIVE, RK4, LEAPFROG};
 
-    class MDInteractionsTrajectorySampler {
+    class MDInteractionsTrajectorySampler: public MDIntegrator {
 
     public:
         constexpr static double DIAMETER_N2 = 3.64e-10;
@@ -52,11 +52,10 @@ namespace CollisionModel{
 
         MDInteractionsTrajectorySampler(
             std::unique_ptr<AbstractMDForceField> forceField,
+            bool rotationActive,
             std::unordered_map<std::string, std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection,
             AppUtils::logger_ptr logger);
 
-        void setTrajectoryWriter(const std::string& trajectoryFileName,
-                                 double minimalSampleInterval=0);
 
         void calculateTrajectory(Core::Particle& particle,
                                  Core::Vector particleRotationAngles,
@@ -69,17 +68,7 @@ namespace CollisionModel{
                                  int maximumSteps,
                                  bool ionIsFrozen,
                                  MDIntegratorType integratorType = RK4_ADAPTIVE);
-
-        bool leapfrogIntern(std::vector<CollisionModel::Molecule*> moleculesPtr, double dt, double finalTime, int maximumSteps, bool ionIsFrozen);
-        bool rk4Intern(std::vector<CollisionModel::Molecule*> moleculesPtr, double dt, double finalTime, int maximumSteps, bool ionIsFrozen);
-        bool rk4InternAdaptiveStep(std::vector<CollisionModel::Molecule*> moleculesPtr, double dt, double finalTime, int maximumSteps, bool ionIsFrozen);
-
     private:
-
-        std::string currentCollisionMolecule_ = "";
-
-        std::unique_ptr<MDTrajectoryWriter> trajectoryWriter_ = nullptr;
-        std::unique_ptr<AbstractMDForceField> forceField_; ///< The molecular force field to use
         std::unordered_map<std::string,  std::shared_ptr<MolecularStructure>> molecularStructureCollection_; ///< collection of all available molecular structures
         AppUtils::logger_ptr logger_ = nullptr;
     };
