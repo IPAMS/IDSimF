@@ -41,11 +41,10 @@
 #ifndef IDSIMF_COLLISIONMODEL_MDINTERACTIONS_H
 #define IDSIMF_COLLISIONMODEL_MDINTERACTIONS_H
 
-#include "Core_constants.hpp"
 #include "CollisionModel_AbstractCollisionModel.hpp"
 #include "CollisionModel_AbstractMDForceField.hpp"
+#include "CollisionModel_MDIntegrator.hpp"
 #include "CollisionModel_SpatialFieldFunctions.hpp"
-#include "CollisionModel_HDF5MDTrajectoryWriter.hpp"
 #include "CollisionModel_Molecule.hpp"
 #include "RS_AbstractReaction.hpp"
 #include "AppUtils_logging.hpp"
@@ -53,9 +52,11 @@
 #include <functional>
 #include <string>
 
+
+
 namespace CollisionModel{
 
-    class MDInteractionsModel : public AbstractCollisionModel {
+    class MDInteractionsModel : public AbstractCollisionModel, public  MDIntegrator{
 
     public:
         constexpr static double DIAMETER_N2 = 3.64e-10;
@@ -140,27 +141,10 @@ namespace CollisionModel{
             std::unique_ptr<AbstractMDForceField> forceField_,
             std::unordered_map<std::string,  std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection);
 
-        void setLegacyTrajectoryWriter(const std::string& trajectoryFileName,
-                                 double trajectoryDistance,
-                                 unsigned int startTimeStep=0);
-
-        void setHDF5TrajectoryWriter(const std::string& trajectoryFileName,
-                                double trajectoryDistance,
-                                unsigned int startTimeStep=0);
-
-        void writeLegacyTrajectorySample(double distance, CollisionModel::Molecule bg, Core::Vector positionBgMolecule, Core::Vector velocityBgMolecule,
-                        std::vector<Core::Vector> forceMolecules, bool endOfTrajectory, std::ofstream* file, double time, double dt);
-
-        bool leapfrogIntern(std::vector<CollisionModel::Molecule*> moleculesPtr, double dt, double finalTime, double requiredRad);
-
-        bool rk4Intern(std::vector<CollisionModel::Molecule*> moleculesPtr, double dt, double finalTime, double requiredRad);
-
-        bool rk4InternAdaptiveStep(std::vector<CollisionModel::Molecule*> moleculesPtr, double dt, double finalTime, double requiredRad, double tolerance);
 
         void initializeModelParticleParameters(Core::Particle& ion) const;
 
         void updateModelParticleParameters(Core::Particle& ion) const;
-
         void updateModelTimestepParameters(unsigned int timestep, double time);
 
         void modifyAcceleration(Core::Vector& acceleration,
@@ -173,46 +157,21 @@ namespace CollisionModel{
         void modifyPosition(Core::Particle& particle,
                             double dt);
 
-
-
     private:
-
-        struct {
-            bool modelRecordsTrajectory = false;
-            bool recordingActive = false;
-        } legacyTWriterConf_, hdf5TWriterConf_;
-
-        double initRotation(CollisionModel::Molecule& mole, double temperature_K);
-        double calcRotEnergy(Core::Vector omega, Core::Matrix3 I);
 
         std::function<double(Core::Vector&)> pressureFunction_ = nullptr; ///< a spatial pressure function
         std::function<Core::Vector(Core::Vector&)> velocityFunction_ = nullptr; ///< a spatial velocity function
-        std::function<double(const Core::Vector&)>temperatureFunction_ = nullptr;  ///< Spatial temperature function
+        std::function<double(const Core::Vector&)> temperatureFunction_ = nullptr;  ///< Spatial temperature function
 
         double collisionGasMass_kg_ = 0.0;    ///< mass of the neutral colliding gas particles in kg
         double collisionGasDiameter_m_ = 0.0; ///< effective collision diameter of the neutral collision gas particles in m
-        std::string collisionMolecule_ = "";
         double integrationTime_ = 0.0;
         double subTimeStep_ = 0.0;
         double collisionRadiusScaling_ = 0.0;
         double angleThetaScaling_ = 0.0;
         double spawnRadius_ = 0.0;
-        double trajectoryDistance_ = 0.0;
-        //bool legacyTrajectoryRecordingActive_ = false;
-        //bool HDF5TrajectoryRecordingActive_ = false;
-        //bool modelRecordsLegacyTrajectories_ = false;
-        //bool modelRecordsHDF5Trajectories_ = false;
         unsigned int recordTrajectoryStartTimeStep_ = 0;
-        bool rotationActive_ = false; 
 
-        std::unique_ptr<std::ofstream> trajectoryOutputStream_;
-        std::unique_ptr<std::ofstream> startingConditionsStream_;
-        std::unique_ptr<std::ofstream> startingConditionsCorrect_;
-
-        std::unique_ptr<HDF5MDTrajectoryWriter> hdf5TrajectoryWriter_;
-
-
-        std::unique_ptr<AbstractMDForceField> forceField_; ///< The molecular force field to use
         std::function<void(RS::CollisionConditions, Core::Particle&)> afterCollisionActionFunction_ = nullptr;
         ///< Function with things to do after a collision (e.g. collision based chemical reactions)
         std::unordered_map<std::string,  std::shared_ptr<MolecularStructure>> molecularStructureCollection_; ///< collection of all available molecular structures

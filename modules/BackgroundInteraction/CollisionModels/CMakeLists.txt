@@ -9,6 +9,7 @@ set(SOURCE_FILES
         HardSoftSphere/CollisionModel_SoftSphere.cpp
         StatisticalDiffusion/CollisionModel_CollisionStatistics.cpp
         StatisticalDiffusion/CollisionModel_StatisticalDiffusion.cpp
+        MDInteractions/CollisionModel_MDIntegrator.cpp
         MDInteractions/CollisionModel_MDInteractions.cpp
         MDInteractions/CollisionModel_MDInteractionsTrajectorySampler.cpp
         MDInteractions/CollisionModel_AbstractMDForceField.cpp
