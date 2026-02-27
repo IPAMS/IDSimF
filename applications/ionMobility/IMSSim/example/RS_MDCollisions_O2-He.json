@@ -18,7 +18,7 @@
   "collision_gas_diameters_angstrom":[2.8],
   "collision_gas_polarizability_m3":[0.205e-30],
   "collision_gas_identifier":["He"],
-  "particle_identifier":["O2+"],
+  "particle_identifier":["O2+"], 
   "md_configuration":"./md_configuration.json",
   "sub_integrator_integration_time_s":1e-10,
   "sub_integrator_step_size_s":1e-16,
@@ -27,5 +27,6 @@
   "spawn_radius_m":25e-10,
   "save_trajectory":"false",
   "trajectory_distance_m":10e-10,
-  "trajectory_start_time_step":100
+  "trajectory_start_time_step":100, 
+  "rotation_active":false
 }

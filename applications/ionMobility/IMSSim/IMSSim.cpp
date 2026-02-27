@@ -122,6 +122,7 @@ int main(int argc, const char *argv[]){
         double trajectoryDistance_m = 0;
         bool saveTrajectory = false;
         unsigned int saveTrajectoryStartTimeStep = 0;
+        bool rotationActive = false;
         if(transportModelType=="btree_MD"){
             collisionGasPolarizability_m3 = simConf->doubleVectorParameter("collision_gas_polarizability_m3");
             collisionGasIdentifier = simConf->stringVectorParameter("collision_gas_identifier");
@@ -136,6 +137,7 @@ int main(int argc, const char *argv[]){
             saveTrajectoryStartTimeStep = simConf->unsignedIntParameter("trajectory_start_time_step");
             potentialsFF = simConf->stringParameter("force_field");
             potentialFunction = simConf->stringParameter("potential_function");
+            rotationActive = simConf->boolParameter("rotation_active");
         }
         std::size_t nBackgroundGases = backgroundPartialPressures_Pa.size();
         if (collisionGasMasses_Amu.size()!=nBackgroundGases || collisionGasDiameters_angstrom.size()!=nBackgroundGases) {
@@ -426,7 +428,7 @@ int main(int argc, const char *argv[]){
                 std::unique_ptr<CollisionModel::MDInteractionsModel> mdModel;
 
                 if(potentialFunction == "LJ"){
-                    CollisionModel::MDForceField_LJ12_6 forceField(collisionGasPolarizability_m3[i], potentialsFF);
+                    CollisionModel::MDForceField_LJ12_6 forceField(collisionGasPolarizability_m3[i], potentialsFF, rotationActive);
                     auto forceFieldPtr = std::make_unique<CollisionModel::MDForceField_LJ12_6>(forceField);
                     mdModel = std::make_unique<CollisionModel::MDInteractionsModel>(
                         backgroundPartialPressures_Pa[i],
@@ -439,11 +441,12 @@ int main(int argc, const char *argv[]){
                         collisionRadiusScaling,
                         angleThetaScaling,
                         spawnRadius_m,
+                        rotationActive,
                         std::move(forceFieldPtr),
                         molecularStructureCollection);
                 }
                 else if(potentialFunction == "Buckingham"){
-                    CollisionModel::MDForceField_Buckingham forceField(collisionGasPolarizability_m3[i], potentialsFF);
+                    CollisionModel::MDForceField_Buckingham forceField(collisionGasPolarizability_m3[i], potentialsFF, rotationActive);
                     auto forceFieldPtr = std::make_unique<CollisionModel::MDForceField_Buckingham>(forceField);
                     forceFieldPtr->populateInteractionTable(particlesPtrs, molecularStructureCollection, collisionGasIdentifier[i]);
                     mdModel = std::make_unique<CollisionModel::MDInteractionsModel>(
@@ -457,6 +460,7 @@ int main(int argc, const char *argv[]){
                         collisionRadiusScaling,
                         angleThetaScaling,
                         spawnRadius_m,
+                        rotationActive,
                         std::move(forceFieldPtr),
                         molecularStructureCollection);
                 }
