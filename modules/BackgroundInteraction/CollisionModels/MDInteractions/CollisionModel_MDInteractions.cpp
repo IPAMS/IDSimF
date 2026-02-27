@@ -526,15 +526,22 @@ bool CollisionModel::MDInteractionsModel::leapfrogIntern(std::vector<CollisionMo
 
     std::vector<Core::Vector> forceMolecules(moleculesPtr_size);
     std::vector<Core::Vector> torqueMolecules(moleculesPtr_size);
+
     forceField_->calculateForceField(moleculesPtr, forceMolecules, torqueMolecules);
 
     // do the first half step for the velocity, as per leapfrog definition
-    double energyStart = 0;
+    
     size_t i = 0;
     for(auto* molecule : moleculesPtr){
-        energyStart += 0.5 * molecule->getComVel().magnitudeSquared() * molecule->getMass();
         Core::Vector newComVel =  molecule->getComVel() + forceMolecules.at(i) / molecule->getMass() * dt/2;
         molecule->setComVel(newComVel);
+        if(rotationActive_){
+            Core::Vector newAnglMom = molecule->getAngMom() + torqueMolecules.at(i) * dt/2;
+            molecule->setAngMom(newAnglMom);
+            Core::Matrix3 rotMatrix = molecule->getRotationMatrix();
+            Core::Matrix3 worldInvInertia = rotMatrix*molecule->getInertiaInvMatrix()*rotMatrix.transpose();
+            molecule->setAngVel(worldInvInertia*newAnglMom);
+        }
         i++;
     }
 
@@ -542,12 +549,29 @@ bool CollisionModel::MDInteractionsModel::leapfrogIntern(std::vector<CollisionMo
     for (int j = 0; j < nSteps; j++){
 
         // time step for the new position
-        i = 0;
-        double energyEnd = 0;
+        i = 0; 
         for(auto* molecule : moleculesPtr){
             Core::Vector newComPos =  molecule->getComPos() + molecule->getComVel() * dt;
             molecule->setComPos(newComPos);
-            energyEnd += 0.5 * molecule->getComVel().magnitudeSquared() * molecule->getMass();
+            if(rotationActive_){
+                Core::Matrix3 rotMatrix = molecule->getRotationMatrix();
+                Core::Matrix3 worldInvInertia = rotMatrix*molecule->getInertiaInvMatrix()*rotMatrix.transpose();
+                Core::Matrix3 inertiaMatrix = molecule->getInertiaMatrix();
+                double I1 = inertiaMatrix(0,0), I2 = inertiaMatrix(1,1), I3=inertiaMatrix(2,2);
+                Core::Vector omega = worldInvInertia*molecule->getAngMom();
+                if(I1 < CollisionModel::Molecule::MININERTIA){
+                    omega.x(0.0);
+                }
+                if(I2 < CollisionModel::Molecule::MININERTIA){
+                    omega.y(0.0);
+                }
+                if(I3 < CollisionModel::Molecule::MININERTIA){
+                    omega.z(0.0);
+                }
+                
+                Core::Matrix3 newRotMatrix = molecule->getRotationMatrix() + CollisionModel::Molecule::calcRotationMatrixUpdate(rotMatrix, omega) * dt;
+                molecule->setRotationMatrix(newRotMatrix);
+            }
             i++;
         }
         size_t index = 0;
@@ -569,7 +593,19 @@ bool CollisionModel::MDInteractionsModel::leapfrogIntern(std::vector<CollisionMo
         for(auto* molecule : moleculesPtr){
             Core::Vector newComVel =  molecule->getComVel() + forceMolecules.at(i) / molecule->getMass() * dt;
             molecule->setComVel(newComVel);
+            if(rotationActive_){
+                Core::Vector newAnglMom = molecule->getAngMom() + torqueMolecules.at(i) * dt;
+                molecule->setAngMom(newAnglMom);
+                Core::Matrix3 rotMatrix = molecule->getRotationMatrix();
+                Core::Matrix3 worldInvInertia = rotMatrix*molecule->getInertiaInvMatrix()*rotMatrix.transpose();
+                molecule->setAngVel(worldInvInertia*newAnglMom);
+            }
             i++;
+        }
+        //Write time step to HDF5 trajectory:
+        if(hdf5TWriterConf_.recordingActive == true){
+            hdf5TrajectoryWriter_->writeTrajectorySample(
+                j*dt, dt, *moleculesPtr.at(0), *moleculesPtr.at(1));
         }
     }
     return false;
