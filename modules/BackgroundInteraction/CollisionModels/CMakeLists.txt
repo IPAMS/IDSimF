@@ -10,7 +10,6 @@ set(SOURCE_FILES
         StatisticalDiffusion/CollisionModel_CollisionStatistics.cpp
         StatisticalDiffusion/CollisionModel_StatisticalDiffusion.cpp
         MDInteractions/CollisionModel_MDInteractions.cpp
-        MDInteractions/CollisionModel_MDInteractionsExperimental.cpp
         MDInteractions/CollisionModel_MDInteractionsTrajectorySampler.cpp
         MDInteractions/CollisionModel_AbstractMDForceField.cpp
         MDInteractions/CollisionModel_Atom.cpp

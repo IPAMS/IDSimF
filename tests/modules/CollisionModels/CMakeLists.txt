@@ -5,7 +5,6 @@ set(SOURCE_FILES
         test_main.cpp
         test_MathFunctions.cpp
         test_CollisionStatistics.cpp
-        test_energyDiatomicMD.cpp
         test_StatisticalDiffusion.cpp
         test_util.cpp
         test_MultiCollisionModel.cpp 
@@ -14,7 +13,6 @@ set(SOURCE_FILES
         test_Atom.cpp
         test_Molecule.cpp
         test_MDVerlet.cpp
-        test_experimentalMD.cpp
         test_SpatialFunctions.cpp
         test_AtomInteractionMap.cpp
         test_MDInteractionsTrajectorySampler.cpp)
