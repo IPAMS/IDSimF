@@ -298,15 +298,13 @@ TEST_CASE("Test MD Interactions with rotation", "[CollisionModels][MDInteraction
                                                                                     molecularStructureCollection);
 
     double dt = 2e-11;
-    std::string h5Filename = "MD_collisions_multiatom_trajectories_N2.h5";
+    std::string h5Filename = "MD_collisions_multiatom_trajectories_rotation_N2.h5";
     mdSim.setHDF5TrajectoryWriter(h5Filename, 45e-10, 0);
     mdSim.modifyVelocity(ion, dt);
-
 
     CHECK(Approx(ion.getVelocity().x()).margin(0.2) ==  562.6533455264);
     CHECK(Approx(ion.getVelocity().y()).margin(0.2) ==  -17.8037704162);
     CHECK(Approx(ion.getVelocity().z()).margin(0.2) ==  -29.1612891405);
-
 
     unsigned int timestep = 0;
     double time = 0.0;
@@ -314,7 +312,6 @@ TEST_CASE("Test MD Interactions with rotation", "[CollisionModels][MDInteraction
         mdSim.updateModelTimestepParameters(timestep, time);
         mdSim.modifyVelocity(ion, 2e-11);
     }
-
 
     CHECK(Approx(ion.getVelocity().x()).margin(0.8) ==  -435.0030183332);
     CHECK(Approx(ion.getVelocity().y()).margin(0.8) ==  136.6501611714);

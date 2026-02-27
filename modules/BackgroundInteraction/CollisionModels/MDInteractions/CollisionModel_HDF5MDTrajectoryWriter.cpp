@@ -22,7 +22,6 @@
 
 CollisionModel::HDF5MDTrajectoryWriter::HDF5MDTrajectoryWriter(std::string hdf5Filename) {
     h5f_ = std::make_unique<FileIO::HDF5File>(hdf5Filename, FileIO::HDF5File::WRITE_ONLY);
-
 }
 
 void CollisionModel::HDF5MDTrajectoryWriter::initNewTrajectory(std::size_t nAtomsMolecule, std::size_t nAtomsBG) {
