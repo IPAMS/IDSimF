@@ -503,10 +503,3 @@ void CollisionModel::MDForceField_Buckingham::populateInteractionTable(std::vect
     }
 }
 
-void CollisionModel::MDForceField_Buckingham::calculateTorque(std::vector<Core::Vector>& positions, 
-                    Core::Vector& forceMolecules, 
-                    std::vector<Core::Vector>& torqueMolecules) {
-                            
-
-}
-

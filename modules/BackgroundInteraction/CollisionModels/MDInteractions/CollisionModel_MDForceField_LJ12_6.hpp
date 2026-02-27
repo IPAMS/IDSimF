@@ -44,10 +44,6 @@ namespace CollisionModel{
         void calculateForceFieldComponents(std::vector<CollisionModel::Molecule*>& moleculesPtr, 
                                 std::vector<Core::Vector>& forceMolecules, Core::Vector& forceVDW, Core::Vector& forceII) override;
 
-        void calculateTorque(std::vector<Core::Vector>& positions, 
-                                        Core::Vector& forceMolecules, 
-                                        std::vector<Core::Vector>& torqueMolecules) override;
-
 
     private:
         double collisionGasPolarizability_m3_ = 0.0; ///< polarizability of the collision gas in m^3

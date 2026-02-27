@@ -83,7 +83,7 @@ void CollisionModel::MDForceField_LJ12_6::calculateForceField(std::vector<Collis
             double distanceSquaredInverse = 1./distanceSquared;
             double distanceCubed = distanceSquared * sqrt(distanceSquared);
 
-            if(potentialsFF_ == "ALL" || potentialsFF_ == "VDW" || potentialsFF_ == "VDWII"){
+            if(potentialsFF_ == "ALL" || potentialsFF_ == "VDW" || potentialsFF_ == "VDWII" || potentialsFF_ == "VDWQUAD"){
                 double sigma = CollisionModel::Atom::calcLJSig(*atomI, *atomJ);
                 double sigma6 = sigma * sigma * sigma * sigma * sigma * sigma;
                 double epsilon = CollisionModel::Atom::calcLJEps(*atomI, *atomJ);
@@ -106,7 +106,7 @@ void CollisionModel::MDForceField_LJ12_6::calculateForceField(std::vector<Collis
 
             // Second contribution: C4 ion-induced dipole potential
             // This requires an ion and one neutrally charged molecule to be present
-            if(potentialsFF_ == "ALL" || potentialsFF_ == "II" || potentialsFF_ == "VDWII"){
+            if(potentialsFF_ == "ALL" || potentialsFF_ == "II" || potentialsFF_ == "VDWII" || potentialsFF_ == "VDWIIQUAD"){
                 
                 double currentCharge = 0;
                 // Check if one of the molecules is an ion and the other one is not
@@ -115,46 +115,16 @@ void CollisionModel::MDForceField_LJ12_6::calculateForceField(std::vector<Collis
                             atomJ->getType() == CollisionModel::Atom::AtomType::COM){
 
                         currentCharge = atomI->getCharge();
-
-                    }else if (int(ceil(fabs(atomJ->getCharge()/Core::ELEMENTARY_CHARGE))) != 0 &&
-                            atomI->getType() == CollisionModel::Atom::AtomType::COM){
-
-                        currentCharge = atomJ->getCharge();
-
                     }
+
                 }else{
                     if(int(ceil(fabs(atomI->getCharge()/Core::ELEMENTARY_CHARGE))) != 0 &&
                             atomJ->getType() != CollisionModel::Atom::AtomType::COM){
 
                         currentCharge = atomI->getCharge();
 
-                    }else if (int(ceil(fabs(atomJ->getCharge()/Core::ELEMENTARY_CHARGE))) != 0 &&
-                            atomI->getType() != CollisionModel::Atom::AtomType::COM){
-
-                        currentCharge = atomJ->getCharge();
-
                     }
                 }
-
-                // eField[0] += distance.x() * currentCharge / distanceCubed; // E-field in x
-                // eField[1] += distance.y() * currentCharge / distanceCubed; // E-field in y
-                // eField[2] += distance.z() * currentCharge / distanceCubed; // E-field in z
-
-                // // derivative x to x
-                // eFieldDerivative[0] += currentCharge / distanceCubed -
-                //         3 * currentCharge * distance.x() * distance.x() / (distanceCubed * distanceSquared);
-                // // derivative x to y
-                // eFieldDerivative[1] += -3 * currentCharge * distance.x() * distance.y() / (distanceCubed * distanceSquared);
-                // // derivative y to y
-                // eFieldDerivative[2] += currentCharge / distanceCubed -
-                //         3 * currentCharge * distance.y() * distance.y() / (distanceCubed * distanceSquared);
-                // // derivative y to z
-                // eFieldDerivative[3] += -3 * currentCharge * distance.y() * distance.z() / (distanceCubed * distanceSquared);
-                // // derivative z to z
-                // eFieldDerivative[4] += currentCharge / distanceCubed -
-                //         3 * currentCharge * distance.z() * distance.z() / (distanceCubed * distanceSquared);
-                // // derivative x to z
-                // eFieldDerivative[5] += -3 * currentCharge * distance.x() * distance.z() / (distanceCubed * distanceSquared);
 
                 eField[0] = distance.x() * currentCharge / distanceCubed; // E-field in x
                 eField[1] = distance.y() * currentCharge / distanceCubed; // E-field in y
@@ -175,9 +145,8 @@ void CollisionModel::MDForceField_LJ12_6::calculateForceField(std::vector<Collis
                         3 * currentCharge * distance.z() * distance.z() / (distanceCubed * distanceSquared);
                 // derivative x to z
                 eFieldDerivative[5] = -3 * currentCharge * distance.x() * distance.z() / (distanceCubed * distanceSquared);
+
                 Core::Vector ionInducedForce;
-
-
                 if(isN2Approx){
                     double xIonInducedForce = 1./(Core::ELECTRIC_CONSTANT) * collisionGasPolarizability_m3_/2 *
                             (eField[0]*eFieldDerivative[0] + eField[1]*eFieldDerivative[1] + eField[2]*eFieldDerivative[5]);
@@ -198,6 +167,14 @@ void CollisionModel::MDForceField_LJ12_6::calculateForceField(std::vector<Collis
                     ionInducedForce.x(xIonInducedForce);
                     ionInducedForce.y(yIonInducedForce);
                     ionInducedForce.z(zIonInducedForce);
+                }
+                double cutoff = 1.5*CollisionModel::Atom::calcLJSig(*atomI, *atomJ);
+                if(distance.magnitude() < cutoff && rotActive_){
+                    
+                    double dist = distance.magnitude();  
+                    double a = ((dist-cutoff)*1e10);
+                    double decayFuncValue = (1./(1+exp(a*a)*exp(a*a))*2);
+                    ionInducedForce = ionInducedForce * decayFuncValue; 
                 }
 
                 forceMolecules[0] += ionInducedForce;
@@ -285,29 +262,6 @@ void CollisionModel::MDForceField_LJ12_6::calculateForceField(std::vector<Collis
                 }
             }
         }
-    }
-
-    // add the C4 ion-induced dipole force contribution
-    if(potentialsFF_ == "ALL" || potentialsFF_ == "II" || potentialsFF_ == "VDWII"){
-        // Core::Vector ionInducedForce;
-        // if(isN2Approx){
-        //     ionInducedForce.x(1./(Core::ELECTRIC_CONSTANT) * collisionGasPolarizability_m3_/2 *
-        //             (eField[0]*eFieldDerivative[0] + eField[1]*eFieldDerivative[1] + eField[2]*eFieldDerivative[5]));
-        //     ionInducedForce.y(1./(Core::ELECTRIC_CONSTANT) * collisionGasPolarizability_m3_/2 *
-        //             (eField[0]*eFieldDerivative[1] + eField[1]*eFieldDerivative[2] + eField[2]*eFieldDerivative[3]));
-        //     ionInducedForce.z(1./(Core::ELECTRIC_CONSTANT) * collisionGasPolarizability_m3_/2 *
-        //             (eField[0]*eFieldDerivative[5] + eField[1]*eFieldDerivative[3] + eField[2]*eFieldDerivative[4]));
-        // }else{
-        //     ionInducedForce.x(1./(Core::ELECTRIC_CONSTANT) * collisionGasPolarizability_m3_ *
-        //             (eField[0]*eFieldDerivative[0] + eField[1]*eFieldDerivative[1] + eField[2]*eFieldDerivative[5]));
-        //     ionInducedForce.y(1./(Core::ELECTRIC_CONSTANT) * collisionGasPolarizability_m3_ *
-        //             (eField[0]*eFieldDerivative[1] + eField[1]*eFieldDerivative[2] + eField[2]*eFieldDerivative[3]));
-        //     ionInducedForce.z(1./(Core::ELECTRIC_CONSTANT) * collisionGasPolarizability_m3_ *
-        //             (eField[0]*eFieldDerivative[5] + eField[1]*eFieldDerivative[3] + eField[2]*eFieldDerivative[4]));
-        // }
-        // forceMolecules[0] += ionInducedForce;
-        // forceMolecules[1] += ionInducedForce * (-1);
-        
     }
 }
 
@@ -528,16 +482,5 @@ void CollisionModel::MDForceField_LJ12_6::calculateForceFieldComponents(std::vec
     }
 }
 
-void CollisionModel::MDForceField_LJ12_6::calculateTorque(std::vector<Core::Vector>& positions, 
-                    Core::Vector& forceMolecules, 
-                    std::vector<Core::Vector>& torqueMolecules) {
-    
-    torqueMolecules[0].x(torqueMolecules[0].x() + (positions[0].y()*forceMolecules.z() - positions[0].z()*forceMolecules.y())); 
-    torqueMolecules[0].y(torqueMolecules[0].y() + (positions[0].z()*forceMolecules.x() - positions[0].x()*forceMolecules.z()));     
-    torqueMolecules[0].z(torqueMolecules[0].z() + (positions[0].x()*forceMolecules.y() - positions[0].y()*forceMolecules.x()));  
-    torqueMolecules[1].x(torqueMolecules[0].x() - (positions[1].y()*forceMolecules.z() - positions[1].z()*forceMolecules.y())); 
-    torqueMolecules[1].y(torqueMolecules[0].y() - (positions[1].z()*forceMolecules.x() - positions[1].x()*forceMolecules.z()));     
-    torqueMolecules[1].z(torqueMolecules[0].z() - (positions[1].x()*forceMolecules.y() - positions[1].y()*forceMolecules.x()));               
 
-}
 

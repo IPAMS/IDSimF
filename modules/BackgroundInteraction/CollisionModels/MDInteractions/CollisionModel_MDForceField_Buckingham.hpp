@@ -45,9 +45,6 @@ namespace CollisionModel{
         void calculateForceFieldComponents(std::vector<CollisionModel::Molecule*>& moleculesPtr, 
                                 std::vector<Core::Vector>& forceMolecules, Core::Vector& forceVDW, Core::Vector& forceII) override;
                             
-        void calculateTorque(std::vector<Core::Vector>& positions, 
-                                        Core::Vector& forceMolecules, 
-                                        std::vector<Core::Vector>& torqueMolecules) override;
 
         static double calculateVDW(const CollisionModel::Atom& atomA, const CollisionModel::Atom& atomB, double distanceAbs);
 
