@@ -37,7 +37,7 @@ namespace CollisionModel{
         void initNewTrajectory(std::size_t nAtomsMolecule, std::size_t nAtomsBG);
 
         void writeTrajectorySample(double time, double dt,
-                                   Molecule &bgMolecule, Molecule &molecule);
+                                   Molecule &molecule, Molecule &bgMolecule);
 
     private:
         std::size_t nTrajectories_=0;

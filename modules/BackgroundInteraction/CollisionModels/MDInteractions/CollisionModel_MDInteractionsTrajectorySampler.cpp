@@ -82,7 +82,7 @@ void CollisionModel::MDInteractionsTrajectorySampler::calculateTrajectory(
     //     trajectorySuccess = rk4InternAdaptiveStep(moleculesPtr, timeStep, finalTime, maximumSteps, ionIsFrozen);
     // }
     //std::cout << moleculesPtr[1]->getComPos() << std::endl;
-    trajectorySuccess = rk4InternAdaptiveStep(moleculesPtr, timeStep, finalTime, maximumSteps, 1e-8);
+    trajectorySuccess = rk4InternAdaptiveStep(moleculesPtr, timeStep, finalTime, maximumSteps, 1e-8, ionIsFrozen);
 
     double endEnergy = 0;
     for(auto* molecule : moleculesPtr){

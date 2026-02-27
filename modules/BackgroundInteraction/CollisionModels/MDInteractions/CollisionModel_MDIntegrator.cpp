@@ -265,10 +265,10 @@ bool CollisionModel::MDIntegrator::rk4Intern(std::vector<CollisionModel::Molecul
  * @param requiredRad radius defining the collision sphere, i.e. the distance that needs to be undercut for
  * a collision to be considered (same radius which is used to estimate the collision probability)
  * @param tolerance defines the allowed error threshold  to control the timestep lengths
+ * @param ionIsFrozen ion stays stationary
  */
 bool CollisionModel::MDIntegrator::rk4InternAdaptiveStep(std::vector<CollisionModel::Molecule*> moleculesPtr, double dt, double finalTime,
-                                                                    double requiredRad, double tolerance){
-
+                                                                    double requiredRad, double tolerance, bool ionIsFrozen){
     double integrationTimeSum = 0;
     size_t nMolecules = moleculesPtr.size();
     std::vector<Core::Vector> forceMolecules(nMolecules);
@@ -388,7 +388,9 @@ bool CollisionModel::MDIntegrator::rk4InternAdaptiveStep(std::vector<CollisionMo
                 i = 0;
                 for(auto* molecule : moleculesPtr){
                     positionMolecules[i] += l[m][i]*weight[n-1][m];
-                    molecule->setComPos(positionMolecules[i]);
+                    if(molecule->getMolecularStructureName() == collisionMolecule_ || !ionIsFrozen) {
+                        molecule->setComPos(positionMolecules[i]);
+                    }
                     if(rotationActive_){
                         rotMolecules[i] = rotMolecules[i] + u[m][i]*weight[n-1][m];
                         molecule->setRotationMatrix(rotMolecules[i]);
@@ -449,11 +451,8 @@ bool CollisionModel::MDIntegrator::rk4InternAdaptiveStep(std::vector<CollisionMo
                 newComAngMomOrder4[i] = initialAngMomentMolecules[i] + (v[0][i] * 25./216 + v[2][i] * 1408./2565 + v[3][i] * 2197./4104 + v[4][i] * (-1./5));
                 newComRotOrder4[i] = initialRotMolecules[i] + (u[0][i] * (25./216) + u[2][i] * (1408./2565) + u[3][i] * (2197./4104) + u[4][i] * (-1./5));
                 newComRotOrder5[i] = initialRotMolecules[i] + (u[0][i] * (16./135) + u[2][i] * (6656./12825) + u[3][i] * (28561./56430) + u[4][i] * (-9./50) + u[5][i] * (2./55));
-
             }
-
         }
-
 
         #pragma GCC diagnostic push
         #pragma GCC diagnostic ignored "-Wfloat-equal"
@@ -489,13 +488,15 @@ bool CollisionModel::MDIntegrator::rk4InternAdaptiveStep(std::vector<CollisionMo
         integrationTimeSum += dt;
         i = 0;
         for(auto* molecule : moleculesPtr){
-            molecule->setComPos(newComPosOrder4[i]);
-            molecule->setComVel(newComVelOrder4[i]);
-            if(rotationActive_){
-                molecule->setAngMom(newComAngMomOrder4[i]);
-                molecule->setRotationMatrix(newComRotOrder4[i]);
-                Core::Matrix3 worldInvI = newComRotOrder4[i]*initialInertInvMolecules[i]*newComRotOrder4[i].transpose();
-                molecule->setAngVel(worldInvI*newComAngMomOrder4[i]);
+            if(molecule->getMolecularStructureName() == collisionMolecule_ || !ionIsFrozen) {
+                molecule->setComPos(newComPosOrder4[i]);
+                molecule->setComVel(newComVelOrder4[i]);
+                if(rotationActive_){
+                    molecule->setAngMom(newComAngMomOrder4[i]);
+                    molecule->setRotationMatrix(newComRotOrder4[i]);
+                    Core::Matrix3 worldInvI = newComRotOrder4[i]*initialInertInvMolecules[i]*newComRotOrder4[i].transpose();
+                    molecule->setAngVel(worldInvI*newComAngMomOrder4[i]);
+                }
             }
             i++;
 
@@ -513,8 +514,8 @@ bool CollisionModel::MDIntegrator::rk4InternAdaptiveStep(std::vector<CollisionMo
         //write time step to legacy trajectory:
         if (legacyTWriterConf_.recordingActive == true) {
             legacyTrajectoryWriter_->writeTrajectorySample(
-                integrationTimeSum, dt, moleculesPtr[0]->getComPos(), moleculesPtr[0]->getComVel(),
-                moleculesPtr[1]->getComPos(),forceMolecules, distance);
+                integrationTimeSum, dt, moleculesPtr[1]->getComPos(), moleculesPtr[1]->getComVel(),
+                moleculesPtr[0]->getComPos(),forceMolecules, distance);
         }
 
         size_t index = 0;

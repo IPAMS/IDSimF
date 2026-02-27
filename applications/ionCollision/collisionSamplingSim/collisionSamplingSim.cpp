@@ -103,8 +103,8 @@ int main(int argc, const char * argv[]) {
             forceFieldPtr = std::move(buckinghamPtr);
         }
         CollisionModel::MDInteractionsTrajectorySampler mdSim(
-            std::move(forceFieldPtr), molecularStructureCollection, logger);
-        mdSim.setTrajectoryWriter(simResultBasename+"_MD_traj.txt", trajectoryMinimalSampleInterval_s);
+            std::move(forceFieldPtr), false, molecularStructureCollection, logger);
+        mdSim.setLegacyTrajectoryWriter(simResultBasename+"_MD_traj.txt", 10, trajectoryMinimalSampleInterval_s, 0);
 
 
         Core::Vector anglesIon_deg = simConf->vector3dParameter("ion_angles_deg");
