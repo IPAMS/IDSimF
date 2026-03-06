@@ -28,8 +28,8 @@ void CollisionModel::AbstractMDForceField::calculateTorque(std::vector<Core::Vec
     torqueMolecules[0].x(torqueMolecules[0].x() + (positions[0].y()*forceMolecules.z() - positions[0].z()*forceMolecules.y())); 
     torqueMolecules[0].y(torqueMolecules[0].y() + (positions[0].z()*forceMolecules.x() - positions[0].x()*forceMolecules.z()));     
     torqueMolecules[0].z(torqueMolecules[0].z() + (positions[0].x()*forceMolecules.y() - positions[0].y()*forceMolecules.x()));  
-    torqueMolecules[1].x(torqueMolecules[0].x() - (positions[1].y()*forceMolecules.z() - positions[1].z()*forceMolecules.y())); 
-    torqueMolecules[1].y(torqueMolecules[0].y() - (positions[1].z()*forceMolecules.x() - positions[1].x()*forceMolecules.z()));     
-    torqueMolecules[1].z(torqueMolecules[0].z() - (positions[1].x()*forceMolecules.y() - positions[1].y()*forceMolecules.x()));               
+    torqueMolecules[1].x(torqueMolecules[1].x() - (positions[1].y()*forceMolecules.z() - positions[1].z()*forceMolecules.y())); 
+    torqueMolecules[1].y(torqueMolecules[1].y() - (positions[1].z()*forceMolecules.x() - positions[1].x()*forceMolecules.z()));     
+    torqueMolecules[1].z(torqueMolecules[1].z() - (positions[1].x()*forceMolecules.y() - positions[1].y()*forceMolecules.x()));               
 
 }
