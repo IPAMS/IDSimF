@@ -105,6 +105,7 @@ bool CollisionModel::MDIntegrator::leapfrogIntern(std::vector<CollisionModel::Mo
                 }
 
                 Core::Matrix3 newRotMatrix = molecule->getRotationMatrix() + CollisionModel::Molecule::calcRotationMatrixUpdate(rotMatrix, omega) * dt;
+                newRotMatrix = mgs(newRotMatrix);
                 molecule->setRotationMatrix(newRotMatrix);
             }
             i++;
@@ -493,6 +494,7 @@ bool CollisionModel::MDIntegrator::rk4InternAdaptiveStep(std::vector<CollisionMo
                 molecule->setComVel(newComVelOrder4[i]);
                 if(rotationActive_){
                     molecule->setAngMom(newComAngMomOrder4[i]);
+                    newComRotOrder4[i] = mgs(newComRotOrder4[i]);
                     molecule->setRotationMatrix(newComRotOrder4[i]);
                     Core::Matrix3 worldInvI = newComRotOrder4[i]*initialInertInvMolecules[i]*newComRotOrder4[i].transpose();
                     molecule->setAngVel(worldInvI*newComAngMomOrder4[i]);
