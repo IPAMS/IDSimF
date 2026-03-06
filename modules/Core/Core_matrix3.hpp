@@ -44,6 +44,7 @@ namespace Core{
 
         // Access operator:
         double& operator()(const std::size_t row, const std::size_t column);
+        Core::Vector column(const std::size_t column);
 
         // Accessors:
         [[nodiscard]] double element(const std::size_t row, const std::size_t column) const;
@@ -63,6 +64,7 @@ namespace Core{
         friend bool operator!=(const Matrix3 &lhs, const Matrix3 &rhs);
 
         Matrix3 transpose();
+        void setColumn(const std::size_t column, Vector vec);
 
     private:
         double elements_[3][3] = {{0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}};
@@ -81,6 +83,7 @@ namespace Core{
     // special operators for molecule rotation calculation
     Matrix3 star(Vector vec);
     double norm1(Matrix3 mat);
+    Matrix3 mgs(Matrix3 mat);
     
 }
 

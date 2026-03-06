@@ -60,6 +60,10 @@ double& Core::Matrix3::operator()(const std::size_t row, const std::size_t colum
     return elements_[row][column];
 }
 
+Core::Vector Core::Matrix3::column(const std::size_t column){
+    return Core::Vector({elements_[0][column], elements_[1][column], elements_[2][column]});
+}
+
 double Core::Matrix3::element(const std::size_t row, const std::size_t column) const {
     assert(row < 3 && column < 3);
     return elements_[row][column];
@@ -161,6 +165,12 @@ Core::Matrix3 Core::Matrix3::transpose() {
     };
 }
 
+void Core::Matrix3::setColumn(const std::size_t column, Core::Vector vec){
+    this->elements_[0][column] = vec.x();
+    this->elements_[1][column] = vec.y();
+    this->elements_[2][column] = vec.z();
+}
+
 /**
  * Special operation for molecule (rigid body) rotation calculation according to:
  * An Introduction to Physically Based Modeling: Rigid Body Simulation I—Unconstrained Rigid Body Dynamics
@@ -195,4 +205,22 @@ std::ostream& operator<< (std::ostream& os, Core::Matrix3 const& mat){
        << mat.element(1,0) << ' ' << mat.element(1,1)  << ' ' << mat.element(1,2) << "\n"
        << mat.element(2,0) << ' ' << mat.element(2,1)  << ' ' << mat.element(2,2);
     return os;
+}
+
+// Modified Gram-Schmidt orthogonalization 
+// modified version is more stable in finite-precision math
+Core::Matrix3 Core::mgs(Matrix3 mat) {
+    Core::Matrix3 result = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+
+    for(int i = 0; i < 3; i++){
+        Core::Vector columnNorm = mat.column(i) / mat.column(i).magnitude();
+        result.setColumn(i, columnNorm);
+
+        for(int j=i+1; j < 3; j++){
+            Core::Vector nextCol = mat.column(j);
+            nextCol = nextCol - (columnNorm * nextCol) * columnNorm / (columnNorm * columnNorm);
+            mat.setColumn(j, nextCol);
+        }
+    }
+    return result; 
 }

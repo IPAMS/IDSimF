@@ -204,3 +204,21 @@ TEST_CASE("Test Matrix3 operators", "[Core][Matrix3]") {
 
 
 }
+
+
+TEST_CASE("Test Matrix3 modified Gram-Schmidt", "[Core][Matrix3]") {
+    Core::Matrix3 matA({1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0});
+    Core::Matrix3 matB({1.0, 0.0, 2.0, 3.0, 1.0, 0.0, 0.0, 0.0, 1.0});
+    Core::Matrix3 matC({-2.0, 0.0, 2.0, 3.0, -5.0, 0.0, 0.0, 0.0, 1.0});
+
+    Core::Matrix3 matARes({1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0});
+    Core::Matrix3 matBRes({0.447213595499958, 0.0, 0.894427, 0.8381163549, 0.349215147, 
+                                    -0.41905817746, -0.31234752, 0.9370425, 0.1561737});
+    Core::Matrix3 matCRes({-0.707106781186548, 0.0, 0.707106781186548, 0.276172385369497, 
+                            -0.920574617898323, 0.276172, 0.650944554904119, 0.390566732942472, 0.65094455});
+
+    CHECK_THAT(mgs(matA), ApproxEqual(matARes));
+    CHECK_THAT(mgs(matB), ApproxEqual(matBRes));
+    CHECK_THAT(mgs(matC), ApproxEqual(matCRes));
+
+}
