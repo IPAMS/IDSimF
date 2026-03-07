@@ -52,9 +52,11 @@ void CollisionModel::MDInteractionsTrajectorySampler::calculateTrajectory(
     collisionMolecule_ = collisionMolecule;
 
     // Rotate background gas molecule
-    bgMole.setAngles(collisionPartnerRotationAngles);
-    //bgMole.getAtoms()[0]->getRelativePosition().y(0.0);
-    //bgMole.getAtoms()[1]->getRelativePosition().y(0.0);
+    Core::Matrix3 initialRotationMatrixBgMole = mole.calcRotationMatrix(
+        bgMoleInitCond.rotationAngles.x(), bgMoleInitCond.rotationAngles.y(), bgMoleInitCond.rotationAngles.z()
+        );
+    bgMole.setRotationMatrix(initialRotationMatrixBgMole);
+    bgMole.rotateMoleculeRotationMatrix();
     std::vector<CollisionModel::Molecule*> moleculesPtr = {&mole, &bgMole};
 
     // possible check for energy conservation
@@ -73,7 +75,10 @@ void CollisionModel::MDInteractionsTrajectorySampler::calculateTrajectory(
     //Start MD integration
     //activate trajectory recording for the whole trajectory:
     if (legacyTWriterConf_.modelRecordsTrajectory) legacyTWriterConf_.recordingActive=true;
-    if (hdf5TWriterConf_.modelRecordsTrajectory) hdf5TWriterConf_.recordingActive=true;
+    if (hdf5TWriterConf_.modelRecordsTrajectory) {
+        hdf5TWriterConf_.recordingActive=true;
+        hdf5TrajectoryWriter_->initNewTrajectory(mole.getAtomCount(), bgMole.getAtomCount());
+    }
 
     //trajectorySuccess = rk4Intern(moleculesPtr, timeStep, finalTime, collisionRadius);
     //trajectorySuccess = leapfrogIntern(moleculesPtr, timeStep, finalTime, collisionRadius);
@@ -82,7 +87,7 @@ void CollisionModel::MDInteractionsTrajectorySampler::calculateTrajectory(
     //     trajectorySuccess = rk4InternAdaptiveStep(moleculesPtr, timeStep, finalTime, maximumSteps, ionIsFrozen);
     // }
     //std::cout << moleculesPtr[1]->getComPos() << std::endl;
-    trajectorySuccess = rk4InternAdaptiveStep(moleculesPtr, timeStep, finalTime, maximumSteps, 1e-8, ionIsFrozen);
+    trajectorySuccess = rk4InternAdaptiveStep(moleculesPtr, timeStep, finalTime, maximumSteps, 100, 1e-8, ionIsFrozen);
 
     double endEnergy = 0;
     for(auto* molecule : moleculesPtr){

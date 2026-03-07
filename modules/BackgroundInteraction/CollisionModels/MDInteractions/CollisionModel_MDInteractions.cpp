@@ -370,7 +370,7 @@ void CollisionModel::MDInteractionsModel::modifyVelocity(Core::Particle& particl
         double finalTime = integrationTime_; //  final integration time in seconds
         double timeStep = subTimeStep_; // step size in seconds
 
-        trajectorySuccess = rk4InternAdaptiveStep(moleculesPtr, timeStep, finalTime, collisionRadius, tolerance);
+        trajectorySuccess = rk4InternAdaptiveStep(moleculesPtr, timeStep, finalTime, 1e10, collisionRadius, tolerance);
         //trajectorySuccess = leapfrogIntern(moleculesPtr, timeStep, finalTime, collisionRadius);
         double kineticEnergyEnd = 0, rotationEnergyEnd = 0;
         double endEnergy = 0;

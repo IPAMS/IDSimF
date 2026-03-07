@@ -268,7 +268,7 @@ bool CollisionModel::MDIntegrator::rk4Intern(std::vector<CollisionModel::Molecul
  * @param tolerance defines the allowed error threshold  to control the timestep lengths
  * @param ionIsFrozen ion stays stationary
  */
-bool CollisionModel::MDIntegrator::rk4InternAdaptiveStep(std::vector<CollisionModel::Molecule*> moleculesPtr, double dt, double finalTime,
+bool CollisionModel::MDIntegrator::rk4InternAdaptiveStep(std::vector<CollisionModel::Molecule*> moleculesPtr, double dt, double finalTime, int maximumTimeSteps,
                                                                     double requiredRad, double tolerance, bool ionIsFrozen){
     double integrationTimeSum = 0;
     size_t nMolecules = moleculesPtr.size();
@@ -329,7 +329,8 @@ bool CollisionModel::MDIntegrator::rk4InternAdaptiveStep(std::vector<CollisionMo
     double pi = 3.14159;
     Core::RandomSource* rndSource = Core::globalRandomGeneratorPool->getThreadRandomSource();
 
-    while(integrationTimeSum < finalTime){
+    std::size_t nSteps = 0;
+    while(integrationTimeSum < finalTime && steps < maximumTimeSteps){
 
         i = 0;
         for(auto* molecule : moleculesPtr){
