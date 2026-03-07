@@ -67,7 +67,9 @@ int main(int argc, const char * argv[]) {
         double trajectoryMinimalSampleInterval_s = simConf->doubleParameter("trajectory_minimal_sample_interval_s");
         std::string potentialsFF = simConf->stringParameter("force_field");
         std::string potentialFunction = simConf->stringParameter("potential_function");
+        bool rotationOn = simConf->boolParameter("rotation");
         bool ionIsFrozen = simConf->boolParameter("ion_is_frozen");
+        bool useHDF5Writer = simConf->boolParameter("hdf5_writer");
 
         std::string samplerModeStr = simConf->stringParameter("sampler_mode");
 
@@ -82,6 +84,7 @@ int main(int argc, const char * argv[]) {
             throw(std::invalid_argument("Illegal sampler mode"));
         }
 
+
         //read molecular structure file
         std::unordered_map<std::string,  std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection;
         std::string mdCollisionConfFile = simConf->pathRelativeToConfFile(simConf->stringParameter("md_configuration"));
@@ -93,18 +96,24 @@ int main(int argc, const char * argv[]) {
 
         std::unique_ptr<CollisionModel::AbstractMDForceField> forceFieldPtr;
         if(potentialFunction == "LJ") {
-            forceFieldPtr = std::make_unique<CollisionModel::MDForceField_LJ12_6>(collisionGasPolarizability_m3, potentialsFF);
+            forceFieldPtr = std::make_unique<CollisionModel::MDForceField_LJ12_6>(collisionGasPolarizability_m3, potentialsFF, rotationOn);
         }
         else if(potentialFunction == "Buckingham") {
             //we have to initialize buckingham force field:
             std::vector<Core::Particle*> particlePtrs = {&ion};
-            auto buckinghamPtr = std::make_unique<CollisionModel::MDForceField_Buckingham>(collisionGasPolarizability_m3, potentialsFF);
+            auto buckinghamPtr = std::make_unique<CollisionModel::MDForceField_Buckingham>(collisionGasPolarizability_m3, potentialsFF, rotationOn);
             buckinghamPtr->populateInteractionTable(particlePtrs, molecularStructureCollection, collisionGasIdentifier);
             forceFieldPtr = std::move(buckinghamPtr);
         }
         CollisionModel::MDInteractionsTrajectorySampler mdSim(
-            std::move(forceFieldPtr), false, molecularStructureCollection, logger);
-        mdSim.setLegacyTrajectoryWriter(simResultBasename+"_MD_traj.txt", 10, trajectoryMinimalSampleInterval_s, 0);
+            std::move(forceFieldPtr), rotationOn, molecularStructureCollection, logger);
+
+        if (useHDF5Writer) {
+            mdSim.setHDF5TrajectoryWriter(simResultBasename+"_MD_traj.h5",10, 0);
+        }
+        else {
+            mdSim.setLegacyTrajectoryWriter(simResultBasename+"_MD_traj.txt", 10, trajectoryMinimalSampleInterval_s, 0);
+        }
 
 
         Core::Vector anglesIon_deg = simConf->vector3dParameter("ion_angles_deg");
@@ -119,13 +128,17 @@ int main(int argc, const char * argv[]) {
             double gridSpacing_ang = simConf->doubleParameter("grid_spacing_angstrom");
             int gridSamples = simConf->intParameter("grid_samples");
             double velocity_x = simConf->doubleParameter("velocity_x");
-            double angleGas_z_deg = simConf->doubleParameter("gas_particle_angle_z_deg");
-            double angleGas_z_rad = Core::degToRad(angleGas_z_deg);
+            Core::Vector anglesGasParticle_deg = simConf->vector3dParameter("gas_particle_angles_deg");
+            Core::Vector anglesGasParticle_rad = {
+                Core::degToRad(anglesGasParticle_deg.x()),
+                Core::degToRad(anglesGasParticle_deg.y()),
+                Core::degToRad(anglesGasParticle_deg.z()) };
+
             double gridSpacing_m = gridSpacing_ang*1e-10;
             for(int i = -gridSamples+1; i < gridSamples; i++) {
                 Core::Vector gasParticlePosition({-50e-10, i*gridSpacing_m, 0});
                 Core::Vector gasParticleVelocity({velocity_x,0,0});
-                Core::Vector gasParticleRotationAngles({0,0,angleGas_z_rad});
+                Core::Vector gasParticleRotationAngles(anglesGasParticle_rad);
 
                 initialConditions.emplace_back(
                     InitialCondition{gasParticlePosition, gasParticleVelocity, gasParticleRotationAngles}
@@ -155,7 +168,6 @@ int main(int argc, const char * argv[]) {
                 initialConditions.emplace_back(initCon);
             }
         }
-
 
         for(size_t i = 0; i<initialConditions.size(); i++) {
             //reset ion position:
