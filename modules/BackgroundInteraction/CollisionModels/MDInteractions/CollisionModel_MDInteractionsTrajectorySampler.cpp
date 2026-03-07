@@ -35,19 +35,23 @@ CollisionModel::MDInteractionsTrajectorySampler::MDInteractionsTrajectorySampler
 
 
 void CollisionModel::MDInteractionsTrajectorySampler::calculateTrajectory(
-        Core::Particle& particle, Core::Vector particleRotationAngles,
+        Core::Particle& particle,
         std::string collisionMolecule,
-        Core::Vector collisionParticleStartPosition, Core::Vector collisionParticleStartVelocity, Core::Vector collisionPartnerRotationAngles,
+        ParticleInitialConditions moleInitCond, ParticleInitialConditions bgMoleInitCond,
         double integrationTime, double subTimeStep, int maximumSteps, bool ionIsFrozen, MDIntegratorType integratorType) {
 
     int iterations = 0;
 
     // Construct the molecule of interest (in most cases the simulated molecular ion) and its atoms
-    Molecule mole(Core::Vector(0.0, 0.0, 0.0), Core::Vector(0.0, 0.0, 0.0), particle.getMolecularStructure());
-    mole.setAngles(particleRotationAngles);
+    Molecule mole(moleInitCond.position, moleInitCond.velocity, particle.getMolecularStructure());
+    Core::Matrix3 initialRotationMatrix = mole.calcRotationMatrix(
+        moleInitCond.rotationAngles.x(), moleInitCond.rotationAngles.y(), moleInitCond.rotationAngles.z()
+        );
+    mole.setRotationMatrix(initialRotationMatrix);
+    mole.rotateMoleculeRotationMatrix();
 
     // Construct the background gas particle
-    Molecule bgMole(collisionParticleStartPosition, collisionParticleStartVelocity,
+    Molecule bgMole(bgMoleInitCond.position, bgMoleInitCond.velocity,
                                         molecularStructureCollection_.at(collisionMolecule));
     collisionMolecule_ = collisionMolecule;
 

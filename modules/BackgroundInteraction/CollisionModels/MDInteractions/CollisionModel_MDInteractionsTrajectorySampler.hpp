@@ -42,6 +42,13 @@ namespace CollisionModel{
 
     enum MDIntegratorType{RK4_ADAPTIVE, RK4, LEAPFROG};
 
+    struct ParticleInitialConditions {
+        Core::Vector position;
+        Core::Vector velocity;
+        Core::Vector rotationAngles;
+        Core::Vector angularVelocity;
+    };
+
     class MDInteractionsTrajectorySampler: public MDIntegrator {
 
     public:
@@ -58,11 +65,9 @@ namespace CollisionModel{
 
 
         void calculateTrajectory(Core::Particle& particle,
-                                 Core::Vector particleRotationAngles,
                                  std::string collisionMolecule,
-                                 Core::Vector collisionParticleStartPosition,
-                                 Core::Vector collisionParticleStartVelocity,
-                                 Core::Vector collisionParticleRotationAngles,
+                                 ParticleInitialConditions ionInitCond,
+                                 ParticleInitialConditions moleculeInitCond,
                                  double integrationTime,
                                  double subTimeStep,
                                  int maximumSteps,
