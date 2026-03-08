@@ -14,10 +14,12 @@
   "sampler_mode": "y_grid",
   "grid_spacing_angstrom":2.5,
   "grid_samples": 2,
-  "velocity_x": 100,
-  "gas_particle_angles_deg": [0,0,0],
   "trajectory_minimal_sample_interval_s": 1e-13,
-  "ion_angles_deg": [0,0,0]
+  "velocity_x": 100,
+  "ion_angles_deg": [0,0,90],
+  "ion_angular_velocity": [0,100,0],
+  "gas_particle_angles_deg": [0,0,0],
+  "gas_particle_angular_velocity": [100,0,0]
 }
 
 

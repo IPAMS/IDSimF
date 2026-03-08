@@ -73,7 +73,10 @@ namespace CollisionModel{
                                  int maximumSteps,
                                  bool ionIsFrozen,
                                  MDIntegratorType integratorType = RK4_ADAPTIVE);
+
+
     private:
+        void static initializeRotation_(CollisionModel::Molecule& mole, Core::Vector rotationAngles, Core::Vector angularVelocity);
         std::unordered_map<std::string,  std::shared_ptr<MolecularStructure>> molecularStructureCollection_; ///< collection of all available molecular structures
         AppUtils::logger_ptr logger_ = nullptr;
     };

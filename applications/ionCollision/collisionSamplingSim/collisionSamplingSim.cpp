@@ -25,10 +25,8 @@
 
  ****************************/
 #include "AppUtils_simulationConfiguration.hpp"
-#include "AppUtils_inputFileUtilities.hpp"
 #include "AppUtils_ionDefinitionReading.hpp"
 #include "AppUtils_logging.hpp"
-#include "AppUtils_stopwatch.hpp"
 #include "AppUtils_signalHandler.hpp"
 #include "AppUtils_commandlineParser.hpp"
 #include "FileIO_MolecularStructureReader.hpp"
@@ -41,12 +39,6 @@
 enum SamplerMode {
     yGrid, ///< single grid line on y axis
     initFile ///< file with initial conditions
-};
-
-struct InitialCondition {
-    Core::Vector startPosition;
-    Core::Vector startVelocity;
-    Core::Vector startRotation;
 };
 
 int main(int argc, const char * argv[]) {
@@ -115,33 +107,45 @@ int main(int argc, const char * argv[]) {
             mdSim.setLegacyTrajectoryWriter(simResultBasename+"_MD_traj.txt", 10, trajectoryMinimalSampleInterval_s, 0);
         }
 
-
         Core::Vector anglesIon_deg = simConf->vector3dParameter("ion_angles_deg");
         Core::Vector anglesIon_rad = {
             Core::degToRad(anglesIon_deg.x()),
             Core::degToRad(anglesIon_deg.y()),
             Core::degToRad(anglesIon_deg.z()) };
 
-        std::vector<InitialCondition> initialConditions;
+        Core::Vector angularVeloIon = {0.0,0.0,0.0};
+        if (rotationOn == true) {
+            angularVeloIon = simConf->vector3dParameter("ion_angular_velocity");
+        }
+        CollisionModel::ParticleInitialConditions initConIon {
+            {0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}, anglesIon_rad, angularVeloIon
+        };
+
+        std::vector<CollisionModel::ParticleInitialConditions> initialConditions;
 
         if (samplerMode == yGrid) {
             double gridSpacing_ang = simConf->doubleParameter("grid_spacing_angstrom");
             int gridSamples = simConf->intParameter("grid_samples");
             double velocity_x = simConf->doubleParameter("velocity_x");
-            Core::Vector anglesGasParticle_deg = simConf->vector3dParameter("gas_particle_angles_deg");
-            Core::Vector anglesGasParticle_rad = {
-                Core::degToRad(anglesGasParticle_deg.x()),
-                Core::degToRad(anglesGasParticle_deg.y()),
-                Core::degToRad(anglesGasParticle_deg.z()) };
+            Core::Vector rotationGasParticle_deg = simConf->vector3dParameter("gas_particle_angles_deg");
+            Core::Vector rotationGasParticle_rad = {
+                Core::degToRad(rotationGasParticle_deg.x()),
+                Core::degToRad(rotationGasParticle_deg.y()),
+                Core::degToRad(rotationGasParticle_deg.z()) };
+
+            Core::Vector angularVeloGasParticle = {0.0,0.0,0.0};
+            if (rotationOn == true) {
+                angularVeloGasParticle = simConf->vector3dParameter("gas_particle_angular_velocity");
+            }
 
             double gridSpacing_m = gridSpacing_ang*1e-10;
             for(int i = -gridSamples+1; i < gridSamples; i++) {
-                Core::Vector gasParticlePosition({-50e-10, i*gridSpacing_m, 0});
-                Core::Vector gasParticleVelocity({velocity_x,0,0});
-                Core::Vector gasParticleRotationAngles(anglesGasParticle_rad);
+                Core::Vector positionGasParticle({-50e-10, i*gridSpacing_m, 0});
+                Core::Vector velocityGasParticle({velocity_x,0,0});
 
                 initialConditions.emplace_back(
-                    InitialCondition{gasParticlePosition, gasParticleVelocity, gasParticleRotationAngles}
+                    CollisionModel::ParticleInitialConditions{
+                        positionGasParticle, velocityGasParticle, rotationGasParticle_rad, angularVeloGasParticle}
                     );
             }
         }
@@ -161,10 +165,11 @@ int main(int argc, const char * argv[]) {
             std::vector<double> startVelocityZ = initFileReader.extractDouble(stringVector, 5);
 
             for (size_t i=0; i<stringVector.size(); i++) {
-                InitialCondition initCon;
-                initCon.startPosition = {startPosX[i], startPosY[i], startPosZ[i]};
-                initCon.startVelocity = {startVelocityX[i], startVelocityY[i], startVelocityZ[i]};
-                initCon.startRotation = {0.0, 0.0, 0.0};
+                CollisionModel::ParticleInitialConditions initCon;
+                initCon.position = {startPosX[i], startPosY[i], startPosZ[i]};
+                initCon.velocity = {startVelocityX[i], startVelocityY[i], startVelocityZ[i]};
+                initCon.rotationAngles = {0.0, 0.0, 0.0};
+                initCon.angularVelocity = {0.0, 0.0, 0.0};
                 initialConditions.emplace_back(initCon);
             }
         }
@@ -174,11 +179,12 @@ int main(int argc, const char * argv[]) {
             ion.setLocation({0, 0, 0});
             ion.setVelocity({0, 0, 0});
 
-            InitialCondition initCon = initialConditions.at(i);
+            CollisionModel::ParticleInitialConditions initConGasParticle = initialConditions.at(i);
+
 
             mdSim.calculateTrajectory(
-                ion, anglesIon_rad,
-                collisionGasIdentifier, initCon.startPosition, initCon.startVelocity, initCon.startRotation,
+                ion, collisionGasIdentifier,
+                initConIon, initConGasParticle,
                 subIntegratorIntegrationTime_s, subIntegratorStepSize_s, maximumSteps, ionIsFrozen);
 
             logger->info("i:{} ",i);

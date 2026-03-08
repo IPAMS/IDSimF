@@ -44,23 +44,14 @@ void CollisionModel::MDInteractionsTrajectorySampler::calculateTrajectory(
 
     // Construct the molecule of interest (in most cases the simulated molecular ion) and its atoms
     Molecule mole(moleInitCond.position, moleInitCond.velocity, particle.getMolecularStructure());
-    Core::Matrix3 initialRotationMatrix = mole.calcRotationMatrix(
-        moleInitCond.rotationAngles.x(), moleInitCond.rotationAngles.y(), moleInitCond.rotationAngles.z()
-        );
-    mole.setRotationMatrix(initialRotationMatrix);
-    mole.rotateMoleculeRotationMatrix();
+    initializeRotation_(mole, moleInitCond.rotationAngles, moleInitCond.angularVelocity);
 
     // Construct the background gas particle
     Molecule bgMole(bgMoleInitCond.position, bgMoleInitCond.velocity,
                                         molecularStructureCollection_.at(collisionMolecule));
     collisionMolecule_ = collisionMolecule;
+    initializeRotation_(bgMole, bgMoleInitCond.rotationAngles, bgMoleInitCond.angularVelocity);
 
-    // Rotate background gas molecule
-    Core::Matrix3 initialRotationMatrixBgMole = mole.calcRotationMatrix(
-        bgMoleInitCond.rotationAngles.x(), bgMoleInitCond.rotationAngles.y(), bgMoleInitCond.rotationAngles.z()
-        );
-    bgMole.setRotationMatrix(initialRotationMatrixBgMole);
-    bgMole.rotateMoleculeRotationMatrix();
     std::vector<CollisionModel::Molecule*> moleculesPtr = {&mole, &bgMole};
 
     // possible check for energy conservation
@@ -101,3 +92,17 @@ void CollisionModel::MDInteractionsTrajectorySampler::calculateTrajectory(
     ++iterations;
 }
 
+void CollisionModel::MDInteractionsTrajectorySampler::initializeRotation_(
+        CollisionModel::Molecule& mole, Core::Vector rotationAngles, Core::Vector angularVelocity) {
+
+    Core::Matrix3 initialRotationMatrix = mole.calcRotationMatrix(
+    rotationAngles.x(), rotationAngles.y(), rotationAngles.z()
+    );
+
+    mole.setRotationMatrix(initialRotationMatrix);
+    mole.rotateMoleculeRotationMatrix();
+
+    Core::Matrix3 inertiaMatrix = mole.getInertiaMatrix();
+    mole.setAngVel(angularVelocity);
+    mole.setAngMom(inertiaMatrix*angularVelocity);
+}
