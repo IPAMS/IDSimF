@@ -455,3 +455,8 @@ Core::Vector CollisionModel::Molecule::genWorldFramePosition(const std::shared_p
     Core::Vector worldPos = this->getComPos() + this->getRotationMatrix() * atm->getRelativePosition_();
     return worldPos;
 }
+
+Core::Vector CollisionModel::Molecule::genWorldFramePositionRelativeCOM(const std::shared_ptr<CollisionModel::Atom>& atm){
+    Core::Vector relPos = this->getRotationMatrix() * atm->getRelativePosition_();
+    return relPos;
+}

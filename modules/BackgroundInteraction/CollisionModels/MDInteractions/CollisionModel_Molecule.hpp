@@ -94,6 +94,7 @@ namespace CollisionModel{
         void genInertiaBodyMatrix();
         void genInertiaWorldInvMatrix();
         Core::Vector genWorldFramePosition(const std::shared_ptr<CollisionModel::Atom>& atm);
+        Core::Vector genWorldFramePositionRelativeCOM(const std::shared_ptr<CollisionModel::Atom>& atm);
 
         static Core::Matrix3 calcRotationMatrixUpdate(Core::Matrix3 R, Core::Vector omega);
 
