@@ -302,18 +302,18 @@ TEST_CASE("Test MD Interactions with rotation", "[CollisionModels][MDInteraction
     mdSim.setHDF5TrajectoryWriter(h5Filename, 45e-10, 0);
     mdSim.modifyVelocity(ion, dt);
 
-    CHECK(Approx(ion.getVelocity().x()).margin(0.2) ==  562.6533455264);
-    CHECK(Approx(ion.getVelocity().y()).margin(0.2) ==  -17.8037704162);
-    CHECK(Approx(ion.getVelocity().z()).margin(0.2) ==  -29.1612891405);
+    CHECK(Approx(ion.getVelocity().x()).margin(0.2) ==  655.7082706025);
+    CHECK(Approx(ion.getVelocity().y()).margin(0.2) ==  58.930204731);
+    CHECK(Approx(ion.getVelocity().z()).margin(0.2) ==  -38.9123092633);
 
     unsigned int timestep = 0;
     double time = 0.0;
-    for(int i = 0; i < 2; i++) {
+    for(int i = 0; i < 4; i++) {
         mdSim.updateModelTimestepParameters(timestep, time);
         mdSim.modifyVelocity(ion, 2e-11);
     }
 
-    CHECK(Approx(ion.getVelocity().x()).margin(0.8) ==  -435.0030183332);
-    CHECK(Approx(ion.getVelocity().y()).margin(0.8) ==  136.6501611714);
-    CHECK(Approx(ion.getVelocity().z()).margin(0.2) ==  -146.4818087103);
+    CHECK(Approx(ion.getVelocity().x()).margin(0.8) ==  -333.389119178);
+    CHECK(Approx(ion.getVelocity().y()).margin(0.8) ==  -116.1181649756);
+    CHECK(Approx(ion.getVelocity().z()).margin(0.2) ==  -271.8242093107);
 }
