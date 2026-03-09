@@ -70,6 +70,8 @@ void CollisionModel::MDForceField_Buckingham::calculateForceField(std::vector<Co
             // This always contributes to the experienced force
             Core::Vector absPosAtomI = ion->genWorldFramePosition(atomI);
             Core::Vector absPosAtomJ = bgGas->genWorldFramePosition(atomJ);
+            Core::Vector relPosAtomI = ion->genWorldFramePositionRelativeCOM(atomI);
+            Core::Vector relPosAtomJ = bgGas->genWorldFramePositionRelativeCOM(atomJ);
 
             Core::Vector distance = absPosAtomI - absPosAtomJ;
             double distanceSquared = distance.magnitudeSquared();
@@ -103,8 +105,8 @@ void CollisionModel::MDForceField_Buckingham::calculateForceField(std::vector<Co
                 forceMolecules[0] += atomForce;
                 forceMolecules[1] += atomForce * (-1);
                  if(rotActive_){
-                     // FIXME: Check if the usage of the absolute positions is correct here:
-                    std::vector<Core::Vector> positions = {absPosAtomI, absPosAtomJ};
+
+                    std::vector<Core::Vector> positions = {relPosAtomI, relPosAtomJ};
                     calculateTorque(positions, atomForce, torqueMolecules);
                 }
                 
@@ -187,8 +189,8 @@ void CollisionModel::MDForceField_Buckingham::calculateForceField(std::vector<Co
                 forceMolecules[1] += ionInducedForce * (-1);
 
                 if(rotActive_){
-                    //FIXME: Check if this is correct with the absolute positions
-                    std::vector<Core::Vector> positions = {absPosAtomI, absPosAtomJ};
+
+                    std::vector<Core::Vector> positions = {relPosAtomI, relPosAtomJ};
                     calculateTorque(positions, ionInducedForce, torqueMolecules);
                 }
             }
@@ -264,8 +266,8 @@ void CollisionModel::MDForceField_Buckingham::calculateForceField(std::vector<Co
                 forceMolecules[0] += quadrupoleForce;
                 forceMolecules[1] += quadrupoleForce * (-1);
                 if(rotActive_){
-                    // Check if this is correct with the absolute positions:
-                    std::vector<Core::Vector> positions = {absPosAtomI, absPosAtomJ};
+                    
+                    std::vector<Core::Vector> positions = {relPosAtomI, relPosAtomJ};
                     calculateTorque(positions, quadrupoleForce, torqueMolecules);
                 }
             }
