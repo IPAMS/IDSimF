@@ -61,7 +61,7 @@ namespace CollisionModel{
         void setPartCharge(double partChargeElemCharges);
 
         //Getter
-        Core::Vector& getRelativePosition();
+        Core::Vector& getRelativePosition_();
         double getMass() const;
         AtomType getType() const;
         std::size_t getSpeciesIndex() const;

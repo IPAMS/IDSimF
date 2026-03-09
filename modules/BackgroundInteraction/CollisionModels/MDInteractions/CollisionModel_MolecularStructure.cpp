@@ -146,11 +146,10 @@ void CollisionModel::MolecularStructure::calcDipole(){
     
     this->dipole = Core::Vector(0.0, 0.0, 0.0);
     for(auto& atom : atoms){
-        Core::Vector relChargePos = atom->getRelativePosition() * atom->getPartCharge();
+        Core::Vector relChargePos = atom->getRelativePosition_() * atom->getPartCharge();
         this->dipole += relChargePos;
     }
     this->dipoleMag = this->dipole.magnitude();
-    
 }
 
 /**

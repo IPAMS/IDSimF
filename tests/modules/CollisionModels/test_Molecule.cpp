@@ -240,9 +240,9 @@ TEST_CASE("Basic test Molecule creation", "[CollisionModels][Molecule]") {
         CHECK(mole.getAtoms().empty() == false);
         CHECK(isExactDoubleEqual(mole.getDiameter(), 0.5));
 
-        mole.getAtoms().at(0)->getRelativePosition().y(2);
-        CHECK(molstr->getAtoms().at(0)->getRelativePosition().y() == Approx(370/2).margin(1E-13));
-        CHECK(mole.getAtoms().at(0)->getRelativePosition().y() == Approx(2).margin(1E-13));
+        mole.getAtoms().at(0)->getRelativePosition_().y(2);
+        CHECK(molstr->getAtoms().at(0)->getRelativePosition_().y() == Approx(370/2).margin(1E-13));
+        CHECK(mole.getAtoms().at(0)->getRelativePosition_().y() == Approx(2).margin(1E-13));
     }
 }
 
@@ -264,8 +264,8 @@ TEST_CASE("Basic Molecule setter tests", "[CollisionModels][Molecule]") {
     mole.setComVel(Core::Vector(0.1, 0.1, 0.1));
     CHECK(mole.getComVel() == Core::Vector(0.1, 0.1, 0.1));
 
-    mole.setAngles(Core::Vector(0.1, 0.1, 0.1));
-    CHECK(mole.getAngles() == Core::Vector(0.1, 0.1, 0.1));
+    /*mole.setAngles(Core::Vector(0.1, 0.1, 0.1));
+    CHECK(mole.getAngles() == Core::Vector(0.1, 0.1, 0.1));*/
 
     mole.setDiameter(0.2);
     CHECK(isExactDoubleEqual(mole.getDiameter(), 0.2));
@@ -397,27 +397,28 @@ TEST_CASE("Rotation of molecule by matrix operation"){
         alpha = 0, beta = 0, gamma = M_PI/2;
         Core::Matrix3 mat1 = mole.calcRotationMatrix(alpha, beta, gamma);
         mole.setRotationMatrix(mat1);
-        mole.rotateMoleculeRotationMatrix();
-        CHECK(mole.getAtoms().at(0)->getRelativePosition().x() == Approx(185.0).margin(1E-13));
-        CHECK(mole.getAtoms().at(0)->getRelativePosition().y() == Approx(0.0).margin(1E-13));
-        CHECK(mole.getAtoms().at(0)->getRelativePosition().z() == Approx(0.0).margin(1E-13));
-        CHECK(mole.getAtoms().at(1)->getRelativePosition().x() == Approx(-185.0).margin(1E-13));
-        CHECK(mole.getAtoms().at(1)->getRelativePosition().y() == Approx(0.0).margin(1E-13));
-        CHECK(mole.getAtoms().at(1)->getRelativePosition().z() == Approx(0.0).margin(1E-13));
+        Core::Vector absPos0 = mole.genWorldFramePosition(mole.getAtoms().at(0));
+        Core::Vector absPos1 = mole.genWorldFramePosition(mole.getAtoms().at(1));
+        CHECK(absPos0.x() == Approx(185.0).margin(1E-13));
+        CHECK(absPos0.y() == Approx(0.0).margin(1E-13));
+        CHECK(absPos0.z() == Approx(0.0).margin(1E-13));
+        CHECK(absPos1.x() == Approx(-185.0).margin(1E-13));
+        CHECK(absPos1.y() == Approx(0.0).margin(1E-13));
+        CHECK(absPos1.z() == Approx(0.0).margin(1E-13));
     }
 
     SECTION("Rotation about y"){
         alpha = 0, beta = M_PI/2, gamma = 0;
         Core::Matrix3 mat2 = mole.calcRotationMatrix(alpha, beta, gamma);
         mole.setRotationMatrix(mat2);
-        mole.rotateMoleculeRotationMatrix();
-        CHECK(mole.getAtoms().at(0)->getRelativePosition().x() == Approx(0.0).margin(1E-13));
-        CHECK(mole.getAtoms().at(0)->getRelativePosition().y() == Approx(185.0).margin(1E-13));
-        CHECK(mole.getAtoms().at(0)->getRelativePosition().z() == Approx(0.0).margin(1E-13));
-        CHECK(mole.getAtoms().at(1)->getRelativePosition().x() == Approx(0.0).margin(1E-13));
-        CHECK(mole.getAtoms().at(1)->getRelativePosition().y() == Approx(-185.0).margin(1E-13));
-        CHECK(mole.getAtoms().at(1)->getRelativePosition().z() == Approx(0.0).margin(1E-13));
+        //mole.rotateMoleculeRotationMatrix();
+        Core::Vector absPos0 = mole.genWorldFramePosition(mole.getAtoms().at(0));
+        Core::Vector absPos1 = mole.genWorldFramePosition(mole.getAtoms().at(1));
+        CHECK(absPos0.x() == Approx(0.0).margin(1E-13));
+        CHECK(absPos0.y() == Approx(185.0).margin(1E-13));
+        CHECK(absPos0.z() == Approx(0.0).margin(1E-13));
+        CHECK(absPos1.x() == Approx(0.0).margin(1E-13));
+        CHECK(absPos1.y() == Approx(-185.0).margin(1E-13));
+        CHECK(absPos1.z() == Approx(0.0).margin(1E-13));
     }
-    
-
 }

@@ -133,7 +133,7 @@ void CollisionModel::Atom::setPartCharge(double partChargeElemCharges){
 /**
  * Get realtive position w.r.t its parent molecule
  */
-Core::Vector& CollisionModel::Atom::getRelativePosition(){
+Core::Vector& CollisionModel::Atom::getRelativePosition_(){
     return relativePosition;
 }  
 

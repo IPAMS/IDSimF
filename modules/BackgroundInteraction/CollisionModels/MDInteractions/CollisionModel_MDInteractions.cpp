@@ -349,7 +349,7 @@ void CollisionModel::MDInteractionsModel::modifyVelocity(Core::Particle& particl
                                                                                rndSource->uniformRealRndValue()*2*M_PI-M_PI, 
                                                                                rndSource->uniformRealRndValue()*2*M_PI-M_PI);
             molecule->setRotationMatrix(initialRotationMatrix);
-            molecule->rotateMoleculeRotationMatrix();
+            //molecule->rotateMoleculeRotationMatrix();
         }
 
         // possible check for energy conservation

@@ -100,7 +100,7 @@ void CollisionModel::MDInteractionsTrajectorySampler::initializeRotation_(
     );
 
     mole.setRotationMatrix(initialRotationMatrix);
-    mole.rotateMoleculeRotationMatrix();
+    //mole.rotateMoleculeRotationMatrix();
 
     Core::Matrix3 inertiaMatrix = mole.getInertiaMatrix();
     mole.setAngVel(angularVelocity);

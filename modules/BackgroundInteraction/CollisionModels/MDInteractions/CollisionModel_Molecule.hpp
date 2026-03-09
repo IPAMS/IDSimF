@@ -56,7 +56,7 @@ namespace CollisionModel{
         // Setter
         void setComPos(Core::Vector comPos);
         void setComVel(Core::Vector comVel);
-        void setAngles(Core::Vector agls);
+        //void setAngles(Core::Vector agls);
         void setDiameter(double diam);
         void setMolecularStructureName(std::string name);
         void setAngMom(Core::Vector comAngMom);
@@ -88,9 +88,9 @@ namespace CollisionModel{
         // Member functions
         void addAtom(std::shared_ptr<CollisionModel::Atom> atm);
         void removeAtom(std::shared_ptr<CollisionModel::Atom> atm);
-        void rotateMolecule();
+        //void rotateMolecule();
         Core::Matrix3 calcRotationMatrix(double alpha, double beta, double gamma);
-        void rotateMoleculeRotationMatrix();
+        //void rotateMoleculeRotationMatrix();
         void genInertiaBodyMatrix();
         void genInertiaWorldInvMatrix();
         Core::Vector genWorldFramePosition(const std::shared_ptr<CollisionModel::Atom>& atm);

@@ -35,7 +35,7 @@ TEST_CASE("Basic Atom construction tests", "[CollisionModels][Atom]") {
     SECTION("Default constructor"){
         CollisionModel::Atom atm = CollisionModel::Atom();
 
-        CHECK(atm.getRelativePosition() == Core::Vector(0.0, 0.0, 0.0));
+        CHECK(atm.getRelativePosition_() == Core::Vector(0.0, 0.0, 0.0));
         CHECK(isExactDoubleEqual(atm.getMass(), 0.0*Core::AMU_TO_KG));
         CHECK(isExactDoubleEqual(atm.getCharge(), 0.0*Core::ELEMENTARY_CHARGE));
         CHECK(isExactDoubleEqual(atm.getPartCharge(), 0.0*Core::ELEMENTARY_CHARGE));
@@ -48,7 +48,7 @@ TEST_CASE("Basic Atom construction tests", "[CollisionModels][Atom]") {
     SECTION("Constructor with position, mass and charge"){
         CollisionModel::Atom atm = CollisionModel::Atom(Core::Vector(0.5, 0.1, -0.2), 4, -1.0);
 
-        CHECK(atm.getRelativePosition() == Core::Vector(0.5, 0.1, -0.2));
+        CHECK(atm.getRelativePosition_() == Core::Vector(0.5, 0.1, -0.2));
         CHECK(isExactDoubleEqual(atm.getCharge(), -1.0*Core::ELEMENTARY_CHARGE));
         CHECK(isExactDoubleEqual(atm.getMass(), 4*Core::AMU_TO_KG));
         CHECK(isExactDoubleEqual(atm.getPartCharge(), 0.0*Core::ELEMENTARY_CHARGE));
@@ -60,7 +60,7 @@ TEST_CASE("Basic Atom construction tests", "[CollisionModels][Atom]") {
     SECTION("Constructor with position, mass and (partial) charge"){
         CollisionModel::Atom atm = CollisionModel::Atom(Core::Vector(0.5, 0.1, -0.2), 4, -1.0, 2.0);
 
-        CHECK(atm.getRelativePosition() == Core::Vector(0.5, 0.1, -0.2));
+        CHECK(atm.getRelativePosition_() == Core::Vector(0.5, 0.1, -0.2));
         CHECK(isExactDoubleEqual(atm.getCharge(), -1.0*Core::ELEMENTARY_CHARGE));
         CHECK(isExactDoubleEqual(atm.getMass(), 4*Core::AMU_TO_KG));
         CHECK(isExactDoubleEqual(atm.getPartCharge(), 2.0*Core::ELEMENTARY_CHARGE));
@@ -73,7 +73,7 @@ TEST_CASE("Basic Atom construction tests", "[CollisionModels][Atom]") {
         CollisionModel::Atom atm = CollisionModel::Atom(Core::Vector(0.5, 0.1, -0.2), 4, -1.0, 2.0,
                                     CollisionModel::Atom::AtomType::Ar,100, 1.6, 0.02);
 
-        CHECK(atm.getRelativePosition() == Core::Vector(0.5, 0.1, -0.2));
+        CHECK(atm.getRelativePosition_() == Core::Vector(0.5, 0.1, -0.2));
         CHECK(isExactDoubleEqual(atm.getCharge(), -1.0*Core::ELEMENTARY_CHARGE));
         CHECK(isExactDoubleEqual(atm.getMass(), 4*Core::AMU_TO_KG));
         CHECK(isExactDoubleEqual(atm.getPartCharge(), 2.0*Core::ELEMENTARY_CHARGE));
@@ -89,7 +89,7 @@ TEST_CASE("Basic Atom setter tests", "[CollisionModels][Atom]") {
                                     CollisionModel::Atom::AtomType::Ar,1, 1.6, 0.02);
     
     atm.setRelativePosition(Core::Vector(0.1, 0.1, 0.1));
-    CHECK(atm.getRelativePosition() == Core::Vector(0.1, 0.1, 0.1));
+    CHECK(atm.getRelativePosition_() == Core::Vector(0.1, 0.1, 0.1));
 
     atm.setCharge(10);
     CHECK(isExactDoubleEqual(atm.getCharge(), 10*Core::ELEMENTARY_CHARGE));
@@ -135,48 +135,48 @@ TEST_CASE("Rotation of atoms", "[CollisionModels][Atom]") {
         atm1.rotate(Core::Vector(0, 0, M_PI/2));
         atm2.rotate(Core::Vector(0, 0, M_PI/2));
 
-        CHECK(atm1.getRelativePosition().x() == Approx(185.0).margin(1E-13));
-        CHECK(atm1.getRelativePosition().y() == Approx(0.0).margin(1E-13));
-        CHECK(atm1.getRelativePosition().z() == Approx(0.0).margin(1E-13));
-        CHECK(atm2.getRelativePosition().x() == Approx(-185.0).margin(1E-13));
-        CHECK(atm2.getRelativePosition().y() == Approx(0.0).margin(1E-13));
-        CHECK(atm2.getRelativePosition().z() == Approx(0.0).margin(1E-13));
+        CHECK(atm1.getRelativePosition_().x() == Approx(185.0).margin(1E-13));
+        CHECK(atm1.getRelativePosition_().y() == Approx(0.0).margin(1E-13));
+        CHECK(atm1.getRelativePosition_().z() == Approx(0.0).margin(1E-13));
+        CHECK(atm2.getRelativePosition_().x() == Approx(-185.0).margin(1E-13));
+        CHECK(atm2.getRelativePosition_().y() == Approx(0.0).margin(1E-13));
+        CHECK(atm2.getRelativePosition_().z() == Approx(0.0).margin(1E-13));
     }
 
     SECTION("Rotation about y"){
         atm1.rotate(Core::Vector(0, M_PI/2, 0));
         atm2.rotate(Core::Vector(0, M_PI/2, 0));
 
-        CHECK(atm1.getRelativePosition().x() == Approx(0.0).margin(1E-13));
-        CHECK(atm1.getRelativePosition().y() == Approx(185.0).margin(1E-13));
-        CHECK(atm1.getRelativePosition().z() == Approx(0.0).margin(1E-13));
-        CHECK(atm2.getRelativePosition().x() == Approx(0.0).margin(1E-13));
-        CHECK(atm2.getRelativePosition().y() == Approx(-185.0).margin(1E-13));
-        CHECK(atm2.getRelativePosition().z() == Approx(0.0).margin(1E-13));
+        CHECK(atm1.getRelativePosition_().x() == Approx(0.0).margin(1E-13));
+        CHECK(atm1.getRelativePosition_().y() == Approx(185.0).margin(1E-13));
+        CHECK(atm1.getRelativePosition_().z() == Approx(0.0).margin(1E-13));
+        CHECK(atm2.getRelativePosition_().x() == Approx(0.0).margin(1E-13));
+        CHECK(atm2.getRelativePosition_().y() == Approx(-185.0).margin(1E-13));
+        CHECK(atm2.getRelativePosition_().z() == Approx(0.0).margin(1E-13));
     }
 
     SECTION("Rotation about x"){
         atm1.rotate(Core::Vector(M_PI/2, 0, 0));
         atm2.rotate(Core::Vector(M_PI/2, 0, 0));
 
-        CHECK(atm1.getRelativePosition().x() == Approx(0.0).margin(1E-13));
-        CHECK(atm1.getRelativePosition().y() == Approx(0.0).margin(1E-13));
-        CHECK(atm1.getRelativePosition().z() == Approx(-185.0).margin(1E-13));
-        CHECK(atm2.getRelativePosition().x() == Approx(0.0).margin(1E-13));
-        CHECK(atm2.getRelativePosition().y() == Approx(0.0).margin(1E-13));
-        CHECK(atm2.getRelativePosition().z() == Approx(185.0).margin(1E-13));
+        CHECK(atm1.getRelativePosition_().x() == Approx(0.0).margin(1E-13));
+        CHECK(atm1.getRelativePosition_().y() == Approx(0.0).margin(1E-13));
+        CHECK(atm1.getRelativePosition_().z() == Approx(-185.0).margin(1E-13));
+        CHECK(atm2.getRelativePosition_().x() == Approx(0.0).margin(1E-13));
+        CHECK(atm2.getRelativePosition_().y() == Approx(0.0).margin(1E-13));
+        CHECK(atm2.getRelativePosition_().z() == Approx(185.0).margin(1E-13));
     }
 
     SECTION("All three rotations"){
         atm1.rotate(Core::Vector(M_PI/2, M_PI/2, M_PI/2));
         atm2.rotate(Core::Vector(M_PI/2, M_PI/2, M_PI/2));
 
-        CHECK(atm1.getRelativePosition().x() == Approx(0.0).margin(1E-13));
-        CHECK(atm1.getRelativePosition().y() == Approx(-185.0).margin(1E-13));
-        CHECK(atm1.getRelativePosition().z() == Approx(0.0).margin(1E-13));
-        CHECK(atm2.getRelativePosition().x() == Approx(0.0).margin(1E-13));
-        CHECK(atm2.getRelativePosition().y() == Approx(185.0).margin(1E-13));
-        CHECK(atm2.getRelativePosition().z() == Approx(0.0).margin(1E-13));
+        CHECK(atm1.getRelativePosition_().x() == Approx(0.0).margin(1E-13));
+        CHECK(atm1.getRelativePosition_().y() == Approx(-185.0).margin(1E-13));
+        CHECK(atm1.getRelativePosition_().z() == Approx(0.0).margin(1E-13));
+        CHECK(atm2.getRelativePosition_().x() == Approx(0.0).margin(1E-13));
+        CHECK(atm2.getRelativePosition_().y() == Approx(185.0).margin(1E-13));
+        CHECK(atm2.getRelativePosition_().z() == Approx(0.0).margin(1E-13));
     }
 
 }

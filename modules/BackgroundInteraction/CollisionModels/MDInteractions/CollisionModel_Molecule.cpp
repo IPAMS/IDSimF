@@ -61,7 +61,7 @@ CollisionModel::Molecule::Molecule(const Core::Vector &comPos, const Core::Vecto
     this->atomCount = atoms.size();  
     this->setCoMCoordinates();
     this->genInertiaBodyMatrix();
-    this->rotateMolecule();
+    //this->rotateMolecule();
 }
 
 /**
@@ -113,10 +113,10 @@ void CollisionModel::Molecule::setComVel(Core::Vector comVel){
 /**
  * Sets new angles of the atoms w.r.t. the center-of-mass of the molecule
  */
-void CollisionModel::Molecule::setAngles(Core::Vector agls){
+/*void CollisionModel::Molecule::setAngles(Core::Vector agls){
     this->angles = agls;
     this->rotateMolecule();
-}
+}*/
 
 /**
  * Sets new diameter of the molecule
@@ -271,11 +271,10 @@ void CollisionModel::Molecule::calcDipole(){
     
     this->dipole = Core::Vector(0.0, 0.0, 0.0);
     for(auto& atom : atoms){
-        Core::Vector relChargePos = atom->getRelativePosition() * atom->getPartCharge();
+        Core::Vector relChargePos = atom->getRelativePosition_() * atom->getPartCharge();
         this->dipole += relChargePos;
     }
     this->dipoleMag = this->dipole.magnitude();
-    
 }
 
 /**
@@ -339,11 +338,11 @@ void CollisionModel::Molecule::setIsIon(){
 /**
  * Rotates the molecule by an angle set beforehand 
  */
-void CollisionModel::Molecule::rotateMolecule(){
+/*void CollisionModel::Molecule::rotateMolecule(){
     for(auto& atom : atoms){
        atom->rotate(this->angles);
     }
-}
+}*/
 
 void CollisionModel::Molecule::genInertiaBodyMatrix(){
     // since this is the body moment of inertia matrix 
@@ -352,7 +351,7 @@ void CollisionModel::Molecule::genInertiaBodyMatrix(){
     
     double Ixx = 0, Iyy = 0,  Izz = 0;
     for(auto& atom : atoms){
-        Core::Vector atomPos = atom->getRelativePosition();
+        Core::Vector atomPos = atom->getRelativePosition_();
         Ixx += atom->getMass() * (atomPos.y()*atomPos.y() + atomPos.z()*atomPos.z());
         Iyy += atom->getMass() * (atomPos.x()*atomPos.x() + atomPos.z()*atomPos.z());
         Izz += atom->getMass() * (atomPos.x()*atomPos.x() + atomPos.y()*atomPos.y());
@@ -388,15 +387,15 @@ void CollisionModel::Molecule::setCoMCoordinates(){
 
     double comX = 0, comY = 0, comZ = 0; 
     for(auto& atom : atoms){
-        comX += atom->getMass()*atom->getRelativePosition().x();
-        comY += atom->getMass()*atom->getRelativePosition().y();
-        comZ += atom->getMass()*atom->getRelativePosition().z();
+        comX += atom->getMass()*atom->getRelativePosition_().x();
+        comY += atom->getMass()*atom->getRelativePosition_().y();
+        comZ += atom->getMass()*atom->getRelativePosition_().z();
     }
     comX = 1/mass * comX;  
     comY = 1/mass * comY;  
     comZ = 1/mass * comZ;  
     for(auto& atom : atoms){
-        Core::Vector atomPos = atom->getRelativePosition();
+        Core::Vector atomPos = atom->getRelativePosition_();
         atom->setRelativePosition({atomPos.x()-comX, atomPos.y()-comY, atomPos.z()-comZ});
     }
 }
@@ -439,13 +438,13 @@ Core::Matrix3 CollisionModel::Molecule::calcRotationMatrix(double alpha, double 
 }
 
 
-void CollisionModel::Molecule::rotateMoleculeRotationMatrix(){
+/*void CollisionModel::Molecule::rotateMoleculeRotationMatrix(){
     for(auto& atom : atoms){
         Core::Vector relPos = atom->getRelativePosition(); 
         Core::Vector newPos = rotationMatrix*relPos;
         atom->setRelativePosition(newPos);
     }
-}
+}*/
 
 Core::Matrix3 CollisionModel::Molecule::calcRotationMatrixUpdate(Core::Matrix3 R, Core::Vector omega){
     return Core::star(omega)*R;
@@ -453,6 +452,6 @@ Core::Matrix3 CollisionModel::Molecule::calcRotationMatrixUpdate(Core::Matrix3 R
 
 
 Core::Vector CollisionModel::Molecule::genWorldFramePosition(const std::shared_ptr<CollisionModel::Atom>& atm){
-    Core::Vector worldPos = this->getComPos() + this->getRotationMatrix() * atm->getRelativePosition();
+    Core::Vector worldPos = this->getComPos() + this->getRotationMatrix() * atm->getRelativePosition_();
     return worldPos;
 }

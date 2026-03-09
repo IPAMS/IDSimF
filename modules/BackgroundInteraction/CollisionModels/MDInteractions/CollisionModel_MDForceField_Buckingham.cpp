@@ -68,9 +68,8 @@ void CollisionModel::MDForceField_Buckingham::calculateForceField(std::vector<Co
            
             // First contribution: Lennard-Jones potential
             // This always contributes to the experienced force
-            Core::Vector absPosAtomI = ion->getComPos() + atomI->getRelativePosition();
-            Core::Vector absPosAtomJ = bgGas->getComPos() + atomJ->getRelativePosition();
-
+            Core::Vector absPosAtomI = ion->genWorldFramePosition(atomI);
+            Core::Vector absPosAtomJ = bgGas->genWorldFramePosition(atomJ);
 
             Core::Vector distance = absPosAtomI - absPosAtomJ;
             double distanceSquared = distance.magnitudeSquared();
@@ -104,7 +103,8 @@ void CollisionModel::MDForceField_Buckingham::calculateForceField(std::vector<Co
                 forceMolecules[0] += atomForce;
                 forceMolecules[1] += atomForce * (-1);
                  if(rotActive_){
-                    std::vector<Core::Vector> positions = {atomI->getRelativePosition(), atomJ->getRelativePosition()};
+                     // FIXME: Check if the usage of the absolute positions is correct here:
+                    std::vector<Core::Vector> positions = {absPosAtomI, absPosAtomJ};
                     calculateTorque(positions, atomForce, torqueMolecules);
                 }
                 
@@ -187,7 +187,8 @@ void CollisionModel::MDForceField_Buckingham::calculateForceField(std::vector<Co
                 forceMolecules[1] += ionInducedForce * (-1);
 
                 if(rotActive_){
-                    std::vector<Core::Vector> positions = {atomI->getRelativePosition(), atomJ->getRelativePosition()};
+                    //FIXME: Check if this is correct with the absolute positions
+                    std::vector<Core::Vector> positions = {absPosAtomI, absPosAtomJ};
                     calculateTorque(positions, ionInducedForce, torqueMolecules);
                 }
             }
@@ -263,7 +264,8 @@ void CollisionModel::MDForceField_Buckingham::calculateForceField(std::vector<Co
                 forceMolecules[0] += quadrupoleForce;
                 forceMolecules[1] += quadrupoleForce * (-1);
                 if(rotActive_){
-                    std::vector<Core::Vector> positions = {atomI->getRelativePosition(), atomJ->getRelativePosition()};
+                    // Check if this is correct with the absolute positions:
+                    std::vector<Core::Vector> positions = {absPosAtomI, absPosAtomJ};
                     calculateTorque(positions, quadrupoleForce, torqueMolecules);
                 }
             }
@@ -309,8 +311,8 @@ void CollisionModel::MDForceField_Buckingham::calculateForceFieldComponents(std:
             
             // First contribution: Lennard-Jones potential
             // This always contributes to the experienced force
-            Core::Vector absPosAtomI = ion->getComPos() + atomI->getRelativePosition();
-            Core::Vector absPosAtomJ = bgGas->getComPos() + atomJ->getRelativePosition();
+            Core::Vector absPosAtomI = ion->genWorldFramePosition(atomI);
+            Core::Vector absPosAtomJ = bgGas->genWorldFramePosition(atomJ);
 
 
             Core::Vector distance = absPosAtomI - absPosAtomJ;
