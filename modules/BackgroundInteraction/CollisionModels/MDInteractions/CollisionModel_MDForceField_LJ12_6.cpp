@@ -99,8 +99,7 @@ void CollisionModel::MDForceField_LJ12_6::calculateForceField(std::vector<Collis
                 forceMolecules[0] += atomForce;
                 forceMolecules[1] += atomForce * (-1);
                 if(rotActive_){
-                    //std::vector<Core::Vector> positions = {atomI->getRelativePosition(), atomJ->getRelativePosition()};
-                    //FIXME: Check if it is correct to use the absolute positions here:
+
                     std::vector<Core::Vector> positions = {relPosAtomI, relPosAtomJ};
                     calculateTorque(positions, atomForce, torqueMolecules);
                 }
@@ -184,10 +183,8 @@ void CollisionModel::MDForceField_LJ12_6::calculateForceField(std::vector<Collis
                 forceMolecules[1] += ionInducedForce * (-1);
 
                 if(rotActive_){
-                    //std::vector<Core::Vector> positions = {atomI->getRelativePosition(), atomJ->getRelativePosition()};
-                    //Fixme: Check if absolute position is correct here
-                    std::vector<Core::Vector> positions = {relPosAtomI, relPosAtomJ};
 
+                    std::vector<Core::Vector> positions = {relPosAtomI, relPosAtomJ};
                     calculateTorque(positions, ionInducedForce, torqueMolecules);
                 }
             }
@@ -263,8 +260,7 @@ void CollisionModel::MDForceField_LJ12_6::calculateForceField(std::vector<Collis
                 forceMolecules[0] += quadrupoleForce;
                 forceMolecules[1] += quadrupoleForce * (-1);
                 if(rotActive_){
-                    //std::vector<Core::Vector> positions = {atomI->getRelativePosition(), atomJ->getRelativePosition()};
-                    //FIXME: Check if this is correct with absolute positions
+                    
                     std::vector<Core::Vector> positions = {relPosAtomI, relPosAtomJ};
                     calculateTorque(positions, quadrupoleForce, torqueMolecules);
                 }
