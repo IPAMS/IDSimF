@@ -70,15 +70,10 @@ namespace CollisionModel{
         double getCharge() const;
         double getPartCharge() const;
 
-        // Member function
-
-        void rotate(const Core::Vector &angles); 
-
         //Helper functions
 
         static double calcLJEps(const Atom &atm1, const Atom &atm2);
         static double calcLJSig(const Atom &atm1, const Atom &atm2);
-        static void rotate2D(double angle, Core::Vector& relPos); 
 
     private:
 

@@ -49,7 +49,7 @@ namespace CollisionModel{
         ~Molecule() = default;
         Molecule(const Core::Vector &comPos, const Core::Vector &comVel);
         Molecule(const Core::Vector &comPos, const Core::Vector &comVel, 
-                 const Core::Vector &agls, std::vector<std::shared_ptr<CollisionModel::Atom>> &atms,
+                 std::vector<std::shared_ptr<CollisionModel::Atom>> &atms,
                  double diam);
         Molecule(const Core::Vector &comPos, const Core::Vector &comVel, std::shared_ptr<CollisionModel::MolecularStructure> structure);
 
@@ -68,7 +68,6 @@ namespace CollisionModel{
         // Getter 
         Core::Vector& getComPos();
         Core::Vector& getComVel();
-        Core::Vector& getAngles();
         bool getIsDipole() const;
         bool getIsIon() const;
         double getMass() const;
@@ -88,9 +87,7 @@ namespace CollisionModel{
         // Member functions
         void addAtom(std::shared_ptr<CollisionModel::Atom> atm);
         void removeAtom(std::shared_ptr<CollisionModel::Atom> atm);
-        //void rotateMolecule();
         Core::Matrix3 calcRotationMatrix(double alpha, double beta, double gamma);
-        //void rotateMoleculeRotationMatrix();
         void genInertiaBodyMatrix();
         void genInertiaWorldInvMatrix();
         Core::Vector genWorldFramePosition(const std::shared_ptr<CollisionModel::Atom>& atm);
@@ -112,7 +109,6 @@ namespace CollisionModel{
         // Attributes
         Core::Vector centerOfMassPos = {0.0, 0.0, 0.0}; // Center-of-mass position of the molecule [m]
         Core::Vector centerOfMassVel = {0.0, 0.0, 0.0}; // Center-of-mass velocity of the molecule [m/s]
-        Core::Vector angles = {0.0, 0.0, 0.0}; // Angles describing the xyz-rotation of the molecule w.r.t its starting configuration [rad]
         bool isDipole = false; // Flag to denote the molecule is a neutral dipole 
         bool isIon = false; // Flag to denote the molecule is an ion 
         double mass = 0.0; // Mass of the molecule [kg]

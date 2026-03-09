@@ -187,44 +187,6 @@ double CollisionModel::Atom::getPartCharge() const{
 }
 
 /**
- * @brief Rotates atoms w.r.t its parent molecule based on given rotation angles in the
- *          x-y-z coordinate system. The implicitly given bond lengths are preserved.
- *          The angles are given as the accumalative angles in relation to the standard 
- *          configuration of the molecule (all three angles are zero), e.g.
- *          rotate([0,0,pi/2]) rotates by pi/2 about z from the zero configuration and 
- *          not by an additional pi/2 from the current configuration 
- * 
- * @param angles The current x-y-z rotation angles of the molecule
- */
-void CollisionModel::Atom::rotate(const Core::Vector &angles){
-    
-    double tmp_x = angles.x();
-    double tmp_y = angles.y();
-    double tmp_z = angles.z();
-
-    double new_rel_x = cos(tmp_y) * cos(tmp_z)*relativePosition.x() 
-                        + (sin(tmp_x) * sin(tmp_y) * cos(tmp_z) + cos(tmp_x) * sin(tmp_z)) * relativePosition.y() 
-                        + (sin(tmp_x) * sin(tmp_z) - cos(tmp_x) * sin(tmp_y) * cos(tmp_z)) * relativePosition.z();
-    double new_rel_y = - cos(tmp_y) * sin(tmp_z) * relativePosition.x()
-                        + (cos(tmp_x) * cos(tmp_z) - sin(tmp_x) * sin(tmp_y) * sin(tmp_z)) * relativePosition.y()
-                        + (cos(tmp_x) * sin(tmp_y) * sin(tmp_z) + sin(tmp_x)*cos(tmp_z)) * relativePosition.z();
-    double new_rel_z = sin(tmp_y) * relativePosition.x()
-                        - sin(tmp_x) * cos(tmp_y) * relativePosition.y()
-                        + cos(tmp_x) * cos(tmp_y) * relativePosition.z();
-
-    this->relativePosition.x(new_rel_x);
-    this->relativePosition.y(new_rel_y);
-    this->relativePosition.z(new_rel_z);
-}       
-
-void CollisionModel::Atom::rotate2D(double angle, Core::Vector& relPos){
-    double xNew = relPos.x() * cos(angle) - relPos.y() * sin(angle);
-    double yNew = relPos.x() * sin(angle) + relPos.y() * cos(angle);
-    relPos.x(xNew);
-    relPos.y(yNew);
-} 
-
-/**
  * Calculates the approximate LJ interaction parameter epsilon between two atoms 
  */
 double CollisionModel::Atom::calcLJEps(const CollisionModel::Atom &atm1, const CollisionModel::Atom &atm2){

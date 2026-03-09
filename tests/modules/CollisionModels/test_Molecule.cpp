@@ -40,7 +40,6 @@ TEST_CASE("Basic test Molecule creation", "[CollisionModels][Molecule]") {
 
         CHECK(mole.getComPos() == Core::Vector(0.0, 0.0, 0.0));
         CHECK(mole.getComVel() == Core::Vector(0.0, 0.0, 0.0));
-        CHECK(mole.getAngles() == Core::Vector(0.0, 0.0, 0.0));
         CHECK(mole.getDipole() == Core::Vector(0.0, 0.0, 0.0));
         CHECK(mole.getIsDipole() == false);
         CHECK(mole.getIsIon() == false);
@@ -56,7 +55,6 @@ TEST_CASE("Basic test Molecule creation", "[CollisionModels][Molecule]") {
 
         CHECK(mole.getComPos() == Core::Vector(0.5, 1.0, -0.3));
         CHECK(mole.getComVel() == Core::Vector(-1.5, 0.3, 0.33));
-        CHECK(mole.getAngles() == Core::Vector(0.0, 0.0, 0.0));
         CHECK(mole.getDipole() == Core::Vector(0.0, 0.0, 0.0));
         CHECK(mole.getIsDipole() == false);
         CHECK(mole.getIsIon() == false);
@@ -78,12 +76,10 @@ TEST_CASE("Basic test Molecule creation", "[CollisionModels][Molecule]") {
             std::make_shared<CollisionModel::Atom>(std::move(atm1)), std::make_shared<CollisionModel::Atom>(std::move(atm2))};
         CollisionModel::Molecule mole = CollisionModel::Molecule(Core::Vector(0.5, 1.0, -0.3), 
                                                                     Core::Vector(-1.5, 0.3, 0.33),
-                                                                    Core::Vector(0.0, 0.0, 0.0),
                                                                     atoms, 0.5);
 
         CHECK(mole.getComPos() == Core::Vector(0.5, 1.0, -0.3));
         CHECK(mole.getComVel() == Core::Vector(-1.5, 0.3, 0.33));
-        CHECK(mole.getAngles() == Core::Vector(0.0, 0.0, 0.0));
         CHECK(mole.getDipole() == Core::Vector(0.0, 0.0, 0.0));
         CHECK(mole.getIsDipole() == false);
         CHECK(mole.getIsIon() == false);
@@ -110,12 +106,10 @@ TEST_CASE("Basic test Molecule creation", "[CollisionModels][Molecule]") {
             std::make_shared<CollisionModel::Atom>(std::move(atm1)), std::make_shared<CollisionModel::Atom>(std::move(atm2))};
         CollisionModel::Molecule mole = CollisionModel::Molecule(Core::Vector(0.5, 1.0, -0.3), 
                                                                     Core::Vector(-1.5, 0.3, 0.33),
-                                                                    Core::Vector(0.0, 0.0, 0.0),
                                                                     atoms, 0.5);
 
         CHECK(mole.getComPos() == Core::Vector(0.5, 1.0, -0.3));
         CHECK(mole.getComVel() == Core::Vector(-1.5, 0.3, 0.33));
-        CHECK(mole.getAngles() == Core::Vector(0.0, 0.0, 0.0));
         CHECK(mole.getDipole().y() == Approx(-2.96E-17).margin(0.001E-15));
         CHECK(mole.getIsDipole() == true);
         CHECK(mole.getIsIon() == true);
@@ -139,12 +133,10 @@ TEST_CASE("Basic test Molecule creation", "[CollisionModels][Molecule]") {
             std::make_shared<CollisionModel::Atom>(std::move(atm1)), std::make_shared<CollisionModel::Atom>(std::move(atm2))};
         CollisionModel::Molecule mole = CollisionModel::Molecule(Core::Vector(0.5, 1.0, -0.3), 
                                                                     Core::Vector(-1.5, 0.3, 0.33),
-                                                                    Core::Vector(0.0, 0.0, 0.0),
                                                                     atoms, 0.5);
 
         CHECK(mole.getComPos() == Core::Vector(0.5, 1.0, -0.3));
         CHECK(mole.getComVel() == Core::Vector(-1.5, 0.3, 0.33));
-        CHECK(mole.getAngles() == Core::Vector(0.0, 0.0, 0.0));
         CHECK(mole.getDipole().y() == Approx(0.0).margin(1E-13));
         CHECK(mole.getIsDipole() == false);
         CHECK(mole.getIsIon() == true);
@@ -167,12 +159,10 @@ TEST_CASE("Basic test Molecule creation", "[CollisionModels][Molecule]") {
             std::make_shared<CollisionModel::Atom>(std::move(atm1)), std::make_shared<CollisionModel::Atom>(std::move(atm2))};
         CollisionModel::Molecule mole = CollisionModel::Molecule(Core::Vector(0.5, 1.0, -0.3), 
                                                                     Core::Vector(-1.5, 0.3, 0.33),
-                                                                    Core::Vector(0.0, 0.0, 0.0),
                                                                     atoms, 0.5);
 
         CHECK(mole.getComPos() == Core::Vector(0.5, 1.0, -0.3));
         CHECK(mole.getComVel() == Core::Vector(-1.5, 0.3, 0.33));
-        CHECK(mole.getAngles() == Core::Vector(0.0, 0.0, 0.0));
         CHECK(mole.getDipole().y() == Approx(0.0).margin(1E-13));
         CHECK(mole.getIsDipole() == false);
         CHECK(mole.getIsIon() == false);
@@ -201,7 +191,6 @@ TEST_CASE("Basic test Molecule creation", "[CollisionModels][Molecule]") {
 
         CHECK(mole.getComPos() == Core::Vector(0.5, 1.0, -0.3));
         CHECK(mole.getComVel() == Core::Vector(-1.5, 0.3, 0.33));
-        CHECK(mole.getAngles() == Core::Vector(0.0, 0.0, 0.0));
         CHECK(mole.getDipole().y() == Approx(0.0).margin(1E-13));
         CHECK(mole.getIsDipole() == false);
         CHECK(mole.getIsIon() == false);
@@ -230,7 +219,6 @@ TEST_CASE("Basic test Molecule creation", "[CollisionModels][Molecule]") {
 
         CHECK(mole.getComPos() == Core::Vector(0.5, 1.0, -0.3));
         CHECK(mole.getComVel() == Core::Vector(-1.5, 0.3, 0.33));
-        CHECK(mole.getAngles() == Core::Vector(0.0, 0.0, 0.0));
         CHECK(mole.getDipole().y() == Approx(0.0).margin(1E-13));
         CHECK(mole.getIsDipole() == false);
         CHECK(mole.getIsIon() == false);
@@ -255,7 +243,6 @@ TEST_CASE("Basic Molecule setter tests", "[CollisionModels][Molecule]") {
             std::make_shared<CollisionModel::Atom>(std::move(atm1)), std::make_shared<CollisionModel::Atom>(std::move(atm2))};
     CollisionModel::Molecule mole = CollisionModel::Molecule(Core::Vector(0.5, 1.0, -0.3), 
                                                                 Core::Vector(-1.5, 0.3, 0.33),
-                                                                Core::Vector(0.0, 0.0, 0.0),
                                                                 atoms, 0.5);
     
     mole.setComPos(Core::Vector(0.1, 0.1, 0.1));
@@ -280,7 +267,6 @@ TEST_CASE("Molecule add/remove atoms tests", "[CollisionModels][Molecule]") {
     std::vector<std::shared_ptr<CollisionModel::Atom>> atoms = {};
     CollisionModel::Molecule mole = CollisionModel::Molecule(Core::Vector(0.5, 1.0, -0.3), 
                                                                 Core::Vector(-1.5, 0.3, 0.33),
-                                                                Core::Vector(0.0, 0.0, 0.0),
                                                                 atoms, 0.5);
                                                    
     mole.addAtom(std::make_shared<CollisionModel::Atom>(std::move(atm1)));
@@ -298,7 +284,6 @@ TEST_CASE("Molecule ability to change properties of atoms", "[CollisionModels][M
     std::vector<std::shared_ptr<CollisionModel::Atom>> atoms = {};
     CollisionModel::Molecule mole = CollisionModel::Molecule(Core::Vector(0.5, 1.0, -0.3), 
                                                                 Core::Vector(-1.5, 0.3, 0.33),
-                                                                Core::Vector(0.0, 0.0, 0.0),
                                                                 atoms, 0.5);
                                                     
     mole.addAtom(std::make_shared<CollisionModel::Atom>(std::move(atm1)));
@@ -322,12 +307,10 @@ TEST_CASE("Test inertia body matrix calculation"){
         std::make_shared<CollisionModel::Atom>(std::move(atm1)), std::make_shared<CollisionModel::Atom>(std::move(atm2))};
     CollisionModel::Molecule mole = CollisionModel::Molecule(Core::Vector(0.0, 0.0, 0.0), 
                                                                 Core::Vector(0.0, 0.0, 0.0),
-                                                                Core::Vector(0.0, 0.0, 0.0),
                                                                 atoms, 0.5);
     
     CHECK(mole.getComPos() == Core::Vector(0.0, 0.0, 0.0));
     CHECK(mole.getComVel() == Core::Vector(0.0, 0.0, 0.0));
-    CHECK(mole.getAngles() == Core::Vector(0.0, 0.0, 0.0));
     CHECK(mole.getDipole() == Core::Vector(0.0, 0.0, 0.0));
     CHECK(mole.getIsDipole() == false);
     CHECK(mole.getIsIon() == false);
@@ -388,7 +371,6 @@ TEST_CASE("Rotation of molecule by matrix operation"){
     std::vector<std::shared_ptr<CollisionModel::Atom>> atoms = {
         std::make_shared<CollisionModel::Atom>(std::move(atm1)), std::make_shared<CollisionModel::Atom>(std::move(atm2))};
     CollisionModel::Molecule mole = CollisionModel::Molecule(Core::Vector(0.0, 0.0, 0.0), 
-                                                                Core::Vector(0.0, 0.0, 0.0),
                                                                 Core::Vector(0.0, 0.0, 0.0),
                                                                 atoms, 0.5);
     double alpha, beta, gamma;

@@ -45,12 +45,11 @@ CollisionModel::Molecule::Molecule(const Core::Vector &comPos, const Core::Vecto
  * @param atms the vector with atoms contained in the molecule
  * @param diam molecule diameter in m
  */
-CollisionModel::Molecule::Molecule(const Core::Vector &comPos, const Core::Vector &comVel, 
-                                    const Core::Vector &agls, std::vector<std::shared_ptr<CollisionModel::Atom>> &atms,
+CollisionModel::Molecule::Molecule(const Core::Vector &comPos, const Core::Vector &comVel,
+                                     std::vector<std::shared_ptr<CollisionModel::Atom>> &atms,
                                     double diam):
     centerOfMassPos(comPos),
     centerOfMassVel(comVel),
-    angles(agls),
     atoms(atms),
     diameter(diam)
 {
@@ -156,13 +155,6 @@ Core::Vector& CollisionModel::Molecule::getComPos(){
  */
 Core::Vector& CollisionModel::Molecule::getComVel(){
     return centerOfMassVel;
-}
-
-/**
- * Gets the angles of the atoms w.r.t. the center-of-mass of the molecule
- */
-Core::Vector& CollisionModel::Molecule::getAngles(){
-    return angles;
 }
 
 /**
@@ -335,15 +327,6 @@ void CollisionModel::Molecule::setIsIon(){
     
 }
 
-/**
- * Rotates the molecule by an angle set beforehand 
- */
-/*void CollisionModel::Molecule::rotateMolecule(){
-    for(auto& atom : atoms){
-       atom->rotate(this->angles);
-    }
-}*/
-
 void CollisionModel::Molecule::genInertiaBodyMatrix(){
     // since this is the body moment of inertia matrix 
     // only diagonal matrix elements exist and the rest are omitted by 
@@ -401,9 +384,7 @@ void CollisionModel::Molecule::setCoMCoordinates(){
 }
 
 void CollisionModel::Molecule::genInertiaWorldInvMatrix(){
-
     this->inertiaWorldInv =  rotationMatrix*inertiaPrincipleInv*rotationMatrix.transpose();
-
 }
 
 
@@ -436,15 +417,6 @@ Core::Matrix3 CollisionModel::Molecule::calcRotationMatrix(double alpha, double 
     
     
 }
-
-
-/*void CollisionModel::Molecule::rotateMoleculeRotationMatrix(){
-    for(auto& atom : atoms){
-        Core::Vector relPos = atom->getRelativePosition(); 
-        Core::Vector newPos = rotationMatrix*relPos;
-        atom->setRelativePosition(newPos);
-    }
-}*/
 
 Core::Matrix3 CollisionModel::Molecule::calcRotationMatrixUpdate(Core::Matrix3 R, Core::Vector omega){
     return Core::star(omega)*R;
