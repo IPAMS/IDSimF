@@ -49,6 +49,16 @@ namespace CollisionModel{
         Core::Vector angularVelocity;
     };
 
+    struct SamplingResult {
+        double startKineticEnergy;
+        double endKineticEnergy;
+        double startRotationEnergy;
+        double endRotationEnergy;
+        double startTotalEnergy;
+        double endTotalEnergy;
+        bool trajectorySuccess;
+    };
+
     class MDInteractionsTrajectorySampler: public MDIntegrator {
 
     public:
@@ -64,7 +74,7 @@ namespace CollisionModel{
             AppUtils::logger_ptr logger);
 
 
-        void calculateTrajectory(Core::Particle& particle,
+        SamplingResult calculateTrajectory(Core::Particle& particle,
                                  std::string collisionMolecule,
                                  ParticleInitialConditions ionInitCond,
                                  ParticleInitialConditions moleculeInitCond,

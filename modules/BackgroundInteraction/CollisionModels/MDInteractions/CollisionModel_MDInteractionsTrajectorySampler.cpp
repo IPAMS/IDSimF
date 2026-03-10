@@ -34,13 +34,11 @@ CollisionModel::MDInteractionsTrajectorySampler::MDInteractionsTrajectorySampler
         {}
 
 
-void CollisionModel::MDInteractionsTrajectorySampler::calculateTrajectory(
+CollisionModel::SamplingResult CollisionModel::MDInteractionsTrajectorySampler::calculateTrajectory(
         Core::Particle& particle,
         std::string collisionMolecule,
         ParticleInitialConditions moleInitCond, ParticleInitialConditions bgMoleInitCond,
         double integrationTime, double subTimeStep, int maximumSteps, bool ionIsFrozen, MDIntegratorType integratorType) {
-
-    int iterations = 0;
 
     // Construct the molecule of interest (in most cases the simulated molecular ion) and its atoms
     Molecule mole(moleInitCond.position, moleInitCond.velocity, particle.getMolecularStructure());
@@ -56,11 +54,14 @@ void CollisionModel::MDInteractionsTrajectorySampler::calculateTrajectory(
 
     // possible check for energy conservation
     std::vector<Core::Vector> startVelocity;
-    double startEnergy = 0;
+    double startKineticEnergy = 0;
+    double startRotationEnergy = 0;
     for(auto* molecule : moleculesPtr){
         startVelocity.push_back(molecule->getComVel());
-        startEnergy += 0.5 * molecule->getMass() * molecule->getComVel().magnitudeSquared();
+        startKineticEnergy += 0.5 * molecule->getMass() * molecule->getComVel().magnitudeSquared();
+        startRotationEnergy += calcRotEnergy(molecule->getAngVel(), molecule->getInertiaMatrix());
     }
+    double startTotalEnergy = startKineticEnergy + startRotationEnergy;
 
     // Call the sub-integrator
     double finalTime = integrationTime; // final integration time in seconds
@@ -74,22 +75,26 @@ void CollisionModel::MDInteractionsTrajectorySampler::calculateTrajectory(
         hdf5TWriterConf_.recordingActive=true;
         hdf5TrajectoryWriter_->initNewTrajectory(mole.getAtomCount(), bgMole.getAtomCount());
     }
-
-    //trajectorySuccess = rk4Intern(moleculesPtr, timeStep, finalTime, collisionRadius);
-    //trajectorySuccess = leapfrogIntern(moleculesPtr, timeStep, finalTime, collisionRadius);
     bool trajectorySuccess;
-    // if (integratorType == RK4_ADAPTIVE) {
-    //     trajectorySuccess = rk4InternAdaptiveStep(moleculesPtr, timeStep, finalTime, maximumSteps, ionIsFrozen);
-    // }
-    //std::cout << moleculesPtr[1]->getComPos() << std::endl;
+    //trajectorySuccess = leapfrogIntern(moleculesPtr, timeStep, finalTime, 100, ionIsFrozen);
     trajectorySuccess = rk4InternAdaptiveStep(moleculesPtr, timeStep, finalTime, maximumSteps, 100, 1e-8, ionIsFrozen);
 
-    double endEnergy = 0;
+
+    double endKineticEnergy = 0;
+    double endRotationEnergy = 0;
     for(auto* molecule : moleculesPtr){
-        endEnergy += 0.5 * molecule->getMass() * molecule->getComVel().magnitudeSquared();
+        endKineticEnergy += 0.5 * molecule->getMass() * molecule->getComVel().magnitudeSquared();
+        endRotationEnergy += calcRotEnergy(molecule->getAngVel(), molecule->getInertiaMatrix());
     }
+    double endTotalEnergy = endKineticEnergy + endRotationEnergy;
     particle.setVelocity(mole.getComVel() + particle.getVelocity());
-    ++iterations;
+
+    return {
+        startKineticEnergy, endKineticEnergy,
+        startRotationEnergy, endRotationEnergy,
+        startTotalEnergy, endTotalEnergy,
+        trajectorySuccess
+    };
 }
 
 void CollisionModel::MDInteractionsTrajectorySampler::initializeRotation_(

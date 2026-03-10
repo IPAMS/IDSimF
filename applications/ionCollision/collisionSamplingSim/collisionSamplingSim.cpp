@@ -181,13 +181,18 @@ int main(int argc, const char * argv[]) {
 
             CollisionModel::ParticleInitialConditions initConGasParticle = initialConditions.at(i);
 
-
-            mdSim.calculateTrajectory(
+            CollisionModel::SamplingResult result = mdSim.calculateTrajectory(
                 ion, collisionGasIdentifier,
                 initConIon, initConGasParticle,
                 subIntegratorIntegrationTime_s, subIntegratorStepSize_s, maximumSteps, ionIsFrozen);
 
-            logger->info("i:{} ",i);
+
+            logger->info("i: {:2} success: {:5} E_kin: {:8.4} {:8.4}  E_rot: {:8.4} {:8.4} E_tot: {:8.4} {:8.4} E_err: {:5.2}",
+                i, result.trajectorySuccess,
+                result.startKineticEnergy, result.endKineticEnergy,
+                result.startRotationEnergy, result.endRotationEnergy,
+                result.startTotalEnergy, result.endTotalEnergy,
+                (result.endTotalEnergy-result.startTotalEnergy)/result.startTotalEnergy);
         }
     }
     catch(AppUtils::TerminatedWhileCommandlineParsing& terminatedMessage){
