@@ -55,9 +55,9 @@ namespace CollisionModel{
                                 double trajectoryDistance,
                                 unsigned int startTimeStep=0);
 
-        bool leapfrogIntern(std::vector<Molecule*> moleculesPtr, double dt, double finalTime, double requiredRad);
+        bool leapfrogIntern(std::vector<Molecule*> moleculesPtr, double dt, double finalTime, double requiredRad, bool ionIsFrozen = false);
         bool rk4Intern(std::vector<Molecule*> moleculesPtr, double dt, double finalTime, double requiredRad);
-        bool rk4InternAdaptiveStep(std::vector<Molecule*> moleculesPtr, double dt, double finalTime, int maximumTimeSteps, double requiredRad, double tolerance, bool ionIsFrozen=false);
+        bool rk4InternAdaptiveStep(std::vector<Molecule*> moleculesPtr, double dt, double finalTime, int maximumTimeSteps, double requiredRad, double tolerance, bool ionIsFrozen = false);
 
     protected:
 

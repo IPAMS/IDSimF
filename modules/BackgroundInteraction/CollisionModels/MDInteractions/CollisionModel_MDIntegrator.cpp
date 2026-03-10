@@ -41,8 +41,9 @@ forceField_(std::move(forceField))
  * @param finalTime maximum integration time
  * @param requiredRad radius defining the collision sphere, i.e. the distance that needs to be undercut for
  * a collision to be considered (same radius which is used to estimate the collision probability)
+ * @param ionIsFrozen
  */
-bool CollisionModel::MDIntegrator::leapfrogIntern(std::vector<CollisionModel::Molecule*> moleculesPtr, double dt, double finalTime, double requiredRad){
+bool CollisionModel::MDIntegrator::leapfrogIntern(std::vector<CollisionModel::Molecule*> moleculesPtr, double dt, double finalTime, double requiredRad, bool ionIsFrozen){
 
     bool wasHit = false;
 
@@ -58,7 +59,6 @@ bool CollisionModel::MDIntegrator::leapfrogIntern(std::vector<CollisionModel::Mo
 
 
     int nSteps = int(round(finalTime/dt));
-
     std::vector<Core::Vector> forceMolecules(moleculesPtr_size);
     std::vector<Core::Vector> torqueMolecules(moleculesPtr_size);
 
@@ -86,8 +86,10 @@ bool CollisionModel::MDIntegrator::leapfrogIntern(std::vector<CollisionModel::Mo
         // time step for the new position
         i = 0;
         for(auto* molecule : moleculesPtr){
-            Core::Vector newComPos =  molecule->getComPos() + molecule->getComVel() * dt;
-            molecule->setComPos(newComPos);
+            if(molecule->getMolecularStructureName() == collisionMolecule_ || !ionIsFrozen) {
+                Core::Vector newComPos =  molecule->getComPos() + molecule->getComVel() * dt;
+                molecule->setComPos(newComPos);
+            }
             if(rotationActive_){
                 Core::Matrix3 rotMatrix = molecule->getRotationMatrix();
                 Core::Matrix3 worldInvInertia = rotMatrix*molecule->getInertiaInvMatrix()*rotMatrix.transpose();
