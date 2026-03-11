@@ -387,7 +387,6 @@ void CollisionModel::MDInteractionsModel::modifyVelocity(Core::Particle& particl
                 std::cout << "Energy not conserved: " << startEnergy << " " << endEnergy << std::endl;
                 trajectorySuccess = false;
                 dt = dt/2;
-           
             }
         }else{
             if(startEnergy >= endEnergy*1.10  || startEnergy <= endEnergy*0.90){

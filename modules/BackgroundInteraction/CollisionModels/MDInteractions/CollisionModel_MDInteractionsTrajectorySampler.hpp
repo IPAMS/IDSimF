@@ -56,7 +56,7 @@ namespace CollisionModel{
         double endRotationEnergy;
         double startTotalEnergy;
         double endTotalEnergy;
-        bool trajectorySuccess;
+        bool wasHit;
     };
 
     class MDInteractionsTrajectorySampler: public MDIntegrator {

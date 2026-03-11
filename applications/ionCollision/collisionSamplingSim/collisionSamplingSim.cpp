@@ -187,8 +187,8 @@ int main(int argc, const char * argv[]) {
                 subIntegratorIntegrationTime_s, subIntegratorStepSize_s, maximumSteps, ionIsFrozen);
 
 
-            logger->info("i: {:2} success: {:5} E_kin: {:8.4} {:8.4}  E_rot: {:8.4} {:8.4} E_tot: {:8.4} {:8.4} E_err: {:5.2}",
-                i, result.trajectorySuccess,
+            logger->info("i: {:2} was hit: {:5} E_kin: {:8.4} {:8.4}  E_rot: {:8.4} {:8.4} E_tot: {:8.4} {:8.4} E_err: {:5.2}",
+                i, result.wasHit,
                 result.startKineticEnergy, result.endKineticEnergy,
                 result.startRotationEnergy, result.endRotationEnergy,
                 result.startTotalEnergy, result.endTotalEnergy,

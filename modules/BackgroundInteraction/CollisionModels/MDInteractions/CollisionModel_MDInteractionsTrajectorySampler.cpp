@@ -75,9 +75,9 @@ CollisionModel::SamplingResult CollisionModel::MDInteractionsTrajectorySampler::
         hdf5TWriterConf_.recordingActive=true;
         hdf5TrajectoryWriter_->initNewTrajectory(mole.getAtomCount(), bgMole.getAtomCount());
     }
-    bool trajectorySuccess;
+    bool wasHit;
     //trajectorySuccess = leapfrogIntern(moleculesPtr, timeStep, finalTime, 100, ionIsFrozen);
-    trajectorySuccess = rk4InternAdaptiveStep(moleculesPtr, timeStep, finalTime, maximumSteps, 100, 1e-8, ionIsFrozen);
+    wasHit = rk4InternAdaptiveStep(moleculesPtr, timeStep, finalTime, maximumSteps, 100, 1e-8, ionIsFrozen);
 
 
     double endKineticEnergy = 0;
@@ -93,7 +93,7 @@ CollisionModel::SamplingResult CollisionModel::MDInteractionsTrajectorySampler::
         startKineticEnergy, endKineticEnergy,
         startRotationEnergy, endRotationEnergy,
         startTotalEnergy, endTotalEnergy,
-        trajectorySuccess
+        wasHit
     };
 }
 
