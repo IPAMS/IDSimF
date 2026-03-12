@@ -34,7 +34,7 @@ namespace CollisionModel{
     class HDF5MDTrajectoryWriter {
     public:
         HDF5MDTrajectoryWriter(std::string hdf5Filename);
-        void initNewTrajectory(std::size_t nAtomsMolecule, std::size_t nAtomsBG);
+        void initNewTrajectory(Molecule &molecule, Molecule &bgMolecule);
 
         void writeTrajectorySample(double time, double dt,
                                    Molecule &molecule, Molecule &bgMolecule);

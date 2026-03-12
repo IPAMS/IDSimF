@@ -73,7 +73,7 @@ CollisionModel::SamplingResult CollisionModel::MDInteractionsTrajectorySampler::
     if (legacyTWriterConf_.modelRecordsTrajectory) legacyTWriterConf_.recordingActive=true;
     if (hdf5TWriterConf_.modelRecordsTrajectory) {
         hdf5TWriterConf_.recordingActive=true;
-        hdf5TrajectoryWriter_->initNewTrajectory(mole.getAtomCount(), bgMole.getAtomCount());
+        hdf5TrajectoryWriter_->initNewTrajectory(mole, bgMole);
     }
     bool wasHit;
     //trajectorySuccess = leapfrogIntern(moleculesPtr, timeStep, finalTime, 100, ionIsFrozen);

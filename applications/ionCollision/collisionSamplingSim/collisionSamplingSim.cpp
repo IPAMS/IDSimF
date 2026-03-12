@@ -186,13 +186,14 @@ int main(int argc, const char * argv[]) {
                 initConIon, initConGasParticle,
                 subIntegratorIntegrationTime_s, subIntegratorStepSize_s, maximumSteps, ionIsFrozen);
 
-
-            logger->info("i: {:2} was hit: {:5} E_kin: {:8.4} {:8.4}  E_rot: {:8.4} {:8.4} E_tot: {:8.4} {:8.4} E_err: {:5.2}",
+            double energyError = (result.endTotalEnergy-result.startTotalEnergy)/result.startTotalEnergy;
+            bool energyConserved = (abs(energyError)<0.1);
+            logger->info("i: {:2} hit: {:5} | E_kin: {:8.4} {:8.4}  E_rot: {:8.4} {:8.4} E_tot: {:8.4} {:8.4} | E cons. {:5} E_err: {:5.2}",
                 i, result.wasHit,
                 result.startKineticEnergy, result.endKineticEnergy,
                 result.startRotationEnergy, result.endRotationEnergy,
                 result.startTotalEnergy, result.endTotalEnergy,
-                (result.endTotalEnergy-result.startTotalEnergy)/result.startTotalEnergy);
+                energyConserved, energyError);
         }
     }
     catch(AppUtils::TerminatedWhileCommandlineParsing& terminatedMessage){

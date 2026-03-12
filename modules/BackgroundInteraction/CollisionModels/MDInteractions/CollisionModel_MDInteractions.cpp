@@ -297,7 +297,7 @@ void CollisionModel::MDInteractionsModel::modifyVelocity(Core::Particle& particl
 
         //Init new HDF5 trajectory
         if(hdf5TWriterConf_.recordingActive == true){
-            hdf5TrajectoryWriter_->initNewTrajectory(mole.getAtoms().size(), bgMole.getAtoms().size());
+            hdf5TrajectoryWriter_->initNewTrajectory(mole, bgMole);
         }
 
 
