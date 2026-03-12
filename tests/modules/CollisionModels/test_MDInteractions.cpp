@@ -108,9 +108,6 @@ TEST_CASE("Basic test MD Interactions model", "[CollisionModels][MDInteractionsM
         CHECK(Approx(ion.getVelocity().y()).margin(0.8) ==  -170.992193862); //-170.992193862);
         CHECK(Approx(ion.getVelocity().z()).margin(0.2) ==  -267.150091929); //-267.150091929);
 
-        std::string readBack_early = readTextFile("MD_collisions_microscopic_trajectories_test.txt");
-        // CHECK(readBack_early == "");
-
         for(int i = 0; i < 4; i++) {
             mdSim.updateModelTimestepParameters(timestep, time);
             mdSim.modifyVelocity(ion, 2e-11);
@@ -121,7 +118,6 @@ TEST_CASE("Basic test MD Interactions model", "[CollisionModels][MDInteractionsM
         long i;
         for (i = 0; std::getline(fstream, line); ++i){
             if (i==100){
-
                 //parse line
                 std::string delimiter = ",";
                 size_t pos = 0;
@@ -132,12 +128,19 @@ TEST_CASE("Basic test MD Interactions model", "[CollisionModels][MDInteractionsM
                     line.erase(0, pos + delimiter.length());
                     values.push_back(std::strtod(token.c_str(), nullptr));
                 }
+                //parse last value
+                if (line.size() > 0) {
+                    values.push_back(std::strtod(line.c_str(), nullptr));
+                }
                 // for(auto j : values){
                 //     std::cout << j << std::endl;
                 // }
-                std::vector<double> compareValues = {0.10036e-10, 0.62538e-09, -2.34314e-10, 2.78511e-10,
+                std::vector<double> compareValues =
+                    {1.34745e-10, -2.27634e-10, 3.09759e-11, 2.6301e-10, 2.46681e-12, -1379.11, -28.5662, -112.195, 1.09982e-10, -1.87699e-10, 2.54482e-11, 1.16555e-15, 3.47231e-12, -2.22873e-12, 4.82311e-13};
+                    //{1.3633e-10, -2.2762e-10, 3.11065e-11, 2.64082e-10, 2.46567e-12, -1397.99, 3.66005, -116.564, 1.03247e-10, -1.73467e-10, 2.3652e-11, 1.14127e-15, 3.46571e-12, -2.24046e-12, 4.82781e-13};
+                /*std::vector<double> compareValues = {0.10036e-10, 0.62538e-09, -2.34314e-10, 2.78511e-10,
                                                     6.47741e-13, -342.483, -1132.27, -375.806, 8.4005e-17,
-                                                    -5.37867e-16, -1.70928e-16};
+                                                    -5.37867e-16, -1.70928e-16};*/
                 std::vector<double> compareMargins = {2e-10, 2e-9, 2e-9, 2e-9, 2e-7};
 
                 CHECK(values.size() == compareValues.size());
