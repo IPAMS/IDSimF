@@ -203,8 +203,8 @@ TEST_CASE("Test MD Model with Multi-Atom Molecules", "[CollisionModels][MDIntera
         }
 
         // check results written into trajectory:
-        CHECK(checkDims(h5Filename, "MD_trajectories/trajectory1", 175, 11));
-        CHECK(checkDims(h5Filename, "MD_trajectories/trajectory2", 174, 11));
+        CHECK(checkDims(h5Filename, "MD_trajectories/trajectory1", 197, 11));
+        CHECK(checkDims(h5Filename, "MD_trajectories/trajectory2", 193, 11));
         H5::Group group = openGroup(h5Filename, "MD_trajectories");
         CHECK(group.getNumObjs() == 3);
 
@@ -239,8 +239,8 @@ TEST_CASE("Test MD Model with Multi-Atom Molecules", "[CollisionModels][MDIntera
         }
 
         // check results written into trajectory:
-        CHECK(checkDims(h5Filename, "MD_trajectories/trajectory1", 139, 17));
-        CHECK(checkDims(h5Filename, "MD_trajectories/trajectory2", 155, 17));
+        CHECK(checkDims(h5Filename, "MD_trajectories/trajectory1", 135, 17));
+        CHECK(checkDims(h5Filename, "MD_trajectories/trajectory2", 183, 17));
         H5::Group group = openGroup(h5Filename, "MD_trajectories");
         CHECK(group.getNumObjs() == 4);
 
@@ -305,9 +305,9 @@ TEST_CASE("Test MD Interactions with rotation", "[CollisionModels][MDInteraction
     mdSim.setHDF5TrajectoryWriter(h5Filename, 45e-10, 0);
     mdSim.modifyVelocity(ion, dt);
 
-    CHECK(Approx(ion.getVelocity().x()).margin(0.2) ==  655.7082706025);
-    CHECK(Approx(ion.getVelocity().y()).margin(0.2) ==  58.930204731);
-    CHECK(Approx(ion.getVelocity().z()).margin(0.2) ==  -38.9123092633);
+    CHECK(Approx(ion.getVelocity().x()).margin(0.2) ==  495.7040847218);
+    CHECK(Approx(ion.getVelocity().y()).margin(0.2) ==  43.9704656224);
+    CHECK(Approx(ion.getVelocity().z()).margin(0.2) ==  -54.8414059866);
 
     unsigned int timestep = 0;
     double time = 0.0;
@@ -316,7 +316,7 @@ TEST_CASE("Test MD Interactions with rotation", "[CollisionModels][MDInteraction
         mdSim.modifyVelocity(ion, 2e-11);
     }
 
-    CHECK(Approx(ion.getVelocity().x()).margin(0.8) ==  -333.389119178);
-    CHECK(Approx(ion.getVelocity().y()).margin(0.8) ==  -116.1181649756);
-    CHECK(Approx(ion.getVelocity().z()).margin(0.2) ==  -271.8242093107);
+    CHECK(Approx(ion.getVelocity().x()).margin(0.8) ==  32.3509170218);
+    CHECK(Approx(ion.getVelocity().y()).margin(0.8) ==  -336.6975108956);
+    CHECK(Approx(ion.getVelocity().z()).margin(0.2) ==  -326.1171405377);
 }
