@@ -331,6 +331,14 @@ bool CollisionModel::MDIntegrator::rk4InternAdaptiveStep(std::vector<CollisionMo
     double pi = 3.14159;
     Core::RandomSource* rndSource = Core::globalRandomGeneratorPool->getThreadRandomSource();
 
+    //Write first time step to trajectory
+    //Write time step to HDF5 trajectory:
+    if(hdf5TWriterConf_.recordingActive == true){
+        hdf5TrajectoryWriter_->writeTrajectorySample(
+            0.0, 0.0, *moleculesPtr.at(0), *moleculesPtr.at(1));
+    }
+
+    // Start integration
     std::size_t nSteps = 0;
     while(integrationTimeSum < finalTime && steps < maximumTimeSteps){
 
@@ -436,7 +444,6 @@ bool CollisionModel::MDIntegrator::rk4InternAdaptiveStep(std::vector<CollisionMo
                 l[n][i] = l[n][i]*dt;
                 u[n][i] = u[n][i]*dt;
             }
-
         }
 
         for(size_t b = 0; b < nMolecules; ++b){
@@ -461,8 +468,6 @@ bool CollisionModel::MDIntegrator::rk4InternAdaptiveStep(std::vector<CollisionMo
         #pragma GCC diagnostic push
         #pragma GCC diagnostic ignored "-Wfloat-equal"
         for(size_t p = 0; p < 2; p++){
-
-
             if(fabs(newComVelOrder5[p].magnitude()) != 0)
                 R[p][0] = fabs(newComVelOrder4[p].magnitude()-newComVelOrder5[p].magnitude())/fabs(newComVelOrder5[p].magnitude());
             else
@@ -488,6 +493,12 @@ bool CollisionModel::MDIntegrator::rk4InternAdaptiveStep(std::vector<CollisionMo
         }
         #pragma GCC diagnostic pop
 
+        //Write time step (first ts, pre position change) to HDF5 trajectory:
+        if (steps == 0) {
+            writeTrajectorySample_(integrationTimeSum, dt, moleculesPtr, forceMolecules, distance);
+        }
+
+
         globalDelta = 0.84 * std::pow((tolerance/globalR), 1./4);
         integrationTimeSum += dt;
         i = 0;
@@ -504,24 +515,13 @@ bool CollisionModel::MDIntegrator::rk4InternAdaptiveStep(std::vector<CollisionMo
                 }
             }
             i++;
-
         }
 
         steps++;
         dt = dt * globalDelta;
 
-        //Write time step to HDF5 trajectory:
-        if(hdf5TWriterConf_.recordingActive == true){
-            hdf5TrajectoryWriter_->writeTrajectorySample(
-                integrationTimeSum, dt, *moleculesPtr.at(0), *moleculesPtr.at(1));
-        }
-
-        //write time step to legacy trajectory:
-        if (legacyTWriterConf_.recordingActive == true) {
-            legacyTrajectoryWriter_->writeTrajectorySample(
-                integrationTimeSum, dt, moleculesPtr[1]->getComPos(), moleculesPtr[1]->getComVel(),
-                moleculesPtr[0]->getComPos(),forceMolecules, distance);
-        }
+        //Write time step (post position change) to HDF5 trajectory:
+        writeTrajectorySample_(integrationTimeSum, dt, moleculesPtr, forceMolecules, distance);
 
         size_t index = 0;
         for(size_t b = 0; b < nMolecules; ++b){
@@ -567,6 +567,24 @@ double CollisionModel::MDIntegrator::initRotation(CollisionModel::Molecule& mole
 
 double CollisionModel::MDIntegrator::calcRotEnergy(Core::Vector omega, Core::Matrix3 I){
     return 0.5*(I(0,0)*omega.x()*omega.x() + I(1,1)*omega.y()*omega.y() + I(2,2)*omega.z()*omega.z());
+}
+
+void CollisionModel::MDIntegrator::writeTrajectorySample_(
+        double integrationTimeSum, double dt, std::vector<Molecule*> &moleculesPtr,
+        std::vector<Core::Vector> &forceMolecules, double distance) const {
+
+    //Write time step to HDF5 trajectory:
+    if(hdf5TWriterConf_.recordingActive == true){
+        hdf5TrajectoryWriter_->writeTrajectorySample(
+            integrationTimeSum, dt, *moleculesPtr.at(0), *moleculesPtr.at(1));
+    }
+
+    //write time step to legacy trajectory:
+    if (legacyTWriterConf_.recordingActive == true) {
+        legacyTrajectoryWriter_->writeTrajectorySample(
+            integrationTimeSum, dt, moleculesPtr[1]->getComPos(), moleculesPtr[1]->getComVel(),
+            moleculesPtr[0]->getComPos(),forceMolecules, distance);
+    }
 }
 
 

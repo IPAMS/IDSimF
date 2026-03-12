@@ -86,16 +86,16 @@ TEST_CASE("Basic test of MD trajectory sampler", "[CollisionModels][MDInteractio
 
     FileIO::CSVReader csvReader;
     std::vector<std::vector<std::string>> readBack_result = csvReader.readCSVFile("MD_collisions_trajectory_sampler_test.txt", ',');
-    CHECK(readBack_result.size() == 762);
+    CHECK(readBack_result.size() == 768);
     std::vector<double> times = csvReader.extractDouble(readBack_result, 4);
     std::vector<double> bgMolecule_x = csvReader.extractDouble(readBack_result, 0);
 
     // Trajectories should begin at the right indices
-    CHECK(Approx(times.at(0))==1e-16);
-    CHECK(Approx(times.at(200))==1e-16);
-    CHECK(Approx(times.at(400))==1e-16);
+    CHECK(Approx(times.at(0))==0.0);
+    CHECK(Approx(times.at(201))==0.0);
+    CHECK(Approx(times.at(402))==0.0);
 
     // start positions should be equal, but rotation of background molecule should change things
-    CHECK(Approx(bgMolecule_x[0])==bgMolecule_x[200]);
-    CHECK(Approx(bgMolecule_x[100]) != bgMolecule_x[300]);
+    CHECK(Approx(bgMolecule_x[0])==bgMolecule_x[201]);
+    CHECK(Approx(bgMolecule_x[100]) != bgMolecule_x[301]);
 }

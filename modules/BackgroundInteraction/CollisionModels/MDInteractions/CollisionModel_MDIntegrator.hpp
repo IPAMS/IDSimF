@@ -70,6 +70,9 @@ namespace CollisionModel{
 
         double initRotation(Molecule& mole, double temperature_K);
         double calcRotEnergy(Core::Vector omega, Core::Matrix3 I);
+        void writeTrajectorySample_(
+            double integrationTimeSum, double dt, std::vector<Molecule*> &moleculesPtr,
+            std::vector<Core::Vector> &forceMolecules, double distance) const;
 
         std::string collisionMolecule_ = "";
         bool rotationActive_ = false;
