@@ -50,7 +50,7 @@ void CollisionModel::HDF5MDTrajectoryWriter::initNewTrajectory(
         masses.push_back(bgMolecule.getAtoms()[i]->getMass() / Core::AMU_TO_KG);
     }
     h5f_->writeDatasetAttribute<std::string>(currentDS_,"column_names", columnNames);
-    h5f_->writeDatasetAttribute<double>(currentDS_,"masses", masses);
+    h5f_->writeDatasetAttribute<double>(currentDS_,"atom_masses", masses);
 
     std::vector<std::size_t> nAtoms = {nAtomsMolecule, nAtomsBG};
     h5f_->writeDatasetAttribute<std::size_t>(currentDS_,"number_of_atoms", nAtoms);

@@ -252,6 +252,10 @@ TEST_CASE("Test MD Model with Multi-Atom Molecules", "[CollisionModels][MDIntera
             "bg_a0_pos_x", "bg_a0_pos_y", "bg_a0_pos_z", "bg_a1_pos_x", "bg_a1_pos_y", "bg_a1_pos_z", "bg_a2_pos_x", "bg_a2_pos_y", "bg_a2_pos_z"};
         CHECK_THAT(colNamesAttribute, Catch::Matchers::Equals(expectedColNames));
 
+        auto atomMasses = readAttribute<H5::DataSet, double>(tra1DS, "atom_masses");
+        std::vector<double> expectedAtomMasses = { 15.9989995956, 15.9989995956, 14.0066995621, 14.0066995621, 0.0 };
+        CHECK_THAT(atomMasses, Catch::Matchers::Approx(expectedAtomMasses));
+
         auto nAtomsAttribute = readAttribute<H5::DataSet, std::size_t>(tra1DS, "number_of_atoms");
         std::vector<std::size_t> expectedAtomNumbers = {2, 3};
         CHECK_THAT(nAtomsAttribute, Catch::Matchers::Equals(expectedAtomNumbers));
