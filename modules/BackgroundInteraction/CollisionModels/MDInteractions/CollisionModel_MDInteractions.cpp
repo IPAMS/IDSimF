@@ -310,6 +310,10 @@ void CollisionModel::MDInteractionsModel::modifyVelocity(Core::Particle& particl
                                             rndSource->normalRealRndValue() * vrStdevBgMolecule - particle.getVelocity().y(),
                                             rndSource->normalRealRndValue() * vrStdevBgMolecule - particle.getVelocity().z()};
 
+        if (iterations < 10) {
+            std::cout << "iterations " << iterations << " velocityBgMolecule "<<velocityBgMolecule<< std::endl;
+        }
+
         bgMole.setComVel(velocityBgMolecule);
 
         // calculate random point on sphere

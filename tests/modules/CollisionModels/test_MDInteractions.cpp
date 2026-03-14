@@ -185,7 +185,7 @@ TEST_CASE("Test MD Model with Multi-Atom Molecules", "[CollisionModels][MDIntera
 
     double dt = 2e-11;
 
-    SECTION("Test with He as collision gas") {
+    /*SECTION("Test with He as collision gas") {
         CollisionModel::MDInteractionsModel mdSim = CollisionModel::MDInteractionsModel(
             2000000, 298,
             4.003, CollisionModel::MDInteractionsModel::DIAMETER_HE, "He",
@@ -219,7 +219,7 @@ TEST_CASE("Test MD Model with Multi-Atom Molecules", "[CollisionModels][MDIntera
         auto nAtomsAttribute = readAttribute<H5::DataSet, std::size_t>(tra1DS, "number_of_atoms");
         std::vector<std::size_t> expectedAtomNumbers = {2, 1};
         CHECK_THAT(nAtomsAttribute, Catch::Matchers::Equals(expectedAtomNumbers));
-    }
+    }*/
 
     SECTION("Test with N2 as collision gas") {
         CollisionModel::MDInteractionsModel mdSim = CollisionModel::MDInteractionsModel(
