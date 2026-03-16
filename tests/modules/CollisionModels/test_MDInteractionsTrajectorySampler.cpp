@@ -33,6 +33,7 @@
 #include "FileIO_MolecularStructureReader.hpp"
 #include "test_util.hpp"
 
+#include <iomanip>
 #include <iostream>
 
 
@@ -61,41 +62,58 @@ TEST_CASE("Basic test of MD trajectory sampler", "[CollisionModels][MDInteractio
         nullptr
         );
 
-    mdSim.setLegacyTrajectoryWriter("MD_collisions_trajectory_sampler_test.txt", 10, 0.0, 0);
+    SECTION("Test trajectory correctness") {
 
-    //Calculate two trajectories with the same sampler:
-    mdSim.calculateTrajectory(ion, "N2",
-       ionInitC, collisionParticleInitialConditions,
-        1e-11, 1e-16, 200, true);
+        CHECK_THAT(ion.getVelocity(), ApproxEqual(Core::Vector(600, 50.0,0.0)));
+        mdSim.calculateTrajectory(ion, "N2",
+   ionInitC, collisionParticleInitialConditions,
+    1e-11, 1e-16, 2000, false);
 
-    collisionParticleInitialConditions.rotationAngles = {0,0,M_PI/2.0};
-    mdSim.calculateTrajectory(ion, "N2",
+
+        auto velo = ion.getVelocity();
+        std::cout << "Test finished, velo:"<<velo << std::endl;
+        std::cout <<std::setprecision(15)<< "velo x:"<<velo.x()  << std::endl;
+        std::cout <<std::setprecision(15)<< "velo y:"<<velo.y()  << std::endl;
+        //CHECK_THAT(ion.getVelocity(), ApproxEqual(Core::Vector(1394.7830392687233,-103.33733294743877,0.0)));
+    }
+
+    SECTION("Test multiple trajectories in one file") {
+        mdSim.setLegacyTrajectoryWriter("MD_collisions_trajectory_sampler_test.txt", 10, 0.0, 0);
+
+        //Calculate multiple trajectories with the same sampler:
+        mdSim.calculateTrajectory(ion, "N2",
+           ionInitC, collisionParticleInitialConditions,
+            1e-11, 1e-16, 200, true);
+
+        collisionParticleInitialConditions.rotationAngles = {0,0,M_PI/2.0};
+        mdSim.calculateTrajectory(ion, "N2",
+            ionInitC, collisionParticleInitialConditions,
+            1e-11, 1e-16, 200, true);
+
+        mdSim.calculateTrajectory(ion, "Ar",
         ionInitC, collisionParticleInitialConditions,
-        1e-11, 1e-16, 200, true);
+        1e-11, 1e-16, 300, false);
 
-    mdSim.calculateTrajectory(ion, "Ar",
-    ionInitC, collisionParticleInitialConditions,
-    1e-11, 1e-16, 300, false);
+        ion.setMolecularStructure(molecularStructureCollection.at("Acetone"));
+        ionInitC.rotationAngles = {90,0,0};
 
-    ion.setMolecularStructure(molecularStructureCollection.at("Acetone"));
-    ionInitC.rotationAngles = {90,0,0};
+        mdSim.calculateTrajectory(ion, "Ar",
+        ionInitC, collisionParticleInitialConditions,
+        1e-11, 1e-16, 300, false);
 
-    mdSim.calculateTrajectory(ion, "Ar",
-    ionInitC, collisionParticleInitialConditions,
-    1e-11, 1e-16, 300, false);
+        FileIO::CSVReader csvReader;
+        std::vector<std::vector<std::string>> readBack_result = csvReader.readCSVFile("MD_collisions_trajectory_sampler_test.txt", ',');
+        CHECK(readBack_result.size() == 768);
+        std::vector<double> times = csvReader.extractDouble(readBack_result, 4);
+        std::vector<double> bgMolecule_x = csvReader.extractDouble(readBack_result, 0);
 
-    FileIO::CSVReader csvReader;
-    std::vector<std::vector<std::string>> readBack_result = csvReader.readCSVFile("MD_collisions_trajectory_sampler_test.txt", ',');
-    CHECK(readBack_result.size() == 768);
-    std::vector<double> times = csvReader.extractDouble(readBack_result, 4);
-    std::vector<double> bgMolecule_x = csvReader.extractDouble(readBack_result, 0);
+        // Trajectories should begin at the right indices
+        CHECK(Approx(times.at(0))==0.0);
+        CHECK(Approx(times.at(201))==0.0);
+        CHECK(Approx(times.at(402))==0.0);
 
-    // Trajectories should begin at the right indices
-    CHECK(Approx(times.at(0))==0.0);
-    CHECK(Approx(times.at(201))==0.0);
-    CHECK(Approx(times.at(402))==0.0);
-
-    // start positions should be equal, but rotation of background molecule should change things
-    CHECK(Approx(bgMolecule_x[0])==bgMolecule_x[201]);
-    CHECK(Approx(bgMolecule_x[100]) != bgMolecule_x[301]);
+        // start positions should be equal, but rotation of background molecule should change things
+        CHECK(Approx(bgMolecule_x[0])==bgMolecule_x[201]);
+        CHECK(Approx(bgMolecule_x[100]) != bgMolecule_x[301]);
+    }
 }
