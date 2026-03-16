@@ -25,6 +25,8 @@
 
  ****************************/
 #include "CollisionModel_MDIntegrator.hpp"
+#include <iomanip>
+#include <set>
 
 CollisionModel::MDIntegrator::MDIntegrator(std::string collisionMolecule, bool rotationActive,
                                            std::unique_ptr<AbstractMDForceField> forceField):
@@ -124,6 +126,7 @@ bool CollisionModel::MDIntegrator::leapfrogIntern(std::vector<CollisionModel::Mo
             }
         }
 
+        std::cout << "MD Integrator 127 "<<std::endl;
         // recalculate the force
         forceField_->calculateForceField(moleculesPtr, forceMolecules,torqueMolecules);
         i = 0;
@@ -272,6 +275,7 @@ bool CollisionModel::MDIntegrator::rk4Intern(std::vector<CollisionModel::Molecul
  */
 bool CollisionModel::MDIntegrator::rk4InternAdaptiveStep(std::vector<CollisionModel::Molecule*> moleculesPtr, double dt, double finalTime, int maximumTimeSteps,
                                                                     double requiredRad, double tolerance, bool ionIsFrozen){
+    std::cout <<"integrator 276: new integration ------------------"<<std::endl;
     double integrationTimeSum = 0;
     size_t nMolecules = moleculesPtr.size();
     std::vector<Core::Vector> forceMolecules(nMolecules);
@@ -343,6 +347,7 @@ bool CollisionModel::MDIntegrator::rk4InternAdaptiveStep(std::vector<CollisionMo
     while(integrationTimeSum < finalTime && steps < maximumTimeSteps){
 
         i = 0;
+        std::cout <<"integrator 346: new step ------------------------------------------------------"<<std::endl;
         for(auto* molecule : moleculesPtr){
             velocityMolecules[i] = molecule->getComVel();
             positionMolecules[i] = molecule->getComPos();
@@ -365,6 +370,9 @@ bool CollisionModel::MDIntegrator::rk4InternAdaptiveStep(std::vector<CollisionMo
 
         for(size_t q = 0; q < nMolecules; q++){
             k[0][q] = forceMolecules[q] * dt / mass[q];
+
+            std::cout <<"integrator 373 q:"<<q<<" k:"<<k[0][q]<<"force:"<<forceMolecules[q]<<std::endl;
+
             l[0][q] = velocityMolecules[q] * dt;
             if(rotationActive_){
 
@@ -387,20 +395,26 @@ bool CollisionModel::MDIntegrator::rk4InternAdaptiveStep(std::vector<CollisionMo
             }
 
         }
-
+        std::cout <<"integrator 394 before"<<std::endl;
         for(size_t n = 1; n < 6; n++){
+            std::cout <<"integrator 396 n:"<<n<<std::endl;
             for(i = 0; i < nMolecules; i++){
                 positionMolecules[i] = initialPositionMolecules[i];
                 if(rotationActive_){
                     rotMolecules[i] = initialRotMolecules[i];
                 }
-
             }
             for(size_t m = 0; m < 6; m++){
+                std::cout <<"integrator 404 m:"<<m<<std::endl;
                 i = 0;
                 for(auto* molecule : moleculesPtr){
                     positionMolecules[i] += l[m][i]*weight[n-1][m];
+                    if (i== 0) {
+                        std::cout <<"integrator 408 i:"<<i<<"m:"<<m<<" n:"<<n<<" posMolecules:"<<positionMolecules[i]<<" l:"<<l[m][i]<<"weight:"<<weight[n-1][m]<<std::endl;
+                    }
+
                     if(molecule->getMolecularStructureName() == collisionMolecule_ || !ionIsFrozen) {
+                        std::cout <<std::setprecision(20)<<"integrator 410: new com: "<<positionMolecules[i] <<std::endl;
                         molecule->setComPos(positionMolecules[i]);
                     }
                     if(rotationActive_){
@@ -414,7 +428,11 @@ bool CollisionModel::MDIntegrator::rk4InternAdaptiveStep(std::vector<CollisionMo
             forceField_->calculateForceField(moleculesPtr, forceMolecules, torqueMolecules);
 
             for(i = 0; i < nMolecules; i++){
+
                 k[n][i] = forceMolecules[i] * dt / mass[i];
+                if (i==0) {
+                    std::cout <<std::setprecision(20 )<< "integrator 433 k["<<n<<"]["<<i<<"]="<<k[n][i]<<" force:" << forceMolecules[i]<<"mass:"<<mass[i]<<std::endl;
+                }
                 l[n][i] = velocityMolecules[i];
 
                 if(rotationActive_){
@@ -438,6 +456,9 @@ bool CollisionModel::MDIntegrator::rk4InternAdaptiveStep(std::vector<CollisionMo
 
                 for(size_t m = 0; m < 6; m++){
                     l[n][i] += k[m][i]*weight[n-1][m];
+                    if (i==0) {
+                        std::cout <<std::setprecision(20)<<"integrator 451 i: "<<i<<" m: "<<m<<" n: "<<n<< " l:"<<l[n][i]<<" k: "<<k[m][i]<<" weight "<<weight[n-1][m]<<std::endl;
+                    }
                     if(rotationActive_) u[n][i] = u[n][i] +
                             CollisionModel::Molecule::calcRotationMatrixUpdate(rotMolecules[i],worldInvInertia*v[m][i]*weight[n-1][m]);
                 }
@@ -453,6 +474,7 @@ bool CollisionModel::MDIntegrator::rk4InternAdaptiveStep(std::vector<CollisionMo
         }
 
 
+        std::cout << "k " << k[0][0] <<"|"<<k[1][0]<<"|"<<k[2][0]<<"|"<<k[3][0]<<"|"<<k[4][0]<<"|"<<k[5][0] << std::endl;
         for(i = 0; i < 2; i++){
             newComVelOrder5[i] = initialVelocityMolecules[i] + (k[0][i] * 16./135 + k[2][i] * 6656./12825 + k[3][i] * 28561./56430 + k[4][i] * (-9./50) + k[5][i] * 2./55);
             newComPosOrder4[i] = initialPositionMolecules[i] + (l[0][i] * 25./216 + l[2][i] * 1408./2565 + l[3][i] * 2197./4104 + l[4][i] * (-1./5));
@@ -504,6 +526,10 @@ bool CollisionModel::MDIntegrator::rk4InternAdaptiveStep(std::vector<CollisionMo
         i = 0;
         for(auto* molecule : moleculesPtr){
             if(molecule->getMolecularStructureName() == collisionMolecule_ || !ionIsFrozen) {
+                //fixme: remove me
+                if (i == 0) {
+                    std::cout << "steps: "<<steps << "pos: "<<newComPosOrder4[i] << " vel: "<<newComVelOrder4[i]<<std::endl;
+                }
                 molecule->setComPos(newComPosOrder4[i]);
                 molecule->setComVel(newComVelOrder4[i]);
                 if(rotationActive_){

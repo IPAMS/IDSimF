@@ -1,8 +1,7 @@
-project(md_runtime_benchmark)
+project(md_correctness_test)
 
 set(SOURCE_FILES
-        md_runtime_benchmark.cpp
-        ../correctness_benchmark/md_correctness_test.cpp)
+        md_correctness_test.cpp)
 
 include_directories(${CMAKE_SOURCE_DIR}/modules/BTree)
 include_directories(${CMAKE_SOURCE_DIR}/modules/backgroundInteraction/collisionModels)
@@ -14,5 +13,5 @@ set(TEST_FILES
         ${TEST_FILE_FOLDER}/test_molecularstructure_reader.json )
 file(COPY ${TEST_FILES} DESTINATION .)
 
-add_executable(benchmark_collision_md_runtime ${SOURCE_FILES})
-target_link_libraries(benchmark_collision_md_runtime core apputils particlesimulation collisionmodels)
+add_executable(benchmark_collision_md_correctness ${SOURCE_FILES})
+target_link_libraries(benchmark_collision_md_correctness core apputils particlesimulation collisionmodels)

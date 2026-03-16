@@ -22,6 +22,7 @@
 #include "CollisionModel_MDForceField_LJ12_6.hpp"
 #include <array>
 #include <iostream>
+#include <iomanip>
 CollisionModel::MDForceField_LJ12_6::MDForceField_LJ12_6(double collisionGasPolarizability_m3, 
                                                               std::string potentials, 
                                                               bool rotActive):
@@ -37,6 +38,8 @@ void CollisionModel::MDForceField_LJ12_6::calculateForceField(std::vector<Collis
     // save all the forces acting on each molecule
     CollisionModel::Molecule* ion = moleculesPtr[0];
     CollisionModel::Molecule* bgGas = moleculesPtr[1];
+
+    std::cout <<std::setprecision(20)<< std::setprecision(10) << "LJ12_6.cpp 42: ff 0 | ion com: "<<ion->getComPos() << " | bg com:"<<bgGas->getComPos() << std::endl;
     forceMolecules[0] = Core::Vector(0.0, 0.0, 0.0);
     forceMolecules[1] = Core::Vector(0.0, 0.0, 0.0);
     torqueMolecules[0] = Core::Vector(0.0, 0.0, 0.0);
@@ -98,6 +101,7 @@ void CollisionModel::MDForceField_LJ12_6::calculateForceField(std::vector<Collis
                 atomForce.z(distance.z() * ljFactor);
                 forceMolecules[0] += atomForce;
                 forceMolecules[1] += atomForce * (-1);
+                std::cout <<std::setprecision(20)<< "LJ12_6.cpp 104: atom force:"<<atomForce << std::endl;
                 if(rotActive_){
 
                     std::vector<Core::Vector> positions = {relPosAtomI, relPosAtomJ};
@@ -132,6 +136,10 @@ void CollisionModel::MDForceField_LJ12_6::calculateForceField(std::vector<Collis
                 eField[1] = distance.y() * currentCharge / distanceCubed; // E-field in y
                 eField[2] = distance.z() * currentCharge / distanceCubed; // E-field in z
 
+                std::cout <<std::setprecision(20)<< "LJ12_6.cpp 139: eField[0]:"<<eField[0] << std::endl;
+                std::cout <<std::setprecision(20)<< "LJ12_6.cpp 139: eField[1]:"<<eField[1] << std::endl;
+                std::cout <<std::setprecision(20)<< "LJ12_6.cpp 139: eField[2]:"<<eField[2] << std::endl;
+
                 // derivative x to x
                 eFieldDerivative[0] = currentCharge / distanceCubed -
                         3 * currentCharge * distance.x() * distance.x() / (distanceCubed * distanceSquared);
@@ -147,6 +155,14 @@ void CollisionModel::MDForceField_LJ12_6::calculateForceField(std::vector<Collis
                         3 * currentCharge * distance.z() * distance.z() / (distanceCubed * distanceSquared);
                 // derivative x to z
                 eFieldDerivative[5] = -3 * currentCharge * distance.x() * distance.z() / (distanceCubed * distanceSquared);
+
+                std::cout <<std::setprecision(20)<< "LJ12_6.cpp 159: eFieldDerivative[0]:"<<eFieldDerivative[0] << std::endl;
+                std::cout <<std::setprecision(20)<< "LJ12_6.cpp 159: eFieldDerivative[1]:"<<eFieldDerivative[1] << std::endl;
+                std::cout <<std::setprecision(20)<< "LJ12_6.cpp 159: eFieldDerivative[2]:"<<eFieldDerivative[2] << std::endl;
+                std::cout <<std::setprecision(20)<< "LJ12_6.cpp 159: eFieldDerivative[3]:"<<eFieldDerivative[3] << std::endl;
+                std::cout <<std::setprecision(20)<< "LJ12_6.cpp 159: eFieldDerivative[4]:"<<eFieldDerivative[4] << std::endl;
+                std::cout <<std::setprecision(20)<< "LJ12_6.cpp 159: eFieldDerivative[5]:"<<eFieldDerivative[5] << std::endl;
+
 
                 Core::Vector ionInducedForce;
                 if(isN2Approx){
@@ -169,6 +185,17 @@ void CollisionModel::MDForceField_LJ12_6::calculateForceField(std::vector<Collis
                     ionInducedForce.x(xIonInducedForce);
                     ionInducedForce.y(yIonInducedForce);
                     ionInducedForce.z(zIonInducedForce);
+                    std::cout <<std::setprecision(20)<< "LJ12_6.cpp 188: yIonInduced:"<<yIonInducedForce << std::endl;
+
+                    double f1 = 1./(Core::ELECTRIC_CONSTANT) * collisionGasPolarizability_m3_;
+                    double f2 = (eField[0]*eFieldDerivative[1] + eField[1]*eFieldDerivative[2] + eField[2]*eFieldDerivative[3]);
+                    double f2_1 = eField[0]*eFieldDerivative[1];
+                    double f2_2 = eField[1]*eFieldDerivative[2];
+                    double f2_3 = eField[2]*eFieldDerivative[3];
+                    std::cout <<std::setprecision(20)<< "LJ12_6.cpp 192: f1:"<<f1 <<" f2:"<<f2 << std::endl;
+                    std::cout <<std::setprecision(20)<< "LJ12_6.cpp 192: f2_1:"<<f2_1 <<" f2_2:"<<f2_2 << std::endl;//<<" f2_3:"<<f2_3 << std::endl;
+
+
                 }
                 double cutoff = 1.5*CollisionModel::Atom::calcLJSig(*atomI, *atomJ);
                 if(distance.magnitude() < cutoff && rotActive_){
@@ -176,11 +203,13 @@ void CollisionModel::MDForceField_LJ12_6::calculateForceField(std::vector<Collis
                     double dist = distance.magnitude();  
                     double a = ((dist-cutoff)*1e10);
                     double decayFuncValue = (1./(1+exp(a*a)*exp(a*a))*2);
-                    ionInducedForce = ionInducedForce * decayFuncValue; 
+                    ionInducedForce = ionInducedForce * decayFuncValue;
+                    std::cout <<std::setprecision(20)<< "LJ12_6.cpp 196: dist:"<<dist <<" a:"<<a << "decay: "<<decayFuncValue << std::endl;
                 }
 
                 forceMolecules[0] += ionInducedForce;
                 forceMolecules[1] += ionInducedForce * (-1);
+                std::cout <<std::setprecision(20)<< "LJ12_6.cpp 201: ion induced force:"<<ionInducedForce << std::endl;
 
                 if(rotActive_){
 
@@ -259,6 +288,9 @@ void CollisionModel::MDForceField_LJ12_6::calculateForceField(std::vector<Collis
                 quadrupoleForce.z(currentCharge * partialChargeN2 * 1./Core::ELECTRIC_CONSTANT * distance.z() / distanceCubed );
                 forceMolecules[0] += quadrupoleForce;
                 forceMolecules[1] += quadrupoleForce * (-1);
+                std::cout <<std::setprecision(20)<< "LJ12_6.cpp 265: quad force:"<<quadrupoleForce << std::endl;
+
+                std::cout <<std::setprecision(20)<< "LJ12_6.cpp 266: si:"<<atomI->getSpeciesIndex() <<" sj:"<<atomJ->getSpeciesIndex() <<" ff[0]" << forceMolecules[0] << "ff[1]" << forceMolecules[1] << std::endl;
                 if(rotActive_){
                     
                     std::vector<Core::Vector> positions = {relPosAtomI, relPosAtomJ};

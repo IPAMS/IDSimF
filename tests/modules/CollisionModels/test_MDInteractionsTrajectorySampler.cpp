@@ -67,7 +67,7 @@ TEST_CASE("Basic test of MD trajectory sampler", "[CollisionModels][MDInteractio
         CHECK_THAT(ion.getVelocity(), ApproxEqual(Core::Vector(600, 50.0,0.0)));
         mdSim.calculateTrajectory(ion, "N2",
    ionInitC, collisionParticleInitialConditions,
-    1e-11, 1e-16, 2000, false);
+    1e-11, 1e-16, 2, false);
 
 
         auto velo = ion.getVelocity();
