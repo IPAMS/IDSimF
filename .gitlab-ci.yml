@@ -46,3 +46,6 @@ deploy-job:
     - docker build -t $DOCKER_USER/idsimf-cli .
     - docker push mrajkovic/idsimf-cli:latest
     - echo "Application successfully deployed."
+  only:
+    changes:
+      - Dockerfile
