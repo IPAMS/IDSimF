@@ -57,7 +57,6 @@ Integration::FullSumVerletIntegrator::FullSumVerletIntegrator(
  */
 void Integration::FullSumVerletIntegrator::addParticle(Core::Particle *particle){
     particles_.push_back(particle);
-    newPos_.emplace_back(Core::Vector(0,0,0));
     a_t_.emplace_back(Core::Vector(0,0,0));
     a_tdt_.emplace_back(Core::Vector(0,0,0));
 
@@ -98,20 +97,26 @@ void Integration::FullSumVerletIntegrator::runSingleStep(double dt){
     }
     std::size_t i;
     #pragma omp parallel \
-            default(none) shared(newPos_, a_tdt_, a_t_, dt, particles_) \
+            default(none) shared(a_tdt_, a_t_, dt, particles_) \
             private(i) //firstprivate(MyNod)
     {
 
+        // update particle position, then calculate acceleration with fully updated particle positions
         #pragma omp for schedule(dynamic, 40)
-        for (i=0; i<nParticles_; i++){
-
-            if (particles_[i]->isActive()){
+        for (i=0; i<nParticles_; i++) {
+            if (particles_[i]->isActive()) {
+                particles_[i]->setLocation(
+                    particles_[i]->getLocation() + particles_[i]->getVelocity() * dt + a_t_[i]*(1.0/2.0*dt*dt));
 
                 if (collisionModel_ != nullptr) {
                     collisionModel_->updateModelParticleParameters(*(particles_[i]));
                 }
+            }
+        }
 
-                newPos_[i] = particles_[i]->getLocation() + particles_[i]->getVelocity() * dt + a_t_[i]*(1.0/2.0*dt*dt);
+        #pragma omp for schedule(dynamic, 40)
+        for (i=0; i<nParticles_; i++){
+            if (particles_[i]->isActive()) {
                 a_tdt_[i] = accelerationFunction_(particles_[i], i, fullSumSolver_, time_, timestep_);
                 //acceleration changes due to background interaction:
 
@@ -124,31 +129,17 @@ void Integration::FullSumVerletIntegrator::runSingleStep(double dt){
 
                 //velocity changes due to background interaction:
                 if (collisionModel_ != nullptr) {
-                    //std::cout << "before:" << particles_[i]->getVelocity() << std::endl;
                     collisionModel_->modifyVelocity(*(particles_[i]),dt);
-                    //std::cout << "after:" << particles_[i]->getVelocity() << std::endl;
+                    collisionModel_->modifyPosition(*(particles_[i]), dt);
+                }
+
+                if (otherActionsFunction_ != nullptr) {
+                    otherActionsFunction_(particles_[i], i, time_, timestep_);
                 }
             }
         }
     }
 
-    // First find all new positions, then perform otherActions then update tree.
-    // This ensures that all new particle positions are found with the state from
-    // last time step. No particle positions are found with a partly updated tree.
-    // Additionally, the update step is not (yet) parallel.
-    for (std::size_t i=0; i<nParticles_; i++){
-        if (particles_[i]->isActive()){
-            //position changes due to background interaction:
-            if (collisionModel_ != nullptr) {
-                collisionModel_->modifyPosition(newPos_[i], *(particles_[i]), dt);
-            }
-
-            if (otherActionsFunction_ != nullptr) {
-                otherActionsFunction_(newPos_[i], particles_[i], i, time_, timestep_);
-            }
-            particles_[i]->setLocation(newPos_[i]);
-        }
-    }
     time_ = time_ + dt;
     timestep_++;
     if (postTimestepFunction_ != nullptr) {
@@ -157,7 +148,7 @@ void Integration::FullSumVerletIntegrator::runSingleStep(double dt){
 }
 
 /**
- * Finalizes the verlet integration run (should be called after the last time step).
+ * Finalizes the Verlet integration run (should be called after the last time step).
  */
 void Integration::FullSumVerletIntegrator::finalizeSimulation(){
     if (postTimestepFunction_ != nullptr){

@@ -21,7 +21,7 @@
  ------------
  BTree_parallelRK4Integrator.hpp
  
- Parallel version of a Runge Kutta 4 Integrator with Barnes-Hut Tree space charge calcultation
+ Parallel version of a Runge Kutta 4 Integrator with Barnes-Hut Tree space charge calculation
 
  ****************************/
 
@@ -65,6 +65,7 @@ namespace Integration{
             void run(unsigned int nTimesteps, double dt) override;
             void runSingleStep(double dt) override;
             void finalizeSimulation() override;
+            void setTheta(double newTheta);
 
     private:
 

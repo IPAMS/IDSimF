@@ -21,7 +21,7 @@
  ------------
  RS_StaticThermalizingReaction.hpp
 
- Particle / Collision based reaction which reinitializes the velocity of the simulated particle with a
+ Reaction which reinitializes the velocity of the simulated particle with a
  thermal velocity drawn from maxwell boltzmann distribution to model the effect of resonant charge transfer
  (Reactions of type A+ + A -> A + A+)
 

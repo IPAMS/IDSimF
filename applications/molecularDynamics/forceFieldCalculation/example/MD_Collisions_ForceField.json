@@ -1,0 +1,9 @@
+{
+  "collision_gas_polarizability_m3":0.205e-30,
+  "collision_gas_identifier":"He",
+  "particle_identifier":"Li+",
+  "force_field":"ALL",
+  "md_configuration":"./moleculeStructures_MOBCAL_MMFF93.json",
+  "starting_configuration":"./startingConditions_LiHe_individualSteps.txt",
+  "output_file":"trajectory_position_force_IDSimF.txt"
+}

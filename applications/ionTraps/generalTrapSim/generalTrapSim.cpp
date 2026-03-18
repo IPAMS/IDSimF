@@ -37,13 +37,13 @@
 #include "FileIO_inductionCurrentWriter.hpp"
 #include "PSim_simionPotentialArray.hpp"
 #include "CollisionModel_HardSphere.hpp"
-#include "appUtils_simulationConfiguration.hpp"
-#include "appUtils_ionDefinitionReading.hpp"
-#include "appUtils_logging.hpp"
-#include "appUtils_stopwatch.hpp"
-#include "appUtils_signalHandler.hpp"
-#include "appUtils_commandlineParser.hpp"
-#include "appUtils_integrationRunning.hpp"
+#include "AppUtils_simulationConfiguration.hpp"
+#include "AppUtils_ionDefinitionReading.hpp"
+#include "AppUtils_logging.hpp"
+#include "AppUtils_stopwatch.hpp"
+#include "AppUtils_signalHandler.hpp"
+#include "AppUtils_commandlineParser.hpp"
+#include "AppUtils_integrationRunning.hpp"
 #include "FileIO_ionCloudReader.hpp"
 #include <iostream>
 #include <vector>
@@ -89,21 +89,13 @@ int main(int argc, const char * argv[]) {
 
         //read potential array configuration of the trap =================================================
         double paSpatialScale = simConf->doubleParameter("potential_array_scale");
-        std::vector<std::unique_ptr<ParticleSimulation::SimionPotentialArray>> potentialArrays;
-        std::vector<std::string> potentialArraysNames = simConf->stringVectorParameter("potential_arrays");
-        for (const auto& paName: potentialArraysNames) {
-            std::filesystem::path paPath = confBasePath/paName;
-            std::unique_ptr<ParticleSimulation::SimionPotentialArray> pa_pt =
-                    std::make_unique<ParticleSimulation::SimionPotentialArray>(paPath, paSpatialScale);
-            potentialArrays.push_back(std::move(pa_pt));
-        }
+        std::vector<std::unique_ptr<ParticleSimulation::SimionPotentialArray>> potentialArrays =
+            simConf->readPotentialArrays("potential_arrays", paSpatialScale, true);
 
         // SIMION fast adjust PAs use 10000 as normalized potential value, thus we have to scale everything with 1/10000
-        double potentialScale = 1.0/10000.0;
-        std::vector<double> potentialsFactorsDc = simConf->doubleVectorParameter("dc_potentials", potentialScale);
-        std::vector<double> potentialFactorsRf = simConf->doubleVectorParameter("rf_potential_factors", potentialScale);
-        std::vector<double> potentialFactorsExcite = simConf->doubleVectorParameter("excite_potential_factors",
-                potentialScale);
+        std::vector<double> potentialsFactorsDc = simConf->doubleVectorParameter("dc_potentials");
+        std::vector<double> potentialFactorsRf = simConf->doubleVectorParameter("rf_potential_factors");
+        std::vector<double> potentialFactorsExcite = simConf->doubleVectorParameter("excite_potential_factors");
         std::vector<double> detectionPAFactorsRaw = simConf->doubleVectorParameter("detection_potential_factors");
         std::vector<ParticleSimulation::SimionPotentialArray*> detectionPAs;
 
@@ -300,13 +292,13 @@ int main(int argc, const char * argv[]) {
         };
 
         auto otherActionsFunctionQIT = [&simulationDomainBoundaries, &ionsInactive, &potentialArrays, &startSplatTracker](
-                Core::Vector& newPartPos, Core::Particle* particle,
-                int /*particleIndex*/,
+                Core::Particle* particle, int /*particleIndex*/,
                  double time, unsigned int /*timestep*/) {
             // if the ion is out of the boundary box or ends up in an electrode:
             // Terminate the ion
             // (since all potential arrays of the simulation define the basis functions of a linear combination,
             // the electrode geometry has to be the same in all electrodes, thus check only the first one)
+            Core::Vector newPartPos = particle->getLocation();
             if (newPartPos.x()<=simulationDomainBoundaries[0][0] ||
                     newPartPos.x()>=simulationDomainBoundaries[0][1] ||
                     newPartPos.y()<=simulationDomainBoundaries[1][0] ||

@@ -1,37 +1,25 @@
 project(IDSimF_collisionModels)
 
 set(SOURCE_FILES
-        CollisionModel_HardSphere.hpp
-        CollisionModel_HardSphere.cpp
-        CollisionModel_MathFunctions.hpp
         CollisionModel_MathFunctions.cpp
-        CollisionModel_SpatialFieldFunctions.hpp
         CollisionModel_SpatialFieldFunctions.cpp
-        CollisionModel_StatisticalDiffusion.cpp
-        CollisionModel_StatisticalDiffusion.hpp
-        CollisionModel_AbstractCollisionModel.hpp
         CollisionModel_util.cpp
-        CollisionModel_util.hpp
         CollisionModel_MultiCollisionModel.cpp
-        CollisionModel_MultiCollisionModel.hpp
-        CollisionModel_CollisionStatistics.cpp
-        CollisionModel_CollisionStatistics.hpp
-        CollisionStatistic_default.hpp 
-        CollisionModel_SoftSphere.cpp 
-        CollisionModel_SoftSphere.hpp
-        CollisionModel_MDInteractions.cpp
-        CollisionModel_MDInteractionsPreconstructed.cpp
-        CollisionModel_MDInteractionsPreconstructed.hpp
-        CollisionModel_MDInteractions.hpp
-        CollisionModel_AbstractMDForceField.cpp
-        CollisionModel_AbstractMDForceField.hpp
-        CollisionModel_Atom.cpp
-        CollisionModel_Atom.hpp
-        CollisionModel_Molecule.cpp
-        CollisionModel_Molecule.hpp
-        CollisionModel_MolecularStructure.cpp
-        CollisionModel_MolecularStructure.hpp CollisionModel_MDForceField_LJ12_6.cpp CollisionModel_MDForceField_LJ12_6.hpp)
+        HardSoftSphere/CollisionModel_HardSphere.cpp
+        HardSoftSphere/CollisionModel_SoftSphere.cpp
+        StatisticalDiffusion/CollisionModel_CollisionStatistics.cpp
+        StatisticalDiffusion/CollisionModel_StatisticalDiffusion.cpp
+        MDInteractions/CollisionModel_MDInteractions.cpp
+        MDInteractions/CollisionModel_MDInteractionsExperimental.cpp
+        MDInteractions/CollisionModel_MDInteractionsTrajectorySampler.cpp
+        MDInteractions/CollisionModel_AbstractMDForceField.cpp
+        MDInteractions/CollisionModel_Atom.cpp
+        MDInteractions/CollisionModel_Molecule.cpp
+        MDInteractions/CollisionModel_MolecularStructure.cpp
+        MDInteractions/CollisionModel_MDForceField_LJ12_6.cpp
+        MDInteractions/CollisionModel_MDForceField_Buckingham.cpp
+        MDInteractions/CollisionModel_MDTrajectoryWriter.cpp)
 
 add_library(collisionmodels STATIC ${SOURCE_FILES})
-target_include_directories(collisionmodels PUBLIC .)
-target_link_libraries(collisionmodels core spacecharge rs apputils)
+target_include_directories(collisionmodels PUBLIC . HardSoftSphere StatisticalDiffusion MDInteractions)
+target_link_libraries(collisionmodels PRIVATE core apputils particlesimulation spacecharge rs spdlog::spdlog)

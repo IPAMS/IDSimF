@@ -70,8 +70,7 @@ template<class solverType>
 
             unsigned int nParticlesTouched = 0;
             auto otherActionsFct = [&nParticlesTouched](
-                    Core::Vector& /*newPartPos*/, Core::Particle* /*particle*/,
-                    int /*particleIndex*/, double /*time*/, int /*timestep*/)
+                    Core::Particle* /*particle*/, int /*particleIndex*/, double /*time*/, int /*timestep*/)
             {
                 #pragma omp atomic
                 nParticlesTouched++;

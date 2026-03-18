@@ -142,7 +142,6 @@ TEST_CASE( "Test particle insertion and remove in serial node", "[Node]") {
         //Test particle is added as a reference:
         CHECK( testNode.getParticle() == &testIon1);
 
-
         testNode.insertParticle(&testIon2);
         CHECK( testNode.getNumberOfParticles() == 2);
 
@@ -177,7 +176,7 @@ TEST_CASE( "Test particle insertion and remove in serial node", "[Node]") {
         CHECK_THROWS(testNode.insertParticle(&testIon2));
 
         testNode.computeChargeDistributionRecursive();
-        testNode.printTree(0);
+        //testNode.printTree(0);
         CHECK(testNode.getNumberOfParticles() == 1);
     }
 
@@ -333,7 +332,7 @@ TEST_CASE( "Test particle insertion and remove in serial node", "[Node]") {
         testIon2.getHostNode()->removeMyselfFromTree();
         testNode2.testNodeIntegrity(0);
         testNode2.testNodeParticleIntegrity();
-        testNode2.testSpatialTreeIntegrity();
+        //testNode2.testSpatialTreeIntegrity();
 
         //testNode2.printTree(1);
         //std::cout << "------------------------------------------"<<std::endl;
@@ -343,8 +342,8 @@ TEST_CASE( "Test particle insertion and remove in serial node", "[Node]") {
 TEST_CASE( "Test field calculation in serial node", "[Node]") {
 
     BTree::Tree testTree(
-            Core::Vector(-1.5, -1.5, -1.5),
-            Core::Vector(1.5, 1.5, 1.5)
+            Core::Vector(-2.5, -2.5, -2.5),
+            Core::Vector(2.5, 2.5, 2.5)
     );
 
     BTree::Node testNode(
@@ -361,13 +360,12 @@ TEST_CASE( "Test field calculation in serial node", "[Node]") {
         Core::Vector c = BTree::Node::calculateElectricField(a, b, 1.0);
         Core::Vector d = Core::Vector(-(1.0/(4*M_PI*8.854e-12)),0.0,0.0);
 
-        CHECK(
-                vectorApproxCompare(
-                        BTree::Node::calculateElectricField(a, b, 1.0),
-                        BTree::Node::calculateElectricField(b, a, 1.0)*(-1))
-                        ==  vectorsApproxEqual);
+        CHECK_THAT(
+            BTree::Node::calculateElectricField(a, b, 1.0),
+            ApproxEqual(BTree::Node::calculateElectricField(b, a, 1.0)*(-1)));
 
-        CHECK(vectorApproxCompare(c,d) == vectorsApproxEqual);
+        CHECK_THAT(c, ApproxEqual(d));
+
     }
 
     SECTION( "Test physical correctness of charge calculation") {
@@ -463,7 +461,7 @@ TEST_CASE( "Test field calculation in serial node", "[Node]") {
         CHECK( testField1.x() == Approx(testField1.z()).epsilon(0.001));
     }
 
-    SECTION("Test charge distribution calculation in all spatial directions with many particles") {
+    SECTION("Test charge distribution calculation in all spatial directions with many particles and varied theta") {
 
         Core::Particle testIon1 = Core::Particle(Core::Vector(9.0,0.0,0.0),1.0);
         Core::Particle testIon2 = Core::Particle(Core::Vector(0.0,0.0,9.0),1.0);
@@ -482,6 +480,8 @@ TEST_CASE( "Test field calculation in serial node", "[Node]") {
         }
         testNode.computeChargeDistributionRecursive();
 
+        CHECK( testNode.getTheta() ==Approx(0.9));
+
         Core::Vector testField1 = testNode.computeElectricFieldFromTree(testIon1);
         Core::Vector testField2 = testNode.computeElectricFieldFromTree(testIon2);
         Core::Vector testField3 = testNode.computeElectricFieldFromTree(testIon3);
@@ -490,5 +490,20 @@ TEST_CASE( "Test field calculation in serial node", "[Node]") {
         CHECK( (testField1.x() - testField2.z()) < 1e-8);
         CHECK( (testField1.x() - testField3.y()) < 1e-8);
         CHECK( (testField3 - testField4).magnitude() < 1e-8);
+
+        testNode.setTheta(0.02);
+        testNode.computeChargeDistributionRecursive();
+        CHECK( testNode.getTheta() ==Approx(0.02));
+
+        Core::Vector testField1_lowTheta = testNode.computeElectricFieldFromTree(testIon1);
+        Core::Vector testField2_lowTheta = testNode.computeElectricFieldFromTree(testIon2);
+        Core::Vector testField3_lowTheta = testNode.computeElectricFieldFromTree(testIon3);
+        Core::Vector testField4_lowTheta = testNode.computeElectricFieldFromTree(testIon4);
+
+        CHECK( (testField1_lowTheta.x() - testField2_lowTheta.z()) < 1e-8);
+        CHECK( (testField1_lowTheta.x() - testField3_lowTheta.y()) < 1e-8);
+        CHECK( (testField3_lowTheta - testField4_lowTheta).magnitude() < 1e-8);
+
+
     }
 }

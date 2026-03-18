@@ -45,21 +45,20 @@ Core::Vector BTree::Node::computeElectricFieldFromTree(Core::Particle &targetP){
     if (numP_ == 1){
         Core::Vector efield= calculateElectricField(
                 targetP.getLocation(),
-                particle_->wrappedParticle->getLocation(),
+                particle_->bufferedTreePosition,
                 particle_->wrappedParticle->getCharge());
         return(efield);
     }
     else{
         double r = (targetP.getLocation()-centerOfCharge_).magnitude();
         double d = max_.x() - min_.x();
-        
+
         if (r > 0 && d/r < BTree::Node::theta){
             Core::Vector efield= calculateElectricField(
                     targetP.getLocation(),
                     centerOfCharge_,
                     charge_);
             return(efield);
-            
         }
         else{
             Core::Vector efield= Core::Vector(0.0,0.0,0.0);

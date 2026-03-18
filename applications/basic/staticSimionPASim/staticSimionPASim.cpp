@@ -33,11 +33,11 @@
 #include "Integration_verletIntegrator.hpp"
 #include "FileIO_ionCloudReader.hpp"
 #include "PSim_simionPotentialArray.hpp"
-#include "appUtils_simulationConfiguration.hpp"
-#include "appUtils_logging.hpp"
-#include "appUtils_stopwatch.hpp"
-#include "appUtils_signalHandler.hpp"
-#include "appUtils_commandlineParser.hpp"
+#include "AppUtils_simulationConfiguration.hpp"
+#include "AppUtils_logging.hpp"
+#include "AppUtils_stopwatch.hpp"
+#include "AppUtils_signalHandler.hpp"
+#include "AppUtils_commandlineParser.hpp"
 #include <iostream>
 #include <vector>
 
@@ -122,7 +122,7 @@ int main(int argc, const char * argv[]) {
         hdf5Writer->setParticleAttributes(auxParamNames, additionalParameterTransformFct);
 
         auto postTimestepFunction =
-                [trajectoryWriteInterval, &hdf5Writer, &additionalParameterTransformFct, &logger](
+                [trajectoryWriteInterval, &hdf5Writer, &logger](
                         Integration::AbstractTimeIntegrator* /*integrator*/,
                         std::vector<Core::Particle*>& particles, double time, int timestep,
                         bool lastTimestep)

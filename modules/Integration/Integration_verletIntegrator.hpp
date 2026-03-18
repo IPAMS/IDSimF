@@ -78,6 +78,7 @@ namespace Integration{
         void run(unsigned int nTimesteps, double dt) override;
         void runSingleStep(double dt) override;
         void finalizeSimulation() override;
+        void setTheta(double newTheta);
 
     private:
         CollisionModel::AbstractCollisionModel* collisionModel_ = nullptr; ///< a gas collision model active in the simulation

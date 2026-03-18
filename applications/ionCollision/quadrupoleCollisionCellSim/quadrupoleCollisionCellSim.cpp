@@ -33,13 +33,14 @@
 #include "PSim_particleStartSplatTracker.hpp"
 #include "Integration_parallelVerletIntegrator.hpp"
 #include "CollisionModel_HardSphere.hpp"
-#include "appUtils_simulationConfiguration.hpp"
-#include "appUtils_inputFileUtilities.hpp"
-#include "appUtils_ionDefinitionReading.hpp"
-#include "appUtils_logging.hpp"
-#include "appUtils_stopwatch.hpp"
-#include "appUtils_signalHandler.hpp"
-#include "appUtils_commandlineParser.hpp"
+#include "AppUtils_simulationConfiguration.hpp"
+#include "AppUtils_inputFileUtilities.hpp"
+#include "AppUtils_ionDefinitionReading.hpp"
+#include "AppUtils_logging.hpp"
+#include "AppUtils_stopwatch.hpp"
+#include "AppUtils_signalHandler.hpp"
+#include "AppUtils_commandlineParser.hpp"
+#include "omp.h"
 #include <iostream>
 #include <vector>
 
@@ -91,10 +92,8 @@ int main(int argc, const char * argv[]) {
         std::vector<std::string> potentialArraysNames = simConf->stringVectorParameter("potential_arrays");
         double potentialArrayScale = simConf->doubleParameter("potential_array_scale");
         std::vector<std::unique_ptr<ParticleSimulation::SimionPotentialArray>> potentialArrays =
-                AppUtils::readPotentialArrayFiles(potentialArraysNames, simConf->confBasePath(), potentialArrayScale,
-                        true);
+            simConf->readPotentialArrays("potential_arrays", potentialArrayScale, true);
 
-        //scaling factor of 0.1 because SIMION uses a value of 10000 in  Fast Adjust PAs and  mm to m is 1000 = 0.1
         std::vector<double> potentialsDc = simConf->doubleVectorParameter("dc_potentials");
         std::vector<double> potentialFactorsRf = simConf->doubleVectorParameter("rf_potential_factors");
 
@@ -144,6 +143,13 @@ int main(int argc, const char * argv[]) {
         std::vector<Core::Particle*> particlePtrs;
 
         AppUtils::readIonDefinition(particles, particlePtrs, *simConf);
+
+        std::size_t i=0;
+        for (Core::Particle* particle: particlePtrs) {
+            particle->setIndex(i);
+            ++i;
+        }
+
 
         //init gas collision models:
         CollisionModel::HardSphereModel hsModel = CollisionModel::HardSphereModel(
@@ -302,10 +308,10 @@ int main(int argc, const char * argv[]) {
 
         if (ionTerminationMode==TERMINATE) {
             otherActionsFunction = [&isIonTerminated, &ionsInactive, &startSplatTracker](
-                    Core::Vector& newPartPos, Core::Particle* particle,
+                    Core::Particle* particle,
                     int /*particleIndex*/,  double time, int /*timestep*/) {
                 // if the ion is out of the boundary box or ion has hit an electrode: Terminate
-                if (isIonTerminated(newPartPos)) {
+                if (isIonTerminated(particle->getLocation())) {
                     startSplatTracker.particleSplat(particle, time);
                     particle->setActive(false);
                     particle->setSplatTime(time);
@@ -318,13 +324,13 @@ int main(int argc, const char * argv[]) {
                     AppUtils::getStartZoneFromIonDefinition(*simConf);
 
             otherActionsFunction = [&isIonTerminated, pz = std::move(particleStartZone), &startSplatTracker](
-                    Core::Vector& newPartPos, Core::Particle* particle,
-                    int /*particleIndex*/,
-                     double time, int /*timestep*/) {
+                    Core::Particle* particle, int particleIndex, double time, int timestep) {
                 // if the ion is out of the boundary box or ion has hit an electrode: Restart in ion start zone
-                if (isIonTerminated(newPartPos)) {
-                    newPartPos = pz->getRandomParticlePosition();
-                    startSplatTracker.particleRestart(particle, particle->getLocation(), newPartPos, time);
+
+                if (isIonTerminated(particle->getLocation())) {
+                    Core::Vector oldPos = Core::Vector(particle->getLocation());
+                    particle->setLocation(pz->getRandomParticlePosition());
+                    startSplatTracker.particleRestart(particle, oldPos, particle->getLocation(), time);
                 }
             };
         }

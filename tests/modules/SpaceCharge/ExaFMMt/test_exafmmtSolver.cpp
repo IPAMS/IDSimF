@@ -58,16 +58,16 @@ TEST_CASE( "Test particle/particle interaction calculation with ExaFMMt", "[ExaF
 
         Core::Vector force1 = exafmmSolver.getEFieldFromSpaceCharge(*ions[1]);
         Core::Vector fullSumForce1 = fullSumSolver.getEFieldFromSpaceCharge(*ions[1]);
-        CHECK(vectorApproxCompare(force1, fullSumForce1) == vectorsApproxEqual);
+        CHECK_THAT(force1, ApproxEqual(fullSumForce1));
 
         Core::Vector force10 = exafmmSolver.getEFieldFromSpaceCharge(*ions[10]);
         Core::Vector fullSumForce10 = fullSumSolver.getEFieldFromSpaceCharge(*ions[10]);
-        CHECK(vectorApproxCompare(force10, fullSumForce10) == vectorsApproxEqual);
+        CHECK_THAT(force10, ApproxEqual(fullSumForce10));
     }
 
     SECTION( "Test force calculation with a large number of particles in a latticed cube"){
         std::size_t nPerDirection = 15;
-        auto ions = getIonsInLattice(nPerDirection);
+        auto ions = getIonsInLattice(nPerDirection, 1);
 
         std::size_t i = 0;
         for (auto& ion: ions){
@@ -81,15 +81,15 @@ TEST_CASE( "Test particle/particle interaction calculation with ExaFMMt", "[ExaF
 
         Core::Vector force1 = exafmmSolver.getEFieldFromSpaceCharge(*ions[1]);
         Core::Vector fullSumForce1 = fullSumSolver.getEFieldFromSpaceCharge(*ions[1]);
-        CHECK(vectorApproxCompare(force1, fullSumForce1) == vectorsApproxEqual);
+        CHECK_THAT(force1, ApproxEqual(fullSumForce1));
 
         Core::Vector force10 = exafmmSolver.getEFieldFromSpaceCharge(*ions[10]);
         Core::Vector fullSumForce10 = fullSumSolver.getEFieldFromSpaceCharge(*ions[10]);
-        CHECK(vectorApproxCompare(force10, fullSumForce10) == vectorsApproxEqual);
+        CHECK_THAT(force10, ApproxEqual(fullSumForce10));
 
         Core::Vector force100 = exafmmSolver.getEFieldFromSpaceCharge(*ions[100]);
         Core::Vector fullSumForce100 = fullSumSolver.getEFieldFromSpaceCharge(*ions[100]);
-        CHECK(vectorApproxCompare(force100, fullSumForce100) == vectorsApproxEqual);
+        CHECK_THAT(force100, ApproxEqual(fullSumForce100));
     }
 
     SECTION( "Test force calculation with small cube of charges"){
@@ -117,6 +117,6 @@ TEST_CASE( "Test particle/particle interaction calculation with ExaFMMt", "[ExaF
 
         Core::Vector force1 = exafmmSolver.getEFieldFromSpaceCharge(particles[8]);
         Core::Vector fullSumForce1 = fullSumSolver.getEFieldFromSpaceCharge(particles[8]);
-        CHECK(vectorApproxCompare(force1, fullSumForce1) == vectorsApproxEqual);
+        CHECK_THAT(force1, ApproxEqual(fullSumForce1));
     }
 }

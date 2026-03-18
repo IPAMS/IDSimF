@@ -20,7 +20,9 @@
  ****************************/
 #include "BTree_abstractNode.hpp"
 #include "Core_particle.hpp"
+#include <cassert>
 #include <iostream>
+
 
 /**
  * Constructs a tree node
@@ -28,12 +30,13 @@
  * @param max the upper corner of the node (spatial xhi,yhi,zhi corner)
  * @param parent the parent node, the new node will be a subnode of that node (can be nullptr for root nodes)
  */
-BTree::AbstractNode::AbstractNode(Core::Vector min, Core::Vector max)
-        :
-        min_(min),
-        max_(max),
-        center_(min+(max-min)/2)
-{}
+BTree::AbstractNode::AbstractNode(Core::Vector min, Core::Vector max):
+    min_(min),
+    max_(max),
+    center_(min + (max - min) / 2)
+{
+    assert( (max-min).magnitude() > 1e-10);
+}
 
 // Static methods:
 
@@ -42,6 +45,20 @@ BTree::AbstractNode::AbstractNode(Core::Vector min, Core::Vector max)
  */
 int BTree::AbstractNode::getNumberOfNodes(){
     return nNodes_;
+}
+
+/**
+ * Sets the multipole acceptance criterion (theta) for the nodes
+ */
+void BTree::AbstractNode::setTheta(double newTheta) {
+    theta = newTheta;
+}
+
+/**
+ * Gets current value of multipole acceptance criterion (theta)
+ */
+double BTree::AbstractNode::getTheta() {
+    return theta;
 }
 
 /**

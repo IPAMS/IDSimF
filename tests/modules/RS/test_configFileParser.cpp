@@ -35,6 +35,8 @@
 #include <vector>
 #include <utility>
 
+#include "RS_CrossectionThermalizingReaction.hpp"
+
 using sMap = std::map<RS::Substance*,int>;
 using sPair= sMap::value_type;
 
@@ -101,16 +103,23 @@ TEST_CASE("Test parsing of chemical systems with RS config file parser", "[RS][C
         N2.staticConcentration(3.58e16);
         std::unique_ptr<RS::SimulationConfiguration> simConf = parser.parseFile("RS_minimal_test.conf");
 
+        //substance types with optional parameters should be parsed correctly:
+        CHECK(simConf->substance(9)->type() == RS::Substance::substanceType::isotropic);
+        CHECK(simConf->substance(9)->name() == "Ar");
+
         RS::AbstractReaction* r0 = simConf->reaction(0);
         RS::AbstractReaction* r1 = simConf->reaction(1);
         RS::AbstractReaction* r3 = simConf->reaction(3);
         RS::AbstractReaction* r4 = simConf->reaction(4);
         RS::AbstractReaction* r5 = simConf->reaction(5);
+        RS::AbstractReaction* r6 = simConf->reaction(6);
+
         CHECK(r0->getTypeLabel() == "static");
         CHECK(r1->getTypeLabel() == "vanthoff");
         CHECK(r3->getTypeLabel() == "vanthoff_field");
         CHECK(r4->getTypeLabel() == "simple_step");
         CHECK(r5->getTypeLabel() == "static_thermalizing");
+        CHECK(r6->getTypeLabel() == "thermalizing");
 
         //Test if the rate constants are calculated correctly
 
@@ -163,8 +172,30 @@ TEST_CASE("Test parsing of chemical systems with RS config file parser", "[RS][C
                 "simple thermalizing reaction");
         k_test = reac_compare_5.attemptReaction(reactionConditions, &dummyParticle, 1e-5).reactionProbability;
         double k_5 = r5->attemptReaction(reactionConditions, &dummyParticle, 1e-5).reactionProbability;
-
         CHECK(Approx(k_5) == k_test);
+
+        RS::Substance ArIon("Ar+",RS::Substance::substanceType::discrete);
+        RS::Substance Ar("Ar",RS::Substance::substanceType::isotropic);
+        Ar.mass(40);
+        Ar.staticConcentration(3.0e22);
+
+        sMap eductsThermalizing;
+        sMap productsThermalizing;
+
+        eductsThermalizing.insert(sPair(&ArIon,0));
+        eductsThermalizing.insert(sPair(&Ar,1));
+        productsThermalizing.insert(sPair(&ArIon,1));
+
+        dummyParticle.setVelocity({500,0,0});
+        RS::CrossectionThermalizingReaction reac_compare_6(
+                eductsThermalizing, productsThermalizing,
+                7.4e-10,
+                "thermalizing reaction defined by reaction cross section"
+                );
+        k_test = reac_compare_6.attemptReaction(reactionConditions, &dummyParticle, 1e-8).reactionProbability;
+        double k_6 = r6->attemptReaction(reactionConditions, &dummyParticle, 1e-8).reactionProbability;
+
+        CHECK(Approx(k_6) == k_test);
     }
 
     SECTION ("Existing water cluster RS config file should parse correctly") {

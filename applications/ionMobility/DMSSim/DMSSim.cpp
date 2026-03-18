@@ -43,11 +43,11 @@
 #include "CollisionModel_MDInteractions.hpp"
 #include "CollisionModel_MDForceField_LJ12_6.hpp"
 #include "CollisionModel_SpatialFieldFunctions.hpp"
-#include "appUtils_simulationConfiguration.hpp"
-#include "appUtils_logging.hpp"
-#include "appUtils_stopwatch.hpp"
-#include "appUtils_signalHandler.hpp"
-#include "appUtils_commandlineParser.hpp"
+#include "AppUtils_simulationConfiguration.hpp"
+#include "AppUtils_logging.hpp"
+#include "AppUtils_stopwatch.hpp"
+#include "AppUtils_signalHandler.hpp"
+#include "AppUtils_commandlineParser.hpp"
 #include "dmsSim_dmsFields.hpp"
 #include <iostream>
 #include <cmath>
@@ -78,8 +78,8 @@ int main(int argc, const char * argv[]) {
         std::vector<unsigned int> nParticles = simConf->unsignedIntVectorParameter("n_particles");
         unsigned int nSteps = simConf->unsignedIntParameter("sim_time_steps");
         unsigned int nStepsPerOscillation = simConf->unsignedIntParameter("sim_time_steps_per_sv_oscillation");
-        int concentrationWriteInterval = simConf->intParameter("concentrations_write_interval");
-        int trajectoryWriteInterval = simConf->intParameter("trajectory_write_interval");
+        unsigned int concentrationWriteInterval = simConf->unsignedIntParameter("concentrations_write_interval");
+        unsigned int trajectoryWriteInterval = simConf->unsignedIntParameter("trajectory_write_interval");
         double spaceChargeFactor = simConf->doubleParameter("space_charge_factor");
 
 
@@ -131,7 +131,7 @@ int main(int argc, const char * argv[]) {
         if (backgroundTempStr=="isotherm") {
             //backgroundTempMode = ISOTHERM;
             double backgroundTemperature_K = simConf->doubleParameter("background_temperature_K");
-            backgroundTemperatureFct = CollisionModel::getConstantDoubleFunction(backgroundTemperature_K);
+            backgroundTemperatureFct = CollisionModel::getConstantScalarFunction(backgroundTemperature_K);
         }
         else if (backgroundTempStr=="linear_gradient") {
             //backgroundTempMode = LINEAR_GRADIENT;
@@ -319,8 +319,10 @@ int main(int argc, const char * argv[]) {
                 };
 
         auto otherActionsFct = [electrodeHalfDistance_m, electrodeLength_m, &ionsInactive](
-                Core::Vector& newPartPos, Core::Particle* particle,
-                int /*particleIndex*/,  double time, int /*timestep*/) {
+                Core::Particle* particle, int /*particleIndex*/,
+                double time, int /*timestep*/) {
+
+            Core::Vector newPartPos = particle->getLocation();
 
             if (std::fabs(newPartPos.z())>=electrodeHalfDistance_m) {
                 particle->setActive(false);
@@ -338,7 +340,7 @@ int main(int argc, const char * argv[]) {
         std::unique_ptr<CollisionModel::AbstractCollisionModel> collisionModelPtr;
         if (collisionType==SDS || collisionType==HS || collisionType==MD) {
             // prepare static pressure and temperature functions
-            auto staticPressureFct = CollisionModel::getConstantDoubleFunction(backgroundPressure_Pa);
+            auto staticPressureFct = CollisionModel::getConstantScalarFunction(backgroundPressure_Pa);
 
             std::function<Core::Vector(const Core::Vector&)> velocityFct;
 

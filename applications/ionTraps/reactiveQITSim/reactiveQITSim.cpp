@@ -42,11 +42,11 @@
 #include "FileIO_idealizedQitFFTWriter.hpp"
 #include "CollisionModel_HardSphere.hpp"
 #include "CollisionModel_MultiCollisionModel.hpp"
-#include "appUtils_simulationConfiguration.hpp"
-#include "appUtils_logging.hpp"
-#include "appUtils_stopwatch.hpp"
-#include "appUtils_signalHandler.hpp"
-#include "appUtils_commandlineParser.hpp"
+#include "AppUtils_simulationConfiguration.hpp"
+#include "AppUtils_logging.hpp"
+#include "AppUtils_stopwatch.hpp"
+#include "AppUtils_signalHandler.hpp"
+#include "AppUtils_commandlineParser.hpp"
 #include "json.h"
 #include <iostream>
 #include <vector>
@@ -344,10 +344,8 @@ int main(int argc, const char * argv[]) {
 
         unsigned int ionsInactive = 0;
         auto otherActionsFunctionQIT = [maxIonRadius_m, &ionsInactive, &startSplatTracker]
-                (Core::Vector& newPartPos, Core::Particle* particle,
-                 int /*particleIndex*/,  double time, int /*timestep*/) {
-            if (newPartPos.magnitude()>maxIonRadius_m) {
-
+                (Core::Particle* particle, int /*particleIndex*/,  double time, int /*timestep*/) {
+            if (particle->getLocation().magnitude()>maxIonRadius_m) {
                 particle->setActive(false);
                 particle->setSplatTime(time);
                 startSplatTracker.particleSplat(particle, time);

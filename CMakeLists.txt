@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.9)
+cmake_minimum_required(VERSION 3.12)
 project(IDSimF)
 
 # use CTest extension
@@ -7,7 +7,16 @@ enable_testing()
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+#add_compile_definitions(PUBLIC _GLIBCXX_USE_CXX11_ABI=0)
 add_compile_options(-Wdelete-non-virtual-dtor -Wall -Wextra -Wsign-conversion -Wfloat-equal -Wfloat-conversion -Wimplicit-fallthrough -Wpedantic)
+#set(
+#        CMAKE_CXX_FLAGS
+#        "${CMAKE_CXX_FLAGS} -std=c++11 -stdlib=libc++ -isysroot/Library/Developer/CommandLineTools/SDKs/MacOSX15.sdk -arch arm64"
+#)
+
+#add_compile_options(-stdlib=libc++) #-Wzero-as-null-pointer-constant)
+#add_link_options(-stdlib=libc++)
+
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     add_compile_options(-Wshorten-64-to-32 -stdlib=libc++) #-Wzero-as-null-pointer-constant)
@@ -47,23 +56,54 @@ if(USE_OpenMP)
     endif()
 endif()
 
-find_package(HDF5 COMPONENTS CXX HL)
-if(HDF5_FOUND)
-    message(STATUS "HDF5 Found, Version:")
-    message(STATUS ${HDF5_VERSION})
+if(HDF5_MANUAL_ROOT)
+    message(STATUS "HDF5 root manually specified, root:")
+    message(STATUS ${HDF5_MANUAL_ROOT})
+    set(HDF5_INCLUDE_DIRS
+            ${HDF5_MANUAL_ROOT}/c++/src
+            ${HDF5_MANUAL_ROOT}/src
+            ${HDF5_MANUAL_ROOT}/src/H5FDsubfiling
+            ${HDF5_MANUAL_ROOT}/build/src
+    )
+    set(HDF5_LIBRARIES
+            ${HDF5_MANUAL_ROOT}/build/bin/libhdf5.dylib
+            ${HDF5_MANUAL_ROOT}/build/bin/libhdf5_hl.dylib
+    )
+    set(HDF5_CXX_LIBRARIES
+            ${HDF5_MANUAL_ROOT}/build/bin/libhdf5_cpp.dylib
+            ${HDF5_MANUAL_ROOT}/build/bin/libhdf5_hl_cpp.dylib
+    )
+else()
+    find_package(HDF5 COMPONENTS CXX HL)
+    if(HDF5_FOUND)
+        message(STATUS "HDF5 Found, Version:")
+        message(STATUS ${HDF5_VERSION})
 
-    set(USE_OLD_HDF5_API false)
-    if(${HDF5_VERSION} VERSION_LESS_EQUAL "1.14.1")
-        set(USE_OLD_HDF5_API true)
+        option(FORCE_OLD_HDF5_API "Force old HDF5 API" OFF)
+        if(FORCE_OLD_HDF5_API)
+            set(USE_OLD_HDF5_API true)
+        else()
+            set(USE_OLD_HDF5_API false)
+            if(${HDF5_VERSION})
+                if(${HDF5_VERSION} VERSION_LESS_EQUAL "1.14.1")
+                    set(USE_OLD_HDF5_API true)
+                endif()
+            endif()
+        endif()
+
+        if(USE_OLD_HDF5_API)
+            message(STATUS "Using old HDF5 API Calls")
+            add_compile_definitions(OLD_HDF5_API)
+        endif()
     endif()
-
-    if(USE_OLD_HDF5_API)
-        message(STATUS "Using old HDF5 API Calls")
-        add_compile_definitions(OLD_HDF5_API)
-    endif()
-
 endif()
 
+message(STATUS "HDF5 libs")
+message(STATUS ${HDF5_LIBRARIES})
+message(STATUS ${HDF5_CXX_LIBRARIES})
+
+message(STATUS "HDF5 include dirs:")
+message(STATUS ${HDF5_INCLUDE_DIRS})
 include_directories(${HDF5_INCLUDE_DIRS})
 
 
@@ -98,6 +138,7 @@ endif()
 
 # third party libraries ------------------------------------
 add_subdirectory(libs/spdlog)
+add_subdirectory(libs/jsoncpp)
 # add_subdirectory(libs/cxxopts)
 
 add_subdirectory (modules/Core)
@@ -107,6 +148,7 @@ add_subdirectory (modules/BackgroundInteraction/CollisionModels)
 add_subdirectory (modules/FileIO)
 add_subdirectory (modules/Integration)
 add_subdirectory (modules/ParticleSimulation)
+add_subdirectory (modules/AppUtils)
 
 add_subdirectory (tests/modules/Core)
 add_subdirectory (tests/modules/SpaceCharge)
@@ -116,7 +158,7 @@ add_subdirectory (tests/modules/ParticleSimulation)
 add_subdirectory (tests/modules/Integration)
 add_subdirectory (tests/modules/FileIO)
 add_subdirectory (tests/simulations)
-add_subdirectory (tests/applications)
+add_subdirectory (tests/modules/AppUtils)
 
 add_subdirectory (tests/benchmarks/errorfunction)
 add_subdirectory (tests/benchmarks/filewriter/HDF5filewriter)
@@ -134,11 +176,11 @@ if (USE_EIGEN)
     add_subdirectory (tests/benchmarks/vector/vectorImplementationsCompare)
 endif()
 
-add_subdirectory (applications/util)
 add_subdirectory (applications/basic/spaceChargeMinimalSim)
 add_subdirectory (applications/basic/spaceChargeSimpleSim)
 add_subdirectory (applications/basic/staticSimionPASim)
 add_subdirectory (applications/ionCollision/quadrupoleCollisionCellSim)
+add_subdirectory (applications/ionCollision/collisionSamplingSim)
 add_subdirectory (applications/ionMobility/util)
 add_subdirectory (applications/ionMobility/DMSSim)
 add_subdirectory (applications/ionMobility/DMSSimplifiedSim)
@@ -152,3 +194,5 @@ add_subdirectory (applications/ionTraps/generalTrapSim)
 add_subdirectory (applications/ionTraps/LITSim)
 add_subdirectory (applications/ionTraps/reactiveQITSim)
 add_subdirectory (applications/chemistry/idealIsothermReactorSim)
+add_subdirectory (applications/molecularDynamics/idealizedMultipleCollisions)
+add_subdirectory (applications/molecularDynamics/forceFieldCalculation)

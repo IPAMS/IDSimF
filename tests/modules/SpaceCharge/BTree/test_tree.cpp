@@ -28,6 +28,7 @@
 #include "Core_vector.hpp"
 #include "Core_particle.hpp"
 #include "BTree_tree.hpp"
+#include "BTree_parallelTree.hpp"
 #include "PSim_boxStartZone.hpp"
 #include "PSim_util.hpp"
 #include "SC_fullSumSolver.hpp"
@@ -91,6 +92,9 @@ TEST_CASE( "Test serial tree semantics / particle management","[Tree]") {
         CHECK(testTree.getRoot()->getNumberOfParticles() == 1);
 
         CHECK(testTree.getParticle(1)->wrappedParticle == &testIon1);
+
+        Core::Particle testIon3(Core::Vector(0.0,0.0,0.0), 1.0);
+        testTree.insertParticle(testIon3, 3);
     }
 
     SECTION( "Test external index particle access"){
@@ -132,15 +136,68 @@ TEST_CASE( "Test serial tree semantics / particle management","[Tree]") {
         Core::Particle testIon2(Core::Vector(2.0,1.0,1.0), 1.0);
         testTree_2.insertParticle(testIon2,20);
         testTree_2.computeChargeDistribution();
-
-        testTree_2.updateParticleLocation(10, Core::Vector(2.01,1.0,1.0));
+        testIon1.setLocation({2.01,1.0,1.0});
+        testTree_2.updateParticleLocation(10);
         CHECK( testIon1.getLocation() == Core::Vector(2.01,1.0,1.0));
         CHECK( testTree_2.getNumberOfParticles() == 2);
         CHECK( testTree_2.getRoot()->getCenterOfCharge() == Core::Vector(2.005,1.0,1.0));
 
-        testTree_2.updateParticleLocation(10,Core::Vector(2.01001,1.0,1.0));
+        testIon1.setLocation({2.01001,1.0,1.0});
+        testTree_2.updateParticleLocation(10);
         CHECK( testIon1.getLocation() == Core::Vector(2.01001,1.0,1.0));
         CHECK( testTree_2.getRoot()->getCenterOfCharge() == Core::Vector(2.005005,1.0,1.0));
+
+        CHECK_NOTHROW(testTree_2.getRoot()->testSpatialTreeIntegrity());
+        CHECK_NOTHROW(testTree_2.getRoot()->testNodeIntegrity(0));
+        CHECK_NOTHROW(testTree_2.getRoot()->testNodeParticleIntegrity());
+    }
+
+    SECTION("Test resilience against external particle position updates") {
+
+        //insert particles
+        auto ions = getIonsInLattice(5, +1);
+        std::size_t i = 0;
+        for (auto& ion: ions){
+            testTree.insertParticle(*ion, i);
+            ++i;
+        }
+        testTree.computeChargeDistribution();
+        CHECK_THAT(
+            testTree.getRoot()->getCenterOfCharge(),
+            ApproxEqual(Core::Vector(0.4,0.4,0.4)));
+
+        //get force to a static test ion and shift particles externally:
+        Core::Particle staticTestIon(Core::Vector(0.0,0.0,0.0), 1.0);
+        Core::Vector forceBeforeShift = testTree.getEFieldFromSpaceCharge(staticTestIon);
+        for (auto& ion: ions) {
+            ion->setLocation(ion->getLocation() + Core::Vector(0.5,0.5,0.0));
+        }
+        testTree.computeChargeDistribution();
+        CHECK_THAT(
+            testTree.getRoot()->getCenterOfCharge(),
+            ApproxEqual(Core::Vector(0.4,0.4,0.4)));
+
+        //force calculation in tree should not be affected by external position shifts without notification of tree:
+        Core::Vector forceAfterShift = testTree.getEFieldFromSpaceCharge(staticTestIon);
+        CHECK_THAT(forceBeforeShift, ApproxEqual(forceAfterShift, 1e-15));
+
+        //notification should change state of tree:
+        testTree.updateParticleLocation(0);
+        testTree.computeChargeDistribution();
+
+        CHECK_THAT(
+            testTree.getRoot()->getCenterOfCharge(),
+            ApproxEqual(Core::Vector(0.404,0.404,0.4)));
+
+        testTree.updateParticleLocation(1);
+        testTree.updateParticleLocation(10);
+        testTree.updateParticleLocation(20);
+
+        testTree.computeChargeDistribution();
+
+        CHECK_THAT(
+            testTree.getRoot()->getCenterOfCharge(),
+            ApproxEqual(Core::Vector(0.416,0.416,0.4)));
     }
 
     SECTION( "Test tree integrity with large number of random particles"){
@@ -163,8 +220,8 @@ TEST_CASE( "Test serial tree semantics / particle management","[Tree]") {
 
 TEST_CASE( "Test serial tree charge distribution calculation","[Tree]"){
     BTree::Tree testTree(
-            Core::Vector(-2.0, -2.0, -2.0),
-            Core::Vector(2.0, 2.0, 2.0));
+            Core::Vector(-4.0, -4.0, -4.0),
+            Core::Vector(4.0, 4.0, 4.0));
 
     SECTION("Test basic particle insertion, deletion and charge distribution calculation"){
         //Test particle add increases the number of particles:
@@ -198,11 +255,9 @@ TEST_CASE( "Test serial tree charge distribution calculation","[Tree]"){
 
         testTree.computeChargeDistribution();
         CHECK(testTree.getEFieldFromSpaceCharge(testIon1) != Core::Vector(0.0,0.0,0.0));
-        CHECK(
-                vectorApproxCompare(
-                        testTree.getEFieldFromSpaceCharge(testIon2),
-                        Core::Vector(0.0,0.0,0.0))
-                        ==  vectorsApproxEqual);
+        CHECK_THAT(
+            testTree.getEFieldFromSpaceCharge(testIon2),
+            ApproxEqual(Core::Vector(0.0,0.0,0.0)));
         CHECK(testTree.getEFieldFromSpaceCharge(testIon3) != Core::Vector(0.0,0.0,0.0));
     }
 
@@ -267,9 +322,9 @@ TEST_CASE( "Test serial tree charge distribution calculation","[Tree]"){
         CHECK(std::abs(topForce.z()) < 1 );
     }
 
-    SECTION( "Test force calculation with a large number of particles in a latticed cube"){
+    SECTION("Test force calculation with a large number of positive particles in a latticed cube"){
         unsigned int nPerDirection = 20;
-        auto ions = getIonsInLattice(nPerDirection);
+        auto ions = getIonsInLattice(nPerDirection, +1);
 
         SpaceCharge::FullSumSolver fullSumSolver;
         std::size_t i = 0;
@@ -288,6 +343,28 @@ TEST_CASE( "Test serial tree charge distribution calculation","[Tree]"){
 
         Core::Vector force10 = testTree.getEFieldFromSpaceCharge(*ions[10]);
         Core::Vector fullSumForce10 = fullSumSolver.getEFieldFromSpaceCharge(*ions[10]);
+        CHECK( ((force10-fullSumForce10).magnitude() / force10.magnitude()) < 1.5e-2);
+
+
+        // shift particle cube, reinsert particles and check forces:
+        i = 0;
+        for (auto& ion: ions){
+            ion->setLocation(ion->getLocation() + Core::Vector(1.0, 1.1, 1.2));
+            testTree.updateParticleLocation(i);
+            ++i;
+        }
+
+        testTree.computeChargeDistribution();
+        CHECK_NOTHROW(testTree.getRoot()->testSpatialTreeIntegrity());
+        CHECK_NOTHROW(testTree.getRoot()->testNodeIntegrity(0));
+        CHECK_NOTHROW(testTree.getRoot()->testNodeParticleIntegrity());
+
+        force1 = testTree.getEFieldFromSpaceCharge(*ions[1]);
+        fullSumForce1 = fullSumSolver.getEFieldFromSpaceCharge(*ions[1]);
+        CHECK( ((force1-fullSumForce1).magnitude() / force1.magnitude()) < 2e-2);
+
+        force10 = testTree.getEFieldFromSpaceCharge(*ions[10]);
+        fullSumForce10 = fullSumSolver.getEFieldFromSpaceCharge(*ions[10]);
         CHECK( ((force10-fullSumForce10).magnitude() / force10.magnitude()) < 1.5e-2);
     }
 }

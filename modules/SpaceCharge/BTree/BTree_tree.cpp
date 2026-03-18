@@ -77,6 +77,8 @@ void BTree::Tree::insertParticle(Core::Particle &particle, size_t ext_index){
  */
 BTree::TreeParticle* BTree::Tree::insertParticle_(Core::Particle &particle, size_t ext_index){
 
+    assert( !root_->locationNotInNode(particle.getLocation()));
+
     //create new wrapped particle for tree:
     auto treeParticle = std::make_unique<BTree::TreeParticle>(&particle);
     BTree::TreeParticle* treeParticlePtr = treeParticle.get();
@@ -119,36 +121,33 @@ BTree::TreeParticle* BTree::Tree::getParticle(size_t ext_index) const{
 }
 
 /**
- * Updates the location of a particle in the tree
- * (the position of particles managed by the tree should not be updated directly via the particle,
- * this will invalidate the tree)
+ * Notifies the tree, that a particle position has been updated
  *
- * @param ext_index the external index of the particle to update
- * @param newLocation a new location of that particle
+ * @param ext_index the external index of the particle to update the tree position for
  */
-void BTree::Tree::updateParticleLocation(size_t ext_index, Core::Vector newLocation){
+void BTree::Tree::updateParticleLocation(size_t ext_index){
     //test if location has changed
     //if yes: test if particle is still in the node
 
     BTree::TreeParticle* particle = this->getParticle(ext_index);
-    BTree::AbstractNode* pNode = particle->getHostNode();
-    
-    if (particle->wrappedParticle->getLocation() == newLocation){
+    if (particle->bufferedTreePosition == particle->wrappedParticle->getLocation()){
         return;
     }
-    else if ( !(
-                 newLocation.x() <= pNode->getMin().x() ||
-                 newLocation.y() <= pNode->getMin().y() ||
-                 newLocation.z() <= pNode->getMin().z()
+    Core::Vector newPos = Core::Vector(particle->wrappedParticle->getLocation());
+    BTree::AbstractNode* pNode = particle->getHostNode();
+    if ( !(
+                 newPos.x() <= pNode->getMin().x() ||
+                 newPos.y() <= pNode->getMin().y() ||
+                 newPos.z() <= pNode->getMin().z()
                 )
                  &&
                 !(
-                 newLocation.x() >= pNode->getMax().x() ||
-                 newLocation.y() >= pNode->getMax().y() ||
-                 newLocation.z() >= pNode->getMax().z()
+                 newPos.x() >= pNode->getMax().x() ||
+                 newPos.y() >= pNode->getMax().y() ||
+                 newPos.z() >= pNode->getMax().z()
                 )  )
     {
-        particle->wrappedParticle->setLocation(newLocation);
+        particle->bufferedTreePosition = newPos;
         pNode->updateSelf();
         pNode->updateParents();
     }
@@ -156,7 +155,6 @@ void BTree::Tree::updateParticleLocation(size_t ext_index, Core::Vector newLocat
         // we have to reinsert
         Core::Particle* wrappedParticle = particle->wrappedParticle;
         this->removeParticle(ext_index); //this destroys the reference to particle (the TreeParticle)
-        wrappedParticle->setLocation(newLocation);
         BTree::TreeParticle* newTreeParticle = this->insertParticle_(*wrappedParticle, ext_index);
         newTreeParticle->getHostNode()->updateSelf();
         newTreeParticle->getHostNode()->updateParents();

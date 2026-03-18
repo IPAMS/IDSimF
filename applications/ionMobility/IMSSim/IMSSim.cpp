@@ -43,11 +43,12 @@
 #include "CollisionModel_SoftSphere.hpp"
 #include "CollisionModel_MDInteractions.hpp"
 #include "CollisionModel_MDForceField_LJ12_6.hpp"
-#include "appUtils_simulationConfiguration.hpp"
-#include "appUtils_logging.hpp"
-#include "appUtils_stopwatch.hpp"
-#include "appUtils_signalHandler.hpp"
-#include "appUtils_commandlineParser.hpp"
+#include "CollisionModel_MDForceField_Buckingham.hpp"
+#include "AppUtils_simulationConfiguration.hpp"
+#include "AppUtils_logging.hpp"
+#include "AppUtils_stopwatch.hpp"
+#include "AppUtils_signalHandler.hpp"
+#include "AppUtils_commandlineParser.hpp"
 #include "FileIO_MolecularStructureReader.hpp"
 #include "Core_randomGenerators.hpp"
 #include "json.h"
@@ -79,6 +80,12 @@ int main(int argc, const char *argv[]){
         std::string confFileName = cmdLineParser.confFileName();
         AppUtils::simConf_ptr simConf = cmdLineParser.simulationConfiguration();
 
+        // optionally setting random generator seed manually (for debugging / reproduction purposes):
+        if (simConf->isParameter("random_seed")) {
+            unsigned int randomSeed = simConf->unsignedIntParameter("random_seed");
+            Core::globalRandomGeneratorPool->setSeedForElements(randomSeed);
+        }
+
         std::vector<unsigned int> nParticles = simConf->unsignedIntVectorParameter("n_particles");
         int nSteps = simConf->intParameter("sim_time_steps");
         int concentrationWriteInterval = simConf->intParameter("concentrations_write_interval");
@@ -104,6 +111,8 @@ int main(int argc, const char *argv[]){
         
         std::vector<std::string> collisionGasIdentifier;
         std::vector<std::string> particleIdentifier;
+        std::string potentialsFF;
+        std::string potentialFunction;
         std::vector<double> collisionGasPolarizability_m3;
         double subIntegratorIntegrationTime_s = 0;
         double subIntegratorStepSize_s = 0;
@@ -125,8 +134,9 @@ int main(int argc, const char *argv[]){
             saveTrajectory = simConf->boolParameter("save_trajectory");
             trajectoryDistance_m = simConf->doubleParameter("trajectory_distance_m");
             saveTrajectoryStartTimeStep = simConf->unsignedIntParameter("trajectory_start_time_step");
+            potentialsFF = simConf->stringParameter("force_field");
+            potentialFunction = simConf->stringParameter("potential_function");
         }
-
         std::size_t nBackgroundGases = backgroundPartialPressures_Pa.size();
         if (collisionGasMasses_Amu.size()!=nBackgroundGases || collisionGasDiameters_angstrom.size()!=nBackgroundGases) {
             throw std::invalid_argument("Inconsistent background gas configuration");
@@ -237,6 +247,7 @@ int main(int argc, const char *argv[]){
                 uniqueReactivePartPtr particle = std::make_unique<RS::ReactiveParticle>(subst);
 
                 particle->setLocation(initialPositions[k]);
+                particle->setFloatAttribute(key_ChemicalIndex, substanceIndices.at(particle->getSpecies()));
                 if(transportModelType=="btree_MD"){
                     particle->setMolecularStructure(molecularStructureCollection.at(particleIdentifier[i]));
                     particle->setDiameter(particle->getMolecularStructure()->getDiameter());
@@ -332,9 +343,9 @@ int main(int argc, const char *argv[]){
 
         auto otherActionsFunctionIMSSimple =
                 [stopPosX_m, &ionsInactive]
-                        (Core::Vector& newPartPos, Core::Particle* particle, int /*particleIndex*/, double time,
+                        (Core::Particle* particle, int /*particleIndex*/, double time,
                          int /*timestep*/) {
-                    if (newPartPos.x()>=stopPosX_m) {
+                    if (particle->getLocation().x()>=stopPosX_m) {
                         particle->setActive(false);
                         particle->setSplatTime(time);
                         ionsInactive++;
@@ -343,9 +354,9 @@ int main(int argc, const char *argv[]){
 
         auto otherActionsFunctionIMSVerlet =
                 [&otherActionsFunctionIMSSimple]
-                        (Core::Vector& newPartPos, Core::Particle* particle, int particleIndex,
+                        (Core::Particle* particle, int particleIndex,
                           double time, int timestep) {
-                    otherActionsFunctionIMSSimple(newPartPos, particle, particleIndex, time, timestep);
+                    otherActionsFunctionIMSSimple(particle, particleIndex, time, timestep);
                 };
 
         //define and init transport models and trajectory integrators:
@@ -411,9 +422,13 @@ int main(int argc, const char *argv[]){
             //prepare multimodel with multiple MD models (one per collision gas)
             std::vector<std::unique_ptr<CollisionModel::AbstractCollisionModel>> mdModels;
             for (std::size_t i = 0; i<nBackgroundGases; ++i) {
-                CollisionModel::MDForceField_LJ12_6 forceField(collisionGasPolarizability_m3[i]);
-                auto forceFieldPtr = std::make_unique<CollisionModel::MDForceField_LJ12_6>(forceField);
-                auto mdModel = std::make_unique<CollisionModel::MDInteractionsModel>(
+                
+                std::unique_ptr<CollisionModel::MDInteractionsModel> mdModel;
+
+                if(potentialFunction == "LJ"){
+                    CollisionModel::MDForceField_LJ12_6 forceField(collisionGasPolarizability_m3[i], potentialsFF);
+                    auto forceFieldPtr = std::make_unique<CollisionModel::MDForceField_LJ12_6>(forceField);
+                    mdModel = std::make_unique<CollisionModel::MDInteractionsModel>(
                         backgroundPartialPressures_Pa[i],
                         backgroundTemperature_K,
                         collisionGasMasses_Amu[i],
@@ -426,7 +441,26 @@ int main(int argc, const char *argv[]){
                         spawnRadius_m,
                         std::move(forceFieldPtr),
                         molecularStructureCollection);
-
+                }
+                else if(potentialFunction == "Buckingham"){
+                    CollisionModel::MDForceField_Buckingham forceField(collisionGasPolarizability_m3[i], potentialsFF);
+                    auto forceFieldPtr = std::make_unique<CollisionModel::MDForceField_Buckingham>(forceField);
+                    forceFieldPtr->populateInteractionTable(particlesPtrs, molecularStructureCollection, collisionGasIdentifier[i]);
+                    mdModel = std::make_unique<CollisionModel::MDInteractionsModel>(
+                        backgroundPartialPressures_Pa[i],
+                        backgroundTemperature_K,
+                        collisionGasMasses_Amu[i],
+                        collisionGasDiameters_m[i],
+                        collisionGasIdentifier[i],
+                        subIntegratorIntegrationTime_s, 
+                        subIntegratorStepSize_s,
+                        collisionRadiusScaling,
+                        angleThetaScaling,
+                        spawnRadius_m,
+                        std::move(forceFieldPtr),
+                        molecularStructureCollection);
+                }
+            
                 if (saveTrajectory){
                     mdModel->setTrajectoryWriter(projectName+"_md_trajectories.txt",
                                                  trajectoryDistance_m, saveTrajectoryStartTimeStep);
@@ -492,6 +526,7 @@ int main(int argc, const char *argv[]){
         AppUtils::Stopwatch stopWatch;
         stopWatch.start();
 
+        timestepWriteFctSimple(particlesPtrs, 0.0, 0, false); //explicitly write state before first timestep
         for (int step = 0; step<nSteps; step++) {
             if (step%concentrationWriteInterval==0) {
                 resultFilewriter.writeTimestep(rsSim);

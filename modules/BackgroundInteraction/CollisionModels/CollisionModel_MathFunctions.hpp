@@ -35,6 +35,10 @@
 namespace CollisionModel {
 
     Core::Vector sphereRand(double r);
+
+    double calcSign(double value);
+    void rotate(const Core::Vector &angles, Core::Vector& position);
+
 }
 
 #endif /* Collision_MathFunctions_hpp */

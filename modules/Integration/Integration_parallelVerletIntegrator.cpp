@@ -59,7 +59,6 @@ Integration::ParallelVerletIntegrator::ParallelVerletIntegrator(
  */
 void Integration::ParallelVerletIntegrator::addParticle(Core::Particle *particle){
     particles_.push_back(particle);
-    newPos_.emplace_back(Core::Vector(0,0,0));
     a_t_.emplace_back(Core::Vector(0,0,0));
     a_tdt_.emplace_back(Core::Vector(0,0,0));
 
@@ -108,38 +107,52 @@ void Integration::ParallelVerletIntegrator::run(unsigned int nTimesteps, double 
  */
 void Integration::ParallelVerletIntegrator::runSingleStep(double dt){
 
-    //std::cout << "runSingleStep "<<dt<<" "<<time_<<std::endl;
-    //first: Generate new particles if necessary
     bearParticles_(time_);
 
     int ver=0;
-
-    // Feld, das für die Kraftberechnung benutzt wird
-    // Vector of tree nodes which is used for the serialized, non recursive force calculation
-    // (
-    //std::vector<BTree::ParallelNode*> MyNod(numberOfNodes_, nullptr);
-
-    //
 
     if (collisionModel_ !=nullptr){
         collisionModel_->updateModelTimestepParameters(timestep_, time_);
     }
     std::size_t i;
     #pragma omp parallel \
-            default(none) shared(newPos_, a_tdt_, a_t_, dt, particles_) \
-            private(i) //firstprivate(MyNod)
+            default(none) shared(a_t_, dt, particles_) \
+            private(i)
     {
-
         #pragma omp for schedule(dynamic, 40)
-        for (i=0; i<nParticles_; i++){
+        for (i=0; i<nParticles_; ++i){
 
             if (particles_[i]->isActive()){
+
+                particles_[i]->setLocation(
+                    particles_[i]->getLocation() + particles_[i]->getVelocity() * dt + a_t_[i]*(1.0/2.0*dt*dt));
 
                 if (collisionModel_ != nullptr) {
                     collisionModel_->updateModelParticleParameters(*(particles_[i]));
                 }
+            }
+        }
+    }
 
-                newPos_[i] = particles_[i]->getLocation() + particles_[i]->getVelocity() * dt + a_t_[i]*(1.0/2.0*dt*dt);
+    // Update particle positions and serialized structure of the tree
+    for (std::size_t i=0; i<nParticles_; i++){
+        if (particles_[i]->isActive()){
+            tree_.updateParticleLocation(i, &ver);
+        }
+    }
+
+    // Update serialized tree structure:
+    tree_.updateNodes(ver);
+
+    // Now calculate acceleration and velocity and perform particle modification in a parallel way
+    #pragma omp parallel \
+    default(none) shared(a_tdt_, a_t_, dt, particles_) \
+    private(i)
+    {
+        #pragma omp for schedule(dynamic, 40)
+        for (i=0; i<nParticles_; ++i){
+
+            if (particles_[i]->isActive()){
                 a_tdt_[i] = accelerationFunction_(particles_[i], i, tree_, time_, timestep_);
                 //acceleration changes due to background interaction:
 
@@ -152,34 +165,18 @@ void Integration::ParallelVerletIntegrator::runSingleStep(double dt){
 
                 //velocity changes due to background interaction:
                 if (collisionModel_ != nullptr) {
-                    //std::cout << "before:" << particles_[i]->getVelocity() << std::endl;
                     collisionModel_->modifyVelocity(*(particles_[i]),dt);
-                    //std::cout << "after:" << particles_[i]->getVelocity() << std::endl;
+                    collisionModel_->modifyPosition(*(particles_[i]), dt);
+                }
+
+                // other actions:
+                if (otherActionsFunction_ != nullptr) {
+                    otherActionsFunction_(particles_[i], i, time_, timestep_);
                 }
             }
         }
     }
 
-    // First find all new positions, then perform otherActions then update tree.
-    // This ensures that all new particle positions are found with the state from
-    // last time step. No particle positions are found with a partly updated tree.
-    // Additionally, the update step is not (yet) parallel.
-    for (std::size_t i=0; i<nParticles_; i++){
-        if (particles_[i]->isActive()){
-            //position changes due to background interaction:
-            if (collisionModel_ != nullptr) {
-                collisionModel_->modifyPosition(newPos_[i], *(particles_[i]), dt);
-            }
-
-            if (otherActionsFunction_ != nullptr) {
-                otherActionsFunction_(newPos_[i], particles_[i], i, time_, timestep_);
-            }
-            tree_.updateParticleLocation(i, newPos_[i], &ver);
-        }
-    }
-
-    // Update serialized tree structure:
-    tree_.updateNodes(ver);
     time_ = time_ + dt;
     timestep_++;
     if (postTimestepWriteFunction_ != nullptr) {
@@ -195,5 +192,13 @@ void Integration::ParallelVerletIntegrator::finalizeSimulation(){
         postTimestepWriteFunction_(this, particles_, time_, timestep_, true);
     }
 }
+
+/**
+ * Sets the theta value (multipole acceptance criterion) for the tree used by the integrator
+ */
+void Integration::ParallelVerletIntegrator::setTheta(double newTheta) {
+    tree_.getRoot()->setTheta(newTheta);
+}
+
 
 

@@ -14,7 +14,7 @@
 
 #include "CollisionModel_StatisticalDiffusion.hpp"
 #include "Core_particle.hpp"
-#include "appUtils_stopwatch.hpp"
+#include "AppUtils_stopwatch.hpp"
 
 #include <iostream>
 
@@ -34,7 +34,7 @@ void performBenchmark(int nSamples, double dt){
     for (int i=0; i< nSamples; ++i){
         Core::Vector acceleration {200, 0.0, 0.0};
         sds.modifyAcceleration(acceleration, ion, dt);
-        sds.modifyPosition(ion.getLocation(), ion, dt);
+        sds.modifyPosition(ion, dt);
     }
 
     Core::Vector ionLoc = ion.getLocation();

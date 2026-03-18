@@ -4,7 +4,7 @@ set(SOURCE_FILES
         IMSSim.cpp)
 
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
-target_link_libraries(${PROJECT_NAME} core apputils spacecharge rs collisionmodels particlesimulation)
+target_link_libraries(${PROJECT_NAME} core apputils particlesimulation file_io integration spacecharge rs collisionmodels)
 
 add_test(NAME app_ionMobility_IMSSim_waterCluster_HS COMMAND ${PROJECT_NAME}
         "example/RS_waterCluster_HS.json" "run_BT-RS-IMSSim_waterCluster_HS" -n ${N_THREADS})

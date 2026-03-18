@@ -81,8 +81,7 @@ namespace Integration{
          * in every time step of the integration
          */
         typedef std::function
-                <void (Core::Vector& newPartPos,
-                       Core::Particle* particle,
+                <void (Core::Particle* particle,
                        std::size_t particleIndex,
                        double time,
                        unsigned int timestep)>

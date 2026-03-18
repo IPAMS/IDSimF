@@ -67,7 +67,7 @@ Simulation configuration description
             [[x low, x high], [y low, y high], [z low, z high]] 
     
 ``wave_amplitude_V`` : float
-    Maximum aplitude (in V) of the traveling wave.
+    Maximum amplitude (in V) of the traveling wave.
     
 ``wave_frequency_Hz`` : float
     Frequency (in Hz) with which the sampled waveform profile is cycled on the traveling wave segments, proportional to the wave velocity.

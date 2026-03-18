@@ -30,12 +30,24 @@
 #define Collision_SpatialFieldFunctions_hpp
 
 #include "Core_vector.hpp"
+#include "PSim_interpolatedField.hpp"
+#include "PSim_simionPotentialArray.hpp"
 #include <functional>
 
 namespace CollisionModel{
     
-    std::function<double(const Core::Vector&)>getConstantDoubleFunction(double constantValue);
+    std::function<double(const Core::Vector&)>getConstantScalarFunction(double constantValue);
     std::function<Core::Vector(const Core::Vector&)>getConstantVectorFunction(Core::Vector constantValue);
+    std::function<double(const Core::Vector&)>getVariableScalarFunction(ParticleSimulation::InterpolatedField &interpolatedField, std::size_t fieldIndex = 0);
+    std::function<Core::Vector(const Core::Vector&)>getVariableVectorFunction(ParticleSimulation::InterpolatedField &interpolatedField, std::size_t fieldIndex = 0);
+    std::function<double(const Core::Vector&)>getVariableScalarFunction(ParticleSimulation::SimionPotentialArray &simionPA);
+    std::function<Core::Vector(const Core::Vector&)>getVariableVectorFunction(
+        ParticleSimulation::SimionPotentialArray &pa_x,
+        ParticleSimulation::SimionPotentialArray &pa_y,
+        ParticleSimulation::SimionPotentialArray &pa_z);
+    std::function<Core::Vector(const Core::Vector&)>getVariableAxialSymmetricVectorFunction(
+        ParticleSimulation::SimionPotentialArray &pa_x,
+        ParticleSimulation::SimionPotentialArray &pa_r);
 
 }
 

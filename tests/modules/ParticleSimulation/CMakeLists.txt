@@ -25,6 +25,7 @@ set(TEST_FILES
         ${TEST_FILE_FOLDER}/simion_test_planar_2d_scaled.pa
         ${TEST_FILE_FOLDER}/simion_test_planar_2d_nonUniformlyScaled.pa
         ${TEST_FILE_FOLDER}/simion_test_planar_3d.pa
+        ${TEST_FILE_FOLDER}/SIMION_test_flow_axi2d.pa
         ${TEST_FILE_FOLDER}/simion_test_planar_3d_mirrored.pa
         ${TEST_FILE_FOLDER}/test_linear_vector_field_01.h5
         ${TEST_FILE_FOLDER}/test_linear_scalar_field_01.h5

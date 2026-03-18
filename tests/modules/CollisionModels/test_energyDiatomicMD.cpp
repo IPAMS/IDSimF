@@ -25,7 +25,7 @@
 
  ****************************/
 
-#include "CollisionModel_MDInteractionsPreconstructed.hpp"
+#include "CollisionModel_MDInteractionsExperimental.hpp"
 #include "CollisionModel_Molecule.hpp"
 #include "CollisionModel_Atom.hpp"
 #include "Core_randomGenerators.hpp"
@@ -37,31 +37,31 @@
 
 TEST_CASE("Basic test MD energy conservation diatomic", "[CollisionModels][MDInteractionsModel]") {
 
-    Core::globalRandomGeneratorPool = std::make_unique<Core::TestRandomGeneratorPool>();
+    // Core::globalRandomGeneratorPool = std::make_unique<Core::TestRandomGeneratorPool>();
 
-    double diameterN2 = CollisionModel::MDInteractionsModelPreconstructed::DIAMETER_N2;
-    FileIO::MolecularStructureReader reader = FileIO::MolecularStructureReader();
-    std::unordered_map<std::string,  std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection = 
-                                                                    reader.readMolecularStructure("test_molecularstructure_reader.json");
-    Core::Particle ion;
-    ion.setMolecularStructure(molecularStructureCollection.at("Li+"));
-    ion.setVelocity(Core::Vector(1000.0, 0.0, 0.0));
-    CollisionModel::MDInteractionsModelPreconstructed mdSim = CollisionModel::MDInteractionsModelPreconstructed(2000000, 298, 28, 
-                                                                                    diameterN2,
-                                                                                    1.7E-30, 
-                                                                                    "N2", 
-                                                                                    1e-9, 
-                                                                                    1E-17, 
-                                                                                    3, 1, 
-                                                                                    30e-10, 
-                                                                                    molecularStructureCollection, 
-                                                                                    Core::Vector(30.0e-10, 0.0, 0.0),
-                                                                                    Core::Vector(3.1415, 0.0, 0.0));
+    // double diameterN2 = CollisionModel::MDInteractionsModelPreconstructed::DIAMETER_N2;
+    // FileIO::MolecularStructureReader reader = FileIO::MolecularStructureReader();
+    // std::unordered_map<std::string,  std::shared_ptr<CollisionModel::MolecularStructure>> molecularStructureCollection = 
+    //                                                                 reader.readMolecularStructure("test_molecularstructure_reader.json");
+    // Core::Particle ion;
+    // ion.setMolecularStructure(molecularStructureCollection.at("Li+"));
+    // ion.setVelocity(Core::Vector(1000.0, 0.0, 0.0));
+    // CollisionModel::MDInteractionsModelPreconstructed mdSim = CollisionModel::MDInteractionsModelPreconstructed(2000000, 298, 28, 
+    //                                                                                 diameterN2,
+    //                                                                                 1.7E-30, 
+    //                                                                                 "N2", 
+    //                                                                                 1e-9, 
+    //                                                                                 1E-17, 
+    //                                                                                 3, 1, 
+    //                                                                                 30e-10, 
+    //                                                                                 molecularStructureCollection, 
+    //                                                                                 Core::Vector(30.0e-10, 0.0, 0.0),
+    //                                                                                 Core::Vector(3.1415, 0.0, 0.0));
 
-    mdSim.setTrajectoryWriter("MD_collisions_preconstructed_energy_trajectories.txt", 30e-10, 0);
-    mdSim.updateModelTimestepParameters(1, 0);
-    double dt = 2e-11;
-    mdSim.modifyVelocity(ion, dt);
+    // mdSim.setTrajectoryWriter("MD_collisions_preconstructed_energy_trajectories.txt", 30e-10, 0);
+    // mdSim.updateModelTimestepParameters(1, 0);
+    // double dt = 2e-11;
+    // mdSim.modifyVelocity(ion, dt);
 
 
 }

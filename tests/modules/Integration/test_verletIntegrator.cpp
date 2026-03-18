@@ -19,9 +19,9 @@
  along with IDSimF.  If not, see <https://www.gnu.org/licenses/>.
 
  ------------
- test_verletIntegrator.cpp
+ test_treeSpaceChargeQuality.cpp
 
- Testing of serial version of the verlet integrator
+ Test simulation with serial and parallel BTree and comparison with full sum
 
  ****************************/
 
@@ -125,8 +125,8 @@ TEST_CASE("Test serial verlet integrator", "[ParticleSimulation][VerletIntegrato
 
             int nParticlesTouched = 0;
             auto otherActionsFct = [&nParticlesTouched] (
-                    Core::Vector& /*newPartPos*/,Core::Particle* /*particle*/,
-                    int /*particleIndex*/, double /*time*/, int /*timestep*/){
+                    Core::Particle* /*particle*/, int /*particleIndex*/,
+                    double /*time*/, int /*timestep*/){
                 nParticlesTouched++;
             };
 

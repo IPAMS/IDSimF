@@ -189,13 +189,14 @@ void Integration::ParallelRK4Integrator::runSingleStep(double dt){
         if (particles_[i]->isActive()){
             //position changes due to background interaction:
             if (collisionModel_ != nullptr) {
-                collisionModel_->modifyPosition(newPos_[i], *(particles_[i]), dt);
+                collisionModel_->modifyPosition(*(particles_[i]), dt);
             }
 
             if (otherActionsFunction_ != nullptr) {
-                otherActionsFunction_(newPos_[i], particles_[i], i, time_, timestep_);
+                otherActionsFunction_(particles_[i], i, time_, timestep_);
             }
-            tree_.updateParticleLocation(i, newPos_[i], &ver);
+            particles_[i]->setLocation(newPos_[i]);
+            tree_.updateParticleLocation(i, &ver);
         }
     }
 
@@ -229,5 +230,9 @@ Core::Vector Integration::ParallelRK4Integrator::evaluateAccelerationFunction_(C
         collisionModel_->modifyAcceleration(acceleration, *particle, dt);
     }
     return acceleration;
+}
+
+void Integration::ParallelRK4Integrator::setTheta(double newTheta) {
+    tree_.getRoot()->setTheta(newTheta);
 }
 

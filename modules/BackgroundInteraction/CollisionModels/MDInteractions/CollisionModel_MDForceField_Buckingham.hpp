@@ -1,0 +1,61 @@
+/***************************
+ Ion Dynamics Simulation Framework (IDSimF)
+
+ Copyright 2024 - Physical and Theoretical Chemistry /
+ Institute of Pure and Applied Mass Spectrometry
+ of the University of Wuppertal, Germany
+
+ IDSimF is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+
+ IDSimF is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with IDSimF.  If not, see <https://www.gnu.org/licenses/>.
+
+ ------------
+ CollisionModel_MDForceField_LJ12_6.hpp
+
+ Lennard Jones 12-6 Force Field for MD Collision Simulations
+
+ ****************************/
+#ifndef IDSIMF_COLLISIONMODEL_MDFORCEFIELD_BUCKINGHAM_HPP
+#define IDSIMF_COLLISIONMODEL_MDFORCEFIELD_BUCKINGHAM_HPP
+
+#include "CollisionModel_AbstractMDForceField.hpp"
+#include "Core_particle.hpp"
+#include "CollisionModel_MolecularStructure.hpp"
+#include "CollisionModel_AtomInteractionMap.hpp"
+
+namespace CollisionModel{
+    class MDForceField_Buckingham : public AbstractMDForceField {
+
+    public:
+        MDForceField_Buckingham(double collisionGasPolarizability_m3, std::string potentials = "ALL");
+
+        void calculateForceField(std::vector<CollisionModel::Molecule*>& moleculesPtr, 
+                                std::vector<Core::Vector>& forceMolecules) override;
+                            
+        void calculateForceFieldComponents(std::vector<CollisionModel::Molecule*>& moleculesPtr, 
+                                std::vector<Core::Vector>& forceMolecules, Core::Vector& forceVDW, Core::Vector& forceII) override;
+
+        static double calculateVDW(const CollisionModel::Atom& atomA, const CollisionModel::Atom& atomB, double distanceAbs);
+
+        void populateInteractionTable(std::vector<Core::Particle*> particlesPtrs, 
+                            std::unordered_map<std::string, std::shared_ptr<CollisionModel::MolecularStructure>> structureMap, 
+                            std::string collisionGasIdentifier);
+
+    private:
+        double collisionGasPolarizability_m3_ = 0.0; ///< polarizability of the collision gas in m^3
+        std::string potentialsFF_ = "";
+        CollisionModel::AtomInteractionMap<double> interactionMap;
+    };
+
+}
+
+#endif //IDSIMF_COLLISIONMODEL_MDFORCEFIELD_BUCKINGHAM_HPP

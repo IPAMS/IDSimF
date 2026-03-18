@@ -56,6 +56,12 @@ ParticleSimulation::SimionPotentialArray::SimionPotentialArray(std::string filen
     readPa_(filename);
 }
 
+void ParticleSimulation::SimionPotentialArray::setCornerPosition(Core::Vector newCornerPosition) {
+    cornerLocation_ = {newCornerPosition.x(),newCornerPosition.y(),newCornerPosition.z()};
+    updateBounds_();
+}
+
+
 double ParticleSimulation::SimionPotentialArray::getPotential(index_t ix, index_t iy, index_t iz) const {
 
     if (Core::safetyGuards) {
@@ -449,7 +455,8 @@ std::array<double,3> ParticleSimulation::SimionPotentialArray::transformAndCheck
                                    xT > internalBoundsUpper_[0] ||
                                    r  > internalBoundsUpper_[1] ) ){
             std::stringstream ss;
-            ss << "Point " << xPt << " " << yPt << " " << zPt << " is not in the cylindrical potential array";
+            ss << "Point " << xPt << " " << yPt << " " << zPt << " is not in the cylindrical potential array (internal: "
+                << xT <<" " << yT << " " << zT<<")";
             throw (ParticleSimulation::PotentialArrayException(ss.str()));
         }
 
@@ -464,7 +471,8 @@ std::array<double,3> ParticleSimulation::SimionPotentialArray::transformAndCheck
                  yT < internalBoundsLower_[1] || yT > internalBoundsUpper_[1] ||
                  zT < internalBoundsLower_[2] || zT > internalBoundsUpper_[2] )) {
             std::stringstream ss;
-            ss << "Point " << xPt << " " << yPt << " " << zPt << " is not in the planar potential array";
+            ss << "Point " << xPt << " " << yPt << " " << zPt << " is not in the planar potential array (internal: "
+                << xT <<" " << yT << " " << zT<<")";
             throw (ParticleSimulation::PotentialArrayException(ss.str()));
         }
 
@@ -690,9 +698,17 @@ void ParticleSimulation::SimionPotentialArray::printState() const{
 
     std::cout << "SIMION PA ---------------------------------"<<std::endl;
     std::cout << "corner position: " << cornerLocation_[0] << " " << cornerLocation_[1] << " " << cornerLocation_[2] << " scale:" << spatialScale_ << std::endl;
-    std::cout << "mode: "<<mode_ << " symmetry: "<< symmetry_ << " maxVoltage: "<<maxVoltage_ <<std::endl;
+    std::string symmetryString = (symmetry_ == CYLINDRICAL) ? "cylindrical " : "planar";
+
+    std::cout << "mode: "<<mode_ << " symmetry: "<< symmetry_ <<" ("<<symmetryString<<")"<< " maxVoltage: "<<maxVoltage_ <<std::endl;
     std::cout << "nx: "<<nx_ << " ny: "<<ny_ << " nz: "<<nz_ <<" npoints: "<< numPoints_<<std::endl;
     std::cout << "mx: "<<mirrorx_ << " my: "<<mirrory_<< " mz: "<<mirrorz_ <<std::endl;
+    std::cout << "internal scale dx: "<<dx_ << " dy: "<<dy_<< " dz: "<<dz_ <<std::endl;
+    std::cout << "bounds: ";
+    for(auto &bound: getBounds()){
+        std::cout << " "<<bound;
+    }
+    std::cout << std::endl;
     //std::cout << "electrostatic: "<< electrostatic << " ng:"<< ng << std::endl;
 
     for (std::size_t i=0; i< 10; ++i){

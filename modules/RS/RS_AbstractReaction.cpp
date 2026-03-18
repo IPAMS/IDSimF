@@ -139,7 +139,6 @@ void RS::AbstractReaction::updateStaticReactionConcentration() {
         if (subst->type() == Substance::substanceType::isotropic){
             staticReactionConcentration_ = staticReactionConcentration_ * ( std::pow(subst->staticConcentration(),sto_factor) );
         }
-
     }
 }
 

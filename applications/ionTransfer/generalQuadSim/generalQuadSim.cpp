@@ -36,9 +36,9 @@
 #include "PSim_boxStartZone.hpp"
 #include "Integration_verletIntegrator.hpp"
 #include "CollisionModel_HardSphere.hpp"
-#include "appUtils_stopwatch.hpp"
-#include "appUtils_signalHandler.hpp"
-#include "appUtils_commandlineParser.hpp"
+#include "AppUtils_stopwatch.hpp"
+#include "AppUtils_signalHandler.hpp"
+#include "AppUtils_commandlineParser.hpp"
 #include <iostream>
 #include <vector>
 
@@ -121,10 +121,6 @@ int main(int argc, const char * argv[]) {
             }
         }
 
-        auto backgroundGasVelocityFunction = [&flowField](Core::Vector& location) {
-            Core::Vector flowVelo = flowField->getInterpolatedVector(location.x(), location.y(), location.z(), 0);
-            return flowVelo;
-        };
 
         auto backgroundGasPressureFunction = [&rhoField, P_factor](Core::Vector& location) {
             double rho = rhoField->getInterpolatedScalar(location.x(), location.y(), location.z(), 0);
@@ -136,7 +132,7 @@ int main(int argc, const char * argv[]) {
         //init gas collision models:
         CollisionModel::HardSphereModel hsModel = CollisionModel::HardSphereModel(
                 backgroundGasPressureFunction,
-                backgroundGasVelocityFunction,
+                CollisionModel::getVariableVectorFunction(*flowField),
                 backgroundTemperture,
                 collisionGasMassAmu,
                 collisionGasDiameterM
@@ -204,10 +200,10 @@ int main(int argc, const char * argv[]) {
             }
         };
 
-        auto otherActionsFunction = [maxQLength, maxRadius, &startZone](Core::Vector& newPartPos,
-                                                                        Core::Particle* particle, int /*particleIndex*/,
+        auto otherActionsFunction = [maxQLength, maxRadius, &startZone](Core::Particle* particle, int /*particleIndex*/,
                                                                          double /*time*/, int /*timestep*/) {
 
+            Core::Vector newPartPos = particle->getLocation();
             double r_pos = std::sqrt(newPartPos.y()*newPartPos.y()+newPartPos.z()*newPartPos.z());
 
             if (newPartPos.x()>maxQLength) {

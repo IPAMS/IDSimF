@@ -4,7 +4,7 @@ set(SOURCE_FILES
         QITSim.cpp)
 
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
-target_link_libraries(${PROJECT_NAME} core apputils collisionmodels particlesimulation)
+target_link_libraries(${PROJECT_NAME} core apputils particlesimulation file_io integration spacecharge collisionmodels rs)
 target_link_libraries(${PROJECT_NAME} ${VTK_LIBRARIES} ${HDF5_CXX_LIBRARIES} ${HDF5_LIBRARIES})
 
 add_test(NAME app_ionTraps_QITSim_fixedRF COMMAND ${PROJECT_NAME} "example/QIT_fixedRF.json" "run_app_ionTraps_QITSim_fixedRF" -n ${N_THREADS})

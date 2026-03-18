@@ -1,4 +1,3 @@
-cmake_minimum_required(VERSION 3.5)
 project(benchmark_PA_samplingError)
 
 set(SOURCE_FILES
@@ -16,4 +15,4 @@ include_directories(${CMAKE_SOURCE_DIR}/modules/BTree)
 include_directories(${CMAKE_SOURCE_DIR}/modules/particleSimulation)
 
 add_executable(benchmark_simionpa_samplingerror ${SOURCE_FILES})
-target_link_libraries(benchmark_simionpa_samplingerror core particlesimulation apputils)
+target_link_libraries(benchmark_simionpa_samplingerror core apputils particlesimulation file_io)

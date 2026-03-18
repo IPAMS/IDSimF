@@ -31,7 +31,6 @@
 #include "Core_particle.hpp"
 #include "FileIO_trajectoryHDF5Writer.hpp"
 #include "FileIO_scalar_writer.hpp"
-#include "PSim_util.hpp"
 #include "PSim_sampledWaveform.hpp"
 #include "PSim_particleStartSplatTracker.hpp"
 #include "PSim_math.hpp"
@@ -39,16 +38,15 @@
 #include "FileIO_inductionCurrentWriter.hpp"
 #include "PSim_simionPotentialArray.hpp"
 #include "CollisionModel_HardSphere.hpp"
-#include "appUtils_simulationConfiguration.hpp"
-#include "appUtils_integrationRunning.hpp"
-#include "appUtils_ionDefinitionReading.hpp"
-#include "appUtils_logging.hpp"
-#include "appUtils_stopwatch.hpp"
-#include "appUtils_signalHandler.hpp"
-#include "appUtils_commandlineParser.hpp"
+#include "AppUtils_simulationConfiguration.hpp"
+#include "AppUtils_integrationRunning.hpp"
+#include "AppUtils_ionDefinitionReading.hpp"
+#include "AppUtils_logging.hpp"
+#include "AppUtils_stopwatch.hpp"
+#include "AppUtils_signalHandler.hpp"
+#include "AppUtils_commandlineParser.hpp"
 #include <iostream>
 #include <vector>
-#include <ctime>
 #include <filesystem>
 
 enum RfAmplitudeMode {STATIC_RF,RAMPED_RF};
@@ -91,25 +89,16 @@ int main(int argc, const char * argv[]) {
 
         //read potential array configuration of the trap =================================================
         double paSpatialScale = simConf->doubleParameter("potential_array_scaling");
-        std::vector<std::unique_ptr<ParticleSimulation::SimionPotentialArray>> potentialArrays;
-        std::vector<std::string> potentialArraysNames = simConf->stringVectorParameter("potential_arrays");
-        for (const auto& paName: potentialArraysNames) {
-            std::filesystem::path paPath = confBasePath/paName;
-            std::unique_ptr<ParticleSimulation::SimionPotentialArray> pa_pt =
-                    std::make_unique<ParticleSimulation::SimionPotentialArray>(paPath, paSpatialScale);
-            potentialArrays.push_back(std::move(pa_pt));
-        }
+        std::vector<std::unique_ptr<ParticleSimulation::SimionPotentialArray>> potentialArrays =
+            simConf->readPotentialArrays("potential_arrays",paSpatialScale,true);
 
         double axialPotentialCenter = simConf->doubleParameter("axial_potential_center");
-        double axialPotentialFloowWidth = simConf->doubleParameter("axial_potential_floor_width");
+        double axialPotentialFloorWidth = simConf->doubleParameter("axial_potential_floor_width");
         double axialPotentialGradient = simConf->doubleParameter("axial_potential_gradient_V/m");
 
-        // SIMION fast adjust PAs use 10000 as normalized potential value, thus we have to scale everything with 1/10000
-        double potentialScale = 1.0/10000.0;
-        std::vector<double> potentialsFactorsDc = simConf->doubleVectorParameter("dc_potentials", potentialScale);
-        std::vector<double> potentialFactorsRf = simConf->doubleVectorParameter("rf_potential_factors", potentialScale);
-        std::vector<double> potentialFactorsExcite = simConf->doubleVectorParameter("excite_potential_factors",
-                potentialScale);
+        std::vector<double> potentialsFactorsDc = simConf->doubleVectorParameter("dc_potentials");
+        std::vector<double> potentialFactorsRf = simConf->doubleVectorParameter("rf_potential_factors");
+        std::vector<double> potentialFactorsExcite = simConf->doubleVectorParameter("excite_potential_factors");
         std::vector<double> detectionPAFactorsRaw = simConf->doubleVectorParameter("detection_potential_factors");
         std::vector<ParticleSimulation::SimionPotentialArray*> detectionPAs;
 
@@ -148,8 +137,8 @@ int main(int argc, const char * argv[]) {
         }
 
         //read physical configuration ===================================================================
-        double backgroundPressure = simConf->doubleParameter("background_pressure_Pa");
-        double backgroundTemperature = simConf->doubleParameter("background_temperature_K");
+        double backgroundPressure = simConf->doubleParameter("background_gas_pressure_Pa");
+        double backgroundTemperature = simConf->doubleParameter("background_gas_temperature_K");
         double spaceChargeFactor = simConf->doubleParameter("space_charge_factor");
         double collisionGasMassAmu = simConf->doubleParameter("collision_gas_mass_amu");
         double collisionGasDiameterM = simConf->doubleParameter("collision_gas_diameter_angstrom")*1e-10;
@@ -157,7 +146,7 @@ int main(int argc, const char * argv[]) {
 
         //read rf configuration =========================================================================
         double f_rf = simConf->doubleParameter("f_rf"); //RF frequency 1e6;
-        double omega = f_rf*2.0*M_PI; //RF angular frequencyf_rf* 2.0 * M_PI;
+        double omega = f_rf*2.0*M_PI; //RF angular frequency_rf* 2.0 * M_PI;
 
         RfAmplitudeMode rfMode;
         std::vector<double> V_0_ramp;
@@ -211,10 +200,10 @@ int main(int argc, const char * argv[]) {
 
         // define functions for the trajectory integration ==================================================
         std::size_t ionsInactive = 0;
-        auto trapFieldFunction =
+        auto trapFieldFct =
                 [exciteMode, rfMode, excitePulseLength, excitePulsePotential, omega, &swiftWaveForm, &V_0, &V_0_ramp,
                         &potentialArrays, &potentialsFactorsDc, &potentialFactorsRf, &potentialFactorsExcite]
-                        (Core::Particle* particle, int /*particleIndex*/,  double time, unsigned int timestep)
+                        (Core::Particle* particle, double time, unsigned int timestep)
                         -> Core::Vector {
 
                     Core::Vector pos = particle->getLocation();
@@ -250,44 +239,83 @@ int main(int argc, const char * argv[]) {
                     return fEfield*particleCharge;
                 };
 
-        double axialPotential_upperStart = axialPotentialCenter+axialPotentialFloowWidth;
-        double axialPotential_lowerStart = axialPotentialCenter-axialPotentialFloowWidth;
-        auto accelerationFunctionLIT =
-                [spaceChargeFactor, &trapFieldFunction,
-                        axialPotential_lowerStart, axialPotential_upperStart, axialPotentialGradient](
-                        Core::Particle* particle, int particleIndex,
+        double axialPotential_upperStart = axialPotentialCenter+axialPotentialFloorWidth;
+        double axialPotential_lowerStart = axialPotentialCenter-axialPotentialFloorWidth;
+        auto trapAxialForceFct =
+            [axialPotential_lowerStart, axialPotential_upperStart, axialPotentialGradient]
+            (Core::Particle* particle) -> Core::Vector {
+                Core::Vector pos = particle->getLocation();
+                double particleCharge = particle->getCharge();
+
+                double z_force = 0;
+                if (pos.z()>axialPotential_upperStart) {
+                    z_force = (axialPotential_upperStart-pos.z())*axialPotentialGradient*particleCharge;
+                }
+                else if (pos.z()<axialPotential_lowerStart) {
+                    z_force = (axialPotential_lowerStart-pos.z())*axialPotentialGradient*particleCharge;
+                }
+                return {0.0, 0.0, z_force};
+            };
+
+        auto accelerationFct_verletIntegration=
+                [spaceChargeFactor, &trapFieldFct, &trapAxialForceFct](
+                        Core::Particle* particle, int /*particleIndex*/,
                         SpaceCharge::FieldCalculator& scFieldCalculator, double time, unsigned int timestep) -> Core::Vector {
 
-                    Core::Vector pos = particle->getLocation();
                     double particleCharge = particle->getCharge();
 
-                    Core::Vector rfForce = trapFieldFunction(particle, particleIndex, time, timestep);
-                    double z_force = 0;
-                    if (pos.z()>axialPotential_upperStart) {
-                        z_force = (axialPotential_upperStart-pos.z())*axialPotentialGradient*particleCharge;
-                    }
-                    else if (pos.z()<axialPotential_lowerStart) {
-                        z_force = (axialPotential_lowerStart-pos.z())*axialPotentialGradient*particleCharge;
-                    }
-
-                    Core::Vector axialForce = {0.0, 0.0, z_force};
-
+                    Core::Vector rfForce = trapFieldFct(particle, time, timestep);
                     Core::Vector spaceChargeForce(0, 0, 0);
                     if (spaceChargeFactor>0) {
                         spaceChargeForce =
                                 scFieldCalculator.getEFieldFromSpaceCharge(*particle)*(particleCharge*spaceChargeFactor);
                     }
 
+                    Core::Vector axialForce = trapAxialForceFct(particle);
+                    Core::Vector trapForce = rfForce + axialForce;
+
                     //update the additional parameters for writing them later to the trajectory:
-                    particle->setFloatAttribute(key_trapForce_x, rfForce.x());
-                    particle->setFloatAttribute(key_trapForce_y, rfForce.y());
-                    particle->setFloatAttribute(key_trapForce_z, rfForce.z());
+                    particle->setFloatAttribute(key_trapForce_x, trapForce.x());
+                    particle->setFloatAttribute(key_trapForce_y, trapForce.y());
+                    particle->setFloatAttribute(key_trapForce_z, trapForce.z());
                     particle->setFloatAttribute(key_spaceCharge_x, spaceChargeForce.x());
                     particle->setFloatAttribute(key_spaceCharge_y, spaceChargeForce.y());
                     particle->setFloatAttribute(key_spaceCharge_z, spaceChargeForce.z());
 
-                    return ((rfForce+axialForce+spaceChargeForce)/particle->getMass());
+
+                    return ((trapForce+spaceChargeForce)/particle->getMass());
                 };
+
+        auto accelerationFctSpaceCharge_RKIntegration =
+                [spaceChargeFactor](
+                        Core::Particle* particle, int /*particleIndex*/,
+                        SpaceCharge::FieldCalculator& scFieldCalculator, double /*time*/, unsigned int /*timestep*/) -> Core::Vector {
+
+                    double particleCharge = particle->getCharge();
+                    Core::Vector spaceChargeForce(0, 0, 0);
+                    if (spaceChargeFactor>0) {
+                        spaceChargeForce =
+                                scFieldCalculator.getEFieldFromSpaceCharge(*particle)*(particleCharge*spaceChargeFactor);
+                    }
+
+                    particle->setFloatAttribute(key_spaceCharge_x, spaceChargeForce.x());
+                    particle->setFloatAttribute(key_spaceCharge_y, spaceChargeForce.y());
+                    particle->setFloatAttribute(key_spaceCharge_z, spaceChargeForce.z());
+
+                    return (spaceChargeForce/particle->getMass());
+        };
+
+        auto accelerationFctTrapField_RKIntegration =
+                [&trapFieldFct, &trapAxialForceFct](Core::Particle* particle, Core::Vector /*position*/, Core::Vector /*velocity*/, double time, unsigned int timestep){
+                    Core::Vector rfForce = trapFieldFct(particle, time, timestep);
+                    Core::Vector axialForce = trapAxialForceFct(particle);
+                    Core::Vector trapForce = rfForce + axialForce;
+                    particle->setFloatAttribute(key_trapForce_x, trapForce.x());
+                    particle->setFloatAttribute(key_trapForce_y, trapForce.y());
+                    particle->setFloatAttribute(key_trapForce_z, trapForce.z());
+
+                    return (trapForce)/particle->getMass();
+        };
 
         // Prepare ion start / stop tracker and ion start monitoring / ion termination functions
         ParticleSimulation::ParticleStartSplatTracker startSplatTracker;
@@ -296,12 +324,12 @@ int main(int argc, const char * argv[]) {
         };
 
         auto otherActionsFunctionQIT = [&simulationDomainBoundaries, &ionsInactive, &potentialArrays, &startSplatTracker](
-                Core::Vector& newPartPos, Core::Particle* particle,
-                int /*particleIndex*/,  double time, int /*timestep*/) {
+                Core::Particle* particle, int /*particleIndex*/,  double time, int /*timestep*/) {
             // if the ion is out of the boundary box or ends up in an electrode:
             // Terminate the ion
             // (since all potential arrays of the simulation define the basis functions of a linear combination,
             // the electrode geometry has to be the same in all electrodes, thus check only the first one)
+            Core::Vector newPartPos = particle->getLocation();
             if (newPartPos.x()<=simulationDomainBoundaries[0][0] ||
                     newPartPos.x()>=simulationDomainBoundaries[0][1] ||
                     newPartPos.y()<=simulationDomainBoundaries[1][0] ||
@@ -343,12 +371,12 @@ int main(int argc, const char * argv[]) {
                 };
 
         std::vector<std::string> particleAttributesNames = {"velocity x", "velocity y", "velocity z",
-                                                            "rf x", "rf y", "rf z",
+                                                            "trap force x", "trap force y", "trap force z",
                                                             "spacecharge x", "spacecharge y", "spacecharge z",
                                                             "mass", "charge"};
 
         FileIO::partAttribTransformFctTypeInteger integerParticleAttributesTransformFct =
-                [](Core::Particle* particle) -> std::vector<int> {
+                [](const Core::Particle* particle) -> std::vector<int> {
                     std::vector<int> result = {
                             particle->getIntegerAttribute("global index"),
                             static_cast<int>(particle->getIndex())
@@ -371,7 +399,7 @@ int main(int argc, const char * argv[]) {
                 {
 
                     // check if simulation should be terminated (if all particles are terminated)
-                    if (ionsInactive>=particles.size() && particles.size()>0) {
+                    if (ionsInactive>=particles.size() && !particles.empty()) {
                         integrator->setTerminationState();
                     }
 
@@ -413,10 +441,12 @@ int main(int argc, const char * argv[]) {
         stopWatch.start();
 
         AppUtils::runTrajectoryIntegration(
-                simConf, timeSteps, dt,
-                particlePtrs,
-                accelerationFunctionLIT,
-                postTimestepFunction, otherActionsFunctionQIT, particleStartMonitoringFct, &hsModel);
+            simConf, timeSteps, dt,
+            particlePtrs,
+            accelerationFct_verletIntegration,
+            accelerationFctTrapField_RKIntegration,
+            accelerationFctSpaceCharge_RKIntegration,
+            postTimestepFunction, otherActionsFunctionQIT, particleStartMonitoringFct, &hsModel);
 
         if (rfMode==RAMPED_RF) {
             hdf5Writer->writeNumericListDataset("V_rf", V_rf_export);
