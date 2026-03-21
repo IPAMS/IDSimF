@@ -194,9 +194,6 @@ void CollisionModel::MDForceField_Buckingham::calculateForceField(std::vector<Co
                     calculateTorque(positions, ionInducedForce, torqueMolecules);
                 }
             }
-            
-
-
 
             // Third contribution: ion <-> permanent dipole potential
             // This requires an ion and a dipole to be present

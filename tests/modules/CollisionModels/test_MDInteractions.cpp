@@ -28,11 +28,13 @@
 #include "CollisionModel_MDInteractions.hpp"
 #include "CollisionModel_Molecule.hpp"
 #include "CollisionModel_MDForceField_LJ12_6.hpp"
+#include "CollisionModel_MDForceField_Buckingham.hpp"
 #include "Core_randomGenerators.hpp"
 #include "catch.hpp"
 #include "FileIO_MolecularStructureReader.hpp"
 #include "test_hdf5_util.hpp"
 #include <iostream>
+
 
 std::string readTextFile(std::string filename){
     std::ifstream ifs(filename);
@@ -290,37 +292,79 @@ TEST_CASE("Test MD Interactions with rotation", "[CollisionModels][MDInteraction
     Core::Particle ion;
     ion.setMolecularStructure(molecularStructureCollection.at("Ar+"));
     ion.setVelocity(Core::Vector(600.0, 50.0, 0.0));
-    CollisionModel::MDForceField_LJ12_6 forceField(1.705E-30, "ALL", true);
-    auto forceFieldPtr = std::make_unique<CollisionModel::MDForceField_LJ12_6>(forceField);
-    CollisionModel::MDInteractionsModel mdSim = CollisionModel::MDInteractionsModel(2000000, 298,
-                                                                                    28,
-                                                                                    CollisionModel::MDInteractionsModel::DIAMETER_N2,
-                                                                                    "N2",
-                                                                                    1e-10, 
-                                                                                    1E-17,
-                                                                                    3, 1,
-                                                                                    45e-10,
-                                                                                    true,
-                                                                                    std::move(forceFieldPtr),
-                                                                                    molecularStructureCollection);
 
-    double dt = 2e-11;
-    std::string h5Filename = "MD_collisions_multiatom_trajectories_rotation_N2.h5";
-    mdSim.setHDF5TrajectoryWriter(h5Filename, 45e-10, 0);
-    mdSim.modifyVelocity(ion, dt);
+    SECTION("Test with Buckingham Force Field") {
+        CollisionModel::MDForceField_Buckingham forceField(1.705E-30, "ALL", true);
+        auto forceFieldPtr = std::make_unique<CollisionModel::MDForceField_Buckingham>(forceField);
+        std::vector<Core::Particle*> particlesPtrs = {&ion};
+        forceFieldPtr->populateInteractionTable(particlesPtrs, molecularStructureCollection, "N2");
+        CollisionModel::MDInteractionsModel mdSim = CollisionModel::MDInteractionsModel(2000000, 298,
+                                                                                        28,
+                                                                                        CollisionModel::MDInteractionsModel::DIAMETER_N2,
+                                                                                        "N2",
+                                                                                        1e-10,
+                                                                                        1E-17,
+                                                                                        3, 1,
+                                                                                        45e-10,
+                                                                                        true,
+                                                                                        std::move(forceFieldPtr),
+                                                                                        molecularStructureCollection);
 
-    CHECK(Approx(ion.getVelocity().x()).margin(0.2) ==  495.7040847218);
-    CHECK(Approx(ion.getVelocity().y()).margin(0.2) ==  43.9704656224);
-    CHECK(Approx(ion.getVelocity().z()).margin(0.2) ==  -54.8414059866);
+        double dt = 2e-11;
+        std::string h5Filename = "MD_collisions_multiatom_trajectories_rotation_N2_Buckingham.h5";
+        mdSim.setHDF5TrajectoryWriter(h5Filename, 45e-10, 0);
+        mdSim.modifyVelocity(ion, dt);
 
-    unsigned int timestep = 0;
-    double time = 0.0;
-    for(int i = 0; i < 4; i++) {
-        mdSim.updateModelTimestepParameters(timestep, time);
-        mdSim.modifyVelocity(ion, 2e-11);
+        /*CHECK(Approx(ion.getVelocity().x()).margin(0.2) ==  495.7040847218);
+        CHECK(Approx(ion.getVelocity().y()).margin(0.2) ==  43.9704656224);
+        CHECK(Approx(ion.getVelocity().z()).margin(0.2) ==  -54.8414059866);*/
+
+        unsigned int timestep = 0;
+        double time = 0.0;
+        for(int i = 0; i < 4; i++) {
+            mdSim.updateModelTimestepParameters(timestep, time);
+            mdSim.modifyVelocity(ion, 2e-11);
+        }
+
+        /*CHECK(Approx(ion.getVelocity().x()).margin(0.8) ==  32.3509170218);
+        CHECK(Approx(ion.getVelocity().y()).margin(0.8) ==  -336.6975108956);
+        CHECK(Approx(ion.getVelocity().z()).margin(0.2) ==  -326.1171405377);*/
     }
 
-    CHECK(Approx(ion.getVelocity().x()).margin(0.8) ==  32.3509170218);
-    CHECK(Approx(ion.getVelocity().y()).margin(0.8) ==  -336.6975108956);
-    CHECK(Approx(ion.getVelocity().z()).margin(0.2) ==  -326.1171405377);
+    SECTION("Test with Lennard-Jones Force Field") {
+        CollisionModel::MDForceField_LJ12_6 forceField(1.705E-30, "ALL", true);
+        auto forceFieldPtr = std::make_unique<CollisionModel::MDForceField_LJ12_6>(forceField);
+        CollisionModel::MDInteractionsModel mdSim = CollisionModel::MDInteractionsModel(2000000, 298,
+                                                                                        28,
+                                                                                        CollisionModel::MDInteractionsModel::DIAMETER_N2,
+                                                                                        "N2",
+                                                                                        1e-10,
+                                                                                        1E-17,
+                                                                                        3, 1,
+                                                                                        45e-10,
+                                                                                        true,
+                                                                                        std::move(forceFieldPtr),
+                                                                                        molecularStructureCollection);
+
+        double dt = 2e-11;
+        std::string h5Filename = "MD_collisions_multiatom_trajectories_rotation_N2.h5";
+        mdSim.setHDF5TrajectoryWriter(h5Filename, 45e-10, 0);
+        mdSim.modifyVelocity(ion, dt);
+
+        CHECK(Approx(ion.getVelocity().x()).margin(0.2) ==  495.7040847218);
+        CHECK(Approx(ion.getVelocity().y()).margin(0.2) ==  43.9704656224);
+        CHECK(Approx(ion.getVelocity().z()).margin(0.2) ==  -54.8414059866);
+
+        unsigned int timestep = 0;
+        double time = 0.0;
+        for(int i = 0; i < 4; i++) {
+            mdSim.updateModelTimestepParameters(timestep, time);
+            mdSim.modifyVelocity(ion, 2e-11);
+        }
+
+        CHECK(Approx(ion.getVelocity().x()).margin(0.8) ==  32.3509170218);
+        CHECK(Approx(ion.getVelocity().y()).margin(0.8) ==  -336.6975108956);
+        CHECK(Approx(ion.getVelocity().z()).margin(0.2) ==  -326.1171405377);
+    }
+
 }
